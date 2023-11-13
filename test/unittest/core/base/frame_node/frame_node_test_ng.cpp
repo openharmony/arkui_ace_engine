@@ -32,6 +32,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -265,8 +266,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg008, TestSize.Level1)
      * @tc.steps: step 2. call AddFRCSceneInfo .
      * @tc.expect: rosenContext set scene and speed, no expect
      */
-    node->AddFRCSceneInfo("test", 0, SelectOverlayNode::SceneStatus::START);
-    node->AddFRCSceneInfo("test", 0, SelectOverlayNode::SceneStatus::RUNNING);
+    node->AddFRCSceneInfo("test", 0, SceneStatus::START);
+    node->AddFRCSceneInfo("test", 0, SceneStatus::RUNNING);
 
     /**
      * @tc.steps: step 3. call CheckSecurityComponentStatus .

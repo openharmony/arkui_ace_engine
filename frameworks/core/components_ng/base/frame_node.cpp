@@ -30,6 +30,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -1540,6 +1541,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto localMat = renderContext_->GetLocalTransformMatrix();
     auto param = renderContext_->GetTrans();
+    localMat_ = localMat;
     if (param.empty()) {
         translateCfg[GetId()] = { .id = GetId(), .localMat = localMat };
     } else {
@@ -2225,6 +2227,12 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
 
 void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        const std::string sceneStatusStrs[] = {"START", "RUNNING", "END"};
+        LOGI("%{public}s  AddFRCSceneInfo scene:%{public}s   speed:%{public}f  status:%{public}s", GetTag().c_str(),
+            scene.c_str(), speed, sceneStatusStrs[static_cast<int32_t>(status)].c_str());
+    }
+
     if (status == SceneStatus::RUNNING) {
         return;
     }
@@ -2314,6 +2322,8 @@ void FrameNode::UpdatePercentSensitive()
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
+    ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", GetTag().c_str(),
+        GetId(), GetParent() ? GetParent()->GetId() : 0);
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();
@@ -2378,14 +2388,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         geometryNode_->SetContentSize(size.value());
     }
     GetPercentSensitive();
-    {
-        ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", GetTag().c_str(),
-            GetId(), GetParent() ? GetParent()->GetId() : 0);
-        layoutAlgorithm_->Measure(this);
-    }
+    layoutAlgorithm_->Measure(this);
     if (overlayNode_) {
-        ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", overlayNode_->GetTag().c_str(),
-            overlayNode_->GetId(), overlayNode_->GetParent() ? overlayNode_->GetParent()->GetId() : 0);
         overlayNode_->Measure(layoutProperty_->CreateChildConstraint());
     }
     UpdatePercentSensitive();
@@ -2412,6 +2416,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 // Called to perform layout children.
 void FrameNode::Layout()
 {
+    ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(),
+        GetId(), GetParent() ? GetParent()->GetId() : 0);
     int64_t time = GetSysTimestamp();
     OffsetNodeToSafeArea();
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
@@ -2433,11 +2439,7 @@ void FrameNode::Layout()
             }
             layoutProperty_->UpdateContentConstraint();
         }
-        {
-            ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(),
-                GetId(), GetParent() ? GetParent()->GetId() : 0);
-            GetLayoutAlgorithm()->Layout(this);
-        }
+        GetLayoutAlgorithm()->Layout(this);
         if (overlayNode_) {
             LayoutOverlay();
         }
@@ -2699,8 +2701,6 @@ void FrameNode::LayoutOverlay()
     auto childSize = overlayNode_->GetGeometryNode()->GetMarginFrameSize();
     auto translate = Alignment::GetAlignPosition(size, childSize, align) + offset;
     overlayNode_->GetGeometryNode()->SetMarginFrameOffset(translate);
-    ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", overlayNode_->GetTag().c_str(),
-        GetId(), overlayNode_->GetParent() ? overlayNode_->GetParent()->GetId() : 0);
     overlayNode_->Layout();
 }
 

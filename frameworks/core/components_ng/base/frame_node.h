@@ -31,6 +31,7 @@
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/ui_node.h"
@@ -85,6 +86,15 @@ public:
         return 1;
     }
 
+    void SetCheckboxFlag(const bool checkboxFlag)
+    {
+        checkboxFlag_ = checkboxFlag;
+    }
+
+    bool GetCheckboxFlag() const
+    {
+        return checkboxFlag_;
+    }
     void OnInspectorIdUpdate(const std::string& /*unused*/) override;
 
     struct ZIndexComparator {
@@ -458,11 +468,6 @@ public:
 
     std::optional<RectF> GetViewPort() const;
 
-    enum class SceneStatus {
-        START,
-        RUNNING,
-        END,
-    };
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
     // speed is measured by millimeter/second
     void AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status);
@@ -578,6 +583,11 @@ public:
         isFirstBuilding_ = false;
     }
 
+    Matrix4 GetLocalMatrix()
+    {
+        return localMat_;
+    }
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(
@@ -687,8 +697,10 @@ private:
     bool customerSet_ = false;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
+    Matrix4 localMat_ = Matrix4::CreateIdentity();
 
     bool isRestoreInfoUsed_ = false;
+    bool checkboxFlag_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

@@ -78,7 +78,7 @@ void ClickRecognizer::OnAccepted()
         touchPoint = touchPoints_.begin()->second;
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetNodeId());
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     if (onClick_) {
         ClickInfo info(touchPoint.id);
@@ -279,7 +279,7 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
             touchPoint = touchPoints_.begin()->second;
         }
         PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-        NGGestureRecognizer::Transform(localPoint, GetNodeId());
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
         info.SetScreenLocation(touchPoint.GetScreenOffset());
         info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
         info.SetSourceDevice(deviceType_);

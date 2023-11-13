@@ -89,9 +89,6 @@ const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 
 } // namespace
 
-static std::atomic<int32_t> gInstanceId = 0;
-static std::atomic<int32_t> gSubWindowInstanceId = 100000;
-static std::atomic<int32_t> gSubInstanceId = 1000000;
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 const std::string SUBWINDOW_TOAST_DIALOG_PREFIX = "ARK_APP_SUBWINDOW_TOAST_DIALOG_";
 const int32_t REQUEST_CODE = -1;
@@ -156,6 +153,8 @@ public:
     {
         auto rect = info->rect_;
         auto type = info->type_;
+        double positionY = info->textFieldPositionY_;
+        double height = info->textFieldHeight_;
         Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
         LOGI("UIContent OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
         if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
@@ -165,10 +164,10 @@ public:
             CHECK_NULL_VOID(taskExecutor);
             ContainerScope scope(instanceId_);
             taskExecutor->PostTask(
-                [container, keyboardRect, rsTransaction] {
+                [container, keyboardRect, rsTransaction, positionY, height] {
                     auto context = container->GetPipelineContext();
                     CHECK_NULL_VOID(context);
-                    context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
+                    context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
                 },
                 TaskExecutor::TaskType::UI);
         }
@@ -641,9 +640,9 @@ void UIContentImpl::CommonInitializeForm(
 #endif
     // create container
     if (runtime_) {
-        instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
+        instanceId_ = Container::GenerateId<STAGE_CONTAINER>();
     } else {
-        instanceId_ = gSubWindowInstanceId.fetch_add(1, std::memory_order_relaxed);
+        instanceId_ = Container::GenerateId<FA_SUBWINDOW_CONTAINER>();
     }
 #ifdef FORM_SUPPORTED
     auto formUtils = std::make_shared<FormUtilsImpl>();
@@ -1101,9 +1100,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 #endif
     // create container
     if (runtime_) {
-        instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
+        instanceId_ = Container::GenerateId<STAGE_CONTAINER>();
     } else {
-        instanceId_ = gSubWindowInstanceId.fetch_add(1, std::memory_order_relaxed);
+        instanceId_ = Container::GenerateId<FA_SUBWINDOW_CONTAINER>();
     }
 #ifdef FORM_SUPPORTED
     auto formUtils = std::make_shared<FormUtilsImpl>();
@@ -1634,7 +1633,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     LOGI("The window name is %{public}s", window->GetWindowName().c_str());
     CHECK_NULL_VOID(window_);
     RefPtr<Container> container;
-    instanceId_ = gSubInstanceId.fetch_add(1, std::memory_order_relaxed);
+    instanceId_ = Container::GenerateId<COMPONENT_SUBWINDOW_CONTAINER>();
 
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext;

@@ -396,7 +396,7 @@ void TextSelectController::FireSelectEvent()
     if (!onAccessibilityCallback_ || !IsSelected()) {
         return;
     }
-    bool needReport = false;
+    bool needReport =  !GetFirstIndex().has_value() || !GetSecondIndex().has_value();
     if (GetFirstIndex().has_value()) {
         needReport |= GetFirstIndex().value() != firstHandleInfo_.index;
     }

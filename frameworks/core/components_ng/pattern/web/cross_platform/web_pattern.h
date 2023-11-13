@@ -305,6 +305,22 @@ public:
     DragRet GetDragAcceptableStatus();
     Offset GetDragOffset() const;
 #endif
+    void SetWrapContent(bool isWrapContentEnabled)
+    {
+        isWrapContentEnabled_ = isWrapContentEnabled;
+    }
+    bool GetWrapContent() const
+    {
+        return isWrapContentEnabled_;
+    }
+    int GetRootLayerWidth() const
+    {
+        return rootLayerWidth_;
+    }
+    int GetRootLayerHeight() const
+    {
+        return rootLayerHeight_;
+    }
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -470,6 +486,9 @@ private:
     RefPtr<WebDelegateInterface> delegate_ = nullptr;
 
     bool selectPopupMenuShowing_ = false;
+    bool isWrapContentEnabled_ = false;
+    int32_t rootLayerWidth_ = 0;
+    int32_t rootLayerHeight_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

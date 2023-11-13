@@ -54,7 +54,6 @@ private:
     FormPlatformFinish onFinish_;
 };
 
-int32_t AceFormAbility::instanceId_ = 300000;
 const std::string AceFormAbility::START_PARAMS_KEY = "__startParams";
 const std::string AceFormAbility::URI = "url";
 
@@ -62,7 +61,7 @@ REGISTER_AA(AceFormAbility)
 
 AceFormAbility::AceFormAbility()
 {
-    instanceId_++;
+    instanceId_ = Container::GenerateId<PA_FORM_CONTAINER>();
 }
 
 void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)

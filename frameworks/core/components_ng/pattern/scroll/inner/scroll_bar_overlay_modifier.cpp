@@ -187,10 +187,16 @@ void ScrollBarOverlayModifier::StopAdaptAnimation()
 
 void ScrollBarOverlayModifier::StartHoverAnimation(const Rect& fgRect, HoverAnimationType hoverAnimationType)
 {
-    CHECK_NULL_VOID(hoverAnimationType != HoverAnimationType::NONE);
+    // Only the cross axis offset is updated, the main axis offset will be updated by adaptAnimation.
+    if (hoverAnimationType == HoverAnimationType::NONE) {
+        SetCrossModeOffset(fgRect.GetOffset());
+        return;
+    }
     if (hoverAnimationType != hoverAnimatingType_) {
         StopHoverAnimation();
     }
+    // In order to only play the offset of the hover part in the animation, update the cross axis offset in advance
+    SetCrossModeOffset(fgRect.GetOffset() + GetHoverOffset(fgRect.GetSize()));
     hoverAnimatingType_ = hoverAnimationType;
     AnimationOption option;
     option.SetCurve(Curves::SHARP);
@@ -215,13 +221,7 @@ void ScrollBarOverlayModifier::StartHoverAnimation(const Rect& fgRect, HoverAnim
 void ScrollBarOverlayModifier::StopHoverAnimation()
 {
     if (hoverAnimation_) {
-        AnimationOption option;
-        option.SetCurve(Curves::SHARP);
-        option.SetDuration(0);
-        hoverAnimation_ = AnimationUtils::StartAnimation(option, [&]() {
-            SetCrossModeSize(Size(barWidth_->Get(), barHeight_->Get()));
-            SetCrossModeOffset(Offset(barX_->Get(), barY_->Get()));
-        });
+        AnimationUtils::StopAnimation(hoverAnimation_);
     }
 }
 
@@ -268,5 +268,15 @@ void ScrollBarOverlayModifier::SetBarColor(Color barColor)
 {
     CHECK_NULL_VOID(barColor_);
     barColor_->Set(barColor);
+}
+
+Offset ScrollBarOverlayModifier::GetHoverOffset(const Size& size) const
+{
+    if (positionMode_ == PositionMode::RIGHT) {
+        return Offset(size.Width() - barWidth_->Get(), 0.f);
+    } else if (positionMode_ == PositionMode::BOTTOM) {
+        return Offset(0.f, size.Height() - barHeight_->Get());
+    }
+    return Offset::Zero();
 }
 } // namespace OHOS::Ace::NG

@@ -126,11 +126,13 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
             auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(recognizer);
             if (!recognizerGroup && newIdx >= idx) {
                 recognizer->AssignNodeId(host->GetId());
+                recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
             }
             recognizer->BeginReferee(touchId);
             innerRecognizers.push_back(std::move(recognizer));
         } else {
             eventTarget->AssignNodeId(host->GetId());
+            eventTarget->AttachFrameNode(WeakPtr<FrameNode>(host));
             finalResult.push_back(eventTarget);
         }
         newIdx++; // not process previous recognizers
@@ -174,6 +176,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         }
         innerExclusiveRecognizer_->SetCoordinateOffset(offset);
         innerExclusiveRecognizer_->BeginReferee(touchId);
+        innerExclusiveRecognizer_->AttachFrameNode(WeakPtr<FrameNode>(host));
         current = innerExclusiveRecognizer_;
     }
 
@@ -196,6 +199,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             }
         }
         recognizer->AssignNodeId(host->GetId());
+        recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
         recognizer->SetSize(size.Height(), size.Width());
         recognizer->SetCoordinateOffset(offset);
         recognizer->BeginReferee(touchId, true);
@@ -221,6 +225,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 externalParallelRecognizer_[parallelIndex]->SetCoordinateOffset(offset);
                 externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
                 externalParallelRecognizer_[parallelIndex]->AssignNodeId(host->GetId());
+                externalParallelRecognizer_[parallelIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
                 current = externalParallelRecognizer_[parallelIndex];
                 parallelIndex++;
             } else if (recognizers.size() == 1) {
@@ -245,6 +250,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 externalExclusiveRecognizer_[exclusiveIndex]->SetCoordinateOffset(offset);
                 externalExclusiveRecognizer_[exclusiveIndex]->BeginReferee(touchId);
                 externalExclusiveRecognizer_[exclusiveIndex]->AssignNodeId(host->GetId());
+                externalExclusiveRecognizer_[exclusiveIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
                 current = externalExclusiveRecognizer_[exclusiveIndex];
                 exclusiveIndex++;
             } else if (recognizers.size() == 1) {

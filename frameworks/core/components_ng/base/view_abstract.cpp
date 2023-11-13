@@ -237,9 +237,6 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
 
 void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color)
 {
-    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        return;
-    }
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
 }
 
@@ -536,12 +533,24 @@ void ViewAbstract::SetBorderStyle(const BorderStyle& value)
     ACE_UPDATE_RENDER_CONTEXT(BorderStyle, borderStyle);
 }
 
+void ViewAbstract::SetBorderStyle(FrameNode* frameNode, const BorderStyle& value)
+{
+    BorderStyleProperty borderStyle;
+    borderStyle.SetBorderStyle(value);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderStyle, borderStyle, frameNode);
+}
+
 void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BorderStyle, value);
+}
+
+void ViewAbstract::SetBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderStyle, value, frameNode);
 }
 
 void ViewAbstract::DisableOnClick()
@@ -1124,9 +1133,8 @@ void ViewAbstract::BindPopup(
             }
         } else {
             if (popupPattern) {
-                popupPattern->StartExitingAnimation([targetId]() {
-                    SubwindowManager::GetInstance()->HidePopupNG(targetId);
-                });
+                popupPattern->StartExitingAnimation(
+                    [targetId]() { SubwindowManager::GetInstance()->HidePopupNG(targetId); });
             }
         }
         return;
@@ -1152,8 +1160,8 @@ void ViewAbstract::BindPopup(
     }
 }
 
-void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params,
-    const RefPtr<FrameNode>& targetNode, const NG::OffsetF& offset, const MenuParam& menuParam)
+void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode,
+    const NG::OffsetF& offset, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(targetNode);
 
@@ -1171,15 +1179,10 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
 {
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(targetNode);
-    auto type = menuParam.type;
-#ifdef PREVIEW
-    // unable to use the subWindow in the Previewer.
-    type = MenuType::MENU;
-#endif
     auto menuNode =
         MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
     RegisterMenuCallback(menuNode, menuParam);
-    if (type == MenuType::CONTEXT_MENU) {
+    if (menuParam.type == MenuType::CONTEXT_MENU) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }
@@ -1262,6 +1265,11 @@ void ViewAbstract::SetBackShadow(const Shadow& shadow)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BackShadow, shadow);
+}
+
+void ViewAbstract::SetBackShadow(FrameNode* frameNode, const Shadow& shadow)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadow, frameNode);
 }
 
 void ViewAbstract::SetBlendMode(BlendMode blendMode)
@@ -1603,8 +1611,8 @@ void ViewAbstract::SetKeyboardShortcut(
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNode));
 }
 
-void ViewAbstract::CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-    const std::function<void(float)>& onCallbackEvent)
+void ViewAbstract::CreateAnimatablePropertyFloat(
+    const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -1627,8 +1635,8 @@ void ViewAbstract::CreateAnimatableArithmeticProperty(const std::string& propert
     frameNode->CreateAnimatableArithmeticProperty(propertyName, value, onCallbackEvent);
 }
 
-void ViewAbstract::UpdateAnimatableArithmeticProperty(const std::string& propertyName,
-    RefPtr<CustomAnimatableArithmetic>& value)
+void ViewAbstract::UpdateAnimatableArithmeticProperty(
+    const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -1668,5 +1676,113 @@ void ViewAbstract::SetRenderFit(RenderFit renderFit)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(RenderFit, renderFit);
+}
+
+void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, value, frameNode);
+}
+
+void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const Dimension& value)
+{
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(value);
+    borderRadius.multiValued = false;
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadius, frameNode);
+}
+
+void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, value, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, value, frameNode);
+}
+
+void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const Dimension& value)
+{
+    BorderWidthProperty borderWidth;
+    if (Negative(value.Value())) {
+        borderWidth.SetBorderWidth(Dimension(0));
+        LOGW("border width is negative, reset to 0");
+    } else {
+        borderWidth.SetBorderWidth(value);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
+}
+
+void ViewAbstract::SetBorderColor(FrameNode* frameNode, const BorderColorProperty& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, value, frameNode);
+}
+
+void ViewAbstract::SetBorderColor(FrameNode* frameNode, const Color& value)
+{
+    BorderColorProperty borderColor;
+    borderColor.SetColor(value);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
+}
+
+void ViewAbstract::SetWidth(FrameNode* frameNode, const CalcLength& width)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    // get previously user defined ideal height
+    std::optional<CalcLength> height = std::nullopt;
+    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (layoutConstraint && layoutConstraint->selfIdealSize) {
+        height = layoutConstraint->selfIdealSize->Height();
+    }
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
+}
+
+void ViewAbstract::SetHeight(FrameNode* frameNode, const CalcLength& height)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    // get previously user defined ideal width
+    std::optional<CalcLength> width = std::nullopt;
+    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (layoutConstraint && layoutConstraint->selfIdealSize) {
+        width = layoutConstraint->selfIdealSize->Width();
+    }
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
+}
+
+void ViewAbstract::ClearWidthOrHeight(FrameNode* frameNode, bool isWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
+}
+
+void ViewAbstract::SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Position, value, frameNode);
+}
+
+void ViewAbstract::SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformMatrix, matrix, frameNode);
+}
+
+void ViewAbstract::SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetHitTestMode(hitTestMode);
+}
+
+void ViewAbstract::SetOpacity(FrameNode* frameNode, double opacity)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, opacity, frameNode);
+}
+
+void ViewAbstract::SetZIndex(FrameNode* frameNode, int32_t value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ZIndex, value, frameNode);
 }
 } // namespace OHOS::Ace::NG

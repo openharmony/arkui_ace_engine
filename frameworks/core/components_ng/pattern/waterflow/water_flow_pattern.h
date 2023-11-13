@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
-#include "core/components_ng/pattern/waterflow/water_flow_position_controller.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT WaterFlowPattern : public ScrollablePattern {
@@ -56,8 +55,6 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     bool UpdateStartIndex(int32_t index);
-
-    void SetPositionController(RefPtr<WaterFlowPositionController> control);
 
     void AddFooter(const RefPtr<NG::UINode>& footer)
     {
@@ -105,6 +102,8 @@ public:
 
     void ScrollPage(bool reverse);
 
+    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     double GetStoredOffset() const
@@ -119,7 +118,7 @@ public:
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
-    Rect GetItemRect(int32_t index) const;
+    Rect GetItemRect(int32_t index) const override;
 
 private:
     void OnModifyDone() override;
@@ -131,9 +130,6 @@ private:
 
     // clip padding of WaterFlow
     RefPtr<WaterFlowContentModifier> contentModifier_;
-
-    // just for hold WaterFlowPositionController
-    RefPtr<WaterFlowPositionController> controller_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_PATTERN_H

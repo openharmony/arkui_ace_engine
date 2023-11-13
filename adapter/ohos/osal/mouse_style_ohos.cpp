@@ -72,7 +72,6 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
         { MouseFormat::LOADING, MMI::LOADING },
         { MouseFormat::RUNNING, MMI::RUNNING },
     };
-    SetPointerVisible(pointerStyle);
     int32_t MMIPointStyle = MMI::DEFAULT;
     int64_t idx = BinarySearchFindIndex(mouseFormatMap, ArraySize(mouseFormatMap), pointerStyle);
     if (idx >= 0) {

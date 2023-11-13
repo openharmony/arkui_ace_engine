@@ -41,7 +41,7 @@ public:
 
     virtual int32_t GetUdKey(std::string& udKey) = 0;
 
-    virtual int32_t GetShadowOffset(ShadowOffsetData shadowOffsetData) = 0;
+    virtual int32_t GetShadowOffset(ShadowOffsetData& shadowOffsetData) = 0;
 
     virtual int32_t GetDragState(MsdpDragState& dragState) = 0;
 };

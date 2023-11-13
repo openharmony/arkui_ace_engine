@@ -1640,7 +1640,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
     JSClass<JSWeb>::StaticMethod("onOverScroll", &JSWeb::OnOverScroll);
     JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
-    JSClass<JSWeb>::StaticMethod("wrapContent", &JSWeb::WrapContent);
+    JSClass<JSWeb>::StaticMethod("layoutMode", &JSWeb::SetLayoutMode);
     JSClass<JSWeb>::StaticMethod("nestedScroll", &JSWeb::SetNestedScroll);
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentStart", &JSWeb::JavaScriptOnDocumentStart);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
@@ -1893,6 +1893,11 @@ void JSWeb::Create(const JSCallbackInfo& info)
     if (!controllerObj->IsObject()) {
         return;
     }
+    auto type = paramObject->GetProperty("type");
+    WebType webType = WebType::SURFACE;
+    if (type->IsNumber() && (type->ToNumber<int32_t>() >= 0) && (type->ToNumber<int32_t>() <= 1)) {
+        webType = static_cast<WebType>(type->ToNumber<int32_t>());
+    }
     auto controller = JSRef<JSObject>::Cast(controllerObj);
     auto setWebIdFunction = controller->GetProperty("setWebId");
     if (setWebIdFunction->IsFunction()) {
@@ -1915,7 +1920,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         int32_t parentNWebId = -1;
         bool isPopup = JSWebWindowNewHandler::ExistController(controller, parentNWebId);
         WebModel::GetInstance()->Create(
-            dstSrc.value(), std::move(setIdCallback), std::move(setHapPathCallback), parentNWebId, isPopup);
+            dstSrc.value(), std::move(setIdCallback), std::move(setHapPathCallback), parentNWebId, isPopup, webType);
 
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
@@ -1934,7 +1939,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
     } else {
         auto* jsWebController = controller->Unwrap<JSWebController>();
-        WebModel::GetInstance()->Create(dstSrc.value(), jsWebController->GetController());
+        WebModel::GetInstance()->Create(dstSrc.value(), jsWebController->GetController(), webType);
     }
 
     WebModel::GetInstance()->SetFocusable(true);
@@ -3590,9 +3595,21 @@ void JSWeb::OnOverScroll(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetOverScrollId(jsCallback);
 }
 
-void JSWeb::WrapContent(bool isWrapContentEnabled)
+void JSWeb::SetLayoutMode(int32_t layoutMode)
 {
-    WebModel::GetInstance()->SetWrapContent(isWrapContentEnabled);
+    auto mode = WebLayoutMode::NONE;
+    switch (layoutMode) {
+        case 0:
+            mode = WebLayoutMode::NONE;
+            break;
+        case 1:
+            mode = WebLayoutMode::FIT_CONTENT;
+            break;
+        default:
+            mode = WebLayoutMode::NONE;
+            break;
+    }
+    WebModel::GetInstance()->SetLayoutMode(mode);
 }
 
 void JSWeb::SetNestedScroll(const JSCallbackInfo& args)

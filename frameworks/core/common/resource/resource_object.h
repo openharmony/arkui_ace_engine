@@ -69,7 +69,7 @@ public:
     }
 
 private:
-    uint32_t id_;
+    int32_t id_;
     uint32_t type_;
     std::vector<ResourceObjectParams> params_;
     std::string bundleName_;

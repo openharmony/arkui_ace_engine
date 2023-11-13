@@ -32,6 +32,189 @@ class BackgroundColorModifier extends Modifier {
     }
 }
 BackgroundColorModifier.identity = Symbol("backgroundColor");
+class WidthModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetWidth(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setWidth(node, this.value);
+        }
+    }
+}
+class BorderWidthModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetBorderWidth(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setBorderWidth(node, this.value.left, this.value.right, this.value.top, this.value.bottom);
+        }
+    }
+}
+class HeightModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetHeight(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setHeight(node, this.value);
+        }
+    }
+}
+class BorderRadiusModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetBorderRadius(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+        }
+    }
+}
+class PositionModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetPosition(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setPosition(node, this.value.x, this.value.y);
+        }
+    }
+}
+class BorderColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetBorderColor(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setBorderColor(node, this.value.leftColor, this.value.rightColor, this.value.topColor, this.value.bottomColor);
+        }
+    }
+}
+class TransformModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetTransform(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setTransform(node, this.value.matrix);
+        }
+    }
+}
+class ClipModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetClip(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setClip(node, this.value);
+        }
+    }
+}
+class BorderStyleModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetBorderStyle(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setBorderStyle(node, this.value.type, this.value.style, this.value.top, this.value.right, this.value.bottom, this.value.left);
+        }
+    }
+}
+class ShadowModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetShadow(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setShadow(node, this.value.style, this.value.radius, this.value.type, this.value.color, this.value.offsetX, this.value.offsetY, this.value.fill);
+        }
+    }
+}
+class HitTestBehaviorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetHitTestBehavior(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setHitTestBehavior(node, this.value);
+        }
+    }
+}
+class ZIndexModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetZIndex(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setZIndex(node, this.value);
+        }
+    }
+}
+class OpacityModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetOpacity(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setOpacity(node, this.value);
+        }
+    }
+}
+BackgroundColorModifier.identity = Symbol("backgroundColor");
+BorderRadiusModifier.identity = Symbol("borderRadius");
+BorderWidthModifier.identity = Symbol("borderWidth");
+WidthModifier.identity = Symbol("width");
+HeightModifier.identity = Symbol("height");
+PositionModifier.identity = Symbol("position");
+BorderColorModifier.identity = Symbol("borderColor");
+TransformModifier.identity = Symbol("transform");
+ClipModifier.identity = Symbol("clip");
+BorderStyleModifier.identity = Symbol("borderStyle");
+ShadowModifier.identity = Symbol("shadow");
+HitTestBehaviorModifier.identity = Symbol("hitTestBehavior");
+ZIndexModifier.identity = Symbol("zIndex");
+OpacityModifier.identity = Symbol("opacity");
+const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
+const isString = (val) => typeof val === 'string';
+const isNumber = (val) => typeof val === 'number';
+const isBigint = (val) => typeof val === 'bigint';
+const isBoolean = (val) => typeof val === 'boolean';
+const isSymbol = (val) => typeof val === 'symbol';
+const isUndefined = (val) => typeof val === 'undefined';
+const isObject = (val) => typeof val === 'object';
+const isFunction = (val) => typeof val === 'function';
+function CheckJSCallbackInfo(value, checklist) {
+    var typeVerified = false;
+    checklist.forEach(function (infoType) {
+        switch (infoType) {
+            case JSCallbackInfoType.STRING:
+                if (isString(value)) {
+                    typeVerified = true;
+                }
+                break;
+            case JSCallbackInfoType.NUMBER:
+                if (isNumber(value)) {
+                    typeVerified = true;
+                }
+                break;
+            case JSCallbackInfoType.OBJECT:
+                if (isObject(value)) {
+                    typeVerified = true;
+                }
+                break;
+            case JSCallbackInfoType.FUNCTION:
+                if (isFunction(value)) {
+                    typeVerified = true;
+                }
+                break;
+            default:
+                break;
+        }
+    });
+    return typeVerified || checklist.length == 0;
+}
 function modifier(modifiers, modifierClass, value) {
     const identity = modifierClass["identity"];
     const item = modifiers.get(identity);
@@ -59,10 +242,24 @@ class ArkComponent {
         });
     }
     width(value) {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "number" && typeof value !== "string") {
+            console.log("width only support number and string");
+            modifier(this._modifiers, WidthModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, WidthModifier, value);
+        }
+        return this;
     }
     height(value) {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "number" && typeof value !== "string") {
+            console.log("height only support number and string");
+            modifier(this._modifiers, HeightModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, HeightModifier, value);
+        }
+        return this;
     }
     expandSafeArea(types, edges) {
         throw new Error("Method not implemented.");
@@ -83,7 +280,13 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     hitTestBehavior(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, HitTestBehaviorModifier, value);
+        }
+        else {
+            modifier(this._modifiers, HitTestBehaviorModifier, undefined);
+        }
+        return this;
     }
     layoutWeight(value) {
         throw new Error("Method not implemented.");
@@ -123,22 +326,91 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     opacity(value) {
-        throw new Error("Method not implemented.");
+        var opacityDefault = 0.0;
+        var checklist = [JSCallbackInfoType.OBJECT, JSCallbackInfoType.NUMBER, JSCallbackInfoType.STRING];
+        if (!CheckJSCallbackInfo(value, checklist)) {
+            modifier(this._modifiers, OpacityModifier, 1.0);
+        }
+        else {
+            if (isNumber(value)) {
+                opacityDefault = value;
+            }
+            else if (isString(value)) {
+                opacityDefault = Number(value);
+            }
+            modifier(this._modifiers, OpacityModifier, opacityDefault);
+        }
+        return this;
     }
     border(value) {
         throw new Error("Method not implemented.");
     }
     borderStyle(value) {
-        throw new Error("Method not implemented.");
+        var arkBorderStyle = new ArkBorderStyle();
+        if (arkBorderStyle.parseBorderStyle(value)) {
+            modifier(this._modifiers, BorderStyleModifier, arkBorderStyle);
+        }
+        else {
+            modifier(this._modifiers, BorderStyleModifier, undefined);
+        }
+        return this;
     }
     borderWidth(value) {
-        throw new Error("Method not implemented.");
+        var borderWidth = new ArkBorderWidth();
+        if (typeof value === "number" || typeof value === "string") {
+            borderWidth.left = value;
+            borderWidth.right = value;
+            borderWidth.top = value;
+            borderWidth.bottom = value;
+        }
+        else {
+            borderWidth.left = value === null || value === void 0 ? void 0 : value.left;
+            borderWidth.right = value === null || value === void 0 ? void 0 : value.right;
+            borderWidth.top = value === null || value === void 0 ? void 0 : value.top;
+            borderWidth.bottom = value === null || value === void 0 ? void 0 : value.bottom;
+        }
+        modifier(this._modifiers, BorderWidthModifier, borderWidth);
+        return this;
     }
     borderColor(value) {
-        throw new Error("Method not implemented.");
+        var arkColor = new ArkColor();
+        var borderColorGroup = new ArkBorderColor();
+        if (typeof value === "number" || typeof value === "string") {
+            arkColor.parseColorValue(value);
+            borderColorGroup.leftColor = arkColor.color;
+            borderColorGroup.rightColor = arkColor.color;
+            borderColorGroup.topColor = arkColor.color;
+            borderColorGroup.bottomColor = arkColor.color;
+        }
+        else if (!!value.left || !!value.right || !!value.top || !!value.bottom) {
+            arkColor.parseColorValue(value.left);
+            borderColorGroup.leftColor = left.color;
+            arkColor.parseColorValue(value.right);
+            borderColorGroup.rightColor = right.color;
+            arkColor.parseColorValue(value.top);
+            borderColorGroup.topColor = top.color;
+            arkColor.parseColorValue(value.bottom);
+            borderColorGroup.bottomColor = bottom.color;
+        }
+        modifier(this._modifiers, BorderColorModifier, borderColorGroup);
+        return this;
     }
     borderRadius(value) {
-        throw new Error("Method not implemented.");
+        var borderRadius = new ArkBorderRadius;
+        if (typeof value === "number" || typeof value === "string") {
+            borderRadius.topLeft = value;
+            borderRadius.topRight = value;
+            borderRadius.bottomLeft = value;
+            borderRadius.bottomRight = value;
+        }
+        else {
+            borderRadius.topLeft = value === null || value === void 0 ? void 0 : value.topRight;
+            borderRadius.topRight = value === null || value === void 0 ? void 0 : value.topRight;
+            borderRadius.bottomLeft = value === null || value === void 0 ? void 0 : value.bottomLeft;
+            borderRadius.bottomRight = value === null || value === void 0 ? void 0 : value.bottomRight;
+        }
+        modifier(this._modifiers, BorderRadiusModifier, borderRadius);
+        return this;
     }
     borderImage(value) {
         throw new Error("Method not implemented.");
@@ -255,7 +527,8 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     transform(value) {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, TransformModifier, new ArkTransformMatrix(value["matrix4x4"]));
+        return this;
     }
     onAppear(event) {
         throw new Error("Method not implemented.");
@@ -285,7 +558,14 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     zIndex(value) {
-        throw new Error("Method not implemented.");
+        if (value !== null) {
+            var zIndex = 0;
+            if (typeof (value) === "number") {
+                zIndex = value;
+            }
+            modifier(this._modifiers, ZIndexModifier, zIndex);
+        }
+        return this;
     }
     sharedTransition(id, options) {
         throw new Error("Method not implemented.");
@@ -297,7 +577,18 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     position(value) {
-        throw new Error("Method not implemented.");
+        if (!value || (!!(value === null || value === void 0 ? void 0 : value.x) && typeof (value === null || value === void 0 ? void 0 : value.x) != "number" && typeof (value === null || value === void 0 ? void 0 : value.x) != "string") ||
+            (!!(value === null || value === void 0 ? void 0 : value.y) && typeof (value === null || value === void 0 ? void 0 : value.y) != "number" && typeof (value === null || value === void 0 ? void 0 : value.x) != "string")) {
+            console.log("position x and y should be number or string");
+            modifier(this._modifiers, PositionModifier, undefined);
+        }
+        else {
+            var position = new ArkPosition();
+            position.x = value === null || value === void 0 ? void 0 : value.x;
+            position.y = value === null || value === void 0 ? void 0 : value.y;
+            modifier(this._modifiers, PositionModifier, position);
+        }
+        return this;
     }
     markAnchor(value) {
         throw new Error("Method not implemented.");
@@ -360,10 +651,18 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     shadow(value) {
-        throw new Error("Method not implemented.");
+        var arkShadow = new ArkShadow();
+        if (arkShadow.parseShadowValue(value)) {
+            modifier(this._modifiers, ShadowModifier, arkShadow);
+        }
+        else {
+            modifier(this._modifiers, ShadowModifier, undefined);
+        }
+        return this;
     }
     clip(value) {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, ClipModifier, value);
+        return this;
     }
     mask(value) {
         throw new Error("Method not implemented.");
@@ -467,15 +766,503 @@ class ArkButtonComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
 }
-globalThis.Button.attributeModifier = (modifier) => {
+globalThis.Button.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
     var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
-    if (thisViewPu.length !== 0) {
-        var viewPu = thisViewPu[thisViewPu.length - 1];
-        var component = viewPu.getOrCreateArkComponent(elmtId, (nativePtr) => new ArkButtonComponent(nativePtr), nativeNode);
-        modifier.applyNormalAttribute(component);
-        component.applyModifierPatch();
+    var component = this.createOrGetNode(elmtId, () => {
+        return new ArkButtonComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+//@ts-nocheck
+class ArkLoadingProgressComponent extends ArkComponent {
+    color(value) {
+        throw new Error("Method not implemented.");
     }
+    enableLoading(value) {
+        throw new Error("Method not implemented.");
+    }
+}
+globalThis.LoadingProgress.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var component = this.createOrGetNode(elmtId, () => {
+        return new ArkLoadingProgressComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+//@ts-nocheck
+class ArkRefreshComponent extends ArkComponent {
+    onStateChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onRefreshing(callback) {
+        throw new Error("Method not implemented.");
+    }
+}
+globalThis.Refresh.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var component = this.createOrGetNode(elmtId, () => {
+        return new ArkRefreshComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+//@ts-nocheck
+class ArkScrollComponent extends ArkComponent {
+    scrollable(value) {
+        throw new Error("Method not implemented.");
+    }
+    onScroll(event) {
+        throw new Error("Method not implemented.");
+    }
+    onScrollEdge(event) {
+        throw new Error("Method not implemented.");
+    }
+    onScrollStart(event) {
+        throw new Error("Method not implemented.");
+    }
+    onScrollEnd(event) {
+        throw new Error("Method not implemented.");
+    }
+    onScrollStop(event) {
+        throw new Error("Method not implemented.");
+    }
+    scrollBar(barState) {
+        throw new Error("Method not implemented.");
+    }
+    scrollBarColor(color) {
+        throw new Error("Method not implemented.");
+    }
+    scrollBarWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    edgeEffect(edgeEffect) {
+        throw new Error("Method not implemented.");
+    }
+    onScrollFrameBegin(event) {
+        throw new Error("Method not implemented.");
+    }
+    nestedScroll(value) {
+        throw new Error("Method not implemented.");
+    }
+    enableScrollInteraction(value) {
+        throw new Error("Method not implemented.");
+    }
+    friction(value) {
+        throw new Error("Method not implemented.");
+    }
+    scrollSnap(value) {
+        throw new Error("Method not implemented.");
+    }
+}
+globalThis.Scroll.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var component = this.createOrGetNode(elmtId, () => {
+        return new ArkScrollComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+//@ts-nocheck
+class ArkStackComponent extends ArkComponent {
+    alignContent(value) {
+        throw new Error("Method not implemented.");
+    }
+}
+globalThis.Stack.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var component = this.createOrGetNode(elmtId, () => {
+        return new ArkStackComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+//@ts-nocheck
+class ArkImageComponent extends ArkComponent {
+    alt(value) {
+        throw new Error("Method not implemented.");
+    }
+    matchTextDirection(value) {
+        throw new Error("Method not implemented.");
+    }
+    fitOriginalSize(value) {
+        throw new Error("Method not implemented.");
+    }
+    fillColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    objectFit(value) {
+        throw new Error("Method not implemented.");
+    }
+    objectRepeat(value) {
+        throw new Error("Method not implemented.");
+    }
+    autoResize(value) {
+        throw new Error("Method not implemented.");
+    }
+    renderMode(value) {
+        throw new Error("Method not implemented.");
+    }
+    interpolation(value) {
+        throw new Error("Method not implemented.");
+    }
+    sourceSize(value) {
+        throw new Error("Method not implemented.");
+    }
+    syncLoad(value) {
+        throw new Error("Method not implemented.");
+    }
+    colorFilter(value) {
+        throw new Error("Method not implemented.");
+    }
+    copyOption(value) {
+        throw new Error("Method not implemented.");
+    }
+    onComplete(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onError(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onError(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onFinish(event) {
+        throw new Error("Method not implemented.");
+    }
+}
+globalThis.Image.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var component = this.createOrGetNode(elmtId, () => {
+        return new ArkImageComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+//@ts-nocheck
+class ArkTextComponent extends ArkComponent {
+    font(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontSize(value) {
+        throw new Error("Method not implemented.");
+    }
+    minFontSize(value) {
+        throw new Error("Method not implemented.");
+    }
+    maxFontSize(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontStyle(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontWeight(value) {
+        throw new Error("Method not implemented.");
+    }
+    textAlign(value) {
+        throw new Error("Method not implemented.");
+    }
+    lineHeight(value) {
+        throw new Error("Method not implemented.");
+    }
+    textOverflow(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontFamily(value) {
+        throw new Error("Method not implemented.");
+    }
+    maxLines(value) {
+        throw new Error("Method not implemented.");
+    }
+    decoration(value) {
+        throw new Error("Method not implemented.");
+    }
+    letterSpacing(value) {
+        throw new Error("Method not implemented.");
+    }
+    textCase(value) {
+        throw new Error("Method not implemented.");
+    }
+    baselineOffset(value) {
+        throw new Error("Method not implemented.");
+    }
+    copyOption(value) {
+        throw new Error("Method not implemented.");
+    }
+    textShadow(value) {
+        throw new Error("Method not implemented.");
+    }
+    heightAdaptivePolicy(value) {
+        throw new Error("Method not implemented.");
+    }
+    textIndent(value) {
+        throw new Error("Method not implemented.");
+    }
+    wordBreak(value) {
+        throw new Error("Method not implemented.");
+    }
+    onCopy(callback) {
+        throw new Error("Method not implemented.");
+    }
+    selection(selectionStart, selectionEnd) {
+        throw new Error("Method not implemented.");
+    }
+    ellipsisMode(value) {
+        throw new Error("Method not implemented.");
+    }
+}
+globalThis.Text.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var component = this.createOrGetNode(elmtId, () => {
+        return new ArkTextComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+//@ts-nocheck
+class ArkTextAreaComponent extends ArkComponent {
+    placeholderColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    placeholderFont(value) {
+        throw new Error("Method not implemented.");
+    }
+    textAlign(value) {
+        throw new Error("Method not implemented.");
+    }
+    caretColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontSize(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontStyle(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontWeight(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontFamily(value) {
+        throw new Error("Method not implemented.");
+    }
+    inputFilter(value, error) {
+        throw new Error("Method not implemented.");
+    }
+    onChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onTextSelectionChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onContentScroll(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onEditChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onCopy(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onCut(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onPaste(callback) {
+        throw new Error("Method not implemented.");
+    }
+    copyOption(value) {
+        throw new Error("Method not implemented.");
+    }
+    enableKeyboardOnFocus(value) {
+        throw new Error("Method not implemented.");
+    }
+    maxLength(value) {
+        throw new Error("Method not implemented.");
+    }
+    showCounter(value) {
+        throw new Error("Method not implemented.");
+    }
+    style(value) {
+        throw new Error("Method not implemented.");
+    }
+    barState(value) {
+        throw new Error("Method not implemented.");
+    }
+    selectionMenuHidden(value) {
+        throw new Error("Method not implemented.");
+    }
+    maxLines(value) {
+        throw new Error("Method not implemented.");
+    }
+    customKeyboard(value) {
+        throw new Error("Method not implemented.");
+    }
+}
+globalThis.TextArea.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var component = this.createOrGetNode(elmtId, () => {
+        return new ArkTextAreaComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+//@ts-nocheck
+class ArkTextInputComponent extends ArkComponent {
+    type(value) {
+        throw new Error("Method not implemented.");
+    }
+    placeholderColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    placeholderFont(value) {
+        throw new Error("Method not implemented.");
+    }
+    enterKeyType(value) {
+        throw new Error("Method not implemented.");
+    }
+    caretColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    onEditChanged(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onEditChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onSubmit(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onTextSelectionChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onContentScroll(callback) {
+        throw new Error("Method not implemented.");
+    }
+    maxLength(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontSize(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontStyle(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontWeight(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontFamily(value) {
+        throw new Error("Method not implemented.");
+    }
+    inputFilter(value, error) {
+        throw new Error("Method not implemented.");
+    }
+    onCopy(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onCut(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onPaste(callback) {
+        throw new Error("Method not implemented.");
+    }
+    copyOption(value) {
+        throw new Error("Method not implemented.");
+    }
+    showPasswordIcon(value) {
+        throw new Error("Method not implemented.");
+    }
+    textAlign(value) {
+        throw new Error("Method not implemented.");
+    }
+    style(value) {
+        throw new Error("Method not implemented.");
+    }
+    caretStyle(value) {
+        throw new Error("Method not implemented.");
+    }
+    selectedBackgroundColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    caretPosition(value) {
+        throw new Error("Method not implemented.");
+    }
+    enableKeyboardOnFocus(value) {
+        throw new Error("Method not implemented.");
+    }
+    passwordIcon(value) {
+        throw new Error("Method not implemented.");
+    }
+    showError(value) {
+        throw new Error("Method not implemented.");
+    }
+    showUnit(value) {
+        throw new Error("Method not implemented.");
+    }
+    showUnderline(value) {
+        throw new Error("Method not implemented.");
+    }
+    selectionMenuHidden(value) {
+        throw new Error("Method not implemented.");
+    }
+    barState(value) {
+        throw new Error("Method not implemented.");
+    }
+    maxLines(value) {
+        throw new Error("Method not implemented.");
+    }
+    customKeyboard(value) {
+        throw new Error("Method not implemented.");
+    }
+}
+globalThis.TextInput.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var component = this.createOrGetNode(elmtId, () => {
+        return new ArkTextInputComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+//@ts-nocheck
+class ArkToggleComponent extends ArkComponent {
+    onChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    selectedColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    switchPointColor(color) {
+        throw new Error("Method not implemented.");
+    }
+}
+globalThis.Toggle.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var component = this.createOrGetNode(elmtId, () => {
+        return new ArkToggleComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
 };
 const COLOR_WITH_MAGIC = /#[0-9A-Fa-f]{6,8}/;
 const COLOR_WITH_MAGIC_MINI = /#[0-9A-Fa-f]{3,4}/;
@@ -618,5 +1405,137 @@ class ArkColor {
     }
     fromRGB(red, green, blue) {
         return this.fromARGB(0xff, red, green, blue);
+    }
+}
+//@ts-nocheck
+class ArkBorderStyle {
+    constructor() {
+        this.type = undefined;
+        this.style = undefined;
+        this.top = undefined;
+        this.right = undefined;
+        this.bottom = undefined;
+        this.left = undefined;
+    }
+    isEqual(another) {
+        return (this.type === another.type) && (this.style === another.style) &&
+            (this.top === another.top) && (this.right === another.right) &&
+            (this.bottom === another.bottom) && (this.left === another.left);
+    }
+    parseBorderStyle(value) {
+        if (typeof value === "number") {
+            this.style = value;
+            this.type = true;
+            return true;
+        }
+        else if (typeof value === "object") {
+            return this.parseEdgeStyles(value);
+        }
+        return false;
+    }
+    parseEdgeStyles(options) {
+        this.top = options.top;
+        this.right = options.right;
+        this.bottom = options.bottom;
+        this.left = options.left;
+        this.type = true;
+        return true;
+    }
+}
+class ArkShadow {
+    constructor() {
+        this.style = undefined;
+        this.radius = undefined;
+        this.type = undefined;
+        this.color = undefined;
+        this.offsetX = undefined;
+        this.offsetY = undefined;
+        this.fill = undefined;
+    }
+    isEqual(another) {
+        return (this.style === another.style) && (this.radius === another.radius) &&
+            (this.type === another.type) && (this.color === another.color) &&
+            (this.offsetX === another.offsetX) && (this.offsetY === another.offsetY) &&
+            (this.fill === another.fill);
+    }
+    parseShadowValue(value) {
+        if (typeof value === "number") {
+            this.style = value;
+            return true;
+        }
+        else if (typeof value === "object") {
+            return this.parseShadowOptions(value);
+        }
+        return false;
+    }
+    parseShadowOptions(options) {
+        var arkColor = new ArkColor();
+        if (!arkColor.parseColorValue(options.color)) {
+            return false;
+        }
+        this.radius = options.radius;
+        this.type = options.type;
+        this.color = arkColor.color;
+        this.offsetX = options.offsetX;
+        this.offsetY = options.offsetY;
+        this.fill = options.fill;
+        return true;
+    }
+}
+class ArkBorderColor {
+    constructor() {
+        this.leftColor = undefined;
+        this.rightColor = undefined;
+        this.topColor = undefined;
+        this.bottomColor = undefined;
+    }
+    isEqual(another) {
+        return (this.leftColor === another.leftColor && this.rightColor === another.rightColor && this.topColor === another.topColor && this.bottomColor === another.bottomColor);
+    }
+}
+class ArkPosition {
+    constructor() {
+        this.x = undefined;
+        this.y = undefined;
+    }
+    isEqual(another) {
+        return (this.x === another.x) && (this.y === another.y);
+    }
+}
+class ArkBorderWidth {
+    constructor() {
+        this.left = undefined;
+        this.right = undefined;
+        this.top = undefined;
+        this.bottom = undefined;
+    }
+    isEqual(another) {
+        return (this.left === another.left && this.right === another.right && this.top === another.top && this.bottom === another.bottom);
+    }
+}
+class ArkBorderRadius {
+    constructor() {
+        this.topLeft = undefined;
+        this.topRight = undefined;
+        this.bottomLeft = undefined;
+        this.bottomRight = undefined;
+    }
+    isEqual(another) {
+        return (this.topLeft === another.topLeft && this.topRight === another.topRight && this.bottomLeft === another.bottomLeft && this.bottomRight === another.bottomRight);
+    }
+}
+class ArkTransformMatrix {
+    constructor(matrix) {
+        this.matrix = matrix;
+        this.length = 16;
+    }
+    compareArrays(arr1, arr2) {
+        return Array.isArray(arr1)
+            && Array.isArray(arr2)
+            && arr1.length === arr2.length
+            && arr1.every((value, index) => value === arr2[index]);
+    }
+    isEqual(another) {
+        this.compareArrays(this.matrix, another.matrix);
     }
 }

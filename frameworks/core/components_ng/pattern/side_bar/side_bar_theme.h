@@ -62,6 +62,13 @@ public:
             theme->controlImageColor_ = sideBarPattern->GetAttr<Color>("control_image_color", Color::BLACK);
             theme->sideBarBackgroundColor_ = sideBarPattern->GetAttr<Color>("side_bar_background_color", Color::WHITE);
             theme->controlButtonRadius_ = sideBarPattern->GetAttr<Dimension>("control_button_radius", 0.0_vp);
+            auto dividerShadowEnable = sideBarPattern->GetAttr<std::string>("divider_shadow_enable", "0");
+            theme->dividerShadowEnable_ = StringUtils::StringToInt(dividerShadowEnable);
+
+            auto sideBarUnfocusEffectEnable
+                = sideBarPattern->GetAttr<std::string>("section_unfocus_effect_enable", "0");
+            theme->sideBarUnfocusEffectEnable_ = StringUtils::StringToInt(sideBarUnfocusEffectEnable);
+            theme->sideBarUnfocusColor_ = sideBarPattern->GetAttr<Color>("section_unfocus_color", Color::TRANSPARENT);
         }
     };
 
@@ -82,6 +89,21 @@ public:
         return controlButtonRadius_;
     }
 
+    uint32_t GetDividerShadowEnable() const
+    {
+        return dividerShadowEnable_;
+    }
+
+    const uint32_t& GetSideBarUnfocusEffectEnable() const
+    {
+        return sideBarUnfocusEffectEnable_;
+    }
+
+    const Color& GetSideBarUnfocusColor() const
+    {
+        return sideBarUnfocusColor_;
+    }
+
 protected:
     SideBarTheme() = default;
 
@@ -89,6 +111,9 @@ private:
     Color controlImageColor_ = Color::BLACK;
     Color sideBarBackgroundColor_ = Color::WHITE;
     Dimension controlButtonRadius_;
+    uint32_t dividerShadowEnable_ = 0;
+    uint32_t sideBarUnfocusEffectEnable_ = 0;
+    Color sideBarUnfocusColor_ = Color::TRANSPARENT;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SIDE_BAR_SIDE_BAR_THEME_H

@@ -91,19 +91,30 @@ void WindowScene::OnAttachToFrameNode()
     context->SetRSNode(surfaceNode);
     surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
-    auto lostFocusCallback = [weakThis = WeakClaim(this)]() {
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
-        auto host = self->GetHost();
-        CHECK_NULL_VOID(host);
-        auto focusHub = host->GetFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->LostFocus();
+    RegisterFocusCallback();
+
+    WindowPattern::OnAttachToFrameNode();
+}
+
+void WindowScene::RegisterFocusCallback()
+{
+    auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent([weakThis]() {
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            auto focusHub = host->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->LostFocus();
+        },
+            TaskExecutor::TaskType::UI);
     };
     CHECK_NULL_VOID(session_);
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
-
-    WindowPattern::OnAttachToFrameNode();
 }
 
 void WindowScene::UpdateSession(const sptr<Rosen::Session>& session)

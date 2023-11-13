@@ -52,8 +52,6 @@ namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
 
-constexpr float CARET_WIDTH = 1.5f;
-constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
 
 struct SelectionMenuParams {
     RichEditorType type;

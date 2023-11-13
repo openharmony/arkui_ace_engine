@@ -55,23 +55,16 @@ struct OptionParam {
     std::function<void()> action;
 
     OptionParam() = default;
-    OptionParam(
-        const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
-        : value(valueParam),
-          icon(iconParam),
-          enabled(true),
-          action(actionParam) {}
+    OptionParam(const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
+        : value(valueParam), icon(iconParam), enabled(true), action(actionParam)
+    {}
     OptionParam(const std::string& valueParam, const std::string& iconParam, bool enabledParam,
         const std::function<void()>& actionParam)
-        : value(valueParam),
-          icon(iconParam),
-          enabled(enabledParam),
-          action(actionParam) {}
+        : value(valueParam), icon(iconParam), enabled(enabledParam), action(actionParam)
+    {}
     OptionParam(const std::string& valueParam, const std::function<void()>& actionParam)
-        : value(valueParam),
-          icon(""),
-          enabled(true),
-          action(actionParam) {}
+        : value(valueParam), icon(""), enabled(true), action(actionParam)
+    {}
 
     ~OptionParam() = default;
 };
@@ -314,7 +307,24 @@ public:
     static void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts);
 
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
-
+    static void SetWidth(FrameNode* frameNode, const CalcLength& width);
+    static void SetHeight(FrameNode* frameNode, const CalcLength& height);
+    static void ClearWidthOrHeight(FrameNode* frameNode, bool isWidth);
+    static void SetBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value);
+    static void SetBorderRadius(FrameNode* frameNode, const Dimension& value);
+    static void SetBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value);
+    static void SetBorderWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
+    static void SetBorderColor(FrameNode* frameNode, const Color& value);
+    static void SetBorderStyle(FrameNode* frameNode, const BorderStyle& value);
+    static void SetBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value);
+    static void SetBackShadow(FrameNode* frameNode, const Shadow& shadow);
+    static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
+    static void SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix);
+    static void SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode);
+    static void SetOpacity(FrameNode* frameNode, double opacity);
+    static void SetZIndex(FrameNode* frameNode, int32_t value);
+    
 private:
     static void AddDragFrameNodeToManager();
 };

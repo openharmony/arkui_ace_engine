@@ -44,11 +44,13 @@ void GaugeModelNG::SetValue(float value)
 void GaugeModelNG::SetStartAngle(float startAngle)
 {
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, StartAngle, startAngle);
+    ACE_UPDATE_LAYOUT_PROPERTY(GaugeLayoutProperty, StartAngle, startAngle);
 }
 
 void GaugeModelNG::SetEndAngle(float endAngle)
 {
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, EndAngle, endAngle);
+    ACE_UPDATE_LAYOUT_PROPERTY(GaugeLayoutProperty, EndAngle, endAngle);
 }
 
 void GaugeModelNG::SetColors(const std::vector<Color>& colors, const std::vector<float>& values)
@@ -68,6 +70,7 @@ void GaugeModelNG::SetGradientColors(
 void GaugeModelNG::SetStrokeWidth(const Dimension& strokeWidth)
 {
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, StrokeWidth, strokeWidth);
+    ACE_UPDATE_LAYOUT_PROPERTY(GaugeLayoutProperty, StrokeWidth, strokeWidth);
 }
 
 void GaugeModelNG::SetDescription(const RefPtr<AceType>& customNode)

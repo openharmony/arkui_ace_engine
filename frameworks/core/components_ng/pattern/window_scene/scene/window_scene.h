@@ -49,6 +49,7 @@ protected:
 private:
     void BufferAvailableCallback();
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
+    void RegisterFocusCallback();
 
     bool destroyed_ = false;
 
