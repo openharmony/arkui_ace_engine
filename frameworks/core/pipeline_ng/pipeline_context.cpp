@@ -1505,9 +1505,7 @@ void PipelineContext::FlushTouchEvents()
             auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
             idToTouchPoints.emplace(scalePoint.id, scalePoint);
             idToTouchPoints[scalePoint.id].history.insert(idToTouchPoints[scalePoint.id].history.begin(), scalePoint);
-            if (iter->type != TouchType::MOVE) {
-                needInterpolation = false;
-            }
+            needInterpolation = iter->type != TouchType::MOVE ? false : true;
         }
         if (needInterpolation) {
             auto targetTimeStamp = resampleTimeStamp_;
