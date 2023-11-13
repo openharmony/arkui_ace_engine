@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
-#include <map>
 
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
@@ -33,7 +32,6 @@ namespace {
 
 constexpr int32_t MAX_PAN_FINGERS = 10;
 constexpr int32_t DEFAULT_PAN_FINGERS = 1;
-constexpr Dimension DISTANCE_PER_MOUSE_DEGREE = LINE_HEIGHT_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES;
 constexpr int32_t AXIS_PAN_FINGERS = 1;
 
 } // namespace
@@ -130,8 +128,8 @@ void PanRecognizer::UpdateTouchPointInVelocityTracker(const TouchEvent& event, b
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "Pan recognizer receives %{public}d touch down event, begin to detect pan event", event.id);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer receives %{public}d touch down event, begin to detect pan event",
+        event.id);
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
@@ -210,6 +208,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
+
     if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
         UpdateTouchPointInVelocityTracker(event, true);
     } else if (static_cast<int32_t>(touchPoints_.size()) > fingers_) {
@@ -325,22 +324,25 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     if (fingers_ != AXIS_PAN_FINGERS) {
         return;
     }
-    globalPoint_ = Point(event.x, event.y);
-    auto distancePerMouseDegreePx = DISTANCE_PER_MOUSE_DEGREE.ConvertToPx();
-    if (direction_.type == PanDirection::ALL || (direction_.type & PanDirection::HORIZONTAL) == 0) {
-        // PanRecognizer Direction: Vertical or ALL
-        delta_ =
-            Offset(-event.horizontalAxis * distancePerMouseDegreePx, -event.verticalAxis * distancePerMouseDegreePx);
-    } else if ((direction_.type & PanDirection::VERTICAL) == 0) {
-        // PanRecognizer Direction: Horizontal
-        if (NearZero(event.horizontalAxis)) {
-            delta_ = Offset(-event.verticalAxis * distancePerMouseDegreePx, 0);
-        } else {
-            delta_ = Offset(
-                -event.horizontalAxis * distancePerMouseDegreePx, -event.verticalAxis * distancePerMouseDegreePx);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    bool isShiftKeyPressed = false;
+    bool hasDifferentDirectionGesture = false;
+    if (pipeline) {
+        isShiftKeyPressed =
+            pipeline->IsKeyInPressed(KeyCode::KEY_SHIFT_LEFT) || pipeline->IsKeyInPressed(KeyCode::KEY_SHIFT_RIGHT);
+        hasDifferentDirectionGesture = pipeline->HasDifferentDirectionGesture();
+    }
+    delta_ = event.ConvertToOffset(isShiftKeyPressed, hasDifferentDirectionGesture);
+    if (event.sourceTool == SourceTool::MOUSE) {
+        if ((direction_.type & PanDirection::HORIZONTAL) == 0) {        // Direction is vertical
+            delta_.SetX(0.0);
+        } else if ((direction_.type & PanDirection::VERTICAL) == 0) {   // Direction is horizontal
+            delta_.SetY(0.0);
         }
     }
 
+    globalPoint_ = Point(event.x, event.y);
     mainDelta_ = GetMainAxisDelta();
     averageDistance_ += delta_;
 
@@ -603,6 +605,18 @@ double PanRecognizer::GetMainAxisDelta()
         default:
             return 0.0;
     }
+}
+
+RefPtr<GestureSnapshot> PanRecognizer::Dump() const
+{
+    RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
+    std::stringstream oss;
+    oss << "direction: " <<  direction_.type << ", "
+        << "isForDrag: " << isForDrag_ << ", "
+        << "distance: " << distance_ << ", "
+        << "fingers: " << fingers_;
+    info->customInfo = oss.str();
+    return info;
 }
 
 } // namespace OHOS::Ace::NG

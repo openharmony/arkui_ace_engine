@@ -115,6 +115,38 @@ public:
         }
     }
 
+    void SetOnOffsetChangeOffset(OnOffsetChangeFunc&& onOffsetChange)
+    {
+        onOffsetChangeEvent_ = std::move(onOffsetChange);
+    }
+
+    void FireOffsetChangeEvent(int32_t offset) const
+    {
+        if (onOffsetChangeEvent_) {
+            onOffsetChangeEvent_(offset);
+        }
+    }
+
+    void SetStartOnStateChange(OnStateChangedEvent&& onStateChangeEvent)
+    {
+        startOnStateChangeEvent_ = std::move(onStateChangeEvent);
+    }
+
+    void SetEndOnStateChange(OnStateChangedEvent&& onStateChangeEvent)
+    {
+        endOnStateChangeEvent_ = std::move(onStateChangeEvent);
+    }
+
+    void FireStateChangeEvent(SwipeActionState newState, bool isStart) const
+    {
+        if (isStart && startOnStateChangeEvent_) {
+            startOnStateChangeEvent_(newState);
+        }
+        if (!isStart && endOnStateChangeEvent_) {
+            endOnStateChangeEvent_(newState);
+        }
+    }
+
     int32_t GetIndex(const Point& point) const;
 
     std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType drag) override;
@@ -128,6 +160,9 @@ private:
     OnEnterDeleteAreaEvent onEnterEndDeleteAreaEvent_;
     OnExitDeleteAreaEvent onExitStartDeleteAreaEvent_;
     OnExitDeleteAreaEvent onExitEndDeleteAreaEvent_;
+    OnOffsetChangeFunc onOffsetChangeEvent_;
+    OnStateChangedEvent startOnStateChangeEvent_;
+    OnStateChangedEvent endOnStateChangeEvent_;
 };
 } // namespace OHOS::Ace::NG
 

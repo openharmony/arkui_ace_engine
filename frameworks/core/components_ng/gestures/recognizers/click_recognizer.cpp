@@ -324,4 +324,14 @@ bool ClickRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
     return true;
 }
 
+RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
+{
+    RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
+    std::stringstream oss;
+    oss << "count: " <<  count_ << ", "
+        << "fingers: " << fingers_;
+    info->customInfo = oss.str();
+    return info;
+}
+
 } // namespace OHOS::Ace::NG

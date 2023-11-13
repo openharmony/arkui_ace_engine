@@ -84,11 +84,7 @@ public:
         }
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(CachedCount, int32_t);
-    void OnCachedCountUpdate(int32_t /* cachedCount */) const
-    {
-        ResetWaterflowLayoutInfoAndMeasure();
-    }
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(WaterflowDirection, FlexDirection);
     void OnWaterflowDirectionUpdate(FlexDirection /* WaterflowDirection */) const

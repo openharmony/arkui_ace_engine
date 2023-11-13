@@ -38,6 +38,7 @@ const char ROTATE_TYPE_REVERSE[] = "auto-reverse";
 
 } // namespace
 
+#ifndef USE_ROSEN_DRAWING
 #if !defined(PREVIEW)
 const char FONT_TYPE_HWCHINESE[] = "/system/fonts/HwChinese-Medium.ttf";
 const char FONT_TYPE_DROIDSANS[] = "/system/fonts/DroidSans.ttf";
@@ -46,6 +47,12 @@ sk_sp<SkTypeface> RosenSvgPainter::fontTypeNormal_ = SkTypeface::MakeFromFile(FO
 #else
 sk_sp<SkTypeface> RosenSvgPainter::fontTypeChinese_;
 sk_sp<SkTypeface> RosenSvgPainter::fontTypeNormal_;
+#endif
+#else
+const char FONT_TYPE_HWCHINESE[] = "/system/fonts/HwChinese-Medium.ttf";
+const char FONT_TYPE_DROIDSANS[] = "/system/fonts/DroidSans.ttf";
+std::shared_ptr<RSTypeface> RosenSvgPainter::fontTypeChinese_ = RSTypeface::MakeFromFile(FONT_TYPE_HWCHINESE);
+std::shared_ptr<RSTypeface> RosenSvgPainter::fontTypeNormal_ = RSTypeface::MakeFromFile(FONT_TYPE_DROIDSANS);
 #endif
 
 #ifndef USE_ROSEN_DRAWING
@@ -498,9 +505,6 @@ bool RosenSvgPainter::GetMotionPathPosition(const std::string& path, double perc
 
 #ifndef USE_ROSEN_DRAWING
 Offset RosenSvgPainter::UpdateText(SkCanvas* canvas, const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo)
-#else
-Offset RosenSvgPainter::UpdateText(RSCanvas* canvas, const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo)
-#endif
 {
     Offset offset = textDrawInfo.offset;
     if (!canvas) {
@@ -509,25 +513,18 @@ Offset RosenSvgPainter::UpdateText(RSCanvas* canvas, const SvgTextInfo& svgTextI
     }
 
     SkFont font;
-
     font.setSize(svgTextInfo.textStyle.GetFontSize().Value());
     font.setScaleX(1.0);
+
     double space = 0.0;
     SkScalar x = SkDoubleToScalar(offset.GetX());
     SkScalar y = SkDoubleToScalar(offset.GetY());
     std::wstring data = StringUtils::ToWstring(svgTextInfo.data);
 
-#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     SkPaint strokePaint;
     RosenSvgPainter::SetFillStyle(paint, svgTextInfo.fillState, svgTextInfo.opacity);
     RosenSvgPainter::SetStrokeStyle(strokePaint, svgTextInfo.strokeState, svgTextInfo.opacity);
-#else
-    RSBrush brush;
-    RSPen strokePen;
-    RosenSvgPainter::SetFillStyle(brush, svgTextInfo.fillState, svgTextInfo.opacity);
-    RosenSvgPainter::SetStrokeStyle(strokePen, svgTextInfo.strokeState, svgTextInfo.opacity);
-#endif
 
     for (int i = 0; i < (int)data.size(); i++) {
         wchar_t temp = data[i];
@@ -544,7 +541,6 @@ Offset RosenSvgPainter::UpdateText(RSCanvas* canvas, const SvgTextInfo& svgTextI
         auto width = font.measureText(&temp, sizeof(temp), SkTextEncoding::kUTF16);
 #endif
 
-#ifndef USE_ROSEN_DRAWING
         canvas->save();
         canvas->rotate(textDrawInfo.rotate, x, y);
         canvas->drawTextBlob(blob.get(), x, y, paint);
@@ -552,32 +548,66 @@ Offset RosenSvgPainter::UpdateText(RSCanvas* canvas, const SvgTextInfo& svgTextI
             canvas->drawTextBlob(blob.get(), x, y, strokePaint);
         }
         canvas->restore();
-#else
-        canvas->Save();
-        canvas->Rotate(textDrawInfo.rotate, x, y);
-        canvas->AttachBrush(brush);
-        LOGE("Drawing is not supported");
-        canvas->DetachBrush();
-        if (svgTextInfo.strokeState.HasStroke() && !NearZero(svgTextInfo.strokeState.GetLineWidth().Value())) {
-            canvas->AttachPen(strokePen);
-            LOGE("Drawing is not supported");
-            canvas->DetachPen();
-        }
-        canvas->Restore();
-#endif
         x = x + width + space;
     }
 
     return Offset(x, y);
 }
+#else
+Offset RosenSvgPainter::UpdateText(RSCanvas* canvas, const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo)
+{
+    Offset offset = textDrawInfo.offset;
+    if (!canvas) {
+        LOGE("Paint skCanvas is null");
+        return offset;
+    }
+
+    RSFont font;
+    font.SetSize(svgTextInfo.textStyle.GetFontSize().Value());
+    font.SetScaleX(1.0);
+
+    double space = 0.0;
+    SkScalar x = SkDoubleToScalar(offset.GetX());
+    SkScalar y = SkDoubleToScalar(offset.GetY());
+    std::wstring data = StringUtils::ToWstring(svgTextInfo.data);
+
+    RSBrush brush;
+    RSPen strokePen;
+    RosenSvgPainter::SetFillStyle(brush svgTextInfo.fillState, svgTextInfo.opacity);
+    RosenSvgPainter::SetStrokeStyle(strokePen, svgTextInfo.strokeState, svgTextInfo.opacity);
+
+    for (int i = 0; i < (int)data.size(); i++) {
+        wchar_t temp = data[i];
+        if (temp >= 0x4e00 && temp <= 0x9fa5) {
+            // range of chinese
+            font.setTypeface(fontTypeChinese_);
+        } else {
+            font.setTypeface(fontTypeNormal_);
+        }
+        auto blob = SkTextBlob::MakeFromText(&temp, sizeof(temp), font, SkTextEncoding::kUTF16);
+        auto width = font.MeasureText(&temp, sizeof(temp), RSTextEncoding::UTF16);
+
+        canvas->Save();
+        canvas->Rotate(textDrawInfo.rotate, x, y);
+        canvas->AttachBrush(brush);
+        canvas->DrawTextBlob(blob.get(), x, y);
+        canvas->DetachBrush();
+        if (svgTextInfo.strokeState.HasStroke() && !NearZero(svgTextInfo.strokeState.GetLineWidth().Value())) {
+            canvas->AttachPen(strokePen);
+            canvas->drawTextBlob(blob.get(), x, y);
+            canvas->DetachPen();
+        }
+        canvas->Restore();
+        x = x + width + space;
+    }
+
+    return Offset(x, y);
+}
+#endif
 
 #ifndef USE_ROSEN_DRAWING
 double RosenSvgPainter::UpdateTextPath(
     SkCanvas* canvas, const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo)
-#else
-double RosenSvgPainter::UpdateTextPath(
-    RSCanvas* canvas, const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo)
-#endif
 {
     double offset = pathDrawInfo.offset;
     if (!canvas) {
@@ -591,7 +621,6 @@ double RosenSvgPainter::UpdateTextPath(
     double space = 0.0;
     std::wstring data = StringUtils::ToWstring(svgTextInfo.data);
 
-#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     SkPaint strokePaint;
     RosenSvgPainter::SetFillStyle(paint, svgTextInfo.fillState, svgTextInfo.opacity);
@@ -601,16 +630,6 @@ double RosenSvgPainter::UpdateTextPath(
     SkParsePath::FromSVGString(pathDrawInfo.path.c_str(), &path);
     SkPathMeasure pathMeasure(path, false);
     SkScalar length = pathMeasure.getLength();
-#else
-    RSBrush brush;
-    RSPen strokePen;
-    RosenSvgPainter::SetFillStyle(brush, svgTextInfo.fillState, svgTextInfo.opacity);
-    RosenSvgPainter::SetStrokeStyle(strokePen, svgTextInfo.strokeState, svgTextInfo.opacity);
-
-    RSPath path;
-    path.BuildFromSVGString(pathDrawInfo.path);
-    RSScalar length = path.GetLength(false);
-#endif
 
     for (int i = 0; i < (int)data.size(); i++) {
         wchar_t temp = data[i];
@@ -634,7 +653,6 @@ double RosenSvgPainter::UpdateTextPath(
             continue;
         }
 
-#ifndef USE_ROSEN_DRAWING
         SkPoint position;
         SkVector tangent;
         if (!pathMeasure.getPosTan(offset + width / 2.0, &position, &tangent)) {
@@ -653,7 +671,54 @@ double RosenSvgPainter::UpdateTextPath(
             canvas->drawTextBlob(blob.get(), 0.0, 0.0, strokePaint);
         }
         canvas->restore();
+        offset = offset + width + space;
+    }
+
+    return offset;
+}
 #else
+double RosenSvgPainter::UpdateTextPath(
+    RSCanvas* canvas, const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo)
+{
+    double offset = pathDrawInfo.offset;
+    if (!canvas) {
+        LOGE("Paint skCanvas is null");
+        return offset;
+    }
+
+    RSFont font;
+    font.SetSize(svgTextInfo.textStyle.GetFontSize().Value());
+    font.SetScaleX(1.0);
+    double space = 0.0;
+    std::wstring data = StringUtils::ToWstring(svgTextInfo.data);
+
+    RSBrush brush;
+    RSPen strokePen;
+    RosenSvgPainter::SetFillStyle(brush, svgTextInfo.fillState, svgTextInfo.opacity);
+    RosenSvgPainter::SetStrokeStyle(strokePen, svgTextInfo.strokeState, svgTextInfo.opacity);
+
+    RSPath path;
+    path.BuildFromSVGString(pathDrawInfo.path);
+    RSScalar length = path.GetLength(false);
+
+    for (int i = 0; i < (int)data.size(); i++) {
+        wchar_t temp = data[i];
+        if (temp >= 0x4e00 && temp <= 0x9fa5) {
+            font.SetTypeface(fontTypeChinese_);
+        } else {
+            font.SetTypeface(fontTypeNormal_);
+        }
+        auto width = font.MeasureText(&temp, sizeof(wchar_t), RSTextEncoding::UTF16);
+        if (length < offset + width + space) {
+            LOGD("path length is not enough, length:%{public}lf, next offset:%{public}lf", length,
+                offset + width + space);
+            break;
+        }
+        if (offset < 0) {
+            offset += (width + space);
+            continue;
+        }
+
         RSPoint position;
         RSPoint tangent;
         if (!path.GetPositionAndTangent(offset + width / 2.0, position, tangent, false)) {
@@ -663,27 +728,28 @@ double RosenSvgPainter::UpdateTextPath(
         if (!path.GetPositionAndTangent(offset, position, tempTangent, false)) {
             break;
         }
-        SkRSXform rsxForm = SkRSXform::Make(tangent.GetX(), tangent.GetY(), position.GetX(), position.GetY());
-        auto blob = SkTextBlob::MakeFromRSXform(&temp, sizeof(wchar_t), &rsxForm, font, SkTextEncoding::kUTF16);
+        RSXform rsxForm = RSXform::Make(tangent.GetX(), tangent.GetY(), position.GetX(), position.GetY());
+        auto blob = RSTextBlob::MakeFromRSXform(&temp, sizeof(wchar_t), &rsxForm, font, RSTextEncoding::UTF16);
 
         canvas->Save();
         canvas->Rotate(pathDrawInfo.rotate, position.GetX(), position.GetY());
         canvas->AttachBrush(brush);
-        LOGE("Drawing is not supported");
+        canvas->DrawTextBlob(blob.get(), 0.0, 0.0);
         canvas->DetachBrush();
         if (svgTextInfo.strokeState.HasStroke() && !NearZero(svgTextInfo.strokeState.GetLineWidth().Value())) {
             canvas->AttachPen(strokePen);
-            LOGE("Drawing is not supported");
+            canvas->DrawTextBlob(blob.get(), 0.0, 0.0);
             canvas->DetachPen();
         }
         canvas->Restore();
-#endif
         offset = offset + width + space;
     }
 
     return offset;
 }
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 Offset RosenSvgPainter::MeasureTextBounds(
     const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo, Rect& bounds)
 {
@@ -713,7 +779,39 @@ Offset RosenSvgPainter::MeasureTextBounds(
 
     return Offset(x, y);
 }
+#else
+Offset RosenSvgPainter::MeasureTextBounds(
+    const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo, Rect& bounds)
+{
+    Offset offset = textDrawInfo.offset;
+    RSFont font;
 
+    font.SetSize(svgTextInfo.textStyle.GetFontSize().Value());
+    font.SetScaleX(1.0);
+    double space = 0.0;
+    SkScalar x = SkDoubleToScalar(offset.GetX());
+    SkScalar y = SkDoubleToScalar(offset.GetY());
+    std::wstring data = StringUtils::ToWstring(svgTextInfo.data);
+
+    for (int i = 0; i < (int)data.size(); i++) {
+        wchar_t temp = data[i];
+        if (temp >= 0x4e00 && temp <= 0x9fa5) {
+            // range of chinese
+            font.SetTypeface(fontTypeChinese_);
+        } else {
+            font.SetTypeface(fontTypeNormal_);
+        }
+        auto width = font.MeasureText(&temp, sizeof(temp), RSTextEncoding::UTF16);
+        x = x + width + space;
+    }
+    bounds.SetWidth(fmax(x, bounds.Width()));
+    bounds.SetHeight(fmax(y, bounds.Height()));
+
+    return Offset(x, y);
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 double RosenSvgPainter::MeasureTextPathBounds(
     const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo, Rect& bounds)
 {
@@ -751,6 +849,45 @@ double RosenSvgPainter::MeasureTextPathBounds(
     bounds.SetHeight(fmax(pathBounds.bottom(), bounds.Height()));
     return offset;
 }
+#else
+double RosenSvgPainter::MeasureTextPathBounds(
+    const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo, Rect& bounds)
+{
+    double offset = pathDrawInfo.offset;
+
+    RSFont font;
+    font.SetSize(svgTextInfo.textStyle.GetFontSize().Value());
+    font.SetScaleX(1.0);
+    double space = 0.0;
+    std::wstring data = StringUtils::ToWstring(svgTextInfo.data);
+
+    SkPath path;
+    SkParsePath::FromSVGString(pathDrawInfo.path.c_str(), &path);
+    SkPathMeasure pathMeasure(path, false);
+    SkScalar length = pathMeasure.getLength();
+
+    for (int i = 0; i < (int)data.size(); i++) {
+        wchar_t temp = data[i];
+        if (temp >= 0x4e00 && temp <= 0x9fa5) {
+            font.SetTypeface(fontTypeChinese_);
+        } else {
+            font.SetTypeface(fontTypeNormal_);
+        }
+        auto width = font.MeasureText(&temp, sizeof(temp), RSTextEncoding::UTF16);
+        if (length < offset + width + space) {
+            LOGD("path length is not enough, length:%{public}lf, next offset:%{public}lf", length,
+                offset + width + space);
+            break;
+        }
+        offset = offset + width + space;
+    }
+
+    auto& pathBounds = path.getBounds();
+    bounds.SetWidth(fmax(pathBounds.right(), bounds.Width()));
+    bounds.SetHeight(fmax(pathBounds.bottom(), bounds.Height()));
+    return offset;
+}
+#endif
 
 static const char* SkipSpace(const char str[])
 {

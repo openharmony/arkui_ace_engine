@@ -149,5 +149,14 @@ void EventManager::DispatchKeyboardShortcut(const KeyEvent& event) {}
 
 void EventManager::ClearResults() {}
 
+bool EventManager::HasDifferentDirectionGesture()
+{
+    return false;
+}
+
 EventManager::EventManager() {}
+
+void EventManager::DumpEvent() const {}
+
+void AddGestureSnapshot(int32_t finger, const RefPtr<TouchEventTarget>& target) {}
 } // namespace OHOS::Ace

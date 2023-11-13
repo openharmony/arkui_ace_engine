@@ -74,6 +74,7 @@
       OHOS::Ace::DragEvent::*;
       OHOS::Ace::ResourceManager::*;
       OHOS::Ace::NG::AppBarView::*;
+      OHOS::Ace::Color::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
 

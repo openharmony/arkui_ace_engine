@@ -1127,7 +1127,7 @@ void RosenRenderTextField::SetShaderIfNeeded(std::unique_ptr<Rosen::TypographySt
     txtStyle->foreground->setShader(shader);
 #endif
 #else
-    // Drawing is not supported
+    txtStyle->foreground_brush.SetShaderEffect(shader);
 #endif
     builder->PushStyle(*txtStyle);
 #ifndef USE_GRAPHIC_TEXT_GINE

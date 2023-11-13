@@ -46,7 +46,6 @@ constexpr float PADDING_WEIGHT = 10.0f;
 const Dimension FONT_SIZE = Dimension(2.0);
 const float TEXT_HEIGHT_NUMBER = 3.0f;
 const float TEXT_WEIGHT_NUMBER = 6.0f;
-const int32_t ANIMATION_ZERO_TO_OUTER = 200;
 const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const Dimension FOCUS_SIZE = Dimension(1.0);
 const float MOVE_DISTANCE = 5.0f;
@@ -762,7 +761,6 @@ void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
 void DatePickerColumnPattern::HandleDragEnd()
 {
     pressed_ = false;
-    CHECK_NULL_VOID(GetHost());
     CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
     auto frameNode = GetHost();
@@ -787,48 +785,26 @@ void DatePickerColumnPattern::HandleDragEnd()
         InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == DatePickerScrollDirection::UP ? -1 : 1);
     }
-    auto curve = CreateAnimation(scrollDelta_, 0.0);
-    fromController_->ClearInterpolators();
-    fromController_->AddInterpolator(curve);
-    fromController_->Play();
+    CreateAnimation(scrollDelta_, 0.0);
     frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
 
 void DatePickerColumnPattern::CreateAnimation()
 {
     CHECK_NULL_VOID(!animationCreated_);
-    toController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
-    toController_->SetDuration(ANIMATION_ZERO_TO_OUTER); // 200ms for animation that from zero to outer.
-    auto weak = AceType::WeakClaim(this);
-    toController_->AddStopListener([weak]() {
-        auto column = weak.Upgrade();
-        CHECK_NULL_VOID(column);
-        column->HandleCurveStopped();
-    });
-    fromBottomCurve_ = CreateAnimation(jumpInterval_, 0.0);
-    fromTopCurve_ = CreateAnimation(0.0 - jumpInterval_, 0.0);
-    fromController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
-    fromController_->SetDuration(CLICK_ANIMATION_DURATION); // 300ms for animation that from outer to zero.
-    animationCreated_ = true;
-}
-
-RefPtr<CurveAnimation<double>> DatePickerColumnPattern::CreateAnimation(double from, double to)
-{
-    auto weak = AceType::WeakClaim(this);
-    auto curve = AceType::MakeRefPtr<CurveAnimation<double>>(from, to, Curves::FAST_OUT_SLOW_IN);
-    curve->AddListener(Animation<double>::ValueCallback([weak](double value) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto propertyCallback = [weak = AceType::WeakClaim(this)](float value) {
         auto column = weak.Upgrade();
         CHECK_NULL_VOID(column);
         column->ScrollOption(value);
-    }));
-    return curve;
-}
+    };
+    scrollProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    renderContext->AttachNodeAnimatableProperty(scrollProperty_);
 
-RefPtr<CurveAnimation<double>> DatePickerColumnPattern::CreateClickAnimation(double from, double to)
-{
-    auto weak = AceType::WeakClaim(this);
-    auto curve = AceType::MakeRefPtr<CurveAnimation<double>>(from, to, Curves::FAST_OUT_SLOW_IN);
-    curve->AddListener(Animation<double>::ValueCallback([weak](double value) {
+    auto aroundClickCallback = [weak = AceType::WeakClaim(this)](float value) {
         auto column = weak.Upgrade();
         CHECK_NULL_VOID(column);
         if (value > 0) {
@@ -836,25 +812,23 @@ RefPtr<CurveAnimation<double>> DatePickerColumnPattern::CreateClickAnimation(dou
         } else {
             column->UpdateColumnChildPosition(std::floor(value));
         }
-    }));
-    return curve;
+    };
+    aroundClickProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(aroundClickCallback));
+    renderContext->AttachNodeAnimatableProperty(aroundClickProperty_);
+    animationCreated_ = true;
 }
 
-void DatePickerColumnPattern::HandleCurveStopped()
+void DatePickerColumnPattern::CreateAnimation(double from, double to)
 {
-    CHECK_NULL_VOID(animationCreated_);
-    if (NearZero(scrollDelta_)) {
-        return;
-    }
-    ScrollOption(0.0 - scrollDelta_);
-    InnerHandleScroll(GreatNotEqual(scrollDelta_, 0.0));
-    fromController_->ClearInterpolators();
-    if (LessNotEqual(scrollDelta_, 0.0)) {
-        fromController_->AddInterpolator(fromTopCurve_);
-    } else {
-        fromController_->AddInterpolator(fromBottomCurve_);
-    }
-    fromController_->Play();
+    AnimationOption option;
+    option.SetCurve(Curves::FAST_OUT_SLOW_IN);
+    option.SetDuration(CLICK_ANIMATION_DURATION);
+    scrollProperty_->Set(from);
+    AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), to]() {
+        auto column = weak.Upgrade();
+        CHECK_NULL_VOID(column);
+        column->scrollProperty_->Set(to);
+    });
 }
 
 void DatePickerColumnPattern::ScrollOption(double delta, bool isJump)
@@ -1153,9 +1127,7 @@ void DatePickerColumnPattern::SetAccessibilityAction()
         }
         CHECK_NULL_VOID(pattern->animationCreated_);
         pattern->InnerHandleScroll(true);
-        pattern->fromController_->ClearInterpolators();
-        pattern->fromController_->AddInterpolator(pattern->fromTopCurve_);
-        pattern->fromController_->Play();
+        pattern->CreateAnimation(0.0 - pattern->jumpInterval_, 0.0);
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
@@ -1169,9 +1141,7 @@ void DatePickerColumnPattern::SetAccessibilityAction()
         }
         CHECK_NULL_VOID(pattern->animationCreated_);
         pattern->InnerHandleScroll(false);
-        pattern->fromController_->ClearInterpolators();
-        pattern->fromController_->AddInterpolator(pattern->fromBottomCurve_);
-        pattern->fromController_->Play();
+        pattern->CreateAnimation(pattern->jumpInterval_, 0.0);
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
@@ -1196,25 +1166,24 @@ void DatePickerColumnPattern::OnAroundButtonClick(RefPtr<DatePickerEventParam> p
     int32_t middleIndex = GetShowCount() / 2;
     int32_t step = param->itemIndex_ - middleIndex;
     if (step != 0) {
-        if (fromController_->IsRunning()) {
-            fromController_->Finish();
+        if (animation_) {
+            AnimationUtils::StopAnimation(animation_);
+            yLast_ = 0.0;
+            yOffset_ = 0.0;
         }
         auto distance =
             (step > 0 ? optionProperties_[middleIndex].prevDistance : optionProperties_[middleIndex].nextDistance) *
             std::abs(step);
-        auto curveTop = CreateClickAnimation(0.0, 0.0 - abs(distance));
-        auto curveBottom = CreateClickAnimation(0.0, abs(distance));
-        fromController_->ClearInterpolators();
 
-        fromController_->AddInterpolator(step > 0 ? curveTop : curveBottom);
-        fromController_->SetDuration(CLICK_ANIMATION_DURATION);
-        auto weak = AceType::WeakClaim(this);
-        fromController_->AddStopListener([weak]() {
+        AnimationOption option;
+        option.SetCurve(Curves::FAST_OUT_SLOW_IN);
+        option.SetDuration(CLICK_ANIMATION_DURATION);
+        aroundClickProperty_->Set(0.0);
+        animation_ = AnimationUtils::StartAnimation(option, [weak = AceType::WeakClaim(this), step, distance]() {
             auto column = weak.Upgrade();
             CHECK_NULL_VOID(column);
-            column->yLast_ = 0.0f;
+            column->aroundClickProperty_->Set(step > 0 ? 0.0 - abs(distance) : abs(distance));
         });
-        fromController_->Play();
     }
 }
 
@@ -1231,10 +1200,7 @@ void DatePickerColumnPattern::PlayRestAnimation()
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == DatePickerScrollDirection::UP ? -1 : 1);
     }
 
-    auto curve = CreateAnimation(scrollDelta_, 0.0);
-    fromController_->ClearInterpolators();
-    fromController_->AddInterpolator(curve);
-    fromController_->Play();
+    CreateAnimation(scrollDelta_, 0.0);
 }
 
 void DatePickerColumnPattern::AddHotZoneRectToText()

@@ -241,7 +241,7 @@ public:
         return { FocusType::NODE, true };
     }
 
-    void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
+    void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void UpdateInputFilterErrorText(const std::string& errorText) override;
 
@@ -426,7 +426,7 @@ public:
     int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     bool IsOperation() const
     {
-        return contentController_->GetTextValue().length() > 0;
+        return !contentController_->IsEmpty();
     }
 
     bool CursorMoveLeft() override;
@@ -840,7 +840,7 @@ public:
     bool IsUnspecifiedOrTextType() const;
     void TextIsEmptyRect(RectF& rect);
     void TextAreaInputRectUpdate(RectF& rect);
-    void UpdateRectByAlignment(RectF& rect);
+    void UpdateRectByTextAlign(RectF& rect);
 
     void EditingValueFilterChange();
 
@@ -929,7 +929,10 @@ public:
     {
         return showSelect_;
     }
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+protected:
+    virtual void InitDragEvent();
+#endif
 private:
     void GetTextSelectRectsInRangeAndWillChange();
     bool HasFocus() const;
@@ -943,7 +946,6 @@ private:
     void InitLongPressEvent();
     void InitClickEvent();
 #ifdef ENABLE_DRAG_FRAMEWORK
-    void InitDragEvent();
     void InitDragDropEvent();
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragStart();
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();

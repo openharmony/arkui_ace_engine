@@ -359,7 +359,7 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     };
 
     CHECK_NULL_VOID(axisEventCallback_);
-    if (event.action == AxisAction::BEGIN) {
+    if (event.action == AxisAction::BEGIN && event.sourceType == SourceType::MOUSE) {
         axisEventCallback_(event, nullptr);
         /* The first step of axis event is equivalent to touch event START + UPDATE.
          * Create a fake UPDATE event here to adapt to axis event.

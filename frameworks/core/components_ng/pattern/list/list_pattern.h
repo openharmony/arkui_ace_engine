@@ -17,18 +17,15 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 
 #include "core/animation/chain_animation.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_content_modifier.h"
+#include "core/components_ng/pattern/list/list_drag_status_listener.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_paint_method.h"
 #include "core/components_ng/pattern/list/list_paint_property.h"
-#include "core/components_ng/pattern/list/list_position_controller.h"
-#include "core/components_ng/pattern/list/list_drag_status_listener.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -145,14 +142,6 @@ public:
         return itemPosition_;
     }
 
-    void SetPositionController(RefPtr<ListPositionController> control)
-    {
-        positionController_ = control;
-        if (control) {
-            control->SetScrollPattern(AceType::WeakClaim<ListPattern>(this));
-        }
-    }
-
     float GetTotalOffset() const override
     {
         return currentOffset_;
@@ -167,15 +156,19 @@ public:
         FireOnScrollStart();
     }
     void ScrollTo(float position) override;
-    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START);
+    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
     void ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align);
-    void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     bool ScrollPage(bool reverse);
     void ScrollBy(float offset);
     Offset GetCurrentOffset() const;
-    Rect GetItemRect(int32_t index) const;
+    Rect GetItemRect(int32_t index) const override;
     Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const;
     void OnAnimateStop() override;
+    float GetMainContentSize() const override
+    {
+        return contentMainSize_;
+    };
+
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation();
@@ -227,6 +220,8 @@ public:
     {
         return predictLayoutParam_;
     }
+
+    void CloseAllSwipeActions(OnFinishFunc&&);
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
@@ -297,7 +292,6 @@ private:
     void InitNotifyDragEvent();
     RefPtr<ListContentModifier> listContentModifier_;
 
-    RefPtr<ListPositionController> positionController_;
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;

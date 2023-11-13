@@ -107,11 +107,7 @@ void DrawCalendarText(RSCanvas* canvas,
     // paint text in center of item
     double textPaintOffsetX = (boxRect.Width() - textWidth) / 2.0;
     double textPaintOffsetY = (boxRect.Height() - textHeight) / 2.0;
-#ifndef USE_ROSEN_DRAWING
     paragraph->Paint(canvas, offset.GetX() + textPaintOffsetX, offset.GetY() + textPaintOffsetY);
-#else
-    LOGE("Drawing is not supported");
-#endif
     textRect.SetRect(offset.GetX() + textPaintOffsetX, offset.GetY() + textPaintOffsetY, textWidth, textHeight);
 }
 
@@ -1018,8 +1014,13 @@ void RosenRenderCalendar::SetWorkStateStyle(
     const CalendarDay& day, SkColor workColor, SkColor offColor, Rosen::TextStyle& workStateStyle) const
 #endif
 #else
+#ifndef USE_GRAPHIC_TEXT_GINE
 void RosenRenderCalendar::SetWorkStateStyle(const CalendarDay& day, RSColorQuad workColor,
     RSColorQuad offColor, txt::TextStyle& workStateStyle) const
+#else
+void RosenRenderCalendar::SetWorkStateStyle(
+    const CalendarDay& day, SkColor workColor, RSColorQuad offColor, Rosen::TextStyle& workStateStyle) const
+#endif
 #endif
 {
     if (day.dayMark == "work") {

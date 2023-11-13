@@ -697,7 +697,7 @@ HWTEST_F(ScrollTestNg, ScrollPositionController001, TestSize.Level1)
     /**
      * @tc.steps: step7. Test GetCurrentPosition
      */
-    EXPECT_EQ(controller->GetCurrentPosition(), -ITEM_HEIGHT);
+    EXPECT_EQ(controller->GetCurrentOffset().GetY(), ITEM_HEIGHT);
 
     /**
      * @tc.steps: step8. Test ScrollEdgeType::SCROLL_NONE
@@ -794,7 +794,7 @@ HWTEST_F(ScrollTestNg, ScrollPositionController002, TestSize.Level1)
     /**
      * @tc.steps: step6. Test GetCurrentPosition
      */
-    EXPECT_EQ(controller->GetCurrentPosition(), -ITEM_WIDTH);
+    EXPECT_EQ(controller->GetCurrentOffset().GetX(), ITEM_WIDTH);
 
     /**
      * @tc.steps: step7. Test ScrollEdgeType::SCROLL_NONE

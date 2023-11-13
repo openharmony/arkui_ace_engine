@@ -91,6 +91,8 @@ public:
 
     GestureEventFunc GetLongPressActionFunc();
 
+    virtual RefPtr<GestureSnapshot> Dump() const override;
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;

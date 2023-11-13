@@ -15,6 +15,10 @@
 
 #include "base/utils/time_util.h"
 
+#include <chrono>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
 #include <sys/time.h>
 
 #include "base/log/log.h"
@@ -26,6 +30,8 @@ namespace {
 constexpr int64_t SEC_TO_MICROSEC = 1000000;
 constexpr int64_t SEC_TO_NANOSEC = 1000000000;
 constexpr int64_t MICROSEC_TO_NANOSEC = 1000;
+constexpr int64_t SEC_TO_MILLISEC = 1000;
+constexpr int64_t MILLISEC_TO_MICROSEC = 1000;
 constexpr int32_t HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT = -12;
 constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
 constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
@@ -37,7 +43,7 @@ constexpr int32_t TWENTY_FOUR_HOUR_BASE = 24;
 constexpr int32_t TWELVE_HOUR_BASE = 12;
 constexpr int32_t DAY_TIME_LOWER_LIMIT = 6;
 constexpr int32_t DAY_TIME_UPPER_LIMIT = 18;
-
+constexpr int32_t MAX_TIME_STR_LEN = 64;
 } // namespace
 
 int64_t GetMicroTickCount()
@@ -54,6 +60,25 @@ int64_t GetSysTimestamp()
     return ts.tv_sec * SEC_TO_NANOSEC + ts.tv_nsec;
 }
 
+int64_t GetCurrentTimestamp()
+{
+    struct timeval currentTime;
+    gettimeofday(&currentTime, nullptr);
+    return static_cast<int64_t>(currentTime.tv_sec) * SEC_TO_MILLISEC + currentTime.tv_usec / MILLISEC_TO_MICROSEC;
+}
+
+std::string ConvertTimestampToStr(int64_t timestamp)
+{
+    char timeStr[MAX_TIME_STR_LEN];
+    // timestamp is in millisecond unit, divide 1000 to second
+    auto t = static_cast<std::time_t>(timestamp / SEC_TO_MILLISEC);
+    auto local = std::localtime(&t);
+    std::strftime(timeStr, MAX_TIME_STR_LEN, "%Y-%m-%d %H:%M:%S", local);
+    std::stringstream oss;
+    // milliseconds in timestr should be 3 characters length
+    oss << timeStr << "." << std::setw(3) << std::setfill('0') << (timestamp % SEC_TO_MILLISEC);
+    return oss.str();
+}
 
 TimeOfNow GetTimeOfNow(int32_t hoursWest)
 {

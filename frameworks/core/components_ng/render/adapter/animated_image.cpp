@@ -227,7 +227,7 @@ void AnimatedRSImage::DecodeImpl(uint32_t idx)
 #ifndef USE_ROSEN_DRAWING
         bitmap.allocPixels(imageInfo);
 #else
-        auto info = Rosen::Drawing::ConvertToRSImageInfo(imageInfo);
+        auto info = Rosen::Drawing::SkiaImageInfo::ConvertToRSImageInfo(imageInfo);
         bitmap.Build(info);
 #endif
     }
