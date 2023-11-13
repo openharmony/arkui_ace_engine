@@ -28,7 +28,6 @@
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
 #include "core/common/flutter/flutter_asset_manager.h"
-#include "iremote_object.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
