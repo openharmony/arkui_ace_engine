@@ -105,11 +105,19 @@ void JSView::RenderJSExecution()
         ACE_SCORING_EVENT("Component.AboutToRender");
         jsViewFunction_->ExecuteAboutToRender();
     }
+    if (!jsViewFunction_) {
+        LOGE("JSView: After ExecuteAboutToRender jsViewFunction_ error");
+        return;
+    }
     {
         ACE_SCORING_EVENT("Component.Build");
         ViewStackModel::GetInstance()->PushKey(viewId_);
         jsViewFunction_->ExecuteRender();
         ViewStackModel::GetInstance()->PopKey();
+    }
+    if (!jsViewFunction_) {
+        LOGE("JSView: After ExecuteRender jsViewFunction_ error");
+        return;
     }
     {
         ACE_SCORING_EVENT("Component.OnRenderDone");
