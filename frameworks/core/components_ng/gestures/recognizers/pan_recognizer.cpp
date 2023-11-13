@@ -507,7 +507,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         info.SetSourceDevice(deviceType_);
         info.SetTargetDisplayId(touchPoint.targetDisplayId);
         info.SetDelta(delta_);
-        info.SetMainDelta(mainDelta_);
+        info.SetMainDelta(mainDelta_ / static_cast<double>(touchPoints_.size()));
         info.SetVelocity(velocityTracker_.GetVelocity());
         info.SetMainVelocity(velocityTracker_.GetMainAxisVelocity());
         if (inputEventType_ == InputEventType::AXIS) {
