@@ -1722,10 +1722,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
      */
     auto navBar =
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    auto hub = navigator->GetEventHub<NavigatorEventHub>();
-    CHECK_NULL_VOID(hub);
-    hub->SetType(NavigatorType::BACK);
-    navigator->MarkModifyDone();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto navigator = FrameNode::CreateFrameNode("navigator", 33, AceType::MakeRefPtr<NavigatorPattern>());
@@ -1739,7 +1735,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
 
     navBar->SetBackButton(navigator);
     auto pattern = titleBarNode->GetPattern<TitleBarPattern>();
-    titleBarNode->SetBackButton(navBarNode->GetBackButton());
+    titleBarNode->SetBackButton(NavBarNode->GetBackButton());
     titleBarNode->AddChild(titleBarNode->GetBackButton());
     titleBarNode->title_ = title;
 
