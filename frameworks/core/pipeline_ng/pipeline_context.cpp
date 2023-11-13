@@ -888,6 +888,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         float offsetFix = (rootSize.Height() - positionYWithOffset) > 100.0f
                               ? keyboardHeight - (rootSize.Height() - positionYWithOffset) / 2.0f
                               : keyboardHeight;
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+        if (offsetFix > 0.0f && positionYWithOffset < offsetFix) {
+            offsetFix = keyboardHeight - (rootSize.Height() - positionYWithOffset - height);
+        }
+#endif
         LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f, "
              "keyboardHeight %{public}f",
             positionY, (rootSize.Height() - keyboardHeight), offsetFix, keyboardHeight);
