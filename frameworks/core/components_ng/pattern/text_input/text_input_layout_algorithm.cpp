@@ -33,8 +33,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     auto isInlineStyle = pattern->IsNormalInlineState();
 
-    auto isPasswordType =
-        textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
+    auto isPasswordType = pattern->IsInPasswordMode();
 
     // Create paragraph.
     auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
