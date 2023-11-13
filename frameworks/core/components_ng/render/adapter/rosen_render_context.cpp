@@ -1478,6 +1478,9 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
     RectF rect = GetPaintRectWithoutTransform();
     auto center = rsNode_->GetStagingProperties().GetPivot();
     int32_t degree = rsNode_->GetStagingProperties().GetRotation();
+    if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {
+        degree = 0;
+    }
     degree = degree % 360;
     auto radian = Degree2Radian(degree);
     if (degree != 0) {
