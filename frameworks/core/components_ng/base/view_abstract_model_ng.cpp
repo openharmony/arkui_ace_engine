@@ -25,6 +25,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -57,6 +58,8 @@ void ViewAbstractModelNG::BindMenu(
     std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+    auto targetId = targetNode->GetId();
 #ifdef ENABLE_DRAG_FRAMEWORK
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -64,7 +67,22 @@ void ViewAbstractModelNG::BindMenu(
     CHECK_NULL_VOID(pipelineContext);
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-
+    auto menuNode = overlayManager->GetMenuNode(targetId);
+    if (menuNode) {
+        auto pattern = menuNode->GetPattern<MenuWrapperPattern>();
+        if (!pattern->GetShow() && menuParam.isShow) {
+            overlayManager->ShowMenu(targetId, menuParam.positionOffset, menuNode);
+        } else if (pattern->GetShow() && !menuParam.isShow) {
+            overlayManager->HideMenu(menuNode, targetId, false);
+        }
+    } else if (menuParam.isShow) {
+        if (!params.empty()) {
+            NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
+        } else if (buildFunc) {
+            std::function<void()> previewBuildFunc;
+            CreateCustomMenu(buildFunc, targetNode, menuParam.positionOffset, previewBuildFunc, menuParam);
+        }
+    }
     GestureEventFunc showMenu;
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
     if (!params.empty()) {

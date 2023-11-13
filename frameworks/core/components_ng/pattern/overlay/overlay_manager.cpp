@@ -899,6 +899,9 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
         menu->MarkModifyDone();
     }
     menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    auto pattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetShow(true);
 }
 
 // subwindow only contains one menu instance.
@@ -956,6 +959,9 @@ RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
 
 void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch)
 {
+    auto pattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetShow(false);
     PopMenuAnimation(menu);
     menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 #ifdef ENABLE_DRAG_FRAMEWORK

@@ -2295,9 +2295,9 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackgroundImagePosition(bgImgPosition);
 }
 
-std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info)
+std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, size_t optionIndex)
 {
-    auto paramArray = JSRef<JSArray>::Cast(info[0]);
+    auto paramArray = JSRef<JSArray>::Cast(info[optionIndex]);
     std::vector<NG::OptionParam> params(paramArray->Length());
     // parse paramArray
     for (size_t i = 0; i < paramArray->Length(); ++i) {
@@ -2407,9 +2407,9 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     ParseMenuArrowParam(menuOptions, menuParam);
 }
 
-void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
+void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
 {
-    auto menuOptions = JSRef<JSObject>::Cast(info[1]);
+    auto menuOptions = JSRef<JSObject>::Cast(info[optionIndex]);
     JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
     ParseMenuParam(info, menuOptions, menuParam);
 }
@@ -2447,15 +2447,37 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         menuParam.placement = Placement::BOTTOM_LEFT;
     }
-    if (info.Length() > PARAMETER_LENGTH_FIRST && info[1]->IsObject()) {
-        ParseBindOptionParam(info, menuParam);
+    size_t builderIndex = 0;
+    if (info.Length() > PARAMETER_LENGTH_FIRST) {
+        if (info[0]->IsBoolean()) {
+            menuParam.isShow = info[0]->ToBoolean();
+            builderIndex = 1;
+            if (info.Length() > PARAMETER_LENGTH_SECOND) {
+                ParseBindOptionParam(info, menuParam, builderIndex + 1);
+            }
+        } else {
+            JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
+            menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj);
+            auto isShowObj = callbackObj->GetProperty("value");
+            if (isShowObj->IsBoolean()) {
+                menuParam.isShow = isShowObj->ToBoolean();
+                builderIndex = 1;
+                if (info.Length() > PARAMETER_LENGTH_SECOND) {
+                    ParseBindOptionParam(info, menuParam, builderIndex + 1);
+                }
+            } else {
+                builderIndex = 0;
+                ParseBindOptionParam(info, menuParam, builderIndex + 1);
+            }            
+        }
     }
-    if (info[0]->IsArray()) {
-        std::vector<NG::OptionParam> optionsParam = ParseBindOptionParam(info);
+
+    if (info[builderIndex]->IsArray()) {
+        std::vector<NG::OptionParam> optionsParam = ParseBindOptionParam(info, builderIndex);
         ViewAbstractModel::GetInstance()->BindMenu(std::move(optionsParam), nullptr, menuParam);
-    } else if (info[0]->IsObject()) {
+    } else if (info[builderIndex]->IsObject()) {
         // CustomBuilder
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[builderIndex]);
         auto builder = obj->GetProperty("builder");
         if (!builder->IsFunction()) {
             return;

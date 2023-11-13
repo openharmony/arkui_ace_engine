@@ -72,6 +72,8 @@ struct OptionParam {
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
+    bool isShow = false;
+    std::function<void(const std::string&)> onStateChange;
     std::optional<Placement> placement;
     std::function<void()> onAppear;
     std::function<void()> onDisappear;
