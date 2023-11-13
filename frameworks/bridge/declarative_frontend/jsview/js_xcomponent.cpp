@@ -34,7 +34,6 @@ XComponentType ConvertToXComponentType(const std::string& type)
     if (type == "component") {
         return XComponentType::COMPONENT;
     }
-    LOGW("type: %{public}s is not valid, use 'surface' type as default", type.c_str());
     return XComponentType::SURFACE;
 }
 } // namespace
@@ -107,13 +106,11 @@ void JSXComponent::JSBind(BindingTarget globalObj)
 void JSXComponent::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("xcomponent create error, info is invalid");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto id = paramObject->GetProperty("id");
     if (!id->IsString()) {
-        LOGI("xcomponent create error, id is invalid");
         return;
     }
 
@@ -153,7 +150,6 @@ void JSXComponent::Create(const JSCallbackInfo& info)
 void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
@@ -169,7 +165,6 @@ void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
 void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
@@ -185,7 +180,6 @@ void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
 void JSXComponent::JsBackgroundColor(const JSCallbackInfo& args)
 {
     if (!XComponentModel::GetInstance()->IsTexture()) {
-        LOGW("not support backgroundColor attribute");
         return;
     }
     JSViewAbstract::JsBackgroundColor(args);
@@ -194,19 +188,12 @@ void JSXComponent::JsBackgroundColor(const JSCallbackInfo& args)
 void JSXComponent::JsOpacity(const JSCallbackInfo& args)
 {
     if (!XComponentModel::GetInstance()->IsTexture()) {
-        LOGW("not support opacity attribute");
         return;
     }
     JSViewAbstract::JsOpacity(args);
 }
 
-void JSXComponent::OmitEvent(const JSCallbackInfo& /*args*/)
-{
-    LOGW("This event is omitted, please use apis of native_xcomponent instead");
-}
+void JSXComponent::OmitEvent(const JSCallbackInfo& /* args */) {}
 
-void JSXComponent::OmitAttribute(const JSCallbackInfo& /* args */)
-{
-    LOGW("This attribute is omitted.");
-}
+void JSXComponent::OmitAttribute(const JSCallbackInfo& /* args */) {}
 } // namespace OHOS::Ace::Framework
