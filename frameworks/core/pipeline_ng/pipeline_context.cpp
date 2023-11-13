@@ -262,7 +262,7 @@ std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(const std::vecto
     uint64_t avgTime = 0;
     int32_t i = 0;
     uint64_t lastTime = 0;
-    for (auto iter = history.begin(); iter != history.end(); iter++) {
+    for (auto iter = events.begin(); iter != events.end(); iter++) {
         if (lastTime == 0 || static_cast<uint64_t>(iter->time.time_since_epoch().count()) != lastTime) {
             if (!isScreen) {
                 avgX += iter->x;
