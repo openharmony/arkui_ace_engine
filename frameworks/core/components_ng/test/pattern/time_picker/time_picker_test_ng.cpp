@@ -1183,52 +1183,10 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
 
 /**
  * @tc.name: TimePickerColumnPattern011
- * @tc.desc: Test toController stopListener
- * @tc.type: FUNC
- */
-HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern011, TestSize.Level1)
-{
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
-    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_TRUE(frameNode);
-    frameNode->MarkModifyDone();
-    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
-    ASSERT_TRUE(timePickerRowPattern);
-    timePickerRowPattern->UpdateAllChildNode();
-    auto allChildNode = timePickerRowPattern->GetAllChildNode();
-    auto minuteColumn = allChildNode["minute"].Upgrade();
-    ASSERT_TRUE(minuteColumn);
-    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
-    ASSERT_TRUE(minuteColumnPattern);
-
-    auto options = minuteColumnPattern->GetOptions();
-    auto totalOptionCount = options[minuteColumn];
-
-    minuteColumnPattern->CreateAnimation();
-    EXPECT_EQ(minuteColumnPattern->toController_->stopCallbacks_.size(), 1);
-    minuteColumnPattern->scrollDelta_ = 0;
-    minuteColumnPattern->toController_->NotifyStopListener();
-
-    minuteColumnPattern->scrollDelta_ = TOSS_DELTA;
-    auto preIndex = minuteColumnPattern->GetCurrentIndex();
-    minuteColumnPattern->toController_->NotifyStopListener();
-    auto currentIndex = minuteColumnPattern->GetCurrentIndex();
-    EXPECT_EQ(currentIndex, (preIndex + totalOptionCount - 1) % totalOptionCount);
-
-    minuteColumnPattern->scrollDelta_ = -TOSS_DELTA;
-    preIndex = minuteColumnPattern->GetCurrentIndex();
-    minuteColumnPattern->toController_->NotifyStopListener();
-    currentIndex = minuteColumnPattern->GetCurrentIndex();
-    EXPECT_EQ(currentIndex, (preIndex + 1) % totalOptionCount);
-}
-
-/**
- * @tc.name: TimePickerColumnPattern012
  * @tc.desc: Test ScrollOption function
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern012, TestSize.Level1)
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern011, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
@@ -1269,11 +1227,11 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern012, TestSize.Level1)
 }
 
 /**
- * @tc.name: TimePickerColumnPattern013
+ * @tc.name: TimePickerColumnPattern012
  * @tc.desc: Test SetDividerHeight function
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern013, TestSize.Level1)
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern012, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
@@ -1300,11 +1258,11 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern013, TestSize.Level1)
 }
 
 /**
- * @tc.name: TimePickerColumnPattern014
+ * @tc.name: TimePickerColumnPattern013
  * @tc.desc: Test UpdateColumnChildPosition function abnormal situation
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern014, TestSize.Level1)
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern013, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
@@ -1329,11 +1287,11 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern014, TestSize.Level1)
 }
 
 /**
- * @tc.name: TimePickerColumnPattern015
+ * @tc.name: TimePickerColumnPattern014
  * @tc.desc: Test OnKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern015, TestSize.Level1)
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern014, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
@@ -2291,10 +2249,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern017, TestSize.Level1)
      * @tc.step: step3. call IsRunning.
      * @tc.expected: Check animator isRunning calue.
      */
-    auto controller = columnPattern_->fromController_;
-    ASSERT_NE(controller, nullptr);
-    auto isRunning = controller->IsRunning();
-    EXPECT_TRUE(isRunning);
+    auto animation = columnPattern_->animation_;
+    ASSERT_NE(animation, nullptr);
 }
 
 /**
@@ -2320,32 +2276,27 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern018, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Call OnAroundButtonClick.
-     * @tc.expected: cover branch clickBreak_ is true and expecte isRunning result is false.
+     * @tc.expected: cover branch clickBreak_ is true and expect animation is not running.
      */
     columnPattern_->SetclickBreak(true);
     columnPattern_->OnAroundButtonClick(param);
-    auto controller = columnPattern_->fromController_;
-    ASSERT_NE(controller, nullptr);
-    auto isRunning = controller->IsRunning();
-    EXPECT_FALSE(isRunning);
+    EXPECT_EQ(columnPattern_->animation_, nullptr);
 
     /**
      * @tc.steps: step3. Call OnAroundButtonClick.
-     * @tc.expected: cover branch status_ is RUNNING and expecte isRunning result is true.
+     * @tc.expected: cover branch reset clickBreak_ is false and expect animation is running.
      */
-    columnPattern_->fromController_->status_ = Animator::Status::RUNNING;
+    columnPattern_->SetclickBreak(false);
     columnPattern_->OnAroundButtonClick(param);
-    isRunning = columnPattern_->fromController_->IsRunning();
-    EXPECT_TRUE(isRunning);
+    ASSERT_NE(columnPattern_->animation_, nullptr);
 
     /**
      * @tc.steps: step4. Call OnAroundButtonClick.
-     * @tc.expected: cover branch step  is 0 and expecte isRunning result is true.
+     * @tc.expected: cover branch step is 0 and expect animation is running.
      */
     param->itemIndex_ = 3;
     columnPattern_->OnAroundButtonClick(param);
-    isRunning = columnPattern_->fromController_->IsRunning();
-    EXPECT_TRUE(isRunning);
+    ASSERT_NE(columnPattern_->animation_, nullptr);
 }
 
 /**

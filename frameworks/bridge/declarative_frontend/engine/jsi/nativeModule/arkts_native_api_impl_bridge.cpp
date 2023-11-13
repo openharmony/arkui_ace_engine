@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
-
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 
 namespace OHOS::Ace::NG {
@@ -39,7 +38,55 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBackgroundColor));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBackgroundColor));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetWidth));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetWidth));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetHeight));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetHeight));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBorderRadius));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBorderRadius));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBorderWidth));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBorderWidth));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTransform"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetTransform));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTransform"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetTransform));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBorderColor));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBorderColor));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetPosition));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetPosition));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBorderStyle));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBorderStyle));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetShadow));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShadow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetShadow));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHitTestBehavior"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetHitTestBehavior));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHitTestBehavior"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetHitTestBehavior));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setZIndex"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetZIndex));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetZIndex"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetZIndex));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOpacity));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOpacity));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
     return object;
 }
-}
+} // namespace OHOS::Ace::NG

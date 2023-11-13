@@ -255,7 +255,7 @@ TextFieldPattern::~TextFieldPattern()
     // If soft keyboard is still exist, close it.
     if (HasConnection()) {
 #if defined(ENABLE_STANDARD_INPUT)
-        LOGI("Destruction of text field, close input method.");
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Destruction of text field, close input method.");
         MiscServices::InputMethodController::GetInstance()->Close();
 #else
         connection_->Close(GetInstanceId());
@@ -384,7 +384,8 @@ void TextFieldPattern::UpdateCaretInfoToController() const // todo确定更新�
         StringUtils::Str8ToStr16(contentController_->GetTextValue()), selectController_->GetStartIndex(),
         selectController_->GetEndIndex());
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-        "Caret position update, left %{public}f, top %{public}f, width %{public}f, height %{public}f, Start "
+        "Caret position update, left %{public}f, top %{public}f, width %{public}f, height %{public}f; "
+        "selectController_ Start "
         "%{public}d, end %{public}d",
         cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height, selectController_->GetStartIndex(),
         selectController_->GetEndIndex());
@@ -947,17 +948,17 @@ void TextFieldPattern::HandleOnCameraInput()
         return;
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (imeAttached_) {
+    if (imeShown_) {
         inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
     } else {
         auto optionalTextConfig = GetMiscTextConfig();
         CHECK_NULL_VOID(optionalTextConfig.has_value());
         MiscServices::TextConfig textConfig = optionalTextConfig.value();
-        LOGI("HandleOnCameraInput set calling window id is : %{public}u", textConfig.windowId);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnCameraInput set calling window id is : %{public}u",
+            textConfig.windowId);
         inputMethod->Attach(textChangeListener_, false, textConfig);
         inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
         inputMethod->ShowTextInput();
-        imeAttached_ = true;
     }
 #endif
 #endif
@@ -1131,7 +1132,7 @@ void TextFieldPattern::HandleTouchUp()
         }
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (isLongPress_ && !imeShown_ && HasFocus()) {
+    if (isLongPress_ && !imeShown_ && !isCustomKeyboardAttached_ && HasFocus()) {
         if (RequestKeyboard(false, true, true)) {
             NotifyOnEditChanged(true);
         }
@@ -1567,7 +1568,7 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Keyboard action is %{public}d", action_);
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     // if keyboard attached and keyboard is shown, pull up keyboard again
-    if (needToResetKeyboard && imeShown_) {
+    if (needToResetKeyboard && (imeShown_ || isCustomKeyboardAttached_)) {
         CloseKeyboard(true);
         RequestKeyboard(false, true, true);
     }
@@ -2458,11 +2459,13 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     CHECK_NULL_RETURN(tmpHost, false);
     auto context = tmpHost->GetContext();
     CHECK_NULL_RETURN(context, false);
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    if (imeShown_) {
+        return true;
+    }
+#endif
     if (needShowSoftKeyboard) {
         if (customKeyboardBuilder_) {
-#if defined(ENABLE_STANDARD_INPUT) && defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-            imeShown_ = true;
-#endif
             return RequestCustomKeyboard();
         }
 #if defined(ENABLE_STANDARD_INPUT)
@@ -2541,9 +2544,6 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
         StopTwinkling();
         CloseSelectOverlay(true);
         if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
-#if defined(ENABLE_STANDARD_INPUT)
-            imeShown_ = false;
-#endif
             return CloseCustomKeyboard();
         }
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Request close soft keyboard.");

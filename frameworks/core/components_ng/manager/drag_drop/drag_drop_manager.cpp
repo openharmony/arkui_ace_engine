@@ -182,14 +182,15 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     if (parentFrameNode && (!parentFrameNode->IsActive() || !parentFrameNode->IsVisible())) {
         return nullptr;
     }
-    auto children = parentNode->GetChildren();
+    auto children = parentFrameNode->GetFrameChildren();
 
     for (auto iter = children.rbegin(); iter != children.rend(); iter++) {
-        auto child = *iter;
+        auto child = iter->Upgrade();
         if (child == nullptr) {
             continue;
         }
-        auto childFindResult = FindTargetInChildNodes(child, hitFrameNodes, findDrop);
+        auto childNode = AceType::DynamicCast<UINode>(child);
+        auto childFindResult = FindTargetInChildNodes(childNode, hitFrameNodes, findDrop);
         if (childFindResult) {
             return childFindResult;
         }
@@ -593,14 +594,14 @@ uint32_t DragDropManager::GetRecordSize() const
 Rect DragDropManager::GetDragWindowRect(const Point& point)
 {
     if (!previewRect_.IsValid()) {
-        int x = -1;
-        int y = -1;
-        int width = -1;
-        int height = -1;
         ShadowOffsetData shadowOffsetData { -1, -1, -1, -1 };
         int retOffset = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
         if (retOffset == 0) {
-            previewRect_ = Rect(x, y, width, height);
+            previewRect_ = Rect(
+                shadowOffsetData.offsetX,
+                shadowOffsetData.offsetY,
+                shadowOffsetData.width,
+                shadowOffsetData.height);
         }
     }
     return previewRect_ + Offset(point.GetX(), point.GetY());
@@ -1072,17 +1073,21 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     auto unifiedData = udData;
     event->SetData(unifiedData);
     event->SetSummary(summaryMap_);
-    int x = -1;
-    int y = -1;
-    int width = -1;
-    int height = -1;
     ShadowOffsetData shadowOffsetData { -1, -1, -1, -1 };
     int retOffset = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
     if (retOffset == 0) {
-        previewRect_ = Rect(point.GetX() + x, point.GetY() + y, width, height);
+        previewRect_ = Rect(
+            point.GetX() + shadowOffsetData.offsetX,
+            point.GetY() + shadowOffsetData.offsetY,
+            shadowOffsetData.width,
+            shadowOffsetData.height);
         event->SetPreviewRect(previewRect_);
     } else {
-        previewRect_ = Rect(x, y, width, height);
+        previewRect_ = Rect(
+            shadowOffsetData.offsetX,
+            shadowOffsetData.offsetY,
+            shadowOffsetData.width,
+            shadowOffsetData.height);
         event->SetPreviewRect(previewRect_);
     }
 #endif // ENABLE_DRAG_FRAMEWORK

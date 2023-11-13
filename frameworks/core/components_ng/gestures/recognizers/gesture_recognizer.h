@@ -29,6 +29,15 @@ namespace OHOS::Ace::NG {
 
 enum class RefereeState { READY, DETECTING, PENDING, PENDING_BLOCKED, SUCCEED_BLOCKED, SUCCEED, FAIL };
 
+inline std::string TransRefereeState(RefereeState state)
+{
+    const char *str[] = { "READY", "DETECTING", "PENDING", "PENDING_BLOCKED", "SUCCEED_BLOCKED", "SUCCEED", "FAIL" };
+    if (state >= RefereeState::READY && state <= RefereeState::FAIL) {
+        return str[static_cast<int32_t>(state)];
+    }
+    return std::string("State:").append(std::to_string(static_cast<int32_t>(state)));
+}
+
 class FrameNode;
 
 class ACE_EXPORT NGGestureRecognizer : public TouchEventTarget {
@@ -189,6 +198,7 @@ public:
             OnSucceedCancel();
         }
         refereeState_ = RefereeState::READY;
+        disposal_ = GestureDisposal::NONE;
         OnResetStatus();
     }
 
@@ -214,6 +224,13 @@ public:
     }
 
     void SetTransInfo(int id);
+
+    virtual RefPtr<GestureSnapshot> Dump() const override;
+
+    // for recognizer
+    void AddGestureProcedure(const std::string& procedure) const;
+    // for recognizer group
+    void AddGestureProcedure(const TouchEvent& point, const RefPtr<NGGestureRecognizer>& recognizer) const;
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {

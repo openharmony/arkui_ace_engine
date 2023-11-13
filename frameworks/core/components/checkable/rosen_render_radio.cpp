@@ -43,6 +43,7 @@ void RosenRenderRadio::Paint(RenderContext& context, const Offset& offset)
 #else
     RSPen pen;
     pen.SetAntiAlias(true);
+    RSBrush brush;
 #endif
     if (!isDeclarative_) {
         if (IsPhone() && onFocus_) {
@@ -115,29 +116,29 @@ void RosenRenderRadio::Paint(RenderContext& context, const Offset& offset)
     switch (uiStatus_) {
         case UIStatus::SELECTED:
             // draw stroke border
-            pen.SetAntiAlias(true);
-            pen.SetColor(activeColor_);
+            brush.SetAntiAlias(true);
+            brush.SetColor(activeColor_);
             if (disabled_) {
-                pen.SetColor(Color(activeColor_).BlendOpacity(ConfigureOpacity(disabled_)).GetValue());
+                brush.SetColor(Color(activeColor_).BlendOpacity(ConfigureOpacity(disabled_)).GetValue());
             }
-            canvas->AttachPen(pen);
+            canvas->AttachBrush(brush);
             canvas->DrawCircle(RSPoint(centerX, centerY), outCircleRadius_ * totalScale_);
-            canvas->DetachPen();
+            canvas->DetachBrush();
 
             // draw shadow
             if (!NearZero(pointScale_) && !NearEqual(pointScale_, 1.0)) {
-                pen.SetColor(shadowColor_);
-                canvas->AttachPen(pen);
+                brush.SetColor(shadowColor_);
+                canvas->AttachBrush(brush);
                 canvas->DrawCircle(RSPoint(centerX, centerY),
                     outCircleRadius_ * pointScale_ + NormalizeToPx(shadowWidth_));
-                canvas->DetachPen();
+                canvas->DetachBrush();
             }
 
             // draw inner circle
-            pen.SetColor(pointColor_);
-            canvas->AttachPen(pen);
+            brush.SetColor(pointColor_);
+            canvas->AttachBrush(brush);
             canvas->DrawCircle(RSPoint(centerX, centerY), outCircleRadius_ * pointScale_);
-            canvas->DetachPen();
+            canvas->DetachBrush();
             break;
         case UIStatus::UNSELECTED:
             // draw inner circle

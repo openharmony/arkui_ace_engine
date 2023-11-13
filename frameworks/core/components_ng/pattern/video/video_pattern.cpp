@@ -57,7 +57,10 @@
 #endif
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t SECONDS_PER_HOUR = 3600;
+constexpr uint32_t SECONDS_PER_HOUR = 3600;
+constexpr uint32_t SECONDS_PER_MINUTE = 60;
+const std::string FORMAT_HH_MM_SS = "%02d:%02d:%02d";
+const std::string FORMAT_MM_SS = "%02d:%02d";
 constexpr int32_t MILLISECONDS_TO_SECONDS = 1000;
 constexpr uint32_t CURRENT_POS = 1;
 constexpr uint32_t SLIDER_POS = 2;
@@ -76,8 +79,13 @@ enum SliderChangeMode {
 
 std::string IntTimeToText(uint32_t time)
 {
-    bool needShowHour = time > SECONDS_PER_HOUR;
-    return Localization::GetInstance()->FormatDuration(time, needShowHour);
+    auto minutes = (time % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE;
+    auto seconds = time % SECONDS_PER_MINUTE;
+    if (time >= SECONDS_PER_HOUR) {
+        auto hours = time / SECONDS_PER_HOUR;
+        return StringUtils::FormatString(FORMAT_HH_MM_SS.c_str(), hours, minutes, seconds);
+    }
+    return StringUtils::FormatString(FORMAT_MM_SS.c_str(), minutes, seconds);
 }
 
 SizeF CalculateFitContain(const SizeF& videoSize, const SizeF& layoutSize)
@@ -721,8 +729,15 @@ void VideoPattern::OnModifyDone()
 
     // Update the media player when video node is not in full screen or current node is full screen node
     if (!fullScreenNodeId_.has_value() || InstanceOf<VideoFullScreenNode>(this)) {
-        TAG_LOGD(AceLogTag::ACE_VIDEO, "trigger modify media player");
-        UpdateMediaPlayerOnBg();
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([weak = WeakClaim(this)]() {
+            auto videoPattern = weak.Upgrade();
+            CHECK_NULL_VOID(videoPattern);
+            TAG_LOGD(AceLogTag::ACE_VIDEO, "trigger modify media player");
+            videoPattern->UpdateMediaPlayerOnBg();
+        });
     }
 
     if (SystemProperties::GetExtSurfaceEnabled()) {

@@ -60,7 +60,9 @@ constexpr int32_t OPACITY_BACKBUTTON_IN_DELAY = 150;
 constexpr int32_t OPACITY_BACKBUTTON_IN_DURATION = 200;
 constexpr int32_t OPACITY_BACKBUTTON_OUT_DURATION = 67;
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 450;
+constexpr int32_t DEFAULT_REPLACE_DURATION = 150;
 const RefPtr<CubicCurve> bezierCurve = AceType::MakeRefPtr<CubicCurve>(0.23f, 0.07f, 0.0f, 1.0f);
+const RefPtr<CubicCurve> replaceCurve = AceType::MakeRefPtr<CubicCurve>(0.33, 0.0, 0.67, 1.0);
 } // namespace
 RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
@@ -167,6 +169,9 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         }
         auto uiNode = navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode();
         if (uiNode != remainChild) {
+            if (navDestination->IsOnAnimation()) {
+                return;
+            }
             // remove content child
             auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
             auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
@@ -763,5 +768,90 @@ void NavigationGroupNode::TitleOpacityAnimationOut(const RefPtr<RenderContext>& 
         });
     transitionOutNodeContext->OpacityAnimation(opacityOption, 1.0, 0.0);
     transitionOutNodeContext->UpdateOpacity(0.0);
+}
+
+void NavigationGroupNode::TransitionWithReplaceEnter(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    AnimationOption option;
+    option.SetCurve(replaceCurve);
+    option.SetFillMode(FillMode::FORWARDS);
+    option.SetDuration(DEFAULT_REPLACE_DURATION);
+    option.SetOnFinishEvent(
+        [weakNode = WeakPtr<FrameNode>(node), weakNavigation = WeakClaim(this), id = Container::CurrentId()]() {
+            ContainerScope scope(id);
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [weakNode, weakNavigation]() {
+                    PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+                    auto curNode = weakNode.Upgrade();
+                    CHECK_NULL_VOID(curNode);
+                    curNode->GetRenderContext()->UpdateOpacity(1.0f);
+                    curNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
+                    auto navigationNode = weakNavigation.Upgrade();
+                    CHECK_NULL_VOID(navigationNode);
+                    navigationNode->isOnAnimation_ = false;
+                    navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+                },
+                TaskExecutor::TaskType::UI);
+        });
+    node->GetEventHub<EventHub>()->SetEnabledInternal(false);
+    node->GetRenderContext()->OpacityAnimation(option, 0.0f, 1.0f);
+}
+
+void NavigationGroupNode::TransitionWithReplaceExit(const RefPtr<FrameNode>& preNode, bool isNavBar)
+{
+    CHECK_NULL_VOID(preNode);
+    AnimationOption option;
+    option.SetCurve(replaceCurve);
+    option.SetFillMode(FillMode::FORWARDS);
+    option.SetDuration(DEFAULT_REPLACE_DURATION);
+    option.SetOnFinishEvent([weakNode = WeakPtr<FrameNode>(preNode), weakNavigation = WeakClaim(this),
+                                id = Container::CurrentId(), isNavBar]() {
+        ContainerScope scope(id);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weakNode, weakNavigation, isNavBar]() {
+                auto curNode = weakNode.Upgrade();
+                CHECK_NULL_VOID(curNode);
+                curNode->GetRenderContext()->UpdateOpacity(1.0f);
+                curNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
+                auto navigationNode = weakNavigation.Upgrade();
+                CHECK_NULL_VOID(navigationNode);
+                if (isNavBar) {
+                    navigationNode->SetNeedSetInvisible(true);
+                    return;
+                }
+                auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+                CHECK_NULL_VOID(navDestinationNode);
+                auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+                auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
+                if (shallowBuilder) {
+                    shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+                }
+                // remove old navdestination node
+                if (navDestinationNode->GetContentNode()) {
+                    navDestinationNode->GetContentNode()->Clean();
+                }
+                auto parent = AceType::DynamicCast<FrameNode>(curNode->GetParent());
+                CHECK_NULL_VOID(parent);
+                parent->RemoveChild(curNode);
+                parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                auto context = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID(context);
+                context->MarkNeedFlushMouseEvent();
+            },
+            TaskExecutor::TaskType::UI);
+    });
+    preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+    isOnAnimation_ = true;
+    preNode->GetRenderContext()->OpacityAnimation(option, 1.0f, 0.0f);
 }
 } // namespace OHOS::Ace::NG

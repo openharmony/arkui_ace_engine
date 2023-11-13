@@ -60,18 +60,15 @@ constexpr int32_t ROOT_DECOR_BASE = 3100000;
 constexpr int32_t CARD_NODE_ID_RATION = 10000;
 constexpr int32_t CARD_ROOT_NODE_ID_RATION = 1000;
 constexpr int32_t CARD_BASE = 100000;
+constexpr int32_t UI_EXTENSION_OFFSET_MAX = 100000000;
+constexpr int32_t UI_EXTENSION_OFFSET_MIN = 1000000;
+
+constexpr int32_t UI_EXTENSION_ID_21 = 21;
+constexpr int32_t UI_EXTENSION_ID_10 = 10;
 
 struct ActionTable {
     AceAction aceAction;
     ActionType action;
-};
-
-struct CommonProperty {
-    int32_t windowId = 0;
-    int32_t windowLeft = 0;
-    int32_t windowTop = 0;
-    int32_t pageId = 0;
-    std::string pagePath;
 };
 
 struct AccessibilityActionParam {
@@ -413,6 +410,61 @@ void UpdateCacheInfo(std::list<AccessibilityElementInfo>& infos, uint32_t mode, 
     }
 }
 
+void SortAccessibilityInfosByBreadth(std::list<AccessibilityElementInfo>& infos,
+    std::list<int32_t>& accessibilityIdQueue, std::list<AccessibilityElementInfo>& output)
+{
+    while (!accessibilityIdQueue.empty()) {
+        auto accessibilityId = accessibilityIdQueue.front();
+        accessibilityIdQueue.pop_front();
+        for (std::list<AccessibilityElementInfo>::iterator info = infos.begin(); info != infos.end(); info++) {
+            if (accessibilityId != info->GetAccessibilityId()) {
+                continue;
+            }
+            for (auto& child : info->GetChildIds()) {
+                accessibilityIdQueue.emplace_back(child);
+            }
+            output.emplace_back(*info);
+            infos.erase(info);
+            break;
+        }
+        SortAccessibilityInfosByBreadth(infos, accessibilityIdQueue, output);
+    }
+}
+
+void SortExtensionAccessibilityInfo(std::list<AccessibilityElementInfo>& infos, int32_t rootAccessibilityId)
+{
+    auto input = infos;
+    infos.clear();
+    std::list<int32_t> accessibilityIdQueue;
+    accessibilityIdQueue.emplace_back(rootAccessibilityId);
+    SortAccessibilityInfosByBreadth(input, accessibilityIdQueue, infos);
+}
+
+void ConvertExtensionAccessibilityId(AccessibilityElementInfo& info,
+    const RefPtr<NG::FrameNode>& extensionNode, int32_t uiExtensionOffset)
+{
+    auto extensionAbilityId =
+            extensionNode->WrapExtensionAbilityId(uiExtensionOffset, info.GetAccessibilityId());
+    info.SetAccessibilityId(extensionAbilityId);
+    auto parentNodeId =
+        extensionNode->WrapExtensionAbilityId(uiExtensionOffset, info.GetParentNodeId());
+    info.SetParent(parentNodeId);
+    auto childIds = info.GetChildIds();
+    for (auto& child : childIds) {
+        info.RemoveChild(child);
+        info.AddChild(extensionNode->WrapExtensionAbilityId(uiExtensionOffset, child));
+    }
+}
+
+void ConvertExtensionAccessibilityNodeId(
+    std::list<AccessibilityElementInfo>& infos, const RefPtr<NG::FrameNode>& extensionNode, int32_t uiExtensionOffset)
+{
+    CHECK_NULL_VOID(extensionNode);
+    for (auto& accessibilityElementInfo : infos) {
+        ConvertExtensionAccessibilityId(accessibilityElementInfo, extensionNode, uiExtensionOffset);
+    }
+}
+
 inline std::string BoolToString(bool tag)
 {
     return tag ? "true" : "false";
@@ -461,6 +513,16 @@ bool FindAccessibilityFocus(const RefPtr<AccessibilityNode>& node, RefPtr<Access
     }
 
     return false;
+}
+
+void FindFocusedExtensionElementInfoNG(int32_t elementId, int32_t focusType, const RefPtr<NG::FrameNode>& node,
+    Accessibility::AccessibilityElementInfo& info, const int32_t uiExtensionOffset)
+{
+    if (UI_EXTENSION_OFFSET_MIN < (uiExtensionOffset + 1)) {
+        node->FindFocusedExtensionElementInfoNG(elementId, focusType, uiExtensionOffset, info);
+    } else {
+        info.SetValidElement(false);
+    }
 }
 
 RefPtr<NG::FrameNode> FindAccessibilityFocus(const RefPtr<NG::UINode>& node)
@@ -558,6 +620,27 @@ void FindText(const RefPtr<NG::UINode>& node, const std::string& text, std::list
     if (!node->GetChildren().empty()) {
         for (const auto& child : node->GetChildren()) {
             FindText(child, text, nodeList);
+        }
+    }
+}
+
+void FindText(const RefPtr<NG::UINode>& node, const std::string& text, std::list<RefPtr<NG::FrameNode>>& nodeList,
+    std::list<RefPtr<NG::FrameNode>>& uiExtensionNodes)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    if (frameNode && !frameNode->IsInternal()) {
+        if (frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText().find(text) !=
+            std::string::npos) {
+            nodeList.push_back(frameNode);
+        }
+    }
+    if (frameNode && (frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG)) {
+        uiExtensionNodes.push_back(frameNode);
+    }
+    if (!node->GetChildren().empty()) {
+        for (const auto& child : node->GetChildren()) {
+            FindText(child, text, nodeList, uiExtensionNodes);
         }
     }
 }
@@ -761,20 +844,6 @@ void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElement
         AccessibleAction action(ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, "ace");
         nodeInfo.AddAction(action);
     }
-    auto eventHub = node->GetEventHub<NG::EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto gestureEventHub = eventHub->GetGestureEventHub();
-    CHECK_NULL_VOID(gestureEventHub);
-    nodeInfo.SetClickable(gestureEventHub->IsAccessibilityClickable());
-    if (gestureEventHub->IsAccessibilityClickable()) {
-        AccessibleAction action(ACCESSIBILITY_ACTION_CLICK, "ace");
-        nodeInfo.AddAction(action);
-    }
-    nodeInfo.SetLongClickable(gestureEventHub->IsAccessibilityLongClickable());
-    if (gestureEventHub->IsAccessibilityLongClickable()) {
-        AccessibleAction action(ACCESSIBILITY_ACTION_LONG_CLICK, "ace");
-        nodeInfo.AddAction(action);
-    }
 }
 
 static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
@@ -783,7 +852,7 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
 
-    nodeInfo.SetContent(accessibilityProperty->GetAccessibilityText());
+    nodeInfo.SetContent(accessibilityProperty->GetText());
     if (accessibilityProperty->HasRange()) {
         RangeInfo rangeInfo = ConvertAccessibilityValue(accessibilityProperty->GetAccessibilityValue());
         nodeInfo.SetRange(rangeInfo);
@@ -838,17 +907,23 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     }
 }
 
-void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
-    AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline)
+void UpdateAccessibilityElementInfo(
+    const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty, AccessibilityElementInfo& nodeInfo,
+    const RefPtr<NG::PipelineContext>& ngPipeline, const int32_t uiExtensionOffset = 0)
 {
     CHECK_NULL_VOID(node);
     nodeInfo.SetParent(GetParentId(node));
-    std::vector<int32_t> children;
-    for (const auto& item : node->GetChildren()) {
-        GetFrameNodeChildren(item, children, commonProperty.pageId);
-    }
-    for (const auto& child : children) {
-        nodeInfo.AddChild(child);
+    
+    if (V2::UI_EXTENSION_COMPONENT_TAG == node->GetTag()) {
+        nodeInfo.AddChild(node->WrapExtensionAbilityId(uiExtensionOffset, 0));
+    } else {
+        std::vector<int32_t> children;
+        for (const auto& item : node->GetChildren()) {
+            GetFrameNodeChildren(item, children, commonProperty.pageId);
+        }
+        for (const auto& child : children) {
+            nodeInfo.AddChild(child);
+        }
     }
 
     nodeInfo.SetAccessibilityId(node->GetAccessibilityId());
@@ -882,27 +957,57 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
     UpdateAccessibilityElementInfo(node, nodeInfo);
 }
 
-void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, uint32_t mode, const RefPtr<NG::FrameNode>& node,
-    const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline)
+std::list<AccessibilityElementInfo> SearchExtensionElementInfoByAccessibilityIdNG(
+    int32_t elementId, int32_t mode, const RefPtr<NG::FrameNode>& node,  int32_t offset)
 {
-    uint32_t umode = mode;
+    std::list<AccessibilityElementInfo> extensionElementInfo;
+    if (UI_EXTENSION_OFFSET_MIN < (offset + 1)) {
+        node->SearchExtensionElementInfoByAccessibilityIdNG(elementId, mode, offset, extensionElementInfo);
+    }
+    return extensionElementInfo;
+}
+
+void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<NG::FrameNode>& node,
+    const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
+    const SearchParameter& searchParam)
+{
+    uint32_t umode = searchParam.mode;
     std::list<RefPtr<NG::FrameNode>> children;
     // get all children
-    if (umode & static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN)) {
-        for (const auto& item : node->GetChildren()) {
-            GetFrameNodeChildren(item, children, commonProperty.pageId);
-        }
-
-        while (!children.empty()) {
-            RefPtr<NG::FrameNode> parent = children.front();
-            children.pop_front();
-            AccessibilityElementInfo nodeInfo;
+    if (!(umode & static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN))) {
+        return;
+    }
+    for (const auto& item : node->GetChildren()) {
+        GetFrameNodeChildren(item, children, commonProperty.pageId);
+    }
+    while (!children.empty()) {
+        RefPtr<NG::FrameNode> parent = children.front();
+        children.pop_front();
+        AccessibilityElementInfo nodeInfo;
+        if (parent->GetTag() != V2::UI_EXTENSION_COMPONENT_TAG) {
             UpdateAccessibilityElementInfo(parent, commonProperty, nodeInfo, ngPipeline);
             infos.push_back(nodeInfo);
             for (const auto& item : parent->GetChildren()) {
                 GetFrameNodeChildren(item, children, commonProperty.pageId);
             }
+            continue;
         }
+        if (!(((parent->GetUiExtensionId() < UI_EXTENSION_ID_21) &&
+                (UI_EXTENSION_OFFSET_MAX == searchParam.uiExtensionOffset)) ||
+                (parent->GetUiExtensionId() < UI_EXTENSION_ID_10))) {
+                continue;
+        }
+        std::list<AccessibilityElementInfo> extensionElementInfos = SearchExtensionElementInfoByAccessibilityIdNG(
+            -1, umode, parent, searchParam.uiExtensionOffset / UI_EXTENSION_ID_10);
+        ConvertExtensionAccessibilityNodeId(extensionElementInfos, parent, searchParam.uiExtensionOffset);
+        UpdateAccessibilityElementInfo(parent, commonProperty, nodeInfo, ngPipeline, searchParam.uiExtensionOffset);
+        for (auto& info : extensionElementInfos) {
+            if (parent->WrapExtensionAbilityId(searchParam.uiExtensionOffset, 0) == info.GetAccessibilityId()) {
+                info.SetParent(parent->GetAccessibilityId());
+            }
+            infos.push_back(info);
+        }
+        infos.push_back(nodeInfo);
     }
 }
 
@@ -1661,10 +1766,31 @@ void JsAccessibilityManager::DumpPropertyNG(const std::vector<std::string>& para
 {
     auto pipeline = context_.Upgrade();
     CHECK_NULL_VOID(pipeline);
+    auto nodeID = StringUtils::StringToInt(params[1]);
+    RefPtr<NG::PipelineContext> ngPipeline;
+
+#ifdef WINDOW_SCENE_SUPPORTED
+    ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    std::list<AccessibilityElementInfo> extensionElementInfos;
+    if (uiExtensionManager->IsWrapExtensionAbilityId(nodeID)) {
+        SearchElementInfoByAccessibilityIdNG(
+            nodeID, PREFETCH_RECURSIVE_CHILDREN, extensionElementInfos, ngPipeline, UI_EXTENSION_OFFSET_MAX);
+        for (auto& extensionElementInfo : extensionElementInfos) {
+            if (nodeID == extensionElementInfo.GetAccessibilityId()) {
+                DumpCommonPropertyNG(extensionElementInfo);
+                DumpAccessibilityPropertyNG(extensionElementInfo);
+                DumpLog::GetInstance().Print(
+                    0, extensionElementInfo.GetComponentType(), extensionElementInfo.GetChildCount());
+                return;
+            }
+        }
+    }
+#endif
 
     RefPtr<NG::FrameNode> frameNode;
-    auto nodeID = StringUtils::StringToInt(params[1]);
-    auto ngPipeline = FindPipelineByElementId(nodeID, frameNode);
+    ngPipeline = FindPipelineByElementId(nodeID, frameNode);
     CHECK_NULL_VOID(ngPipeline);
     CHECK_NULL_VOID(frameNode);
 
@@ -1685,7 +1811,6 @@ void JsAccessibilityManager::DumpPropertyNG(const std::vector<std::string>& para
     CommonProperty commonProperty { ngPipeline->GetWindowId(), windowLeft, windowTop, pageId, pagePath };
     UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
     DumpCommonPropertyNG(nodeInfo);
-
     DumpAccessibilityPropertyNG(nodeInfo);
     DumpLog::GetInstance().Print(0, nodeInfo.GetComponentType(), nodeInfo.GetChildCount());
 }
@@ -1721,27 +1846,43 @@ void JsAccessibilityManager::DumpProperty(const std::vector<std::string>& params
     }
 }
 
-static void DumpTreeNG(
-    const RefPtr<NG::FrameNode>& parent, int32_t depth, NodeId nodeID, const CommonProperty& commonProperty)
+static void DumpAccessibilityElementInfosTreeNG(
+    std::list<AccessibilityElementInfo>& infos, int32_t depth, int32_t accessibilityId)
 {
-    auto node = GetInspectorById(parent, nodeID);
-    if (!node) {
-        DumpLog::GetInstance().Print("Error: failed to get accessibility node with ID " + std::to_string(nodeID));
-        return;
+    AccessibilityElementInfo accessibilityInfo;
+    for (auto& info : infos) {
+        if (accessibilityId == info.GetAccessibilityId()) {
+            accessibilityInfo = info;
+            break;
+        }
     }
-
-    if (!node->IsActive()) {
-        return;
+    DumpLog::GetInstance().AddDesc("ID: " + std::to_string(accessibilityInfo.GetAccessibilityId()));
+    DumpLog::GetInstance().AddDesc("compid: " + accessibilityInfo.GetInspectorKey());
+    DumpLog::GetInstance().AddDesc("text: " + accessibilityInfo.GetContent());
+    DumpLog::GetInstance().AddDesc("accessibilityText: ");
+    DumpLog::GetInstance().AddDesc("accessibilityGroup: ");
+    DumpLog::GetInstance().AddDesc("accessibilityLevel: ");
+    DumpLog::GetInstance().AddDesc("visible: " + std::to_string(accessibilityInfo.IsVisible()));
+    DumpLog::GetInstance().AddDesc("checkable: " + std::to_string(accessibilityInfo.IsCheckable()));
+    DumpLog::GetInstance().AddDesc("scrollable: " + std::to_string(accessibilityInfo.IsScrollable()));
+    DumpLog::GetInstance().AddDesc("checked: " + std::to_string(accessibilityInfo.IsCheckable()));
+    DumpLog::GetInstance().AddDesc("hint: " + accessibilityInfo.GetHint());
+    DumpLog::GetInstance().Print(depth, accessibilityInfo.GetComponentType(), accessibilityInfo.GetChildCount());
+    for (auto child : accessibilityInfo.GetChildIds()) {
+        DumpAccessibilityElementInfosTreeNG(infos, depth + 1, child);
     }
+}
 
+static void DumpTreeNG(
+    const RefPtr<NG::FrameNode>& node, int32_t depth, const CommonProperty& commonProperty, int32_t childSize)
+{
     NG::RectF rect = node->GetTransformRectRelativeToWindow();
     DumpLog::GetInstance().AddDesc("ID: " + std::to_string(node->GetAccessibilityId()));
     DumpLog::GetInstance().AddDesc("compid: " + node->GetInspectorId().value_or(""));
     DumpLog::GetInstance().AddDesc("text: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText());
     DumpLog::GetInstance().AddDesc(
         "accessibilityText: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText());
-    DumpLog::GetInstance().AddDesc(
-        "accessibilityGroup: " +
+    DumpLog::GetInstance().AddDesc("accessibilityGroup: " +
         std::to_string(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->IsAccessibilityGroup()));
     DumpLog::GetInstance().AddDesc(
         "accessibilityLevel: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityLevel());
@@ -1755,8 +1896,7 @@ static void DumpTreeNG(
         auto gestureEventHub = eventHub->GetGestureEventHub();
         DumpLog::GetInstance().AddDesc(
             "clickable: " + std::to_string(gestureEventHub ? gestureEventHub->IsAccessibilityClickable() : false));
-        DumpLog::GetInstance().AddDesc(
-            "longclickable: " +
+        DumpLog::GetInstance().AddDesc("longclickable: " +
             std::to_string(gestureEventHub ? gestureEventHub->IsAccessibilityLongClickable() : false));
     }
     DumpLog::GetInstance().AddDesc(
@@ -1767,15 +1907,38 @@ static void DumpTreeNG(
         "checked: " + std::to_string(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->IsChecked()));
     DumpLog::GetInstance().AddDesc(
         "hint: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetHintText());
+    DumpLog::GetInstance().Print(depth, node->GetTag(), childSize);
+}
 
+void JsAccessibilityManager::DumpTreeNodeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
+    NodeId nodeID, const CommonProperty& commonProperty)
+{
+    auto node = GetInspectorById(parent, nodeID);
+    if (!node) {
+        DumpLog::GetInstance().Print("Error: failed to get accessibility node with ID " + std::to_string(nodeID));
+        return;
+    }
+    if (!node->IsActive()) {
+        return;
+    }
     std::vector<int32_t> children;
     for (const auto& item : node->GetChildren()) {
         GetFrameNodeChildren(item, children, commonProperty.pageId);
     }
-    DumpLog::GetInstance().Print(depth, node->GetTag(), children.size());
-
-    for (auto nodeId : children) {
-        DumpTreeNG(node, depth + 1, nodeId, commonProperty);
+    DumpTreeNG(node, depth, commonProperty, children.size());
+    if (node->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
+        std::list<AccessibilityElementInfo> extensionElementInfos;
+        auto pipeline = context_.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        SearchElementInfoByAccessibilityIdNG(
+            nodeID, PREFETCH_RECURSIVE_CHILDREN, extensionElementInfos, pipeline, UI_EXTENSION_OFFSET_MAX);
+        if (!extensionElementInfos.empty()) {
+            DumpAccessibilityElementInfosTreeNG(
+                extensionElementInfos, depth + 1, node->WrapExtensionAbilityId(UI_EXTENSION_OFFSET_MAX, 0));
+        }
+    }
+    for (auto childId : children) {
+        DumpTreeNodeNG(node, depth + 1, childId, commonProperty);
     }
 }
 
@@ -1799,9 +1962,11 @@ void JsAccessibilityManager::DumpTree(int32_t depth, NodeId nodeID)
         auto pageId = page->GetPageId();
         auto pagePath = GetPagePath();
         CommonProperty commonProperty { ngPipeline->GetWindowId(), windowLeft, windowTop, pageId, pagePath };
-        DumpTreeNG(rootNode, depth, nodeID, commonProperty);
+        auto weak = WeakClaim(this);
+        DumpTreeNodeNG(rootNode, depth, nodeID, commonProperty);
         for (auto subContext : GetSubPipelineContexts()) {
-            ngPipeline = AceType::DynamicCast<NG::PipelineContext>(subContext.Upgrade());
+            auto subPipeline = subContext.Upgrade();
+            ngPipeline = AceType::DynamicCast<NG::PipelineContext>(subPipeline);
             CHECK_NULL_VOID(ngPipeline);
             rootNode = ngPipeline->GetRootElement();
             CHECK_NULL_VOID(rootNode);
@@ -1811,7 +1976,7 @@ void JsAccessibilityManager::DumpTree(int32_t depth, NodeId nodeID)
             commonProperty.windowTop = GetWindowTop(ngPipeline->GetWindowId());
             commonProperty.pageId = 0;
             commonProperty.pagePath = "";
-            DumpTreeNG(rootNode, depth + 1, nodeID, commonProperty);
+            DumpTreeNodeNG(rootNode, depth, nodeID, commonProperty);
         }
     }
 }
@@ -1922,14 +2087,13 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int32_t el
     if (pipeline) {
         auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
         if (ngPipeline) {
-            SearchElementInfoByAccessibilityIdNG(elementId, mode, infos, pipeline);
+            SearchElementInfoByAccessibilityIdNG(elementId, mode, infos, pipeline, UI_EXTENSION_OFFSET_MAX);
             SetSearchElementInfoByAccessibilityIdResult(callback, infos, requestId);
             return;
         }
     }
 
     NodeId nodeId = elementId;
-    // get root node
     if (elementId == -1) {
         nodeId = 0;
     }
@@ -1951,8 +2115,8 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int32_t el
     SetSearchElementInfoByAccessibilityIdResult(callback, infos, requestId);
 }
 
-void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(
-    int32_t elementId, int32_t mode, std::list<AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context)
+void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
+    std::list<AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context, int32_t uiExtensionOffset)
 {
     auto mainContext = context_.Upgrade();
     CHECK_NULL_VOID(mainContext);
@@ -1964,13 +2128,26 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(
 
     AccessibilityElementInfo nodeInfo;
     NodeId nodeId = elementId;
-    // accessibility use -1 for first search to get root node
     if (elementId == -1) {
         nodeId = rootNode->GetAccessibilityId();
     }
 
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    if (uiExtensionManager->IsWrapExtensionAbilityId(nodeId)) {
+        SearchParameter param {nodeId, "", mode, uiExtensionOffset};
+        SearchExtensionElementInfoByAccessibilityIdNG(param, rootNode, infos, context, ngPipeline);
+        return;
+    }
+#endif
+
     auto node = GetInspectorById(rootNode, nodeId);
     CHECK_NULL_VOID(node);
+    if (node->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
+        SearchExtensionElementInfoNG(-1, mode, node, infos, uiExtensionOffset);
+        nodeInfo.AddChild(node->WrapExtensionAbilityId(uiExtensionOffset, 0));
+    }
     int32_t pageId = 0;
     std::string pagePath;
     if (context->GetWindowId() == mainContext->GetWindowId()) {
@@ -1985,11 +2162,107 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(
         GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
     UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
     infos.push_back(nodeInfo);
-    UpdateCacheInfoNG(infos, mode, node, commonProperty, ngPipeline);
+    SearchParameter param {nodeId, "", mode, uiExtensionOffset};
+    UpdateCacheInfoNG(infos, node, commonProperty, ngPipeline, param);
+    SortExtensionAccessibilityInfo(infos, nodeInfo.GetAccessibilityId());
+}
+
+void JsAccessibilityManager::SearchExtensionElementInfoByAccessibilityIdNG(const SearchParameter& searchParam,
+    const RefPtr<NG::FrameNode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
+    const RefPtr<PipelineBase>& context, const RefPtr<NG::PipelineContext>& ngPipeline)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    auto unWrapIdPair = uiExtensionManager->UnWrapExtensionAbilityId(searchParam.uiExtensionOffset, searchParam.nodeId);
+    int32_t childWrapId = unWrapIdPair.second;
+    int32_t uiExtensionId = unWrapIdPair.first;
+    std::list<AccessibilityElementInfo> extensionElementInfos;
+    auto uiExtensionNode = FindNodeFromRootByExtensionId(node, uiExtensionId);
+    CHECK_NULL_VOID(uiExtensionNode);
+    SearchExtensionElementInfoNG(childWrapId, searchParam.mode, uiExtensionNode, infos, searchParam.uiExtensionOffset);
+#endif
+}
+
+void JsAccessibilityManager::SearchExtensionElementInfoNG(int32_t elementId,
+    int32_t mode, const RefPtr<NG::FrameNode>& node,
+    std::list<AccessibilityElementInfo>& infos, int32_t uiExtensionOffset)
+{
+    auto extensionElementInfos = OHOS::Ace::Framework::SearchExtensionElementInfoByAccessibilityIdNG(
+        elementId, mode, node, uiExtensionOffset / UI_EXTENSION_ID_10);
+    ConvertExtensionAccessibilityNodeId(extensionElementInfos, node, uiExtensionOffset);
+    for (auto& info : extensionElementInfos) {
+        if (node->WrapExtensionAbilityId(uiExtensionOffset, 0) == info.GetAccessibilityId()) {
+            info.SetParent(node->GetAccessibilityId());
+        }
+        infos.push_back(info);
+    }
+}
+
+std::list<AccessibilityElementInfo> SearchElementInfosByTextNG(
+    int32_t elementId, const std::string& text, const RefPtr<NG::FrameNode>& node, int32_t offset)
+{
+    std::list<AccessibilityElementInfo> extensionElementInfo;
+    if (UI_EXTENSION_OFFSET_MIN < (offset + 1)) {
+        node->SearchElementInfosByTextNG(elementId, text, offset, extensionElementInfo);
+    }
+    return extensionElementInfo;
+}
+
+void JsAccessibilityManager::SearchElementInfosByTextNG(const SearchParameter& searchParam,
+    const RefPtr<NG::FrameNode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
+    const RefPtr<PipelineBase>& context, const RefPtr<NG::PipelineContext>& ngPipeline)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    auto unWrapIdPair = uiExtensionManager->UnWrapExtensionAbilityId(searchParam.uiExtensionOffset, searchParam.nodeId);
+    int32_t childWrapId = unWrapIdPair.second;
+    int32_t uiExtensionId = unWrapIdPair.first;
+    std::list<AccessibilityElementInfo> extensionElementInfos;
+    AccessibilityElementInfo nodeInfo;
+    auto uiExtensionNode = FindNodeFromRootByExtensionId(node, uiExtensionId);
+    CHECK_NULL_VOID(uiExtensionNode);
+
+    extensionElementInfos = OHOS::Ace::Framework::SearchElementInfosByTextNG(
+        childWrapId, searchParam.text, uiExtensionNode, searchParam.uiExtensionOffset / UI_EXTENSION_ID_10);
+    if (extensionElementInfos.empty()) {
+        return;
+    }
+    ConvertExtensionAccessibilityNodeId(extensionElementInfos, uiExtensionNode, searchParam.uiExtensionOffset);
+    for (auto& info : extensionElementInfos) {
+        infos.emplace_back(info);
+    }
+#endif
+}
+
+RefPtr<NG::FrameNode> JsAccessibilityManager::FindNodeFromRootByExtensionId(
+    const RefPtr<NG::FrameNode>& root, const int32_t uiExtensionId)
+{
+    CHECK_NULL_RETURN(root, nullptr);
+    std::queue<RefPtr<NG::UINode>> nodes;
+    nodes.push(root);
+    RefPtr<NG::FrameNode> frameNode;
+    while (!nodes.empty()) {
+        auto current = nodes.front();
+        nodes.pop();
+        frameNode = AceType::DynamicCast<NG::FrameNode>(current);
+        if ((frameNode != nullptr) && (V2::UI_EXTENSION_COMPONENT_ETS_TAG == frameNode->GetTag())) {
+            if (uiExtensionId ==  frameNode->GetUiExtensionId()) {
+                return frameNode;
+            }
+        }
+        const auto& children = current->GetChildren();
+        for (const auto& child : children) {
+            nodes.push(child);
+        }
+    }
+    return nullptr;
 }
 
 void JsAccessibilityManager::SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
-    std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context)
+    std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
+    int32_t uiExtensionOffset)
 {
     auto mainContext = context_.Upgrade();
     CHECK_NULL_VOID(mainContext);
@@ -2062,7 +2335,7 @@ void JsAccessibilityManager::SearchElementInfosByText(const int32_t elementId, c
     auto pipeline = GetPipelineByWindowId(windowId);
     if (pipeline) {
         if (AceType::InstanceOf<NG::PipelineContext>(pipeline)) {
-            SearchElementInfosByTextNG(elementId, text, infos, pipeline);
+            SearchElementInfosByTextNG(elementId, text, infos, pipeline, UI_EXTENSION_OFFSET_MAX);
             SetSearchElementInfoByTextResult(callback, infos, requestId);
             return;
         }
@@ -2121,7 +2394,7 @@ void JsAccessibilityManager::FindFocusedElementInfo(const int32_t elementId, con
     }
 
     if (AceType::InstanceOf<NG::PipelineContext>(context)) {
-        FindFocusedElementInfoNG(elementId, focusType, nodeInfo, context);
+        FindFocusedElementInfoNG(elementId, focusType, nodeInfo, context, UI_EXTENSION_OFFSET_MAX);
         SetFindFocusedElementInfoResult(callback, nodeInfo, requestId);
         return;
     }
@@ -2155,7 +2428,7 @@ void JsAccessibilityManager::FindFocusedElementInfo(const int32_t elementId, con
 }
 
 void JsAccessibilityManager::FindFocusedElementInfoNG(int32_t elementId, int32_t focusType,
-    Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context)
+    Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context, const int32_t uiExtensionOffset)
 {
     auto mainContext = context_.Upgrade();
     CHECK_NULL_VOID(mainContext);
@@ -2197,6 +2470,41 @@ void JsAccessibilityManager::FindFocusedElementInfoNG(int32_t elementId, int32_t
     CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
         GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
     UpdateAccessibilityElementInfo(resultNode, commonProperty, info, ngPipeline);
+}
+
+void JsAccessibilityManager::FindFocusedExtensionElementInfoNG(const SearchParameter& searchParam,
+    Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto mainContext = context_.Upgrade();
+    CHECK_NULL_VOID(mainContext);
+
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(ngPipeline);
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    auto elementIdPair = uiExtensionManager->UnWrapExtensionAbilityId(searchParam.uiExtensionOffset,
+        searchParam.nodeId);
+    int32_t nextElementId = elementIdPair.second;
+    auto uiExtensionNode = uiExtensionManager->GetFocusUiExtensionNode();
+    CHECK_NULL_VOID(uiExtensionNode);
+    OHOS::Ace::Framework::FindFocusedExtensionElementInfoNG(
+        nextElementId, searchParam.mode, uiExtensionNode, info, searchParam.uiExtensionOffset / UI_EXTENSION_ID_10);
+    ConvertExtensionAccessibilityId(info, uiExtensionNode, searchParam.uiExtensionOffset);
+    int32_t pageId = 0;
+    std::string pagePath;
+    if (context->GetWindowId() == mainContext->GetWindowId()) {
+        auto stageManager = ngPipeline->GetStageManager();
+        CHECK_NULL_VOID(stageManager);
+        auto page = stageManager->GetLastPage();
+        CHECK_NULL_VOID(page);
+        pageId = page->GetPageId();
+        pagePath = GetPagePath();
+    }
+    CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
+        GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
+    UpdateAccessibilityElementInfo(uiExtensionNode, commonProperty, info, ngPipeline, searchParam.uiExtensionOffset);
+#endif
 }
 
 RefPtr<NG::FrameNode> JsAccessibilityManager::FindNodeFromPipeline(
@@ -2610,7 +2918,7 @@ void JsAccessibilityManager::FocusMoveSearch(const int32_t elementId, const int3
     }
 
     if (AceType::InstanceOf<NG::PipelineContext>(context)) {
-        FocusMoveSearchNG(elementId, direction, nodeInfo, context);
+        FocusMoveSearchNG(elementId, direction, nodeInfo, context, UI_EXTENSION_OFFSET_MAX);
         SetFocusMoveSearchResult(callback, nodeInfo, requestId);
         return;
     }
@@ -2809,8 +3117,18 @@ bool JsAccessibilityManager::ClearCurrentFocus()
     return currentFocusNode->ActionAccessibilityFocus(false);
 }
 
+void FocusExtensionElementMoveSearchNG(int32_t elementId, int32_t direction, RefPtr<NG::FrameNode>& node,
+    Accessibility::AccessibilityElementInfo& info, const int32_t uiExtensionOffset)
+{
+    if (UI_EXTENSION_OFFSET_MIN < (uiExtensionOffset + 1)) {
+        node->FocusMoveSearchNG(elementId, direction, uiExtensionOffset, info);
+    } else {
+        info.SetValidElement(false);
+    }
+}
+
 void JsAccessibilityManager::FocusMoveSearchNG(int32_t elementId, int32_t direction,
-    Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context)
+    Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context, const int32_t uiExtensionOffset)
 {
     auto mainContext = context_.Upgrade();
     CHECK_NULL_VOID(mainContext);
@@ -2858,6 +3176,43 @@ void JsAccessibilityManager::FocusMoveSearchNG(int32_t elementId, int32_t direct
     CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
         GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
     UpdateAccessibilityElementInfo(resultNode, commonProperty, info, ngPipeline);
+}
+
+void JsAccessibilityManager::FocusExtensionElementMoveSearchNG(const SearchParameter& searchParam,
+    Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto mainContext = context_.Upgrade();
+    CHECK_NULL_VOID(mainContext);
+
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(ngPipeline);
+
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    auto elementIdPair =
+        uiExtensionManager->UnWrapExtensionAbilityId(searchParam.uiExtensionOffset, searchParam.nodeId);
+    int32_t nextElementId = elementIdPair.second;
+    auto uiExtensionNode = uiExtensionManager->GetFocusUiExtensionNode();
+    CHECK_NULL_VOID(uiExtensionNode);
+    OHOS::Ace::Framework::FocusExtensionElementMoveSearchNG(
+        nextElementId, searchParam.mode, uiExtensionNode, info, searchParam.uiExtensionOffset / UI_EXTENSION_ID_10);
+    ConvertExtensionAccessibilityId(info, uiExtensionNode, searchParam.uiExtensionOffset);
+    int32_t pageId = 0;
+    std::string pagePath;
+    if (context->GetWindowId() == mainContext->GetWindowId()) {
+        auto stageManager = ngPipeline->GetStageManager();
+        CHECK_NULL_VOID(stageManager);
+        auto page = stageManager->GetLastPage();
+        CHECK_NULL_VOID(page);
+        pageId = page->GetPageId();
+        pagePath = GetPagePath();
+    }
+    CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
+        GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
+    UpdateAccessibilityElementInfo(uiExtensionNode, commonProperty, info, ngPipeline, searchParam.uiExtensionOffset);
+
+#endif
 }
 
 // AccessibilitySystemAbilityClient will release callback after DeregisterElementOperator

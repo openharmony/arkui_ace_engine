@@ -75,7 +75,7 @@ void ScreenPattern::OnAttachToFrameNode()
     auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
     Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
         screenBounds.rect_.width_, screenBounds.rect_.height_ };
-    float density = screenSession_->GetScreenProperty().GetDensity();
+    float density = screenSession_->GetScreenProperty().GetDefaultDensity();
     rootScene->SetDisplayDensity(density);
     rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
 }
@@ -88,7 +88,7 @@ void ScreenPattern::UpdateDisplayInfo()
     auto uid = IPCSkeleton::GetCallingUid();
     auto screenId = screenSession_->GetScreenId();
     auto screenProperty = screenSession_->GetScreenProperty();
-    auto dpi = screenProperty.GetDensity() * DOT_PER_INCH;
+    auto dpi = screenProperty.GetDefaultDensity() * DOT_PER_INCH;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -162,7 +162,7 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
     Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
         screenBounds.rect_.width_, screenBounds.rect_.height_ };
-    float density = screenSession_->GetScreenProperty().GetDensity();
+    float density = screenSession_->GetScreenProperty().GetDefaultDensity();
     rootScene->SetDisplayDensity(density);
     rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
     return true;

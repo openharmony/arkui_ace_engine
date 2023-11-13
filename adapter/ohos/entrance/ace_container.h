@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <memory>
 #include <mutex>
+#include <list>
 
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
@@ -33,6 +34,10 @@
 #include "core/common/js_message_dispatcher.h"
 #include "core/pipeline/pipeline_context.h"
 #include "base/memory/ace_type.h"
+
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+}
 
 namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
@@ -445,6 +450,22 @@ public:
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         StopDragCallback&& stopDragCallback) override;
+
+    static void SearchElementInfoByAccessibilityIdNG(
+        int32_t instanceId, int32_t elementId, int32_t mode,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output);
+
+    static void SearchElementInfosByTextNG(
+        int32_t instanceId, int32_t elementId, const std::string& text,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output);
+    
+    static void FindFocusedElementInfoNG(
+        int32_t instanceId, int32_t elementId, int32_t focusType,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output);
+
+    static void FocusMoveSearchNG(
+        int32_t instanceId, int32_t elementId, int32_t direction,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output);
 
 private:
     virtual bool MaybeRelease() override;

@@ -14,10 +14,12 @@
  */
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
-
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
-
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t UI_EXTENSION_OFFSET_MIN = 1000000;
+};
+
 void UIExtensionManager::RegisterUIExtensionInFocus(const WeakPtr<UIExtensionPattern>& uiExtensionFocused)
 {
     uiExtensionFocused_ = uiExtensionFocused;
@@ -28,5 +30,28 @@ bool UIExtensionManager::OnBackPressed()
     auto uiExtensionFocused = uiExtensionFocused_.Upgrade();
     CHECK_NULL_RETURN(uiExtensionFocused, false);
     return uiExtensionFocused->OnBackPressed();
+}
+
+bool UIExtensionManager::IsWrapExtensionAbilityId(int32_t elementId)
+{
+    return elementId > UI_EXTENSION_OFFSET_MIN;
+}
+
+std::pair<int32_t, int32_t> UIExtensionManager::UnWrapExtensionAbilityId(
+    int32_t extensionOffset, int32_t elementId)
+{
+    if (extensionOffset == 0) {
+        return std::pair<int32_t, int32_t>(0, 0);
+    }
+    int32_t index = elementId / extensionOffset;
+    int32_t abilityId = elementId % extensionOffset;
+    return std::pair<int32_t, int32_t>(index, abilityId);
+}
+
+const RefPtr<FrameNode> UIExtensionManager::GetFocusUiExtensionNode()
+{
+    auto uiExtensionFocused = uiExtensionFocused_.Upgrade();
+    CHECK_NULL_RETURN(uiExtensionFocused, nullptr);
+    return uiExtensionFocused->GetUiExtensionNode();
 }
 } // namespace OHOS::Ace::NG

@@ -119,6 +119,8 @@ public:
     void BackButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
     void MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
     void TitleOpacityAnimationOut(const RefPtr<RenderContext>& transitionOutNodeContext);
+    void TransitionWithReplaceExit(const RefPtr<FrameNode>& preNode, bool isNavBar);
+    void TransitionWithReplaceEnter(const RefPtr<FrameNode>& topNode);
 
 private:
     RefPtr<UINode> navBarNode_;

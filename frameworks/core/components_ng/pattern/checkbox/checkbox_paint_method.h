@@ -53,6 +53,9 @@ public:
         if (paintProperty->HasCheckBoxSelectedColor()) {
             checkboxModifier_->SetUserActiveColor(paintProperty->GetCheckBoxSelectedColorValue());
         }
+        if (paintProperty->HasCheckBoxSelectedStyle()) {
+            checkboxModifier_->SetCheckboxStyle(paintProperty->GetCheckBoxSelectedStyleValue());
+        }
         if (paintProperty->HasCheckBoxUnSelectedColor()) {
             checkboxModifier_->SetInActiveColor(paintProperty->GetCheckBoxUnSelectedColorValue());
         }

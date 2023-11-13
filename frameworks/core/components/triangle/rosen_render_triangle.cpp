@@ -76,12 +76,12 @@ void RosenRenderTriangle::Paint(RenderContext& context, const Offset& offset)
         arc3.GetStartAngle() * RADIAN_TO_DEGREE, arc3.GetSweepAngle() * RADIAN_TO_DEGREE);
     path.Close();
 
-    RSPen pen;
-    pen.SetARGB(color_.GetRed(), color_.GetGreen(), color_.GetBlue(), color_.GetAlpha());
-    pen.SetAntiAlias(true);
-    canvas->AttachPen(pen);
+    RSBrush brush;
+    brush.SetARGB(color_.GetRed(), color_.GetGreen(), color_.GetBlue(), color_.GetAlpha());
+    brush.SetAntiAlias(true);
+    canvas->AttachBrush(brush);
     canvas->DrawPath(path);
-    canvas->DetachPen();
+    canvas->DetachBrush();
 #endif
 }
 

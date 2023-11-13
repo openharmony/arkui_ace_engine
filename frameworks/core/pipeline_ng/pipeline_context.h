@@ -265,6 +265,8 @@ public:
 
     void RemoveWindowSizeChangeCallback(int32_t nodeId);
 
+    bool HasDifferentDirectionGesture() const;
+
     bool IsKeyInPressed(KeyCode tarCode) const
     {
         CHECK_NULL_RETURN(eventManager_, false);
