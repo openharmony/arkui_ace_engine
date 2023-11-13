@@ -89,6 +89,9 @@ const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 
 } // namespace
 
+static std::atomic<int32_t> gInstanceId = 0;
+static std::atomic<int32_t> gSubWindowInstanceId = 100000;
+static std::atomic<int32_t> gSubInstanceId = 1000000;
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 const std::string SUBWINDOW_TOAST_DIALOG_PREFIX = "ARK_APP_SUBWINDOW_TOAST_DIALOG_";
 const int32_t REQUEST_CODE = -1;
@@ -640,9 +643,9 @@ void UIContentImpl::CommonInitializeForm(
 #endif
     // create container
     if (runtime_) {
-        instanceId_ = Container::GenerateId<STAGE_CONTAINER>();
+        instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
     } else {
-        instanceId_ = Container::GenerateId<FA_SUBWINDOW_CONTAINER>();
+        instanceId_ = gSubWindowInstanceId.fetch_add(1, std::memory_order_relaxed);
     }
 #ifdef FORM_SUPPORTED
     auto formUtils = std::make_shared<FormUtilsImpl>();
@@ -1100,9 +1103,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 #endif
     // create container
     if (runtime_) {
-        instanceId_ = Container::GenerateId<STAGE_CONTAINER>();
+        instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
     } else {
-        instanceId_ = Container::GenerateId<FA_SUBWINDOW_CONTAINER>();
+        instanceId_ = gSubWindowInstanceId.fetch_add(1, std::memory_order_relaxed);
     }
 #ifdef FORM_SUPPORTED
     auto formUtils = std::make_shared<FormUtilsImpl>();
@@ -1633,7 +1636,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     LOGI("The window name is %{public}s", window->GetWindowName().c_str());
     CHECK_NULL_VOID(window_);
     RefPtr<Container> container;
-    instanceId_ = Container::GenerateId<COMPONENT_SUBWINDOW_CONTAINER>();
+    instanceId_ = gSubInstanceId.fetch_add(1, std::memory_order_relaxed);
 
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext;

@@ -16,35 +16,39 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_SCOPE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_SCOPE_H
 
-#include <cinttypes>
+#include <functional>
+#include <shared_mutex>
+#include <stdint.h>
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace {
 
-constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
-constexpr int32_t INSTANCE_ID_PLATFORM = -2;
-
 class ACE_EXPORT ContainerScope {
 public:
     explicit ContainerScope(int32_t id)
     {
-        restoreId_ = CurrentId();
-        UpdateCurrent(id);
+        restoreId_ = ContainerScope::CurrentId();
+        ContainerScope::UpdateCurrent(id);
     }
 
     ~ContainerScope()
     {
-        UpdateCurrent(restoreId_);
+        ContainerScope::UpdateCurrent(restoreId_);
     }
 
     static int32_t CurrentId();
 
     static void UpdateCurrent(int32_t id);
 
+    static void SetScopeNotify(std::function<void(int32_t)>&& notify);
+
 private:
-    int32_t restoreId_ = INSTANCE_ID_UNDEFINED;
+    static thread_local int32_t currentId_;
+    int32_t restoreId_ = -1;
+    static std::function<void(int32_t)> updateScopeNotify_;
+    static std::shared_mutex scopeLock_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContainerScope);
 };

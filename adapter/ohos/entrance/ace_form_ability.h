@@ -116,7 +116,7 @@ public:
 private:
     void LoadFormEnv(const OHOS::AAFwk::Want& want);
 
-    int32_t instanceId_;
+    static int32_t instanceId_;
     static const std::string START_PARAMS_KEY;
     static const std::string URI;
     sptr<IRemoteObject> formProviderRemoteObject_;

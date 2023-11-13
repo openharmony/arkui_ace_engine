@@ -18,9 +18,6 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
-#ifdef PLUGIN_COMPONENT_SUPPORTED
-#include "core/common/plugin_manager.h"
-#endif
 
 namespace OHOS::Ace {
 
@@ -86,21 +83,6 @@ bool Container::Dump(const std::vector<std::string>& params, std::vector<std::st
     tip.append(AceType::TypeName(this));
     info.emplace_back(tip);
     return true;
-}
-
-bool Container::IsIdAvailable(int32_t id)
-{
-    return !AceEngine::Get().GetContainer(id);
-}
-
-template<>
-int32_t Container::GenerateId<PLUGIN_SUBCONTAINER>()
-{
-#ifdef PLUGIN_COMPONENT_SUPPORTED
-    return PluginManager::GetInstance().GetPluginSubContainerId();
-#else
-    return INSTANCE_ID_UNDEFINED;
-#endif
 }
 
 } // namespace OHOS::Ace

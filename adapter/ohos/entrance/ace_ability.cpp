@@ -60,6 +60,7 @@ const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
+static int32_t g_instanceId = 0;
 
 FrontendType GetFrontendType(const std::string& frontendType)
 {
@@ -211,7 +212,7 @@ AceAbility::AceAbility() = default;
 void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     Ability::OnStart(want, sessionInfo);
-    abilityId_ = Container::GenerateId<FA_CONTAINER>();
+    abilityId_ = g_instanceId++;
     static std::once_flag onceFlag;
     auto abilityContext = GetAbilityContext();
     auto cacheDir = abilityContext->GetCacheDir();
