@@ -177,7 +177,7 @@ std::shared_ptr<RSImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& in
 
     RSBitmap bitmap;
     SkImageInfo skImageInfo = codec_->getInfo().makeColorType(kN32_SkColorType);
-    auto imageInfo = Rosen::Drawing::ConvertToRSImageInfo(skImageInfo);
+    auto imageInfo = Rosen::Drawing::SkiaImageInfo::ConvertToRSImageInfo(skImageInfo);
     bitmap.Build(imageInfo);
     SkCodec::Options options;
     options.fFrameIndex = index;

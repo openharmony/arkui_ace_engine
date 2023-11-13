@@ -17,11 +17,13 @@
 
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/thread/frame_trace_adapter.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/gestures/recognizers/recognizer_group.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
@@ -75,6 +77,11 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNo
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
     const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
 {
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "TouchEvent do TouchTest in EventManager: "
+        "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
+        "touchPoint referee state:%{public}d, needAppend:%{public}d", touchPoint.id,
+        touchPoint.x, touchPoint.y, (int)(refereeNG_->QueryAllDone(touchPoint.id)),
+        (int)needAppend);
     ContainerScope scope(instanceId_);
 
     ACE_FUNCTION_TRACE();
@@ -286,6 +293,11 @@ void EventManager::FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents)
 
 bool EventManager::DispatchTouchEvent(const TouchEvent& event)
 {
+    if (event.type != TouchType::MOVE) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "TouchEvent Dispatch in EventManager: "
+            "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
+            "type=%{public}d", event.id, event.x, event.y, (int)event.type);
+    }
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -311,6 +323,10 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         if (Container::IsCurrentUseNewPipeline()) {
             refereeNG_->AddGestureToScope(point.id, iter->second);
         }
+        // add gesture snapshot to dump
+        for (const auto& target : iter->second) {
+            AddGestureSnapshot(point.id, target);
+        }
     }
 
     bool dispatchSuccess = true;
@@ -330,9 +346,17 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
                 auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
                 if (recognizer) {
                     entry->HandleMultiContainerEvent(point);
+                    eventTree_.AddGestureProcedure(
+                        reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)),
+                        point,
+                        NG::TransRefereeState(recognizer->GetRefereeState()),
+                        NG::TransGestureDisposal(recognizer->GetGestureDisposal()));
                 }
                 if (!recognizer && !isStopTouchEvent) {
                     isStopTouchEvent = !entry->HandleMultiContainerEvent(point);
+                    eventTree_.AddGestureProcedure(
+                        reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)),
+                        std::string("Handle").append(GestureSnapshot::TransTouchType(point.type)), "", "");
                 }
             }
         } else {
@@ -1285,6 +1309,33 @@ EventManager::EventManager()
         }
     };
     refereeNG_->SetQueryStateFunc(std::move(cleanReferee));
+}
+
+void EventManager::DumpEvent() const
+{
+    std::list<std::pair<int32_t, std::string>> dumpList;
+    eventTree_.Dump(dumpList, 0);
+    for (auto& item : dumpList) {
+        DumpLog::GetInstance().Print(item.first, item.second);
+    }
+}
+
+void EventManager::AddGestureSnapshot(int32_t finger, const RefPtr<TouchEventTarget>& target)
+{
+    RefPtr<GestureSnapshot> info = target->Dump();
+    auto frameNode = target->GetAttachedNode().Upgrade();
+    if (frameNode) {
+        info->nodeId = frameNode->GetId();
+    }
+    eventTree_.AddGestureSnapshot(finger, std::move(info));
+
+    // add child gesture if target is group
+    auto group = AceType::DynamicCast<NG::RecognizerGroup>(target);
+    if (group) {
+        for (const auto& child : group->GetGroupRecognizer()) {
+            AddGestureSnapshot(finger, child);
+        }
+    }
 }
 
 } // namespace OHOS::Ace

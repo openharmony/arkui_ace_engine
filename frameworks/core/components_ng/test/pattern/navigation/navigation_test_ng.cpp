@@ -1092,7 +1092,7 @@ HWTEST_F(NavigationTestNg, NavigationModelNGTest002, TestSize.Level1)
     navigationModel.SetTitleHeight(SPLIT_WIDTH);
     navigationModel.SetSubtitle("navigationModel");
     navigationModel.SetHideNavBar(true);
-    navigationModel.SetBackButtonIcon("navigationModel", true, pixMap);
+    navigationModel.SetBackButtonIcon("navigationModel", true, pixMap, "", "");
     navigationModel.SetHideBackButton(true);
     navigationModel.NeedSetItems();
     navigationModel.SetToolBarItems(std::move(toolBarItems));

@@ -783,6 +783,22 @@ var InputType;
   InputType[InputType["Password"] = 7] = "Password";
 })(InputType || (InputType = {}));
 
+var SearchType;
+(function (SearchType) {
+  SearchType[SearchType["NORMAL"] = 0] = "NORMAL";
+  SearchType[SearchType["NUMBER"] = 2] = "NUMBER";
+  SearchType[SearchType["PHONE_NUMBER"] = 3] = "PHONE_NUMBER";
+  SearchType[SearchType["EMAIL"] = 5] = "EMAIL";
+})(SearchType || (SearchType = {}));
+
+var TextAreaType;
+(function (TextAreaType) {
+  TextAreaType[TextAreaType["NORMAL"] = 0] = "NORMAL";
+  TextAreaType[TextAreaType["NUMBER"] = 2] = "NUMBER";
+  TextAreaType[TextAreaType["PHONE_NUMBER"] = 3] = "PHONE_NUMBER";
+  TextAreaType[TextAreaType["EMAIL"] = 5] = "EMAIL";
+})(TextAreaType || (TextAreaType = {}));
+
 var EnterKeyType;
 (function (EnterKeyType) {
   EnterKeyType[EnterKeyType["Go"] = 2] = "Go";
@@ -1034,7 +1050,7 @@ var CopyOptions;
   CopyOptions[CopyOptions["None"] = 0] = "None";
   CopyOptions[CopyOptions["InApp"] = 1] = "InApp";
   CopyOptions[CopyOptions["LocalDevice"] = 2] = "LocalDevice";
-  CopyOptions[CopyOptions["CrossDevice"] = 3] = "CrossDevice";
+  CopyOptions[CopyOptions["CROSS_DEVICE"] = 3] = "CrossDevice";
 })(CopyOptions || (CopyOptions = {}));
 
 var RichEditorSpanType;
@@ -1523,23 +1539,47 @@ class NavPathStack {
     this.pathArray = [];
     // indicate class has changed.
     this.changeFlag = 0;
+    this.isReplace = false;
     this.type = this.constructor.name;
   }
   pushName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
   }
   push(info) {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
   }
   pushPathByName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
   }
   pushPath(info) {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
+  }
+  replacePath(info) {
+    if (this.pathArray.length != 0) {
+      this.pathArray.pop();
+      this.isReplace = true;
+    }
+    this.pathArray.push(info);
+    this.changeFlag = this.changeFlag + 1;
+  }
+  replacePathByName(name, param) {
+    if (this.pathArray.length != 0) {
+      this.pathArray.pop();
+      this.isReplace = true;
+    }
+    this.pathArray.push(new NavPathInfo(name, param));
+    this.changeFlag = this.changeFlag + 1;
+  }
+  setIsReplace(value) {
+    this.isReplace = value;
   }
   pop() {
     if (this.pathArray.length === 0) {
@@ -1547,6 +1587,7 @@ class NavPathStack {
     }
     let pathInfo = this.pathArray.pop();
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
     return pathInfo;
   }
   popTo(name) {
@@ -1555,6 +1596,7 @@ class NavPathStack {
       return -1;
     }
     this.pathArray.splice(index + 1);
+    this.isReplace = false;
     this.changeFlag = this.changeFlag + 1;
     return index;
   }
@@ -1565,6 +1607,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
     return index;
   }
   popToIndex(index) {
@@ -1573,6 +1616,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
   }
   moveToTop(name) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -1582,6 +1626,7 @@ class NavPathStack {
     let info = this.pathArray.splice(index, 1);
     this.pathArray.push(info[0]);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
     return index;
   }
   moveIndexToTop(index) {
@@ -1591,10 +1636,12 @@ class NavPathStack {
     let info = this.pathArray.splice(index, 1);
     this.pathArray.push(info[0]);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
   }
   clear() {
     this.pathArray.splice(0);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
   }
   removeName(name) {
     var removed = false;
@@ -1606,6 +1653,7 @@ class NavPathStack {
     }
     if (removed) {
       this.changeFlag = this.changeFlag + 1;
+      this.isReplace = false;
     }
   }
   removeIndex(index) {
@@ -1614,6 +1662,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index, 1);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
   }
   getAllPathName() {
     let array = this.pathArray.flatMap(element => element.name);
@@ -1905,9 +1954,14 @@ var SwiperNestedScrollMode;
   SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_FIRST"] = 1] = "SELF_FIRST";
 })(SwiperNestedScrollMode || (SwiperNestedScrollMode = {}));
 
-var CheckBoxStyle;
-(function (CheckBoxStyle) {
-  CheckBoxStyle["CIRCULAR_STYLE"] = 0;
-  CheckBoxStyle["SQUARE_STYLE"] = 1;
-})(CheckBoxStyle || (CheckBoxStyle = {}));
+var CheckBoxShape;
+(function (CheckBoxShape) {
+  CheckBoxShape["CIRCLE"] = 0;
+  CheckBoxShape["ROUNDED_SQUARE"] = 1;
+})(CheckBoxShape || (CheckBoxShape = {}));
 
+var WebLayoutMode;
+(function (WebLayoutMode) {
+  WebLayoutMode[WebLayoutMode["NONE"] = 0] = "NONE";
+  WebLayoutMode[WebLayoutMode["FIT_CONTENT"] = 1] = "FIT_CONTENT";
+})(WebLayoutMode || (WebLayoutMode = {}));

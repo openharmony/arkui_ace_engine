@@ -76,6 +76,8 @@ public:
         isAllowMouse_ = isAllowMouse;
     }
 
+    virtual RefPtr<GestureSnapshot> Dump() const override;
+
 private:
     enum class GestureAcceptResult {
         ACCEPT,

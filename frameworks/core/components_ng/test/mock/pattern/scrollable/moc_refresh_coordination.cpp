@@ -25,9 +25,9 @@ RefPtr<ScrollableCoordinationEvent> RefreshCoordination::CreateCoordinationEvent
     return nullptr;
 }
 
-void RefreshCoordination::OnScrollStart(bool isDrag) const {}
+void RefreshCoordination::OnScrollStart(bool isDrag, float speed) const {}
 
-bool RefreshCoordination::OnScroll(float offset) const
+bool RefreshCoordination::OnScroll(float offset, float speed) const
 {
     return false;
 }

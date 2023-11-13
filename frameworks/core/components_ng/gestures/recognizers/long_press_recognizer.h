@@ -91,6 +91,8 @@ public:
 
     GestureEventFunc GetLongPressActionFunc();
 
+    virtual RefPtr<GestureSnapshot> Dump() const override;
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -120,7 +122,6 @@ private:
     bool isForDrag_ = false;
     bool isDisableMouseLeft_ = false;
     Point globalPoint_;
-    DelayedTask task_;
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
 };
 

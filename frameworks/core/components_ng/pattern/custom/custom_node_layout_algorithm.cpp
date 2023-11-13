@@ -50,9 +50,6 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 if (!child) {
                     continue;
                 }
-                if (buildItem_ == nullptr) {
-                    buildItem_ = child;
-                }
                 child->MountToParent(host);
                 if (layoutWrapperNode) {
                     child->AdjustLayoutWrapperTree(layoutWrapperNode, true, true);

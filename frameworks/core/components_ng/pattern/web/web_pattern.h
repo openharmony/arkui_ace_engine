@@ -392,13 +392,13 @@ public:
     Offset GetDragOffset() const;
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
-    void SetWrapContent(bool isWrapContentEnabled)
+    void SetLayoutMode(WebLayoutMode mode)
     {
-        isWrapContentEnabled_ = isWrapContentEnabled;
+        layoutMode_ = mode;
     }
-    bool GetWrapContent() const
+    WebLayoutMode GetLayoutMode() const
     {
-        return isWrapContentEnabled_;
+        return layoutMode_;
     }
     void OnRootLayerChanged(int width, int height);
     int GetRootLayerWidth() const
@@ -625,7 +625,7 @@ private:
     bool isParentHasScroll_ = false;
     OffsetF relativeOffsetOfScroll_;
     bool isFirstFlingScrollVelocity_ = true;
-    bool isWrapContentEnabled_ = false;
+    WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool scrollState_ = false;
     NestedScrollMode nestedScrollMode_ = NestedScrollMode::SELF_ONLY;
     Axis axis_ = Axis::FREE;

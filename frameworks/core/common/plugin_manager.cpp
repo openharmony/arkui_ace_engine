@@ -127,7 +127,7 @@ void PluginManager::RemovePluginParentContainer(int64_t pluginId)
     parentContainerMap_.erase(pluginId);
 }
 
-int64_t PluginManager::GetPluginParentContainerId(int64_t pluginId)
+int32_t PluginManager::GetPluginParentContainerId(int64_t pluginId)
 {
     std::lock_guard<std::mutex> lock(parentContainerMutex_);
     auto result = parentContainerMap_.find(pluginId);

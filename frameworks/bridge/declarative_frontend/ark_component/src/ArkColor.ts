@@ -12,7 +12,7 @@ const MAX_RGBA_OPACITY = 1.0;
 const MIN_COLOR_STR_LEN = 8;
 const HEX_DECIMAL = 16;
 
-class ArkColor {
+class ArkColor implements Equable{
     private color: number | undefined;
 
     constructor() {
@@ -166,5 +166,9 @@ class ArkColor {
 
     fromRGB(red: number, green: number, blue: number) {
         return this.fromARGB(0xff, red, green, blue);
+    }
+
+    getColor(): number | undefined{
+        return this.color;
     }
 }

@@ -79,6 +79,7 @@ public:
 
     void RemoveResourceAdapter(const std::string& bundleName, const std::string& moduleName)
     {
+        std::unique_lock<std::shared_mutex> lock(mutex_);
         if (!bundleName.empty() && !moduleName.empty()) {
             resourceAdapters_.erase(std::make_pair(bundleName, moduleName));
         }
@@ -86,6 +87,7 @@ public:
 
     void Reset()
     {
+        std::unique_lock<std::shared_mutex> lock(mutex_);
         resourceAdapters_.clear();
     }
 

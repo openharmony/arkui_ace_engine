@@ -114,6 +114,7 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
             for (const auto& recognizer : recognizers_) {
                 if (recognizer && recognizer->CheckTouchId(point.id)) {
                     recognizer->HandleEvent(point);
+                    AddGestureProcedure(point, recognizer);
                 }
             }
             break;

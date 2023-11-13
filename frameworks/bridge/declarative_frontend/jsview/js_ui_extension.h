@@ -38,6 +38,9 @@ public:
     ~JSUIExtensionProxy() override = default;
     static void JSBind(BindingTarget globalObj);
     void Send(const JSCallbackInfo& info);
+    void SendSync(const JSCallbackInfo& info);
+    void On(const JSCallbackInfo& info);
+    void Off(const JSCallbackInfo& info);
     void SetProxy(const RefPtr<NG::UIExtensionProxy>& proxy);
     void SetInstanceId(int32_t instanceId);
 private:

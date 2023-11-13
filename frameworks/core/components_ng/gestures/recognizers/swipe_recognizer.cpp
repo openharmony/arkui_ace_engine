@@ -354,4 +354,15 @@ bool SwipeRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
     return true;
 }
 
+RefPtr<GestureSnapshot> SwipeRecognizer::Dump() const
+{
+    RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
+    std::stringstream oss;
+    oss << "direction: " <<  direction_.type << ", "
+        << "speed: " << speed_ << ", "
+        << "fingers: " << fingers_;
+    info->customInfo = oss.str();
+    return info;
+}
+
 } // namespace OHOS::Ace::NG

@@ -603,4 +603,16 @@ double PanRecognizer::GetMainAxisDelta()
     }
 }
 
+RefPtr<GestureSnapshot> PanRecognizer::Dump() const
+{
+    RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
+    std::stringstream oss;
+    oss << "direction: " <<  direction_.type << ", "
+        << "isForDrag: " << isForDrag_ << ", "
+        << "distance: " << distance_ << ", "
+        << "fingers: " << fingers_;
+    info->customInfo = oss.str();
+    return info;
+}
+
 } // namespace OHOS::Ace::NG

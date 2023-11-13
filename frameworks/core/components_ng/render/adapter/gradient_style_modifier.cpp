@@ -80,13 +80,13 @@ void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSi
     brush.SetShaderEffect(shader);
 
     RSRoundRect rRect;
-    canvas.Save();
     if (borderRadius_.has_value()) {
         std::vector<RSPoint> fRadii = { { borderRadius_.value().x_, borderRadius_.value().x_ },
             { borderRadius_.value().y_, borderRadius_.value().y_ },
             { borderRadius_.value().z_, borderRadius_.value().z_ },
             { borderRadius_.value().w_, borderRadius_.value().w_ } };
         rRect = RSRoundRect(RSRect(0, 0, frameSize.Width(), frameSize.Height()), fRadii);
+        canvas.Save();
         canvas.ClipRoundRect(rRect, RSClipOp::INTERSECT, true);
     }
     canvas.AttachBrush(brush);

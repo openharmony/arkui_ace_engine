@@ -43,6 +43,13 @@ const UndefinedElmtId = -1;
 
 // function type of partial update function
 type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
+
+interface UpdateFuncRecord {
+  updateFunc: UpdateFunc;
+  componentName: string;
+  node?: object
+}
+
 // function type of recycle node update function
 type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
 
@@ -91,8 +98,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // registry of update functions
   // the key is the elementId of the Component/Element that's the result of this function
-  protected updateFuncByElmtId: Map<number, UpdateFunc | { updateFunc: UpdateFunc, componentName: string }>
-    = new Map<number, UpdateFunc | { updateFunc: UpdateFunc, componentName: string }>();
+  protected updateFuncByElmtId: Map<number, UpdateFunc | UpdateFuncRecord>
+    = new Map<number, UpdateFunc | UpdateFuncRecord>();
 
   // set of all @Local/StorageLink/Prop variables owned by this ViwPU
   private ownStorageLinksProps_ : Set<ObservedPropertyAbstractPU<any>> = new Set<ObservedPropertyAbstractPU<any>>();
@@ -410,7 +417,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
 
     // do not process an Element that has been marked to be deleted
-    const updateFunc1: { updateFunc: UpdateFunc, componentName: string } | UpdateFunc = this.updateFuncByElmtId.get(elmtId);
+    const updateFunc1: UpdateFuncRecord | UpdateFunc = this.updateFuncByElmtId.get(elmtId);
     const updateFunc: UpdateFunc | undefined = ((typeof updateFunc1 == "object") ? (updateFunc1!.updateFunc) : updateFunc1) as UpdateFunc | undefined;
     const componentName : string = (typeof updateFunc1 == "object") ? updateFunc1.componentName as string : "unknown component type";
 
@@ -800,11 +807,18 @@ abstract class ViewPU extends NativeViewPartialUpdate
     };
 
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-
-    updateFunc(elmtId, /* is first render */ true );
+    // needs to move set before updateFunc.
+    // make sure the key and object value exist since it will add node in attributeModifier during updateFunc.
     this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, componentName: _componentName } );
+    try {
+      updateFunc(elmtId, /* is first render */ true );
+    } catch (error) {
+      // avoid the incompatible change that move set function before updateFunc.
+      this.updateFuncByElmtId.delete(elmtId);
+      stateMgmtConsole.applicationError(`${this.debugInfo()} has error in update func: ${(error as Error).message}`)
+      throw error;
+    }
   }
-
 
   getOrCreateRecycleManager(): RecycleManager {
     if (!this.recycleManager) {
@@ -854,11 +868,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const oldElmtId: number = node.id__();
     // store the current id and origin id, used for dirty element sort in {compareNumber}
     recycleUpdateFunc(newElmtId, /* is first render */ true, node);
-    const oldEntry: UpdateFunc | { updateFunc: UpdateFunc, componentName: string } | undefined = this.updateFuncByElmtId.get(oldElmtId);
+    const oldEntry: UpdateFunc | UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(oldElmtId);
     this.updateFuncByElmtId.delete(oldElmtId);
     this.updateFuncByElmtId.set(newElmtId, {
       updateFunc: compilerAssignedUpdateFunc,
-      componentName: (typeof oldEntry == "object") ? oldEntry.componentName : "unknown"
+      componentName: (typeof oldEntry == "object") ? oldEntry.componentName : "unknown",
+      node: (typeof oldEntry == "object") ? oldEntry.node : undefined,
     });
     node.updateId(newElmtId);
     node.updateRecycleElmtId(oldElmtId, newElmtId);
@@ -1084,6 +1099,22 @@ abstract class ViewPU extends NativeViewPartialUpdate
     ) as ObservedPropertyAbstractPU<T>;
     this.ownStorageLinksProps_.add(localStorageProp);
     return localStorageProp;
+  }
+
+  public createOrGetNode(elmtId: number, builder: () => object): object {
+    const entry = this.updateFuncByElmtId.get(elmtId);
+    if (entry === undefined) {
+      throw new Error(`${this.debugInfo()} fail to create node, elemtId is illegal`);
+    }
+    if (typeof entry !== 'object') {
+      throw new Error('need update toolchain version');
+    }
+    let nodeInfo = (entry as UpdateFuncRecord).node;
+    if (nodeInfo === undefined) {
+      nodeInfo = builder();
+      entry.node = nodeInfo;
+    }
+    return nodeInfo;
   }
 
   /**

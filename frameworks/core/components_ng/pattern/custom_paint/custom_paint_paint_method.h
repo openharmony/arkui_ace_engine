@@ -329,6 +329,7 @@ protected:
     void UpdatePaintShader(const OffsetF& offset, RSPen* pen, RSBrush* brush, const Ace::Gradient& gradient);
     void UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush);
     void InitPaintBlend(RSBrush& brush);
+    void InitPaintBlend(RSPen& pen);
     std::shared_ptr<RSShaderEffect> MakeConicGradient(RSBrush* brush, const Ace::Gradient& gradient);
 #endif
 

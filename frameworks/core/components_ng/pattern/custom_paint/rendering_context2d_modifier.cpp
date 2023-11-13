@@ -58,7 +58,7 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
         return;
     }
 
-    auto recordingCanvas = drawingContext.canvas;
+    auto& recordingCanvas = drawingContext.canvas;
     auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
     if (!drawCmdList) {
         return;
