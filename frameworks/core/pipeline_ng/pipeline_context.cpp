@@ -287,10 +287,27 @@ std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<Touc
     const std::vector<TouchEvent> &current, const uint64_t &nanoTimeStamp, const bool isScreen)
 {
     if (history.empty() || current.empty()) {
+        LOGD("history or current has no point, do not resample");
         return std::make_pair(0, 0);
     }
     auto historyPoint = GetAvgPoint(history, isScreen);
     auto currentPoint = GetAvgPoint(current, isScreen);
+
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("input time is %{public}lld", static_cast<long long>(nanoTimeStamp));
+        for (auto iter : history) {
+            LOGI("history point x %{public}f, y %{public}f, time %{public}lld", iter.x, iter.y,
+                static_cast<long long>(iter.time.time_since_epoch().count()));
+        }
+        LOGI("historyAvgPoint is x %{public}f, y %{public}f, time %{public}lld", std::get<INDEX_X>(historyPoint),
+            std::get<INDEX_Y>(historyPoint), static_cast<long long>(std::get<INDEX_TIME>(historyPoint)));
+        for (auto iter : current) {
+            LOGI("current point x %{public}f, y %{public}f, time %{public}lld", iter.x, iter.y,
+                static_cast<long long>(iter.time.time_since_epoch().count()));
+        }
+        LOGI("currentAvgPoint is x %{public}f, y %{public}f, time %{public}lld", std::get<INDEX_X>(currentPoint),
+            std::get<INDEX_Y>(currentPoint), static_cast<long long>(std::get<INDEX_TIME>(currentPoint)));
+    }
     return LinearInterpolation(historyPoint, currentPoint, nanoTimeStamp);
 }
 
@@ -311,9 +328,9 @@ TouchEvent PipelineContext::GetResampleTouchEvent(const std::vector<TouchEvent> 
         newTouchEvent.isInterpolated = true;
         }
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f",
+        LOGI("Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}lld",
             newTouchEvent.id, newTouchEvent.x, newTouchEvent.y, newTouchEvent.screenX,
-            newTouchEvent.screenY);
+            newTouchEvent.screenY, static_cast<long long>(newTouchEvent.time.time_since_epoch().count));
     }
     return newTouchEvent;
 }
