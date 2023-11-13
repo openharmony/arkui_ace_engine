@@ -478,6 +478,8 @@ private:
     std::pair<float, float> GetResampleCoord(const std::vector<TouchEvent> &history,
         const std::vector<TouchEvent> &current, const uint64_t &nanoTimeStamp, const bool isScreen);
 
+    std::tuple<float, float, uint64_t> GetAvgPoint(std::vector<TouchEvent> %events, const bool isScreen);
+
     TouchEvent GetResampleTouchEvent(const std::vector<TouchEvent> &history,
         const std::vector<TouchEvent> &current, const uint64_t &nanoTimeStamp);
 

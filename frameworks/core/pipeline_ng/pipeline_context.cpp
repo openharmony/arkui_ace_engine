@@ -255,58 +255,41 @@ std::pair<float, float> PipelineContext::LinearInterpolation(const std::tuple<fl
     return std::make_pair(0, 0);
 }
 
-std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<TouchEvent> &history,
-    const std::vector<TouchEvent> &current, const uint64_t &nanoTimeStamp, const bool isScreen)
+std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(std::vector<TouchEvent> %events, const bool isScreen)
 {
-    float avgHistoryX = 0.f;
-    float avgHistoryY = 0.f;
-    float avgCurrentX = 0.f;
-    float avgCurrentY = 0.f;
-    uint64_t avgHistoryTime = 0;
-    uint64_t avgCurrentTime = 0;
+    float avgX = 0.f;
+    float avgY = 0.f;
+    uint64_t avgTime = 0;
     int32_t i = 0;
     uint64_t lastTime = 0;
-    if (history.empty() || current.empty()) {
-        return std::make_pair(0, 0);
-    }
     for (auto iter = history.begin(); iter != history.end(); iter++) {
         if (lastTime == 0 || static_cast<uint64_t>(iter->time.time_since_epoch().count()) != lastTime) {
             if (!isScreen) {
-                avgHistoryX += iter->x;
-                avgHistoryY += iter->y;
+                avgX += iter->x;
+                avgY += iter->y;
             } else {
-                avgHistoryX += iter->screenX;
-                avgHistoryY += iter->screenY;
+                avgX += iter->screenX;
+                avgY += iter->screenY;
             }
-            avgHistoryTime += static_cast<uint64_t>(iter->time.time_since_epoch().count());
+            avgTime += static_cast<uint64_t>(iter->time.time_since_epoch().count());
             i++;
             lastTime = static_cast<uint64_t>(iter->time.time_since_epoch().count());
         }
     }
-    avgHistoryX /= i;
-    avgHistoryY /= i;
-    avgHistoryTime /= i;
-    i = 0;
-    lastTime = 0;
-    for (auto iter = current.begin(); iter != current.end(); iter++) {
-        if (lastTime == 0 || static_cast<uint64_t>(iter->time.time_since_epoch().count()) != lastTime) {
-            if (!isScreen) {
-                avgCurrentX += iter->x;
-                avgCurrentY += iter->y;
-            } else {
-                avgCurrentX += iter->screenX;
-                avgCurrentY += iter->screenY;
-            }
-            avgCurrentTime += static_cast<uint64_t>(iter->time.time_since_epoch().count());
-            i++;
-            lastTime = static_cast<uint64_t>(iter->time.time_since_epoch().count());
-        }
+    avgX /= i;
+    avgY /= i;
+    avgTime /= i;
+    return std::make_tuple(avgX, avgY, avgTime);
+}
+
+std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<TouchEvent> &history,
+    const std::vector<TouchEvent> &current, const uint64_t &nanoTimeStamp, const bool isScreen)
+{
+    if (history.empty() || current.empty()) {
+        return std::make_pair(0, 0);
     }
-    avgCurrentX /= i;
-    avgCurrentY /= i;
-    avgCurrentTime /= i;
-    std::tuple<float, float, uint64_t> historyPoint(avgHistoryX, avgHistoryY, avgHistoryTime);
-    std::tuple<float, float, uint64_t> currentPoint(avgCurrentX, avgCurrentY, avgCurrentTime);
+    auto historyPoint = GetAvgPoint(history, isScreen);
+    auto currentPoint = GetAvgPoint(current, isScreen);
     return LinearInterpolation(historyPoint, currentPoint, nanoTimeStamp);
 }
 
