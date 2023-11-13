@@ -529,8 +529,8 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
         auto touchOffsetToWindow = info.GetTouches().front().GetGlobalLocation();
         auto touchOffsetToFrameNode = info.GetTouches().front().GetLocalLocation();
         auto rectToWindow = host->GetTransformRectRelativeToWindow();
-        UpdateTextFieldManager(
-            { rectToWindow.GetOffset().GetX(), rectToWindow.GetOffset().GetY() }, rectToWindow.Height());
+        UpdateTextFieldManager({ rectToWindow.GetOffset().GetX(), touchOffsetToWindow.GetY() },
+            rectToWindow.Height() - touchOffsetToFrameNode.GetY());
     }
     DispatchPointerEvent(pointerEvent);
 }
