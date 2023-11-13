@@ -334,7 +334,7 @@ TouchEvent PipelineContext::GetResampleTouchEvent(const std::vector<TouchEvent> 
     return newTouchEvent;
 }
 
-TouchEvent PipelineContext::GetLatestPoint(const std::vectoe<TouchEvent> &current, const uint64_t &nanoTimeStamp)
+TouchEvent PipelineContext::GetLatestPoint(const std::vector<TouchEvent> &current, const uint64_t &nanoTimeStamp)
 {
     TouchEvent result;
     uint64_t gap = UINT64_MAX;
