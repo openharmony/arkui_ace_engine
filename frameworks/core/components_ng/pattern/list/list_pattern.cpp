@@ -661,7 +661,7 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
     if (endIndex_ == maxListItemIndex_ && groupAtEnd) {
         auto endPos = endMainPos_ + GetChainDelta(endIndex_);
         if (GreatNotEqual(contentMainSize_, endMainPos_ - startMainPos_)) {
-            endPos = startMainPos_ + contentMainSize_
+            endPos = startMainPos_ + contentMainSize_;
         }
         auto newEndPos = endPos + delta;
         if (endPos < contentMainSize_ && newEndPos < contentMainSize_) {
