@@ -3585,6 +3585,12 @@ bool TextFieldPattern::OnBackPressed()
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d receives back press event", tmpHost->GetId());
+    if (SelectOverlayIsOn()) {
+        selectController_->UpdateCaretIndex(std::max(
+            selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
+        CloseSelectOverlay();
+        return true;
+    }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (!imeShown_ && !isCustomKeyboardAttached_) {
 #else
@@ -3593,7 +3599,6 @@ bool TextFieldPattern::OnBackPressed()
         return false;
     }
 
-    selectController_->ResetHandles();
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     CloseKeyboard(true);
 #if defined(ANDROID_PLATFORM)

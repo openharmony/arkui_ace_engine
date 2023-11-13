@@ -18,6 +18,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -40,9 +41,9 @@ bool TextFieldManagerNG::OnBackPressed()
 {
     auto pattern = onFocusTextField_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
-    auto textfieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern);
-    CHECK_NULL_RETURN(textfieldPattern, false);
-    return textfieldPattern->OnBackPressed();
+    auto textBasePattern = AceType::DynamicCast<TextBase>(pattern);
+    CHECK_NULL_RETURN(textBasePattern, false);
+    return textBasePattern->OnBackPressed();
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField)

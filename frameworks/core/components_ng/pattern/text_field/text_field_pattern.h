@@ -710,7 +710,7 @@ public:
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
     void HandleBlurEvent();
     void HandleFocusEvent();
-    bool OnBackPressed();
+    bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
