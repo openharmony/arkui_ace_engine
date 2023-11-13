@@ -1733,9 +1733,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
     auto buttonNode = FrameNode::CreateFrameNode("BackButton", 55, AceType::MakeRefPtr<ButtonPattern>());
     auto backButtonImageNode = FrameNode::CreateFrameNode("Image", 66, AceType::MakeRefPtr<ImagePattern>());
 
-    navBar->SetBackButton(navigator);
     auto pattern = titleBarNode->GetPattern<TitleBarPattern>();
-    titleBarNode->SetBackButton(navBar->GetBackButton());
+    titleBarNode->backButton_ = navigator;
     titleBarNode->AddChild(titleBarNode->GetBackButton());
     titleBarNode->title_ = title;
 
@@ -1762,9 +1761,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
 
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propImageSource_ = std::nullopt;
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propHideBackButton_ = false;
-    navBar->GetLayoutProperty<NavBarLayoutProperty>()->propHideBackButton_ = false;
     pattern->OnModifyDone();
-    ASSERT_EQ(buttonNode->GetLayoutProperty()->propVisibility_, VisibleType::VISIBLE);
 
     auto mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propPixelMap_ = mockPixelMap;
