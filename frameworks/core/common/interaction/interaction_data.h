@@ -72,7 +72,7 @@ struct DragDropRet {
     int32_t windowId = -1;
 };
 
-enum class MsdpDragState {
+enum class DragState {
     ERROR = 0,
     START,
     STOP,

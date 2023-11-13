@@ -42,11 +42,9 @@ public:
 
     MOCK_METHOD(int32_t, GetUdKey, (std::string& udKey), (override));
 
-    MOCK_METHOD(int32_t, GetShadowOffset, (ShadowOffsetData shadowOffsetData), (override));
-
     MOCK_METHOD(int32_t, GetShadowOffset, (ShadowOffsetData& shadowOffsetData), (override));
 
-    MOCK_METHOD(int32_t, GetDragState, (MsdpDragState& dragState), (override));
+    MOCK_METHOD(int32_t, GetDragState, (DragState& dragState), (const, override));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_INTERACTION_H

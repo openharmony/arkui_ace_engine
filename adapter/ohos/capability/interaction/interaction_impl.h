@@ -38,7 +38,7 @@ public:
 
     int32_t GetShadowOffset(ShadowOffsetData& shadowOffsetData) override;
 
-    int32_t GetDragState(MsdpDragState& dragState) override;
+    int32_t GetDragState(DragState& dragState) const override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_INTERACTION_IMPL_H
