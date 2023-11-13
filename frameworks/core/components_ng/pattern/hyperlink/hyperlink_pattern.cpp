@@ -87,10 +87,15 @@ void HyperlinkPattern::OnModifyDone()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
+    auto renderContext = host->GetRenderContext();
     if (!enabled) {
-        hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextDisabledColor());
+        hyperlinkLayoutProperty->UpdateTextColor(
+            hyperlinkLayoutProperty->GetColor().value_or(theme->GetTextColor()).BlendOpacity(theme->GetOpacity()));
+        renderContext->UpdateForegroundColor(
+            hyperlinkLayoutProperty->GetColor().value_or(theme->GetTextColor()).BlendOpacity(theme->GetOpacity()));
     } else {
-        hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor());
+        hyperlinkLayoutProperty->UpdateTextColor(hyperlinkLayoutProperty->GetColor().value_or(theme->GetTextColor()));
+        renderContext->UpdateForegroundColor(hyperlinkLayoutProperty->GetColor().value_or(theme->GetTextColor()));
     }
     if (host->IsDraggable()) {
         EnableDrag();
