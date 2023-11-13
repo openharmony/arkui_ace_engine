@@ -1,8 +1,18 @@
 {
     "files": [
+        "src/ArkColor.ts",
+        "src/ArkClassDefine.ts",
         "src/ArkComponent.ts",
         "src/ArkButton.ts",
-        "src/ArkColor.ts",
+        "src/ArkLoadingProgress.ts",
+        "src/ArkRefresh.ts",
+        "src/ArkScroll.ts",
+        "src/ArkStack.ts",
+        "src/ArkImage.ts",
+        "src/ArkText.ts",
+        "src/ArkTextArea.ts",
+        "src/ArkTextInput.ts",
+        "src/ArkToggle.ts",
     ],
 
     "compilerOptions": {

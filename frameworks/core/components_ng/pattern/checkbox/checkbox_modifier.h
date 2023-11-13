@@ -176,6 +176,8 @@ public:
     void SetCheckboxStyle(CheckBoxStyle checkBoxStyle)
     {
         checkBoxStyle_ = checkBoxStyle;
+        CHECK_NULL_VOID(checkBoxShape_);
+        checkBoxShape_->Set(static_cast<int32_t>(checkBoxStyle));
     }
 
     void SetHoverEffectType(const HoverEffectType hoverEffectType)
@@ -207,6 +209,7 @@ private:
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     CheckBoxStyle checkBoxStyle_ = CheckBoxStyle::CIRCULAR_STYLE;
     HoverEffectType hoverEffectType_ = HoverEffectType::AUTO;
+    RefPtr<PropertyInt> checkBoxShape_;
 
     RefPtr<PropertyBool> enabled_;
     RefPtr<AnimatablePropertyColor> animatableBoardColor_;

@@ -339,37 +339,19 @@ std::optional<Color> GetOptionalColor(napi_env env, napi_value argv, napi_valuet
 {
     if (valueType == napi_number) {
         uint32_t num;
+        uint32_t alpha = 0xff000000;
         napi_get_value_uint32(env, argv, &num);
-        Color color(num);
-        return color;
+        if ((num & alpha) == 0) {
+            num |= alpha;
+        }
+        return Color(num);
     } else if (valueType == napi_string) {
         std::string str;
         bool result = GetNapiString(env, argv, str, valueType);
-        uint32_t argbLen = 9;
-        uint32_t rgbLen = 7;
-        if (!result || (str.length() != argbLen && str.length() != rgbLen) || str.find('#') != 0) {
+        Color color;
+        if (!result || !Color::ParseColorString(str, color)) {
             return std::nullopt;
         }
-        uint32_t offset = 4;
-        uint32_t valueOfA = 10;
-        std::string colorStr = str.substr(1, str.length() - 1);
-        uint32_t value = 0;
-        if (str.length() == rgbLen) {
-            value += 0xff;
-        }
-        for (const auto& it : colorStr) {
-            value <<= offset;
-            if (it >= '0' && it <= '9') {
-                value += it - '0';
-            } else if (it >= 'a' && it <= 'f') {
-                value += it - 'a' + valueOfA;
-            } else if (it >= 'A' && it <= 'F') {
-                value += it - 'A' + valueOfA;
-            } else {
-                return std::nullopt;
-            }
-        }
-        Color color(value);
         return color;
     } else {
         return std::nullopt;

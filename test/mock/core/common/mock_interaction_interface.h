@@ -27,11 +27,11 @@ class MockInteractionInterface : public InteractionInterface {
     DECLARE_ACE_TYPE(MockInteractionInterface, InteractionInterface);
 
 public:
-    MOCK_METHOD(int32_t, UpdateShadowPic, (const ShadowInfoCore &shadowInfo), (override));
+    MOCK_METHOD(int32_t, UpdateShadowPic, (const ShadowInfoCore& shadowInfo), (override));
 
     MOCK_METHOD(int32_t, SetDragWindowVisible, (bool visible), (override));
 
-    MOCK_METHOD(int32_t, StartDrag, (const DragDataCore &dragData,
+    MOCK_METHOD(int32_t, StartDrag, (const DragDataCore& dragData,
         std::function<void(const OHOS::Ace::DragNotifyMsg&)> callback), (override));
 
     MOCK_METHOD(int32_t, UpdateDragStyle, (DragCursorStyleCore style), (override));
@@ -40,9 +40,9 @@ public:
     MOCK_METHOD(int32_t, StopDrag, (DragDropRet result), (override));
 #endif
 
-    MOCK_METHOD(int32_t, GetUdKey, (std::string &udKey), (override));
+    MOCK_METHOD(int32_t, GetUdKey, (std::string& udKey), (override));
 
-    MOCK_METHOD(int32_t, GetShadowOffset, (ShadowOffsetData shadowOffsetData), (override));
+    MOCK_METHOD(int32_t, GetShadowOffset, (ShadowOffsetData& shadowOffsetData), (override));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_INTERACTION_H

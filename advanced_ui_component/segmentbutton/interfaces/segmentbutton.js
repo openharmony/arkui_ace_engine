@@ -23,6 +23,90 @@ const curves = globalThis.requireNativeModule("ohos.curves");
 const KeyCode = globalThis.requireNapi("multimodalInput.keyCode").KeyCode;
 const MIN_ITEM_COUNT = 2;
 const MAX_ITEM_COUNT = 5;
+const SegmentButtonTheme = {
+    FONT_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_text_secondary"],
+        bundleName: "",
+        moduleName: ""
+    },
+    TAB_SELECTED_FONT_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_text_primary"],
+        bundleName: "",
+        moduleName: ""
+    },
+    CAPSULE_SELECTED_FONT_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_foreground_contrary"],
+        bundleName: "",
+        moduleName: ""
+    },
+    FONT_SIZE: {
+        id: -1,
+        type: 10002,
+        params: ["sys.float.ohos_id_text_size_body2"],
+        bundleName: "",
+        moduleName: ""
+    },
+    SELECTED_FONT_SIZE: {
+        id: -1,
+        type: 10002,
+        params: ["sys.float.ohos_id_text_size_body2"],
+        bundleName: "",
+        moduleName: ""
+    },
+    BACKGROUND_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_button_normal"],
+        bundleName: "",
+        moduleName: ""
+    },
+    TAB_SELECTED_BACKGROUND_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_foreground_contrary"],
+        bundleName: "",
+        moduleName: ""
+    },
+    CAPSULE_SELECTED_BACKGROUND_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_emphasize"],
+        bundleName: "",
+        moduleName: ""
+    },
+    FOCUS_BORDER_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_focused_outline"],
+        bundleName: "",
+        moduleName: ""
+    },
+    HOVER_COlOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_hover"],
+        bundleName: "",
+        moduleName: ""
+    },
+    PRESS_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_click_effect"],
+        bundleName: "",
+        moduleName: ""
+    }
+};
+
+function nearEqual(t, e) {
+    return Math.abs(t - e) < .001
+}
+
 let SegmentButtonItemOptions = class {
     constructor(t) {
         this.icon = t.icon;
@@ -109,73 +193,37 @@ SegmentButtonItemOptionsArray = SegmentButtonItemOptionsArray_1 = __decorate([Ob
 
 let SegmentButtonOptions = SegmentButtonOptions_1 = class {
     constructor(t) {
-        var e, o, s, i, n, r, d, a, h, c, l, p, u, m, _;
+        var e, o, s, i, n, r, d, h, a, c, u, l, p, m, _;
         this.multiply = !1;
         this.showText = !1;
         this.showIcon = !1;
-        this.fontColor = null !== (e = t.fontColor) && void 0 !== e ? e : {
-                                                                              id: -1,
-                                                                              type: 10001,
-                                                                              params: ["sys.color.ohos_id_color_text_secondary"],
-                                                                              bundleName: "",
-                                                                              moduleName: ""
-                                                                          };
-        this.selectedFontColor = null !== (o = t.selectedFontColor) && void 0 !== o ? o : {
-                                                                                              id: -1,
-                                                                                              type: 10001,
-                                                                                              params: ["sys.color.ohos_id_color_text_primary"],
-                                                                                              bundleName: "",
-                                                                                              moduleName: ""
-                                                                                          };
-        this.fontSize = null !== (s = t.fontSize) && void 0 !== s ? s : {
-                                                                            id: -1,
-                                                                            type: 10002,
-                                                                            params: ["sys.float.ohos_id_text_size_body2"],
-                                                                            bundleName: "",
-                                                                            moduleName: ""
-                                                                        };
-        this.selectedFontSize = null !== (i = t.selectedFontSize) && void 0 !== i ? i : {
-                                                                                            id: -1,
-                                                                                            type: 10002,
-                                                                                            params: ["sys.float.ohos_id_text_size_body2"],
-                                                                                            bundleName: "",
-                                                                                            moduleName: ""
-                                                                                        };
+        this.fontColor = null !== (e = t.fontColor) && void 0 !== e ? e : SegmentButtonTheme.FONT_COLOR;
+        this.selectedFontColor = null !== (o = t.selectedFontColor) && void 0 !== o ? o : SegmentButtonTheme.TAB_SELECTED_FONT_COLOR;
+        this.fontSize = null !== (s = t.fontSize) && void 0 !== s ? s : SegmentButtonTheme.FONT_SIZE;
+        this.selectedFontSize = null !== (i = t.selectedFontSize) && void 0 !== i ? i : SegmentButtonTheme.SELECTED_FONT_SIZE;
         this.fontWeight = null !== (n = t.fontWeight) && void 0 !== n ? n : FontWeight.Regular;
         this.selectedFontWeight = null !== (r = t.selectedFontWeight) && void 0 !== r ? r : FontWeight.Medium;
-        this.backgroundColor = null !== (d = t.backgroundColor) && void 0 !== d ? d : {
-                                                                                          id: -1,
-                                                                                          type: 10001,
-                                                                                          params: ["sys.color.ohos_id_color_button_normal"],
-                                                                                          bundleName: "",
-                                                                                          moduleName: ""
-                                                                                      };
-        this.selectedBackgroundColor = null !== (a = t.selectedBackgroundColor) && void 0 !== a ? a : {
-                                                                                                          id: -1,
-                                                                                                          type: 10001,
-                                                                                                          params: ["sys.color.ohos_id_color_foreground_contrary"],
-                                                                                                          bundleName: "",
-                                                                                                          moduleName: ""
-                                                                                                      };
-        this.imageSize = null !== (h = t.imageSize) && void 0 !== h ? h : { width: 24, height: 24 };
+        this.backgroundColor = null !== (d = t.backgroundColor) && void 0 !== d ? d : SegmentButtonTheme.BACKGROUND_COLOR;
+        this.selectedBackgroundColor = null !== (h = t.selectedBackgroundColor) && void 0 !== h ? h : SegmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR;
+        this.imageSize = null !== (a = t.imageSize) && void 0 !== a ? a : { width: 24, height: 24 };
         this.buttonMargin = null !== (c = t.buttonMargin) && void 0 !== c ? c : {
                                                                                     top: 4,
                                                                                     right: 8,
                                                                                     bottom: 4,
                                                                                     left: 8
                                                                                 };
-        this.textMargin = null !== (l = t.textMargin) && void 0 !== l ? l : 0;
+        this.textMargin = null !== (u = t.textMargin) && void 0 !== u ? u : 0;
         this.type = t.type;
         this.buttons = new SegmentButtonItemOptionsArray(t.buttons);
         if ("capsule" === this.type) {
-            this.multiply = null !== (p = t.multiply) && void 0 !== p && p;
+            this.multiply = null !== (l = t.multiply) && void 0 !== l && l;
             this.buttons.forEach((t => {
                 this.showText || (this.showText = void 0 !== t.text);
                 this.showIcon || (this.showIcon = void 0 !== t.icon || void 0 !== t.selectedIcon)
             }));
             if (this.showText && this.showIcon) {
                 this.iconTextRadius = 12;
-                this.buttonMargin = null !== (u = t.buttonMargin) && void 0 !== u ? u : {
+                this.buttonMargin = null !== (p = t.buttonMargin) && void 0 !== p ? p : {
                                                                                             top: 6,
                                                                                             right: 8,
                                                                                             bottom: 6,
@@ -183,22 +231,20 @@ let SegmentButtonOptions = SegmentButtonOptions_1 = class {
                                                                                         };
                 this.iconTextBackgroundRadius = 14
             }
-            this.selectedFontColor = null !== (m = t.selectedFontColor) && void 0 !== m ? m : {
-                                                                                                  id: -1,
-                                                                                                  type: 10001,
-                                                                                                  params: ["sys.color.ohos_id_color_foreground_contrary"],
-                                                                                                  bundleName: "",
-                                                                                                  moduleName: ""
-                                                                                              };
-            this.selectedBackgroundColor = null !== (_ = t.selectedBackgroundColor) && void 0 !== _ ? _ : {
-                                                                                                              id: -1,
-                                                                                                              type: 10001,
-                                                                                                              params: ["sys.color.ohos_id_color_emphasize"],
-                                                                                                              bundleName: "",
-                                                                                                              moduleName: ""
-                                                                                                          }
+            this.selectedFontColor = null !== (m = t.selectedFontColor) && void 0 !== m ? m : SegmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR;
+            this.selectedBackgroundColor = null !== (_ = t.selectedBackgroundColor) && void 0 !== _ ? _ : SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
         } else this.showText = !0;
         this.componentPadding = this.multiply ? 0 : 2
+    }
+
+    get buttons() {
+        return this._buttons
+    }
+
+    set buttons(t) {
+        var e;
+        void 0 !== this._buttons && this._buttons !== t && (null === (e = this.onButtonsChange) || void 0 === e || e.call(this));
+        this._buttons = t
     }
 
     static tab(t) {
@@ -294,13 +340,7 @@ class MultiSelectBackground extends ViewPU {
                             Stack.create();
                             Stack.layoutWeight(1);
                             Stack.height(this.buttonItemsSize[e].height);
-                            Stack.backgroundColor(null !== (s = this.options.backgroundColor) && void 0 !== s ? s : {
-                                                                                                                        id: -1,
-                                                                                                                        type: 10001,
-                                                                                                                        params: ["sys.color.ohos_id_color_button_normal"],
-                                                                                                                        bundleName: "",
-                                                                                                                        moduleName: ""
-                                                                                                                    });
+                            Stack.backgroundColor(null !== (s = this.options.backgroundColor) && void 0 !== s ? s : SegmentButtonTheme.BACKGROUND_COLOR);
                             Stack.borderRadius(this.buttonBorderRadius[e]);
                             o || Stack.pop();
                             ViewStackProcessor.StopGetAccessRecording()
@@ -430,19 +470,7 @@ class SelectItem extends ViewPU {
                     Stack.create();
                     Stack.borderRadius(this.buttonBorderRadius[this.selectedIndexes[0]]);
                     Stack.size(this.buttonItemsSize[this.selectedIndexes[0]]);
-                    Stack.backgroundColor(null !== (o = this.options.selectedBackgroundColor) && void 0 !== o ? o : "tab" === this.options.type ? {
-                                                                                                                                                      id: -1,
-                                                                                                                                                      type: 10001,
-                                                                                                                                                      params: ["sys.color.ohos_id_color_foreground_contrary"],
-                                                                                                                                                      bundleName: "",
-                                                                                                                                                      moduleName: ""
-                                                                                                                                                  } : {
-                                                                                                                                                          id: -1,
-                                                                                                                                                          type: 10001,
-                                                                                                                                                          params: ["sys.color.ohos_id_color_emphasize"],
-                                                                                                                                                          bundleName: "",
-                                                                                                                                                          moduleName: ""
-                                                                                                                                                      });
+                    Stack.backgroundColor(null !== (o = this.options.selectedBackgroundColor) && void 0 !== o ? o : "tab" === this.options.type ? SegmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR : SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR);
                     Stack.position(ObservedObject.GetRawObject(this.selectedItemPosition));
                     Stack.scale({
                         x: this.zoomScaleArray[this.selectedIndexes[0]],
@@ -567,36 +595,18 @@ class MultiSelectItemArray extends ViewPU {
 
     onOptionsChange() {
         var t;
-        for (let e = 0;e < this.selectedIndexes.length; e++) this.multiColor[this.selectedIndexes[e]] = null !== (t = this.options.selectedBackgroundColor) && void 0 !== t ? t : {
-                                                                                                                                                                                      id: -1,
-                                                                                                                                                                                      type: 10001,
-                                                                                                                                                                                      params: ["sys.color.ohos_id_color_emphasize"],
-                                                                                                                                                                                      bundleName: "",
-                                                                                                                                                                                      moduleName: ""
-                                                                                                                                                                                  }
+        for (let e = 0;e < this.selectedIndexes.length; e++) this.multiColor[this.selectedIndexes[e]] = null !== (t = this.options.selectedBackgroundColor) && void 0 !== t ? t : SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
     }
 
     onSelectedChange() {
         var t;
         for (let t = 0;t < 5; t++) this.multiColor[t] = Color.Transparent;
-        for (let e = 0;e < this.selectedIndexes.length; e++) this.multiColor[this.selectedIndexes[e]] = null !== (t = this.options.selectedBackgroundColor) && void 0 !== t ? t : {
-                                                                                                                                                                                      id: -1,
-                                                                                                                                                                                      type: 10001,
-                                                                                                                                                                                      params: ["sys.color.ohos_id_color_emphasize"],
-                                                                                                                                                                                      bundleName: "",
-                                                                                                                                                                                      moduleName: ""
-                                                                                                                                                                                  }
+        for (let e = 0;e < this.selectedIndexes.length; e++) this.multiColor[this.selectedIndexes[e]] = null !== (t = this.options.selectedBackgroundColor) && void 0 !== t ? t : SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
     }
 
     aboutToAppear() {
         var t;
-        for (let e = 0;e < this.selectedIndexes.length; e++) this.multiColor[this.selectedIndexes[e]] = null !== (t = this.options.selectedBackgroundColor) && void 0 !== t ? t : {
-                                                                                                                                                                                      id: -1,
-                                                                                                                                                                                      type: 10001,
-                                                                                                                                                                                      params: ["sys.color.ohos_id_color_emphasize"],
-                                                                                                                                                                                      bundleName: "",
-                                                                                                                                                                                      moduleName: ""
-                                                                                                                                                                                  }
+        for (let e = 0;e < this.selectedIndexes.length; e++) this.multiColor[this.selectedIndexes[e]] = null !== (t = this.options.selectedBackgroundColor) && void 0 !== t ? t : SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
     }
 
     initialRender() {
@@ -727,19 +737,7 @@ class SegmentButtonItem extends ViewPU {
                     Image.size(null !== (o = this.options.imageSize) && void 0 !== o ? o : { width: 24, height: 24 });
                     Image.focusable(0 == this.index);
                     Image.draggable(!1);
-                    Image.fillColor(this.property.isSelected ? null !== (s = this.options.selectedFontColor) && void 0 !== s ? s : {
-                                                                                                                                       id: -1,
-                                                                                                                                       type: 10001,
-                                                                                                                                       params: ["sys.color.ohos_id_color_foreground_contrary"],
-                                                                                                                                       bundleName: "",
-                                                                                                                                       moduleName: ""
-                                                                                                                                   } : null !== (i = this.options.fontColor) && void 0 !== i ? i : {
-                                                                                                                                                                                                       id: -1,
-                                                                                                                                                                                                       type: 10001,
-                                                                                                                                                                                                       params: ["sys.color.ohos_id_color_text_secondary"],
-                                                                                                                                                                                                       bundleName: "",
-                                                                                                                                                                                                       moduleName: ""
-                                                                                                                                                                                                   });
+                    Image.fillColor(this.property.isSelected ? null !== (s = this.options.selectedFontColor) && void 0 !== s ? s : SegmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR : null !== (i = this.options.fontColor) && void 0 !== i ? i : SegmentButtonTheme.FONT_COLOR);
                     e || Image.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }))
@@ -801,13 +799,7 @@ class PressAndHoverEffect extends ViewPU {
         this.__colorProperty = new SynchedPropertyNesedObjectPU(e.colorProperty, this, "colorProperty");
         this.__buttonBorderRadius = this.initializeConsume("buttonBorderRadius", "buttonBorderRadius");
         this.pressIndex = 0;
-        this.pressColor = {
-            id: -1,
-            type: 10001,
-            params: ["sys.color.ohos_id_color_click_effect"],
-            bundleName: "",
-            moduleName: ""
-        };
+        this.pressColor = SegmentButtonTheme.PRESS_COLOR;
         this.setInitiallyProvidedValue(e)
     }
 
@@ -1156,13 +1148,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                         width: "capsule" === this.options.type && this.buttonItemsSelected[this.focusIndex] ? this.buttonWidth[t] + 8 : this.buttonWidth[t],
                         height: "capsule" === this.options.type && this.buttonItemsSelected[this.focusIndex] ? this.buttonHeight[t] + 8 : this.buttonHeight[t]
                     });
-                    Stack.borderColor({
-                        id: -1,
-                        type: 10001,
-                        params: ["sys.color.ohos_id_color_focused_outline"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
+                    Stack.borderColor(SegmentButtonTheme.FOCUS_BORDER_COLOR);
                     Stack.borderWidth(2);
                     o || Stack.pop();
                     ViewStackProcessor.StopGetAccessRecording()
@@ -1178,33 +1164,33 @@ class SegmentButtonItemArrayComponent extends ViewPU {
     }
 
     calculateBorderRadius() {
-        var t, e, o, s, i, n, r, d, a;
-        let h = Array.from({ length: 5 }, (() => ({ topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 })));
+        var t, e, o, s, i, n, r, d, h;
+        let a = Array.from({ length: 5 }, (() => ({ topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 })));
         for (let c = 0;c < this.buttonBorderRadius.length; c++) {
-            let l = this.buttonItemsSize[c].height / 2;
+            let u = this.buttonItemsSize[c].height / 2;
             if ("tab" !== this.options.type && null !== (t = this.options.multiply) && void 0 !== t && t) if (0 === c) {
-                h[c].topLeft = null !== (n = this.options.iconTextRadius) && void 0 !== n ? n : l;
-                h[c].topRight = 0;
-                h[c].bottomLeft = null !== (r = this.options.iconTextRadius) && void 0 !== r ? r : l;
-                h[c].bottomRight = 0
+                a[c].topLeft = null !== (n = this.options.iconTextRadius) && void 0 !== n ? n : u;
+                a[c].topRight = 0;
+                a[c].bottomLeft = null !== (r = this.options.iconTextRadius) && void 0 !== r ? r : u;
+                a[c].bottomRight = 0
             } else if (c === Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1) {
-                h[c].topLeft = 0;
-                h[c].topRight = null !== (d = this.options.iconTextRadius) && void 0 !== d ? d : l;
-                h[c].bottomLeft = 0;
-                h[c].bottomRight = null !== (a = this.options.iconTextRadius) && void 0 !== a ? a : l
+                a[c].topLeft = 0;
+                a[c].topRight = null !== (d = this.options.iconTextRadius) && void 0 !== d ? d : u;
+                a[c].bottomLeft = 0;
+                a[c].bottomRight = null !== (h = this.options.iconTextRadius) && void 0 !== h ? h : u
             } else {
-                h[c].topLeft = 0;
-                h[c].topRight = 0;
-                h[c].bottomLeft = 0;
-                h[c].bottomRight = 0
+                a[c].topLeft = 0;
+                a[c].topRight = 0;
+                a[c].bottomLeft = 0;
+                a[c].bottomRight = 0
             } else {
-                h[c].topLeft = null !== (e = this.options.iconTextRadius) && void 0 !== e ? e : l;
-                h[c].topRight = null !== (o = this.options.iconTextRadius) && void 0 !== o ? o : l;
-                h[c].bottomLeft = null !== (s = this.options.iconTextRadius) && void 0 !== s ? s : l;
-                h[c].bottomRight = null !== (i = this.options.iconTextRadius) && void 0 !== i ? i : l
+                a[c].topLeft = null !== (e = this.options.iconTextRadius) && void 0 !== e ? e : u;
+                a[c].topRight = null !== (o = this.options.iconTextRadius) && void 0 !== o ? o : u;
+                a[c].bottomLeft = null !== (s = this.options.iconTextRadius) && void 0 !== s ? s : u;
+                a[c].bottomRight = null !== (i = this.options.iconTextRadius) && void 0 !== i ? i : u
             }
         }
-        this.buttonBorderRadius = h
+        this.buttonBorderRadius = a
     }
 
     initialRender() {
@@ -1264,13 +1250,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                     }));
                                     Stack.onHover((t => {
                                             t ? Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
-                                            this.hoverColorArray[e].hoverColor = {
-                                                id: -1,
-                                                type: 10001,
-                                                params: ["sys.color.ohos_id_color_hover"],
-                                                bundleName: "",
-                                                moduleName: ""
-                                            }
+                                            this.hoverColorArray[e].hoverColor = SegmentButtonTheme.HOVER_COlOR
                                         })) : Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
                                             this.hoverColorArray[e].hoverColor = Color.Transparent
                                         }))
@@ -1382,20 +1362,8 @@ class SegmentButtonItemArrayComponent extends ViewPU {
 
 let ItemProperty = class {
     constructor() {
-        this.fontColor = {
-            id: -1,
-            type: 10001,
-            params: ["sys.color.ohos_id_color_text_secondary"],
-            bundleName: "",
-            moduleName: ""
-        };
-        this.fontSize = {
-            id: -1,
-            type: 10002,
-            params: ["sys.float.ohos_id_text_size_body2"],
-            bundleName: "",
-            moduleName: ""
-        };
+        this.fontColor = SegmentButtonTheme.FONT_COLOR;
+        this.fontSize = SegmentButtonTheme.FONT_SIZE;
         this.fontWeight = FontWeight.Regular;
         this.isSelected = !1
     }
@@ -1441,6 +1409,8 @@ class SegmentButton extends ViewPU {
         this.addProvidedVar("zoomScaleArray", this.__zoomScaleArray);
         this.doSelectedChangeAnimate = !1;
         this.isCurrentPositionSelected = !1;
+        this.panGestureStartPoint = { x: 0, y: 0 };
+        this.isPanGestureMoved = !1;
         this.setInitiallyProvidedValue(e);
         this.declareWatch("options", this.onOptionsChange);
         this.declareWatch("selectedIndexes", this.onSelectedChange);
@@ -1459,7 +1429,9 @@ class SegmentButton extends ViewPU {
         void 0 !== t.selectedItemPosition && (this.selectedItemPosition = t.selectedItemPosition);
         void 0 !== t.zoomScaleArray && (this.zoomScaleArray = t.zoomScaleArray);
         void 0 !== t.doSelectedChangeAnimate && (this.doSelectedChangeAnimate = t.doSelectedChangeAnimate);
-        void 0 !== t.isCurrentPositionSelected && (this.isCurrentPositionSelected = t.isCurrentPositionSelected)
+        void 0 !== t.isCurrentPositionSelected && (this.isCurrentPositionSelected = t.isCurrentPositionSelected);
+        void 0 !== t.panGestureStartPoint && (this.panGestureStartPoint = t.panGestureStartPoint);
+        void 0 !== t.isPanGestureMoved && (this.isPanGestureMoved = t.isPanGestureMoved)
     }
 
     updateStateVars(t) {
@@ -1621,10 +1593,21 @@ class SegmentButton extends ViewPU {
 
     aboutToAppear() {
         if (void 0 !== this.options && void 0 !== this.options.buttons) {
+            this.options.onButtonsChange = () => {
+                    "tab" === this.options.type ? this.selectedIndexes = [0] : this.selectedIndexes = []
+            };
             this.updateSelectedIndexes();
             this.setItemsSelected();
             this.updateAnimatedProperty(null)
         }
+    }
+
+    isMouseWheelScroll(t) {
+        return t.source === SourceType.Mouse && !this.isPanGestureMoved
+    }
+
+    isMovedFromPanGestureStartPoint(t, e) {
+        return!nearEqual(t, this.panGestureStartPoint.x) || !nearEqual(e, this.panGestureStartPoint.y)
     }
 
     initialRender() {
@@ -1651,7 +1634,7 @@ class SegmentButton extends ViewPU {
             TapGesture.create();
             TapGesture.onAction((t => {
                 var e;
-                let o = t.fingerList.find((t => null !== t));
+                let o = t.fingerList.find(Boolean);
                 if (void 0 === o) return;
                 if (void 0 === this.options || void 0 === this.options.buttons) return;
                 let s = o.localX;
@@ -1685,9 +1668,11 @@ class SegmentButton extends ViewPU {
                 var e;
                 if (void 0 === this.options || void 0 === this.options.buttons) return;
                 if ("capsule" === this.options.type && null !== (e = this.options.multiply) && void 0 !== e && e) return;
-                let o = t.fingerList.find((t => null !== t));
+                let o = t.fingerList.find(Boolean);
                 if (void 0 === o) return;
                 let s = o.localX;
+                this.panGestureStartPoint = { x: o.globalX, y: o.globalY };
+                this.isPanGestureMoved = !1;
                 for (let t = 0;t < Math.min(this.options.buttons.length, this.buttonItemsSize.length); t++) {
                     s -= this.buttonItemsSize[t].width;
                     if (s < 0) {
@@ -1701,9 +1686,10 @@ class SegmentButton extends ViewPU {
                 if (void 0 === this.options || void 0 === this.options.buttons) return;
                 if ("capsule" === this.options.type && null !== (e = this.options.multiply) && void 0 !== e && e) return;
                 if (!this.isCurrentPositionSelected) return;
-                let o = t.fingerList.find((t => null !== t));
+                let o = t.fingerList.find(Boolean);
                 if (void 0 === o) return;
                 let s = o.localX;
+                !this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(o.globalX, o.globalY) && (this.isPanGestureMoved = !0);
                 for (let t = 0;t < Math.min(this.options.buttons.length, this.buttonItemsSize.length); t++) {
                     s -= this.buttonItemsSize[t].width;
                     if (s < 0) {
@@ -1725,8 +1711,12 @@ class SegmentButton extends ViewPU {
             }));
             PanGesture.onActionEnd((t => {
                 var e;
-                if (void 0 !== this.options && void 0 !== this.options.buttons && ("capsule" !== this.options.type || null === (e = this.options.multiply) || void 0 === e || !e)) {
-                    if (t.source === SourceType.Mouse) {
+                if (void 0 === this.options || void 0 === this.options.buttons) return;
+                if ("capsule" === this.options.type && null !== (e = this.options.multiply) && void 0 !== e && e) return;
+                let o = t.fingerList.find(Boolean);
+                if (void 0 !== o) {
+                    !this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(o.globalX, o.globalY) && (this.isPanGestureMoved = !0);
+                    if (this.isMouseWheelScroll(t)) {
                         let e = 0 !== t.offsetX ? t.offsetX : t.offsetY;
                         this.doSelectedChangeAnimate = !0;
                             e > 0 && this.selectedIndexes[0] > 0 ? this.selectedIndexes[0] -= 1 : e < 0 && this.selectedIndexes[0] < Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1 && (this.selectedIndexes[0] += 1);
@@ -1773,13 +1763,7 @@ class SegmentButton extends ViewPU {
                             ViewStackProcessor.StartGetAccessRecordingFor(t);
                             Stack.create();
                             Stack.size(ObservedObject.GetRawObject(this.componentSize));
-                            Stack.backgroundColor(null !== (o = this.options.backgroundColor) && void 0 !== o ? o : {
-                                                                                                                        id: -1,
-                                                                                                                        type: 10001,
-                                                                                                                        params: ["sys.color.ohos_id_color_button_normal"],
-                                                                                                                        bundleName: "",
-                                                                                                                        moduleName: ""
-                                                                                                                    });
+                            Stack.backgroundColor(null !== (o = this.options.backgroundColor) && void 0 !== o ? o : SegmentButtonTheme.BACKGROUND_COLOR);
                             Stack.borderRadius(null !== (s = this.options.iconTextBackgroundRadius) && void 0 !== s ? s : this.componentSize.height / 2);
                             Stack.foregroundBlurStyle(BlurStyle.BACKGROUND_THICK, { colorMode: ThemeColorMode.LIGHT });
                             e || Stack.pop();
@@ -1890,43 +1874,13 @@ class SegmentButton extends ViewPU {
                                                                             } : this.buttonItemsPosition[this.selectedIndexes[0]];
             this.buttonItemsSelected.forEach(((t, e) => {
                 var o, s;
-                this.buttonItemProperty[e].fontColor = t ? null !== (o = this.options.selectedFontColor) && void 0 !== o ? o : "tab" === this.options.type ? {
-                                                                                                                                                                 id: -1,
-                                                                                                                                                                 type: 10001,
-                                                                                                                                                                 params: ["sys.color.ohos_id_color_text_primary"],
-                                                                                                                                                                 bundleName: "",
-                                                                                                                                                                 moduleName: ""
-                                                                                                                                                             } : {
-                                                                                                                                                                     id: -1,
-                                                                                                                                                                     type: 10001,
-                                                                                                                                                                     params: ["sys.color.ohos_id_color_foreground_contrary"],
-                                                                                                                                                                     bundleName: "",
-                                                                                                                                                                     moduleName: ""
-                                                                                                                                                                 } : null !== (s = this.options.fontColor) && void 0 !== s ? s : {
-                                                                                                                                                                                                                                     id: -1,
-                                                                                                                                                                                                                                     type: 10001,
-                                                                                                                                                                                                                                     params: ["sys.color.ohos_id_color_text_secondary"],
-                                                                                                                                                                                                                                     bundleName: "",
-                                                                                                                                                                                                                                     moduleName: ""
-                                                                                                                                                                                                                                 }
+                this.buttonItemProperty[e].fontColor = t ? null !== (o = this.options.selectedFontColor) && void 0 !== o ? o : "tab" === this.options.type ? SegmentButtonTheme.TAB_SELECTED_FONT_COLOR : SegmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR : null !== (s = this.options.fontColor) && void 0 !== s ? s : SegmentButtonTheme.FONT_COLOR
             }))
         };
             t ? Context.animateTo({ curve: t }, e) : e();
         this.buttonItemsSelected.forEach(((t, e) => {
             var o, s, i, n;
-            this.buttonItemProperty[e].fontSize = t ? null !== (o = this.options.selectedFontSize) && void 0 !== o ? o : {
-                                                                                                                             id: -1,
-                                                                                                                             type: 10002,
-                                                                                                                             params: ["sys.float.ohos_id_text_size_body2"],
-                                                                                                                             bundleName: "",
-                                                                                                                             moduleName: ""
-                                                                                                                         } : null !== (s = this.options.fontSize) && void 0 !== s ? s : {
-                                                                                                                                                                                            id: -1,
-                                                                                                                                                                                            type: 10002,
-                                                                                                                                                                                            params: ["sys.float.ohos_id_text_size_body2"],
-                                                                                                                                                                                            bundleName: "",
-                                                                                                                                                                                            moduleName: ""
-                                                                                                                                                                                        };
+            this.buttonItemProperty[e].fontSize = t ? null !== (o = this.options.selectedFontSize) && void 0 !== o ? o : SegmentButtonTheme.SELECTED_FONT_SIZE : null !== (s = this.options.fontSize) && void 0 !== s ? s : SegmentButtonTheme.FONT_SIZE;
             this.buttonItemProperty[e].fontWeight = t ? null !== (i = this.options.selectedFontWeight) && void 0 !== i ? i : FontWeight.Medium : null !== (n = this.options.fontWeight) && void 0 !== n ? n : FontWeight.Regular;
             this.buttonItemProperty[e].isSelected = t
         }))

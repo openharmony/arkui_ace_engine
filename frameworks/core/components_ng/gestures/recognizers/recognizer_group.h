@@ -85,6 +85,44 @@ public:
     }
 
     const std::list<RefPtr<NGGestureRecognizer>>& GetGroupRecognizer();
+
+    Axis GetAxisDirection() override
+    {
+        uint8_t horizontalFlag = 0;
+        uint8_t verticalFlag = 0;
+        uint8_t freeFlag = 0;
+        for (const auto& recognizer : recognizers_) {
+            if (!recognizer) {
+                continue;
+            }
+            auto direction = recognizer->GetAxisDirection();
+            switch (direction) {
+                case Axis::HORIZONTAL:
+                    horizontalFlag = 0x1;
+                    break;
+                case Axis::VERTICAL:
+                    verticalFlag = 0x2;
+                    break;
+                case Axis::FREE:
+                    freeFlag = 0x3;
+                    break;
+                default:
+                    break;
+            }
+        }
+        uint8_t directionFlag = horizontalFlag | verticalFlag | freeFlag;
+        switch (directionFlag) {
+            case 0x1:
+                return Axis::HORIZONTAL;
+            case 0x2:
+                return Axis::VERTICAL;
+            case 0x3:
+                return Axis::FREE;
+            default:
+                return Axis::NONE;
+        }
+    }
+
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override;
     void OnFinishGestureReferee(int32_t touchId, bool isBlocked = false) override;

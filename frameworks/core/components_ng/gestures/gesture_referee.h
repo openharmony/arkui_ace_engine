@@ -36,6 +36,15 @@ enum class GestureDisposal {
     NONE,
 };
 
+inline std::string TransGestureDisposal(GestureDisposal disposal)
+{
+    const char *str[] = { "ACCEPT", "REJECT", "PENDING", "NONE" };
+    if (disposal >= GestureDisposal::ACCEPT && disposal <= GestureDisposal::NONE) {
+        return str[static_cast<int32_t>(disposal)];
+    }
+    return std::string("Disposal:").append(std::to_string(static_cast<int32_t>(disposal)));
+}
+
 class GestureScope : public AceType {
     DECLARE_ACE_TYPE(GestureScope, AceType);
 

@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_paint_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/scroll/scroll_position_controller.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -42,8 +41,8 @@ void ScrollModelNG::Create()
     SetEdgeEffect(EdgeEffect::NONE, true);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
-    auto positionController = AceType::MakeRefPtr<NG::ScrollPositionController>();
-    pattern->SetScrollPositionController(positionController);
+    auto positionController = AceType::MakeRefPtr<NG::ScrollableController>();
+    pattern->SetPositionController(positionController);
     positionController->SetScrollPattern(pattern);
 }
 
@@ -54,8 +53,8 @@ RefPtr<ScrollControllerBase> ScrollModelNG::GetOrCreateController()
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     if (!pattern->GetScrollPositionController()) {
-        auto controller = AceType::MakeRefPtr<NG::ScrollPositionController>();
-        pattern->SetScrollPositionController(controller);
+        auto controller = AceType::MakeRefPtr<NG::ScrollableController>();
+        pattern->SetPositionController(controller);
     }
     return pattern->GetScrollPositionController();
 }
@@ -173,6 +172,7 @@ void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetAlwaysEnabled(alwaysEnabled);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void ScrollModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)

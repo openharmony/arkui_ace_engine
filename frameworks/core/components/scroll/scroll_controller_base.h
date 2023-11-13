@@ -59,6 +59,7 @@ enum class ScrollAlign {
     NONE,
 };
 
+using OnFinishFunc = std::function<void()>;
 class ACE_EXPORT ScrollControllerBase : public AceType {
     DECLARE_ACE_TYPE(ScrollControllerBase, AceType);
 
@@ -97,6 +98,7 @@ public:
     {
         return Rect();
     }
+    virtual void CloseAllSwipeActions(OnFinishFunc&& onFinishCallback) {}
 };
 } // namespace OHOS::Ace
 

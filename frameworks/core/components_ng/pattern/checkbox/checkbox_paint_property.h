@@ -55,6 +55,7 @@ public:
         paintProperty->propCheckBoxCheckMarkColor_ = CloneCheckBoxCheckMarkColor();
         paintProperty->propCheckBoxCheckMarkSize_ = CloneCheckBoxCheckMarkSize();
         paintProperty->propCheckBoxCheckMarkWidth_ = CloneCheckBoxCheckMarkWidth();
+        paintProperty->propCheckBoxSelectedStyle_ = CloneCheckBoxSelectedStyle();
         paintProperty->SetHost(this->GetHost());
         return paintProperty;
     }
@@ -68,6 +69,7 @@ public:
         ResetCheckBoxCheckMarkColor();
         ResetCheckBoxCheckMarkSize();
         ResetCheckBoxCheckMarkWidth();
+        ResetCheckBoxSelectedStyle();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;

@@ -505,8 +505,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     NG::CalendarSettingData settingData;
     auto selectedDate = paramObj->GetProperty("selected");
     auto parseSelectedDate = ParseDate(selectedDate);
-
-    if (selectedDate->IsObject()) {
+    if (selectedDate->IsObject() && parseSelectedDate.GetYear() != 0) {
         settingData.selectedDate = parseSelectedDate;
     }
 

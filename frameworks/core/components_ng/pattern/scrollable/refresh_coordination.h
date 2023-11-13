@@ -33,9 +33,9 @@ public:
         coordinationEvent_ = CreateCoordinationEvent();
     };
     ~RefreshCoordination() = default;
-    void OnScrollStart(bool isDrag) const;
-    bool OnScroll(float offset) const;
-    void OnScrollEnd(float speed) const;
+    void OnScrollStart(bool isDrag, float mainVelocity) const;
+    bool OnScroll(float offset, float mainVelocity) const;
+    void OnScrollEnd(float mainVelocity) const;
     bool InCoordination()
     {
         auto refreshNode = refreshNode_.Upgrade();

@@ -83,7 +83,7 @@ void JSList::SetEdgeEffect(const JSCallbackInfo& info)
     int32_t edgeEffect;
     if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsInt32(info[0], edgeEffect) ||
         edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
-        edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
+        edgeEffect = static_cast<int32_t>(EdgeEffect::SPRING);
     }
     ListModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), false);
 
@@ -733,6 +733,7 @@ void JSListScroller::JSBind(BindingTarget globalObj)
 {
     JSClass<JSListScroller>::Declare("ListScroller");
     JSClass<JSListScroller>::CustomMethod("getItemRectInGroup", &JSListScroller::GetItemRectInGroup);
+    JSClass<JSListScroller>::CustomMethod("closeAllSwipeActions", &JSListScroller::CloseAllSwipeActions);
     JSClass<JSListScroller>::InheritAndBind<JSScroller>(globalObj, JSListScroller::Constructor,
         JSListScroller::Destructor);
 }
@@ -768,5 +769,41 @@ void JSListScroller::GetItemRectInGroup(const JSCallbackInfo& args)
     } else {
         JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
     }
+}
+
+void JSListScroller::CloseAllSwipeActions(const JSCallbackInfo& args)
+{
+    if (args.Length() != 0 && args.Length() != 1) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "too many parameters.");
+        return;
+    }
+    OnFinishFunc onFinishCallBack;
+    if (args.Length() == 1) {
+        if (!args[0]->IsObject()) {
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "options param must be object.");
+            return;
+        }
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        auto onFinishProperty = obj->GetProperty("onFinish");
+        if (onFinishProperty->IsFunction()) {
+            RefPtr<JsFunction> jsOnFinishFunc =
+                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinishProperty));
+                onFinishCallBack = [execCtx = args.GetExecutionContext(),
+                                       func = std::move(jsOnFinishFunc)]() {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    func->Execute();
+                    return;
+                };
+        } else {
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "onFinish param must be function.");
+            return;
+        }
+    }
+    auto scrollController = GetController().Upgrade();
+    if (!scrollController) {
+        JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
+        return;
+    }
+    scrollController->CloseAllSwipeActions(std::move(onFinishCallBack));
 }
 } // namespace OHOS::Ace::Framework

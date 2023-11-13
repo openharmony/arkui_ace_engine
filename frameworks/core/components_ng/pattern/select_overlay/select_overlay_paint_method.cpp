@@ -44,6 +44,8 @@ void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CheckHasExtensionMenu();
 
     selectOverlayModifier_->SetMenuOptionOffset(offset);
+    selectOverlayModifier_->SetFirstHandleIsShow(info_.firstHandle.isShow);
+    selectOverlayModifier_->SetSecondHandleIsShow(info_.secondHandle.isShow);
 }
 
 void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)

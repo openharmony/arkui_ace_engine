@@ -103,7 +103,8 @@ void NavigationModelImpl::SetHideNavBar(bool hideNavBar)
     return;
 }
 
-void NavigationModelImpl::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+void NavigationModelImpl::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+    const std::string& bundleName, const std::string& moduleName)
 {
     return;
 }

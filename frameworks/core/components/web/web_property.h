@@ -59,6 +59,11 @@ enum class WebDarkMode {
     Auto,
 };
 
+enum class WebLayoutMode {
+    NONE,
+    FIT_CONTENT,
+};
+
 constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
 constexpr int32_t DEFAULT_FIXED_FONT_SIZE = 13;
 constexpr int32_t DEFAULT_FONT_SIZE = 16;

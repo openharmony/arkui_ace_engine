@@ -49,7 +49,7 @@ void WebLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     int rootLayerWidth = pattern->GetRootLayerWidth();
     int rootLayerHeight = pattern->GetRootLayerHeight();
     auto type = pattern->GetWebType();
-    if (pattern->GetWrapContent() && IsValidRootLayer(rootLayerWidth, type) &&
+    if (pattern->GetLayoutMode() == WebLayoutMode::FIT_CONTENT && IsValidRootLayer(rootLayerWidth, type) &&
         IsValidRootLayer(rootLayerHeight, type)) {
         TAG_LOGD(AceLogTag::ACE_WEB, "RootLayerWidth = %{public}d, RootLayerHeight = %{public}d", rootLayerWidth,
             rootLayerHeight);

@@ -38,6 +38,15 @@ inline std::unique_ptr<JsonValue> CovertShadowToJson(const Shadow& shadow)
     jsonShadow->Put("type", std::to_string(static_cast<int32_t>(shadow.GetShadowType())).c_str());
     return jsonShadow;
 }
+
+std::unique_ptr<JsonValue> CovertShadowsToJson(const std::vector<Shadow>& shadows)
+{
+    auto jsonShadows = JsonUtil::CreateArray(true);
+    for (const auto& shadow : shadows) {
+        jsonShadows->Put(CovertShadowToJson(shadow));
+    }
+    return jsonShadows;
+}
 } // namespace
 
 std::string TextLayoutProperty::GetCopyOptionString() const
@@ -107,9 +116,9 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("maxLines", std::to_string(GetMaxLines().value_or(UINT32_MAX)).c_str());
 
     auto shadow = GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
-    auto jsonShadow = CovertShadowToJson(shadow.front());
+    // Determines if there are multiple textShadows
+    auto jsonShadow = (shadow.size() == 1) ? CovertShadowToJson(shadow.front()) : CovertShadowsToJson(shadow);
     json->Put("textShadow", jsonShadow);
-
     json->Put("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
         GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str());
     json->Put("copyOption", GetCopyOptionString().c_str());

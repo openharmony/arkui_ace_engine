@@ -734,6 +734,20 @@ HWTEST_F(FormTestNg, OnActionEvent, TestSize.Level1)
      */
     action->Replace("action", "call");
     pattern->OnActionEvent(action->ToString());
+
+    /**
+     * @tc.steps: step5.support uri deeplink without abilityName.
+     * @tc.expected: pattern will not call FireOnRouterEvent.
+     */
+    action->Put("uri", "schema://host/pathStartWith");
+    pattern->OnActionEvent(action->ToString());
+
+    /**
+     * @tc.steps: step6.support uri deeplink with abilityName.
+     * @tc.expected: pattern will not call FireOnRouterEvent.
+     */
+    action->Put("abilityName", "abilityName");
+    pattern->OnActionEvent(action->ToString());
 }
 
 /**

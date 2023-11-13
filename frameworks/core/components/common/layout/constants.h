@@ -669,6 +669,12 @@ enum class KeyBoardAvoidMode : int32_t {
     RESIZE,
 };
 
+enum class SwipeActionState : uint32_t {
+    COLLAPSED = 0,
+    EXPANDED,
+    ACTIONING,
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

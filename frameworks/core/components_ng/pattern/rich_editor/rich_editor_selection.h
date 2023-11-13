@@ -49,6 +49,7 @@ enum class RichEditorType : int32_t {
     TEXT = 0,
     IMAGE,
     MIXED,
+    NONE,
 };
 
 struct SpanPosition {

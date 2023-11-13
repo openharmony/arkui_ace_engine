@@ -2057,7 +2057,7 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     textContentModifier.onDraw(context);
     EXPECT_EQ(textContentModifier.fontSizeFloat_->Get(), ADAPT_FONT_SIZE_VALUE.Value());
     EXPECT_EQ(textContentModifier.baselineOffsetFloat_->Get(), BASELINE_OFFSET_VALUE.Value());
-    EXPECT_EQ(textContentModifier.shadows_[0].isFilled, ADAPT_FILL_VALUE);
+    EXPECT_EQ(textContentModifier.shadows_[0].isFilled->Get(), ADAPT_FILL_VALUE);
     EXPECT_EQ(textContentModifier.paragraph_, paragraph);
 }
 
@@ -3056,6 +3056,34 @@ HWTEST_F(TextTestNg, TextDecorationToJsonValue002, TestSize.Level1)
     EXPECT_TRUE(decorationJson->Contains("style"));
     EXPECT_TRUE(decorationJson->GetValue("style")->GetString() ==
                 V2::ConvertWrapTextDecorationStyleToString(TextDecorationStyle::SOLID));
+}
+
+/**
+ * @tc.name: TextDecorationToJsonValue003
+ * @tc.desc: Test Text Decoration ToJsonValue when set multiple textShadows.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextDecorationToJsonValue003, TestSize.Level1)
+{
+    TextModelNG text;
+    text.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    Shadow textShadow1 = Shadow();
+    Shadow textShadow2 = Shadow();
+    textShadow1.SetColor(Color::RED);
+    textShadow2.SetColor(Color::WHITE);
+    std::vector<Shadow> shadows { textShadow1, textShadow2 };
+    textLayoutProperty->UpdateTextShadow(shadows);
+    auto json = JsonUtil::Create(true);
+    textLayoutProperty->ToJsonValue(json);
+    EXPECT_TRUE(json->Contains("textShadow"));
+    auto textShadowJson = json->GetValue("textShadow");
+    EXPECT_TRUE(textShadowJson->IsArray());
 }
 
 /**

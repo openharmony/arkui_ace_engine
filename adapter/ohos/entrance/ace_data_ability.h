@@ -28,11 +28,7 @@ namespace OHOS::Ace {
 
 class AceDataAbility final : public OHOS::AppExecFwk::Ability {
 public:
-    AceDataAbility()
-    {
-        abilityId_ = instanceId_;
-        instanceId_++;
-    }
+    AceDataAbility();
     virtual ~AceDataAbility() = default;
 
     void OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo = nullptr) override;
@@ -57,9 +53,8 @@ public:
         const Uri& uri, const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap) override;
 
 private:
-    int32_t abilityId_ = 200000;
+    int32_t abilityId_;
 
-    static int32_t instanceId_;
     static const std::string START_PARAMS_KEY;
     static const std::string URI;
 };
