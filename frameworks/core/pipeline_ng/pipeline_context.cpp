@@ -315,7 +315,7 @@ TouchEvent PipelineContext::GetResampleTouchEvent(const std::vector<TouchEvent> 
 {
     auto newXy = GetResampleCoord(history, current, nanoTimeStamp, false);
     auto newScreenXy = GetResampleCoord(history, current, nanoTimeStamp, true);
-    TouchEvent newTouchEvent = GetLatestPoint(idIter.second.history, nanoTimeStamp);
+    TouchEvent newTouchEvent = GetLatestPoint(current, nanoTimeStamp);
     if (newXy.first != 0 && newXy.second != 0) {
         newTouchEvent.x = newXy.first;
         newTouchEvent.y = newXy.second;
