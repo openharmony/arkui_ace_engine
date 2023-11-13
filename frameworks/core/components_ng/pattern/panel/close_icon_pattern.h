@@ -68,6 +68,7 @@ private:
 
     RefPtr<ClickEvent> buttonClickListenr_;
     ClickButtonCallback clickButtonCallback_;
+    bool isFirstLayout_ {true};
 
     ACE_DISALLOW_COPY_AND_MOVE(CloseIconPattern);
 };
