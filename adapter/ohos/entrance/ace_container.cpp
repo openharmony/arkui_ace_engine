@@ -1312,6 +1312,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
             themeManager->LoadCustomTheme(assetManager);
             themeManager->LoadResourceThemes();
         }
+        auto themeManager = pipelineContext->GetThemeManager();
+        if (themeManager) {
+            pipelineContext->SetAppBgColor(themeManager->GetBackgroundColor());
+        }
     };
 
     auto setupRootElementTask = [context = pipelineContext_, callback, isSubContainer = isSubContainer_]() {
@@ -1581,6 +1585,9 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     auto front = GetFrontend();
     CHECK_NULL_VOID(front);
     front->OnConfigurationUpdated(configuration);
+    if (!IsTransparentForm()) {
+        pipelineContext_->SetAppBgColor(themeManager->GetBackgroundColor());
+    }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
 #endif
