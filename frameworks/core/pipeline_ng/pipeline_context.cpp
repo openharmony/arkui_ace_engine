@@ -330,7 +330,7 @@ TouchEvent PipelineContext::GetResampleTouchEvent(const std::vector<TouchEvent> 
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}lld",
             newTouchEvent.id, newTouchEvent.x, newTouchEvent.y, newTouchEvent.screenX,
-            newTouchEvent.screenY, static_cast<long long>(newTouchEvent.time.time_since_epoch().count));
+            newTouchEvent.screenY, static_cast<long long>(newTouchEvent.time.time_since_epoch().count()));
     }
     return newTouchEvent;
 }
