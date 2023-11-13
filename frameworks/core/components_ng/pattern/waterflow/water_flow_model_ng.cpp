@@ -206,4 +206,9 @@ void WaterFlowModelNG::SetFriction(double friction)
     CHECK_NULL_VOID(pattern);
     pattern->SetFriction(friction);
 }
+
+void WaterFlowModelNG::SetCachedCount(int32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value);
+}
 } // namespace OHOS::Ace::NG

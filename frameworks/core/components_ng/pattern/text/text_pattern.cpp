@@ -97,6 +97,7 @@ void TextPattern::CloseSelectOverlay(bool animation)
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         selectOverlayProxy_->Close(animation);
     }
+    RemoveAreaChangeInner();
 }
 
 void TextPattern::ResetSelection()
@@ -401,6 +402,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleOnCopy();
+        pattern->RemoveAreaChangeInner();
     };
     selectInfo.menuCallback.onSelectAll = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -412,6 +414,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         CHECK_NULL_VOID(pattern);
         if (closedByGlobalEvent) {
             pattern->ResetSelection();
+            pattern->RemoveAreaChangeInner();
         }
     };
 
@@ -919,9 +922,6 @@ void TextPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->AddOnAreaChangeNode(host->GetId());
 
     if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag())) {
         // measure flag changed, reset paragraph.
@@ -1013,6 +1013,9 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool
     } else {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        pipeline->AddOnAreaChangeNode(host->GetId());
         selectInfo.callerFrameNode = GetHost();
         if (!selectInfo.isUsingMouse) {
             CheckHandles(selectInfo.firstHandle);
@@ -1454,4 +1457,12 @@ void TextPattern::OnAreaChangedInner()
     }
 }
 
+void TextPattern::RemoveAreaChangeInner()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    pipeline->RemoveOnAreaChangeNode(host->GetId());
+}
 } // namespace OHOS::Ace::NG

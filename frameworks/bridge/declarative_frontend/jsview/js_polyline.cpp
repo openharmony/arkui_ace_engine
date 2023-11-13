@@ -48,7 +48,6 @@ void JSPolyline::JSBind(BindingTarget globalObj)
 void JSPolyline::JSPoints(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsArray()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     ShapePoint point;
@@ -56,13 +55,11 @@ void JSPolyline::JSPoints(const JSCallbackInfo& info)
 
     JSRef<JSArray> pointsArray = JSRef<JSArray>::Cast(info[0]);
     if (pointsArray->Length() < 2) {
-        LOGE("Polyline  have at least 2 points");
         return;
     }
     for (size_t i = 0; i < pointsArray->Length(); i++) {
         JSRef<JSVal> val = pointsArray->GetValueAt(i);
         if (!val->IsArray()) {
-            LOGE("point is not array.");
             continue;
         }
         JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(val);
@@ -71,7 +68,6 @@ void JSPolyline::JSPoints(const JSCallbackInfo& info)
         } else if (pointArray->GetValueAt(0)->IsString()) {
             point.first = StringUtils::StringToDimension(pointArray->GetValueAt(0)->ToString(), true);
         } else {
-            LOGE("Polyline point should be Number or String");
             return;
         }
         if (pointArray->GetValueAt(1)->IsNumber()) {
@@ -79,7 +75,6 @@ void JSPolyline::JSPoints(const JSCallbackInfo& info)
         } else if (pointArray->GetValueAt(1)->IsString()) {
             point.second = StringUtils::StringToDimension(pointArray->GetValueAt(1)->ToString(), true);
         } else {
-            LOGE("Polyline point should be Number or String");
             return;
         }
         points.push_back(point);

@@ -280,21 +280,20 @@ bool PatternLockPattern::CheckAutoReset() const
 
 void PatternLockPattern::OnTouchDown(const TouchLocationInfo& info)
 {
-    float moveDeltaX = static_cast<float>(info.GetLocalLocation().GetX());
-    float moveDeltaY = static_cast<float>(info.GetLocalLocation().GetY());
-    OffsetF touchPoint;
-    touchPoint.SetX(moveDeltaX);
-    touchPoint.SetY(moveDeltaY);
+    auto globalLocationX = static_cast<float>(info.GetGlobalLocation().GetX());
+    auto globalLocationY = static_cast<float>(info.GetGlobalLocation().GetY());
+    globalTouchPoint_.SetX(globalLocationX);
+    globalTouchPoint_.SetY(globalLocationY);
 
     if (!CheckAutoReset()) {
         return;
     }
     HandleReset();
-    cellCenter_ = touchPoint;
+    CalculateCellCenter();
     bool isAdd = false;
     for (int32_t i = 0; i < PATTERN_LOCK_COL_COUNT && !isAdd; i++) {
         for (int32_t j = 0; j < PATTERN_LOCK_COL_COUNT && !isAdd; j++) {
-            isAdd = AddChoosePoint(touchPoint, i + 1, j + 1);
+            isAdd = AddChoosePoint(cellCenter_, i + 1, j + 1);
         }
     }
 
@@ -662,7 +661,9 @@ void PatternLockPattern::CalculateCellCenter()
         }
         cellCenter_ = GetLastChoosePointOffset();
     } else {
-        cellCenter_ = globalTouchPoint_ - absoluteOffset_;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        cellCenter_ = globalTouchPoint_ - host->GetTransformRelativeOffset();
     }
 }
 } // namespace OHOS::Ace::NG

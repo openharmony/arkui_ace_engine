@@ -426,7 +426,7 @@ public:
     int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     bool IsOperation() const
     {
-        return contentController_->GetTextValue().length() > 0;
+        return !contentController_->IsEmpty();
     }
 
     bool CursorMoveLeft() override;
@@ -502,8 +502,7 @@ public:
     {
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, false);
-        return layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD &&
-               layoutProperty->GetShowPasswordIconValue(true);
+        return IsInPasswordMode() && layoutProperty->GetShowPasswordIconValue(true);
     }
 
     void SetEnableTouchAndHoverEffect(bool enable)
@@ -840,7 +839,7 @@ public:
     bool IsUnspecifiedOrTextType() const;
     void TextIsEmptyRect(RectF& rect);
     void TextAreaInputRectUpdate(RectF& rect);
-    void UpdateRectByAlignment(RectF& rect);
+    void UpdateRectByTextAlign(RectF& rect);
 
     void EditingValueFilterChange();
 
@@ -924,12 +923,16 @@ public:
     }
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
+    bool IsInPasswordMode() const;
 
     bool GetShowSelect() const
     {
         return showSelect_;
     }
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+protected:
+    virtual void InitDragEvent();
+#endif
 private:
     void GetTextSelectRectsInRangeAndWillChange();
     bool HasFocus() const;
@@ -943,7 +946,6 @@ private:
     void InitLongPressEvent();
     void InitClickEvent();
 #ifdef ENABLE_DRAG_FRAMEWORK
-    void InitDragEvent();
     void InitDragDropEvent();
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragStart();
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
@@ -1038,7 +1040,7 @@ private:
     void RestorePreInlineStates();
 
     bool ResetObscureTickCountDown();
-    bool IsInPasswordMode() const;
+
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
     void UpdateErrorTextMargin();

@@ -853,11 +853,11 @@ void WebModelNG::SetOverScrollId(std::function<void(const BaseEventInfo* info)>&
     webEventHub->SetOnOverScrollEvent(std::move(uiCallback));
 }
 
-void WebModelNG::SetWrapContent(bool isWrapContentEnabled)
+void WebModelNG::SetLayoutMode(WebLayoutMode mode)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->SetWrapContent(isWrapContentEnabled);
+    webPattern->SetLayoutMode(mode);
 }
 
 void WebModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)

@@ -25,6 +25,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -589,6 +590,7 @@ private:
     void BeforeCreateLayoutWrapper() override;
 
     void SetLazyLoadFeature(bool useLazyLoad) const;
+    void SetLazyForEachLongPredict(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
     int32_t ComputeNextIndexByVelocity(float velocity) const;
     void UpdateCurrentIndex(int32_t index);
@@ -603,6 +605,7 @@ private:
     void MarkDirtyNodeSelf();
     void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
     int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
+    void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
 
     /**
      * @brief Checks if the animation is currently running.

@@ -37,6 +37,7 @@ constexpr uint32_t MEDIA_RESOURCE_MATCH_SIZE = 2;
 const int32_t RAWFILE_PREFIX_LENGTH = strlen("resource://RAWFILE/");
 const std::regex MEDIA_RES_ID_REGEX(R"(^resource://\w+/([0-9]+)\.\w+$)", std::regex::icase);
 const std::regex MEDIA_APP_RES_ID_REGEX(R"(^resource://.*/([0-9]+)\.\w+$)", std::regex::icase);
+const std::string FA_RESOURCE_PREFIX = "assets/entry/";
 
 OHOS::Media::PlayerSeekMode ConvertToMediaSeekMode(SeekMode seekMode)
 {
@@ -147,8 +148,8 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
     auto assetManager = pipelineContext->GetAssetManager();
     CHECK_NULL_RETURN(assetManager, false);
     uint32_t resId = 0;
-    auto state1 = GetResourceId(filePath, resId);
-    if (!state1) {
+    auto getResIdState = GetResourceId(filePath, resId);
+    if (!getResIdState) {
         return false;
     }
     auto themeManager = pipelineContext->GetThemeManager();
@@ -156,14 +157,19 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
     auto themeConstants = themeManager->GetThemeConstants();
     CHECK_NULL_RETURN(themeConstants, false);
     std::string mediaPath;
-    auto state2 = themeConstants->GetMediaById(resId, mediaPath);
-    if (!state2) {
+    auto getMediaPathState = themeConstants->GetMediaById(resId, mediaPath);
+    if (!getMediaPathState) {
         LOGE("GetMediaById failed");
         return false;
     }
     MediaFileInfo fileInfo;
-    auto state3 = assetManager->GetFileInfo(mediaPath.substr(mediaPath.find("resources/base")), fileInfo);
-    if (!state3) {
+    std::string videoFilePath = mediaPath.substr(mediaPath.find("resources/base"));
+    auto container = Container::Current();
+    if (!container->IsUseStageModel()) {
+        videoFilePath = FA_RESOURCE_PREFIX + videoFilePath;
+    }
+    auto getFileInfoState = assetManager->GetFileInfo(videoFilePath, fileInfo);
+    if (!getFileInfoState) {
         LOGE("GetMediaFileInfo failed");
         return false;
     }
@@ -189,14 +195,17 @@ bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
     auto assetManager = pipelineContext->GetAssetManager();
     CHECK_NULL_RETURN(assetManager, false);
     auto path = "resources/rawfile/" + filePath.substr(RAWFILE_PREFIX_LENGTH);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    if (!container->IsUseStageModel()) {
+        path = FA_RESOURCE_PREFIX + path;
+    }
     MediaFileInfo fileInfo;
-    auto state1 = assetManager->GetFileInfo(path, fileInfo);
-    if (!state1) {
+    auto getFileInfoState = assetManager->GetFileInfo(path, fileInfo);
+    if (!getFileInfoState) {
         LOGE("GetMediaFileInfo failed");
         return false;
     }
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, false);
     auto hapPath = container->GetHapPath();
     auto hapFd = open(hapPath.c_str(), O_RDONLY);
     if (hapFd < 0) {

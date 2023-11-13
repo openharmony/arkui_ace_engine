@@ -173,6 +173,7 @@ void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetAlwaysEnabled(alwaysEnabled);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void ScrollModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)

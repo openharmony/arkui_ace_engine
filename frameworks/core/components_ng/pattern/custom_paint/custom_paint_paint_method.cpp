@@ -1429,15 +1429,18 @@ void CustomPaintPaintMethod::Arc(PaintWrapper* paintWrapper, const ArcParam& par
 
 void CustomPaintPaintMethod::ArcTo(PaintWrapper* paintWrapper, const ArcToParam& param)
 {
-#ifndef USE_ROSEN_DRAWING
     OffsetF offset = GetContentOffset(paintWrapper);
     double x1 = param.x1 + offset.GetX();
     double y1 = param.y1 + offset.GetY();
     double x2 = param.x2 + offset.GetX();
     double y2 = param.y2 + offset.GetY();
     double radius = param.radius;
+#ifndef USE_ROSEN_DRAWING
     skPath_.arcTo(SkDoubleToScalar(x1), SkDoubleToScalar(y1), SkDoubleToScalar(x2), SkDoubleToScalar(y2),
         SkDoubleToScalar(radius));
+#else
+    rsPath_.ArcTo(static_cast<RSScalar>(x1), static_cast<RSScalar>(y1), static_cast<RSScalar>(x2),
+        static_cast<RSScalar>(y2), static_cast<RSScalar>(radius));
 #endif
 }
 
@@ -1700,13 +1703,16 @@ void CustomPaintPaintMethod::Path2DArc(const OffsetF& offset, const PathArgs& ar
 
 void CustomPaintPaintMethod::Path2DArcTo(const OffsetF& offset, const PathArgs& args)
 {
-#ifndef USE_ROSEN_DRAWING
     double x1 = args.para1 + offset.GetX();
     double y1 = args.para2 + offset.GetY();
     double x2 = args.para3 + offset.GetX();
     double y2 = args.para4 + offset.GetY();
     double r = args.para5;
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.arcTo(x1, y1, x2, y2, r);
+#else
+    rsPath2d_.ArcTo(static_cast<RSScalar>(x1), static_cast<RSScalar>(y1), static_cast<RSScalar>(x2),
+        static_cast<RSScalar>(y2), static_cast<RSScalar>(r));
 #endif
 }
 

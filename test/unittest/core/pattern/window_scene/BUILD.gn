@@ -98,6 +98,7 @@ ohos_unittest("window_scene_test") {
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene_model.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/screen/screen_model.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/screen/screen_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/screen/screen_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",

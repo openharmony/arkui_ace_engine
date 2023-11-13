@@ -17,6 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MANAGER_H
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "base/want/want_wrap.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 class UIExtensionPattern;
@@ -28,6 +31,9 @@ public:
 
     void RegisterUIExtensionInFocus(const WeakPtr<UIExtensionPattern>& uiExtensionFocused);
     bool OnBackPressed();
+    const RefPtr<FrameNode> GetFocusUiExtensionNode();
+    bool IsWrapExtensionAbilityId(int32_t elementId);
+    std::pair<int32_t, int32_t> UnWrapExtensionAbilityId(int32_t extensionOffset, int32_t elementId);
 
 private:
     WeakPtr<UIExtensionPattern> uiExtensionFocused_;

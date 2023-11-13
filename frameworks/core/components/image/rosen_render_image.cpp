@@ -1712,6 +1712,7 @@ Rosen::Drawing::ColorType RosenRenderImage::PixelFormatToRSColorType(const RefPt
         case PixelFormat::ALPHA_8:
             return Rosen::Drawing::ColorType::COLORTYPE_ALPHA_8;
         case PixelFormat::RGBA_F16:
+            return Rosen::Drawing::ColorType::COLORTYPE_RGBA_F16;
         case PixelFormat::UNKNOWN:
         case PixelFormat::ARGB_8888:
         case PixelFormat::RGB_888:

@@ -19,6 +19,20 @@ const KeyCode = globalThis.requireNapi("multimodalInput.keyCode").KeyCode;
 const MIN_ITEM_COUNT = 2
 const MAX_ITEM_COUNT = 5
 
+const SegmentButtonTheme = {
+  FONT_COLOR: $r('sys.color.ohos_id_color_text_secondary'),
+  TAB_SELECTED_FONT_COLOR: $r('sys.color.ohos_id_color_text_primary'),
+  CAPSULE_SELECTED_FONT_COLOR: $r('sys.color.ohos_id_color_foreground_contrary'),
+  FONT_SIZE: $r('sys.float.ohos_id_text_size_body2'),
+  SELECTED_FONT_SIZE: $r('sys.float.ohos_id_text_size_body2'),
+  BACKGROUND_COLOR: $r('sys.color.ohos_id_color_button_normal'),
+  TAB_SELECTED_BACKGROUND_COLOR: $r('sys.color.ohos_id_color_foreground_contrary'),
+  CAPSULE_SELECTED_BACKGROUND_COLOR: $r('sys.color.ohos_id_color_emphasize'),
+  FOCUS_BORDER_COLOR: $r("sys.color.ohos_id_color_focused_outline"),
+  HOVER_COlOR: $r("sys.color.ohos_id_color_hover"),
+  PRESS_COLOR: $r("sys.color.ohos_id_color_click_effect"),
+}
+  
 interface Point {
   x: number
   y: number
@@ -214,14 +228,14 @@ export class SegmentButtonOptions {
   onButtonsChange?: () => void
 
   constructor(options: TabSegmentButtonOptions | CapsuleSegmentButtonOptions) {
-    this.fontColor = options.fontColor ?? $r('sys.color.ohos_id_color_text_secondary')
-    this.selectedFontColor = options.selectedFontColor ?? $r('sys.color.ohos_id_color_text_primary')
-    this.fontSize = options.fontSize ?? $r('sys.float.ohos_id_text_size_body2')
-    this.selectedFontSize = options.selectedFontSize ?? $r('sys.float.ohos_id_text_size_body2')
+    this.fontColor = options.fontColor ?? SegmentButtonTheme.FONT_COLOR
+    this.selectedFontColor = options.selectedFontColor ?? SegmentButtonTheme.TAB_SELECTED_FONT_COLOR
+    this.fontSize = options.fontSize ?? SegmentButtonTheme.FONT_SIZE
+    this.selectedFontSize = options.selectedFontSize ?? SegmentButtonTheme.SELECTED_FONT_SIZE
     this.fontWeight = options.fontWeight ?? FontWeight.Regular
     this.selectedFontWeight = options.selectedFontWeight ?? FontWeight.Medium
-    this.backgroundColor = options.backgroundColor ?? $r('sys.color.ohos_id_color_button_normal')
-    this.selectedBackgroundColor = options.selectedBackgroundColor ?? $r('sys.color.ohos_id_color_foreground_contrary')
+    this.backgroundColor = options.backgroundColor ?? SegmentButtonTheme.BACKGROUND_COLOR
+    this.selectedBackgroundColor = options.selectedBackgroundColor ?? SegmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR
     this.imageSize = options.imageSize ?? { width: 24, height: 24 }
     this.buttonMargin = options.buttonMargin ?? { top: 4, right: 8, bottom: 4, left: 8 }
     this.textMargin = options.textMargin ?? 0
@@ -238,8 +252,8 @@ export class SegmentButtonOptions {
         this.buttonMargin = options.buttonMargin ?? { top: 6, right: 8, bottom: 6, left: 8 }
         this.iconTextBackgroundRadius = 14
       }
-      this.selectedFontColor = options.selectedFontColor ?? $r('sys.color.ohos_id_color_foreground_contrary')
-      this.selectedBackgroundColor = options.selectedBackgroundColor ?? $r('sys.color.ohos_id_color_emphasize')
+      this.selectedFontColor = options.selectedFontColor ?? SegmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR
+      this.selectedBackgroundColor = options.selectedBackgroundColor ?? SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
     } else {
       this.showText = true
     }
@@ -269,7 +283,7 @@ struct MultiSelectBackground {
           Stack()
             .layoutWeight(1)
             .height(this.buttonItemsSize[index].height)
-            .backgroundColor(this.options.backgroundColor ?? $r('sys.color.ohos_id_color_button_normal'))
+            .backgroundColor(this.options.backgroundColor ?? SegmentButtonTheme.BACKGROUND_COLOR)
             .borderRadius(this.buttonBorderRadius[index])
         }
       })
@@ -294,8 +308,8 @@ struct SelectItem {
         .borderRadius(this.buttonBorderRadius[this.selectedIndexes[0]])
         .size(this.buttonItemsSize[this.selectedIndexes[0]])
         .backgroundColor(this.options.selectedBackgroundColor ??
-        (this.options.type === 'tab' ? $r('sys.color.ohos_id_color_foreground_contrary') :
-        $r('sys.color.ohos_id_color_emphasize')))
+        (this.options.type === 'tab' ? SegmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR :
+        SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR))
         .position(this.selectedItemPosition)
         .scale({ x: this.zoomScaleArray[this.selectedIndexes[0]], y: this.zoomScaleArray[this.selectedIndexes[0]] })
         .shadow(ShadowStyle.OUTER_DEFAULT_MD)
@@ -315,7 +329,7 @@ struct MultiSelectItemArray {
 
   onOptionsChange() {
     for (let i = 0; i < this.selectedIndexes.length; i++) {
-      this.multiColor[this.selectedIndexes[i]] = this.options.selectedBackgroundColor ?? $r('sys.color.ohos_id_color_emphasize')
+      this.multiColor[this.selectedIndexes[i]] = this.options.selectedBackgroundColor ?? SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
     }
   }
 
@@ -324,13 +338,13 @@ struct MultiSelectItemArray {
       this.multiColor[i] = Color.Transparent
     }
     for (let i = 0; i < this.selectedIndexes.length; i++) {
-      this.multiColor[this.selectedIndexes[i]] = this.options.selectedBackgroundColor ?? $r('sys.color.ohos_id_color_emphasize')
+      this.multiColor[this.selectedIndexes[i]] = this.options.selectedBackgroundColor ?? SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
     }
   }
 
   aboutToAppear() {
     for (let i = 0; i < this.selectedIndexes.length; i++) {
-      this.multiColor[this.selectedIndexes[i]] = this.options.selectedBackgroundColor ?? $r('sys.color.ohos_id_color_emphasize')
+      this.multiColor[this.selectedIndexes[i]] = this.options.selectedBackgroundColor ?? SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
     }
   }
 
@@ -364,8 +378,8 @@ struct SegmentButtonItem {
           .size(this.options.imageSize ?? { width: 24, height: 24 })
           .focusable(this.index == 0)
           .draggable(false)
-          .fillColor(this.property.isSelected ? (this.options.selectedFontColor ?? $r('sys.color.ohos_id_color_foreground_contrary')) :
-            (this.options.fontColor ?? $r('sys.color.ohos_id_color_text_secondary')))
+          .fillColor(this.property.isSelected ? (this.options.selectedFontColor ?? SegmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR) :
+            (this.options.fontColor ?? SegmentButtonTheme.FONT_COLOR))
       }
       if (this.options.showText) {
         Text(this.itemOptions.text)
@@ -400,7 +414,7 @@ struct PressAndHoverEffect {
   @ObjectLink colorProperty: HoverColorProperty
   @Consume buttonBorderRadius: BorderRadiuses[]
   pressIndex: number = 0
-  pressColor: ResourceColor = $r("sys.color.ohos_id_color_click_effect")
+  pressColor: ResourceColor = SegmentButtonTheme.PRESS_COLOR
 
   build() {
     Stack()
@@ -528,7 +542,7 @@ struct SegmentButtonItemArrayComponent {
             width: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonWidth[index] + 8 : this.buttonWidth[index],
             height: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonHeight[index] + 8 : this.buttonHeight[index]
           })
-          .borderColor($r("sys.color.ohos_id_color_focused_outline"))
+          .borderColor(SegmentButtonTheme.FOCUS_BORDER_COLOR)
           .borderWidth(2)
       }
     }
@@ -626,7 +640,7 @@ struct SegmentButtonItemArrayComponent {
             .onHover((isHover: boolean) => {
               if (isHover) {
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                  this.hoverColorArray[index].hoverColor = ($r("sys.color.ohos_id_color_hover"))
+                  this.hoverColorArray[index].hoverColor = (SegmentButtonTheme.HOVER_COlOR)
                 })
               } else {
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
@@ -667,8 +681,8 @@ struct SegmentButtonItemArrayComponent {
 
 @Observed
 class ItemProperty {
-  fontColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary')
-  fontSize: DimensionNoPercentage = $r('sys.float.ohos_id_text_size_body2')
+  fontColor: ResourceColor = SegmentButtonTheme.FONT_COLOR
+  fontSize: DimensionNoPercentage = SegmentButtonTheme.FONT_SIZE
   fontWeight: FontWeight = FontWeight.Regular
   isSelected: boolean = false
 }
@@ -805,7 +819,7 @@ export struct SegmentButton {
         } else {
           Stack()
             .size(this.componentSize)
-            .backgroundColor(this.options.backgroundColor ?? $r('sys.color.ohos_id_color_button_normal'))
+            .backgroundColor(this.options.backgroundColor ?? SegmentButtonTheme.BACKGROUND_COLOR)
             .borderRadius(this.options.iconTextBackgroundRadius ?? this.componentSize.height as number / 2)
             .foregroundBlurStyle(BlurStyle.BACKGROUND_THICK, { colorMode: ThemeColorMode.LIGHT })
         }
@@ -1051,8 +1065,8 @@ export struct SegmentButton {
       this.buttonItemsSelected.forEach((selected, index) => {
         this.buttonItemProperty[index].fontColor = selected ?
           this.options.selectedFontColor ?? (this.options.type === 'tab' ?
-          $r('sys.color.ohos_id_color_text_primary') : $r('sys.color.ohos_id_color_foreground_contrary')) :
-          this.options.fontColor ?? $r('sys.color.ohos_id_color_text_secondary')
+          SegmentButtonTheme.TAB_SELECTED_FONT_COLOR : SegmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR) :
+          this.options.fontColor ?? SegmentButtonTheme.FONT_COLOR
       })
     }
     if (curve) {
@@ -1061,8 +1075,8 @@ export struct SegmentButton {
       setAnimatedPropertyFunc()
     }
     this.buttonItemsSelected.forEach((selected, index) => {
-      this.buttonItemProperty[index].fontSize = selected ? this.options.selectedFontSize ?? $r('sys.float.ohos_id_text_size_body2')
-                                                         : this.options.fontSize ?? $r('sys.float.ohos_id_text_size_body2')
+      this.buttonItemProperty[index].fontSize = selected ? this.options.selectedFontSize ?? SegmentButtonTheme.SELECTED_FONT_SIZE
+                                                         : this.options.fontSize ?? SegmentButtonTheme.FONT_SIZE
       this.buttonItemProperty[index].fontWeight = selected ? this.options.selectedFontWeight ?? FontWeight.Medium :
         this.options.fontWeight ?? FontWeight.Regular
       this.buttonItemProperty[index].isSelected = selected

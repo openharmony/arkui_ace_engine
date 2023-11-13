@@ -41,4 +41,9 @@ GestureEventFunc LongPressRecognizer::GetLongPressActionFunc()
 {
     return [](GestureEvent& info) {};
 }
+
+RefPtr<GestureSnapshot> LongPressRecognizer::Dump() const
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

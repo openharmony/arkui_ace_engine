@@ -66,14 +66,7 @@ public:
         if (!patternLockModifier_) {
             patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
         }
-
-        auto host = GetHost();
-        auto geometryNode = host->GetGeometryNode();
-        auto tempOffset = geometryNode->GetFrameOffset() + geometryNode->GetParentAbsoluteOffset();
-        if (tempOffset != absoluteOffset_) {
-            absoluteOffset_ = tempOffset;
-            CalculateCellCenter();
-        }
+        CalculateCellCenter();
         auto paintMethod =
             MakeRefPtr<PatternLockPaintMethod>(cellCenter_, isMoveEventValid_, choosePoint_, patternLockModifier_);
         return paintMethod;
@@ -161,7 +154,6 @@ private:
     RefPtr<TouchEventImpl> touchUpListener_;
     RefPtr<TouchEventImpl> touchMoveListener_;
     RefPtr<PanEvent> panEvent_;
-    OffsetF absoluteOffset_;
     OffsetF globalTouchPoint_;
 
     bool isMoveEventValid_ = false;

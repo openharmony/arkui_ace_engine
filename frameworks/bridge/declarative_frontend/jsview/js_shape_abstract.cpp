@@ -58,7 +58,6 @@ constexpr double STROKE_MITERLIMIT_DEFAULT = 4.0f;
 void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsArray()) {
-        LOGE("info is not array");
         return;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(info[0]);
@@ -76,7 +75,6 @@ void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
         if (paramIsValid) {
             dashArray.emplace_back(dim);
         } else {
-            LOGE("ParseJsDimension failed");
             dashArray.clear();
             break;
         }
@@ -93,7 +91,6 @@ void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
 void JSShapeAbstract::SetStroke(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color strokeColor;
@@ -107,7 +104,6 @@ void JSShapeAbstract::SetStroke(const JSCallbackInfo& info)
 void JSShapeAbstract::SetFill(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     if (info[0]->IsString() && info[0]->ToString() == "none") {
@@ -124,7 +120,6 @@ void JSShapeAbstract::SetFill(const JSCallbackInfo& info)
 void JSShapeAbstract::SetStrokeDashOffset(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension offset(0.0f);
@@ -154,20 +149,16 @@ void JSShapeAbstract::SetStrokeLineJoin(int lineJoin)
 void JSShapeAbstract::SetStrokeMiterLimit(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     double miterLimit = STROKE_MITERLIMIT_DEFAULT;
-    if (!ParseJsDouble(info[0], miterLimit)) {
-        LOGI("strokeMiterLimit error. now use default value");
-    }
+    ParseJsDouble(info[0], miterLimit);
     ShapeAbstractModel::GetInstance()->SetStrokeMiterLimit(miterLimit);
 }
 
 void JSShapeAbstract::SetStrokeOpacity(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     double strokeOpacity = DEFAULT_OPACITY;
@@ -185,7 +176,6 @@ void JSShapeAbstract::SetStrokeOpacity(const JSCallbackInfo& info)
 void JSShapeAbstract::SetFillOpacity(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     double fillOpacity = DEFAULT_OPACITY;
@@ -202,7 +192,6 @@ void JSShapeAbstract::SetFillOpacity(const JSCallbackInfo& info)
 void JSShapeAbstract::SetStrokeWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     // the default value is 1.0_vp
@@ -234,7 +223,6 @@ void JSShapeAbstract::SetAntiAlias(bool antiAlias)
 void JSShapeAbstract::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -246,24 +234,20 @@ void JSShapeAbstract::SetWidth(const JSRef<JSVal>& jsValue)
     CalcDimension value;
     if (jsValue->IsUndefined()) {
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
-        LOGW("jsValue is undefined");
         return;
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (!ParseJsDimensionVp(jsValue, value)) {
-            LOGW("ParseJsDimensionVp failed");
             return;
         }
     } else {
         if (!ParseJsDimensionVpNG(jsValue, value)) {
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
-            LOGW("ParseJsDimensionVp failed");
             return;
         }
     }
 
     if (LessNotEqual(value.Value(), 0.0)) {
-        LOGW("value is less than zero");
         value.SetValue(0.0);
     }
     ShapeAbstractModel::GetInstance()->SetWidth(value);
@@ -272,7 +256,6 @@ void JSShapeAbstract::SetWidth(const JSRef<JSVal>& jsValue)
 void JSShapeAbstract::JsHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -284,24 +267,20 @@ void JSShapeAbstract::SetHeight(const JSRef<JSVal>& jsValue)
     CalcDimension value;
     if (jsValue->IsUndefined()) {
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
-        LOGW("jsValue is undefined");
         return;
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (!ParseJsDimensionVp(jsValue, value)) {
-            LOGW("ParseJsDimensionVp failed");
             return;
         }
     } else {
         if (!ParseJsDimensionVpNG(jsValue, value)) {
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
-            LOGW("ParseJsDimensionVp failed");
             return;
         }
     }
 
     if (LessNotEqual(value.Value(), 0.0)) {
-        LOGW("value is less than zero");
         value.SetValue(0.0);
     }
     ShapeAbstractModel::GetInstance()->SetHeight(value);
@@ -310,12 +289,10 @@ void JSShapeAbstract::SetHeight(const JSRef<JSVal>& jsValue)
 void JSShapeAbstract::JsSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
         return;
     }
 
@@ -328,7 +305,6 @@ void JSShapeAbstract::ObjectWidth(const JSCallbackInfo& info)
 {
     info.ReturnSelf();
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -342,7 +318,6 @@ void JSShapeAbstract::ObjectWidth(const JSRef<JSVal>& jsValue)
         return;
     }
     if (LessNotEqual(value.Value(), 0.0)) {
-        LOGE("Value is less than zero");
         return;
     }
     if (basicShape_) {
@@ -354,7 +329,6 @@ void JSShapeAbstract::ObjectHeight(const JSCallbackInfo& info)
 {
     info.ReturnSelf();
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -368,7 +342,6 @@ void JSShapeAbstract::ObjectHeight(const JSRef<JSVal>& jsValue)
         return;
     }
     if (LessNotEqual(value.Value(), 0.0)) {
-        LOGE("Value is less than zero");
         return;
     }
     if (basicShape_) {
@@ -379,12 +352,10 @@ void JSShapeAbstract::ObjectHeight(const JSRef<JSVal>& jsValue)
 void JSShapeAbstract::ObjectSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
         return;
     }
 
@@ -412,7 +383,6 @@ void JSShapeAbstract::ObjectFill(const JSCallbackInfo& info)
 {
     info.ReturnSelf();
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -481,7 +451,6 @@ void JSShapeAbstract::ObjectPosition(const JSCallbackInfo& info)
 void JSShapeAbstract::SetForegroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color foregroundColor;

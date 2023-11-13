@@ -660,7 +660,7 @@ void NavigationModelNG::Create()
         contentNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
             HitTestMode::HTMTRANSPARENT_SELF);
         auto renderContext = contentNode->GetRenderContext();
-        if (theme) {
+        if (theme && !renderContext->HasBackgroundColor()) {
             renderContext->UpdateBackgroundColor(theme->GetNavigationGroupColor());
         }
         navigationGroupNode->AddChild(contentNode);

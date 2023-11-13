@@ -178,6 +178,7 @@ void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetAlwaysEnabled(alwaysEnabled);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void GridModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)

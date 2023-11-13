@@ -29,6 +29,20 @@ class Font {
         this.ohos_font.registerFont(options);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    getSystemFontList() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let arrayResult_ = this.ohos_font.getSystemFontList();
+        __JSScopeUtil__.restoreInstanceId();
+        return arrayResult_;
+    }
+
+    getFontByName(fontName) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result_ = this.ohos_font.getFontByName(fontName);
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
 }
 
 class MediaQuery {

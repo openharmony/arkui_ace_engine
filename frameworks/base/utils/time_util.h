@@ -20,6 +20,7 @@
 #include <ctime>
 #include <float.h>
 #include <limits.h>
+#include <string>
 
 #include "base/utils/macros.h"
 
@@ -32,6 +33,12 @@ constexpr int32_t DEFAULT_HOURS_WEST = -8;
 ACE_EXPORT int64_t GetMicroTickCount();
 
 int64_t GetSysTimestamp();
+
+/**
+* return milliseconds to 1970-1-1 0:0:0
+*/
+int64_t GetCurrentTimestamp();
+std::string ConvertTimestampToStr(int64_t timestamp);
 
 struct TimeOfNow final {
     explicit TimeOfNow(double hoursWest = INT_MAX) : hoursWest_(hoursWest) {}

@@ -21,6 +21,10 @@
 #include "core/image/image_loader.h"
 #include "core/image/image_source_info.h"
 
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
+
 namespace OHOS::Ace {
 ImageFileCache::ImageFileCache() = default;
 ImageFileCache::~ImageFileCache() = default;
@@ -82,7 +86,11 @@ RefPtr<NG::ImageData> ImageFileCache::GetDataFromCacheFile(const std::string& fi
     }
     auto cacheFileLoader = AceType::MakeRefPtr<FileImageLoader>();
     auto rsData = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));
+#ifndef USE_ROSEN_DRAWING
     return NG::ImageData::MakeFromDataWrapper(&rsData);
+#else
+    return AceType::MakeRefPtr<NG::DrawingImageData>(rsData);
+#endif
 }
 
 void ImageFileCache::WriteCacheFile(
