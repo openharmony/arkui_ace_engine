@@ -398,6 +398,21 @@ void ListLayoutAlgorithm::CheckJumpToIndex()
     jumpIndex_ = std::clamp(targetIndex, 0, totalItemCount_ - 1);
 }
 
+void ListLayoutAlgorithm::UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper)
+{
+    if (IsScrollSnapAlignCenter(layoutWrapper) && !itemPosition_.empty()) {
+        float itemHeight = 0.0f;
+        if (GetStartIndex() == 0) {
+            itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+            contentStartOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
+        }
+        if (GetEndIndex() == totalItemCount_ - 1) {
+            itemHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.rbegin()->second.startPos;
+            contentEndOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
+        }
+    }
+}
+
 void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
 {
     int32_t startIndex = 0;
@@ -422,16 +437,8 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             jumpIndex_ = totalItemCount_ - 1;
             scrollAlign_ = ScrollAlign::END;
         }
-        if (IsScrollSnapAlignCenter(layoutWrapper) && overScrollFeature_) {
-            float itemHeight = 0.0f;
-            if (startIndex == 0) {
-                itemHeight = itemPosition_.begin()->second.endPos - startPos;
-                contentStartOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
-            }
-            if (endIndex == totalItemCount_ - 1) {
-                itemHeight = endPos - itemPosition_.rbegin()->second.startPos;
-                contentEndOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
-            }
+        if (overScrollFeature_) {
+            UpdateSnapCenterContentOffset(layoutWrapper);
         }
         if (IsScrollSnapAlignCenter(layoutWrapper)) {
             midIndex = GetMidIndex(layoutWrapper, true);
@@ -613,28 +620,18 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
 
     currentEndPos += chainOffset;
     // adjust offset.
-    if (IsScrollSnapAlignCenter(layoutWrapper) && currentIndex == totalItemCount_ - 1) {
-        float itemHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.rbegin()->second.startPos;
-        contentEndOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
-    }
+    UpdateSnapCenterContentOffset(layoutWrapper);
     if (LessNotEqual(currentEndPos, endMainPos_ - contentEndOffset_) && !itemPosition_.empty()) {
         auto firstItemTop = itemPosition_.begin()->second.startPos;
-        auto itemTotalSize = currentEndPos - firstItemTop;
-        if (IsScrollSnapAlignCenter(layoutWrapper)) {
-            if (jumpIndex_.has_value() && (itemPosition_.find(jumpIndex_.value()) != itemPosition_.end())) {
-                auto jumpItemStartPos = itemPosition_[jumpIndex_.value()].startPos;
-                auto jumpItemEndPos = itemPosition_[jumpIndex_.value()].endPos;
-                currentOffset_ = jumpItemEndPos - (jumpItemEndPos - jumpItemStartPos) / 2.0f - contentMainSize_ / 2.0f;
-            }
-            startMainPos_ = currentOffset_;
-        } else if (LessOrEqual(itemTotalSize, contentMainSize_) && (itemPosition_.begin()->first == 0)) {
+        auto itemTotalSize = currentEndPos - firstItemTop + contentEndOffset_ + contentStartOffset_;
+        if (LessOrEqual(itemTotalSize, contentMainSize_) && (itemPosition_.begin()->first == 0)) {
             // all items size is less than list.
             if (!canOverScroll_) {
-                currentOffset_ = firstItemTop;
+                currentOffset_ = firstItemTop - contentStartOffset_;
                 startMainPos_ = currentOffset_;
             } else {
-                startMainPos_ = currentEndPos - contentMainSize_;
-                endMainPos_ = currentEndPos;
+                startMainPos_ = currentEndPos + contentEndOffset_ - contentMainSize_;
+                endMainPos_ = currentEndPos + contentEndOffset_;
             }
             if (!mainSizeIsDefined_) {
                 // adapt child size.
@@ -643,10 +640,10 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
         } else {
             // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
             if (!canOverScroll_ || jumpIndex_.has_value()) {
-                currentOffset_ = currentEndPos - contentMainSize_;
+                currentOffset_ = currentEndPos + contentEndOffset_ - contentMainSize_;
             }
-            startMainPos_ = currentEndPos - contentMainSize_;
-            endMainPos_ = currentEndPos;
+            startMainPos_ = currentEndPos + contentEndOffset_ - contentMainSize_;
+            endMainPos_ = currentEndPos + contentEndOffset_;
         }
         if (Negative(currentOffset_) && itemPosition_.begin()->second.isGroup) {
             AdjustPostionForListItemGroup(layoutWrapper, axis_, GetStartIndex());
@@ -700,34 +697,24 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
 
     currentStartPos += chainOffset;
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
-    if (IsScrollSnapAlignCenter(layoutWrapper) && currentIndex == 0) {
-        float itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
-        contentStartOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
-    }
+    UpdateSnapCenterContentOffset(layoutWrapper);
     if (GreatNotEqual(currentStartPos, startMainPos_ + contentStartOffset_)) {
-        bool overBottom = (GreatNotEqual(GetEndPosition() - GetStartPosition(), contentMainSize_) &&
-                           LessNotEqual(GetEndPosition(), endMainPos_));
-        if (((!canOverScroll_ || overBottom) && !IsScrollSnapAlignCenter(layoutWrapper)) || jumpIndex_.has_value()) {
-            currentOffset_ = currentStartPos;
-            if (!mainSizeIsDefined_ && GetEndIndex() == totalItemCount_ - 1) {
-                auto itemTotalSize = GetEndPosition() - currentStartPos;
-                contentMainSize_ = std::min(contentMainSize_, itemTotalSize);
-            }
+        auto itemTotalSize = GetEndPosition() - currentStartPos + contentEndOffset_ + contentStartOffset_;
+        bool overBottom = (GetEndIndex() == totalItemCount_ - 1) && (LessNotEqual(itemTotalSize, contentMainSize_));
+        if (overBottom && !mainSizeIsDefined_) {
+            contentMainSize_ = std::min(contentMainSize_, itemTotalSize);
         }
-        if (!IsScrollSnapAlignCenter(layoutWrapper) || jumpIndex_.has_value()) {
-            endMainPos_ = currentStartPos + contentMainSize_;
-            startMainPos_ = currentStartPos;
+        if (!canOverScroll_ || jumpIndex_.has_value()) {
+            currentOffset_ = currentStartPos - contentStartOffset_;
         }
+        endMainPos_ = currentStartPos - contentStartOffset_ + contentMainSize_;
+        startMainPos_ = currentStartPos - contentStartOffset_;
     }
 
     if (overScrollFeature_) {
         return;
     }
 
-    if (!mainSizeIsDefined_) {
-        auto itemTotalSize = GetEndPosition() - currentStartPos;
-        contentMainSize_ = std::min(contentMainSize_, itemTotalSize);
-    }
     // Mark inactive in wrapper.
     std::list<int32_t> removeIndexes;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
@@ -765,7 +752,7 @@ void ListLayoutAlgorithm::FixPredictSnapOffset(const RefPtr<ListLayoutProperty>&
     int32_t endIndex = FindPredictSnapEndIndexInItemPositions(predictEndPos, scrollSnapAlign);
     if (endIndex != -1) {
         predictEndPos = CalculatePredictSnapEndPositionByIndex(endIndex, scrollSnapAlign);
-        predictSnapOffset_ = totalOffset_ - predictEndPos;
+        predictSnapOffset_ = totalOffset_ - predictEndPos + currentOffset_;
         predictSnapEndPos_.reset();
     } else {
         if (IsUniformHeightProbably()) {
@@ -1310,7 +1297,7 @@ float ListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(uint32_t index
     if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
         predictSnapEndPos = totalOffset_ + itemPosition_[index].startPos;
     } else if (scrollSnapAlign == V2::ScrollSnapAlign::CENTER) {
-        float itemHeight = itemPosition_[index].endPos - itemPosition_[index].startPos + spaceWidth_;
+        float itemHeight = itemPosition_[index].endPos - itemPosition_[index].startPos;
         predictSnapEndPos = totalOffset_ + itemPosition_[index].startPos + itemHeight / 2.0f - contentMainSize_ / 2.0f;
     } else if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
         predictSnapEndPos = totalOffset_ + itemPosition_[index].endPos - contentMainSize_;

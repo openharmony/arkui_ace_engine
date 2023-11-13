@@ -1516,7 +1516,7 @@ HWTEST_F(ListTestNg, AttrScrollSnapAlign004, TestSize.Level1)
     EXPECT_TRUE(IsEqualTotalOffset(-ITEM_HEIGHT * 3.5));
     pattern_->OnScrollSnapCallback(contentMainSize / 2, velocity);
     pattern_->HandleScroll(contentMainSize / 2, SCROLL_FROM_ANIMATION, NestedState::GESTURE);
-    EXPECT_TRUE(IsEqualTotalOffset(-contentMainSize / 2));
+    EXPECT_TRUE(IsEqualTotalOffset(-ITEM_HEIGHT * 3.5 - contentMainSize / 2));
 }
 
 /**
@@ -5413,9 +5413,9 @@ HWTEST_F(ListTestNg, UpdateCurrentOffset001, TestSize.Level1)
      */
     CreateWithItem([](ListModelNG model) { model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER); });
     UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_UPDATE);
-    EXPECT_LT(pattern_->GetTotalOffset(), -400.f);
+    EXPECT_LT(pattern_->GetTotalOffset(), -350.f);
     UpdateCurrentOffset(-ITEM_HEIGHT * 8, SCROLL_FROM_UPDATE);
-    EXPECT_LT(pattern_->GetTotalOffset(), 400.f);
+    EXPECT_LT(pattern_->GetTotalOffset(), 450.f);
 }
 
 /**
