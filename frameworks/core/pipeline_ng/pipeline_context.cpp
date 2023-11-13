@@ -255,8 +255,8 @@ std::pair<float, float> PipelineContext::LinearInterpolation(const std::tuple<fl
     return std::make_pair(0, 0);
 }
 
-std::pair<float, float> PipelineContext::GetResamplePoint(const std::vector<TouchEvent> &history, const std::vector<TouchEvent> &current,
-    const uint64_t &nanoTimeStamp, const bool isScreen)
+std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<TouchEvent> &history,
+    const std::vector<TouchEvent> &current, const uint64_t &nanoTimeStamp, const bool isScreen)
 {
     float avgHistoryX = 0.f;
     float avgHistoryY = 0.f;
@@ -310,6 +310,30 @@ std::pair<float, float> PipelineContext::GetResamplePoint(const std::vector<Touc
     return LinearInterpolation(historyPoint, currentPoint, nanoTimeStamp);
 }
 
+TouchEvent PipelineContext::GetResampleTouchEvent(const std::vector<TouchEvent> &history,
+    const std::vector<TouchEvent> &current, const uint64_t &nanoTimeStamp)
+{
+    auto newXy = GetResampleCoord(history, current, nanoTimeStamp, false);
+    auto newScreenXy = GetResampleCoord(history, current, nanoTimeStamp, true);
+    TouchEvent newTouchEvent = GetLatestPoint(idIter.second.history, nanoTimeStamp);
+    if (newXy.first != 0 && newXy.second != 0) {
+        newTouchEvent.x = newXy.first;
+        newTouchEvent.y = newXy.second;
+        newTouchEvent.screenX = newScreenXy.first;
+        newTouchEvent.screenY = newScreenXy.second;
+        std::chrono::nanoseconds nanoseconds(nanoTimeStamp);
+        newTouchEvent.time = TimeStamp(nanoseconds);
+        newTouchEvent.history = current;
+        newTouchEvent.isInterpolated = true;
+        }
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f",
+        newTouchEvent.id, newTouchEvent.x, newTouchEvent.y, newTouchEvent.screenX,
+        newTouchEvent.screenY);
+    }
+    return newTouchEvent;
+}
+
 TouchEvent PipelineContext::GetLatestPoint(const std::vectoe<TouchEvent> &current, const uint64_t &nanoTimeStamp)
 {
     TouchEvent result;
@@ -317,7 +341,7 @@ TouchEvent PipelineContext::GetLatestPoint(const std::vectoe<TouchEvent> &curren
     for (auto iter = current.begin(); iter != current.end(); iter++) {
         uint64_t timeStamp = static_cast<uint64_t>(iter->time.time_since_epoch().count());
         if (timeStamp == nanoTimeStamp) {
-            result - *iter;
+            result = *iter;
             return result;
         } else if (timeStamp > nanoTimeStamp) {
             if (timeStamp - nanoTimeStamp < gap) {
@@ -1423,28 +1447,10 @@ void PipelineContext::FlushTouchEvents()
         if (needInterpolation) {
             auto targetTimeStamp = resampleTimeStamp_;
             for (const auto &idIter : idToTouchPoints) {
-                auto newXy = GetResamplePoint(historyPointsById_[idIter.first], idIter.second.history,
-                    targetTimeStamp, false);
-                auto newScreenXy = GetResamplePoint(historyPointsById_[idIter.first], idIter.second.history,
-                    targetTimeStamp, true);
-                TouchEvent newTouchEvent;
-                newTouchEvent = GetLatestPoint(idIter.second.history, targetTimeStamp);
-                if (newXy.first != 0 && newXy.second != 0) {
-                    newTouchEvent.x = newXy.first;
-                    newTouchEvent.y = newXy.second;
-                    newTouchEvent.screenX = newScreenXy.first;
-                    newTouchEvent.screenY = newScreenXy.second;
-                    std::chrono::nanoseconds nanoseconds(targetTimeStamp);
-                    newTouchEvent.time = TimeStamp(nanoseconds);
-                    newTouchEvent.history = idIter.second.history;
-                    newTouchEvent.pointers = idIter.second.pointers;
-                    newTouchEvent.isInterpolated = true;
+                TouchEvent newTouchEvent = GetResampleTouchEvent(historyPointsById_[idIter.first],
+                    idIter.second.history, targetTimeStamp);
+                if (newTouchEvent.x != 0 && newTouchEvent.y != 0) {
                     newIdTouchPoints[idIter.first] = newTouchEvent;
-                }
-                if (SystemProperties::GetDebugEnabled()) {
-                    LOGI("Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f",
-                        newTouchEvent.id, newTouchEvent.x, newTouchEvent.y, newTouchEvent.screenX,
-                        newTouchEvent.screenY);
                 }
                 historyPointsById_[idIter.first] = idIter.second.history;
             }
