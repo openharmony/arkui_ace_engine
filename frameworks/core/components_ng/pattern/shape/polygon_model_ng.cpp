@@ -29,6 +29,7 @@ void PolygonModelNG::Create(bool isPolygon)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", isPolygon ? V2::POLYGON_ETS_TAG : V2::POLYLINE_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         isPolygon ? V2::POLYGON_ETS_TAG : V2::POLYLINE_ETS_TAG,
         nodeId, [isPolygon]() { return AceType::MakeRefPtr<PolygonPattern>(isPolygon); });

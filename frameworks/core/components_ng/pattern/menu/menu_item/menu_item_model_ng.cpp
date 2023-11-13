@@ -31,6 +31,7 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     CHECK_NULL_VOID(customNode);
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::MENU_ITEM_ETS_TAG, nodeId);
     auto menuItem = FrameNode::GetOrCreateFrameNode(
         V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CustomMenuItemPattern>(); });
     CHECK_NULL_VOID(menuItem);

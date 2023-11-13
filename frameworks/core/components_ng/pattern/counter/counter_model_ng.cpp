@@ -29,6 +29,7 @@ void CounterModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::COUNTER_ETS_TAG, nodeId);
     auto counterNode = CounterNode::GetOrCreateCounterNode(
         V2::COUNTER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CounterPattern>(); });
     auto counterPattern = counterNode->GetPattern<CounterPattern>();

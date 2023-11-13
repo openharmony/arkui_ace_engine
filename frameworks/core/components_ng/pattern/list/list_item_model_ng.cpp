@@ -37,6 +37,7 @@ void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, V2::
         deepRenderFunc(nodeId);
         return ViewStackProcessor::GetInstance()->Finish();
     };
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::LIST_ITEM_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::LIST_ITEM_ETS_TAG, nodeId,
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = listItemStyle]() {

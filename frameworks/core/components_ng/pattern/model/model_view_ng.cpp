@@ -43,6 +43,7 @@ void ModelViewNG::Create(const std::string& src, Render3D::SurfaceType surfaceTy
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     static int staticKey = 0;
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::MODEL_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::MODEL_ETS_TAG, nodeId, [&nodeId, surfaceType]() {
             return AceType::MakeRefPtr<ModelPattern>(staticKey++, surfaceType);
