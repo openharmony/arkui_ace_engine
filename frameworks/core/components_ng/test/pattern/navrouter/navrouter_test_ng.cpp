@@ -1735,7 +1735,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
 
     navBar->SetBackButton(navigator);
     auto pattern = titleBarNode->GetPattern<TitleBarPattern>();
-    titleBarNode->SetBackButton(NavBarNode->GetBackButton());
+    titleBarNode->SetBackButton(navBar->GetBackButton());
     titleBarNode->AddChild(titleBarNode->GetBackButton());
     titleBarNode->title_ = title;
 
