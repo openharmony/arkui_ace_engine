@@ -109,8 +109,11 @@ void DataPanelModifier::UpdateDate()
 {
     if (isEffect_->Get()) {
         // When the date update, the animation will repeat once.
-        date_->Set(ANIMATION_START);
         AnimationOption option = AnimationOption();
+        option.SetDuration(0);
+        option.SetDelay(ANIMATION_DELAY);
+        option.SetIteration(ANIMATION_TIMES);
+        AnimationUtils::Animate(option, [&]() { date_->Set(OHOS::Ace::NG::ANIMATION_START); });
         RefPtr<Curve> curve = AceType::MakeRefPtr<SpringCurve>(
             ANIMATION_CURVE_VELOCITY, ANIMATION_CURVE_MASS, ANIMATION_CURVE_STIFFNESS, ANIMATION_CURVE_DAMPING);
         option.SetDuration(ANIMATION_DURATION);
