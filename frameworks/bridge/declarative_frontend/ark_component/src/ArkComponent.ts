@@ -1,4 +1,3 @@
-
 /// <reference path="./import.ts" />
 const HashMap = globalThis.requireNapi('util.HashMap')
 const arkUINativeModule = globalThis.getArkUINativeModule();
@@ -203,6 +202,18 @@ class OpacityModifier extends Modifier<number> {
         }
         else {
             GetUINativeModule().common.setOpacity(node, this.value);
+        }
+    }
+}
+
+class AlignModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("align");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetAlign(node);
+        }
+        else {
+            GetUINativeModule().common.setAlign(node, this.value);
         }
     }
 }
@@ -728,7 +739,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     align(value: Alignment): this {
-        throw new Error("Method not implemented.");
+        if (isNumber(value)) {
+            modifier(this._modifiers, AlignModifier, value);
+        } else {
+            modifier(this._modifiers, AlignModifier, undefined);
+        }
+        return this 
     }
 
     position(value: Position): this {

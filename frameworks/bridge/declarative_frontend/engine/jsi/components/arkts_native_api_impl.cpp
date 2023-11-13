@@ -15,6 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_common_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -32,6 +33,7 @@ NodeHandle GetFrameNodeById(int nodeId)
 static struct ArkUINodeAPI impl = {
     GetFrameNodeById,
     GetCommonModifier,
+    GetTextModifier,
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI()

@@ -328,7 +328,8 @@ public:
     static void SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode);
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
-    
+    static void SetAlign(FrameNode* frameNode, Alignment alignment);
+
 private:
     static void AddDragFrameNodeToManager();
 };

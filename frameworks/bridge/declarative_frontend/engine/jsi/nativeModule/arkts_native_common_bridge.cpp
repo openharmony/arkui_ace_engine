@@ -20,9 +20,6 @@
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -333,13 +330,11 @@ ArkUINativeModuleValue CommonBridge::SetPosition(ArkUIRuntimeCallInfo* runtimeCa
 
     CalcDimension x;
     CalcDimension y;
-
     bool hasX = ParseJsDimensionVpNG(vm, sizeX, x, false);
     bool hasY = ParseJsDimensionVpNG(vm, sizeY, y, false);
     if (!hasX && !hasY) {
         GetArkUIInternalNodeAPI()->GetCommonModifier().ResetPosition(nativeNode);
     }
-
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetPosition(
         nativeNode, x.Value(), static_cast<int>(x.Unit()), y.Value(), static_cast<int>(y.Unit()));
     return panda::JSValueRef::Undefined(vm);
@@ -615,6 +610,30 @@ ArkUINativeModuleValue CommonBridge::ResetOpacity(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetCommonModifier().ResetOpacity(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue CommonBridge::SetAlign(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if (secondArg->IsNumber()) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().SetAlign(nativeNode, secondArg->ToNumber(vm)->Value());
+    } else {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetAlign(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetAlign(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetAlign(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

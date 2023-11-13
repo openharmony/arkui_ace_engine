@@ -910,6 +910,11 @@ void ViewAbstract::SetAlign(Alignment alignment)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
 }
 
+void ViewAbstract::SetAlign(FrameNode* frameNode, Alignment alignment)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment, frameNode);
+}
+
 void ViewAbstract::SetVisibility(VisibleType visible)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
