@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/navigator/navigator_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
