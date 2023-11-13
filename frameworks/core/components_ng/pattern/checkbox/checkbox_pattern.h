@@ -71,18 +71,18 @@ public:
             auto shadowColor = isSelect ? checkBoxTheme->GetShadowColor() : Color::TRANSPARENT;
             checkboxModifier_ =
                 AceType::MakeRefPtr<CheckBoxModifier>(isSelect, boardColor, checkColor, borderColor, shadowColor);
-            CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
-            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-                checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
-            } else {
-                checkboxStyle = CheckBoxStyle::SQUARE_STYLE;
-            }
-            if (paintProperty->HasCheckBoxSelectedStyle()) {
-                checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
-            }
-            checkboxModifier_->SetCheckboxStyle(checkboxStyle);
-            host->SetCheckboxFlag(true);
         }
+        CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+        } else {
+            checkboxStyle = CheckBoxStyle::SQUARE_STYLE;
+        }
+        if (paintProperty->HasCheckBoxSelectedStyle()) {
+            checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
+        }
+        checkboxModifier_->SetCheckboxStyle(checkboxStyle);
+        host->SetCheckboxFlag(true);
         auto paintMethod = MakeRefPtr<CheckBoxPaintMethod>(checkboxModifier_);
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
