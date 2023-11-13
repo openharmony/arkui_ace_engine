@@ -533,6 +533,10 @@ public:
     }
     virtual void OnFlushTouchEventsBegin() {}
     virtual void OnFlushTouchEventsEnd() {}
+    virtual Axis GetAxisDirection()
+    {
+        return direction_;
+    }
 
     void SetTouchRestrict(const TouchRestrict& touchRestrict)
     {
@@ -642,6 +646,7 @@ protected:
     std::string nodeName_ = "NULL";
     int32_t nodeId_ = -1;
     WeakPtr<NG::FrameNode> node_ = nullptr;
+    Axis direction_ = Axis::NONE;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;

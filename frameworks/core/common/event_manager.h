@@ -76,6 +76,8 @@ public:
 
     void TouchTest(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict);
 
+    bool HasDifferentDirectionGesture();
+
     bool DispatchTouchEvent(const TouchEvent& point);
     bool DispatchTouchEvent(const AxisEvent& event);
     void FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvents);
