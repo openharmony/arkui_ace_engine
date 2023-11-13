@@ -255,7 +255,8 @@ std::pair<float, float> PipelineContext::LinearInterpolation(const std::tuple<fl
     return std::make_pair(0, 0);
 }
 
-std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(const std::vector<TouchEvent> &events, const bool isScreen)
+std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(const std::vector<TouchEvent> &events,
+    const bool isScreen)
 {
     float avgX = 0.f;
     float avgY = 0.f;
