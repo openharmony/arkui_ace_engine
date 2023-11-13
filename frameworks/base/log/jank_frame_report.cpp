@@ -158,6 +158,8 @@ void JankFrameReport::RecordJankStatus(double jank)
     frameJankRecord_[GetJankRange(jank)]++;
     if (jank >= 6.0f) {
         jankFrameCount_++;
+        ACE_SCOPED_TRACE("JANK_STATS_APP skippedTime=%lld(ms)",
+            static_cast<long long>(jank * refreshPeriod_ / NS_TO_MS));
         ACE_COUNT_TRACE(jankFrameCount_, "JANK FRAME %s", pageUrl_.c_str());
     }
     PerfMonitor::GetPerfMonitor()->ReportJankFrameApp(jank);

@@ -116,7 +116,7 @@ public:
     void Start(const std::string& sceneId, PerfActionType type, const std::string& note);
     void End(const std::string& sceneId, bool isRsRender);
     void RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time);
-    int64_t GetInputTime(PerfActionType type, const std::string& note);
+    int64_t GetInputTime(const std::string& sceneId, PerfActionType type, const std::string& note);
     void SetFrameTime(int64_t vsyncTime, int64_t duration, double jank);
     void ReportJankFrameApp(double jank);
     void SetPageUrl(const std::string& pageUrl);
@@ -132,6 +132,7 @@ private:
     void FlushDataBase(SceneRecord* record, DataBase& data, bool needReportToRS);
     void ReportPerfEvent(PerfEventType type, DataBase& data);
     void RecordBaseInfo(SceneRecord* record);
+    bool IsExceptResponseTime(int64_t time, const std::string& sceneId);
 private:
     std::map<PerfActionType, int64_t> mInputTime;
     int64_t mVsyncTime {0};
