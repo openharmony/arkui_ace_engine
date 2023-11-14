@@ -386,13 +386,12 @@ void ListLayoutAlgorithm::CheckJumpToIndex()
     float totalHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     float averageHeight = totalHeight / itemPosition_.size();
     int32_t targetIndex = itemPosition_.begin()->first;
+    currentDelta_ -= itemPosition_.begin()->second.startPos;
     if (NonNegative(currentDelta_)) {
-        currentDelta_ += itemPosition_.begin()->second.startPos;
         int32_t items = currentDelta_ / averageHeight;
         targetIndex += items;
         currentDelta_ -= items * averageHeight;
     } else {
-        currentDelta_ -= itemPosition_.begin()->second.startPos;
         int32_t items = -currentDelta_ / averageHeight;
         targetIndex -= items;
         currentDelta_ += items * averageHeight;
