@@ -1952,7 +1952,7 @@ bool TextFieldPattern::OnPreShowSelectOverlay(
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     isSupportCameraInput_ = inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT)
-        && layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD;
+        && !IsInPasswordMode();
 #else
     isSupportCameraInput_ = false;
 #endif
