@@ -96,8 +96,8 @@ void TextPattern::CloseSelectOverlay(bool animation)
 {
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         selectOverlayProxy_->Close(animation);
+        RemoveAreaChangeInner();
     }
-    RemoveAreaChangeInner();
 }
 
 void TextPattern::ResetSelection()
@@ -1457,14 +1457,14 @@ int32_t TextPattern::GetHandleIndex(const Offset& offset) const
 
 void TextPattern::OnAreaChangedInner()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto parentGlobalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
-    if (parentGlobalOffset != parentGlobalOffset_) {
-        parentGlobalOffset_ = parentGlobalOffset;
-        if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto parentGlobalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+        if (parentGlobalOffset != parentGlobalOffset_) {
+            parentGlobalOffset_ = parentGlobalOffset;
             CalculateHandleOffsetAndShowOverlay();
             ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
         }
@@ -1477,6 +1477,12 @@ void TextPattern::RemoveAreaChangeInner()
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (eventHub->HasOnAreaChanged()) {
+        LOGD("RemoveAreaChangeInner do not remove external area change callback");
+        return;
+    }
     pipeline->RemoveOnAreaChangeNode(host->GetId());
 }
 } // namespace OHOS::Ace::NG
