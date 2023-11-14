@@ -844,6 +844,33 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleScrollVelocity005
+ * @tc.desc: Test nested HandleScroll with different scroll mode forward/backward
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleScrollVelocity005, TestSize.Level1)
+{
+    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
+    mockScroll_->pattern_ = mockPn;
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    EXPECT_TRUE(scrollPn);
+    scrollPn->parent_ = mockPn;
+
+    EXPECT_CALL(*mockPn, HandleScrollVelocity).Times(0);
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(true));
+
+    scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
+    scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::SELF_ONLY };
+
+    bool res = scrollPn->HandleScrollVelocity(5);
+    EXPECT_TRUE(res);
+
+    scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
+    res = scrollPn->HandleScrollVelocity(5);
+    EXPECT_FALSE(res);
+}
+
+/**
  * @tc.name: OnScrollStart001
  * @tc.desc: Test nested HandleScroll onScrollStart
  * @tc.type: FUNC
