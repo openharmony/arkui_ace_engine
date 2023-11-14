@@ -1974,14 +1974,8 @@ void TabBarPattern::DumpAdvanceInfo()
 {
     isRTL_ ? DumpLog::GetInstance().AddDesc("isRTL:true") : DumpLog::GetInstance().AddDesc("isRTL:false");
     touching_ ? DumpLog::GetInstance().AddDesc("touching:true") : DumpLog::GetInstance().AddDesc("touching:false");
-    isHover_ ? DumpLog::GetInstance().AddDesc("isHover:true") : DumpLog::GetInstance().AddDesc("isHover:false");
     isMaskAnimationByCreate_ ? DumpLog::GetInstance().AddDesc("isMaskAnimationByCreate:true")
                              : DumpLog::GetInstance().AddDesc("isMaskAnimationByCreate:false");
-    touchingIndex_.has_value()
-        ? DumpLog::GetInstance().AddDesc("touchingIndex:" + std::to_string(touchingIndex_.value()))
-        : DumpLog::GetInstance().AddDesc("touchingIndex:null");
-    hoverIndex_.has_value() ? DumpLog::GetInstance().AddDesc("hoverIndex:" + std::to_string(hoverIndex_.value()))
-                            : DumpLog::GetInstance().AddDesc("hoverIndex:null");
     animationDuration_.has_value()
         ? DumpLog::GetInstance().AddDesc("animationDuration:" + std::to_string(animationDuration_.value()))
         : DumpLog::GetInstance().AddDesc("animationDuration:null");
