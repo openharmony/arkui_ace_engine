@@ -117,6 +117,11 @@ public:
         transitionStatus_ = transitionStatus;
     }
 
+    TransitionStatus GetTransitionStatus() const
+    {
+        return transitionStatus_;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
