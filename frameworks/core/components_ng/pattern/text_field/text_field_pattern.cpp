@@ -98,6 +98,7 @@ constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
+constexpr float DOUBLECLICK_MIN_INTERVAL_MS = 0.0f;
 constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
@@ -1409,7 +1410,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout = clickTimeStamp - lastClickTimeStamp_;
     lastClickTimeStamp_ = info.GetTimeStamp();
     isUsingMouse_ = info.GetSourceDevice() == SourceType::MOUSE;
-    if (timeout.count() < DOUBLECLICK_INTERVAL_MS) {
+    if (timeout.count() >= DOUBLECLICK_MIN_INTERVAL_MS && timeout.count() < DOUBLECLICK_INTERVAL_MS) {
         HandleDoubleClickEvent(info); // 注册手势事件
     } else {
         HandleSingleClickEvent(info);
