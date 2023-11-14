@@ -2067,9 +2067,24 @@ void ViewAbstract::SetBloom(const float value)
     ACE_UPDATE_RENDER_CONTEXT(Bloom, value);
 }
 
-
 void ViewAbstract::SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(MotionPath, motionPath, frameNode);
+}
+
+void ViewAbstract::SetFocusOnTouch(FrameNode* frameNode, bool isSet)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetIsFocusOnTouch(isSet);
+}
+
+void ViewAbstract::SetGroupDefaultFocus(FrameNode* frameNode, bool isSet)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetIsDefaultGroupFocus(isSet);
 }
 } // namespace OHOS::Ace::NG

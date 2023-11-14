@@ -237,6 +237,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetMotionPath));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMotionPath"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetMotionPath));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGroupDefaultFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetGroupDefaultFocus));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGroupDefaultFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetGroupDefaultFocus));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFocusOnTouch"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetFocusOnTouch));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFocusOnTouch"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetFocusOnTouch));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto counter = panda::ObjectRef::New(vm);
