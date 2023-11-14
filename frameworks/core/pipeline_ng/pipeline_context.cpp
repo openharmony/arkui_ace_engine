@@ -224,8 +224,8 @@ void PipelineContext::RemoveScheduleTask(uint32_t id)
     scheduleTasks_.erase(id);
 }
 
-std::pair<float, float> PipelineContext::LinearInterpolation(const std::tuple<float, float, uint64_t> history,
-    const std::tuple<float, float, uint64_t> current, const uint64_t nanoTimeStamp)
+std::pair<float, float> PipelineContext::LinearInterpolation(const std::tuple<float, float, uint64_t>& history,
+    const std::tuple<float, float, uint64_t>& current, const uint64_t nanoTimeStamp)
 {
     if (nanoTimeStamp == std::get<INDEX_TIME>(history) || nanoTimeStamp == std::get<INDEX_TIME>(current)) {
         return std::make_pair(0.0f, 0.0f);
@@ -255,7 +255,7 @@ std::pair<float, float> PipelineContext::LinearInterpolation(const std::tuple<fl
     return std::make_pair(0.0f, 0.0f);
 }
 
-std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(const std::vector<TouchEvent> &events,
+std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(const std::vector<TouchEvent>& events,
     const bool isScreen)
 {
     float avgX = 0.0f;
@@ -283,8 +283,8 @@ std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(const std::vecto
     return std::make_tuple(avgX, avgY, avgTime);
 }
 
-std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<TouchEvent> &history,
-    const std::vector<TouchEvent> &current, const uint64_t nanoTimeStamp, const bool isScreen)
+std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<TouchEvent>& history,
+    const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen)
 {
     if (history.empty() || current.empty()) {
         LOGD("history or current has no point, do not resample");
@@ -311,8 +311,8 @@ std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<Touc
     return LinearInterpolation(historyPoint, currentPoint, nanoTimeStamp);
 }
 
-TouchEvent PipelineContext::GetResampleTouchEvent(const std::vector<TouchEvent> &history,
-    const std::vector<TouchEvent> &current, const uint64_t nanoTimeStamp)
+TouchEvent PipelineContext::GetResampleTouchEvent(const std::vector<TouchEvent>& history,
+    const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp)
 {
     auto newXy = GetResampleCoord(history, current, nanoTimeStamp, false);
     auto newScreenXy = GetResampleCoord(history, current, nanoTimeStamp, true);
@@ -335,7 +335,7 @@ TouchEvent PipelineContext::GetResampleTouchEvent(const std::vector<TouchEvent> 
     return newTouchEvent;
 }
 
-TouchEvent PipelineContext::GetLatestPoint(const std::vector<TouchEvent> &current, const uint64_t nanoTimeStamp)
+TouchEvent PipelineContext::GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp)
 {
     TouchEvent result;
     uint64_t gap = UINT64_MAX;
