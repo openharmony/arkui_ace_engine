@@ -177,7 +177,6 @@
             ],
             "test": [
                 "//foundation/arkui/ace_engine/test/unittest:unittest",
-                "//foundation/arkui/ace_engine/frameworks/core/components_ng/test:unittest",
                 "//foundation/arkui/ace_engine/test/fuzztest:fuzztest"
             ]
         }

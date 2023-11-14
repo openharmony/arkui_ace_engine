@@ -21,11 +21,16 @@
 #include <utility>
 #include <vector>
 
-#include "gtest/gtest.h"
 #include "gmock/gmock-actions.h"
+#include "gtest/gtest.h"
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/render/mock_media_player.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/render/mock_render_surface.h"
+
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
@@ -50,13 +55,9 @@
 #include "core/components_ng/pattern/video/video_node.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_ng/pattern/video/video_styles.h"
-#include "core/components_ng/test/mock/render/mock_media_player.h"
-#include "core/components_ng/test/mock/render/mock_render_context.h"
-#include "core/components_ng/test/mock/render/mock_render_surface.h"
-#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/image/image_source_info.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;

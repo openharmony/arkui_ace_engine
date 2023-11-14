@@ -31,7 +31,7 @@
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;

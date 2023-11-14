@@ -17,7 +17,7 @@
 #include "gtest/gtest.h"
 
 #include "base/test/mock/mock_asset_manager.h"
-#include "base/test/mock/mock_task_executor.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "core/common/frontend.h"
 #include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/plugin/plugin_window.h"

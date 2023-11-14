@@ -41,12 +41,12 @@ frameworks/bridge/declarative_frontend/state_mgmt/   @guido_grassel @s10021109
 frameworks/bridge/engine/stateMgmt.js   @guido_grassel @s10021109
 
 [JS Frontend Core]
-frameworks/bridge/declarative_frontend/jsview/js_view.h       @yan-shuifeng @guido_grassel 
-frameworks/bridge/declarative_frontend/jsview/js_view.cpp     @yan-shuifeng @guido_grassel 
-frameworks/bridge/declarative_frontend/jsview/js_view_functions.h     @yan-shuifeng @guido_grassel 
-frameworks/bridge/declarative_frontend/jsview/js_view_functions.cpp   @yan-shuifeng @guido_grassel 
-frameworks/bridge/declarative_frontend/view_stack_processor.cpp  @yan-shuifeng @guido_grassel 
-frameworks/bridge/declarative_frontend/view_stack_processor.h    @yan-shuifeng @guido_grassel 
+frameworks/bridge/declarative_frontend/jsview/js_view.h       @yan-shuifeng @guido_grassel
+frameworks/bridge/declarative_frontend/jsview/js_view.cpp     @yan-shuifeng @guido_grassel
+frameworks/bridge/declarative_frontend/jsview/js_view_functions.h     @yan-shuifeng @guido_grassel
+frameworks/bridge/declarative_frontend/jsview/js_view_functions.cpp   @yan-shuifeng @guido_grassel
+frameworks/bridge/declarative_frontend/view_stack_processor.cpp  @yan-shuifeng @guido_grassel
+frameworks/bridge/declarative_frontend/view_stack_processor.h    @yan-shuifeng @guido_grassel
 
 [UI Components]
 frameworks/core/components_ng/pattern/ability_component/  @lushi1202
@@ -323,105 +323,5 @@ frameworks/core/components_ng/components_plugin.gni  @sunfei2021
 frameworks/core/components_ng/components.gni  @sunfei2021
 
 [Test source]
-frameworks/bridge/test/  @liyujie43
 test/mock/  @liyujie43
 test/unittest/  @liyujie43
-frameworks/core/components_ng/test/pattern/ability_component/  @lushi1202
-frameworks/core/components_ng/test/pattern/action_sheet/  @cheng-feiwang
-frameworks/core/components_ng/test/pattern/animator/  @suiwuyue
-frameworks/core/components_ng/test/pattern/app_bar/  @suiwuyue
-frameworks/core/components_ng/test/pattern/badge/  @Hu_ZeQi
-frameworks/core/components_ng/test/pattern/blank/  @xiexiyun
-frameworks/core/components_ng/test/pattern/bubble/  @cheng-feiwang
-frameworks/core/components_ng/test/pattern/button/  @luoying_ace_admin
-frameworks/core/components_ng/test/pattern/calendar/  @techbuilding
-frameworks/core/components_ng/test/pattern/canvas_context/  @keerecles
-frameworks/core/components_ng/test/pattern/canvas_renderer/  @keerecles
-frameworks/core/components_ng/test/pattern/checkbox/  @luoying_ace_admin
-frameworks/core/components_ng/test/pattern/checkboxgroup/  @luoying_ace_admin
-frameworks/core/components_ng/test/pattern/common_view/  @yangfan229
-frameworks/core/components_ng/test/pattern/container_modal/  @suiwuyue
-frameworks/core/components_ng/test/pattern/counter/  @aryawang
-frameworks/core/components_ng/test/pattern/custom/  @yan-shuifeng
-frameworks/core/components_ng/test/pattern/custom_paint/  @keerecles
-frameworks/core/components_ng/test/pattern/data_panel/  @Hu_ZeQi
-frameworks/core/components_ng/test/pattern/dialog/  @cheng-feiwang
-frameworks/core/components_ng/test/pattern/divider/  @luoying_ace_admin
-frameworks/core/components_ng/test/pattern/effect_component/  @liuchao92
-frameworks/core/components_ng/test/pattern/flex/  @yangfan229
-frameworks/core/components_ng/test/pattern/form/  @wangchensu1
-frameworks/core/components_ng/test/pattern/gauge/  @Hu_ZeQi
-frameworks/core/components_ng/test/pattern/gesture/  @zheng-qiyi
-frameworks/core/components_ng/test/pattern/grid/  @suiwuyue
-frameworks/core/components_ng/test/pattern/grid_col/  @xiexiyun
-frameworks/core/components_ng/test/pattern/grid_container/  @xiexiyun
-frameworks/core/components_ng/test/pattern/grid_row/  @xiexiyun
-frameworks/core/components_ng/test/pattern/hyperlink/  @jinweiliu
-frameworks/core/components_ng/test/pattern/image/  @xiexiyun
-frameworks/core/components_ng/test/pattern/image_animator/  @suiwuyue
-frameworks/core/components_ng/test/pattern/indexer/  @suiwuyue
-frameworks/core/components_ng/test/pattern/linear_layout/  @xiexiyun
-frameworks/core/components_ng/test/pattern/linear_split/  @xiexiyun
-frameworks/core/components_ng/test/pattern/list/  @suiwuyue
-frameworks/core/components_ng/test/pattern/loading_progress/  @Zhang-Dong-hui
-frameworks/core/components_ng/test/pattern/marquee/  @aryawang
-frameworks/core/components_ng/test/pattern/menu/  @cheng-feiwang
-frameworks/core/components_ng/test/pattern/model/ @
-frameworks/core/components_ng/test/pattern/navigation/  @tsj_2020
-frameworks/core/components_ng/test/pattern/navigator/  @tsj_2020
-frameworks/core/components_ng/test/pattern/navrouter/  @tsj_2020
-frameworks/core/components_ng/test/pattern/option/  @cheng-feiwang
-frameworks/core/components_ng/test/pattern/overlay/  @yangfan229
-frameworks/core/components_ng/test/pattern/panel/  @zhou-chaobo
-frameworks/core/components_ng/test/pattern/patternlock/  @Zhang-Dong-hui
-frameworks/core/components_ng/test/pattern/picker/  @cheng-feiwang
-frameworks/core/components_ng/test/pattern/plugin/  @wangchensu1
-frameworks/core/components_ng/test/pattern/preview_mock/  @laigerendaqiu
-frameworks/core/components_ng/test/pattern/progress/  @Zhang-Dong-hui
-frameworks/core/components_ng/test/pattern/qrcode/  @Zhang-Dong-hui
-frameworks/core/components_ng/test/pattern/radio/  @luoying_ace_admin
-frameworks/core/components_ng/test/pattern/rating/  @cheng-feiwang
-frameworks/core/components_ng/test/pattern/recycle_view/  @guozejun
-frameworks/core/components_ng/test/pattern/refresh/  @suiwuyue
-frameworks/core/components_ng/test/pattern/relative_container/  @nickyjd
-frameworks/core/components_ng/test/pattern/remote_window/  @liuchao92
-frameworks/core/components_ng/test/pattern/rendering_context/  @keerecles
-frameworks/core/components_ng/test/pattern/rich_editor/  @wu-yinxiao
-frameworks/core/components_ng/test/pattern/root/  @yan-shuifeng
-frameworks/core/components_ng/test/pattern/scroll/  @suiwuyue
-frameworks/core/components_ng/test/pattern/scroll_bar/  @suiwuyue
-frameworks/core/components_ng/test/pattern/scrollable/  @suiwuyue
-frameworks/core/components_ng/test/pattern/search/  @luoying_ace_admin
-frameworks/core/components_ng/test/pattern/security_component/ @
-frameworks/core/components_ng/test/pattern/select/  @cheng-feiwang
-frameworks/core/components_ng/test/pattern/select_overlay/   @cheng-feiwang
-frameworks/core/components_ng/test/pattern/shape/  @sunbees
-frameworks/core/components_ng/test/pattern/side_bar/  @tsj_2020
-frameworks/core/components_ng/test/pattern/slider/  @cheng-feiwang
-frameworks/core/components_ng/test/pattern/stack/  @nickyjd
-frameworks/core/components_ng/test/pattern/stage/  @yan-shuifeng
-frameworks/core/components_ng/test/pattern/stepper/  @tsj_2020
-frameworks/core/components_ng/test/pattern/swiper/  @xuzhidan
-frameworks/core/components_ng/test/pattern/swiper_indicator/  @xuzhidan
-frameworks/core/components_ng/test/pattern/tabs/  @xuzhidan
-frameworks/core/components_ng/test/pattern/text/  @lijuan124
-frameworks/core/components_ng/test/pattern/text_clock/  @aryawang
-frameworks/core/components_ng/test/pattern/text_drag/  @zhaojian2021
-frameworks/core/components_ng/test/pattern/text_field/  @jyj_0306  @lijuan124
-frameworks/core/components_ng/test/pattern/text_picker/  @cheng-feiwang
-frameworks/core/components_ng/test/pattern/texttimer/  @aryawang
-frameworks/core/components_ng/test/pattern/time_picker/  @cheng-feiwang
-frameworks/core/components_ng/test/pattern/toast/ @
-frameworks/core/components_ng/test/pattern/toggle/  @luoying_ace_admin
-frameworks/core/components_ng/test/pattern/ui_extension/  @lushi1202
-frameworks/core/components_ng/test/pattern/video/  @jinweiliu
-frameworks/core/components_ng/test/pattern/view_context/  @hehongyang9
-frameworks/core/components_ng/test/pattern/waterflow/  @suiwuyue
-frameworks/core/components_ng/test/pattern/web/  @LongLie
-frameworks/core/components_ng/test/pattern/window_scene/  @liuchao92
-frameworks/core/components_ng/test/pattern/xcomponent/  @sunbees
-frameworks/core/components_ng/test/event/  @zhaojian2021 @catpoison
-frameworks/core/components_ng/test/syntax/  @yan-shuifeng @lightningHo
-frameworks/core/components_ng/test/svg/  @xiexiyun
-frameworks/core/components_ng/test/image_provider/  @xiexiyun
-frameworks/core/components_ng/test/animation/  @suiwuyue

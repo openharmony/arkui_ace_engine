@@ -20,9 +20,9 @@
 #include "bridge/common/manifest/manifest_parser.h"
 #include "core/common/ace_engine.h"
 #include "core/components/test/mock/mock_resource_adapter.h"
-#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
-#include "core/pipeline_ng/test/mock/mock_interface.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_interface.h"
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
