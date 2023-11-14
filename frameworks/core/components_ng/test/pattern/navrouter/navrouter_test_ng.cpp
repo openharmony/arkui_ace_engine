@@ -33,8 +33,11 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/navigator/navigator_pattern.h"
+#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/components_ng/pattern/navigation/bar_item_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
+#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -1721,24 +1724,27 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ImagePattern>());
-    auto menu = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<ButtonPattern>());
-    auto subtitle = FrameNode::CreateFrameNode("BackButton", 35, AceType::MakeRefPtr<ButtonPattern>());
-    auto title = FrameNode::CreateFrameNode("BackButton", 36, AceType::MakeRefPtr<TextPattern>());
-    auto toolBarNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
+    auto navigator = FrameNode::CreateFrameNode("navigator", 33, AceType::MakeRefPtr<NavigatorPattern>());
+    auto menu = FrameNode::CreateFrameNode("menu", 34, AceType::MakeRefPtr<ButtonPattern>());
+    auto subtitle = FrameNode::CreateFrameNode("subtitle", 35, AceType::MakeRefPtr<TextPattern>());
+    auto title = FrameNode::CreateFrameNode("title", 36, AceType::MakeRefPtr<TextPattern>());
+    auto toolBarNode = FrameNode::CreateFrameNode("toolBar", 44, AceType::MakeRefPtr<ButtonPattern>());
 
-    auto buttonNode = FrameNode::CreateFrameNode("BackButton", 55, AceType::MakeRefPtr<ImagePattern>());
-    auto backButtonImageNode = FrameNode::CreateFrameNode("BackButton", 66, AceType::MakeRefPtr<ImagePattern>());
+    auto buttonNode = FrameNode::CreateFrameNode("BackButton", 55, AceType::MakeRefPtr<ButtonPattern>());
+    auto backButtonImageNode = FrameNode::CreateFrameNode("Image", 66, AceType::MakeRefPtr<ImagePattern>());
 
     auto pattern = titleBarNode->GetPattern<TitleBarPattern>();
-    titleBarNode->parent_ = AceType::WeakClaim(AceType::RawPtr(navBar));
-    titleBarNode->backButton_ = backButton;
+    titleBarNode->backButton_ = navigator;
+    titleBarNode->AddChild(titleBarNode->GetBackButton());
     titleBarNode->title_ = title;
 
-    ASSERT_TRUE(backButton->children_.empty());
-    backButton->children_.emplace_back(buttonNode);
+    ASSERT_TRUE(navigator->children_.empty());
+    navigator->children_.emplace_back(buttonNode);
+    buttonNode->MountToParent(navigator);
     ASSERT_TRUE(buttonNode->children_.empty());
-    buttonNode->children_.emplace_back(backButtonImageNode);
+    backButtonImageNode->MountToParent(buttonNode);
+    backButtonImageNode->MarkModifyDone();
+    buttonNode->MarkModifyDone();
     /**
      * @tc.steps: step2. set properties then call pattern->OnModifyDone();.
      * @tc.expected: check whether the properties is correct.
@@ -1756,18 +1762,14 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propImageSource_ = std::nullopt;
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propHideBackButton_ = false;
     pattern->OnModifyDone();
+
     auto mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propPixelMap_ = mockPixelMap;
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propHideBackButton_ = true;
-    pattern->OnModifyDone();
-
-    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
-    pattern->OnModifyDone();
-    ASSERT_EQ(backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>()->propVisibility_, VisibleType::VISIBLE);
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
     navBar->GetLayoutProperty<NavBarLayoutProperty>()->propHideBackButton_ = true;
     pattern->OnModifyDone();
-    ASSERT_EQ(backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>()->propVisibility_, VisibleType::GONE);
+    ASSERT_EQ(buttonNode->GetLayoutProperty()->propVisibility_, VisibleType::GONE);
 
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto layoutProperty = AceType::MakeRefPtr<NavBarLayoutProperty>();
