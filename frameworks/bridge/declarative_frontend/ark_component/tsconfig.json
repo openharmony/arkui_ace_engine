@@ -26,6 +26,7 @@
         "src/ArkCheckboxGroup.ts",
         "src/ArkGridCol.ts",
         "src/ArkPanel.ts",
+        "src/ArkNavigation.ts",
     ],
 
     "compilerOptions": {
