@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/text_clock_model_impl.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 
@@ -118,6 +119,8 @@ void JSTextClock::JSBind(BindingTarget globalObj)
     JSClass<JSTextClock>::StaticMethod("fontWeight", &JSTextClock::SetFontWeight, opt);
     JSClass<JSTextClock>::StaticMethod("fontStyle", &JSTextClock::SetFontStyle, opt);
     JSClass<JSTextClock>::StaticMethod("fontFamily", &JSTextClock::SetFontFamily, opt);
+    JSClass<JSTextClock>::StaticMethod("textShadow", &JSTextClock::SetTextShadow, opt);
+    JSClass<JSTextClock>::StaticMethod("fontFeature", &JSTextClock::SetFontFeature, opt);
     JSClass<JSTextClock>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -252,6 +255,57 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     }
 
     TextClockModel::GetInstance()->SetFormat(value);
+}
+
+void JSTextClock::SetTextShadow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsNumber() && !tmpInfo->IsObject() && !tmpInfo->IsArray()) {
+        LOGE("Parse shadow object failed.");
+        return;
+    }
+    if (!tmpInfo->IsArray()) {
+        Shadow shadow;
+        if (!JSViewAbstract::ParseShadowProps(info[0], shadow)) {
+            LOGE("Parse shadow object failed.");
+            return;
+        }
+        std::vector<Shadow> shadows { shadow };
+        TextClockModel::GetInstance()->SetTextShadow(shadows);
+        return;
+    }
+    JSRef<JSArray> params = JSRef<JSArray>::Cast(tmpInfo);
+    auto shadowLength = params->Length();
+    std::vector<Shadow> shadows(shadowLength);
+    for (size_t i = 0; i < shadowLength; ++i) {
+        auto shadowJsVal = params->GetValueAt(i);
+        Shadow shadow;
+        if (!JSViewAbstract::ParseShadowProps(shadowJsVal, shadow)) {
+            LOGE("Parse shadow object failed.");
+            continue;
+        }
+        shadows[i] = shadow;
+    }
+    TextClockModel::GetInstance()->SetTextShadow(shadows);
+}
+
+void JSTextClock::SetFontFeature(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
+    if (!info[0]->IsString()) {
+        LOGE("The arg is not string,it is supposed to be a string.");
+        return;
+    }
+
+    std::string fontFeatureSettings = info[0]->ToString();
+    TextClockModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 
 void JSTextClock::JsOnDateChange(const JSCallbackInfo& info)

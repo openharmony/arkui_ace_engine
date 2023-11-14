@@ -31,6 +31,8 @@ public:
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
+    void SetTextShadow(const std::vector<Shadow>& value) override;
+    void SetFontFeature(const FONT_FEATURES_MAP& value) override;
 };
 } // namespace OHOS::Ace::NG
 

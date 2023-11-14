@@ -1926,6 +1926,22 @@ sptr<IRemoteObject> UIContentImpl::GetParentToken()
     return parentToken_;
 }
 
+void UIContentImpl::ProcessFormVisibleChange(bool isVisible)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, isVisible]() {
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipeline);
+            pipeline->HandleFormVisibleChangeEvent(isVisible);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void UIContentImpl::SearchElementInfoByAccessibilityId(
     int32_t elementId, int32_t mode,
     int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
@@ -1953,5 +1969,4 @@ void UIContentImpl::FocusMoveSearch(
 {
     Platform::AceContainer::FindFocusedElementInfoNG(instanceId_, elementId, direction, baseParent, output);
 }
-
 } // namespace OHOS::Ace

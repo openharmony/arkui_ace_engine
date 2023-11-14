@@ -81,5 +81,23 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
     }
     formRenderer->OnSurfaceChange(width, height);
 }
+
+void FormRendererDispatcherImpl::SetVisibleChange(bool isVisible)
+{
+    auto handler = eventHandler_.lock();
+    if (!handler) {
+        HILOG_ERROR("eventHandler is nullptr");
+        return;
+    }
+
+    handler->PostTask([=]() {
+        auto uiContent = uiContent_.lock();
+        if (!uiContent) {
+            HILOG_ERROR("uiContent is nullptr");
+            return;
+        }
+        uiContent->ProcessFormVisibleChange(isVisible);
+    });
+}
 } // namespace Ace
 } // namespace OHOS
