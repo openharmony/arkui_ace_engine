@@ -108,11 +108,13 @@ std::unique_ptr<Media::ImageSource> LayeredDrawableDescriptor::CreateImageSource
         return nullptr;
     }
 
-    size_t len = 0;
     std::unique_ptr<uint8_t[]> data;
-    auto state = resourceMgr_->GetMediaDataById(static_cast<uint32_t>(std::stoul(idStr)), len, data);
+    std::tuple<std::string, size_t, std::string> info;
+    auto state = resourceMgr_->GetDrawableInfoById(static_cast<uint32_t>(std::stoul(idStr)), info, data, iconType_,
+        density_);
+    size_t len = std::get<1>(info);
     if (state != Global::Resource::SUCCESS) {
-        HILOG_ERROR("GetMediaDataById failed");
+        HILOG_ERROR("GetDrawableInfoById failed");
         return nullptr;
     }
 
@@ -196,6 +198,47 @@ bool LayeredDrawableDescriptor::GetDefaultMask()
     return true;
 }
 
+void LayeredDrawableDescriptor::SetMaskPath(std::string& path)
+{
+    HILOG_DEBUG("SetMaskPath:%{public}s", path.c_str());
+    maskPath_ = path;
+}
+
+void LayeredDrawableDescriptor::SetIconType(uint32_t iconType)
+{
+    HILOG_DEBUG("SetIconType");
+    iconType_ = iconType;
+}
+
+void LayeredDrawableDescriptor::SetDensity(uint32_t density)
+{
+    HILOG_DEBUG("SetDensity");
+    density_ = density;
+}
+
+bool LayeredDrawableDescriptor::GetMaskByPath()
+{
+    if (maskPath_.empty()) {
+        HILOG_DEBUG("maskPath is null");
+        return false;
+    }
+    Media::SourceOptions opts;
+    uint32_t errorCode = 0;
+    std::unique_ptr<Media::ImageSource> imageSource =
+        Media::ImageSource::CreateImageSource(maskPath_, opts, errorCode);
+    Media::DecodeOptions decodeOpts;
+    decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
+    if (imageSource) {
+        auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
+        mask_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+    }
+    if (errorCode != 0 || !mask_) {
+        HILOG_ERROR("Get mask failed");
+        return false;
+    }
+    return true;
+}
+
 bool LayeredDrawableDescriptor::GetMaskByName(const std::string& name)
 {
     size_t len = 0;
@@ -248,6 +291,10 @@ std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetBackground()
 std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetMask()
 {
     if (mask_.has_value()) {
+        return std::make_unique<DrawableDescriptor>(mask_.value());
+    }
+
+    if (GetMaskByPath()) {
         return std::make_unique<DrawableDescriptor>(mask_.value());
     }
 
@@ -312,6 +359,8 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     std::shared_ptr<SkBitmap> mask;
     if (mask_.has_value()) {
         mask = ImageConverter::PixelMapToBitmap(mask_.value());
+    } else if (GetMaskByPath()) {
+        mask = ImageConverter::PixelMapToBitmap(mask_.value());
     } else if (GetDefaultMask()) {
         mask = ImageConverter::PixelMapToBitmap(mask_.value());
     } else {
@@ -363,7 +412,7 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     }
 
     std::shared_ptr<Rosen::Drawing::Bitmap> mask;
-    if (mask_.has_value() || GetDefaultMask()) {
+    if (mask_.has_value() || GetMaskByPath() || GetDefaultMask()) {
         mask = ImageConverter::PixelMapToBitmap(mask_.value());
     } else {
         HILOG_ERROR("Get pixelMap of mask failed.");
