@@ -83,8 +83,7 @@ public:
         auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(parentNode->GetPattern());
         auto geometryNode = parentNode->GetGeometryNode();
         if (scrollablePattern && geometryNode) {
-            auto parentViewPort =
-                RectF(parentNode->GetTransformRelativeOffset(), geometryNode->GetFrameSize());
+            auto parentViewPort = RectF(parentNode->GetTransformRelativeOffset(), geometryNode->GetFrameSize());
             intersectRect = parentViewPort.IntersectRectT(visibleRect);
         }
         parentNode = parentNode->GetAncestorNodeOfFrame();
@@ -105,6 +104,14 @@ public:
         }
         return StringUtils::NotInUtf16Bmp(aroundChar) ? 2 : 1;
     }
+
+    // The methods that need to be implemented for input class components
+    virtual RectF GetCaretRect() const
+    {
+        return { 0, 0, 0, 0 };
+    }
+
+    virtual void ScrollToSafeArea() const {}
 
 protected:
     TextSelector textSelector_;

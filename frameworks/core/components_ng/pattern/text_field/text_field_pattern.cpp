@@ -2653,6 +2653,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     }
     insertValueOperations_.emplace(insertValue);
     CloseSelectOverlay(true);
+    ScrollToSafeArea();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -3279,6 +3280,7 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     }
     deleteBackwardOperations_.emplace(length);
     CloseSelectOverlay();
+    ScrollToSafeArea();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -4867,10 +4869,7 @@ void TextFieldPattern::NotifyOnEditChanged(bool isChanged)
 
 int32_t TextFieldPattern::GetLineCount() const
 {
-    if (paragraph_) {
-        return paragraph_->GetLineCount();
-    }
-    return 0;
+    return paragraph_ ? paragraph_->GetLineCount() : 0;
 }
 
 void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
@@ -4938,8 +4937,18 @@ void TextFieldPattern::ProcessResponseArea()
         responseArea_->ClearArea();
     }
 }
+
 bool TextFieldPattern::HasInputOperation()
 {
     return !deleteBackwardOperations_.empty() || !deleteForwardOperations_.empty() || !insertValueOperations_.empty();
+}
+
+void TextFieldPattern::ScrollToSafeArea() const
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->ScrollTextFieldToSafeArea();
 }
 } // namespace OHOS::Ace::NG

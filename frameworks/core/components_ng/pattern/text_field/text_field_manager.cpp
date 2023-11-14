@@ -62,12 +62,14 @@ RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const Ref
 
 void TextFieldManagerNG::ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset)
 {
-    auto textField = DynamicCast<TextFieldPattern>(onFocusTextField_.Upgrade());
-    CHECK_NULL_VOID(textField);
-    auto textFieldNode = textField->GetHost();
-    CHECK_NULL_VOID(textFieldNode);
+    auto node = onFocusTextField_.Upgrade();
+    CHECK_NULL_VOID(node);
+    auto frameNode = node->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textBase = DynamicCast<TextBase>(node);
+    CHECK_NULL_VOID(textBase);
 
-    auto scrollableNode = FindScrollableOfFocusedTextField(textFieldNode);
+    auto scrollableNode = FindScrollableOfFocusedTextField(frameNode);
     CHECK_NULL_VOID(scrollableNode);
     auto scrollPattern = scrollableNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(scrollPattern);
@@ -78,7 +80,7 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bot
     auto scrollableRect = scrollableNode->GetTransformRectRelativeToWindow();
     CHECK_NULL_VOID(scrollableRect.Top() < bottomInset.start);
 
-    auto caretRect = textField->GetCaretRect() + textFieldNode->GetOffsetRelativeToWindow();
+    auto caretRect = textBase->GetCaretRect() + frameNode->GetOffsetRelativeToWindow();
     // caret above scroll's content region
     auto diffTop = caretRect.Top() - scrollableRect.Top();
     if (diffTop < 0) {
