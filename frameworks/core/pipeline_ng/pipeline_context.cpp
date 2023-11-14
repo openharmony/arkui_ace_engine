@@ -224,8 +224,8 @@ void PipelineContext::RemoveScheduleTask(uint32_t id)
     scheduleTasks_.erase(id);
 }
 
-std::pair<float, float> PipelineContext::LinearInterpolation(const std::tuple<float, float, uint64_t> &history,
-    const std::tuple<float, float, uint64_t> &current, const uint64_t nanoTimeStamp)
+std::pair<float, float> PipelineContext::LinearInterpolation(const std::tuple<float, float, uint64_t> history,
+    const std::tuple<float, float, uint64_t> current, const uint64_t nanoTimeStamp)
 {
     if (nanoTimeStamp == std::get<INDEX_TIME>(history) || nanoTimeStamp == std::get<INDEX_TIME>(current)) {
         return std::make_pair(0.0f, 0.0f);

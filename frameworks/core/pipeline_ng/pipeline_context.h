@@ -477,8 +477,8 @@ private:
         }
     };
 
-    std::pair<float, float> LinearInterpolation(const std::tuple<float, float, uint64_t> &history,
-        const std::tuple<float, float, uint64_t> &current, const uint64_t nanoTimeStamp);
+    std::pair<float, float> LinearInterpolation(const std::tuple<float, float, uint64_t> history,
+        const std::tuple<float, float, uint64_t> current, const uint64_t nanoTimeStamp);
 
     std::pair<float, float> GetResampleCoord(const std::vector<TouchEvent> &history,
         const std::vector<TouchEvent> &current, const uint64_t nanoTimeStamp, const bool isScreen);
