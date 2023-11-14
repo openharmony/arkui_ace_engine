@@ -437,6 +437,10 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("BackgroundColor: ").append(renderContext_->GetBackgroundColor()->ColorToString()));
     }
+    if (renderContext_ && renderContext_->GetBorder() && renderContext_->GetBorder()->GetBorderRadius().has_value()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("BorderRadius: ").append(renderContext_->GetBorder()->GetBorderRadius()->ToString().c_str()));
+    }
 
     DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
                                        .append(geometryNode_->GetParentLayoutConstraint().has_value()
