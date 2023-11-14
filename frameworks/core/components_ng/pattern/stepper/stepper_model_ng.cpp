@@ -28,6 +28,7 @@ void StepperModelNG::Create(uint32_t index)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::STEPPER_ETS_TAG, nodeId);
     auto stepperNode = StepperNode::GetOrCreateStepperNode(
         V2::STEPPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StepperPattern>(); });
     stack->Push(stepperNode);

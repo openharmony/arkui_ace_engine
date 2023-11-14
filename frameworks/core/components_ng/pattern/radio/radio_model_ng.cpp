@@ -28,6 +28,7 @@ void RadioModelNG::Create(const std::optional<std::string>& value, const std::op
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::RADIO_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::RADIO_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RadioPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);

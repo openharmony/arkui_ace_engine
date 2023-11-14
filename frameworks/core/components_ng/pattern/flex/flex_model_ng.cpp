@@ -32,6 +32,7 @@ void FlexModelNG::CreateFlexRow()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::FLEX_ETS_TAG, nodeId);
     auto childFrameNode = FrameNode::GetFrameNode(V2::FLEX_ETS_TAG, nodeId);
     if (!childFrameNode) {
         auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -59,6 +60,7 @@ void FlexModelNG::CreateWrap()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::FLEX_ETS_TAG, nodeId);
     auto childFrameNode = FrameNode::GetFrameNode(V2::FLEX_ETS_TAG, nodeId);
     if (!childFrameNode) {
         auto frameNode = FrameNode::GetOrCreateFrameNode(

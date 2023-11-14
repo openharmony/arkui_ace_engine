@@ -39,6 +39,7 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TOGGLE_ETS_TAG, nodeId);
     auto childFrameNode = FrameNode::GetFrameNode(V2::TOGGLE_ETS_TAG, nodeId);
     if (!childFrameNode) {
         switch (toggleType) {

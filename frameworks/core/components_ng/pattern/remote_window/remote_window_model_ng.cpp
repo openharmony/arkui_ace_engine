@@ -27,6 +27,7 @@ void RemoteWindowModelNG::Create(const std::shared_ptr<OHOS::Rosen::RSNode>& rsN
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::REMOTE_WINDOW_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::REMOTE_WINDOW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RemoteWindowPattern>(); });
     stack->Push(frameNode);
