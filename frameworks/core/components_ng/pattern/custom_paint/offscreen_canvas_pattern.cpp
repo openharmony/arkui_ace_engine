@@ -412,4 +412,9 @@ TransformParam OffscreenCanvasPattern::GetTransform() const
 {
     return offscreenPaintMethod_->GetTransform();
 }
+size_t OffscreenCanvasPattern::GetBitmapSize()
+{
+    CHECK_NULL_RETURN(offscreenPaintMethod_, 0);
+    return offscreenPaintMethod_->GetBitmapSize();
+}
 } // namespace OHOS::Ace::NG

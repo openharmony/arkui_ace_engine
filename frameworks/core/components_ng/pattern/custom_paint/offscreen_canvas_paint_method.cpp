@@ -94,6 +94,7 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
         isSucceed_ = false;
         return;
     }
+    bitmapSize_ = imageInfo.computeMinByteSize();
     bitmap_.eraseColor(SK_ColorTRANSPARENT);
     skCanvas_ = std::make_unique<SkCanvas>(bitmap_);
 #else

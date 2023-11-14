@@ -24,6 +24,7 @@ class ACE_EXPORT OffscreenContextModelNG : public OHOS::Ace::OffscreenContextMod
 public:
     RefPtr<AceType> CreateOffscreenPattern(int width, int height) override;
     bool IsSucceed(RefPtr<AceType> offscreenPattern) override;
+    size_t GetBitmapSize(RefPtr<AceType> offscreenPattern) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CANVAS_RENDERER_CANVAS_RENDERER_MODEL_NG_H

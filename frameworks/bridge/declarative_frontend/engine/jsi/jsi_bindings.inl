@@ -605,7 +605,9 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSConstructorInterceptor(panda::Jsi
         if (instance) {
             panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
             Local<ObjectRef>(thisObj)->SetNativePointerFieldCount(1);
-            Local<ObjectRef>(thisObj)->SetNativePointerField(0, *instance, &JsiClass<C>::DestructorInterceptor);
+            size_t nativeSize = info.GetSize();
+            Local<ObjectRef>(thisObj)->SetNativePointerField(
+                0, *instance, &JsiClass<C>::DestructorInterceptor, nullptr, nativeSize);
             return thisObj;
         }
     }
