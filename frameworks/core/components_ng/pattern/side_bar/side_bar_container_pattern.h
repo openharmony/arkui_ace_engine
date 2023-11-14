@@ -184,6 +184,7 @@ private:
     RefPtr<FrameNode> GetDividerNode() const;
     std::optional<float> DimensionConvertToPx(const Dimension& value) const;
     Dimension ConvertPxToPercent(float value) const;
+    void UpdateDividerShadow() const;
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<ClickEvent> controlButtonClickEvent_;
