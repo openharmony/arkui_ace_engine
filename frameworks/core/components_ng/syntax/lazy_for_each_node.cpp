@@ -80,6 +80,7 @@ void LazyForEachNode::PostIdleTask()
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->AddPredictTask([weak = AceType::WeakClaim(this)](int64_t deadline, bool canUseLongPredictTask) {
+        ACE_SCOPED_TRACE("LazyForEach predict");
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
         node->needPredict_ = false;
