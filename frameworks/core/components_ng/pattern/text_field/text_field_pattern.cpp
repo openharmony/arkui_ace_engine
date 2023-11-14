@@ -1997,7 +1997,8 @@ bool TextFieldPattern::OnPreShowSelectOverlay(
     overlayInfo.menuInfo.menuDisable = isHideSelectionMenu;
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
-    isSupportCameraInput_ = inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT);
+    isSupportCameraInput_ = inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT)
+        && !IsInPasswordMode();
 #else
     isSupportCameraInput_ = false;
 #endif
