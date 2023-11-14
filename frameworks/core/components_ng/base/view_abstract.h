@@ -376,7 +376,10 @@ public:
     static void SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath);
     static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
     static void SetGroupDefaultFocus(FrameNode* frameNode, bool isSet);
-
+    static void SetFocusable(FrameNode* frameNode, bool focusable);
+    static void SetTouchable(FrameNode* frameNode, bool touchable);
+    static void SetDefaultFocus(FrameNode* frameNode, bool isSet);
+    
 private:
     static void AddDragFrameNodeToManager();
 };
