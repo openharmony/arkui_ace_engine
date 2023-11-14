@@ -1345,26 +1345,33 @@ bool RichEditorPattern::CloseKeyboard(bool forceClose)
     return false;
 }
 
-void RichEditorPattern::HandleLongPress(GestureEvent& info)
+bool RichEditorPattern::JudgeDraggable(GestureEvent& info)
 {
-    HandleUserLongPressEvent(info);
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
     auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
+    CHECK_NULL_RETURN(hub, false);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
 #ifdef ENABLE_DRAG_FRAMEWORK
         gestureHub->SetIsTextDraggable(true);
 #endif
-        return;
+        return true;
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
     gestureHub->SetIsTextDraggable(false);
 #endif
+    return false;
+}
+
+void RichEditorPattern::HandleLongPress(GestureEvent& info)
+{
+    HandleUserLongPressEvent(info);
+    if (JudgeDraggable(info)) {
+        return;
+    }
     if (isMousePressed_) {
         return;
     }
@@ -1373,16 +1380,23 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
     InitSelection(textOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
-    if (!BetweenSelectedPosition(info.GetGlobalLocation())) {
-        textSelector_.Update(selectEnd, selectEnd);
-    }
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
+    if (!BetweenSelectedPosition(info.GetGlobalLocation())) {
+        if (selectStart == 0) {
+            textSelector_.Update(selectStart, selectStart);
+        } else {
+            textSelector_.Update(selectEnd, selectEnd);
+            selectStart = selectEnd;
+        }
+    }
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     UpdateSelectionType(textSelectInfo);
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay();
     selectionMenuOffset_ = info.GetGlobalLocation();
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
