@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/property/property.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -2128,6 +2129,32 @@ void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     }
 }
 
+void RichEditorPattern::ResetFirstNodeStyle()
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    auto spans = tmpHost->GetChildren();
+    if (!spans.empty()) {
+        auto&& firstNode = DynamicCast<SpanNode>(*(spans.begin()));
+        if (firstNode) {
+            firstNode->ResetTextAlign();
+            firstNode->ResetLeadingMargin();
+            tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
+
+void RichEditorPattern::FireOnDeleteComplete(const RichEditorDeleteValue& info)
+{
+    auto eventHub = GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto isDelete = eventHub->FireAboutToDelete(info);
+    if (isDelete) {
+        DeleteByDeleteValueInfo(info);
+        eventHub->FireOnDeleteComplete();
+    }
+}
+
 void RichEditorPattern::DeleteBackward(int32_t length)
 {
     if (textSelector_.IsValid()) {
@@ -2136,23 +2163,23 @@ void RichEditorPattern::DeleteBackward(int32_t length)
         CloseSelectOverlay();
         ResetSelection();
     }
+    RichEditorDeleteValue info;
+    info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::BACKWARD);
     if (caretPosition_ == 0) {
+        info.SetLength(0);
+        ResetFirstNodeStyle();
+        FireOnDeleteComplete(info);
         return;
     }
-    RichEditorDeleteValue info;
+    if (length == spans_.back()->position) {
+        ResetFirstNodeStyle();
+    }
     info.SetOffset(caretPosition_ - 1);
-    info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::BACKWARD);
     info.SetLength(length);
     int32_t currentPosition = std::clamp((caretPosition_ - length), 0, static_cast<int32_t>(GetTextContentLength()));
     if (!spans_.empty()) {
         CalcDeleteValueObj(currentPosition, length, info);
-        auto eventHub = GetEventHub<RichEditorEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        auto isDelete = eventHub->FireAboutToDelete(info);
-        if (isDelete) {
-            DeleteByDeleteValueInfo(info);
-            eventHub->FireOnDeleteComplete();
-        }
+        FireOnDeleteComplete(info);
     }
     if (!caretVisible_) {
         StartTwinkling();
