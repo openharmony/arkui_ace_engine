@@ -848,7 +848,7 @@ void TextPickerColumnPattern::HandleDragEnd()
     auto toss = GetToss();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    if (!NotLoopOptions() && toss->Play()) {
+    if (toss->Play()) {
         frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         return;
     }
