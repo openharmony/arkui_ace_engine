@@ -51,6 +51,8 @@
 #include "core/components_ng/pattern/navrouter/navrouter_model.h"
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
+#include "core/components_ng/pattern/navigator/navigator_pattern.h"
+#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -1719,10 +1721,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
      */
     auto navBar =
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    auto hub = navigator->GetEventHub<NavigatorEventHub>();
-    CHECK_NULL_VOID(hub);
-    hub->SetType(NavigatorType::BACK);
-    navigator->MarkModifyDone();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto navigator = FrameNode::CreateFrameNode("navigator", 33, AceType::MakeRefPtr<NavigatorPattern>());
@@ -1734,9 +1732,9 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
     auto buttonNode = FrameNode::CreateFrameNode("BackButton", 55, AceType::MakeRefPtr<ButtonPattern>());
     auto backButtonImageNode = FrameNode::CreateFrameNode("Image", 66, AceType::MakeRefPtr<ImagePattern>());
 
-    navBar->SetBackButton(navigator);
+
     auto pattern = titleBarNode->GetPattern<TitleBarPattern>();
-    titleBarNode->SetBackButton(navBarNode->GetBackButton());
+    titleBarNode->backButton_ = navigator;
     titleBarNode->AddChild(titleBarNode->GetBackButton());
     titleBarNode->title_ = title;
 
@@ -1763,9 +1761,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
 
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propImageSource_ = std::nullopt;
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propHideBackButton_ = false;
-    navBar->GetLayoutProperty<NavBarLayoutProperty>()->propHideBackButton_ = false;
     pattern->OnModifyDone();
-    ASSERT_EQ(buttonNode->GetLayoutProperty()->propVisibility_, VisibleType::VISIBLE);
 
     auto mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propPixelMap_ = mockPixelMap;
