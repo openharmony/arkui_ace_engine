@@ -231,7 +231,8 @@ private:
     std::list<Accessibility::AccessibilityElementInfo> SearchElementInfosByTextNG(
         int32_t elementId, const std::string& text, const RefPtr<NG::FrameNode>& node, int32_t offset);
     void FindFocusedExtensionElementInfoNG(const SearchParameter& searchParam,
-        Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context);
+        Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
+        const RefPtr<NG::FrameNode>& root);
     void FocusExtensionElementMoveSearchNG(const SearchParameter& searchParam,
         Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context);
     RefPtr<NG::FrameNode> FindNodeFromRootByExtensionId(const RefPtr<NG::FrameNode>& root, const int32_t uiExtensionId);
@@ -249,6 +250,8 @@ private:
 
     void DumpTreeNodeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
         NodeId nodeID, const CommonProperty& commonProperty);
+
+    void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;
