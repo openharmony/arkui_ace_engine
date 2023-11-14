@@ -272,12 +272,16 @@ bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 
 void UIExtensionPattern::OnWindowShow()
 {
-    RequestExtensionSessionActivation();
+    if (isVisible_) {
+        RequestExtensionSessionActivation();
+    }
 }
 
 void UIExtensionPattern::OnWindowHide()
 {
-    RequestExtensionSessionBackground();
+    if (isVisible_) {
+        RequestExtensionSessionBackground();
+    }
 }
 
 void UIExtensionPattern::RequestExtensionSessionActivation()
@@ -773,6 +777,7 @@ void UIExtensionPattern::SetOnReceiveCallback(const std::function<void(const AAF
 
 void UIExtensionPattern::OnVisibleChange(bool visible)
 {
+    isVisible_ = visible;
     if (visible) {
         RequestExtensionSessionActivation();
     } else {

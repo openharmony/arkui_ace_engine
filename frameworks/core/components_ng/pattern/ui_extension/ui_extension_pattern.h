@@ -192,6 +192,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 
     bool transferringCaller_ = false;
+    bool isVisible_ = true;
 
     int32_t uiExtensionId_ = -1;
     static thread_local int32_t currentUiExtensionId_;
