@@ -2199,7 +2199,7 @@ void JsAccessibilityManager::SearchExtensionElementInfoNG(int32_t elementId,
     }
 }
 
-std::list<AccessibilityElementInfo> SearchElementInfosByTextNG(
+std::list<AccessibilityElementInfo> JsAccessibilityManager::SearchElementInfosByTextNG(
     int32_t elementId, const std::string& text, const RefPtr<NG::FrameNode>& node, int32_t offset)
 {
     std::list<AccessibilityElementInfo> extensionElementInfo;
@@ -2224,7 +2224,7 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(const SearchParameter& s
     auto uiExtensionNode = FindNodeFromRootByExtensionId(node, uiExtensionId);
     CHECK_NULL_VOID(uiExtensionNode);
 
-    extensionElementInfos = OHOS::Ace::Framework::SearchElementInfosByTextNG(
+    extensionElementInfos = SearchElementInfosByTextNG(
         childWrapId, searchParam.text, uiExtensionNode, searchParam.uiExtensionOffset / UI_EXTENSION_ID_10);
     if (extensionElementInfos.empty()) {
         return;
@@ -2297,8 +2297,7 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int32_t elementId, const
     CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
         GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
     for (const auto& node : uiExtensionsNodes) {
-        auto infosByIPC =
-            OHOS::Ace::Framework::SearchElementInfosByTextNG(0, text, node, uiExtensionOffset / UI_EXTENSION_ID_10);
+        auto infosByIPC = SearchElementInfosByTextNG(0, text, node, uiExtensionOffset / UI_EXTENSION_ID_10);
         if (!infosByIPC.empty()) {
             ConvertExtensionAccessibilityNodeId(infosByIPC, node, uiExtensionOffset);
             for (auto& info : infosByIPC) {
