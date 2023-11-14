@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 std::unique_ptr<PasteButtonModelNG> PasteButtonModelNG::instance_ = nullptr;
@@ -45,6 +46,19 @@ void PasteButtonModelNG::Create(int32_t text, int32_t icon,
 {
     SecurityComponentModelNG::CreateCommon(V2::PASTE_BUTTON_ETS_TAG,
         text, icon, backgroundType, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); });
+}
+
+RefPtr<FrameNode> PasteButtonModelNG::CreateNode(int32_t text, int32_t icon,
+    int32_t backgroundType)
+{
+    SecurityComponentElementStyle style = {
+        .text = text,
+        .icon = icon,
+        .backgroundType = backgroundType
+    };
+    return SecurityComponentModelNG::CreateNode(V2::PASTE_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        style, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); });
 }
 
 bool PasteButtonModelNG::GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)

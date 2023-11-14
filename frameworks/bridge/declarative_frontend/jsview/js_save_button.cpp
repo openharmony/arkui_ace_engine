@@ -166,6 +166,10 @@ void JSSaveButton::JSBind(BindingTarget globalObj)
     JSClass<JSSaveButton>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);
     JSClass<JSSaveButton>::StaticMethod("offset", &JSViewAbstract::JsOffset);
     JSClass<JSSaveButton>::StaticMethod("pop", &JSViewAbstract::Pop, opt);
+    JSClass<JSSaveButton>::StaticMethod("width", &JSViewAbstract::JsWidth);
+    JSClass<JSSaveButton>::StaticMethod("height", &JSViewAbstract::JsHeight);
+    JSClass<JSSaveButton>::StaticMethod("size", &JSViewAbstract::JsSize);
+    JSClass<JSSaveButton>::StaticMethod("constraintSize", &JSViewAbstract::JsConstraintSize);
     JSClass<JSSaveButton>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
     JSClass<JSSaveButton>::Bind<>(globalObj);
 }
