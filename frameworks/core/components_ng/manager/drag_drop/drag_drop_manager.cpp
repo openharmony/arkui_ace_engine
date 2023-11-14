@@ -1108,6 +1108,13 @@ void DragDropManager::ClearExtraInfo()
 {
     extraInfo_.clear();
 }
+
+bool DragDropManager::IsMsdpDragging() const
+{
+    DragState dragState;
+    InteractionInterface::GetInstance()->GetDragState(dragState);
+    return dragState == DragState::START;
+}
 #endif // ENABLE_DRAG_FRAMEWORK
 
 void DragDropManager::ClearVelocityInfo()

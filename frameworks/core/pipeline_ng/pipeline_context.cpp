@@ -1440,6 +1440,9 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
         (container && container->IsScenceBoardWindow() &&
             (event.pullAction == MouseAction::PULL_MOVE || event.pullAction == MouseAction::PULL_UP))) {
         auto touchPoint = event.CreateTouchPoint();
+        if (event.pullAction == MouseAction::PULL_MOVE) {
+            touchPoint.pullType = TouchType::PULL_MOVE;
+        }
         OnTouchEvent(touchPoint);
     }
 
