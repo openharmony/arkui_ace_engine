@@ -624,8 +624,10 @@ void SideBarContainerPattern::InitControlButtonTouchEvent(const RefPtr<GestureEv
     auto clickTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->SetControlButtonClick(true);
-        pattern->DoAnimation();
+        if (!pattern->inAnimation_) {
+            pattern->SetControlButtonClick(true);
+            pattern->DoAnimation();
+        }
     };
     controlButtonClickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickTask));
     gestureHub->AddClickEvent(controlButtonClickEvent_);
@@ -682,6 +684,7 @@ void SideBarContainerPattern::DoAnimation()
 
     auto weak = AceType::WeakClaim(this);
     auto context = PipelineContext::GetCurrentContext();
+    inAnimation_ = true;
     context->OpenImplicitAnimation(option, option.GetCurve(), [weak, sideBarStatus]() {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -692,6 +695,7 @@ void SideBarContainerPattern::DoAnimation()
                 pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
                 pattern->UpdateControlButtonIcon();
             }
+            pattern->inAnimation_ = false;
         }
     });
 

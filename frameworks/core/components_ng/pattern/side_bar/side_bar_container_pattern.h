@@ -205,6 +205,7 @@ private:
     bool isControlButtonClick_ = false;
     bool hasInit_ = false;
     bool autoHide_ = false;
+    bool inAnimation_ = false;
 
     Dimension realSideBarWidth_ = -1.0_vp;
     Dimension preSidebarWidth_;
