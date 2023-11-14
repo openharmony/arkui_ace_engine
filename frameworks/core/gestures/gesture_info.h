@@ -246,9 +246,6 @@ struct FingerInfo {
     SourceType sourceType_ = SourceType::NONE;
     SourceTool sourceTool_ = SourceTool::UNKNOWN;
 };
-
-
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_GESTURE_INFO_H

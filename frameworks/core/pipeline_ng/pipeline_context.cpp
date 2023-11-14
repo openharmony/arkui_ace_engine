@@ -80,6 +80,7 @@ namespace {
 constexpr int32_t TIME_THRESHOLD = 2 * 1000000; // 3 millisecond
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t USED_ID_FIND_FLAG = 3; // if args >3 , it means use id to find
+constexpr int32_t MILLISECONDS_TO_NANOSECONDS = 1000000; // Milliseconds to nanoseconds
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -238,6 +239,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         distributedUI->ApplyOneUpdate();
     } while (false);
 #endif
+    ProcessDelayTasks();
     FlushAnimation(nanoTimestamp);
     FlushTouchEvents();
     FlushBuild();
@@ -305,6 +307,24 @@ void PipelineContext::InspectDrew()
             if (node) {
                 OnDrawCompleted(node->GetInspectorId()->c_str());
             }
+        }
+    }
+}
+
+void PipelineContext::ProcessDelayTasks()
+{
+    if (delayedTasks_.empty()) {
+        return;
+    }
+    auto currentTimeStamp = GetSysTimestamp();
+    for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end();) {
+        if (iter->timeStamp + static_cast<int64_t>(iter->time) * MILLISECONDS_TO_NANOSECONDS > currentTimeStamp) {
+            ++iter;
+        } else {
+            if (iter->task) {
+                iter->task();
+            }
+            delayedTasks_.erase(iter++);
         }
     }
 }
