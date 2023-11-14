@@ -58,6 +58,11 @@ public:
         return axis_;
     }
 
+    virtual bool IsReverse() const
+    {
+        return false;
+    };
+
     virtual bool ShouldDelayChildPressedState() const override
     {
         return true;
@@ -116,7 +121,7 @@ public:
     }
     void SetEdgeEffect(EdgeEffect edgeEffect);
     void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> edgeEffect);
-    bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size);
+    bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size, bool reverse = false);
     virtual void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
     bool IsRestrictBoundary()
     {
@@ -346,6 +351,22 @@ public:
         return Rect();
     };
 
+    void SetEdgeEffect()
+    {
+        SetEdgeEffect(edgeEffect_);
+    }
+
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+    {
+        edgeEffect_ = edgeEffect;
+        edgeEffectAlwaysEnabled_ = alwaysEnabled;
+    }
+
+    void GetEdgeEffect()
+    {
+        return edgeEffect_;
+    }
+
     bool GetAlwaysEnabled() const
     {
         return edgeEffectAlwaysEnabled_;
@@ -528,6 +549,8 @@ private:
     RefPtr<NavBarPattern> navBarPattern_;
 
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
+
+    EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool edgeEffectAlwaysEnabled_ = false;
 };
 } // namespace OHOS::Ace::NG

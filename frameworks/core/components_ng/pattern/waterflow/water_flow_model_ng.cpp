@@ -16,10 +16,11 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
 namespace OHOS::Ace::NG {
 void WaterFlowModelNG::Create()
@@ -210,5 +211,10 @@ void WaterFlowModelNG::SetFriction(double friction)
 void WaterFlowModelNG::SetCachedCount(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value);
+}
+
+void WaterFlowModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+{
+    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);
 }
 } // namespace OHOS::Ace::NG

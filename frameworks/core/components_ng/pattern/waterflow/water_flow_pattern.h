@@ -32,6 +32,7 @@ public:
     bool IsScrollable() const override;
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
+    bool IsReverse() const override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void UpdateScrollBarOffset() override;
 
@@ -125,6 +126,8 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitScrollableEvent();
     void CheckScrollable();
+    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
+    SizeF GetContentSize() const;
 
     WaterFlowLayoutInfo layoutInfo_;
 

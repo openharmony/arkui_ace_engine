@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_water_flow.h"
+#include "bridge/declarative_frontend/jsview/js_water_flow.h"
 
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_list.h"
+#include "bridge/declarative_frontend/jsview/js_scrollable.h"
+#include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
-#include "frameworks/bridge/declarative_frontend/jsview/models/water_flow_model_impl.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "bridge/declarative_frontend/jsview/models/water_flow_model_impl.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<WaterFlowModel> WaterFlowModel::instance_ = nullptr;
@@ -120,6 +121,7 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("friction", &JSWaterFlow::SetFriction);
     JSClass<JSWaterFlow>::StaticMethod("clip", &JSList::JsClip);
     JSClass<JSWaterFlow>::StaticMethod("cachedCount", &JSWaterFlow::SetCachedCount);
+    JSClass<JSWaterFlow>::StaticMethod("edgeEffect", &JSWaterFlow::SetEdgeEffect);
 
     JSClass<JSWaterFlow>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -326,5 +328,13 @@ void JSWaterFlow::SetCachedCount(const JSCallbackInfo& info)
     }
 
     WaterFlowModel::GetInstance()->SetCachedCount(cachedCount);
+}
+
+void JSWaterFlow::SetEdgeEffect(const JSCallbackInfo& info)
+{
+    auto edgeEffect = JSScrollable::ParseEdgeEffect(info, WaterFlowModel::GetInstance()->GetEdgeEffect());
+    auto alwaysEnabled =
+        JSScrollable::ParseAlwaysEnable(info, WaterFlowModel::GetInstance()->GetAlwaysEnableEdgeEffect());
+    WaterFlowModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
 }
 } // namespace OHOS::Ace::Framework

@@ -398,7 +398,7 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
     scrollable->SetEdgeEffect(edgeEffect);
 }
 
-bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
+bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size, bool reverse)
 {
     bool isAtTop = IsAtTop();
     bool isAtBottom = IsAtBottom();
@@ -407,7 +407,7 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
         source == SCROLL_FROM_ANIMATION)) {    // handle edge effect
         if ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset))) {
             auto isScrollFromUpdate = source == SCROLL_FROM_UPDATE;
-            scrollEffect_->HandleOverScroll(GetAxis(), -offset, size, isScrollFromUpdate);
+            scrollEffect_->HandleOverScroll(GetAxis(), !reverse ? -offset : offset, size, isScrollFromUpdate);
         }
     }
     if (!(scrollEffect_ && scrollEffect_->IsSpringEffect() && (source == SCROLL_FROM_UPDATE ||
@@ -1333,8 +1333,8 @@ ScrollResult ScrollablePattern::HandleScrollSelfOnly(float& offset, int32_t sour
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     ExecuteScrollFrameBegin(offset, scrollState);
     auto remainOffset = allOffset - offset;
-    auto overOffsets = GetOverScrollOffset(offset);
-    auto overOffset = offset > 0 ? overOffsets.start : overOffsets.end;
+    auto overOffsets = GetOverScrollOffset(!IsReverse() ? offset : -offset);
+    auto overOffset = (!IsReverse() ? offset > 0 : offset < 0) ? overOffsets.start : overOffsets.end;
     remainOffset += overOffset;
     if (NearZero(remainOffset)) {
         SetCanOverScroll(false);

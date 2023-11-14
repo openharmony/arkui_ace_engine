@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/scroll_bar/scroll_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -55,6 +56,16 @@ public:
     virtual void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin) = 0;
     virtual void SetFriction(double friction) = 0;
     virtual void SetCachedCount(int32_t value) = 0;
+
+    virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) = 0;
+    EdgeEffect GetEdgeEffect()
+    {
+        return EdgeEffect::NONE;
+    }
+    bool GetAlwaysEnableEdgeEffect()
+    {
+        return false;
+    }
 
 private:
     static std::unique_ptr<WaterFlowModel> instance_;
