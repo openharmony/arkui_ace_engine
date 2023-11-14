@@ -445,14 +445,14 @@ WeakPtr<FocusHub> SwiperPattern::GetNextFocusNode(FocusStep step, const WeakPtr<
 {
     auto curFocusNode = currentFocusNode.Upgrade();
     CHECK_NULL_RETURN(curFocusNode, nullptr);
-    if ((direction_ == Axis::HORIZONTAL && step == FocusStep::UP) ||
-        (direction_ == Axis::HORIZONTAL && step == FocusStep::SHIFT_TAB) ||
-        (direction_ == Axis::VERTICAL && step == FocusStep::LEFT)) {
+    if ((GetDirection() == Axis::HORIZONTAL && step == FocusStep::UP) ||
+        (GetDirection() == Axis::HORIZONTAL && step == FocusStep::SHIFT_TAB) ||
+        (GetDirection() == Axis::VERTICAL && step == FocusStep::LEFT)) {
         return PreviousFocus(curFocusNode);
     }
-    if ((direction_ == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
-        (direction_ == Axis::HORIZONTAL && step == FocusStep::TAB) ||
-        (direction_ == Axis::VERTICAL && step == FocusStep::RIGHT)) {
+    if ((GetDirection() == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
+        (GetDirection() == Axis::HORIZONTAL && step == FocusStep::TAB) ||
+        (GetDirection() == Axis::VERTICAL && step == FocusStep::RIGHT)) {
         return NextFocus(curFocusNode);
     }
     return nullptr;
@@ -1160,13 +1160,13 @@ bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
-        (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
+    if ((GetDirection() == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
+        (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
         ShowPrevious();
         return true;
     }
-    if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
-        (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
+    if ((GetDirection() == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
+        (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
         ShowNext();
         return true;
     }
