@@ -25,8 +25,6 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-std::unordered_map<int32_t, std::pair<WeakPtr<CustomNode>, bool> > delayJsActiveNodes_;
-
 RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::string& viewKey)
 {
     auto node = MakeRefPtr<CustomNode>(nodeId, viewKey);
@@ -81,26 +79,13 @@ void CustomNode::FlushReload()
     Render();
 }
 
-void CustomNode::FlushDelayJsActive()
-{
-    auto nodes = std::move(delayJsActiveNodes_);
-    for (auto node : nodes) {
-        auto customNode = node.second.first.Upgrade();
-        if (customNode) {
-            customNode->FireSetActiveFunc(node.second.second);
-        }
-    }
-}
-
 void CustomNode::SetJSViewActive(bool active)
 {
-    auto iter = delayJsActiveNodes_.begin();
-    iter = delayJsActiveNodes_.find(GetId());
-    if (iter != delayJsActiveNodes_.end()) {
-        iter->second.second = active;
-    } else {
-        delayJsActiveNodes_.emplace(GetId(), std::make_pair(WeakClaim(this), active));
+    auto context = PipelineContext::GetCurrentContext();
+    if (!context) {
+        return;
     }
+    context->SetJSViewActive(active, WeakClaim(this));
 }
 
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout)
