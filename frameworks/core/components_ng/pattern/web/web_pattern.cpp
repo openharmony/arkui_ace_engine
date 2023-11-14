@@ -2616,9 +2616,8 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
             TAG_LOGD(AceLogTag::ACE_WEB, "FilterScrollEvent ScrollBy remainOffset = %{public}f", result.remain);
             return NearZero(result.remain);
         } else {
-            HandleScrollVelocity(velocity);
+            return HandleScrollVelocity(velocity);
         }
-        return true;
     } else if (nestedScrollMode_ == NestedScrollMode::PARALLEL) {
         if (offset != 0) {
             HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
