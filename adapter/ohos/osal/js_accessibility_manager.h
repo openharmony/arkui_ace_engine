@@ -228,7 +228,7 @@ private:
     void SearchElementInfosByTextNG(const SearchParameter& searchParam, const RefPtr<NG::FrameNode>& node,
         std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
         const RefPtr<NG::PipelineContext>& ngPipeline);
-    std::list<AccessibilityElementInfo> JsAccessibilityManager::SearchElementInfosByTextNG(
+    std::list<Accessibility::AccessibilityElementInfo> SearchElementInfosByTextNG(
         int32_t elementId, const std::string& text, const RefPtr<NG::FrameNode>& node, int32_t offset);
     void FindFocusedExtensionElementInfoNG(const SearchParameter& searchParam,
         Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context);
