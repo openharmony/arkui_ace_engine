@@ -415,6 +415,14 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             jumpIndex_.reset();
         }
     }
+    if (targetIndex_) {
+        if (targetIndex_.value() == LAST_ITEM) {
+            targetIndex_ = totalItemCount_ - 1;
+        } else if ((targetIndex_.value() < 0) || (targetIndex_.value() >= totalItemCount_)) {
+            targetIndex_.reset();
+        }
+        targetIndexStaged_ = targetIndex_;
+    }
     if (!itemPosition_.empty()) {
         startPos = itemPosition_.begin()->second.startPos;
         endPos = itemPosition_.rbegin()->second.endPos;
