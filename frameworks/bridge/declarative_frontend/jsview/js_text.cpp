@@ -666,7 +666,6 @@ void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
     if (!ParseDataDetectorConfig(info, textTypes, onResult)) {
         return;
     }
-    TextModel::GetInstance()->SetTextDetectEnable(true);
     TextModel::GetInstance()->SetTextDetectConfig(textTypes, std::move(onResult));
 }
 

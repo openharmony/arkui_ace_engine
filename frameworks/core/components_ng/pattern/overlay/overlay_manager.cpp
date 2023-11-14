@@ -19,10 +19,12 @@
 #include <utility>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
@@ -33,9 +35,11 @@
 #include "core/common/modal_ui_extension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
@@ -45,6 +49,7 @@
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -62,6 +67,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
@@ -90,6 +96,10 @@ const RefPtr<Curve> SHOW_CUSTOM_KEYBOARD_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
 const RefPtr<Curve> HIDE_CUSTOM_KEYBOARD_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(4.0f, 1.0f, 342.0f, 37.0f);
+
+const std::map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
+    {TextDataDetectType::PHONE_NUMBER, "phoneNum"}, {TextDataDetectType::URL, "url"},
+    {TextDataDetectType::EMAIL, "email"}, {TextDataDetectType::ADDRESS, "location"} };
 
 RefPtr<FrameNode> GetLastPage()
 {
@@ -2660,6 +2670,105 @@ void OverlayManager::CloseModalUIExtension(int32_t sessionId)
     ModalStyle modalStyle;
     modalStyle.modalTransition = NG::ModalTransition::NONE;
     BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, -(sessionId));
+}
+
+RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(
+    const RefPtr<FrameNode>& uiExtNode, const std::vector<std::string>& aiMenuOptions)
+{
+    CHECK_NULL_RETURN(uiExtNode, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto targetNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    MenuParam menuParam;
+    menuParam.type = MenuType::MENU;
+    auto menuWrapperNode =
+        MenuView::Create(uiExtNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true);
+    CHECK_NULL_RETURN(menuWrapperNode, nullptr);
+    auto menuNode = DynamicCast<FrameNode>(menuWrapperNode->GetFirstChild());
+    CHECK_NULL_RETURN(menuNode, nullptr);
+    auto idealSize = CaculateMenuSize(menuNode, aiMenuOptions);
+    auto uiExtLayoutProperty = uiExtNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(uiExtLayoutProperty, nullptr);
+    uiExtLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(idealSize.Width()),  CalcLength(idealSize.Height())));
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuLayoutProperty, nullptr);
+    menuLayoutProperty->UpdateMargin(MarginProperty());
+    menuLayoutProperty->UpdatePadding(PaddingProperty());
+    auto scollNode = DynamicCast<FrameNode>(menuNode->GetFirstChild());
+    CHECK_NULL_RETURN(scollNode, nullptr);
+    auto scollLayoutProperty = scollNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(scollLayoutProperty, nullptr);
+    scollLayoutProperty->UpdateMargin(MarginProperty());
+    scollLayoutProperty->UpdatePadding(PaddingProperty());
+    return menuNode;
+}
+
+SizeF OverlayManager::CaculateMenuSize(
+    const RefPtr<FrameNode>& menuNode, const std::vector<std::string>& aiMenuOptions)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, SizeF());
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, SizeF());
+    TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
+    std::string textContent = "";
+    for (auto option : aiMenuOptions) {
+        if (option.length() > textContent.length()) {
+            textContent = option;
+        }
+    }
+    MeasureContext measureContext;
+    measureContext.textContent = textContent;
+    measureContext.fontSize = textStyle.GetFontSize();
+    auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
+    measureContext.fontWeight = fontweight;
+    auto fontFamilies = textStyle.GetFontFamilies();
+    measureContext.fontWeight = V2::ConvertFontFamily(fontFamilies);
+    auto measureSize = MeasureUtil::MeasureTextSize(measureContext);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, SizeF());
+    auto minItemHeight = static_cast<float>(selectTheme->GetOptionMinHeight().ConvertToPx());
+    auto menuItemHeight = std::max(minItemHeight, static_cast<float>(measureSize.Height()));
+    auto groupDividerPadding = static_cast<float>(selectTheme->GetDividerPaddingVertical().ConvertToPx()) * 2 +
+                           static_cast<float>(selectTheme->GetDefaultDividerWidth().ConvertToPx());
+    auto groupHeight = menuItemHeight + groupDividerPadding;
+
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuLayoutProperty, SizeF());
+    const auto& padding = menuLayoutProperty->CreatePaddingAndBorder();
+    auto middleSpace = static_cast<float>(selectTheme->GetIconContentPadding().ConvertToPx());
+    float contentWidth = static_cast<float>(measureSize.Width()) + padding.Width() + middleSpace;
+
+    auto childConstraint = menuLayoutProperty->CreateChildConstraint();
+    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    CHECK_NULL_RETURN(columnInfo, SizeF());
+    CHECK_NULL_RETURN(columnInfo->GetParent(), SizeF());
+    columnInfo->GetParent()->BuildColumnWidth();
+    auto minWidth = static_cast<float>(columnInfo->GetWidth()) - padding.Width();
+    childConstraint.minSize.SetWidth(minWidth);
+    auto idealWidth = std::max(contentWidth, childConstraint.minSize.Width());
+    auto idealHeight = groupHeight * (aiMenuOptions.size() - 1) +
+        menuItemHeight + static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
+    return SizeF(idealWidth, idealHeight);
+}
+
+bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF safeArea,
+    const std::vector<std::string>& aiMenuOptions, const RefPtr<NG::FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(uiExtNode, false);
+    auto menuNode = BindUIExtensionToMenu(uiExtNode, aiMenuOptions);
+    CHECK_NULL_RETURN(menuNode, false);
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuLayoutProperty, false);
+    menuLayoutProperty->UpdateTargetSize(safeArea.GetSize());
+    OffsetF offset(safeArea.GetX(), safeArea.Bottom());
+    menuLayoutProperty->UpdateMenuOffset(offset);
+    auto menuWrapperNode = DynamicCast<FrameNode>(menuNode->GetParent());
+    CHECK_NULL_RETURN(menuWrapperNode, false);
+    ShowMenu(targetNode->GetId(), offset, menuWrapperNode);
+    return true;
 }
 
 void OverlayManager::MarkDirty(PropertyChangeFlag flag)
