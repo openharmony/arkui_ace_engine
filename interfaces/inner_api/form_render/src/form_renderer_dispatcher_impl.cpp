@@ -96,7 +96,7 @@ void FormRendererDispatcherImpl::SetVisibleChange(bool isVisible)
             HILOG_ERROR("uiContent is nullptr");
             return;
         }
-        uiContent->ProcessVisibleChange(isVisible);
+        uiContent->ProcessFormVisibleChange(isVisible);
     });
 }
 } // namespace Ace

@@ -121,7 +121,7 @@ public:
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
-    virtual void ProcessVisibleChange(bool isVisible) {};
+    virtual void ProcessFormVisibleChange(bool isVisible) {};
 
     // Window color
     virtual uint32_t GetBackgroundColor() = 0;

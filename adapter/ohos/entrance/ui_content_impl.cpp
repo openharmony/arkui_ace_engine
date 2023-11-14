@@ -1945,7 +1945,7 @@ sptr<IRemoteObject> UIContentImpl::GetParentToken()
     return parentToken_;
 }
 
-void UIContentImpl::ProcessVisibleChange(bool isVisible)
+void UIContentImpl::ProcessFormVisibleChange(bool isVisible)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
