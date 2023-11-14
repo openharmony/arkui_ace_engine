@@ -176,6 +176,7 @@ public:
     void CreateHandles() override;
     void HandleOnSelectAll() override;
     void HandleOnCopy() override;
+    bool JudgeDraggable(GestureEvent& info);
 
     bool IsUsingMouse() const
     {
