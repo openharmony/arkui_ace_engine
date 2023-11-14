@@ -1849,7 +1849,7 @@ class stateMgmtConsole {
         // aceConsole.debug(...args);
     }
     static applicationError(...args) {
-        aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
+        aceConsole.warn(`FIX THIS APPLICATION ERROR \n`, ...args);
     }
 }
 class stateMgmtTrace {

@@ -225,7 +225,6 @@ void DeclarativeFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& cont
 
 void DeclarativeFrontend::AttachSubPipelineContext(const RefPtr<PipelineBase>& context)
 {
-    LOGI("DeclarativeFrontend AttachSubPipelineContext.");
     if (!context) {
         return;
     }
@@ -241,7 +240,6 @@ void DeclarativeFrontend::AttachSubPipelineContext(const RefPtr<PipelineBase>& c
 
 void DeclarativeFrontend::SetAssetManager(const RefPtr<AssetManager>& assetManager)
 {
-    LOGI("DeclarativeFrontend SetAssetManager.");
     if (delegate_) {
         delegate_->SetAssetManager(assetManager);
     }
@@ -342,7 +340,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     const auto& onSaveAbilityStateCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](std::string& data) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
-            LOGE("the js engine is nullptr");
             return;
         }
         jsEngine->OnSaveAbilityState(data);
@@ -351,7 +348,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
                                                     const std::string& data) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
-            LOGE("the js engine is nullptr");
             return;
         }
         jsEngine->OnRestoreAbilityState(data);
@@ -360,7 +356,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     const auto& onNewWantCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& data) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
-            LOGE("the js engine is nullptr");
             return;
         }
         jsEngine->OnNewWant(data);
@@ -485,7 +480,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     };
 
     if (isFormRender_) {
-        LOGI("Init Form Delegate");
         delegate_ = AceType::MakeRefPtr<Framework::FormFrontendDelegateDeclarative>(taskExecutor, loadCallback,
             setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
             resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
@@ -509,7 +503,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         delegate_->DisallowPopLastPage();
     }
     if (!jsEngine_) {
-        LOGE("the js engine is nullptr");
         EventReport::SendAppStartException(AppStartExcepType::JS_ENGINE_CREATE_ERR);
         return;
     }
@@ -624,8 +617,8 @@ void DeclarativeFrontend::NavigatePage(uint8_t type, const PageTarget& target, c
             delegate_->BackWithTarget(target, params);
             break;
         default:
-            LOGE("Navigator type is invalid!");
             delegate_->BackWithTarget(target, params);
+            break;
     }
 }
 
@@ -811,7 +804,6 @@ void DeclarativeFrontend::OnNewWant(const std::string& data)
 RefPtr<AccessibilityManager> DeclarativeFrontend::GetAccessibilityManager() const
 {
     if (!delegate_) {
-        LOGE("GetAccessibilityManager delegate is null");
         return nullptr;
     }
     return delegate_->GetJSAccessibilityManager();
@@ -821,7 +813,6 @@ WindowConfig& DeclarativeFrontend::GetWindowConfig()
 {
     if (!delegate_) {
         static WindowConfig windowConfig;
-        LOGW("delegate is null, return default config");
         return windowConfig;
     }
     return delegate_->GetWindowConfig();
@@ -830,7 +821,6 @@ WindowConfig& DeclarativeFrontend::GetWindowConfig()
 bool DeclarativeFrontend::OnBackPressed()
 {
     if (!delegate_) {
-        LOGW("delegate is null, return false");
         return false;
     }
     return delegate_->OnPageBackPress();
@@ -872,7 +862,6 @@ void DeclarativeFrontend::OnInactive() {}
 bool DeclarativeFrontend::OnStartContinuation()
 {
     if (!delegate_) {
-        LOGW("delegate is null, return false");
         return false;
     }
     return delegate_->OnStartContinuation();
@@ -909,7 +898,6 @@ void DeclarativeFrontend::GetPluginsUsed(std::string& data)
 bool DeclarativeFrontend::OnRestoreData(const std::string& data)
 {
     if (!delegate_) {
-        LOGW("delegate is null, return false");
         return false;
     }
     return delegate_->OnRestoreData(data);
@@ -933,7 +921,6 @@ void DeclarativeFrontend::CallRouterBack()
 {
     if (delegate_) {
         if (delegate_->GetStackSize() == 1 && isSubWindow_) {
-            LOGW("Can't back because this is the last page of sub window!");
             return;
         }
         delegate_->CallPopPage();
@@ -1036,7 +1023,6 @@ void DeclarativeFrontend::RebuildAllPages()
 void DeclarativeFrontend::NotifyAppStorage(const std::string& key, const std::string& value)
 {
     if (!delegate_) {
-        LOGW("delegate is null, return false");
         return;
     }
     delegate_->NotifyAppStorage(jsEngine_, key, value);
@@ -1134,7 +1120,6 @@ void DeclarativeEventHandler::HandleSyncEvent(const EventMarker& eventMarker, co
 
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, int32_t param)
 {
-    LOGW("js event handler does not support this event type!");
     AccessibilityEvent accessibilityEvent;
     accessibilityEvent.nodeId = StringUtils::StringToInt(eventMarker.GetData().eventId);
     accessibilityEvent.eventType = eventMarker.GetData().eventType;
@@ -1143,7 +1128,6 @@ void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, i
 
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const KeyEvent& info)
 {
-    LOGW("js event handler does not support this event type!");
     AccessibilityEvent accessibilityEvent;
     accessibilityEvent.nodeId = StringUtils::StringToInt(eventMarker.GetData().eventId);
     accessibilityEvent.eventType = eventMarker.GetData().eventType;
@@ -1177,7 +1161,6 @@ void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, c
 
 void DeclarativeEventHandler::HandleSyncEvent(const EventMarker& eventMarker, bool& result)
 {
-    LOGW("js event handler does not support this event type!");
     AccessibilityEvent accessibilityEvent;
     accessibilityEvent.nodeId = StringUtils::StringToInt(eventMarker.GetData().eventId);
     accessibilityEvent.eventType = eventMarker.GetData().eventType;
@@ -1194,7 +1177,6 @@ void DeclarativeEventHandler::HandleSyncEvent(
 
 void DeclarativeEventHandler::HandleSyncEvent(const EventMarker& eventMarker, const BaseEventInfo& info, bool& result)
 {
-    LOGW("js event handler does not support this event type!");
     AccessibilityEvent accessibilityEvent;
     accessibilityEvent.nodeId = StringUtils::StringToInt(eventMarker.GetData().eventId);
     accessibilityEvent.eventType = eventMarker.GetData().eventType;
@@ -1204,7 +1186,6 @@ void DeclarativeEventHandler::HandleSyncEvent(const EventMarker& eventMarker, co
 void DeclarativeEventHandler::HandleSyncEvent(
     const EventMarker& eventMarker, const std::string& param, std::string& result)
 {
-    LOGW("js event handler does not support this event type!");
     AccessibilityEvent accessibilityEvent;
     accessibilityEvent.nodeId = StringUtils::StringToInt(eventMarker.GetData().eventId);
     accessibilityEvent.eventType = eventMarker.GetData().eventType;
