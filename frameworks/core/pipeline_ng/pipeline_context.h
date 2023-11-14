@@ -226,7 +226,7 @@ public:
     {
         return safeAreaManager_;
     }
-    SafeAreaInsets GetSafeArea() const;
+    virtual SafeAreaInsets GetSafeArea() const;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
