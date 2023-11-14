@@ -1360,9 +1360,13 @@ void SwiperPattern::OnTouchTestHit(SourceType hitTestType)
 
 void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    auto touchType = info.GetTouches().front().GetTouchType();
+    if (info.GetTouches().empty()) {
+        return;
+    }
+    auto locationInfo = info.GetTouches().front();
+    auto touchType = locationInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
-        HandleTouchDown(info);
+        HandleTouchDown(locationInfo);
     } else if (touchType == TouchType::UP) {
         HandleTouchUp();
     } else if (touchType == TouchType::CANCEL) {
@@ -1370,7 +1374,7 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 }
 
-void SwiperPattern::HandleTouchDown(const TouchEventInfo& info)
+void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
 {
     if (HasIndicatorNode()) {
         auto host = GetHost();
@@ -1381,7 +1385,6 @@ void SwiperPattern::HandleTouchDown(const TouchEventInfo& info)
             auto geometryNode = indicatorNode->GetGeometryNode();
             CHECK_NULL_VOID(geometryNode);
             auto hotRegion = geometryNode->GetFrameRect();
-            auto locationInfo = info.GetTouches().front();
             auto touchPoint = PointF(static_cast<float>(locationInfo.GetLocalLocation().GetX()),
                 static_cast<float>(locationInfo.GetLocalLocation().GetY()));
             if (hotRegion.IsInRegion(touchPoint)) {

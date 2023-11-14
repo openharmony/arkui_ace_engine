@@ -7912,11 +7912,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchDown001, TestSize.Level1)
      */
     TouchLocationInfo touchLocationInfo("down", 0);
     touchLocationInfo.SetTouchType(TouchType::DOWN);
-    std::list<TouchLocationInfo> infoList;
-    infoList.emplace_back(touchLocationInfo);
-    TouchEventInfo touchEventInfo("down");
-    touchEventInfo.touches_ = infoList;
-    pattern_->HandleTouchDown(touchEventInfo);
+    pattern_->HandleTouchDown(touchLocationInfo);
 }
 
 /**
