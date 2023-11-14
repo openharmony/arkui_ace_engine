@@ -48,6 +48,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 #include "core/components_ng/render/paragraph.h"
@@ -2250,4 +2251,50 @@ HWTEST_F(RichEditorTestNg, GetParagraphLength001, TestSize.Level1)
     EXPECT_EQ(length, 11);
 }
 
+/**
+ * @tc.name: GetCaretRect001
+ * @tc.desc: test get caret rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, GetCaretRect001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+
+    auto overlayMod = richEditorNode_->GetOverlayNode();
+    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    richEditorOverlay->SetCaretOffsetAndHeight(OffsetF(80.0f, 100.0f), 60.0f);
+    auto caretRect = richEditorPattern->GetCaretRect();
+
+    EXPECT_EQ(richEditorOverlay->GetCaretOffset(), OffsetF(80.0f, 100.0f));
+    EXPECT_EQ(richEditorOverlay->GetCaretHeight(), 60.0f);
+    EXPECT_EQ(caretRect.GetOffset(), richEditorOverlay->GetCaretOffset());
+    EXPECT_EQ(caretRect.Height(), richEditorOverlay->GetCaretHeight());
+}
+
+/**
+ * @tc.name: GetCaretRect002
+ * @tc.desc: test get caret rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, GetCaretRect002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto manager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+
+    auto overlayMod = richEditorNode_->GetOverlayNode();
+    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    richEditorOverlay->SetCaretOffsetAndHeight(OffsetF(80.0f, 100.0f), 60.0f);
+    auto caretRect = richEditorPattern->GetCaretRect();
+
+    manager->SetClickPosition({ caretRect.GetOffset().GetX(), caretRect.GetOffset().GetY() });
+    manager->SetHeight(caretRect.Height());
+    manager->ScrollTextFieldToSafeArea();
+    EXPECT_EQ(GreatNotEqual(manager->GetClickPosition().GetX(), 0.0f), true);
+    EXPECT_EQ(GreatNotEqual(manager->GetClickPosition().GetY(), 0.0f), true);
+
+    EXPECT_EQ(GreatNotEqual(manager->GetHeight(), 0.0f), true);
+    EXPECT_EQ(LessNotEqual(manager->GetHeight(), 800.0f), true);
+}
 } // namespace OHOS::Ace::NG
