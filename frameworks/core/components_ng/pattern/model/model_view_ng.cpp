@@ -37,17 +37,21 @@ ModelViewNG::ModelViewNG()
     }
 }
 
-void ModelViewNG::Create(const std::string& src, Render3D::SurfaceType surfaceType)
+void ModelViewNG::Create(const std::string& src, const std::string& bundleName,
+    const std::string& moduleName, Render3D::SurfaceType surfaceType)
 {
-    LOGD("MODEL_NG: Create-> src: %s", src.c_str());
+    LOGD("MODEL_NG: Create-> src: %s %hhu", src.c_str(), surfaceType);
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     static int staticKey = 0;
+
     ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::MODEL_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MODEL_ETS_TAG, nodeId, [&nodeId, surfaceType]() {
-            return AceType::MakeRefPtr<ModelPattern>(staticKey++, surfaceType);
+        V2::MODEL_ETS_TAG, nodeId, [&nodeId, surfaceType, &bundleName, &moduleName]() {
+            return AceType::MakeRefPtr<ModelPattern>(staticKey++, surfaceType,
+                bundleName, moduleName);
         });
+
     stack->Push(frameNode);
     if (frameNode_.Invalid()) {
         ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSource, src);
@@ -58,13 +62,6 @@ void ModelViewNG::Create(const std::string& src, Render3D::SurfaceType surfaceTy
         ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelImageTexturePaths, {});
         ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelShaderInputBuffer,
             std::make_shared<Render3D::ShaderInputBuffer>());
-    }
-
-    lightsIdx_ = 0;
-    if (lights_.empty()) {
-        isFirstLightsUpdate_ = true;
-    } else {
-        isFirstLightsUpdate_ = false;
     }
     frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
 }
@@ -139,7 +136,8 @@ void ModelViewNG::AddLight(const RefPtr<ModelLight>& light)
         LOGE("Add light invalid light");
         return;
     }
-    if (isFirstLightsUpdate_) {
+
+    if (lights_.empty()) {
         // Set the animation callback.
         RefPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -149,20 +147,10 @@ void ModelViewNG::AddLight(const RefPtr<ModelLight>& light)
         } else {
             LOGE("ModelViewNG() pipeline context is null");
         }
-        lights_.push_back(light);
-        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleLight, light);
-    } else {
-        lightsIdx_++;
-        // Update the corresponding light proepties.
-        auto currentLight = lights_.at(lightsIdx_ - 1);
-        currentLight->SetLightType(light->GetLightType());
-        currentLight->SetIntensity(light->GetLightIntensity());
-        currentLight->SetColor(light->GetLightColor());
-        currentLight->SetLightShadow(light->GetLightShadow());
-        currentLight->SetPosition(light->GetPosition());
-        currentLight->SetRotation(light->GetRotation());
-        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleLight, currentLight);
     }
+
+    lights_.push_back(light);
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleLight, light);
 }
 
 void ModelViewNG::AddGeometry(const std::shared_ptr<Render3D::Geometry>& shape)
@@ -217,6 +205,32 @@ void ModelViewNG::SetHeight(Dimension& height)
         height.SetValue(0.0);
     }
     ViewAbstract::SetHeight(CalcLength(height));
+}
+
+void ModelViewNG::SetRenderHeight(Dimension& height)
+{
+    LOGD("MODEL_NG: ModelViewNG::SetRenderHeight() %f", height.Value());
+    if (LessNotEqual(height.Value(), 0.0)) {
+        height.SetValue(1.0);
+        LOGE("MODEL_NG: ModelViewNG::SetRenderHeight() heigtScale set default 1.0");
+    }
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, RenderHeight, height.Value());
+}
+
+void ModelViewNG::SetRenderWidth(Dimension& width)
+{
+    LOGD("MODEL_NG: ModelViewNG::SetRenderWidth() %f", width.Value());
+    if (LessNotEqual(width.Value(), 0.0)) {
+        width.SetValue(1.0);
+        LOGE("MODEL_NG: ModelViewNG::SetRenderHeight() heigtScale set default 1.0");
+    }
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, RenderWidth, width.Value());
+}
+
+void ModelViewNG::SetRenderFrameRate(float rate)
+{
+    LOGD("MODEL_NG: ModelViewGN::SetRenderFrameRate() %f", rate);
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, RenderFrameRate, rate);
 }
 
 void ModelViewNG::SetShader(const std::string& path)

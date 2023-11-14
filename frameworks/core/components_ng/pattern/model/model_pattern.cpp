@@ -28,10 +28,11 @@ void ModelPattern::OnRebuildFrame()
     modelAdapter_->OnRebuildFrame(context);
 }
 
-ModelPattern::ModelPattern(uint32_t key, Render3D::SurfaceType surfaceType) : key_(key)
+ModelPattern::ModelPattern(uint32_t key, Render3D::SurfaceType surfaceType, const std::string& bundleName,
+    const std::string& moduleName) : key_(key)
 {
     LOGD("MODEL_NG: ModelPattern::ModelPattern(%d)", key);
-    modelAdapter_ = MakeRefPtr<ModelAdapterWrapper>(key_, surfaceType);
+    modelAdapter_ = MakeRefPtr<ModelAdapterWrapper>(key_, surfaceType, bundleName, moduleName);
     modelAdapter_->SetPaintFinishCallback([weak = WeakClaim(this)]() {
             auto model = weak.Upgrade();
             if (model) {
@@ -80,6 +81,10 @@ bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
 
+    auto mainProperty = DynamicCast<ModelPaintProperty>(host->GetPaintProperty<ModelPaintProperty>());
+    auto widthScale = mainProperty->GetRenderWidth().value_or(1.0);
+    auto heightScale = mainProperty->GetRenderHeight().value_or(1.0);
+
     auto contentSize = geometryNode->GetContentSize();
     auto contentOffset = geometryNode->GetContentOffset();
 
@@ -87,8 +92,14 @@ bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     float width = contentSize.Width();
     float height = contentSize.Height();
     float scale = PipelineContext::GetCurrentContext()->GetViewScale();
-    modelAdapter_->OnDirtyLayoutWrapperSwap(contentOffset.GetX(), contentOffset.GetY(), width, height, scale,
-        config.contentSizeChange);
+    Render3D::WindowChangeInfo windowChangeInfo {
+        contentOffset.GetX(), contentOffset.GetY(),
+        width, height,
+        scale, widthScale, heightScale,
+        config.contentSizeChange, modelAdapter_->GetSurfaceType()
+    };
+    LOGD("MODEL_NG: ModelPattern::OnDirtyLayoutWrapperSwap: %f, %f", widthScale, heightScale);
+    modelAdapter_->OnDirtyLayoutWrapperSwap(windowChangeInfo);
     host->MarkNeedSyncRenderTree();
 
     return measure;
@@ -110,7 +121,8 @@ void ModelPattern::OnDetachFromFrameNode(FrameNode* node)
 void ModelPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     CHECK_NULL_VOID(modelAdapter_);
-    bool repaint = modelAdapter_->HandleTouchEvent(info);
+    auto mainProperty = DynamicCast<ModelPaintProperty>(GetHost()->GetPaintProperty<ModelPaintProperty>());
+    bool repaint = modelAdapter_->HandleTouchEvent(info, mainProperty);
     if (repaint) {
         MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }

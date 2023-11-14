@@ -136,6 +136,21 @@ void ModelViewImpl::SetHeight(Dimension& height)
     ViewAbstractModel::GetInstance()->SetHeight(height);
 }
 
+void ModelViewImpl::SetRenderHeight(Dimension& height)
+{
+    LOGD("ModelViewImpl::SetRenderHeight() %f", height.Value());
+}
+
+void ModelViewImpl::SetRenderWidth(Dimension& width)
+{
+    LOGD("ModelViewImpl::SetRenderWidth() %f", width.Value());
+}
+
+void ModelViewImpl::SetRenderFrameRate(float rate)
+{
+    LOGD("ModelViewImpl::SetRenderFeameRate() %f", rate);
+}
+
 void ModelViewImpl::SetShader(const std::string& path)
 {
     LOGD("ModelViewImpl::SetShader() NOT IMPLEMENTED YET");
