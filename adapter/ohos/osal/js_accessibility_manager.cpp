@@ -2296,24 +2296,20 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int32_t elementId, const
     }
     CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
         GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
-    if (!uiExtensionsNodes.empty()) {
-        for (const auto& node : uiExtensionsNodes) {
-            auto infosByIPC = OHOS::Ace::Framework::SearchElementInfosByTextNG(
-                0, text, node, uiExtensionOffset / UI_EXTENSION_ID_10);
-            if (!infosByIPC.empty()) {
-                ConvertExtensionAccessibilityNodeId(infosByIPC, node, uiExtensionOffset);
-                for (auto& info : infosByIPC) {
-                    infos.emplace_back(info);
-                }
+    for (const auto& node : uiExtensionsNodes) {
+        auto infosByIPC =
+            OHOS::Ace::Framework::SearchElementInfosByTextNG(0, text, node, uiExtensionOffset / UI_EXTENSION_ID_10);
+        if (!infosByIPC.empty()) {
+            ConvertExtensionAccessibilityNodeId(infosByIPC, node, uiExtensionOffset);
+            for (auto& info : infosByIPC) {
+                infos.emplace_back(info);
             }
         }
     }
-    if (!frameNodesWithText.empty()) {
-        for (const auto& node : frameNodesWithText) {
-            AccessibilityElementInfo nodeInfo;
-            UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
-            infos.emplace_back(nodeInfo);
-        }
+    for (const auto& node : frameNodesWithText) {
+        AccessibilityElementInfo nodeInfo;
+        UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
+        infos.emplace_back(nodeInfo);
     }
 }
 
