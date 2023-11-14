@@ -270,6 +270,10 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     NGGestureRecognizer::Transform(windowTouchPoint, GetAttachedNode());
     delta_ =
         (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
+
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("Delta is x %{public}f, y %{public}f ", delta_.GetX(), delta_.GetY());
+    }
     mainDelta_ = GetMainAxisDelta();
     UpdateTouchPointInVelocityTracker(event);
     averageDistance_ += delta_ / static_cast<double>(touchPoints_.size());
