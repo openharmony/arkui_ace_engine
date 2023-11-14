@@ -103,17 +103,19 @@ using RSPathDirection = Rosen::Drawing::PathDirection;
 using RSPathEffect = Rosen::Drawing::PathEffect;
 using RSPicture = Rosen::Drawing::Picture;
 using RSRecordingCanvas = Rosen::Drawing::RecordingCanvas;
-using RSRecordingColorFilter = Rosen::Drawing::RecordingColorFilter;
-using RSRecordingColorSpace = Rosen::Drawing::RecordingColorSpace;
-using RSRecordingImageFilter = Rosen::Drawing::RecordingImageFilter;
-using RSRecordingMaskFilter = Rosen::Drawing::RecordingMaskFilter;
+using RSRecordingColorFilter = Rosen::Drawing::ColorFilter;
+using RSRecordingColorSpace = Rosen::Drawing::ColorSpace;
+using RSRecordingImageFilter = Rosen::Drawing::ImageFilter;
+using RSRecordingMaskFilter = Rosen::Drawing::MaskFilter;
 using RSRecordingPath = Rosen::Drawing::RecordingPath;
-using RSRecordingPathEffect = Rosen::Drawing::RecordingPathEffect;
+using RSRecordingPathEffect = Rosen::Drawing::PathEffect;
 using RSRecordingRegion = Rosen::Drawing::RecordingRegion;
-using RSRecordingShaderEffect = Rosen::Drawing::RecordingShaderEffect;
+using RSRecordingShaderEffect = Rosen::Drawing::ShaderEffect;
 using RSSaveLayerOps = Rosen::Drawing::SaveLayerOps;
 using RSSize = Rosen::Drawing::Size;
 using RSSrcRectConstraint = Rosen::Drawing::SrcRectConstraint;
+using RSPixmap = Rosen::Drawing::Pixmap;
+using RSImageInfo = Rosen::Drawing::ImageInfo;
 #endif
 #ifndef USE_GRAPHIC_TEXT_GINE
 using RSPathEffect = rosen::PathEffect;

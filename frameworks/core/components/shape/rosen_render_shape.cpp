@@ -313,12 +313,13 @@ void RosenRenderShape::DrawStroke(RSCanvas* canvas, const RSPath& path)
         strokePen.SetWidth(NormalizePercentToPx(strokeState_.GetLineWidth(), false));
         if (!strokeState_.GetStrokeDashArray().empty()) {
             auto lineDashState = strokeState_.GetStrokeDashArray();
-            std::vector<RSScalar> intervals(lineDashState.size());
+            RSScalar intervals[lineDashState.size()];
             for (size_t i = 0; i < lineDashState.size(); ++i) {
                 intervals[i] = static_cast<RSScalar>(NormalizePercentToPx(lineDashState[i], false));
             }
             RSScalar phase = static_cast<RSScalar>(NormalizePercentToPx(strokeState_.GetStrokeDashOffset(), false));
-            strokePen.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, phase));
+            strokePen.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals,
+                lineDashState.size(), phase));
         }
         canvas->AttachPen(strokePen);
         canvas->DrawPath(path);
