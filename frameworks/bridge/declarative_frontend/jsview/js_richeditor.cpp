@@ -86,6 +86,10 @@ std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
             length.Reset();
         }
         marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
+    } else {
+        CalcDimension length;
+        length.Reset();
+        marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
     }
     return marginProp;
 }
@@ -93,10 +97,15 @@ std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
 std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args)
 {
     std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
+    CalcDimension radiusDim;
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        radiusDim.Reset();
+        NG::BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(radiusDim);
+        borderRadius.multiValued = false;
+        prop = borderRadius;
         return prop;
     }
-    CalcDimension radiusDim;
     if (JSViewAbstract::ParseJsDimensionVp(args, radiusDim)) {
         if (radiusDim.Unit() == DimensionUnit::PERCENT) {
             radiusDim.Reset();
