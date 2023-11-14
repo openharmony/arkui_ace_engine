@@ -404,11 +404,9 @@ void NavigationPattern::DoNavigationTransitionAnimation(const RefPtr<NavDestinat
     auto isReplace = navigationStack_->IsReplace();
     if (isReplace) {
         if (newTopNavDestination && preTopNavDestination) {
-            navigationNode->TransitionWithReplaceExit(preTopNavDestination, false);
-            navigationNode->TransitionWithReplaceEnter(newTopNavDestination);
+            navigationNode->TransitionWithReplace(preTopNavDestination, newTopNavDestination, false);
         } else if (newTopNavDestination) {
-            navigationNode->TransitionWithReplaceExit(navBarNode, true);
-            navigationNode->TransitionWithReplaceEnter(newTopNavDestination);
+            navigationNode->TransitionWithReplace(navBarNode, newTopNavDestination, true);
         }
         navigationStack_->UpdateIsReplace(false);
         return;

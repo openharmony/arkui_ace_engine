@@ -1563,18 +1563,18 @@ class NavPathStack {
     this.isReplace = false;
   }
   replacePath(info) {
-    if (this.pathArray.length != 0) {
+    if (this.pathArray.length !== 0) {
       this.pathArray.pop();
-      this.isReplace = true;
     }
     this.pathArray.push(info);
+    this.isReplace = true;
     this.changeFlag = this.changeFlag + 1;
   }
   replacePathByName(name, param) {
-    if (this.pathArray.length != 0) {
+    if (this.pathArray.length !== 0) {
       this.pathArray.pop();
-      this.isReplace = true;
     }
+    this.isReplace = true;
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
   }
