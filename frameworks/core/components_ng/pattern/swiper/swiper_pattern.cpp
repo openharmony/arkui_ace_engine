@@ -1467,7 +1467,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
             return;
         }
 
-        auto nextIndex = ComputeNextIndexByVelocity(static_cast<float>(dragVelocity));
+        auto nextIndex = ComputeNextIndexByVelocity(static_cast<float>(dragVelocity), true);
         nextIndex = std::clamp(nextIndex, 0, TotalCount() - GetDisplayCount());
         if (currentIndex_ != nextIndex) {
             UpdateCurrentIndex(nextIndex);
@@ -1516,7 +1516,7 @@ void SwiperPattern::UpdateCurrentIndex(int32_t index)
     layoutProperty->UpdateIndexWithoutMeasure(GetLoopIndex(currentIndex_));
 }
 
-int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity) const
+int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDistance) const
 {
     auto nextIndex = currentIndex_;
     auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
@@ -1529,7 +1529,7 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity) const
     auto direction = GreatNotEqual(velocity, 0.0);
     auto dragThresholdFlag = direction ? firstItemInfoInVisibleArea.second.endPos > firstItemLength / 2
                                        : firstItemInfoInVisibleArea.second.endPos < firstItemLength / 2;
-    if ((std::abs(velocity) > MIN_TURN_PAGE_VELOCITY) || dragThresholdFlag) {
+    if ((!onlyDistance && std::abs(velocity) > MIN_TURN_PAGE_VELOCITY) || dragThresholdFlag) {
         nextIndex = direction ? firstItemInfoInVisibleArea.first : firstItemInfoInVisibleArea.first + 1;
     } else {
         nextIndex = direction ? firstItemInfoInVisibleArea.first + 1 : firstItemInfoInVisibleArea.first;
