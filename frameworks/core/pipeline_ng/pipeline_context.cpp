@@ -225,19 +225,19 @@ void PipelineContext::RemoveScheduleTask(uint32_t id)
 }
 
 std::pair<float, float> PipelineContext::LinearInterpolation(const std::tuple<float, float, uint64_t> &history,
-    const std::tuple<float, float, uint64_t> &current, const uint64_t &nanoTimeStamp)
+    const std::tuple<float, float, uint64_t> &current, const uint64_t nanoTimeStamp)
 {
     if (nanoTimeStamp == std::get<INDEX_TIME>(history) || nanoTimeStamp == std::get<INDEX_TIME>(current)) {
-        return std::make_pair(0, 0);
+        return std::make_pair(0.0f, 0.0f);
     }
     if (std::get<INDEX_TIME>(current) < std::get<INDEX_TIME>(history)) {
-        return std::make_pair(0, 0);
+        return std::make_pair(0.0f, 0.0f);
     }
     if (std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history) > INTERPOLATION_THRESHOLD) {
-        return std::make_pair(0, 0);
+        return std::make_pair(0.0f, 0.0f);
     }
     if (nanoTimeStamp < std::get<INDEX_TIME>(history)) {
-        return std::make_pair(0, 0);
+        return std::make_pair(0.0f, 0.0f);
     }
     if (nanoTimeStamp < std::get<INDEX_TIME>(current)) {
         float alpha = (float)(nanoTimeStamp - std::get<INDEX_TIME>(history)) /
@@ -252,14 +252,14 @@ std::pair<float, float> PipelineContext::LinearInterpolation(const std::tuple<fl
         float y = std::get<INDEX_Y>(current) + alpha * (std::get<INDEX_Y>(current) - std::get<INDEX_Y>(history));
         return std::make_pair(x, y);
     }
-    return std::make_pair(0, 0);
+    return std::make_pair(0.0f, 0.0f);
 }
 
 std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(const std::vector<TouchEvent> &events,
     const bool isScreen)
 {
-    float avgX = 0.f;
-    float avgY = 0.f;
+    float avgX = 0.0f;
+    float avgY = 0.0f;
     uint64_t avgTime = 0;
     int32_t i = 0;
     uint64_t lastTime = 0;
@@ -284,35 +284,35 @@ std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(const std::vecto
 }
 
 std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<TouchEvent> &history,
-    const std::vector<TouchEvent> &current, const uint64_t &nanoTimeStamp, const bool isScreen)
+    const std::vector<TouchEvent> &current, const uint64_t nanoTimeStamp, const bool isScreen)
 {
     if (history.empty() || current.empty()) {
         LOGD("history or current has no point, do not resample");
-        return std::make_pair(0, 0);
+        return std::make_pair(0.0f, 0.0f);
     }
     auto historyPoint = GetAvgPoint(history, isScreen);
     auto currentPoint = GetAvgPoint(current, isScreen);
 
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("input time is %{public}lld", static_cast<long long>(nanoTimeStamp));
+        LOGI("input time is %{public}" PRIu64 "", nanoTimeStamp);
         for (auto iter : history) {
-            LOGI("history point x %{public}f, y %{public}f, time %{public}lld", iter.x, iter.y,
-                static_cast<long long>(iter.time.time_since_epoch().count()));
+            LOGI("history point x %{public}f, y %{public}f, time %{public}" PRIu64 "", iter.x, iter.y,
+                static_cast<uint64_t>(iter.time.time_since_epoch().count()));
         }
-        LOGI("historyAvgPoint is x %{public}f, y %{public}f, time %{public}lld", std::get<INDEX_X>(historyPoint),
-            std::get<INDEX_Y>(historyPoint), static_cast<long long>(std::get<INDEX_TIME>(historyPoint)));
+        LOGI("historyAvgPoint is x %{public}f, y %{public}f, time %{public}" PRIu64 "", std::get<INDEX_X>(historyPoint),
+            std::get<INDEX_Y>(historyPoint), std::get<INDEX_TIME>(historyPoint));
         for (auto iter : current) {
-            LOGI("current point x %{public}f, y %{public}f, time %{public}lld", iter.x, iter.y,
-                static_cast<long long>(iter.time.time_since_epoch().count()));
+            LOGI("current point x %{public}f, y %{public}f, time %{public}" PRIu64 "", iter.x, iter.y,
+                static_cast<uint64_t>(iter.time.time_since_epoch().count()));
         }
-        LOGI("currentAvgPoint is x %{public}f, y %{public}f, time %{public}lld", std::get<INDEX_X>(currentPoint),
-            std::get<INDEX_Y>(currentPoint), static_cast<long long>(std::get<INDEX_TIME>(currentPoint)));
+        LOGI("currentAvgPoint is x %{public}f, y %{public}f, time %{public}" PRIu64 "", std::get<INDEX_X>(currentPoint),
+            std::get<INDEX_Y>(currentPoint), std::get<INDEX_TIME>(currentPoint));
     }
     return LinearInterpolation(historyPoint, currentPoint, nanoTimeStamp);
 }
 
 TouchEvent PipelineContext::GetResampleTouchEvent(const std::vector<TouchEvent> &history,
-    const std::vector<TouchEvent> &current, const uint64_t &nanoTimeStamp)
+    const std::vector<TouchEvent> &current, const uint64_t nanoTimeStamp)
 {
     auto newXy = GetResampleCoord(history, current, nanoTimeStamp, false);
     auto newScreenXy = GetResampleCoord(history, current, nanoTimeStamp, true);
@@ -328,14 +328,14 @@ TouchEvent PipelineContext::GetResampleTouchEvent(const std::vector<TouchEvent> 
         newTouchEvent.isInterpolated = true;
         }
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}lld",
+        LOGI("Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}" PRIu64 "",
             newTouchEvent.id, newTouchEvent.x, newTouchEvent.y, newTouchEvent.screenX,
-            newTouchEvent.screenY, static_cast<long long>(newTouchEvent.time.time_since_epoch().count));
+            newTouchEvent.screenY, static_cast<uint64_t>(newTouchEvent.time.time_since_epoch().count()));
     }
     return newTouchEvent;
 }
 
-TouchEvent PipelineContext::GetLatestPoint(const std::vector<TouchEvent> &current, const uint64_t &nanoTimeStamp)
+TouchEvent PipelineContext::GetLatestPoint(const std::vector<TouchEvent> &current, const uint64_t nanoTimeStamp)
 {
     TouchEvent result;
     uint64_t gap = UINT64_MAX;
