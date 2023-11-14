@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "interfaces/inner_api/ace/ai/data_detector_interface.h"
 
 namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
@@ -142,6 +143,48 @@ public:
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
     {
         menuOptionItems_ = std::move(menuOptionItems);
+    }
+
+    void SetTextDetectEnable(bool enable)
+    {
+        textDetectEnable_ = enable;
+    }
+
+    bool GetTextDetectEnable()
+    {
+        return textDetectEnable_;
+    }
+
+    void SetTextDetectTypes(const std::string& types)
+    {
+        textDetectTypes_ = types;
+    }
+
+    std::string GetTextDetectTypes()
+    {
+        return textDetectTypes_;
+    }
+
+    void SetOnResult(std::function<void(const std::string&)>&& onResult)
+    {
+        onResult_ = std::move(onResult);
+    }
+
+    void FireOnResult(const std::string& value)
+    {
+        if (onResult_) {
+            onResult_(value);
+        }
+    }
+
+    void SetTextDetectResult(const TextDataDetectResult result)
+    {
+        textDetectResult_ = result;
+    }
+
+    std::optional<TextDataDetectResult> GetTextDetectResult()
+    {
+        return textDetectResult_;
     }
 
     const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
@@ -376,6 +419,7 @@ private:
     void HandlePanUpdate(const GestureEvent& info);
     void HandlePanEnd(const GestureEvent& info);
     void InitTouchEvent();
+    void InitTextDetect();
     void HandleTouchEvent(const TouchEventInfo& info);
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
@@ -390,7 +434,9 @@ private:
     bool blockPress_ = false;
     bool hasClicked_ = false;
     bool isDoubleClick_ = false;
+    bool textDetectEnable_ = false;
     TimeStamp lastClickTimeStamp_;
+    std::string textDetectTypes_;
 
     RefPtr<Paragraph> paragraph_;
     std::vector<MenuOptionsParam> menuOptionItems_;
@@ -405,6 +451,8 @@ private:
     RefPtr<DragDropProxy> dragDropProxy_;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
+    std::optional<TextDataDetectResult> textDetectResult_;
+    std::function<void(const std::string&)> onResult_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

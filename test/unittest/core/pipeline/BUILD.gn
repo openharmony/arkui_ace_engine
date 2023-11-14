@@ -64,6 +64,7 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/common/font_manager.cpp",
     "$ace_root/frameworks/core/common/ime/text_input_proxy.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_data_detector_mgr.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_layout_inspector.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_text_editing_value.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",

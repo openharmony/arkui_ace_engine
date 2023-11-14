@@ -228,6 +228,11 @@ void TextModelImpl::SetAdaptMaxFontSize(const Dimension& value)
 
 void TextModelImpl::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) {}
 
+void TextModelImpl::SetTextDetectEnable(bool value) {}
+
+void TextModelImpl::SetTextDetectConfig(const std::string& value,
+    std::function<void(const std::string&)>&& onResult) {}
+
 void TextModelImpl::OnSetWidth()
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
