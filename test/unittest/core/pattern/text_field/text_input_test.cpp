@@ -1243,7 +1243,7 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
         "open_harmony@@huawei.com*+$helloworld",
         "open_harmony123 password*+#",
         "openharmony123456*+&@huawei.com",
-        "open_harmony123 password*+#",
+        "o达瓦大屋顶pen_harmony456顶顶顶 password*+#得到",
     };
     std::vector<TestItem<TextInputType, std::string>> testItems;
     testItems.emplace_back(TextInputType::TEXT, "openharmony123_ *+%$", "TextInputType::TEXT");
@@ -1256,7 +1256,7 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
     testItems.emplace_back(
         TextInputType::NUMBER_PASSWORD, "123456", "TextInputType::NUMBER_PASSWORD");
     testItems.emplace_back(
-        TextInputType::SCREEN_LOCK_PASSWORD, "open_harmony123 password*+#", "TextInputType::SCREEN_LOCK_PASSWORD");
+        TextInputType::SCREEN_LOCK_PASSWORD, "open_harmony456 password*+#", "TextInputType::SCREEN_LOCK_PASSWORD");
 
     /**
      * @tc.expected: Check if text filtering meets expectations
