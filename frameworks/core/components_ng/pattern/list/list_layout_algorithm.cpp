@@ -93,10 +93,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (totalItemCount_ > 0) {
         OnSurfaceChanged(layoutWrapper);
-        CheckJumpToIndex();
-        currentOffset_ = currentDelta_;
-        startMainPos_ = currentOffset_;
-        endMainPos_ = currentOffset_ + contentMainSize_;
         stickyStyle_ = listLayoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
         childLayoutConstraint_ = listLayoutProperty->CreateChildConstraint();
         auto mainPercentRefer = GetMainAxisSize(childLayoutConstraint_.percentReference, axis_);
@@ -119,6 +115,10 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             contentMainSize_ = prevContentMainSize_;
         }
         spaceWidth_ += chainInterval_;
+        CheckJumpToIndex();
+        currentOffset_ = currentDelta_;
+        startMainPos_ = currentOffset_;
+        endMainPos_ = currentOffset_ + contentMainSize_;
         CalculateLanes(listLayoutProperty, layoutConstraint, contentIdealSize.CrossSize(axis_), axis_);
         listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
         // calculate child layout constraint.
@@ -387,10 +387,12 @@ void ListLayoutAlgorithm::CheckJumpToIndex()
     float averageHeight = totalHeight / itemPosition_.size();
     int32_t targetIndex = itemPosition_.begin()->first;
     if (NonNegative(currentDelta_)) {
+        currentDelta_ += itemPosition_.begin()->second.startPos;
         int32_t items = currentDelta_ / averageHeight;
         targetIndex += items;
         currentDelta_ -= items * averageHeight;
     } else {
+        currentDelta_ -= itemPosition_.begin()->second.startPos;
         int32_t items = -currentDelta_ / averageHeight;
         targetIndex -= items;
         currentDelta_ += items * averageHeight;
