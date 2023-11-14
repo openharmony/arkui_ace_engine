@@ -16,8 +16,8 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_position_controller.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
@@ -26,6 +26,7 @@ void WaterFlowModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::WATERFLOW_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::WATERFLOW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WaterFlowPattern>(); });
     stack->Push(frameNode);
@@ -49,7 +50,7 @@ void WaterFlowModelNG::SetFooter(std::function<void()>&& footer)
 
 RefPtr<ScrollControllerBase> WaterFlowModelNG::CreateScrollController()
 {
-    return AceType::MakeRefPtr<WaterFlowPositionController>();
+    return AceType::MakeRefPtr<ScrollableController>();
 }
 
 RefPtr<ScrollProxy> WaterFlowModelNG::CreateScrollBarProxy()
@@ -61,7 +62,7 @@ void WaterFlowModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr
 {
     auto waterFlow = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WaterFlowPattern>();
     CHECK_NULL_VOID(waterFlow);
-    waterFlow->SetPositionController(AceType::DynamicCast<WaterFlowPositionController>(scroller));
+    waterFlow->SetPositionController(AceType::DynamicCast<ScrollableController>(scroller));
     waterFlow->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(proxy));
 }
 
@@ -204,5 +205,10 @@ void WaterFlowModelNG::SetFriction(double friction)
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetFriction(friction);
+}
+
+void WaterFlowModelNG::SetCachedCount(int32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value);
 }
 } // namespace OHOS::Ace::NG

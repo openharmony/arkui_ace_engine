@@ -29,6 +29,17 @@ namespace OHOS::Ace::NG {
 
 enum class RefereeState { READY, DETECTING, PENDING, PENDING_BLOCKED, SUCCEED_BLOCKED, SUCCEED, FAIL };
 
+inline std::string TransRefereeState(RefereeState state)
+{
+    const char *str[] = { "READY", "DETECTING", "PENDING", "PENDING_BLOCKED", "SUCCEED_BLOCKED", "SUCCEED", "FAIL" };
+    if (state >= RefereeState::READY && state <= RefereeState::FAIL) {
+        return str[static_cast<int32_t>(state)];
+    }
+    return std::string("State:").append(std::to_string(static_cast<int32_t>(state)));
+}
+
+class FrameNode;
+
 class ACE_EXPORT NGGestureRecognizer : public TouchEventTarget {
     DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget)
 
@@ -39,7 +50,7 @@ public:
 
     static void ResetGlobalTransCfg();
 
-    static void Transform(PointF& localPointF, int id);
+    static void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node);
 
     // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
     void BeginReferee(int32_t touchId, bool needUpdateChild = false)
@@ -127,11 +138,6 @@ public:
         gestureGroup_ = gestureGroup;
     }
 
-    const WeakPtr<NGGestureRecognizer>& GetGestureGroup() const
-    {
-        return gestureGroup_;
-    }
-
     void SetOnAction(const GestureEventFunc& onAction)
     {
         onAction_ = std::make_unique<GestureEventFunc>(onAction);
@@ -192,6 +198,7 @@ public:
             OnSucceedCancel();
         }
         refereeState_ = RefereeState::READY;
+        disposal_ = GestureDisposal::NONE;
         OnResetStatus();
     }
 
@@ -217,6 +224,13 @@ public:
     }
 
     void SetTransInfo(int id);
+
+    virtual RefPtr<GestureSnapshot> Dump() const override;
+
+    // for recognizer
+    void AddGestureProcedure(const std::string& procedure) const;
+    // for recognizer group
+    void AddGestureProcedure(const TouchEvent& point, const RefPtr<NGGestureRecognizer>& recognizer) const;
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {

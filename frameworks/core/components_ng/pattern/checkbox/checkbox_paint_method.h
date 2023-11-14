@@ -53,6 +53,9 @@ public:
         if (paintProperty->HasCheckBoxSelectedColor()) {
             checkboxModifier_->SetUserActiveColor(paintProperty->GetCheckBoxSelectedColorValue());
         }
+        if (paintProperty->HasCheckBoxSelectedStyle()) {
+            checkboxModifier_->SetCheckboxStyle(paintProperty->GetCheckBoxSelectedStyleValue());
+        }
         if (paintProperty->HasCheckBoxUnSelectedColor()) {
             checkboxModifier_->SetInActiveColor(paintProperty->GetCheckBoxUnSelectedColorValue());
         }
@@ -93,8 +96,27 @@ public:
         float boundsRectHeight = size.Height() + 2 * verticalPadding;
         RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
         checkboxModifier_->SetBoundsRect(boundsRect);
+        SetHoverEffectType(paintProperty);
     }
 
+    void SetHoverEffectType(const RefPtr<CheckBoxPaintProperty>& checkBoxPaintProperty)
+    {
+        auto host = checkBoxPaintProperty->GetHost();
+        CHECK_NULL_VOID(host);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto inputEventHub = eventHub->GetInputEventHub();
+        HoverEffectType hoverEffectType = HoverEffectType::AUTO;
+        if (inputEventHub) {
+            hoverEffectType = inputEventHub->GetHoverEffect();
+            if (HoverEffectType::UNKNOWN == hoverEffectType || HoverEffectType::OPACITY == hoverEffectType) {
+                hoverEffectType = HoverEffectType::AUTO;
+            }
+            if (checkboxModifier_) {
+                checkboxModifier_->SetHoverEffectType(hoverEffectType);
+            }
+        }
+    }
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
     {
         hotZoneOffset_ = hotZoneOffset;

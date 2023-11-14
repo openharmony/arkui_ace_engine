@@ -829,7 +829,7 @@ napi_value JsiDeclarativeEngineInstance::GetContextValue()
     return napiValue;
 }
 
-std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
+thread_local std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
 panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 
 // -----------------------

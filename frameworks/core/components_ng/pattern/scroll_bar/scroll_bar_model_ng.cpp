@@ -40,6 +40,7 @@ void ScrollBarModelNG::Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, b
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::SCROLL_BAR_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::SCROLL_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ScrollBarPattern>(); });
     CHECK_NULL_VOID(frameNode);

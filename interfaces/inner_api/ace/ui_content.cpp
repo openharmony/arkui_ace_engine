@@ -15,8 +15,6 @@
 
 #include "interfaces/inner_api/ace/ui_content.h"
 
-#include <vector>
-
 #include "utils.h"
 #include "ace_forward_compatibility.h"
 

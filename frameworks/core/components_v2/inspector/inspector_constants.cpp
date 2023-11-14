@@ -515,8 +515,8 @@ const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
 const char EFFECT_COMPONENT_ETS_TAG[] = "EffectComponent";
 
 // Model
-const char MODEL_COMPONENT_TAG[] = "ModelComponent";
-const char MODEL_ETS_TAG[] = "Model";
+const char MODEL_COMPONENT_TAG[] = "Component3DComponent";
+const char MODEL_ETS_TAG[] = "Component3D";
 
 // window scene
 ACE_EXPORT extern const char ROOT_SCENE_ETS_TAG[] = "RootScene";

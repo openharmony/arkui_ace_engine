@@ -58,7 +58,7 @@ void LongPressRecognizer::OnAccepted()
     if (onLongPress_ && !touchPoints_.empty()) {
         TouchEvent trackPoint = touchPoints_.begin()->second;
         PointF localPoint(trackPoint.GetOffset().GetX(), trackPoint.GetOffset().GetY());
-        NGGestureRecognizer::Transform(localPoint, GetNodeId());
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
         LongPressInfo info(trackPoint.id);
         info.SetTimeStamp(time_);
         info.SetScreenLocation(trackPoint.GetScreenOffset());
@@ -341,6 +341,18 @@ GestureEventFunc LongPressRecognizer::GetLongPressActionFunc()
         }
     };
     return callback;
+}
+
+RefPtr<GestureSnapshot> LongPressRecognizer::Dump() const
+{
+    RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
+    std::stringstream oss;
+    oss << "duration: " <<  duration_ << ", "
+        << "isForDrag: " << isForDrag_ << ", "
+        << "repeat: " << repeat_ << ", "
+        << "fingers: " << fingers_;
+    info->customInfo = oss.str();
+    return info;
 }
 
 } // namespace OHOS::Ace::NG

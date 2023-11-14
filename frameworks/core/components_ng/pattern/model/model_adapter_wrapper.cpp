@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/model/model_adapter_wrapper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "frameworks/core/common/container.h"
 
 #include "graphics_task.h"
 #include "ohos/graphics_manager.h"
@@ -24,8 +25,21 @@
 
 namespace OHOS::Ace::NG {
 
-ModelAdapterWrapper::ModelAdapterWrapper(uint32_t key, Render3D::SurfaceType surfaceType) : key_(key),
-    surfaceType_(surfaceType)
+Render3D::HapInfo ModelAdapterWrapper::SetHapInfo()
+{
+    auto container = Container::Current();
+    if (container == nullptr) {
+        LOGE("modle 3d fail to get container");
+        return {};
+    }
+    std::string hapPath = container->GetHapPath();
+    Render3D::HapInfo hapInfo { hapPath, bundleName_, moduleName_ };
+    return hapInfo;
+}
+
+ModelAdapterWrapper::ModelAdapterWrapper(uint32_t key, Render3D::SurfaceType surfaceType,
+    const std::string& bundleName, const std::string& moduleName) : key_(key), surfaceType_(surfaceType),
+    bundleName_(bundleName), moduleName_(moduleName)
 {
     touchHandler_ = MakeRefPtr<ModelTouchHandler>();
     touchHandler_->SetCameraEventCallback([weak = WeakClaim(this)]
@@ -64,15 +78,16 @@ void ModelAdapterWrapper::CreateWidgetAdapter()
 {
     LOGD("ModelAdapterWrapper::CreateWidgetAdapter key %d", GetKey());
     auto key = GetKey();
-
+    Render3D::HapInfo hapInfo = SetHapInfo();
     // init engine in async manager sometimes crash on screen rotation
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), key] {
+    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), key, &hapInfo] {
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
 
         adapter->widgetAdapter_ = std::make_shared<Render3D::WidgetAdapter>(key);
         auto& gfxManager = Render3D::GraphicsManager::GetInstance();
-        auto&& engine = gfxManager.GetEngine(Render3D::EngineFactory::EngineType::LUME, adapter->GetKey());
+        auto&& engine = gfxManager.GetEngine(Render3D::EngineFactory::EngineType::LUME, adapter->GetKey(),
+            hapInfo);
         adapter->widgetAdapter_->Initialize(std::move(engine));
     });
 }
@@ -108,6 +123,20 @@ void ModelAdapterWrapper::OnDirtyLayoutWrapperSwap(float offsetX, float offsetY,
     });
 }
 
+void ModelAdapterWrapper::OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeInfo& windowChangeInfo)
+{
+    needsSyncPaint_ = true;
+    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &windowChangeInfo] {
+        auto adapter = weak.Upgrade();
+        CHECK_NULL_VOID(adapter);
+        CHECK_NULL_VOID(adapter->textureLayer_);
+        CHECK_NULL_VOID(adapter->widgetAdapter_);
+
+        adapter->textureLayer_->OnWindowChange(windowChangeInfo);
+        adapter->widgetAdapter_->OnWindowChange(adapter->textureLayer_->GetTextureInfo());
+    });
+}
+
 void ModelAdapterWrapper::OnRebuildFrame(RefPtr<RenderContext>& context)
 {
     LOGD("adapter OnRebuildFrame with context");
@@ -124,6 +153,14 @@ void ModelAdapterWrapper::OnPaint3D(const RefPtr<ModelPaintProperty>& modelPaint
 {
     CHECK_NULL_VOID(modelPaintProperty);
 
+    if (modelPaintProperty->NeedsModelSourceSetup()) {
+        UpdateScene(modelPaintProperty);
+    }
+
+    if (modelPaintProperty->NeedsModelBackgroundSetup()) {
+        UpdateEnviroment(modelPaintProperty);
+    }
+
     if (modelPaintProperty->NeedsCameraSetup()) {
         UpdateCamera(modelPaintProperty);
     }
@@ -138,14 +175,6 @@ void ModelAdapterWrapper::OnPaint3D(const RefPtr<ModelPaintProperty>& modelPaint
 
     if (modelPaintProperty->NeedsGeometriesSetup()) {
         UpdateGeometries(modelPaintProperty);
-    }
-
-    if (modelPaintProperty->NeedsModelSourceSetup()) {
-        UpdateScene(modelPaintProperty);
-    }
-
-    if (modelPaintProperty->NeedsModelBackgroundSetup()) {
-        UpdateEnviroment(modelPaintProperty);
     }
 
     if (modelPaintProperty->NeedsCustomRenderSetup()) {
@@ -246,13 +275,16 @@ void ModelAdapterWrapper::SetPaintFinishCallback(PaintFinishCallback callback)
     callback_ = std::move(callback);
 }
 
-bool ModelAdapterWrapper::HandleTouchEvent(const TouchEventInfo& info)
+bool ModelAdapterWrapper::HandleTouchEvent(const TouchEventInfo& info,
+    const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
     CHECK_NULL_RETURN(touchHandler_, false);
     CHECK_NULL_RETURN(textureLayer_, false);
     const auto& textureInfo = textureLayer_->GetTextureInfo();
     auto width = textureInfo.width_;
     auto height = textureInfo.height_;
+    auto cameraState = modelPaintProperty->GetModelCameraMove().value_or(true);
+    touchHandler_->HandleCameraEvents(cameraState);
     return touchHandler_->HandleTouchEvent(info, width, height);
 }
 

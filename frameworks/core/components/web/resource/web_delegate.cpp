@@ -16,6 +16,8 @@
 #include "core/components/web/resource/web_delegate.h"
 
 #include <algorithm>
+#include <cctype>
+#include <cfloat>
 #include <iomanip>
 #include <optional>
 #include <sstream>
@@ -92,6 +94,9 @@ const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1;
+
+#define VISIBLERATIO_LENGTH 4
+#define FLOATRATIO_TO_INT 100
 
 static bool IsDeviceTabletOr2in1()
 {
@@ -2333,6 +2338,7 @@ void WebDelegate::InitWebViewWithWindow()
                 delegate->window_ = nullptr;
                 return;
             }
+            delegate->JavaScriptOnDocumentStart();
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             if (delegate->cookieManager_ == nullptr) {
                 return;
@@ -2466,29 +2472,70 @@ std::string WebDelegate::GetCustomScheme()
     return customScheme;
 }
 
-void WebDelegate::SurfaceOcclusionCallback(bool occlusion)
+void WebDelegate::SurfaceOcclusionCallback(float visibleRatio)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "SurfaceOcclusion changed, occlusion:%{public}d, surfacenode id: %{public}"
-        PRIu64 "", occlusion, surfaceNodeId_);
-    if (surfaceOcclusion_ == occlusion) {
+    TAG_LOGD(AceLogTag::ACE_WEB, "SurfaceOcclusion changed, occlusionPoints:%{public}f, surfacenode id: %{public}"
+        PRIu64 "", visibleRatio, surfaceNodeId_);
+    if (fabs(visibleRatio_ - visibleRatio) <= FLT_EPSILON
+        || (fabs(visibleRatio) > FLT_EPSILON && visibleRatio < 0.0)
+        || (fabs(visibleRatio - 1.0) > FLT_EPSILON && visibleRatio > 1.0)) {
         return;
     }
-    surfaceOcclusion_ = occlusion;
+    visibleRatio_ = visibleRatio;
 
-    if (surfaceOcclusion_) {
+    if (fabs(visibleRatio_) > FLT_EPSILON && visibleRatio_ > 0.0) {
+        CHECK_NULL_VOID(nweb_);
         nweb_->OnUnoccluded();
+        if (fabs(visibleRatio_ - lowerFrameRateVisibleRatio_) <= FLT_EPSILON
+            || visibleRatio_ < lowerFrameRateVisibleRatio_) {
+            nweb_->SetEnableLowerFrameRate(true);
+        } else {
+            nweb_->SetEnableLowerFrameRate(false);
+        }
     } else {
         auto context = context_.Upgrade();
         CHECK_NULL_VOID(context);
+        CHECK_NULL_VOID(context->GetTaskExecutor());
         context->GetTaskExecutor()->PostDelayedTask(
             [weak = WeakClaim(this)]() {
                 auto delegate = weak.Upgrade();
                 CHECK_NULL_VOID(delegate);
-                if (!delegate->surfaceOcclusion_) {
+                if (fabs(delegate->visibleRatio_) <= FLT_EPSILON) {
+                    TAG_LOGD(AceLogTag::ACE_WEB, "the web is still all occluded");
+                    CHECK_NULL_VOID(delegate->nweb_);
                     delegate->nweb_->OnOccluded();
                 }
             },
             TaskExecutor::TaskType::UI, delayTime_);
+    }
+}
+
+void WebDelegate::ratioStrToFloat(const std::string& str)
+{
+    // LowerFrameRateConfig参数的格式限定为x.xx, 长度为4，
+    // 小数点在第二位，其余三位为数字，范围为0.00-1.00
+    if (str.size() != VISIBLERATIO_LENGTH) {
+        return;
+    }
+    auto dotCount = std::count(str.begin(), str.end(), '.');
+    if (dotCount != 1) {
+        return;
+    }
+    auto pos = str.find('.', 0);
+    if (pos != 1) {
+        return;
+    }
+    auto notDigitCount = std::count_if(str.begin(), str.end(),
+        [](char c) {
+            return !isdigit(c) && c != '.';
+        });
+    if (notDigitCount > 0) {
+        return;
+    }
+    float f = std::stof(str);
+    int i = f * FLOATRATIO_TO_INT;
+    if (i >= 0 && i <= 1) {
+        lowerFrameRateVisibleRatio_ = f;
     }
 }
 
@@ -2500,19 +2547,30 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
     if (!IsDeviceTabletOr2in1()) {
         return;
     }
+    std::string visibleAreaRatio = OHOS::NWeb::NWebAdapterHelper::Instance().ParsePerfConfig("LowerFrameRateConfig",
+        "visibleAreaRatio");
+    ratioStrToFloat(visibleAreaRatio);
+    std::vector<float> partitionPoints;
+    TAG_LOGD(AceLogTag::ACE_WEB, "max visible rate to lower frame rate:%{public}f", lowerFrameRateVisibleRatio_);
+    if ((int)(lowerFrameRateVisibleRatio_ * FLOATRATIO_TO_INT) == 0) {
+        partitionPoints = {0};
+    } else {
+        partitionPoints = {0, lowerFrameRateVisibleRatio_};
+    }
     auto ret = OHOS::Rosen::RSInterfaces::GetInstance().RegisterSurfaceOcclusionChangeCallback(
         surfaceNodeId_,
-        [weak = WeakClaim(this), weakContext = context_](bool occlusion) {
+        [weak = WeakClaim(this), weakContext = context_](float visibleRatio) {
             auto context = weakContext.Upgrade();
             CHECK_NULL_VOID(context);
             context->GetTaskExecutor()->PostTask(
-                [weakDelegate = weak, surfaceOcclusion = occlusion]() {
+                [weakDelegate = weak, webVisibleRatio = visibleRatio]() {
                     auto delegate = weakDelegate.Upgrade();
                     CHECK_NULL_VOID(delegate);
-                    delegate->SurfaceOcclusionCallback(surfaceOcclusion);
+                    delegate->SurfaceOcclusionCallback(webVisibleRatio);
                 },
                 TaskExecutor::TaskType::UI);
-        });
+        },
+        partitionPoints);
     if (ret != Rosen::StatusCode::SUCCESS) {
         TAG_LOGD(AceLogTag::ACE_WEB, "RegisterSurfaceOcclusionChangeCallback failed, surfacenode id:%{public}" PRIu64 ""
              ", ret: %{public}" PRIu32 "", surfaceNodeId_, ret);
@@ -2527,7 +2585,7 @@ void WebDelegate::InitWebViewWithSurface()
     CHECK_NULL_VOID(window);
     rosenWindowId_ = window->GetWindowId();
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), context = context_]() {
+        [weak = WeakClaim(this), context = context_, webType = webType_]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             OHOS::NWeb::NWebInitArgs initArgs;
@@ -2568,6 +2626,7 @@ void WebDelegate::InitWebViewWithSurface()
                     (void *)(&delegate->surfaceInfo_),
                     initArgs,
                     delegate->drawSize_.Width(), delegate->drawSize_.Height());
+                delegate->JavaScriptOnDocumentStart();
             } else {
 #ifdef ENABLE_ROSEN_BACKEND
                 TAG_LOGD(AceLogTag::ACE_WEB, "Create webview with surface in");
@@ -2578,6 +2637,7 @@ void WebDelegate::InitWebViewWithSurface()
                     surface,
                     initArgs,
                     delegate->drawSize_.Width(), delegate->drawSize_.Height());
+                delegate->JavaScriptOnDocumentStart();
 #endif
             }
             CHECK_NULL_VOID(delegate->nweb_);
@@ -2614,6 +2674,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->SetWindowId(window_id);
             delegate->SetToken();
             delegate->RegisterSurfaceOcclusionChangeFun();
+            delegate->nweb_->SetDrawMode(webType);
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -5056,6 +5117,14 @@ void WebDelegate::UpdateLocale()
         }
     }
 }
+
+void WebDelegate::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->SetDrawRect(x, y, width, height);
+    }
+}
 #endif
 
 std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::string& name) const
@@ -5072,6 +5141,11 @@ std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::
         ss >> result;
     }
     return result;
+}
+
+void WebDelegate::SetWebType(WebType type)
+{
+    webType_ = static_cast<int32_t>(type);
 }
 
 void WebDelegate::BindRouterBackMethod()
@@ -5459,5 +5533,19 @@ void WebDelegate::ScrollBy(float deltaX, float deltaY)
 {
     CHECK_NULL_VOID(nweb_);
     nweb_->ScrollBy(deltaX, deltaY);
+}
+
+void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems)
+{
+    scriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+}
+
+void WebDelegate::JavaScriptOnDocumentStart()
+{
+    CHECK_NULL_VOID(nweb_);
+    if (scriptItems_.has_value()) {
+        nweb_->JavaScriptOnDocumentStart(scriptItems_.value());
+        scriptItems_ = std::nullopt;
+    }
 }
 } // namespace OHOS::Ace

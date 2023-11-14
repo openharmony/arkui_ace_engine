@@ -123,7 +123,7 @@ ohos_fuzztest("ManifestFuzzTest") {
   } else {
     external_deps = [
       "hilog:libhilog",
-      "init_lite:libbegetutil",
+      "init:libbegetutil",
     ]
   }
   external_deps += [ "c_utils:utils" ]

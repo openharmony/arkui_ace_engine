@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,70 +15,9 @@
 
 #include "core/components_ng/pattern/list/list_position_controller.h"
 
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
-#include "core/animation/curves.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-
-void ListPositionController::JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t source)
-{
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-    CHECK_NULL_VOID(listPattern);
-    if (align == ScrollAlign::NONE) {
-        align = ScrollAlign::START;
-    }
-    listPattern->ScrollToIndex(index, smooth, align);
-}
-
-void ListPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
-{
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-    CHECK_NULL_VOID(listPattern);
-    auto offset = listPattern->GetAxis() == Axis::VERTICAL ? pixelY : pixelX;
-    listPattern->ScrollBy(static_cast<float>(offset));
-}
-
-void ListPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
-{
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-    if (listPattern && listPattern->GetAxis() != Axis::NONE) {
-        listPattern->ScrollToEdge(scrollEdgeType);
-    }
-}
-
-void ListPositionController::ScrollPage(bool reverse, bool smooth)
-{
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-    if (listPattern && listPattern->GetAxis() != Axis::NONE) {
-        listPattern->ScrollPage(reverse);
-    }
-}
-
-bool ListPositionController::IsAtEnd() const
-{
-    auto listPattern = AceType::DynamicCast<ListPattern>(scroll_.Upgrade());
-    CHECK_NULL_RETURN(listPattern, false);
-    return listPattern->IsAtBottom();
-}
-
-Rect ListPositionController::GetItemRect(int32_t index) const
-{
-    auto listPattern = AceType::DynamicCast<ListPattern>(scroll_.Upgrade());
-    CHECK_NULL_RETURN(listPattern, Rect());
-    return listPattern->GetItemRect(index);
-}
 
 Rect ListPositionController::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
 {
@@ -86,4 +25,14 @@ Rect ListPositionController::GetItemRectInGroup(int32_t index, int32_t indexInGr
     CHECK_NULL_RETURN(listPattern, Rect());
     return listPattern->GetItemRectInGroup(index, indexInGroup);
 }
+
+void ListPositionController::CloseAllSwipeActions(OnFinishFunc&& onFinishCallback)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
+    CHECK_NULL_VOID(listPattern);
+    return listPattern->CloseAllSwipeActions(std::move(onFinishCallback));
+}
+
 } // namespace OHOS::Ace::NG

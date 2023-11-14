@@ -1,0 +1,904 @@
+//@ts-nocheck
+
+type KNode = number | null
+
+interface Equable {
+    isEqual(value: Equable): boolean;
+}
+
+class Modifier<T extends number | string | boolean | Equable> {
+    stageValue?: T;
+    value?: T;
+    constructor(value: T) {
+        this.stageValue = value;
+    }
+
+    applyStage(node: KNode): void {
+        if (this.stageValue === this.value) {
+            delete this.stageValue;
+            return;
+        }
+        if (typeof this.stageValue === "object" && typeof this.value === "object") {
+            if ((this.stageValue as Equable).isEqual(this.value as Equable)) {
+                delete this.stageValue;
+                return;
+            }
+        }
+        this.value = this.stageValue;
+        delete this.stageValue;
+        this.applyPeer(node, this.value === undefined);
+        return (this.value === undefined);
+    }
+
+    applyPeer(node: KNode, reset: boolean): void { }
+}
+
+class BackgroundColorModifier extends Modifier<string> {
+    static identity: Symbol = Symbol("backgroundColor");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetBackgroundColor(node);
+        } else {
+            globalThis.getArkUINativeModule().common.setBackgroundColor(node, this.value!);
+        }
+    }
+}
+
+
+class WidthModifier extends Modifier<number | string> {
+    static identity: Symbol = Symbol("width");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetWidth(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setWidth(node, this.value);
+        }
+    }
+}
+
+class BorderWidthModifier extends Modifier<Equable> {
+    static identity: Symbol = Symbol("borderWidth");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetBorderWidth(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setBorderWidth(node, this.value.left, this.value.right, this.value.top, this.value.bottom);
+        }
+    }
+}
+
+
+class HeightModifier extends Modifier<number | string> {
+    static identity: Symbol = Symbol("height");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetHeight(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setHeight(node, this.value);
+        }
+    }
+}
+
+class BorderRadiusModifier extends Modifier<Equable> {
+    static identity: Symbol = Symbol("borderRadius");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetBorderRadius(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+        }
+    }
+}
+
+class PositionModifier extends Modifier<Equable> {
+    static identity: Symbol = Symbol("position");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetPosition(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setPosition(node, this.value.x, this.value.y);
+        }
+    }
+}
+
+class BorderColorModifier extends Modifier<Equable> {
+    static identity: Symbol = Symbol("borderColor");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetBorderColor(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setBorderColor(node, this.value.leftColor, this.value.rightColor, this.value.topColor, this.value.bottomColor);
+        }
+    }
+}
+class TransformModifier extends Modifier<Equable> {
+    static identity: Symbol = Symbol("transform");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetTransform(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setTransform(node, this.value.matrix);
+        }
+    }
+}
+
+class BorderStyleModifier extends Modifier<Equable> {
+    static identity: Symbol = Symbol("borderStyle");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetBorderStyle(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setBorderStyle(node, this.value.type, this.value.style,
+                this.value.top, this.value.right, this.value.bottom, this.value.left);
+        }
+    }
+}
+
+class ShadowModifier extends Modifier<Equable> {
+    static identity: Symbol = Symbol("shadow");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetShadow(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setShadow(node, this.value.style,
+                this.value.radius, this.value.type, this.value.color,
+                this.value.offsetX, this.value.offsetY, this.value.fill);
+        }
+    }
+}
+
+class HitTestBehaviorModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("hitTestBehavior");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetHitTestBehavior(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setHitTestBehavior(node, this.value);
+        }
+    }
+}
+
+class ZIndexModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("zIndex");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetZIndex(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setZIndex(node, this.value);
+        }
+    }
+}
+
+class OpacityModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("opacity");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            globalThis.getArkUINativeModule().common.resetOpacity(node);
+        }
+        else {
+            globalThis.getArkUINativeModule().common.setOpacity(node, this.value);
+        }
+    }
+}
+
+const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
+const isString = (val: any) => typeof val === 'string'
+const isNumber = (val: any) => typeof val === 'number'
+const isBigint = (val: any) => typeof val === 'bigint'
+const isBoolean = (val: any) => typeof val === 'boolean'
+const isSymbol = (val: any) => typeof val === 'symbol'
+const isUndefined = (val: any) => typeof val === 'undefined'
+const isObject = (val: any) => typeof val === 'object'
+const isFunction = (val: any) => typeof val === 'function'
+
+function CheckJSCallbackInfo(value: any, checklist: any[]) {
+    var typeVerified = false;
+    checklist.forEach(function (infoType) {
+        switch (infoType) {
+            case JSCallbackInfoType.STRING:
+                if (isString(value)) {
+                    typeVerified = true;
+                }
+                break;
+            case JSCallbackInfoType.NUMBER:
+                if (isNumber(value)) {
+                    typeVerified = true;
+                }
+                break;
+            case JSCallbackInfoType.OBJECT:
+                if (isObject(value)) {
+                    typeVerified = true;
+                }
+                break;
+            case JSCallbackInfoType.FUNCTION:
+                if (isFunction(value)) {
+                    typeVerified = true;
+                }
+                break;
+            default:
+                break;
+        }
+
+    });
+    return typeVerified || checklist.length == 0;
+}
+
+function modifier<T extends number | string | boolean | Equable, M extends Modifier<T>>(
+    modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>,
+    modifierClass: new (value: T) => M,
+    value: T
+) {
+    const identity: Symbol = (modifierClass as any)["identity"];
+    const item = modifiers.get(identity);
+    if (item) {
+        item.stageValue = value;
+    } else {
+        modifiers.set(identity, new modifierClass(value));
+    }
+}
+
+class ArkComponent implements CommonMethod<CommonAttribute> {
+    _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
+    nativePtr: KNode;
+
+    constructor(nativePtr: KNode) {
+        this._modifiers = new Map();
+        this.nativePtr = nativePtr;
+    }
+
+    applyModifierPatch(): void {
+        let expiringItems = [];
+        this._modifiers.forEach((value, key) => {
+            if (value.applyStage(this.nativePtr)) {
+                expiringItems.push(key);
+            }
+        });
+
+        expiringItems.forEach(key => {
+            this._modifiers.delete(key);
+        });
+    }
+
+    width(value: Length): this {
+        if (typeof value !== "number" && typeof value !== "string") {
+            console.log("width only support number and string");
+            modifier(this._modifiers, WidthModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, WidthModifier, value);
+        }
+        return this;
+    }
+
+    height(value: Length): this {
+        if (typeof value !== "number" && typeof value !== "string") {
+            console.log("height only support number and string");
+            modifier(this._modifiers, HeightModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, HeightModifier, value);
+        }
+        return this;
+    }
+
+    expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
+        throw new Error("Method not implemented.");
+    }
+
+    responseRegion(value: Array<Rectangle> | Rectangle): this {
+        throw new Error("Method not implemented.");
+    }
+
+    mouseResponseRegion(value: Array<Rectangle> | Rectangle): this {
+        throw new Error("Method not implemented.");
+    }
+
+    size(value: SizeOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    constraintSize(value: ConstraintSizeOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    touchable(value: boolean): this {
+        throw new Error("Method not implemented.");
+    }
+
+    hitTestBehavior(value: HitTestMode): this {
+        if (value) {
+            modifier(this._modifiers, HitTestBehaviorModifier, value);
+        } else {
+            modifier(this._modifiers, HitTestBehaviorModifier, undefined);
+        }
+        return this;
+    }
+
+    layoutWeight(value: number | string): this {
+        throw new Error("Method not implemented.");
+    }
+
+    padding(value: Padding | Length): this {
+        throw new Error("Method not implemented.");
+    }
+
+    margin(value: Margin | Length): this {
+        throw new Error("Method not implemented.");
+    }
+
+    background(builder: CustomBuilder, options?: { align?: Alignment }): this {
+        throw new Error("Method not implemented.");
+    }
+
+    backgroundColor(value: ResourceColor): this {
+        var arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, BackgroundColorModifier, arkColor.color);
+        } else {
+            modifier(this._modifiers, BackgroundColorModifier, undefined);
+        }
+        return this;
+    }
+
+    backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this {
+        throw new Error("Method not implemented.");
+    }
+
+    backgroundImageSize(value: SizeOptions | ImageSize): this {
+        throw new Error("Method not implemented.");
+    }
+
+    backgroundImagePosition(value: Position | Alignment): this {
+        throw new Error("Method not implemented.");
+    }
+
+    backgroundBlurStyle(value: BlurStyle, options?: BackgroundBlurStyleOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    foregroundBlurStyle(value: BlurStyle, options?: ForegroundBlurStyleOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    opacity(value: number | Resource): this {
+        var opacityDefault = 0.0;
+        var checklist = [JSCallbackInfoType.OBJECT, JSCallbackInfoType.NUMBER, JSCallbackInfoType.STRING];
+        if (!CheckJSCallbackInfo(value, checklist)) {
+            modifier(this._modifiers, OpacityModifier, 1.0);
+        }
+        else {
+            if (isNumber(value)) {
+                opacityDefault = value;
+            }
+            else if (isString(value)) {
+                opacityDefault = Number(value);
+            }
+            modifier(this._modifiers, OpacityModifier, opacityDefault);
+        }
+        return this;
+    }
+
+    border(value: BorderOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    borderStyle(value: BorderStyle | EdgeStyles): this {
+        var arkBorderStyle = new ArkBorderStyle();
+        if (arkBorderStyle.parseBorderStyle(value)) {
+            modifier(this._modifiers, BorderStyleModifier, arkBorderStyle);
+        } else {
+            modifier(this._modifiers, BorderStyleModifier, undefined);
+        }
+        return this;
+    }
+
+    borderWidth(value: Length | EdgeWidths): this {
+        var borderWidth = new ArkBorderWidth()
+        if (typeof value === "number" || typeof value === "string") {
+            borderWidth.left = value
+            borderWidth.right = value
+            borderWidth.top = value
+            borderWidth.bottom = value
+        }
+        else {
+            borderWidth.left = value?.left
+            borderWidth.right = value?.right
+            borderWidth.top = value?.top
+            borderWidth.bottom = value?.bottom
+        }
+        modifier(this._modifiers, BorderWidthModifier, borderWidth);
+        return this;
+    }
+
+    borderColor(value: ResourceColor | EdgeColors): this {
+        var arkColor = new ArkColor();
+        var borderColorGroup = new ArkBorderColor()
+        if (typeof value === "number" || typeof value === "string") {
+            arkColor.parseColorValue(value)
+            borderColorGroup.leftColor = arkColor.color
+            borderColorGroup.rightColor = arkColor.color
+            borderColorGroup.topColor = arkColor.color
+            borderColorGroup.bottomColor = arkColor.color
+
+        }
+        else if (!!value.left || !!value.right || !!value.top || !!value.bottom) {
+            arkColor.parseColorValue(value.left)
+            borderColorGroup.leftColor = left.color
+            arkColor.parseColorValue(value.right)
+            borderColorGroup.rightColor = right.color
+            arkColor.parseColorValue(value.top)
+            borderColorGroup.topColor = top.color
+            arkColor.parseColorValue(value.bottom)
+            borderColorGroup.bottomColor = bottom.color
+        }
+
+        modifier(this._modifiers, BorderColorModifier, borderColorGroup);
+        return this;
+    }
+
+    borderRadius(value: Length | BorderRadiuses): this {
+        var borderRadius = new ArkBorderRadius
+        if (typeof value === "number" || typeof value === "string") {
+            borderRadius.topLeft = value
+            borderRadius.topRight = value
+            borderRadius.bottomLeft = value
+            borderRadius.bottomRight = value
+        }
+        else {
+            borderRadius.topLeft = value?.topRight
+            borderRadius.topRight = value?.topRight
+            borderRadius.bottomLeft = value?.bottomLeft
+            borderRadius.bottomRight = value?.bottomRight
+        }
+        modifier(this._modifiers, BorderRadiusModifier, borderRadius);
+        return this;
+    }
+
+    borderImage(value: BorderImageOption): this {
+        throw new Error("Method not implemented.");
+    }
+
+    foregroundColor(value: ResourceColor | ColoringStrategy): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onClick(event: (event?: ClickEvent) => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onHover(event: (isHover?: boolean, event?: HoverEvent) => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    hoverEffect(value: HoverEffect): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onMouse(event: (event?: MouseEvent) => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onTouch(event: (event?: TouchEvent) => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onKeyEvent(event: (event?: KeyEvent) => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    focusable(value: boolean): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onFocus(event: () => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onBlur(event: () => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    tabIndex(index: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    defaultFocus(value: boolean): this {
+        throw new Error("Method not implemented.");
+    }
+
+    groupDefaultFocus(value: boolean): this {
+        throw new Error("Method not implemented.");
+    }
+
+    focusOnTouch(value: boolean): this {
+        throw new Error("Method not implemented.");
+    }
+
+    animation(value: AnimateParam): this {
+        throw new Error("Method not implemented.");
+    }
+
+    transition(value: TransitionOptions | TransitionEffect): this {
+        throw new Error("Method not implemented.");
+    }
+
+    gesture(gesture: GestureType, mask?: GestureMask): this {
+        throw new Error("Method not implemented.");
+    }
+
+    priorityGesture(gesture: GestureType, mask?: GestureMask): this {
+        throw new Error("Method not implemented.");
+    }
+
+    parallelGesture(gesture: GestureType, mask?: GestureMask): this {
+        throw new Error("Method not implemented.");
+    }
+
+    blur(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    linearGradientBlur(value: number, options: LinearGradientBlurOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    brightness(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    contrast(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    grayscale(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    colorBlend(value: Color | string | Resource): this {
+        throw new Error("Method not implemented.");
+    }
+
+    saturate(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    sepia(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    invert(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    hueRotate(value: number | string): this {
+        throw new Error("Method not implemented.");
+    }
+
+    useEffect(value: boolean): this {
+        throw new Error("Method not implemented.");
+    }
+
+    backdropBlur(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    renderGroup(value: boolean): this {
+        throw new Error("Method not implemented.");
+    }
+
+    translate(value: TranslateOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    scale(value: ScaleOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    gridSpan(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    gridOffset(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    rotate(value: RotateOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    transform(value: object): this {
+        modifier(this._modifiers, TransformModifier, new ArkTransformMatrix(value["matrix4x4"]));
+        return this;
+    }
+
+    onAppear(event: () => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onDisAppear(event: () => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onAreaChange(event: (oldValue: Area, newValue: Area) => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    visibility(value: Visibility): this {
+        throw new Error("Method not implemented.");
+    }
+
+    flexGrow(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    flexShrink(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    flexBasis(value: number | string): this {
+        throw new Error("Method not implemented.");
+    }
+
+    alignSelf(value: ItemAlign): this {
+        throw new Error("Method not implemented.");
+    }
+
+    displayPriority(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    zIndex(value: number): this {
+        if (value !== null) {
+            var zIndex = 0;
+            if (typeof (value) === "number") {
+                zIndex = value;
+            }
+            modifier(this._modifiers, ZIndexModifier, zIndex);
+        }
+        return this;
+    }
+
+    sharedTransition(id: string, options?: sharedTransitionOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    direction(value: Direction): this {
+        throw new Error("Method not implemented.");
+    }
+
+    align(value: Alignment): this {
+        throw new Error("Method not implemented.");
+    }
+
+    position(value: Position): this {
+        if (!value || (!!value?.x && typeof value?.x != "number" && typeof value?.x != "string") ||
+            (!!value?.y && typeof value?.y != "number" && typeof value?.x != "string")) {
+            console.log("position x and y should be number or string");
+            modifier(this._modifiers, PositionModifier, undefined);
+        }
+        else {
+            var position = new ArkPosition()
+            position.x = value?.x
+            position.y = value?.y
+            modifier(this._modifiers, PositionModifier, position);
+        }
+        return this;
+    }
+
+    markAnchor(value: Position): this {
+        throw new Error("Method not implemented.");
+    }
+
+    offset(value: Position): this {
+        throw new Error("Method not implemented.");
+    }
+
+    enabled(value: boolean): this {
+        throw new Error("Method not implemented.");
+    }
+
+    useSizeType(value: {
+        xs?: number | { span: number; offset: number };
+        sm?: number | { span: number; offset: number };
+        md?: number | { span: number; offset: number };
+        lg?: number | { span: number; offset: number };
+    }): this {
+        throw new Error("Method not implemented.");
+    }
+
+    alignRules(value: AlignRuleOption): this {
+        throw new Error("Method not implemented.");
+    }
+
+    aspectRatio(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    clickEffect(value: ClickEffect | null): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onDragMove(event: (event?: DragEvent, extraParams?: string) => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onDrop(event: (event?: DragEvent, extraParams?: string) => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    allowDrop(value: Array<UniformDataType>): this {
+        throw new Error("Method not implemented.");
+    }
+
+    draggable(value: boolean): this {
+        throw new Error("Method not implemented.");
+    }
+
+    overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number } }): this {
+        throw new Error("Method not implemented.");
+    }
+
+    linearGradient(value: {
+        angle?: number | string;
+        direction?: GradientDirection;
+        colors: Array<any>;
+        repeating?: boolean;
+    }): this {
+        throw new Error("Method not implemented.");
+    }
+
+    sweepGradient(value: {
+        center: Array<any>;
+        start?: number | string;
+        end?: number | string;
+        rotation?: number | string;
+        colors: Array<any>;
+        repeating?: boolean;
+    }): this {
+        throw new Error("Method not implemented.");
+    }
+
+    radialGradient(value: { center: Array<any>; radius: number | string; colors: Array<any>; repeating?: boolean }): this {
+        throw new Error("Method not implemented.");
+    }
+
+    motionPath(value: MotionPathOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    shadow(value: ShadowOptions | ShadowStyle): this {
+        var arkShadow = new ArkShadow();
+        if (arkShadow.parseShadowValue(value)) {
+            modifier(this._modifiers, ShadowModifier, arkShadow);
+        } else {
+            modifier(this._modifiers, ShadowModifier, undefined);
+        }
+        return this;
+    }
+
+    mask(value: CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute | ProgressMask): this {
+        throw new Error("Method not implemented.");
+    }
+
+    key(value: string): this {
+        throw new Error("Method not implemented.");
+    }
+
+    id(value: string): this {
+        throw new Error("Method not implemented.");
+    }
+
+    geometryTransition(id: string): this {
+        throw new Error("Method not implemented.");
+    }
+
+    bindPopup(show: boolean, popup: PopupOptions | CustomPopupOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    bindMenu(content: Array<MenuElement> | CustomBuilder, options?: MenuOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    bindContextMenu(content: CustomBuilder, responseType: ResponseType, options?: ContextMenuOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    bindContentCover(isShow: boolean, builder: CustomBuilder, type?: ModalTransition): this {
+        throw new Error("Method not implemented.");
+    }
+
+    bindContentCover(isShow: boolean, builder: CustomBuilder, options?: ContentCoverOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    bindSheet(isShow: boolean, builder: CustomBuilder, options?: SheetOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    stateStyles(value: StateStyles): this {
+        throw new Error("Method not implemented.");
+    }
+
+    restoreId(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    onVisibleAreaChange(ratios: Array<number>, event: (isVisible: boolean, currentRatio: number) => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    sphericalEffect(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    lightUpEffect(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+
+    pixelStretchEffect(options: PixelStretchEffectOptions): this {
+        throw new Error("Method not implemented.");
+    }
+
+    keyboardShortcut(value: string | FunctionKey, keys: Array<ModifierKey>, action?: () => void): this {
+        throw new Error("Method not implemented.");
+    }
+
+    accessibilityGroup(value: boolean): this {
+        throw new Error("Method not implemented.");
+    }
+
+    accessibilityText(value: string): this {
+        throw new Error("Method not implemented.");
+    }
+
+    accessibilityDescription(value: string): this {
+        throw new Error("Method not implemented.");
+    }
+
+    accessibilityLevel(value: string): this {
+        throw new Error("Method not implemented.");
+    }
+
+    obscured(reasons: Array<ObscuredReasons>): this {
+        throw new Error("Method not implemented.");
+    }
+
+    reuseId(id: string): this {
+        throw new Error("Method not implemented.");
+    }
+
+    renderFit(fitMode: RenderFit): this {
+        throw new Error("Method not implemented.");
+    }
+
+    attributeModifier(modifier: AttributeModifier): this {
+    }
+}

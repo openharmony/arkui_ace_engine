@@ -135,8 +135,18 @@ public:
         typeUpdateWidth_ = typeUpdateWidth;
     }
     void GetControlImageSize(Dimension& width, Dimension& height);
+    void OnWindowFocused() override
+    {
+        WindowFocus(true);
+    }
+
+    void OnWindowUnfocused() override
+    {
+        WindowFocus(false);
+    }
 
 private:
+    void WindowFocus(bool isFocus);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -167,6 +177,8 @@ private:
     void AddDividerHotZoneRect(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm);
     SideBarPosition GetSideBarPositionWithRtl(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
     RefPtr<FrameNode> GetSideBarNode(const RefPtr<FrameNode>& host) const;
+    RefPtr<FrameNode> GetSideBarNodeOrFirstChild() const;
+    RefPtr<FrameNode> GetControlButtonNode() const;
     RefPtr<FrameNode> GetContentNode(const RefPtr<FrameNode>& host) const;
     RefPtr<FrameNode> GetControlImageNode() const;
     RefPtr<FrameNode> GetDividerNode() const;
@@ -193,6 +205,7 @@ private:
     bool isControlButtonClick_ = false;
     bool hasInit_ = false;
     bool autoHide_ = false;
+    bool inAnimation_ = false;
 
     Dimension realSideBarWidth_ = -1.0_vp;
     Dimension preSidebarWidth_;

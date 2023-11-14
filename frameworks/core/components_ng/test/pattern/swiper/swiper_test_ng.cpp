@@ -56,24 +56,9 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::vector<int32_t> SWIPER_LAYOUT_PROPERTY_INDEX = { 0, 1 };
-const std::vector<int32_t> SWIPER_PAINT_PROPERTY_INTERVAL = { 5000, -100 };
-const std::vector<EdgeEffect> SWIPER_PAINT_PROPERTY_EDGE_EFFECT = { EdgeEffect::FADE, EdgeEffect::NONE,
-    EdgeEffect::SPRING };
-const std::vector<RefPtr<Curve>> SWIPER_PAINT_PROPERTY_CURVE = {
-    AceType::MakeRefPtr<LinearCurve>(),
-    AceType::MakeRefPtr<SineCurve>(),
-    AceType::MakeRefPtr<CubicCurve>(0.25f, 0.1f, 0.25f, 1.0f),
-    AceType::MakeRefPtr<CubicCurve>(0.4f, 0.0f, 0.4f, 1.0f),
-    AceType::MakeRefPtr<ElasticsCurve>(2.0f)
-};
-const std::vector<int32_t> SWIPER_PAINT_PROPERTY_DURATION = { 100, 2000, 400 };
-const std::vector<Dimension> SWIPER_PAINT_PROPERTY_ITEM_SPACE = { Dimension(0),
-    Dimension(1), Dimension(10) };
-const std::vector<int32_t> SWIPER_PAINT_PROPERTY_CACHED_COUNT = { 2, 1, 5, 10 };
-const std::vector<int32_t> SWIPER_PAINT_PROPERTY_DISPLAY_COUNT = { 2, 5, 3, 10 };
-const std::vector<Axis> SWIPER_PAINT_PROPERTY_DIRECTION = { Axis::HORIZONTAL, Axis::FREE, Axis::NONE, Axis::VERTICAL };
-const int32_t ITEM_NUMBER = 4;
+constexpr int32_t ITEM_NUMBER = 4;
+constexpr int32_t DEFAULT_INTERVAL = 3000;
+constexpr int32_t DEFAULT_DURATION = 400;
 } // namespace
 
 class SwiperTestNg : public testing::Test, public TestNG {
@@ -309,203 +294,346 @@ void SwiperTestNg::CreateChildWrapperAppendToHostWrapper(
 }
 
 /**
- * @tc.name: SwiperLayoutPropertyTest001
- * @tc.desc: Set one index value into SwiperLayoutProperty and get it.
+ * @tc.name: AttrIndex001
+ * @tc.desc: Test property about index
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperLayoutPropertyTest001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, AttrIndex001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(GetChildRect(frameNode_, 0).GetX(), 0);
+
+    /**
+     * @tc.steps: step2. Set value
+     */
     CreateWithItem([](SwiperModelNG model) { model.SetIndex(1); });
-    EXPECT_EQ(layoutProperty_->GetIndexValue(), 1);
+    EXPECT_EQ(GetChildRect(frameNode_, 0).GetX(), 0);
+    EXPECT_EQ(GetChildRect(frameNode_, 1).GetX(), 0);
+
+    /**
+     * @tc.steps: step3. Set illegal value
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetIndex(-1); });
+    EXPECT_EQ(GetChildRect(frameNode_, 0).GetX(), 0);
+
+    /**
+     * @tc.steps: step4. Set illegal value
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetIndex(ITEM_NUMBER); });
+    EXPECT_EQ(GetChildRect(frameNode_, 0).GetX(), 0);
 }
 
 /**
- * @tc.name: SwiperLayoutPropertyTest002
- * @tc.desc: set a lot of index values into SwiperLayoutProperty and get it.
+ * @tc.name: AttrAutoPlay001
+ * @tc.desc: Test property about autoPlay/interval/loop
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperLayoutPropertyTest002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, AttrAutoPlay001, TestSize.Level1)
 {
-    for (unsigned int i = 0; i < SWIPER_LAYOUT_PROPERTY_INDEX.size(); ++i) {
-        auto index = SWIPER_LAYOUT_PROPERTY_INDEX[i];
-        CreateWithItem([index](SwiperModelNG model) { model.SetIndex(index); });
-        EXPECT_EQ(layoutProperty_->GetIndexValue(), index);
-    }
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_FALSE(pattern_->IsAutoPlay());
+    EXPECT_EQ(pattern_->GetInterval(), DEFAULT_INTERVAL);
+    EXPECT_TRUE(pattern_->IsLoop());
+
+    /**
+     * @tc.steps: step2. Set value
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetAutoPlay(true); });
+    EXPECT_TRUE(pattern_->IsAutoPlay());
+
+    /**
+     * @tc.steps: step3. Set interval
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetAutoPlay(true);
+        model.SetAutoPlayInterval(4000);
+    });
+    EXPECT_EQ(pattern_->GetInterval(), 4000);
+
+    /**
+     * @tc.steps: step4. Set loop
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetAutoPlay(true);
+        model.SetLoop(false);
+    });
+    EXPECT_FALSE(pattern_->IsLoop());
 }
 
 /**
- * @tc.name: SwiperPaintPropertyTest003
- * @tc.desc: set autoPlay value into SwiperLayoutProperty and get it.
+ * @tc.name: AttrIndicator001
+ * @tc.desc: Test property about indicator
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest003, TestSize.Level1)
+HWTEST_F(SwiperTestNg, AttrIndicator001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) { model.SetAutoPlay(false); });
-    EXPECT_FALSE(paintProperty_->GetAutoPlay().value_or(false));
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_TRUE(pattern_->IsShowIndicator());
+    EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::DOT);
+
+    /**
+     * @tc.steps: step2. Set value
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetIndicatorType(SwiperIndicatorType::DIGIT); });
+    EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
 }
 
 /**
- * @tc.name: SwiperPaintPropertyTest004
- * @tc.desc: set a lot of intertval values into SwiperPaintProperty and get it.
+ * @tc.name: AttrDuration001
+ * @tc.desc: Test property about duration
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest004, TestSize.Level1)
+HWTEST_F(SwiperTestNg, AttrDuration001, TestSize.Level1)
 {
-    for (const auto& interval : SWIPER_PAINT_PROPERTY_INTERVAL) {
-        CreateWithItem([interval](SwiperModelNG model) { model.SetAutoPlayInterval(interval); });
-        EXPECT_EQ(paintProperty_->GetAutoPlayInterval().value_or(3000), interval);
-    }
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->GetDuration(), DEFAULT_DURATION);
+
+    /**
+     * @tc.steps: step2. Set value
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetDuration(500); });
+    EXPECT_EQ(pattern_->GetDuration(), 500);
 }
 
 /**
- * @tc.name: SwiperLayoutPropertyTest005
- * @tc.desc: set showIndicator value into SwiperPaintProperty and get it.
+ * @tc.name: AttrVertical001
+ * @tc.desc: Test property about vertical
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperLayoutPropertyTest005, TestSize.Level1)
+HWTEST_F(SwiperTestNg, AttrVertical001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) { model.SetShowIndicator(false); });
-    EXPECT_FALSE(layoutProperty_->GetShowIndicator().value_or(false));
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->GetDirection(), Axis::HORIZONTAL);
+
+    /**
+     * @tc.steps: step2. Set value
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetDirection(Axis::VERTICAL); });
+    EXPECT_EQ(pattern_->GetDirection(), Axis::VERTICAL);
 }
 
 /**
- * @tc.name: SwiperPaintPropertyTest006
- * @tc.desc: set loop value into SwiperPaintProperty and get it.
+ * @tc.name: AttrItemSpace001
+ * @tc.desc: Test property about itemSpace
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest006, TestSize.Level1)
+HWTEST_F(SwiperTestNg, AttrItemSpace001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) { model.SetLoop(false); });
-    EXPECT_FALSE(layoutProperty_->GetLoop().value_or(false));
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->GetItemSpace(), 0);
+
+    /**
+     * @tc.steps: step2. Set value
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetItemSpace(Dimension(10)); });
+    EXPECT_EQ(pattern_->GetItemSpace(), 10);
 }
 
 /**
- * @tc.name: SwiperLayoutPropertyTest007
- * @tc.desc: set one displayMode value into SwiperLayoutProperty and get it.
+ * @tc.name: AttrDisplayMode001
+ * @tc.desc: Test property about displayMode
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperLayoutPropertyTest007, TestSize.Level1)
+HWTEST_F(SwiperTestNg, AttrDisplayMode001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_TRUE(SwiperUtils::IsStretch(layoutProperty_));
+
+    /**
+     * @tc.steps: step2. Set value
+     */
     CreateWithItem([](SwiperModelNG model) { model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR); });
-    EXPECT_EQ(layoutProperty_->GetDisplayMode().value_or(SwiperDisplayMode::STRETCH),
-        SwiperDisplayMode::AUTO_LINEAR);
+    EXPECT_FALSE(SwiperUtils::IsStretch(layoutProperty_));
 }
 
 /**
- * @tc.name: SwiperPaintPropertyTest008
- * @tc.desc: set one effectMode value into SwiperPaintProperty and get it.
+ * @tc.name: AttrCachedCount001
+ * @tc.desc: Test property about cachedCount
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest008, TestSize.Level1)
+HWTEST_F(SwiperTestNg, AttrCachedCount001, TestSize.Level1)
 {
-    for (const auto& effectMode : SWIPER_PAINT_PROPERTY_EDGE_EFFECT) {
-        CreateWithItem([effectMode](SwiperModelNG model) { model.SetEdgeEffect(effectMode); });
-        EXPECT_EQ(paintProperty_->GetEdgeEffect().value_or(EdgeEffect::FADE), effectMode);
-    }
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(layoutProperty_->GetCachedCountValue(1), 1);
+
+    /**
+     * @tc.steps: step2. Set value
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetCachedCount(2); });
+    EXPECT_EQ(layoutProperty_->GetCachedCountValue(1), 2);
+
+    /**
+     * @tc.steps: step3. Set illegal value
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetCachedCount(-1); });
+    EXPECT_EQ(layoutProperty_->GetCachedCountValue(1), -1);
 }
 
 /**
- * @tc.name: SwiperPaintPropertyTest009
- * @tc.desc: set curve value into SwiperPaintProperty and get it.
+ * @tc.name: AttrDisableSwipe001
+ * @tc.desc: Test property about disableSwipe
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest009, TestSize.Level1)
+HWTEST_F(SwiperTestNg, AttrDisableSwipe001, TestSize.Level1)
 {
-    for (int32_t i = 0; i < static_cast<int32_t>(SWIPER_PAINT_PROPERTY_CURVE.size()); ++i) {
-        auto curve = SWIPER_PAINT_PROPERTY_CURVE[i];
-        CreateWithItem([curve](SwiperModelNG model) { model.SetCurve(curve); });
-        EXPECT_EQ(paintProperty_->GetCurve().value_or(Curves::EASE), curve);
-    }
-}
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_FALSE(pattern_->IsDisableSwipe());
 
-/**
- * @tc.name: SwiperPaintPropertyTest0010
- * @tc.desc: set duration value into SwiperPaintProperty and get it.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest0010, TestSize.Level1)
-{
-    for (const auto& duration : SWIPER_PAINT_PROPERTY_DURATION) {
-        CreateWithItem([duration](SwiperModelNG model) { model.SetDuration(duration); });
-        EXPECT_EQ(paintProperty_->GetDuration().value_or(Curves::EASE), duration);
-    }
-}
-
-/**
- * @tc.name: SwiperLayoutPropertyTest0011
- * @tc.desc: set a lot of itemSpace values into SwiperLayoutProperty and get it.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperLayoutPropertyTest0011, TestSize.Level1)
-{
-    for (const auto& itemSpace : SWIPER_PAINT_PROPERTY_ITEM_SPACE) {
-        CreateWithItem([itemSpace](SwiperModelNG model) { model.SetItemSpace(itemSpace); });
-        EXPECT_EQ(layoutProperty_->GetItemSpace().value_or(Dimension(0)).Value(),
-            static_cast<int32_t>(itemSpace.Value()));
-    }
-}
-
-/**
- * @tc.name: SwiperLayoutPropertyTest0012
- * @tc.desc: set a lot of cachedCount values into SwiperLayoutProperty and get it.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperLayoutPropertyTest0012, TestSize.Level1)
-{
-    for (unsigned int i = 0; i < SWIPER_PAINT_PROPERTY_CACHED_COUNT.size(); ++i) {
-        auto count = SWIPER_PAINT_PROPERTY_DISPLAY_COUNT[i];
-        CreateWithItem([count](SwiperModelNG model) { model.SetCachedCount(count); });
-        EXPECT_EQ(layoutProperty_->GetCachedCount().value_or(1), count);
-    }
-}
-
-/**
- * @tc.name: SwiperLayoutPropertyTest0013
- * @tc.desc: set a lot of displayCount values into SwiperLayoutProperty and get it.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperLayoutPropertyTest0013, TestSize.Level1)
-{
-    for (unsigned int i = 0; i < SWIPER_PAINT_PROPERTY_DISPLAY_COUNT.size(); ++i) {
-        auto count = SWIPER_PAINT_PROPERTY_DISPLAY_COUNT[i];
-        CreateWithItem([count](SwiperModelNG model) { model.SetDisplayCount(count); });
-        EXPECT_EQ(layoutProperty_->GetDisplayCount().value_or(1), count);
-    }
-}
-
-/**
- * @tc.name: SwiperPaintPropertyTest0014
- * @tc.desc: set disableSwipe value into SwiperPaintProperty and get it.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest0014, TestSize.Level1)
-{
+    /**
+     * @tc.steps: step2. Set value
+     */
     CreateWithItem([](SwiperModelNG model) { model.SetDisableSwipe(true); });
-    EXPECT_TRUE(paintProperty_->GetDisableSwipe().value_or(false));
+    EXPECT_TRUE(pattern_->IsDisableSwipe());
 }
 
 /**
- * @tc.name: SwiperLayoutPropertyTest0015
- * @tc.desc: set one direction value into SwiperPaintProperty and get it.
+ * @tc.name: AttrCurve001
+ * @tc.desc: Test property about Curve
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperPaintPropertyTest0015, TestSize.Level1)
+HWTEST_F(SwiperTestNg, AttrCurve001, TestSize.Level1)
 {
-    for (const auto& direction : SWIPER_PAINT_PROPERTY_DIRECTION) {
-        CreateWithItem([direction](SwiperModelNG model) { model.SetDirection(direction); });
-        EXPECT_EQ(layoutProperty_->GetDirection().value_or(Axis::HORIZONTAL), direction);
-    }
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->GetCurve(), nullptr);
+
+    /**
+     * @tc.steps: step2. Set value
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetCurve(Curves::SMOOTH); });
+    EXPECT_EQ(pattern_->GetCurve(), Curves::SMOOTH);
 }
 
 /**
- * @tc.name: SwiperPropertyTest0017
- * @tc.desc: set minSize into Swiper and get it.
+ * @tc.name: AttrDisplayCount001
+ * @tc.desc: Test property about DisplayCount
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperPropertyTest0017, TestSize.Level1)
+HWTEST_F(SwiperTestNg, AttrDisplayCount001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) { model.SetMinSize(300.0_vp); });
-    EXPECT_EQ(layoutProperty_->GetMinSize().value_or(Dimension(0.0, DimensionUnit::VP)), 300.0_vp);
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->GetDisplayCount(), 1);
+
+    /**
+     * @tc.steps: step2. Set value
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(2); });
+    EXPECT_EQ(pattern_->GetDisplayCount(), 2);
+
+    /**
+     * @tc.steps: step3. Set illegal value
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(0); });
+    EXPECT_EQ(pattern_->GetDisplayCount(), 1);
+}
+
+/**
+ * @tc.name: AttrEdgeEffect001
+ * @tc.desc: Test property about EdgeEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, AttrEdgeEffect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetLoop(false); });
+    EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::SPRING);
+
+    /**
+     * @tc.steps: step2. Set value
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetEdgeEffect(EdgeEffect::FADE);
+    });
+    EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::FADE);
+
+    /**
+     * @tc.steps: step3. Set value
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetEdgeEffect(EdgeEffect::NONE);
+    });
+    EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::NONE);
+}
+
+/**
+ * @tc.name: AttrMargin001
+ * @tc.desc: Test property about Margin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, AttrMargin001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->GetNextMargin(), 0);
+    EXPECT_EQ(pattern_->GetPrevMargin(), 0);
+
+    /**
+     * @tc.steps: step2. Set value
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetNextMargin(Dimension(10));
+        model.SetPreviousMargin(Dimension(5));
+    });
+    EXPECT_EQ(pattern_->GetNextMargin(), 10);
+    EXPECT_EQ(pattern_->GetPrevMargin(), 5);
+
+    /**
+     * @tc.steps: step2. Set illegal value
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetNextMargin(Dimension(DEVICE_WIDTH + 1));
+        model.SetPreviousMargin(Dimension(5));
+    });
+    EXPECT_EQ(pattern_->GetNextMargin(), 0);
+    EXPECT_EQ(pattern_->GetPrevMargin(), 0);
+
+    /**
+     * @tc.steps: step2. Set illegal value
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetNextMargin(Dimension(10));
+        model.SetPreviousMargin(Dimension(DEVICE_WIDTH + 1));
+    });
+    EXPECT_EQ(pattern_->GetNextMargin(), 0);
+    EXPECT_EQ(pattern_->GetPrevMargin(), 0);
 }
 
 /**

@@ -94,11 +94,6 @@ void JSNavDestination::SetHideTitleBar(bool hide)
 
 void JSNavDestination::SetTitle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-
     if (info[0]->IsString()) {
         NavDestinationModel::GetInstance()->SetTitle(info[0]->ToString(), false);
     } else if (info[0]->IsObject()) {
@@ -108,6 +103,30 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
 
         // CustomBuilder | NavigationCustomTitle
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        do {
+            if (!jsObj->HasProperty("height")) {
+                break;
+            }
+            JSRef<JSVal> height = jsObj->GetProperty("height");
+            CalcDimension titleHeight;
+            bool isValid = JSContainerBase::ParseJsDimensionVp(height, titleHeight);
+            if (height->IsString()) {
+                std::string heightValue;
+                ParseJsString(height, heightValue);
+                if (heightValue == NG::TITLE_MAIN_WITH_SUB) {
+                    NavDestinationModel::GetInstance()->SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
+                    break;
+                }
+                if (heightValue == NG::TITLE_MAIN) {
+                    NavDestinationModel::GetInstance()->SetTitleHeight(NG::SINGLE_LINE_TITLEBAR_HEIGHT);
+                    break;
+                }
+            }
+            if (!isValid || titleHeight.Value() < 0) {
+                return;
+            }
+            NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
+        } while (0);
         JSRef<JSVal> builderObject = jsObj->GetProperty("builder");
         if (builderObject->IsFunction()) {
             ViewStackModel::GetInstance()->NewScope();
@@ -117,37 +136,13 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
             auto customNode = ViewStackModel::GetInstance()->Finish();
             NavDestinationModel::GetInstance()->SetCustomTitle(customNode);
         }
-        JSRef<JSVal> height = jsObj->GetProperty("height");
-        if (height->IsNumber()) {
-            if (height->ToNumber<int32_t>() == 0 || height->ToNumber<int32_t>() == 1) {
-                NavDestinationModel::GetInstance()->SetTitleHeight(height->ToNumber<int32_t>());
-                return;
-            }
-            CalcDimension titleHeight;
-            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() < 0) {
-                return;
-            }
-            NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
-            return;
-        } else {
-            CalcDimension titleHeight;
-            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() <= 0) {
-                return;
-            }
-            NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
-        }
     } else {
-        LOGE("arg is not [String|Function].");
         NavDestinationModel::GetInstance()->SetTitle("", false);
     }
 }
 
 void JSNavDestination::SetOnShown(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least one argument");
-        return;
-    }
     if (!info[0]->IsFunction()) {
         return;
     }
@@ -166,10 +161,6 @@ void JSNavDestination::SetOnShown(const JSCallbackInfo& info)
 
 void JSNavDestination::SetOnHidden(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least one argument");
-        return;
-    }
     if (!info[0]->IsFunction()) {
         return;
     }
@@ -185,10 +176,6 @@ void JSNavDestination::SetOnHidden(const JSCallbackInfo& info)
 
 void JSNavDestination::SetOnBackPressed(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least one argument");
-        return;
-    }
     if (!info[0]->IsFunction()) {
         return;
     }

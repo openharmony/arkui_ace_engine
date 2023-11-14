@@ -59,6 +59,7 @@ constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 constexpr Dimension SWIPER_MARGIN = 16.0_vp;
 constexpr Dimension SWIPER_GUTTER = 16.0_vp;
 constexpr float PX_EPSILON = 0.01f;
+const std::string SWIPER_DRAG_SCENE = "swiper_drag_scene";
 // TODO define as common method
 float CalculateFriction(float gamma)
 {
@@ -444,14 +445,14 @@ WeakPtr<FocusHub> SwiperPattern::GetNextFocusNode(FocusStep step, const WeakPtr<
 {
     auto curFocusNode = currentFocusNode.Upgrade();
     CHECK_NULL_RETURN(curFocusNode, nullptr);
-    if ((direction_ == Axis::HORIZONTAL && step == FocusStep::UP) ||
-        (direction_ == Axis::HORIZONTAL && step == FocusStep::SHIFT_TAB) ||
-        (direction_ == Axis::VERTICAL && step == FocusStep::LEFT)) {
+    if ((GetDirection() == Axis::HORIZONTAL && step == FocusStep::UP) ||
+        (GetDirection() == Axis::HORIZONTAL && step == FocusStep::SHIFT_TAB) ||
+        (GetDirection() == Axis::VERTICAL && step == FocusStep::LEFT)) {
         return PreviousFocus(curFocusNode);
     }
-    if ((direction_ == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
-        (direction_ == Axis::HORIZONTAL && step == FocusStep::TAB) ||
-        (direction_ == Axis::VERTICAL && step == FocusStep::RIGHT)) {
+    if ((GetDirection() == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
+        (GetDirection() == Axis::HORIZONTAL && step == FocusStep::TAB) ||
+        (GetDirection() == Axis::VERTICAL && step == FocusStep::RIGHT)) {
         return NextFocus(curFocusNode);
     }
     return nullptr;
@@ -572,6 +573,10 @@ int32_t SwiperPattern::GetLoopIndex(int32_t originalIndex) const
 
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (!isDragging_) {
+        SetLazyForEachLongPredict(true);
+    }
+
     auto isNotInit = true;
     if (isInit_) {
         isNotInit = false;
@@ -1064,6 +1069,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 return;
             }
+            pattern->FireAndCleanScrollingListener();
             pattern->HandleDragStart(info);
             // notify scrollStart upwards
             pattern->OnScrollStartRecursive(pattern->direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
@@ -1154,13 +1160,13 @@ bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
-        (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
+    if ((GetDirection() == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
+        (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
         ShowPrevious();
         return true;
     }
-    if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
-        (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
+    if ((GetDirection() == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
+        (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
         ShowNext();
         return true;
     }
@@ -1206,48 +1212,80 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     if (itemPosition_.empty()) {
         return;
     }
-    auto edgeEffect = GetEdgeEffect();
-    auto isOutOfBoundary = isTouchPad_ ? IsOutOfBoundary(offset) : IsOutOfBoundary();
-    if (!IsLoop() && isOutOfBoundary && edgeEffect == EdgeEffect::SPRING && (isDragging_ || childScrolling_)) {
-        targetIndex_.reset();
-
-        auto visibleSize = CalculateVisibleSize();
-        if (LessOrEqual(visibleSize, 0.0)) {
+    if (!IsLoop() && (isDragging_ || childScrolling_)) {
+        // handle edge effects
+        if (CheckOverScroll(offset)) {
             return;
         }
-        auto friction = currentIndexOffset_ > 0
-                            ? CalculateFriction(itemPosition_.begin()->second.startPos / visibleSize)
-                            : CalculateFriction((visibleSize - itemPosition_.rbegin()->second.endPos) / visibleSize);
-
-        currentDelta_ = currentDelta_ - friction * offset;
-        currentIndexOffset_ += friction * offset;
+    }
+    currentDelta_ = currentDelta_ - offset;
+    currentIndexOffset_ += offset;
+    if (isDragging_) {
         AnimationCallbackInfo callbackInfo;
         callbackInfo.currentOffset =
             GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
         FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
-    } else if (!IsLoop() && IsOutOfBoundary(offset) &&
-               (edgeEffect == EdgeEffect::FADE || edgeEffect == EdgeEffect::NONE) && (isDragging_ || childScrolling_)) {
-        currentDelta_ = currentDelta_ - offset;
-        if (edgeEffect == EdgeEffect::FADE) {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            if (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) {
-                auto remainOffset = GetDistanceToEdge();
-                fadeOffset_ += (offset - remainOffset);
-            }
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        }
-    } else {
-        currentDelta_ = currentDelta_ - offset;
-        currentIndexOffset_ += offset;
-        if (isDragging_) {
-            AnimationCallbackInfo callbackInfo;
-            callbackInfo.currentOffset =
-                GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
-            FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
-        }
     }
     MarkDirtyNodeSelf();
+}
+
+bool SwiperPattern::CheckOverScroll(float offset)
+{
+    switch (GetEdgeEffect()) {
+        case EdgeEffect::SPRING:
+            if (SpringOverScroll(offset)) {
+                return true;
+            }
+            break;
+        case EdgeEffect::FADE:
+            if (IsOutOfBoundary(offset)) {
+                currentDelta_ = currentDelta_ - offset;
+                auto host = GetHost();
+                CHECK_NULL_RETURN(host, false);
+                if (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) {
+                    auto remainOffset = GetDistanceToEdge();
+                    fadeOffset_ += (offset - remainOffset);
+                }
+                host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                MarkDirtyNodeSelf();
+                return true;
+            }
+            break;
+        case EdgeEffect::NONE:
+            if (IsOutOfBoundary(offset)) {
+                currentDelta_ = currentDelta_ - offset;
+                MarkDirtyNodeSelf();
+                return true;
+            }
+            break;
+    }
+    return false;
+}
+
+bool SwiperPattern::SpringOverScroll(float offset)
+{
+    bool outOfBounds = isTouchPad_ ? IsOutOfBoundary(offset) : IsOutOfBoundary();
+    if (!outOfBounds) {
+        return false;
+    }
+    targetIndex_.reset();
+
+    auto visibleSize = CalculateVisibleSize();
+    if (LessOrEqual(visibleSize, 0.0)) {
+        return true;
+    }
+    auto friction = currentIndexOffset_ > 0
+                        ? CalculateFriction(itemPosition_.begin()->second.startPos / visibleSize)
+                        : CalculateFriction((visibleSize - itemPosition_.rbegin()->second.endPos) / visibleSize);
+
+    currentDelta_ = currentDelta_ - friction * offset;
+    currentIndexOffset_ += friction * offset;
+    AnimationCallbackInfo callbackInfo;
+    callbackInfo.currentOffset =
+        GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
+    FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
+    MarkDirtyNodeSelf();
+    return true;
 }
 
 void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
@@ -1392,6 +1430,7 @@ void SwiperPattern::HandleTouchUp()
 void SwiperPattern::HandleDragStart(const GestureEvent& info)
 {
     TAG_LOGD(AceLogTag::ACE_SWIPER, "Swiper drag start.");
+    UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::START);
     if (usePropertyAnimation_) {
         StopPropertyTranslateAnimation();
     }
@@ -1430,6 +1469,7 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
 void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 {
     TAG_LOGD(AceLogTag::ACE_SWIPER, "Swiper drag update.");
+    UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::RUNNING);
     auto mainDelta = static_cast<float>(info.GetMainDelta());
     if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
         isTouchPad_ = true;
@@ -1457,6 +1497,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
     TAG_LOGD(AceLogTag::ACE_SWIPER, "Swiper drag end.");
+    UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         UpdateItemRenderGroup(false);
         return;
@@ -2699,17 +2740,11 @@ void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
 
 void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
 {
-    // lazyBuild feature.
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    const auto& children = host->GetChildren();
-    for (auto&& child : children) {
-        auto lazyForEach = DynamicCast<LazyForEachNode>(child);
-        if (lazyForEach) {
-            lazyForEach->SetRequestLongPredict(useLazyLoad);
-        }
-    }
+    SetLazyForEachLongPredict(useLazyLoad);
+
     if (useLazyLoad) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<SwiperLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         auto cacheCount = layoutProperty->GetCachedCountValue(1);
@@ -2721,6 +2756,8 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
         if (forEachIndexSet.empty()) {
             return;
         }
+
+        const auto& children = host->GetChildren();
         for (const auto& child : children) {
             if (child->GetTag() != V2::JS_FOR_EACH_ETS_TAG) {
                 continue;
@@ -2742,6 +2779,20 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
                     }
                 },
                 TaskExecutor::TaskType::UI);
+        }
+    }
+}
+
+void SwiperPattern::SetLazyForEachLongPredict(bool useLazyLoad) const
+{
+    // lazyBuild feature.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& children = host->GetChildren();
+    for (auto&& child : children) {
+        auto lazyForEach = DynamicCast<LazyForEachNode>(child);
+        if (lazyForEach) {
+            lazyForEach->SetRequestLongPredict(useLazyLoad);
         }
     }
 }
@@ -3164,6 +3215,13 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
     }
 }
 
+void SwiperPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->AddFRCSceneInfo(SWIPER_DRAG_SCENE, speed, sceneStatus);
+}
+
 void SwiperPattern::OnScrollStartRecursive(float position)
 {
     if (!isDragging_) {
@@ -3225,6 +3283,7 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
     auto parent = parent_.Upgrade();
     if (!parent || !enableNestedScroll_) {
         if (IsOutOfBoundary(offset) && ChildFirst(state)) {
+            CloseTheGap(offset);
             return { offset, true };
         }
         UpdateCurrentOffset(offset);
@@ -3237,6 +3296,7 @@ ScrollResult SwiperPattern::HandleScrollSelfFirst(float offset, int32_t source, 
 {
     // priority: self scroll > parent scroll > parent overScroll > self overScroll
     if (IsOutOfBoundary(offset)) {
+        CloseTheGap(offset);
         // skip CHECK_NULL, already checked in HandleScroll
         auto parent = parent_.Upgrade();
 
@@ -3264,6 +3324,14 @@ ScrollResult SwiperPattern::HandleScrollSelfFirst(float offset, int32_t source, 
     return { 0.0f, !IsLoop() && GetDistanceToEdge() <= 0.0f };
 }
 
+void SwiperPattern::CloseTheGap(float offset)
+{
+    float distanceToEdge = GetDistanceToEdge();
+    if (distanceToEdge > 0.0f) {
+        UpdateCurrentOffset(offset > 0 ? distanceToEdge : -distanceToEdge);
+    }
+}
+
 inline bool SwiperPattern::ChildFirst(NestedState state)
 {
     // SELF/CHILD priority: self scroll > child scroll > self overScroll > child overScroll
@@ -3275,13 +3343,12 @@ void SwiperPattern::DumpAdvanceInfo()
 {
     isLastIndicatorFocused_ ? DumpLog::GetInstance().AddDesc("isLastIndicatorFocused:true")
                             : DumpLog::GetInstance().AddDesc("isLastIndicatorFocused:false");
-    moveDirection_ ? DumpLog::GetInstance().AddDesc("moveDirection:false")
-                   : DumpLog::GetInstance().AddDesc("isLastIndicatorFocused:false");
+    moveDirection_ ? DumpLog::GetInstance().AddDesc("moveDirection:true")
+                   : DumpLog::GetInstance().AddDesc("moveDirection:false");
     indicatorDoingAnimation_ ? DumpLog::GetInstance().AddDesc("indicatorDoingAnimation:true")
                              : DumpLog::GetInstance().AddDesc("indicatorDoingAnimation:false");
-    isInit_ ? DumpLog::GetInstance().AddDesc("isInit:true") : DumpLog::GetInstance().AddDesc("isInit:false");
     hasVisibleChangeRegistered_ ? DumpLog::GetInstance().AddDesc("hasVisibleChangeRegistered:true")
-                                : DumpLog::GetInstance().AddDesc("hasVisibleChangeRegistered_:false");
+                                : DumpLog::GetInstance().AddDesc("hasVisibleChangeRegistered:false");
     isVisible_ ? DumpLog::GetInstance().AddDesc("isVisible:true") : DumpLog::GetInstance().AddDesc("isVisible:false");
     isVisibleArea_ ? DumpLog::GetInstance().AddDesc("isVisibleArea:true")
                    : DumpLog::GetInstance().AddDesc("isVisibleArea:false");
@@ -3341,19 +3408,31 @@ void SwiperPattern::DumpAdvanceInfo()
                             : DumpLog::GetInstance().AddDesc("stopIndicatorAnimation:false");
     isTouchPad_ ? DumpLog::GetInstance().AddDesc("isTouchPad:true")
                 : DumpLog::GetInstance().AddDesc("isTouchPad:false");
-    surfaceChangedCallbackId_ ? DumpLog::GetInstance().AddDesc(
-                                    "surfaceChangedCallbackId:" + std::to_string(surfaceChangedCallbackId_.value()))
-                              : DumpLog::GetInstance().AddDesc("surfaceChangedCallbackId:null");
-    lastSwiperIndicatorType_ ? DumpLog::GetInstance().AddDesc(
-                                   "surfaceChangedCallbackId:" + std::to_string(surfaceChangedCallbackId_.value()))
-                             : DumpLog::GetInstance().AddDesc("lastSwiperIndicatorType:null");
-    DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(startIndex_));
-    DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(endIndex_));
+    surfaceChangedCallbackId_.has_value()
+        ? DumpLog::GetInstance().AddDesc(
+              "surfaceChangedCallbackId:" + std::to_string(surfaceChangedCallbackId_.value()))
+        : DumpLog::GetInstance().AddDesc("surfaceChangedCallbackId:null");
+    if (lastSwiperIndicatorType_.has_value()) {
+        switch (lastSwiperIndicatorType_.value()) {
+            case SwiperIndicatorType::DOT: {
+                DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DOT");
+                break;
+            }
+            case SwiperIndicatorType::DIGIT: {
+                DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DIGIT");
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    } else {
+        DumpLog::GetInstance().AddDesc("lastSwiperIndicatorType:null");
+    }
     DumpLog::GetInstance().AddDesc("currentIndex:" + std::to_string(currentIndex_));
     DumpLog::GetInstance().AddDesc("oldIndex:" + std::to_string(oldIndex_));
     DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(currentOffset_));
     DumpLog::GetInstance().AddDesc("fadeOffset:" + std::to_string(fadeOffset_));
-    DumpLog::GetInstance().AddDesc("turnPageRate:" + std::to_string(turnPageRate_));
     DumpLog::GetInstance().AddDesc("touchBottomRate:" + std::to_string(touchBottomRate_));
     DumpLog::GetInstance().AddDesc("currentIndexOffset:" + std::to_string(currentIndexOffset_));
     DumpLog::GetInstance().AddDesc("gestureSwipeIndex:" + std::to_string(gestureSwipeIndex_));
@@ -3460,5 +3539,20 @@ int32_t SwiperPattern::GetLoopIndex(int32_t index, int32_t childrenSize) const
     }
     loopIndex %= childrenSize;
     return loopIndex;
+}
+
+void SwiperPattern::RegisterScrollingListener(const RefPtr<ScrollingListener> listener)
+{
+    CHECK_NULL_VOID(listener);
+    scrollingListener_.emplace_back(listener);
+}
+
+void SwiperPattern::FireAndCleanScrollingListener()
+{
+    for (auto listener : scrollingListener_) {
+        CHECK_NULL_VOID(listener);
+        listener->NotifyScrollingEvent();
+    }
+    scrollingListener_.clear();
 }
 } // namespace OHOS::Ace::NG

@@ -75,7 +75,7 @@ public:
         } else {
             host->ReplaceChild(host->GetChildAtIndex(headerIndex_), header);
         }
-        auto frameNode  = AceType::DynamicCast<FrameNode>(header);
+        auto frameNode = AceType::DynamicCast<FrameNode>(header->GetFrameChildByIndex(0, false));
         CHECK_NULL_VOID(frameNode);
         auto renderContext = frameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
@@ -93,7 +93,7 @@ public:
         } else {
             host->ReplaceChild(host->GetChildAtIndex(footerIndex_), footer);
         }
-        auto frameNode  = AceType::DynamicCast<FrameNode>(footer);
+        auto frameNode = AceType::DynamicCast<FrameNode>(footer->GetFrameChildByIndex(0, false));
         CHECK_NULL_VOID(frameNode);
         auto renderContext = frameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
@@ -123,6 +123,11 @@ public:
     int32_t GetDisplayStartIndexInGroup() const
     {
         return itemDisplayStartIndex_;
+    }
+
+    int32_t GetItemStartIndex() const
+    {
+        return itemStartIndex_;
     }
 
     int32_t GetEndIndexInGroup() const

@@ -294,7 +294,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
         gridLayoutInfo_.ResetPositionFlags();
         isChildrenUpdated_ = true;
-        if (gridLayoutInfo_.childrenCount_ > 0) {
+        if (layoutWrapper->GetTotalChildCount() > 0) {
             ReloadToStartIndex(mainSize, crossSize, layoutWrapper);
         }
     }

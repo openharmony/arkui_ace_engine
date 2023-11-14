@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_paint_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/scroll/scroll_position_controller.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -36,14 +35,15 @@ void ScrollModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::SCROLL_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::SCROLL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
     stack->Push(frameNode);
-    SetEdgeEffect(EdgeEffect::NONE);
+    SetEdgeEffect(EdgeEffect::NONE, true);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
-    auto positionController = AceType::MakeRefPtr<NG::ScrollPositionController>();
-    pattern->SetScrollPositionController(positionController);
+    auto positionController = AceType::MakeRefPtr<NG::ScrollableController>();
+    pattern->SetPositionController(positionController);
     positionController->SetScrollPattern(pattern);
 }
 
@@ -54,8 +54,8 @@ RefPtr<ScrollControllerBase> ScrollModelNG::GetOrCreateController()
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     if (!pattern->GetScrollPositionController()) {
-        auto controller = AceType::MakeRefPtr<NG::ScrollPositionController>();
-        pattern->SetScrollPositionController(controller);
+        auto controller = AceType::MakeRefPtr<NG::ScrollableController>();
+        pattern->SetPositionController(controller);
     }
     return pattern->GetScrollPositionController();
 }
@@ -165,9 +165,15 @@ void ScrollModelNG::SetScrollBarColor(const Color& color)
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color);
 }
 
-void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
+void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, EdgeEffect, edgeEffect);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetAlwaysEnabled(alwaysEnabled);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void ScrollModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)

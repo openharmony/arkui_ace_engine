@@ -80,6 +80,7 @@ AnimatedImage::AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string 
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     animator_ = CREATE_ANIMATOR(pipelineContext);
+    animator_->PreventFrameJank();
 
     // set up animator
     int32_t totalDuration = 0;
@@ -226,7 +227,7 @@ void AnimatedRSImage::DecodeImpl(uint32_t idx)
 #ifndef USE_ROSEN_DRAWING
         bitmap.allocPixels(imageInfo);
 #else
-        auto info = Rosen::Drawing::ConvertToRSImageInfo(imageInfo);
+        auto info = Rosen::Drawing::SkiaImageInfo::ConvertToRSImageInfo(imageInfo);
         bitmap.Build(info);
 #endif
     }

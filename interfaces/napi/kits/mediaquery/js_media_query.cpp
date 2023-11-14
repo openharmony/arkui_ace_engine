@@ -123,7 +123,6 @@ public:
         LOGI("NAPI MediaQuery On called");
         auto jsEngine = EngineHelper::GetCurrentEngine();
         if (!jsEngine) {
-            LOGE("get jsEngine failed");
             return nullptr;
         }
         jsEngine->RegisterMediaUpdateCallback(NapiCallback);
@@ -140,7 +139,6 @@ public:
 
         MediaQueryListener* listener = GetListener(env, thisVar);
         if (!listener) {
-            LOGE("listener is null");
             napi_close_handle_scope(env, scope);
             return nullptr;
         }
@@ -168,7 +166,6 @@ public:
         size_t argc = ParseArgs(env, info, thisVar, cb);
         MediaQueryListener* listener = GetListener(env, thisVar);
         if (!listener) {
-            LOGE("listener is null");
             return nullptr;
         }
         if (argc == 1) {
@@ -253,7 +250,6 @@ private:
         napi_close_handle_scope(env, scope);
         auto jsEngine = EngineHelper::GetCurrentEngine();
         if (!jsEngine) {
-            LOGE("get jsEngine failed");
             return;
         }
         {

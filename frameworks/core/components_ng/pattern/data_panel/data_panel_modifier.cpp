@@ -109,8 +109,11 @@ void DataPanelModifier::UpdateDate()
 {
     if (isEffect_->Get()) {
         // When the date update, the animation will repeat once.
-        date_->Set(ANIMATION_START);
         AnimationOption option = AnimationOption();
+        option.SetDuration(0);
+        option.SetDelay(ANIMATION_DELAY);
+        option.SetIteration(ANIMATION_TIMES);
+        AnimationUtils::Animate(option, [&]() { date_->Set(OHOS::Ace::NG::ANIMATION_START); });
         RefPtr<Curve> curve = AceType::MakeRefPtr<SpringCurve>(
             ANIMATION_CURVE_VELOCITY, ANIMATION_CURVE_MASS, ANIMATION_CURVE_STIFFNESS, ANIMATION_CURVE_DAMPING);
         option.SetDuration(ANIMATION_DURATION);
@@ -218,11 +221,7 @@ void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, ArcData arcData
 
 void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset) const
 {
-#ifndef USE_ROSEN_DRAWING
-    RSCanvas canvas = context.canvas;
-#else
     RSCanvas& canvas = context.canvas;
-#endif
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
 
@@ -269,11 +268,7 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset) con
 
 void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF offset) const
 {
-#ifndef USE_ROSEN_DRAWING
-    auto canvas = context.canvas;
-#else
     auto& canvas = context.canvas;
-#endif
     auto totalWidth = context.width;
     auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
     auto segmentWidthSum = 0.0f;

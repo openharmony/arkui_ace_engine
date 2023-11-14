@@ -33,6 +33,7 @@ void ListModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::LIST_ETS_TAG, nodeId);
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::LIST_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ListPattern>(); });
     stack->Push(frameNode);
@@ -81,9 +82,15 @@ void ListModelNG::SetScrollBar(Ace::DisplayMode scrollBar)
     ACE_UPDATE_PAINT_PROPERTY(ListPaintProperty, BarDisplayMode, static_cast<DisplayMode>(scrollBar));
 }
 
-void ListModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
+void ListModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, EdgeEffect, edgeEffect);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetAlwaysEnabled(alwaysEnabled);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void ListModelNG::SetEditMode(bool editMode)

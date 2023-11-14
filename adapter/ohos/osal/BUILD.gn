@@ -40,7 +40,7 @@ template("ace_osal_ohos_source_set") {
       external_deps = [
         "hilog:libhilog",
         "hitrace:hitrace_meter",
-        "init_lite:libbegetutil",
+        "init:libbegetutil",
       ]
 
       configs = [ "$ace_root:ace_config" ]

@@ -277,6 +277,12 @@ bool ArkJSRuntime::HasPendingException()
 void ArkJSRuntime::HandleUncaughtException(panda::TryCatch& trycatch,
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
+    Local<ObjectRef> exception = trycatch.GetAndClearException();
+    if (!exception.IsEmpty() && !exception->IsHole() && errorCallback != nullptr) {
+        errorCallback("loading js file has crash or the uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
+        return;
+    }
+
     // Handle the uncaught exception by native engine created by ability runtime in the stage model project.
     if (nativeEngine_) {
         nativeEngine_->HandleUncaughtException();
@@ -284,17 +290,10 @@ void ArkJSRuntime::HandleUncaughtException(panda::TryCatch& trycatch,
     }
 
     if (uncaughtErrorHandler_ == nullptr) {
-        LOGE("uncaughtErrorHandler is null.");
         return;
     }
 
-    Local<ObjectRef> exception = trycatch.GetAndClearException();
-    if (!exception.IsEmpty() && !exception->IsHole() && errorCallback != nullptr) {
-        errorCallback("loading js file has crash or the uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
-    }
-
     if (!exception.IsEmpty() && !exception->IsHole()) {
-        LOGI("HandleUncaughtException catch exception.");
         shared_ptr<JsValue> errorPtr =
             std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(shared_from_this(), exception));
         uncaughtErrorHandler_(errorPtr, shared_from_this());
@@ -310,9 +309,6 @@ void ArkJSRuntime::ExecutePendingJob()
 #if !defined(PREVIEW) && !defined(IOS_PLATFORM)
 void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)
 {
-    if (vm_ == nullptr) {
-        LOGW("vm_ is nullptr.");
-    }
     LocalScope scope(vm_);
     panda::DFXJSNApi::DumpHeapSnapshot(vm_, FORMAT_JSON, true, isPrivate);
 }
@@ -327,7 +323,6 @@ Local<JSValueRef> PandaFunctionData::Callback(panda::JsiRuntimeCallInfo* info) c
 {
     auto runtime = runtime_.lock();
     if (runtime == nullptr) {
-        LOGE("runtime is nullptr");
         return Local<JSValueRef>();
     }
     EscapeLocalScope scope(runtime->GetEcmaVm());

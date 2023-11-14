@@ -39,7 +39,7 @@ public:
     RefPtr<PluginSubContainer> GetPluginSubContainer(int64_t pluginId);
     RefPtr<PluginSubContainer> MatchPluginSubContainerWithPluginId(int64_t pluginId, const std::string& pluginKey);
     int64_t GetPluginSubContainerId();
-    int64_t GetPluginParentContainerId(int64_t pluginId);
+    int32_t GetPluginParentContainerId(int64_t pluginId);
     void SetJsEngineLoader(Framework::JsEngineLoader* jsEngineLoader)
     {
         jsEngineLoader_ = jsEngineLoader;

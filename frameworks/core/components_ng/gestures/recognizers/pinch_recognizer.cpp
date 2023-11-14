@@ -72,10 +72,6 @@ bool PinchRecognizer::IsCtrlBeingPressed()
 
 void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    if (IsRefereeFinished()) {
-        return;
-    }
-
     if (static_cast<int32_t>(activeFingers_.size()) >= fingers_) {
         return;
     }
@@ -295,7 +291,7 @@ Offset PinchRecognizer::ComputePinchCenter()
     double focalY = sumOfY / fingers_;
 
     PointF localPoint(focalX, focalY);
-    NGGestureRecognizer::Transform(localPoint, GetNodeId());
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
     Offset pinchCenter = Offset(localPoint.GetX(), localPoint.GetY());
 
     return pinchCenter;

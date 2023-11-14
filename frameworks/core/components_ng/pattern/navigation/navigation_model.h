@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_H
 
 #include <mutex>
+#include <string>
 
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
@@ -42,7 +43,8 @@ public:
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetHideTitleBar(bool hideTitleBar) = 0;
     virtual void SetHideNavBar(bool hideNavBar) = 0;
-    virtual void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap) = 0;
+    virtual void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+        const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetHideBackButton(bool hideBackButton) = 0;
     virtual void SetHideToolBar(bool hideToolBar) = 0;
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;

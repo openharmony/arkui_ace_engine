@@ -19,6 +19,8 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
+#include "base/thread/task_executor.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/placement.h"
@@ -31,8 +33,9 @@ namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
 } // namespace
 
-void ViewAbstractModelNG::CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
-    const NG::OffsetF& offset, std::function<void()>& previewBuildFunc, const MenuParam& menuParam)
+void ViewAbstractModelNG::CreateCustomMenu(const std::function<void()>& buildFunc,
+    const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset, std::function<void()>& previewBuildFunc,
+    MenuParam menuParam)
 {
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     if (!buildFunc) {
@@ -46,6 +49,10 @@ void ViewAbstractModelNG::CreateCustomMenu(std::function<void()>& buildFunc, con
         previewBuildFunc();
         previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
+#ifdef PREVIEW
+    // unable to use the subWindow in the Previewer.
+    menuParam.type = MenuType::MENU;
+#endif
     NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode, offset, menuParam, previewCustomNode);
 }
 
@@ -113,20 +120,28 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
     CHECK_NULL_VOID(hub);
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
     if (type == ResponseType::RIGHT_CLICK) {
-        OnMouseEventFunc event = [builder = buildFunc, weakTarget, menuParam](MouseInfo& info) mutable {
-            auto targetNode = weakTarget.Upgrade();
-            CHECK_NULL_VOID(targetNode);
-            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
-                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-            auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
-            menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
-            if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
-                std::function<void()> previewBuildFunc;
-                CreateCustomMenu(builder, targetNode, menuPosition, previewBuildFunc, menuParam);
-                info.SetStopPropagation(true);
-            }
+        OnMouseEventFunc event = [builderF = buildFunc, weakTarget, menuParam](MouseInfo& info) mutable {
+            auto containerId = Container::CurrentId();
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [containerId, builder = builderF, weakTarget, menuParam, info]() mutable {
+                    auto targetNode = weakTarget.Upgrade();
+                    CHECK_NULL_VOID(targetNode);
+                    NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                        info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+                    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+                    CHECK_NULL_VOID(pipelineContext);
+                    auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
+                    menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
+                    if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+                        std::function<void()> previewBuildFunc;
+                        NG::ViewAbstractModelNG::CreateCustomMenu(
+                            builder, targetNode, menuPosition, previewBuildFunc, menuParam);
+                        info.SetStopPropagation(true);
+                    }
+                },
+                TaskExecutor::TaskType::PLATFORM);
         };
         auto inputHub = targetNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(inputHub);
@@ -138,29 +153,37 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         gestureHub->SetPreviewMode(menuParam.previewMode);
 #endif
         // create or show menu on long press
-        auto event = [builder = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
-            auto targetNode = weakTarget.Upgrade();
-            CHECK_NULL_VOID(targetNode);
-            auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto dragDropManager = pipelineContext->GetDragDropManager();
-            CHECK_NULL_VOID(dragDropManager);
-            if (dragDropManager->IsAboutToPreview() || dragDropManager->IsDragging()) {
-                return;
-            }
-            if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
-                auto context = targetNode->GetRenderContext();
-                CHECK_NULL_VOID(context);
-                auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
-                CHECK_NULL_VOID(gestureHub);
-                auto pixelMap = context->GetThumbnailPixelMap();
-                gestureHub->SetPixelMap(pixelMap);
-            }
-            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
-                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-            auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
-            menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
-            CreateCustomMenu(builder, targetNode, menuPosition, previewBuildFunc, menuParam);
+        auto event = [builderF = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
+            auto containerId = Container::CurrentId();
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [containerId, builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
+                    auto targetNode = weakTarget.Upgrade();
+                    CHECK_NULL_VOID(targetNode);
+                    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+                    CHECK_NULL_VOID(pipelineContext);
+                    auto dragDropManager = pipelineContext->GetDragDropManager();
+                    CHECK_NULL_VOID(dragDropManager);
+                    if (dragDropManager->IsAboutToPreview() || dragDropManager->IsDragging()) {
+                        return;
+                    }
+                    if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
+                        auto context = targetNode->GetRenderContext();
+                        CHECK_NULL_VOID(context);
+                        auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
+                        CHECK_NULL_VOID(gestureHub);
+                        auto pixelMap = context->GetThumbnailPixelMap();
+                        gestureHub->SetPixelMap(pixelMap);
+                    }
+                    NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                        info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+                    auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
+                    menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
+                    NG::ViewAbstractModelNG::CreateCustomMenu(
+                        builder, targetNode, menuPosition, previewBuildFunc, menuParam);
+                },
+                TaskExecutor::TaskType::PLATFORM);
         };
         auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
 #ifdef ENABLE_DRAG_FRAMEWORK

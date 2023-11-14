@@ -44,6 +44,7 @@ void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32
     auto contentNode = GetContentNode();
     if (!contentNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, nodeId);
         contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, nodeId,
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         SetContentNode(contentNode);

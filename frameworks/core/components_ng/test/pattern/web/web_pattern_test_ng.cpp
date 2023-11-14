@@ -417,4 +417,61 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_004, TestSize.Level1)
     EXPECT_FALSE(rerult);
 #endif
 }
+
+/**
+ * @tc.name: JavaScriptOnDocumentStart009
+ * @tc.desc: JavaScriptOnDocumentStart.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, JavaScriptOnDocumentStart009, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    std::map<std::string, std::vector<std::string>> scriptItems;
+    std::string group = "groupp";
+    std::vector<std::string> vec;
+    vec.push_back("main");
+    scriptItems.insert(std::make_pair(group, vec));
+    webPattern->JavaScriptOnDocumentStart(scriptItems);
+    EXPECT_NE(webPattern->delegate_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: UpdateJavaScriptOnDocumentStart010
+ * @tc.desc: UpdateJavaScriptOnDocumentStart.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, UpdateJavaScriptOnDocumentStart010, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    std::map<std::string, std::vector<std::string>> scriptItems;
+    std::string group = "groupp";
+    std::vector<std::string> vec;
+    vec.push_back("main");
+    scriptItems.insert(std::make_pair(group, vec));
+    webPattern->JavaScriptOnDocumentStart(scriptItems);
+    webPattern->UpdateJavaScriptOnDocumentStart();
+    EXPECT_FALSE(webPattern->scriptItems_);
+#endif
+}
 } // namespace OHOS::Ace::NG

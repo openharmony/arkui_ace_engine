@@ -64,6 +64,8 @@ public:
     void RemoveName(const std::string& name) override;
     void RemoveIndex(int32_t index) override;
     void Clear() override;
+    bool IsReplace() const override;
+    void UpdateIsReplace(bool isReplace) const override;
     std::vector<std::string> GetAllPathName() override;
     RefPtr<NG::UINode> CreateNodeByIndex(int32_t index) override;
     RefPtr<NG::UINode> CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo) override;

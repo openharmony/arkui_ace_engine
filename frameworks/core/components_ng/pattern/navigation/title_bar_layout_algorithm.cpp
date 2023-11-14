@@ -132,10 +132,12 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
         occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
     } else {
         occupiedWidth += menuWidth_;
-        // title is custom, the title right margin is not needed
-        occupiedWidth += isCustom ? 0.0f : (NAV_HORIZONTAL_MARGIN_L).ConvertToPx();
         auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
         occupiedWidth += isCustomMenu ? 0.0f : (defaultPaddingStart_).ConvertToPx();
+        // title is custom or menu is custom, the title right margin is not needed
+        if (!isCustomMenu) {
+            occupiedWidth += isCustom ? 0.0f : (NAV_HORIZONTAL_MARGIN_L).ConvertToPx();
+        }
     }
     return titleBarSize.Width() < occupiedWidth ? 0 : titleBarSize.Width() - occupiedWidth;
 }
@@ -176,10 +178,8 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
             constraint.maxSize.SetWidth(maxWidth);
             // custom title must be single line title
 
-            auto navDestinationProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
-            auto titleHeight = navDestinationProperty->GetTitleBarHeightValue(SINGLE_LINE_TITLEBAR_HEIGHT);
-            constraint.parentIdealSize.SetHeight(titleHeight.ConvertToPx());
-            constraint.maxSize.SetHeight(titleHeight.ConvertToPx());
+            constraint.parentIdealSize.SetHeight(titleBarSize.Height());
+            constraint.maxSize.SetHeight(titleBarSize.Height());
             titleWrapper->Measure(constraint);
             return;
         }
@@ -199,8 +199,8 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     if (titleBarLayoutProperty->HasTitleHeight()) {
         constraint.parentIdealSize.SetWidth(maxWidth);
         constraint.maxSize.SetWidth(maxWidth);
-        constraint.parentIdealSize.SetHeight(titleBarLayoutProperty->GetTitleHeightValue().ConvertToPx());
-        constraint.maxSize.SetHeight(titleBarLayoutProperty->GetTitleHeightValue().ConvertToPx());
+        constraint.parentIdealSize.SetHeight(titleBarSize.Height());
+        constraint.maxSize.SetHeight(titleBarSize.Height());
         titleWrapper->Measure(constraint);
         return;
     }

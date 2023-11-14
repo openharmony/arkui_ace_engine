@@ -30,6 +30,7 @@ void BadgeModelNG::Create(BadgeParameters& badgeParameters)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::BADGE_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::BADGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BadgePattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);

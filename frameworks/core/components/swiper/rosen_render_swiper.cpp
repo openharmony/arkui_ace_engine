@@ -623,8 +623,8 @@ void RosenRenderSwiper::DrawIndicatorItems(RenderContext& context, const Offset&
     paint.setColor(indicator_->GetSelectedColor().GetValue());
     canvas->drawRRect(rRect, paint);
 #else
-    RSPen pen;
-    pen.SetAntiAlias(true);
+    RSBrush brush;
+    brush.SetAntiAlias(true);
 
     InitMoveRange();
     IndicatorOffsetInfo pointInfo;
@@ -642,18 +642,18 @@ void RosenRenderSwiper::DrawIndicatorItems(RenderContext& context, const Offset&
             continue;
         }
         // paint point of indicator, and point adsorbent
-        pen.SetColor(indicator_->GetColor().GetValue());
-        canvas->AttachPen(pen);
+        brush.SetColor(indicator_->GetColor().GetValue());
+        canvas->AttachBrush(brush);
         canvas->DrawCircle(RSPoint(pointInfo.center.GetX() + offset.GetX() - pointInfo.animationMove.GetX(),
                                pointInfo.center.GetY() + offset.GetY() - pointInfo.animationMove.GetY()),
             swiperIndicatorData_.indicatorItemData[i].radius);
-        canvas->DetachPen();
+        canvas->DetachBrush();
     }
 
-    pen.SetColor(indicator_->GetSelectedColor().GetValue());
-    canvas->AttachPen(pen);
+    brush.SetColor(indicator_->GetSelectedColor().GetValue());
+    canvas->AttachBrush(brush);
     canvas->DrawRoundRect(rRect);
-    canvas->DetachPen();
+    canvas->DetachBrush();
 #endif
 }
 

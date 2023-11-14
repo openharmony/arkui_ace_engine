@@ -641,6 +641,24 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
     OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction);
 }
 
+void PipelineBase::OnVirtualKeyboardAreaChange(
+    Rect keyboardArea, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    auto currentContainer = Container::Current();
+    if (currentContainer && !currentContainer->IsSubContainer()) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
+        if (subwindow && subwindow->GetShown()) {
+            // subwindow is shown, main window no need to handle the keyboard event
+            return;
+        }
+    }
+    double keyboardHeight = keyboardArea.Height();
+    if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
+        return;
+    }
+    OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction);
+}
+
 double PipelineBase::ModifyKeyboardHeight(double keyboardHeight) const
 {
     auto windowRect = GetCurrentWindowRect();
@@ -656,6 +674,8 @@ void PipelineBase::SetGetWindowRectImpl(std::function<Rect()>&& callback)
         window_->SetGetWindowRectImpl(std::move(callback));
     }
 }
+
+void PipelineBase::ContainerModalUnFocus() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const
 {

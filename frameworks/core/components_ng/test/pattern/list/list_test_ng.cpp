@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/test/mock/mock_drag_window.h"
 #include "base/utils/utils.h"
 #define private public
 #define protected public
@@ -51,6 +52,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_ng/test/pattern/test_ng.h"
 #include "core/components_v2/list/list_properties.h"
@@ -85,6 +87,14 @@ constexpr float DEFAULT_STARTOFFSET = 0.f;
 constexpr float SPACE = 10.f;
 constexpr float STROKE_WIDTH = 5.f;
 const V2::ItemDivider ITEM_DIVIDER = { Dimension(STROKE_WIDTH), Dimension(10), Dimension(20), Color(0x000000)};
+struct SwipeActionItem {
+    std::function<void()> builderAction;
+    Dimension actionAreaDistance;
+    OnDeleteEvent onDelete;
+    OnEnterDeleteAreaEvent onEnterDeleteArea;
+    OnExitDeleteAreaEvent onExitDeleteArea;
+    OnStateChangedEvent onStateChange;
+};
 } // namespace
 
 class ListTestNg : public testing::Test, public TestNG {
@@ -98,9 +108,8 @@ protected:
     void Create(const std::function<void(ListModelNG)>& callback = nullptr);
     void CreateWithItem(const std::function<void(ListModelNG)>& callback = nullptr);
     void CreateWithSwipe(bool isStartNode, V2::SwipeEdgeEffect swipeEdgeEffect, int32_t itemNumber = TOTAL_LINE_NUMBER);
-    void CreateWithSwipeAction(std::function<void()> builderAction, bool useDefaultDeleteAnimation,
-        OnDeleteEvent onDelete, OnEnterDeleteAreaEvent onEnterDeleteArea, OnExitDeleteAreaEvent onExitDeleteArea,
-        const Dimension& length, bool isStartArea, V2::SwipeEdgeEffect effect);
+    void CreateWithSwipeAction(SwipeActionItem& item, bool useDefaultDeleteAnimation,
+        bool isStartArea, OnOffsetChangeFunc onOffsetChange, V2::SwipeEdgeEffect effect);
 
     static void CreateItem(
         int32_t itemNumber, Axis axis = Axis::VERTICAL, V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
@@ -121,6 +130,8 @@ protected:
     void HandleDragStart(int32_t index);
     void HandleDragUpdate(int32_t index, float mainDelta);
     void HandleDragEnd(int32_t index, float mainVelocity = SWIPER_SPEED_TH);
+    void UpdateContentModifier();
+    RefPtr<ListPaintMethod> UpdateOverlayModifier();
 
     AssertionResult VerifyPosition(
         const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset);
@@ -149,10 +160,12 @@ void ListTestNg::SetUpTestSuite()
     MockContainer::SetUp();
     MockPipelineBase::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
     auto listItemTheme = AceType::MakeRefPtr<ListItemTheme>();
     EXPECT_CALL(*themeManager, GetTheme(ListItemTheme::TypeId())).WillRepeatedly(Return(listItemTheme));
     listItemTheme->itemDefaultColor_ = Color::WHITE;
@@ -179,10 +192,6 @@ void ListTestNg::SetUp() {}
 
 void ListTestNg::TearDown()
 {
-    if (frameNode_ && frameNode_->renderContext_) {
-        // the destructor is not virtual, the MockRenderContext destructor will not be called
-        frameNode_->renderContext_ = nullptr;
-    }
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
@@ -241,9 +250,8 @@ void ListTestNg::CreateWithSwipe(bool isStartNode, V2::SwipeEdgeEffect swipeEdge
     });
 }
 
-void ListTestNg::CreateWithSwipeAction(std::function<void()> builderAction, bool useDefaultDeleteAnimation,
-    OnDeleteEvent onDelete, OnEnterDeleteAreaEvent onEnterDeleteArea, OnExitDeleteAreaEvent onExitDeleteArea,
-    const Dimension& length, bool isStartArea, V2::SwipeEdgeEffect effect)
+void ListTestNg::CreateWithSwipeAction(SwipeActionItem& item,
+    bool useDefaultDeleteAnimation, bool isStartArea, OnOffsetChangeFunc onOffsetChange, V2::SwipeEdgeEffect effect)
 {
     ListModelNG model;
     model.Create();
@@ -251,9 +259,10 @@ void ListTestNg::CreateWithSwipeAction(std::function<void()> builderAction, bool
     itemModel.Create();
     SetHeight(Dimension(ITEM_HEIGHT));
     SetWidth(FILL_LENGTH);
-    itemModel.SetSwiperAction(nullptr, nullptr, effect);
-    itemModel.SetDeleteArea(std::move(builderAction), useDefaultDeleteAnimation, std::move(onDelete),
-        std::move(onEnterDeleteArea), std::move(onExitDeleteArea), length, isStartArea);
+    itemModel.SetSwiperAction(nullptr, nullptr, std::move(onOffsetChange), effect);
+    itemModel.SetDeleteArea(std::move(item.builderAction), useDefaultDeleteAnimation, std::move(item.onDelete),
+        std::move(item.onEnterDeleteArea), std::move(item.onExitDeleteArea),
+        std::move(item.onStateChange), item.actionAreaDistance, isStartArea);
     {
         RowModelNG rowModel;
         rowModel.Create(std::nullopt, nullptr, "");
@@ -320,7 +329,7 @@ void ListTestNg::CreateItemWithSwipe(
     itemModel.Create();
     SetWidth(FILL_LENGTH);
     SetHeight(Dimension(ITEM_HEIGHT));
-    itemModel.SetSwiperAction(std::move(startAction), std::move(endAction), effect);
+    itemModel.SetSwiperAction(std::move(startAction), std::move(endAction), nullptr, effect);
     {
         RowModelNG rowModel;
         rowModel.Create(std::nullopt, nullptr, "");
@@ -385,7 +394,7 @@ void ListTestNg::ScrollDown(float itemNumber)
 
 void ListTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
 {
-    pattern_->ScrollToEdge(scrollEdgeType);
+    pattern_->ScrollToEdge(scrollEdgeType, false);
     RunMeasureAndLayout(frameNode_);
 }
 
@@ -436,10 +445,28 @@ void ListTestNg::HandleDragEnd(int32_t index, float mainVelocity)
     auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, index);
     itemPattern->HandleDragEnd(info);
     // curOffset_ would be NodeSize or Zero
+    EXPECT_NE(itemPattern->springMotion_, nullptr);
     double position = itemPattern->springMotion_->GetEndValue();
     itemPattern->UpdatePostion(position - itemPattern->curOffset_);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     RunMeasureAndLayout(frameNode_);
+}
+
+void ListTestNg::UpdateContentModifier()
+{
+    RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
+    RefPtr<ListPaintMethod> listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
+    listPaint->UpdateContentModifier(AceType::RawPtr(paintWrapper));
+}
+
+RefPtr<ListPaintMethod> ListTestNg::UpdateOverlayModifier()
+{
+    RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
+    RefPtr<ListPaintMethod> listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
+    listPaint->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    return listPaint;
 }
 
 AssertionResult ListTestNg::VerifyPosition(
@@ -631,7 +658,7 @@ HWTEST_F(ListTestNg, ListLayoutProperty001, TestSize.Level1)
         model.SetScrollBar(Ace::DisplayMode::ON);
         model.SetEditMode(true);
         model.SetChainAnimation(true);
-        model.SetEdgeEffect(EdgeEffect::NONE);
+        model.SetEdgeEffect(EdgeEffect::NONE, false);
         model.SetLanes(3);
         model.SetLaneMinLength(Dimension(40));
         model.SetLaneMaxLength(Dimension(60));
@@ -746,7 +773,7 @@ HWTEST_F(ListTestNg, ListItemLayoutProperty001, TestSize.Level1)
     auto json = JsonUtil::Create(true);
     layoutProperty->ToJsonValue(json);
     EXPECT_EQ(static_cast<V2::StickyMode>(json->GetInt("sticky")), V2::StickyMode::NONE);
-    EXPECT_EQ(json->GetBool("editable"), false);
+    EXPECT_FALSE(json->GetBool("editable"));
     EXPECT_EQ(Dimension::FromString(json->GetString("startDeleteAreaDistance")), Dimension(0, DimensionUnit::VP));
     EXPECT_EQ(Dimension::FromString(json->GetString("endDeleteAreaDistance")), Dimension(0, DimensionUnit::VP));
 
@@ -1500,7 +1527,6 @@ HWTEST_F(ListTestNg, AttrScrollSnapAlign004, TestSize.Level1)
     EXPECT_TRUE(IsEqualTotalOffset(-contentMainSize / 2));
 }
 
-
 /**
  * @tc.name: AttrSLECM001
  * @tc.desc: Test property about scroller/listDirection/edgeEffect/chainAnimation/multiSelectable
@@ -1510,7 +1536,7 @@ HWTEST_F(ListTestNg, AttrSLECM001, TestSize.Level1)
 {
     CreateWithItem([](ListModelNG model) {
         model.SetListDirection(Axis::HORIZONTAL);
-        model.SetEdgeEffect(EdgeEffect::SPRING);
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
         model.SetChainAnimation(true);
         model.SetMultiSelectable(true);
     });
@@ -1968,10 +1994,19 @@ HWTEST_F(ListTestNg, SwiperItem006, TestSize.Level1)
 HWTEST_F(ListTestNg, SwiperItem007, TestSize.Level1)
 {
     auto startFunc = GetDefaultSwiperBuilder(START_NODE_LEN);
-    CreateWithSwipeAction(
-        startFunc, true, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), true, V2::SwipeEdgeEffect::None);
+    SwipeActionItem item = {
+        .builderAction = std::move(startFunc),
+        .actionAreaDistance =  Dimension(DELETE_AREA_DISTANCE),
+        .onDelete = nullptr,
+        .onEnterDeleteArea = nullptr,
+        .onExitDeleteArea = nullptr,
+        .onStateChange = nullptr
+
+    };
+    CreateWithSwipeAction(item, true, true, nullptr, V2::SwipeEdgeEffect::None);
     const int32_t listItemIndex = 0;
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
+    EXPECT_NE(listItemPattern, nullptr);
     const float maxDistance = START_NODE_LEN + DELETE_AREA_DISTANCE;
 
     /**
@@ -1981,11 +2016,11 @@ HWTEST_F(ListTestNg, SwiperItem007, TestSize.Level1)
     float moveDelta = 1;
     HandleDragStart(listItemIndex);
     HandleDragUpdate(listItemIndex, maxDistance);
-    EXPECT_EQ(listItemPattern->curOffset_, maxDistance);
+    EXPECT_FLOAT_EQ(listItemPattern->curOffset_, maxDistance);
     HandleDragUpdate(listItemIndex, moveDelta);
-    EXPECT_EQ(listItemPattern->curOffset_, maxDistance);
+    EXPECT_FLOAT_EQ(listItemPattern->curOffset_, maxDistance);
     HandleDragEnd(listItemIndex);
-    EXPECT_EQ(listItemPattern->curOffset_, START_NODE_LEN);
+    EXPECT_FLOAT_EQ(listItemPattern->curOffset_, START_NODE_LEN);
 
     /**
      * @tc.steps: step2. Swipe end
@@ -1995,9 +2030,9 @@ HWTEST_F(ListTestNg, SwiperItem007, TestSize.Level1)
     HandleDragStart(listItemIndex);
     HandleDragUpdate(listItemIndex, -START_NODE_LEN);
     HandleDragUpdate(listItemIndex, moveDelta);
-    EXPECT_EQ(listItemPattern->curOffset_, 0);
+    EXPECT_FLOAT_EQ(listItemPattern->curOffset_, 0);
     HandleDragEnd(listItemIndex);
-    EXPECT_EQ(listItemPattern->curOffset_, 0);
+    EXPECT_FLOAT_EQ(listItemPattern->curOffset_, 0);
 }
 
 /**
@@ -2011,8 +2046,16 @@ HWTEST_F(ListTestNg, SwiperItem007, TestSize.Level1)
 HWTEST_F(ListTestNg, SwiperItem008, TestSize.Level1)
 {
     auto endFunc = GetDefaultSwiperBuilder(END_NODE_LEN);
-    CreateWithSwipeAction(
-        endFunc, true, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), false, V2::SwipeEdgeEffect::None);
+    SwipeActionItem item = {
+        .builderAction = std::move(endFunc),
+        .actionAreaDistance =  Dimension(DELETE_AREA_DISTANCE),
+        .onDelete = nullptr,
+        .onEnterDeleteArea = nullptr,
+        .onExitDeleteArea = nullptr,
+        .onStateChange = nullptr
+
+    };
+    CreateWithSwipeAction(item, true, false, nullptr, V2::SwipeEdgeEffect::None);
     const int32_t listItemIndex = 0;
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
     const float maxDistance = END_NODE_LEN + DELETE_AREA_DISTANCE;
@@ -2053,8 +2096,19 @@ HWTEST_F(ListTestNg, SwiperItem008, TestSize.Level1)
 HWTEST_F(ListTestNg, SwiperItem009, TestSize.Level1)
 {
     auto startFunc = GetDefaultSwiperBuilder(START_NODE_LEN);
-    CreateWithSwipeAction(
-        startFunc, true, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), true, V2::SwipeEdgeEffect::Spring);
+    SwipeActionState curState = SwipeActionState::COLLAPSED;
+    auto onStateChangeFunc = [&curState](SwipeActionState state) { curState = state; };
+    Dimension offset;
+    auto onOffsetChange = [&offset](int val) { offset = Dimension(val, DimensionUnit::VP); };
+    SwipeActionItem item = {
+        .builderAction = std::move(startFunc),
+        .actionAreaDistance =  Dimension(DELETE_AREA_DISTANCE),
+        .onDelete = nullptr,
+        .onEnterDeleteArea = nullptr,
+        .onExitDeleteArea = nullptr,
+        .onStateChange = std::move(onStateChangeFunc)
+    };
+    CreateWithSwipeAction(item, true, true, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
     const int32_t listItemIndex = 0;
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
     const float maxDistance = START_NODE_LEN + DELETE_AREA_DISTANCE;
@@ -2071,6 +2125,7 @@ HWTEST_F(ListTestNg, SwiperItem009, TestSize.Level1)
     EXPECT_GT(listItemPattern->curOffset_, maxDistance);
     HandleDragEnd(listItemIndex);
     EXPECT_EQ(listItemPattern->curOffset_, START_NODE_LEN);
+    EXPECT_EQ(offset.ConvertToPx(), START_NODE_LEN);
 
     /**
      * @tc.steps: step2. Swipe end
@@ -2081,8 +2136,10 @@ HWTEST_F(ListTestNg, SwiperItem009, TestSize.Level1)
     HandleDragUpdate(listItemIndex, -START_NODE_LEN);
     HandleDragUpdate(listItemIndex, moveDelta);
     EXPECT_LT(listItemPattern->curOffset_, 0);
+    EXPECT_EQ(offset.ConvertToPx(), listItemPattern->curOffset_);
     HandleDragEnd(listItemIndex);
     EXPECT_EQ(listItemPattern->curOffset_, 0);
+    EXPECT_EQ(offset.ConvertToPx(), 0);
 }
 
 /**
@@ -2095,8 +2152,19 @@ HWTEST_F(ListTestNg, SwiperItem009, TestSize.Level1)
 HWTEST_F(ListTestNg, SwiperItem010, TestSize.Level1)
 {
     auto endFunc = GetDefaultSwiperBuilder(END_NODE_LEN);
-    CreateWithSwipeAction(
-        endFunc, true, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), false, V2::SwipeEdgeEffect::Spring);
+    SwipeActionState curState = SwipeActionState::COLLAPSED;
+    auto onStateChangeFunc = [&curState](SwipeActionState state) { curState = state; };
+    Dimension offset;
+    auto onOffsetChange = [&offset](int val) { offset = Dimension(val, DimensionUnit::VP); };
+    SwipeActionItem item = {
+        .builderAction = std::move(endFunc),
+        .actionAreaDistance =  Dimension(DELETE_AREA_DISTANCE),
+        .onDelete = nullptr,
+        .onEnterDeleteArea = nullptr,
+        .onExitDeleteArea = nullptr,
+        .onStateChange = std::move(onStateChangeFunc)
+    };
+    CreateWithSwipeAction(item, true, false, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
     const int32_t listItemIndex = 0;
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
     const float maxDistance = END_NODE_LEN + DELETE_AREA_DISTANCE;
@@ -2110,8 +2178,11 @@ HWTEST_F(ListTestNg, SwiperItem010, TestSize.Level1)
     EXPECT_EQ(listItemPattern->curOffset_, -maxDistance);
     HandleDragUpdate(listItemIndex, moveDelta);
     EXPECT_LT(listItemPattern->curOffset_, -maxDistance);
+    EXPECT_EQ(offset.ConvertToPx(), static_cast<int32_t>(listItemPattern->curOffset_));
     HandleDragEnd(listItemIndex);
     EXPECT_EQ(listItemPattern->curOffset_, -END_NODE_LEN);
+    EXPECT_EQ(offset.ConvertToPx(), -END_NODE_LEN);
+    EXPECT_EQ(curState, SwipeActionState::EXPANDED);
 
     /**
      * @tc.steps: step1. Swipe start
@@ -2122,8 +2193,10 @@ HWTEST_F(ListTestNg, SwiperItem010, TestSize.Level1)
     HandleDragUpdate(listItemIndex, END_NODE_LEN);
     HandleDragUpdate(listItemIndex, moveDelta);
     EXPECT_GT(listItemPattern->curOffset_, 0);
+    EXPECT_EQ(offset.ConvertToPx(), listItemPattern->curOffset_);
     HandleDragEnd(listItemIndex);
     EXPECT_EQ(listItemPattern->curOffset_, 0);
+    EXPECT_EQ(offset.ConvertToPx(), 0);
 }
 
 /**
@@ -2141,8 +2214,15 @@ HWTEST_F(ListTestNg, SwiperItem011, TestSize.Level1)
     auto enterEvent = [&isEntry]() { isEntry = true; };
     auto exitEvent = [&isExit]() { isExit = true; };
     auto builder = GetDefaultSwiperBuilder(START_NODE_LEN);
-    CreateWithSwipeAction(builder, true, deleteEvent, enterEvent, exitEvent,
-        Dimension(DELETE_AREA_DISTANCE), true, V2::SwipeEdgeEffect::Spring);
+    SwipeActionItem item = {
+        .builderAction = std::move(builder),
+        .actionAreaDistance =  Dimension(DELETE_AREA_DISTANCE),
+        .onDelete = std::move(deleteEvent),
+        .onEnterDeleteArea = std::move(enterEvent),
+        .onExitDeleteArea = std::move(exitEvent),
+        .onStateChange = nullptr
+    };
+    CreateWithSwipeAction(item, true, true, nullptr, V2::SwipeEdgeEffect::Spring);
     const int32_t listItemIndex = 0;
 
     /**
@@ -2206,8 +2286,15 @@ HWTEST_F(ListTestNg, SwiperItem012, TestSize.Level1)
     auto enterEvent = [&isEntry]() { isEntry = true; };
     auto exitEvent = [&isExit]() { isExit = true; };
     auto builder = GetDefaultSwiperBuilder(END_NODE_LEN);
-    CreateWithSwipeAction(builder, true, deleteEvent, enterEvent, exitEvent,
-        Dimension(DELETE_AREA_DISTANCE), false, V2::SwipeEdgeEffect::Spring);
+    SwipeActionItem item = {
+        .builderAction = std::move(builder),
+        .actionAreaDistance =  Dimension(DELETE_AREA_DISTANCE),
+        .onDelete = std::move(deleteEvent),
+        .onEnterDeleteArea = std::move(enterEvent),
+        .onExitDeleteArea = std::move(exitEvent),
+        .onStateChange = nullptr
+    };
+    CreateWithSwipeAction(item, true, false, nullptr, V2::SwipeEdgeEffect::Spring);
     const int32_t listItemIndex = 0;
     const float exceedArea = DELETE_AREA_DISTANCE + 1;
 
@@ -2270,8 +2357,15 @@ HWTEST_F(ListTestNg, SwiperItem013, TestSize.Level1)
     auto deleteEvent = [&isDelete]() { isDelete = true; };
     auto enterEvent = [&isEntry]() { isEntry = true; };
     auto exitEvent = [&isExit]() { isExit = true; };
-    CreateWithSwipeAction(nullptr, true, deleteEvent, enterEvent, exitEvent,
-        Dimension(DELETE_AREA_DISTANCE), true, V2::SwipeEdgeEffect::None);
+    SwipeActionItem item = {
+        .builderAction = nullptr,
+        .actionAreaDistance =  Dimension(DELETE_AREA_DISTANCE),
+        .onDelete = std::move(deleteEvent),
+        .onEnterDeleteArea = std::move(enterEvent),
+        .onExitDeleteArea = std::move(exitEvent),
+        .onStateChange = nullptr
+    };
+    CreateWithSwipeAction(item, true, true, nullptr, V2::SwipeEdgeEffect::None);
     const int32_t listItemIndex = 0;
 
     /**
@@ -2326,8 +2420,15 @@ HWTEST_F(ListTestNg, SwiperItem014, TestSize.Level1)
     auto deleteEvent = [&isDelete]() { isDelete = true; };
     auto enterEvent = [&isEntry]() { isEntry = true; };
     auto exitEvent = [&isExit]() { isExit = true; };
-    CreateWithSwipeAction(nullptr, true, deleteEvent, enterEvent, exitEvent,
-        Dimension(DELETE_AREA_DISTANCE), false, V2::SwipeEdgeEffect::None);
+    SwipeActionItem item = {
+        .builderAction = nullptr,
+        .actionAreaDistance =  Dimension(DELETE_AREA_DISTANCE),
+        .onDelete = std::move(deleteEvent),
+        .onEnterDeleteArea = std::move(enterEvent),
+        .onExitDeleteArea = std::move(exitEvent),
+        .onStateChange = nullptr
+    };
+    CreateWithSwipeAction(item, true, false, nullptr, V2::SwipeEdgeEffect::None);
     const int32_t listItemIndex = 0;
     const float exceedArea = DELETE_AREA_DISTANCE + 1;
 
@@ -2431,6 +2532,173 @@ HWTEST_F(ListTestNg, SwiperItem017, TestSize.Level1)
     layoutProperty_->UpdateListDirection(Axis::HORIZONTAL);
     listItemPattern->OnModifyDone();
     EXPECT_EQ(listItemPattern->curOffset_, 0.f);
+}
+
+/**
+ * @tc.name: SwiperItem018
+ * @tc.desc: Test swiperAction Attribute for ListItem, set onOffsetChangeCallback & onStateChangeCallback
+ * callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, SwiperItem018, TestSize.Level1)
+{
+    bool isDelete = false;
+    SwipeActionState curState = SwipeActionState::COLLAPSED;
+    Dimension offset;
+    auto onOffsetChange = [&offset](int val) { offset = Dimension(val, DimensionUnit::VP); };
+    SwipeActionItem item = {
+        .builderAction = GetDefaultSwiperBuilder(START_NODE_LEN),
+        .actionAreaDistance =  Dimension(DELETE_AREA_DISTANCE),
+        .onDelete = [&isDelete]() { isDelete = true; },
+        .onEnterDeleteArea = nullptr,
+        .onExitDeleteArea = nullptr,
+        .onStateChange = [&curState](SwipeActionState state) { curState = state; }
+    };
+    CreateWithSwipeAction(item, true, true, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
+    const int32_t listItemIndex = 0;
+    const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
+
+    /**
+     * @tc.steps: step1. Repeat entry and exit
+     */
+    HandleDragStart(listItemIndex);
+    HandleDragUpdate(listItemIndex, START_NODE_LEN);
+    HandleDragUpdate(listItemIndex, DELETE_AREA_DISTANCE);
+    EXPECT_EQ(offset.ConvertToPx(), static_cast<int32_t>(listItemPattern->curOffset_));
+    HandleDragUpdate(listItemIndex, -DELETE_AREA_DISTANCE);
+    EXPECT_EQ(offset.ConvertToPx(), static_cast<int32_t>(listItemPattern->curOffset_));
+    HandleDragUpdate(listItemIndex, DELETE_AREA_DISTANCE);
+    HandleDragUpdate(listItemIndex, -DELETE_AREA_DISTANCE);
+    HandleDragEnd(listItemIndex);
+    EXPECT_EQ(curState, SwipeActionState::EXPANDED);
+
+    /**
+     * @tc.steps: step2. move middle of DELETE_AREA_DISTANCE and release
+     */
+    HandleDragStart(listItemIndex);
+    HandleDragUpdate(listItemIndex, DELETE_AREA_DISTANCE / 2);
+    HandleDragEnd(listItemIndex);
+    EXPECT_EQ(offset.ConvertToPx(), START_NODE_LEN);
+    EXPECT_EQ(curState, SwipeActionState::EXPANDED);
+
+    /**
+     * @tc.steps: step3. move DELETE_AREA_DISTANCE and release
+     */
+    HandleDragStart(listItemIndex);
+    HandleDragUpdate(listItemIndex, DELETE_AREA_DISTANCE);
+    HandleDragEnd(listItemIndex);
+    EXPECT_EQ(curState, SwipeActionState::ACTIONING);
+
+    /**
+     * @tc.steps: step4. move exceed DELETE_AREA_DISTANCE and release
+     */
+    HandleDragStart(listItemIndex);
+    HandleDragUpdate(listItemIndex, DELETE_AREA_DISTANCE + 1);
+    HandleDragEnd(listItemIndex);
+    EXPECT_EQ(curState, SwipeActionState::ACTIONING);
+}
+
+/**
+ * @tc.name: SwiperItem019
+ * @tc.desc: Test swiperAction Attribute for ListItem, set onOffsetChangeCallback & onStateChangeCallback
+ * callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, SwiperItem019, TestSize.Level1)
+{
+    bool isDelete = false;
+    SwipeActionState curState = SwipeActionState::COLLAPSED;
+    Dimension offset;
+    auto onOffsetChange = [&offset](int val) { offset = Dimension(val, DimensionUnit::VP); };
+    SwipeActionItem item = {
+        .builderAction = GetDefaultSwiperBuilder(START_NODE_LEN),
+        .actionAreaDistance =  Dimension(DELETE_AREA_DISTANCE),
+        .onDelete = [&isDelete]() { isDelete = true; },
+        .onEnterDeleteArea = nullptr,
+        .onExitDeleteArea = nullptr,
+        .onStateChange = [&curState](SwipeActionState state) { curState = state; }
+    };
+    CreateWithSwipeAction(item, true, false, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
+    const int32_t listItemIndex = 0;
+    const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
+
+    /**
+     * @tc.steps: step1. Repeat entry and exit
+     */
+    HandleDragStart(listItemIndex);
+    HandleDragUpdate(listItemIndex, -START_NODE_LEN);
+    HandleDragUpdate(listItemIndex, -DELETE_AREA_DISTANCE);
+    EXPECT_EQ(offset.ConvertToPx(), static_cast<int32_t>(listItemPattern->curOffset_));
+    HandleDragUpdate(listItemIndex, DELETE_AREA_DISTANCE);
+    EXPECT_EQ(offset.ConvertToPx(), static_cast<int32_t>(listItemPattern->curOffset_));
+    HandleDragUpdate(listItemIndex, -DELETE_AREA_DISTANCE);
+    HandleDragUpdate(listItemIndex, DELETE_AREA_DISTANCE);
+    HandleDragEnd(listItemIndex);
+    EXPECT_EQ(curState, SwipeActionState::EXPANDED);
+
+    /**
+     * @tc.steps: step2. move middle of DELETE_AREA_DISTANCE and release
+     */
+    HandleDragStart(listItemIndex);
+    HandleDragUpdate(listItemIndex, -DELETE_AREA_DISTANCE / 2);
+    HandleDragEnd(listItemIndex);
+    EXPECT_EQ(curState, SwipeActionState::EXPANDED);
+    EXPECT_EQ(offset.ConvertToPx(), -START_NODE_LEN);
+
+    /**
+     * @tc.steps: step3. move DELETE_AREA_DISTANCE and release
+     */
+    HandleDragStart(listItemIndex);
+    HandleDragUpdate(listItemIndex, -DELETE_AREA_DISTANCE);
+    HandleDragEnd(listItemIndex);
+    EXPECT_EQ(curState, SwipeActionState::ACTIONING);
+
+    /**
+     * @tc.steps: step4. move exceed DELETE_AREA_DISTANCE and release
+     */
+    HandleDragStart(listItemIndex);
+    HandleDragUpdate(listItemIndex, -DELETE_AREA_DISTANCE - 1);
+    HandleDragEnd(listItemIndex);
+    EXPECT_EQ(curState, SwipeActionState::ACTIONING);
+}
+
+/**
+ * @tc.name: SwiperItem020
+ * @tc.desc: Test closeAllSwipeAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, SwiperItem020, TestSize.Level1)
+{
+    auto endFunc = GetDefaultSwiperBuilder(END_NODE_LEN);
+    SwipeActionState curState = SwipeActionState::COLLAPSED;
+    auto onStateChangeFunc = [&curState](SwipeActionState state) { curState = state; };
+    Dimension offset;
+    auto onOffsetChange = [&offset](int val) { offset = Dimension(val, DimensionUnit::VP); };
+    SwipeActionItem item = {
+        .builderAction = std::move(endFunc),
+        .actionAreaDistance =  Dimension(DELETE_AREA_DISTANCE),
+        .onDelete = nullptr,
+        .onEnterDeleteArea = nullptr,
+        .onExitDeleteArea = nullptr,
+        .onStateChange = std::move(onStateChangeFunc)
+    };
+    CreateWithSwipeAction(item, true, false, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
+    const int32_t listItemIndex = 0;
+    const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
+    const float maxDistance = END_NODE_LEN + DELETE_AREA_DISTANCE;
+    /**
+     * @tc.steps: step1. Swipe end greater than maxDistance
+     * @tc.expected: Can continue to move
+     */
+    float moveDelta = -1;
+    HandleDragStart(listItemIndex);
+    HandleDragUpdate(listItemIndex, -maxDistance);
+    HandleDragUpdate(listItemIndex, moveDelta);
+    HandleDragEnd(listItemIndex);
+    EXPECT_EQ(curState, SwipeActionState::EXPANDED);
+    OnFinishFunc onFinishCallBack;
+    listItemPattern->CloseSwipeAction(std::move(onFinishCallBack));
+    EXPECT_EQ(curState, SwipeActionState::COLLAPSED);
 }
 
 /**
@@ -3002,7 +3270,13 @@ HWTEST_F(ListTestNg, Event006, TestSize.Level1)
 HWTEST_F(ListTestNg, EventHub001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Run List GetDragExtraParams func.
+     * @tc.steps: step1. EXPECT_CALL DrawFrameNode, HandleOnItemDragStart will trigger it
+     */
+    auto mockDragWindow = MockDragWindow::CreateDragWindow("", 0, 0, 0, 0);
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), DrawFrameNode(_)).Times(2);
+
+    /**
+     * @tc.steps: step2. Run List GetDragExtraParams func.
      * @tc.expected: Would call pattern->GetItemIndexByPosition
      */
     auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
@@ -3016,7 +3290,7 @@ HWTEST_F(ListTestNg, EventHub001, TestSize.Level1)
     EXPECT_EQ(jsonStr, "{\"insertIndex\":2}");
 
     /**
-     * @tc.steps: step2. HandleOnItemDrag to end
+     * @tc.steps: step3. HandleOnItemDrag to end
      */
     GestureEvent info;
     info.SetGlobalPoint(Point(0, 250.f));
@@ -3390,9 +3664,9 @@ HWTEST_F(ListTestNg, PositionController001, TestSize.Level1)
     /**
      * @tc.steps: step2. Test ScrollBy
      */
-    controller->ScrollBy(ITEM_WIDTH, ITEM_HEIGHT, true);
+    controller->ScrollBy(ITEM_WIDTH, ITEM_HEIGHT, false);
     EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT));
-    controller->ScrollBy(ITEM_WIDTH, -ITEM_HEIGHT, true);
+    controller->ScrollBy(ITEM_WIDTH, -ITEM_HEIGHT, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 
     /**
@@ -3406,11 +3680,11 @@ HWTEST_F(ListTestNg, PositionController001, TestSize.Level1)
     /**
      * @tc.steps: step4. Test ScrollToEdge
      */
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(IsEqualTotalOffset((itemNumber - VIEW_LINE_NUMBER) * ITEM_HEIGHT));
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, true);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 
     /**
@@ -3471,9 +3745,9 @@ HWTEST_F(ListTestNg, PositionController002, TestSize.Level1)
     /**
      * @tc.steps: step2. Test ScrollBy
      */
-    controller->ScrollBy(ITEM_WIDTH, ITEM_HEIGHT, true);
+    controller->ScrollBy(ITEM_WIDTH, ITEM_HEIGHT, false);
     EXPECT_TRUE(IsEqualTotalOffset(ITEM_WIDTH));
-    controller->ScrollBy(-ITEM_WIDTH, ITEM_HEIGHT, true);
+    controller->ScrollBy(-ITEM_WIDTH, ITEM_HEIGHT, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 
     /**
@@ -3487,11 +3761,11 @@ HWTEST_F(ListTestNg, PositionController002, TestSize.Level1)
     /**
      * @tc.steps: step4. Test ScrollToEdge
      */
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(IsEqualTotalOffset((itemNumber - VIEW_LINE_NUMBER) * ITEM_WIDTH));
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, true);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, false);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 
     /**
@@ -4206,127 +4480,323 @@ HWTEST_F(ListTestNg, KeyEvent001, TestSize.Level1)
 
 /**
  * @tc.name: PaintMethod001
- * @tc.desc: Test List paint method
+ * @tc.desc: Test List paint method about UpdateContentModifier
  * @tc.type: FUNC
  */
 HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
 {
-    Create([](ListModelNG model) { model.SetChainAnimation(true); });
+    /**
+     * @tc.steps: step1. Not set divider
+     * @tc.expected: modifier dividerInfo_ has no value.
+     */
+    CreateWithItem([](ListModelNG model) {});
+    UpdateContentModifier();
+    auto dividerInfo = pattern_->listContentModifier_->dividerInfo_;
+    EXPECT_FALSE(dividerInfo.has_value());
 
-    RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
-    ASSERT_NE(paint, nullptr);
-    EXPECT_NE(pattern_->listContentModifier_, nullptr);
-    paint = pattern_->CreateNodePaintMethod();
-    EXPECT_NE(pattern_->listContentModifier_, nullptr);
+    /**
+     * @tc.steps: step2. Set chainAnimation and divider
+     * @tc.expected: modifier dividerInfo_ has no value.
+     */
+    V2::ItemDivider itemDivider = ITEM_DIVIDER;
+    CreateWithItem([itemDivider](ListModelNG model) {
+        model.SetDivider(itemDivider);
+        model.SetChainAnimation(true);
+    });
+    UpdateContentModifier();
+    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
+    EXPECT_FALSE(dividerInfo.has_value());
 
-    RefPtr<ListPaintMethod> listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
-    listPaint->UpdateContentModifier(&paintWrapper);
-    RSCanvas canvas;
-    listPaint->GetForegroundDrawFunction(&paintWrapper);
-    listPaint->PaintEdgeEffect(&paintWrapper, canvas);
-    SUCCEED();
+    /**
+     * @tc.steps: step3. Set divider strokeWidth less than zero
+     * @tc.expected: modifier dividerInfo_ has no value.
+     */
+    itemDivider = ITEM_DIVIDER;
+    itemDivider.strokeWidth = Dimension(-1);
+    CreateWithItem([itemDivider](ListModelNG model) {
+        model.SetDivider(itemDivider);
+    });
+    UpdateContentModifier();
+    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
+    EXPECT_FALSE(dividerInfo.has_value());
+
+    /**
+     * @tc.steps: step4. Set divider strokeWidth Unit as PERCENT
+     * @tc.expected: modifier dividerInfo_ has no value.
+     */
+    itemDivider = ITEM_DIVIDER;
+    itemDivider.strokeWidth = Dimension(STROKE_WIDTH, DimensionUnit::PERCENT);
+    CreateWithItem([itemDivider](ListModelNG model) {
+        model.SetDivider(itemDivider);
+    });
+    UpdateContentModifier();
+    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
+    EXPECT_FALSE(dividerInfo.has_value());
+
+    /**
+     * @tc.steps: step5. Not create item
+     * @tc.expected: modifier dividerInfo_ has no value.
+     */
+    itemDivider = ITEM_DIVIDER;
+    Create([itemDivider](ListModelNG model) {
+        model.SetDivider(itemDivider);
+    });
+    UpdateContentModifier();
+    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
+    EXPECT_FALSE(dividerInfo.has_value());
+
+    /**
+     * @tc.steps: step6. Set divider strokeWidth greater than contentSize(DEVICE_HEIGHT)
+     * @tc.expected: modifier dividerInfo_ has no value.
+     */
+    itemDivider = ITEM_DIVIDER;
+    itemDivider.strokeWidth = Dimension(DEVICE_HEIGHT + 1);
+    CreateWithItem([itemDivider](ListModelNG model) {
+        model.SetDivider(itemDivider);
+    });
+    UpdateContentModifier();
+    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
+    EXPECT_FALSE(dividerInfo.has_value());
+
+    /**
+     * @tc.steps: step7. Set divider startMargin + endMargin equal to crossSize(DEVICE_WIDTH)
+     * @tc.expected: modifier dividerInfo_ has no value.
+     */
+    itemDivider = ITEM_DIVIDER;
+    itemDivider.startMargin = Dimension(DEVICE_WIDTH / 2);
+    itemDivider.endMargin = Dimension(DEVICE_WIDTH / 2);
+    CreateWithItem([itemDivider](ListModelNG model) {
+        model.SetDivider(itemDivider);
+    });
+    UpdateContentModifier();
+    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
+    EXPECT_FALSE(dividerInfo.has_value());
+
+    /**
+     * @tc.steps: step8. Set divider startMargin + endMargin greater than crossSize(DEVICE_WIDTH)
+     * @tc.expected: modifier dividerInfo_ has value and reset margin to zero.
+     */
+    itemDivider = ITEM_DIVIDER;
+    itemDivider.startMargin = Dimension(DEVICE_WIDTH / 2);
+    itemDivider.endMargin = Dimension(DEVICE_WIDTH / 2 + 1);
+    CreateWithItem([itemDivider](ListModelNG model) {
+        model.SetDivider(itemDivider);
+    });
+    UpdateContentModifier();
+    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
+    EXPECT_TRUE(dividerInfo.has_value());
+    EXPECT_EQ(dividerInfo.value().startMargin, 0.f);
+    EXPECT_EQ(dividerInfo.value().endMargin, 0.f);
+
+    /**
+     * @tc.steps: step9. Set divider startMargin + endMargin less than crossSize(DEVICE_WIDTH)
+     * @tc.expected: modifier dividerInfo_ has value and margin not change
+     */
+    itemDivider = ITEM_DIVIDER;
+    CreateWithItem([itemDivider](ListModelNG model) {
+        model.SetDivider(itemDivider);
+    });
+    UpdateContentModifier();
+    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
+    EXPECT_TRUE(dividerInfo.has_value());
+    EXPECT_EQ(dividerInfo.value().startMargin, ITEM_DIVIDER.startMargin.ConvertToPx());
+    EXPECT_EQ(dividerInfo.value().endMargin, ITEM_DIVIDER.endMargin.ConvertToPx());
 }
 
 /**
  * @tc.name: PaintMethod002
- * @tc.desc: Test List paint method
+ * @tc.desc: Test List paint method about GetForegroundDrawFunction/PaintEdgeEffect
  * @tc.type: FUNC
  */
 HWTEST_F(ListTestNg, PaintMethod002, TestSize.Level1)
 {
-    Create([](ListModelNG model) {
-        model.SetScrollBar(Ace::DisplayMode::ON);
-        model.SetDivider(ITEM_DIVIDER);
-        CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
-        CreateItem(TOTAL_LINE_NUMBER);
-    });
-
-    auto scrollBar = pattern_->GetScrollBar();
-    scrollBar->SetScrollable(true);
-    scrollBar->normalWidth_ = Dimension(10);
-
+    /**
+     * @tc.steps: step1. Set EdgeEffect::FADE
+     */
+    CreateWithItem([](ListModelNG model) { model.SetEdgeEffect(EdgeEffect::FADE, false); });
     RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
     RefPtr<ListPaintMethod> listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
-    listPaint->SetTotalItemCount(10);
-
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
     RSCanvas canvas;
-    auto modifier = pattern_->listContentModifier_;
-    DrawingContext ctx = { canvas, 1, 1};
-    modifier->onDraw(ctx);
-
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(SizeF(100, 100));
-    auto renderContext = frameNode_->GetRenderContext();
-    renderContext->UpdateClipEdge(false);
-    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty_);
-    listPaint->UpdateContentModifier(&paintWrapper);
-    modifier->onDraw(ctx);
+    listPaint->GetForegroundDrawFunction(AceType::RawPtr(paintWrapper));
+    listPaint->PaintEdgeEffect(AceType::RawPtr(paintWrapper), canvas);
     SUCCEED();
 }
 
 /**
  * @tc.name: PaintMethod003
- * @tc.desc: Test List paint method
+ * @tc.desc: Test List paint method about UpdateOverlayModifier
  * @tc.type: FUNC
  */
 HWTEST_F(ListTestNg, PaintMethod003, TestSize.Level1)
 {
-    Create([](ListModelNG model) {
-        model.SetScrollBar(Ace::DisplayMode::ON);
-        model.SetDivider(ITEM_DIVIDER);
-        model.SetListDirection(Axis::HORIZONTAL);
-        model.SetLanes(2);
-        CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
-        CreateItem(TOTAL_LINE_NUMBER);
-    });
+    /**
+     * @tc.steps: step1. Test default
+     * @tc.expected: The displayMode is AUTO, has scrollbar and on the right
+     */
+    CreateWithItem([](ListModelNG model) {});
+    RefPtr<ListPaintMethod> paint = UpdateOverlayModifier();
+    auto scrollBarOverlayModifier = paint->scrollBarOverlayModifier_.Upgrade();
+    auto scrollBar = paint->scrollBar_.Upgrade();
+    EXPECT_NE(scrollBar, nullptr);
+    EXPECT_EQ(scrollBar->displayMode_, DisplayMode::AUTO);
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    EXPECT_EQ(scrollBarOverlayModifier->positionMode_, PositionMode::RIGHT);
 
-    RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
-    RefPtr<ListPaintMethod> listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(SizeF(100, 100));
-    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
-    listPaint->UpdateContentModifier(&paintWrapper);
-    RSCanvas canvas;
-    auto modifier = pattern_->listContentModifier_;
-    DrawingContext ctx = { canvas, 1, 1};
-    modifier->onDraw(ctx);
-    SUCCEED();
+    /**
+     * @tc.steps: step2. Update axis
+     * @tc.expected: The scrollbar and on the bottom
+     */
+    layoutProperty_->UpdateListDirection(Axis::HORIZONTAL);
+    pattern_->OnModifyDone();
+    RunMeasureAndLayout(frameNode_);
+    paint = UpdateOverlayModifier();
+    scrollBarOverlayModifier = paint->scrollBarOverlayModifier_.Upgrade();
+    scrollBar = paint->scrollBar_.Upgrade();
+    EXPECT_NE(scrollBar, nullptr);
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    EXPECT_EQ(scrollBarOverlayModifier->positionMode_, PositionMode::BOTTOM);
+
+    /**
+     * @tc.steps: step3. Set DisplayMode::OFF
+     * @tc.expected: Has no scrollbar
+     */
+    CreateWithItem([](ListModelNG model) { model.SetScrollBar(Ace::DisplayMode::OFF); });
+    paint = UpdateOverlayModifier();
+    scrollBarOverlayModifier = paint->scrollBarOverlayModifier_.Upgrade();
+    scrollBar = paint->scrollBar_.Upgrade();
+    EXPECT_EQ(scrollBar, nullptr);
+
+    /**
+     * @tc.steps: step4. Set DisplayMode::ON
+     * @tc.expected: Has scrollbar and on the right
+     */
+    CreateWithItem([](ListModelNG model) { model.SetScrollBar(Ace::DisplayMode::ON); });
+    paint = UpdateOverlayModifier();
+    scrollBarOverlayModifier = paint->scrollBarOverlayModifier_.Upgrade();
+    scrollBar = paint->scrollBar_.Upgrade();
+    EXPECT_NE(scrollBar, nullptr);
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    EXPECT_EQ(scrollBarOverlayModifier->positionMode_, PositionMode::RIGHT);
+
+    /**
+     * @tc.steps: step5. Has no item
+     * @tc.expected: UnScrollable, has no scrollbar
+     */
+    Create([](ListModelNG model) {});
+    paint = UpdateOverlayModifier();
+    scrollBarOverlayModifier = paint->scrollBarOverlayModifier_.Upgrade();
+    scrollBar = paint->scrollBar_.Upgrade();
+    EXPECT_NE(scrollBar, nullptr);
+    EXPECT_FALSE(scrollBar->NeedPaint());
+
+    /**
+     * @tc.steps: step6. Set HORIZONTAL direction
+     * @tc.expected: Has scrollbar and on the bottom
+     */
+    Create([](ListModelNG model) {
+        model.SetListDirection(Axis::HORIZONTAL);
+        CreateItem(TOTAL_LINE_NUMBER, Axis::HORIZONTAL);
+    });
+    paint = UpdateOverlayModifier();
+    scrollBarOverlayModifier = paint->scrollBarOverlayModifier_.Upgrade();
+    scrollBar = paint->scrollBar_.Upgrade();
+    EXPECT_NE(scrollBar, nullptr);
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    EXPECT_EQ(scrollBarOverlayModifier->positionMode_, PositionMode::BOTTOM);
 }
 
 /**
  * @tc.name: PaintMethod004
- * @tc.desc: Test ListItemGroup paint method
+ * @tc.desc: Test List paint method about PaintDivider
  * @tc.type: FUNC
  */
 HWTEST_F(ListTestNg, PaintMethod004, TestSize.Level1)
 {
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _)).Times(3);
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(15);
+    DrawingContext ctx = { canvas, 1, 1 };
+
+    /**
+     * @tc.steps: step1. Set divider
+     */
+    Create([](ListModelNG model) {
+        model.SetDivider(ITEM_DIVIDER);
+        CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+        CreateItem(TOTAL_LINE_NUMBER);
+    });
+    UpdateContentModifier();
+    pattern_->listContentModifier_->onDraw(ctx);
+
+    /**
+     * @tc.steps: step2. Set lanes greater than 1
+     */
+    Create([](ListModelNG model) {
+        model.SetLanes(2);
+        model.SetDivider(ITEM_DIVIDER);
+        CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+        CreateItem(TOTAL_LINE_NUMBER);
+    });
+    UpdateContentModifier();
+    pattern_->listContentModifier_->onDraw(ctx);
+
+    /**
+     * @tc.steps: step3. Set lanes greater than 1 and lastIsItemGroup
+     */
+    Create([](ListModelNG model) {
+        model.SetLanes(2);
+        model.SetDivider(ITEM_DIVIDER);
+        CreateItem(TOTAL_LINE_NUMBER);
+        CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    });
+    UpdateContentModifier();
+    pattern_->listContentModifier_->onDraw(ctx);
+}
+
+/**
+ * @tc.name: PaintMethod005
+ * @tc.desc: Test ListItemGroup paint method about PaintDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, PaintMethod005, TestSize.Level1)
+{
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(6);
+
     Create([](ListModelNG model) {
         CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
     });
-
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
     auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
-
     RefPtr<NodePaintMethod> paint = groupPattern->CreateNodePaintMethod();
     RefPtr<ListItemGroupPaintMethod> groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paint);
+    auto paintWrapper = groupFrameNode->CreatePaintWrapper();
+    groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
 
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
-    RSCanvas canvas;
-    groupPaint->PaintDivider(&paintWrapper, canvas);
+    groupPaint->divider_.strokeWidth = Dimension(-1);
+    groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
+
+    groupPaint->divider_.strokeWidth = Dimension(STROKE_WIDTH, DimensionUnit::PERCENT);
+    groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
 
     groupPaint->divider_ = ITEM_DIVIDER;
-    groupPaint->PaintDivider(&paintWrapper, canvas);
+    groupPaint->divider_.startMargin = Dimension(DEVICE_WIDTH / 2);
+    groupPaint->divider_.endMargin = Dimension(DEVICE_WIDTH / 2);
+    groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
 
-    groupPaint->lanes_ = 2;
-    groupPaint->PaintDivider(&paintWrapper, canvas);
-
-    groupPaint->vertical_ = true;
-    groupPaint->PaintDivider(&paintWrapper, canvas);
-
-    EXPECT_TRUE(true);
+    groupPaint->divider_ = ITEM_DIVIDER;
+    groupPaint->divider_.startMargin = Dimension(DEVICE_WIDTH / 2);
+    groupPaint->divider_.endMargin = Dimension(DEVICE_WIDTH / 2 + 1);
+    groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
 }
 
 /**
@@ -5001,7 +5471,7 @@ HWTEST_F(ListTestNg, ScrollToIndex005, TestSize.Level1)
      */
     index = ListLayoutAlgorithm::LAST_ITEM;
     indexInGroup = 3;
-    EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::START, 600.f + 100.f / 3));
+    EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::START, 400.f));
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::CENTER, 700.f));
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::END, 1200.f));
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::AUTO, 1200.f));
@@ -5251,7 +5721,7 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
  */
 HWTEST_F(ListTestNg, SetEdgeEffectCallback001, TestSize.Level1)
 {
-    CreateWithItem([](ListModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING); });
+    CreateWithItem([](ListModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, false); });
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 0);
     EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), 0);
@@ -5261,7 +5731,7 @@ HWTEST_F(ListTestNg, SetEdgeEffectCallback001, TestSize.Level1)
 
     CreateWithItem([](ListModelNG model) {
         model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
-        model.SetEdgeEffect(EdgeEffect::SPRING);
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
     });
     scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 350.0);
@@ -5272,7 +5742,7 @@ HWTEST_F(ListTestNg, SetEdgeEffectCallback001, TestSize.Level1)
 
     Create([](ListModelNG model) {
         model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
-        model.SetEdgeEffect(EdgeEffect::SPRING);
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
     });
     scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 0);
@@ -5751,5 +6221,65 @@ HWTEST_F(ListTestNg, ListPattern_GetItemRectInGroup001, TestSize.Level1)
      */
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2),
         Rect(0, ITEM_HEIGHT * 2, FILL_LENGTH.Value() * DEVICE_WIDTH, ITEM_HEIGHT * GROUP_LINE_NUMBER)));
+}
+
+/**
+ * @tc.name: EdgeEffectOption001
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, EdgeEffectOption001, TestSize.Level1)
+{
+    Create([](ListModelNG model) {
+        CreateItem(TOTAL_LINE_NUMBER);
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    });
+    EXPECT_FALSE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
+}
+
+/**
+ * @tc.name: EdgeEffectOption002
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, EdgeEffectOption002, TestSize.Level1)
+{
+    Create([](ListModelNG model) {
+        CreateItem(TOTAL_LINE_NUMBER);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    });
+    EXPECT_TRUE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
+}
+
+/**
+ * @tc.name: EdgeEffectOption003
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, EdgeEffectOption003, TestSize.Level1)
+{
+    Create([](ListModelNG model) {
+        CreateItem(1); // 1 is item count.
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    });
+    EXPECT_FALSE(pattern_->GetAlwaysEnabled());
+    EXPECT_FALSE(pattern_->scrollable_);
+}
+
+/**
+ * @tc.name: EdgeEffectOption004
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, EdgeEffectOption004, TestSize.Level1)
+{
+    Create([](ListModelNG model) {
+        CreateItem(1); // 1 is item count.
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    });
+    EXPECT_TRUE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
 }
 } // namespace OHOS::Ace::NG

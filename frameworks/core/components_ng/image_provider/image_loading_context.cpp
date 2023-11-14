@@ -26,6 +26,9 @@
 #include "core/image/image_file_cache.h"
 #include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -50,13 +53,13 @@ RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
     rsData = ImageLoader::QueryImageDataFromImageCache(src);
     if (rsData) {
         dataHit = true;
-        return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&rsData));
+        return AceType::MakeRefPtr<NG::DrawingImageData>(rsData);
     }
     auto drawingData = ImageLoader::LoadDataFromCachedFile(src.GetSrc());
     if (drawingData) {
         auto data = std::make_shared<RSData>();
         data->BuildWithCopy(drawingData->data(), drawingData->size());
-        return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&data));
+        return AceType::MakeRefPtr<NG::DrawingImageData>(data);
     }
 #endif
     return nullptr;
@@ -109,7 +112,7 @@ SizeF ImageLoadingContext::CalculateTargetSize(const SizeF& srcSize, const SizeF
 
 void ImageLoadingContext::OnUnloaded()
 {
-    LOGD("ImageLoadingContext: OnUnloaded, reset params");
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "ImageLoadingContext: OnUnloaded, reset params");
     imageObj_ = nullptr;
     canvasImage_ = nullptr;
     srcRect_ = RectF();
@@ -188,7 +191,7 @@ void ImageLoadingContext::DownloadImage()
     if (NotifyReadyIfCacheHit()) {
         return;
     }
-    downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](const std::vector<uint8_t>& imageData) {
+    downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](const std::string&& imageData) {
         auto ctx = weak.Upgrade();
         CHECK_NULL_VOID(ctx);
         auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
@@ -244,8 +247,8 @@ void ImageLoadingContext::OnMakeCanvasImage()
         }
     }
 
-    LOGD("start MakeCanvasImage: %{public}s, size = %{public}s", imageObj_->GetSourceInfo().ToString().c_str(),
-        targetSize.ToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "start MakeCanvasImage: %{public}s, size = %{public}s",
+        imageObj_->GetSourceInfo().ToString().c_str(), targetSize.ToString().c_str());
     // step4: [MakeCanvasImage] according to [targetSize]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
     imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
@@ -267,7 +270,8 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage
 void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
     errorMsg_ = errorMsg;
-    LOGW("Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(), errorMsg.c_str());
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(),
+        errorMsg.c_str());
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
 }
 
@@ -396,7 +400,8 @@ std::optional<SizeF> ImageLoadingContext::GetSourceSize() const
 {
     CHECK_NULL_RETURN(sourceSizePtr_, std::nullopt);
     if (sourceSizePtr_->Width() <= 0.0 || sourceSizePtr_->Height() <= 0.0) {
-        LOGW("Property SourceSize is at least One invalid! Use the Image Size to calculate resize target");
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Property SourceSize is at least One invalid! Use the Image Size to calculate resize target");
         return std::nullopt;
     }
     return { *sourceSizePtr_ };

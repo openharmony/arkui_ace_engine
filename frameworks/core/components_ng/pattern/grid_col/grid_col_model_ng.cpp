@@ -37,6 +37,7 @@ void GridColModelNG::Create(const RefPtr<V2::GridContainerSize>& span, const Ref
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::GRID_COL_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::GRID_COL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridColLayoutPattern>(); });
     stack->Push(frameNode);

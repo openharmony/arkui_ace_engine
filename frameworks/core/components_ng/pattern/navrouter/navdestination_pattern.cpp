@@ -49,6 +49,9 @@ void BuildTitle(const RefPtr<NavDestinationGroupNode>& navDestinationNode, const
     }
     if (navDestinationNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
         titleBarNode->RemoveChild(titleBarNode->GetTitle());
+        auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+        CHECK_NULL_VOID(titleBarLayoutProperty);
+        titleBarLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
     titleBarNode->SetTitle(navDestinationNode->GetTitle());
     titleBarNode->AddChild(titleBarNode->GetTitle());

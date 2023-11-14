@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 
 #include <optional>
+#include <vector>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
@@ -24,6 +25,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -49,6 +51,14 @@ public:
     {
         return false;
     }
+
+    bool ShouldDelayChildPressedState() const override
+    {
+        return true;
+    }
+
+    void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) override;
+    void FireAndCleanScrollingListener() override;
 
     bool UsResRegion() override
     {
@@ -246,6 +256,21 @@ public:
     }
 
     void UpdateCurrentOffset(float offset);
+    /**
+     * @brief Checks if the given offset exceeds the bounds of the swiper container and triggers overScroll.
+     *
+     * @param offset The offset to check.
+     * @return True if overScroll is triggered, false otherwise.
+     */
+    bool CheckOverScroll(float offset);
+
+    /**
+     * @brief Applies spring effect to the over-scrolling of the swiper.
+     *
+     * @param offset The offset of the swiper.
+     * @return true if the spring effect is applied successfully, false otherwise.
+     */
+    bool SpringOverScroll(float offset);
 
     void CheckMarkDirtyNodeForRenderIndicator(float additionalOffset = 0.0f);
 
@@ -565,6 +590,7 @@ private:
     void BeforeCreateLayoutWrapper() override;
 
     void SetLazyLoadFeature(bool useLazyLoad) const;
+    void SetLazyForEachLongPredict(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
     int32_t ComputeNextIndexByVelocity(float velocity) const;
     void UpdateCurrentIndex(int32_t index);
@@ -579,6 +605,7 @@ private:
     void MarkDirtyNodeSelf();
     void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
     int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
+    void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
 
     /**
      * @brief Checks if the animation is currently running.
@@ -595,6 +622,14 @@ private:
     {
         return GetDirection();
     }
+
+    /**
+     * @brief Closes gap to the edge, called before Swiper transfers extra offset to parent/child to ensure that Swiper
+     * actually reaches the edge.
+     *
+     * @param offset The scroll offset from DragUpdate.
+     */
+    void CloseTheGap(float offset);
 
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
     ScrollResult HandleScrollSelfFirst(float offset, int32_t source, NestedState state);
@@ -717,6 +752,7 @@ private:
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
 
     WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
+    std::vector<RefPtr<ScrollingListener>> scrollingListener_;
 };
 } // namespace OHOS::Ace::NG
 

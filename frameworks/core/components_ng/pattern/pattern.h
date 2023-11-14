@@ -29,6 +29,10 @@
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
 
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+}
+
 namespace OHOS::Ace::NG {
 struct DirtySwapConfig {
     bool frameSizeChange = false;
@@ -37,6 +41,25 @@ struct DirtySwapConfig {
     bool contentOffsetChange = false;
     bool skipMeasure = false;
     bool skipLayout = false;
+};
+
+class ScrollingListener : public AceType {
+    DECLARE_ACE_TYPE(ScrollingListener, AceType);
+
+public:
+    explicit ScrollingListener(std::function<void()>&& callback) : callback_(std::move(callback)) {}
+
+    ~ScrollingListener() override = default;
+
+    void NotifyScrollingEvent()
+    {
+        if (callback_) {
+            callback_();
+        }
+    }
+
+private:
+    std::function<void()> callback_;
 };
 
 // Pattern is the base class for different measure, layout and paint behavior.
@@ -200,6 +223,8 @@ public:
     {
         return true;
     }
+
+    virtual void UpdateScrollOffset(SizeF /* frameSize */) {}
 
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(
@@ -372,6 +397,33 @@ public:
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
     virtual void OnDirectionOrDpiConfigurationUpdate() {}
+
+    virtual bool ShouldDelayChildPressedState() const
+    {
+        return false;
+    }
+
+    virtual void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) {}
+    virtual void FireAndCleanScrollingListener() {}
+
+    virtual int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
+    {
+        return -1;
+    }
+    
+    virtual void SearchExtensionElementInfoByAccessibilityId(int32_t elementId, int32_t mode,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {}
+    virtual void SearchElementInfosByText(int32_t elementId, const std::string& text,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {}
+    virtual void FindFocusedElementInfo(int32_t elementId, int32_t focusType,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
+    virtual void FocusMoveSearch(int32_t elementId, int32_t direction,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
+
+    virtual int32_t GetUiExtensionId()
+    {
+        return -1;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}

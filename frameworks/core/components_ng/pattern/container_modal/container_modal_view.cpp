@@ -67,8 +67,10 @@ float ContainerModalView::baseScale = 1.0f;
 
 RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
 {
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ACE_SCOPED_TRACE("Create[ContainerModal][self:%d]", nodeId);
     auto containerModalNode = FrameNode::CreateFrameNode(
-        "ContainerModal", ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ContainerModalPattern>());
+        "ContainerModal", nodeId, MakeRefPtr<ContainerModalPattern>());
     containerModalNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto stack = FrameNode::CreateFrameNode(
         V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StackPattern>());

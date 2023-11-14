@@ -452,11 +452,6 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     if (ifNeedInit_) {
         RangeCalculation(hostNode, navigationLayoutProperty);
-    } else {
-        auto parentSize = CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
-        auto navBarWidthValue = navigationLayoutProperty->GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH);
-        auto navBarWidth = navBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
-        realNavBarWidth_ = navBarWidth;
     }
     if (size.Width() == 0.0f) {
         return;

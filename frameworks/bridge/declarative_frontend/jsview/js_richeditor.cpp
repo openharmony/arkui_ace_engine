@@ -86,6 +86,10 @@ std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
             length.Reset();
         }
         marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
+    } else {
+        CalcDimension length;
+        length.Reset();
+        marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
     }
     return marginProp;
 }
@@ -93,10 +97,15 @@ std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
 std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args)
 {
     std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
+    CalcDimension radiusDim;
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        radiusDim.Reset();
+        NG::BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(radiusDim);
+        borderRadius.multiValued = false;
+        prop = borderRadius;
         return prop;
     }
-    CalcDimension radiusDim;
     if (JSViewAbstract::ParseJsDimensionVp(args, radiusDim)) {
         if (radiusDim.Unit() == DimensionUnit::PERCENT) {
             radiusDim.Reset();
@@ -505,7 +514,7 @@ void JSRichEditor::SetCopyOptions(const JSCallbackInfo& info)
 
 void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
 {
-    RichEditorType editorType = RichEditorType::TEXT;
+    RichEditorType editorType = RichEditorType::NONE;
     if (info.Length() >= 1 && info[0]->IsNumber()) {
         auto spanType = info[0]->ToNumber<int32_t>();
         editorType = static_cast<RichEditorType>(spanType);
@@ -916,6 +925,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
         JSRef<JSObject> styleObject = JSRef<JSObject>::Cast(styleObj);
         if (!styleObject->IsUndefined()) {
             auto pipelineContext = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
             auto theme = pipelineContext->GetTheme<TextTheme>();
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsTextStyle(styleObject, style, updateSpanStyle_);
@@ -1175,6 +1185,7 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
 
     auto [start, end] = ParseRange(jsObject);
     auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     ImageSpanAttribute imageStyle;
@@ -1289,6 +1300,7 @@ void JSRichEditorController::SetTypingStyle(const JSCallbackInfo& info)
         return;
     }
     auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     JSRef<JSObject> richEditorTextStyle = JSRef<JSObject>::Cast(info[0]);

@@ -49,62 +49,25 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            InitializeTextStyles(theme, themeConstants);
-            theme->popupDecoration_ = AceType::MakeRefPtr<Decoration>();
-            theme->popupDecoration_->SetBackgroundColor(themeConstants->GetColor(THEME_PICKER_BACK_COLOR));
-            theme->popupDecoration_->SetBorderRadius(Radius(themeConstants->GetDimension(THEME_PICKER_POPUP_RADIUS)));
-            theme->popupEdge_.SetLeft(themeConstants->GetDimension(THEME_PICKER_POPUP_PADDING));
-            theme->popupEdge_.SetTop(themeConstants->GetDimension(THEME_PICKER_POPUP_PADDING));
-            theme->popupEdge_.SetRight(themeConstants->GetDimension(THEME_PICKER_POPUP_PADDING));
-            theme->popupEdge_.SetBottom(themeConstants->GetDimension(THEME_PICKER_POPUP_PADDING_BOTTOM));
-            auto showOptionCount = themeConstants->GetInt(THEME_PICKER_SHOW_OPTION_COUNT);
-            theme->showOptionCount_ =
-                showOptionCount < 0 ? theme->showOptionCount_ : static_cast<uint32_t>(showOptionCount);
-            theme->showButtons_ = static_cast<bool>(themeConstants->GetInt(THEME_PICKER_SHOW_BUTTONS));
-            theme->focusColor_ = themeConstants->GetColor(THEME_PICKER_FOCUS_COLOR);
-            theme->focusRadius_ = Radius(themeConstants->GetDimension(THEME_PICKER_FOCUS_RADIUS));
-            theme->selectedOptionSize_ = Size(themeConstants->GetDouble(THEME_PICKER_OPTION_WIDTH),
-                themeConstants->GetDouble(THEME_PICKER_SELECT_OPTION_HEIGHT));
-            theme->normalOptionSize_ = Size(themeConstants->GetDouble(THEME_PICKER_OPTION_WIDTH),
-                themeConstants->GetDouble(THEME_PICKER_NORMAL_OPTION_HEIGHT));
-            theme->optionPadding_ = themeConstants->GetDouble(THEME_PICKER_OPTION_PADDING);
+
+            auto themeStyle = themeConstants->GetThemeStyle();
+            if (!themeStyle) {
+                return theme;
+            }
+
+            InitializeTextStyles(theme, themeStyle);
             theme->optionSizeUnit_ = DimensionUnit::VP;
-            theme->jumpInterval_ = themeConstants->GetDimension(THEME_PICKER_JUMP_INTERVAL);
-            theme->columnIntervalMargin_ = themeConstants->GetDimension(THEME_PICKER_COLUMN_MARGIN);
-            theme->selectedOptionDecoration_ = AceType::MakeRefPtr<Decoration>();
-            theme->selectedOptionDecoration_->SetBackgroundColor(
-                themeConstants->GetColor(THEME_PICKER_SELECT_OPTION_BACK_COLOR));
-            theme->selectedOptionDecoration_->SetBorderRadius(
-                Radius(themeConstants->GetDimension(THEME_PICKER_SELECT_OPTION_RADIUS)));
-            theme->focusOptionDecoration_ = AceType::MakeRefPtr<Decoration>();
-            theme->focusOptionDecoration_->SetBackgroundColor(
-                themeConstants->GetColor(THEME_PICKER_FOCUS_OPTION_BACK_COLOR));
-            theme->focusOptionDecoration_->SetBorderRadius(
-                Radius(themeConstants->GetDimension(THEME_PICKER_FOCUS_OPTION_RADIUS)));
             theme->lunarWidth_ = Dimension(36.0, DimensionUnit::VP);  // this width do not need setting by outer.
             theme->lunarHeight_ = Dimension(18.0, DimensionUnit::VP); // this height do not need setting by outer.
-            theme->buttonWidth_ = themeConstants->GetDimension(THEME_PICKER_BUTTON_WIDTH);
-            theme->buttonHeight_ = themeConstants->GetDimension(THEME_PICKER_BUTTON_HEIGHT);
-            theme->buttonTopPadding_ = themeConstants->GetDimension(THEME_PICKER_BUTTON_TOP_PADDING);
-            theme->titleBottomPadding_ = themeConstants->GetDimension(THEME_PICKER_TITLE_BOTTOM_PADDING);
-            theme->popupOutDecoration_ = AceType::MakeRefPtr<Decoration>();
-            theme->popupOutDecoration_->SetBackgroundColor(themeConstants->GetColor(THEME_PICKER_DIALOG_MASK_COLOR));
-            auto timeSplitter = themeConstants->GetInt(THEME_PICKER_TIME_SPLITTER);
-            theme->timeSplitter_ = timeSplitter < 0 ? theme->timeSplitter_ : static_cast<uint32_t>(timeSplitter);
             theme->rotateInterval_ = 15.0; // when rotate 15.0 angle handle scroll of picker column.
             theme->dividerThickness_ = DIVIDER_THICKNESS;
-            theme->dividerSpacing_ = themeConstants->GetDimension(THEME_PICKER_SELECT_DIVIDER_SPACING);
-            theme->dividerColor_ = themeConstants->GetColor(THEME_PICKER_SELECT_DIVIDER_COLOR);
-            theme->gradientHeight_ = themeConstants->GetDimension(THEME_PICKER_GRADIENT_HEIGHT);
-            theme->columnFixedWidth_ = themeConstants->GetDimension(THEME_PICKER_COLUMN_FIXED_WIDTH);
-            theme->pressColor_ = themeConstants->GetColor(THEME_PICKER_PRESS_COLOR);
-            Parse(themeConstants->GetThemeStyle(), theme);
+            Parse(themeStyle, theme);
             return theme;
         }
 
         void Parse(const RefPtr<ThemeStyle>& style, const RefPtr<PickerTheme>& theme) const
         {
-            if (!style || !theme || !theme->popupDecoration_) {
+            if (!style || !theme) {
                 return;
             }
             auto pattern = style->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
@@ -112,6 +75,64 @@ public:
                 LOGE("Pattern of picker is null, please check!");
                 return;
             }
+
+            theme->popupDecoration_ = AceType::MakeRefPtr<Decoration>();
+            if (!theme->popupDecoration_) {
+                return;
+            }
+            theme->popupDecoration_->SetBackgroundColor(pattern->GetAttr<Color>("popup_bg_color", Color()));
+            theme->popupDecoration_->SetBorderRadius(
+                Radius(pattern->GetAttr<Dimension>("picker_popup_radius", 0.0_vp)));
+            theme->popupEdge_.SetLeft(pattern->GetAttr<Dimension>("picker_popup_padding", 0.0_vp));
+            theme->popupEdge_.SetTop(pattern->GetAttr<Dimension>("picker_popup_padding", 0.0_vp));
+            theme->popupEdge_.SetRight(pattern->GetAttr<Dimension>("picker_popup_padding", 0.0_vp));
+            theme->popupEdge_.SetBottom(pattern->GetAttr<Dimension>("picker_popup_padding_bottom", 0.0_vp));
+            auto showOptionCount = static_cast<int32_t>(pattern->GetAttr<double>("picker_show_option_count", 0.0));
+            theme->showOptionCount_ =
+                showOptionCount < 0 ? theme->showOptionCount_ : static_cast<uint32_t>(showOptionCount);
+            theme->showButtons_ = static_cast<bool>(pattern->GetAttr<double>("picker_show_buttons", 0.0));
+            theme->focusColor_ = pattern->GetAttr<Color>("picker_focus_color", Color());
+            theme->focusRadius_ = Radius(pattern->GetAttr<Dimension>("picker_focus_radius", 0.0_vp));
+            theme->selectedOptionSize_ = Size(pattern->GetAttr<double>("picker_option_width", 0.0),
+                pattern->GetAttr<double>("picker_select_option_height", 0.0));
+            theme->normalOptionSize_ = Size(pattern->GetAttr<double>("picker_option_width", 0.0),
+                pattern->GetAttr<double>("picker_normal_option_height", 0.0));
+            theme->optionPadding_ = pattern->GetAttr<double>("picker_option_padding", 0.0);
+            theme->jumpInterval_ = pattern->GetAttr<Dimension>("picker_jump_interval", 0.0_vp);
+            theme->columnIntervalMargin_ = pattern->GetAttr<Dimension>("picker_column_margin", 0.0_vp);
+            theme->selectedOptionDecoration_ = AceType::MakeRefPtr<Decoration>();
+            if (!theme->selectedOptionDecoration_) {
+                return;
+            }
+            theme->selectedOptionDecoration_->SetBackgroundColor(
+                pattern->GetAttr<Color>("picker_select_option_back_color", Color()));
+            theme->selectedOptionDecoration_->SetBorderRadius(
+                Radius(pattern->GetAttr<Dimension>("picker_select_option_radius", 0.0_vp)));
+            theme->focusOptionDecoration_ = AceType::MakeRefPtr<Decoration>();
+            if (!theme->focusOptionDecoration_) {
+                return;
+            }
+            theme->focusOptionDecoration_->SetBackgroundColor(
+                pattern->GetAttr<Color>("picker_focus_option_back_color", Color()));
+            theme->focusOptionDecoration_->SetBorderRadius(
+                Radius(pattern->GetAttr<Dimension>("picker_focus_option_radius", 0.0_vp)));
+            theme->buttonWidth_ = pattern->GetAttr<Dimension>("picker_button_width", 0.0_vp);
+            theme->buttonHeight_ = pattern->GetAttr<Dimension>("picker_button_height", 0.0_vp);
+            theme->buttonTopPadding_ = pattern->GetAttr<Dimension>("picker_button_top_padding", 0.0_vp);
+            theme->titleBottomPadding_ = pattern->GetAttr<Dimension>("picker_title_bottom_padding", 0.0_vp);
+            theme->popupOutDecoration_ = AceType::MakeRefPtr<Decoration>();
+            if (!theme->popupOutDecoration_) {
+                return;
+            }
+            theme->popupOutDecoration_->SetBackgroundColor(
+                pattern->GetAttr<Color>("picker_dialog_mask_color", Color()));
+            auto timeSplitter = static_cast<int32_t>(pattern->GetAttr<double>("picker_time_splitter", 0.0));
+            theme->timeSplitter_ = timeSplitter < 0 ? theme->timeSplitter_ : static_cast<uint32_t>(timeSplitter);
+            theme->dividerSpacing_ = pattern->GetAttr<Dimension>("picker_select_divider_spacing", 0.0_vp);
+            theme->dividerColor_ = pattern->GetAttr<Color>("picker_select_divider_color", Color());
+            theme->gradientHeight_ = pattern->GetAttr<Dimension>("picker_select_gradient_height", 0.0_vp);
+            theme->columnFixedWidth_ = pattern->GetAttr<Dimension>("picker_column_fixed_width", 0.0_vp);
+            theme->pressColor_ = pattern->GetAttr<Color>("picker_press_color", Color());
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, theme->hoverColor_);
             theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, theme->pressColor_);
             theme->paddingHorizontal_ = pattern->GetAttr<Dimension>("padding_horizontal", 24.0_vp);
@@ -138,67 +159,68 @@ public:
         }
 
     private:
-        void InitializeButtonTextStyles(const RefPtr<PickerTheme>& theme,
-            const RefPtr<ThemeConstants>& themeConstants) const
+        void InitializeButtonTextStyles(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
         {
-            theme->buttonStyle_.SetFontSize(themeConstants->GetDimension(THEME_PICKER_BUTTON_FONT_SIZE));
-            theme->buttonStyle_.SetTextColor(themeConstants->GetColor(THEME_PICKER_BUTTON_TEXT_COLOR));
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
+            if (pattern) {
+                theme->buttonStyle_.SetFontSize(pattern->GetAttr<Dimension>("picker_button_font_size", 0.0_fp));
+                theme->buttonStyle_.SetTextColor(pattern->GetAttr<Color>("picker_button_text_color", Color()));
+            }
         }
 
-        void InitializeTitleTextStyles(const RefPtr<PickerTheme>& theme,
-            const RefPtr<ThemeConstants>& themeConstants) const
+        void InitializeTitleTextStyles(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
         {
-            theme->titleStyle_.SetFontSize(themeConstants->GetDimension(THEME_PICKER_TITLE_FONT_SIZE));
-            theme->titleStyle_.SetTextColor(themeConstants->GetColor(THEME_PICKER_TITLE_TEXT_COLOR));
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
+            if (pattern) {
+                theme->titleStyle_.SetFontSize(pattern->GetAttr<Dimension>("picker_title_font_size", 0.0_fp));
+                theme->titleStyle_.SetTextColor(pattern->GetAttr<Color>("picker_title_text_color", Color()));
+            }
             theme->titleStyle_.SetFontWeight(FontWeight::W500);
             theme->titleStyle_.SetMaxLines(1);
             theme->titleStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
         }
 
-        void InitializeItemTextStyles(const RefPtr<PickerTheme>& theme,
-            const RefPtr<ThemeConstants>& themeConstants) const
+        void InitializeItemTextStyles(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
         {
-            auto themeStyle = themeConstants->GetThemeStyle();
-            if (themeStyle) {
-                auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
-                if (pattern) {
-                    theme->selectedOptionStyle_.SetTextColor(
-                        pattern->GetAttr<Color>("selected_text_color", Color(0x007DFF)));
-                    theme->selectedOptionStyle_.SetFontSize(
-                        pattern->GetAttr<Dimension>("selected_text_size", 20.0_vp));
-                    theme->selectedOptionStyle_.SetFontWeight(FontWeight::MEDIUM);
-                    theme->selectedOptionStyle_.SetAdaptTextSize(theme->selectedOptionStyle_.GetFontSize(),
-                        themeConstants->GetDimension(THEME_PICKER_SELECT_OPTION_MIN_FONT_SIZE));
-                    theme->selectedOptionStyle_.SetMaxLines(1);
-                    theme->selectedOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
+            if (pattern) {
+                theme->selectedOptionStyle_.SetTextColor(
+                    pattern->GetAttr<Color>("selected_text_color", Color(0x007DFF)));
+                theme->selectedOptionStyle_.SetFontSize(
+                    pattern->GetAttr<Dimension>("selected_text_size", 20.0_vp));
+                theme->selectedOptionStyle_.SetFontWeight(FontWeight::MEDIUM);
+                theme->selectedOptionStyle_.SetAdaptTextSize(theme->selectedOptionStyle_.GetFontSize(),
+                    pattern->GetAttr<Dimension>("picker_select_option_min_font_size", 0.0_fp));
+                theme->selectedOptionStyle_.SetMaxLines(1);
+                theme->selectedOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
 
-                    theme->normalOptionStyle_.SetTextColor(
-                        pattern->GetAttr<Color>("text_color", Color(0xff182431)));
-                    theme->normalOptionStyle_.SetFontSize(
-                        pattern->GetAttr<Dimension>("text_size", 16.0_fp));
-                    theme->normalOptionStyle_.SetFontWeight(FontWeight::REGULAR);
-                    theme->normalOptionStyle_.SetAdaptTextSize(theme->normalOptionStyle_.GetFontSize(),
-                        themeConstants->GetDimension(THEME_PICKER_NORMAL_OPTION_MIN_FONT_SIZE));
-                    theme->normalOptionStyle_.SetMaxLines(1);
-                    theme->normalOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
+                theme->normalOptionStyle_.SetTextColor(
+                    pattern->GetAttr<Color>("text_color", Color(0xff182431)));
+                theme->normalOptionStyle_.SetFontSize(
+                    pattern->GetAttr<Dimension>("text_size", 16.0_fp));
+                theme->normalOptionStyle_.SetFontWeight(FontWeight::REGULAR);
+                theme->normalOptionStyle_.SetAdaptTextSize(theme->normalOptionStyle_.GetFontSize(),
+                    pattern->GetAttr<Dimension>("picker_normal_option_min_font_size", 0.0_fp));
+                theme->normalOptionStyle_.SetMaxLines(1);
+                theme->normalOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
 
-                    theme->disappearOptionStyle_.SetTextColor(
-                        pattern->GetAttr<Color>("disappear_text_color", Color(0xff182431)));
-                    theme->disappearOptionStyle_.SetFontSize(
-                        pattern->GetAttr<Dimension>("disappear_text_size", 14.0_fp));
-                    theme->disappearOptionStyle_.SetFontWeight(FontWeight::REGULAR);
-                    theme->disappearOptionStyle_.SetAdaptTextSize(theme->disappearOptionStyle_.GetFontSize(),
-                        themeConstants->GetDimension(THEME_PICKER_NORMAL_OPTION_MIN_FONT_SIZE));
-                    theme->disappearOptionStyle_.SetMaxLines(1);
-                    theme->disappearOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
-                }
+                theme->disappearOptionStyle_.SetTextColor(
+                    pattern->GetAttr<Color>("disappear_text_color", Color(0xff182431)));
+                theme->disappearOptionStyle_.SetFontSize(
+                    pattern->GetAttr<Dimension>("disappear_text_size", 14.0_fp));
+                theme->disappearOptionStyle_.SetFontWeight(FontWeight::REGULAR);
+                theme->disappearOptionStyle_.SetAdaptTextSize(theme->disappearOptionStyle_.GetFontSize(),
+                    pattern->GetAttr<Dimension>("picker_normal_option_min_font_size", 0.0_fp));
+                theme->disappearOptionStyle_.SetMaxLines(1);
+                theme->disappearOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
             }
-            theme->focusOptionStyle_.SetFontSize(themeConstants->GetDimension(THEME_PICKER_FOCUS_OPTION_FONT_SIZE));
-            theme->focusOptionStyle_.SetTextColor(themeConstants->GetColor(THEME_PICKER_FOCUS_OPTION_TEXT_COLOR));
+
+            theme->focusOptionStyle_.SetFontSize(pattern->GetAttr<Dimension>("picker_focus_option_font_size", 0.0_fp));
+            theme->focusOptionStyle_.SetTextColor(pattern->GetAttr<Color>("picker_focus_option_text_color", Color()));
             theme->focusOptionStyle_.SetFontWeight(
-                FontWeight(themeConstants->GetInt(THEME_PICKER_FOCUS_OPTION_WEIGHT)));
+                FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("picker_focus_option_weight", 0.0))));
             theme->focusOptionStyle_.SetAdaptTextSize(theme->focusOptionStyle_.GetFontSize(),
-                themeConstants->GetDimension(THEME_PICKER_SELECT_OPTION_MIN_FONT_SIZE));
+                pattern->GetAttr<Dimension>("picker_select_option_min_font_size", 0.0_fp));
             theme->focusOptionStyle_.SetMaxLines(1);
             theme->focusOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
 
@@ -207,12 +229,11 @@ public:
             }
         }
 
-        void InitializeTextStyles(const RefPtr<PickerTheme>& theme,
-            const RefPtr<ThemeConstants>& themeConstants) const
+        void InitializeTextStyles(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
         {
-            InitializeItemTextStyles(theme, themeConstants);
-            InitializeTitleTextStyles(theme, themeConstants);
-            InitializeButtonTextStyles(theme, themeConstants);
+            InitializeItemTextStyles(theme, themeStyle);
+            InitializeTitleTextStyles(theme, themeStyle);
+            InitializeButtonTextStyles(theme, themeStyle);
         }
     };
 

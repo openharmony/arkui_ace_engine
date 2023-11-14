@@ -31,9 +31,11 @@ using JsProxyCallback = std::function<void()>;
 
 class ACE_EXPORT WebModelNG : public OHOS::Ace::WebModel {
 public:
-    void Create(const std::string& src, const RefPtr<WebController>& webController) override;
+    void Create(const std::string& src, const RefPtr<WebController>& webController,
+        WebType type = WebType::SURFACE) override;
     void Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
-        std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup) override;
+        std::function<void(const std::string&)>&& setHapPathCallback,
+        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE) override;
     void SetCustomScheme(const std::string& cmdLine) override;
     void SetOnCommonDialog(std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType) override;
     void SetOnConsoleLog(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
@@ -143,8 +145,9 @@ public:
     void SetAudioResumeInterval(int32_t resumeInterval) override;
     void SetAudioExclusive(bool audioExclusive) override;
     void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
-    void SetWrapContent(bool isWrapContentEnabled) override;
+    void SetLayoutMode(WebLayoutMode mode) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

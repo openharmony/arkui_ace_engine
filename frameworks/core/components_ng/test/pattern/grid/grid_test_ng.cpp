@@ -400,7 +400,7 @@ HWTEST_F(GridTestNg, Property001, TestSize.Level1)
         model.SetMaxCount(5);
         model.SetMinCount(2);
         model.SetCellLength(100);
-        model.SetEdgeEffect(EdgeEffect::SPRING);
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
         model.SetScrollEnabled(false);
         CreateColItem(10);
     });
@@ -1190,9 +1190,9 @@ HWTEST_F(GridTestNg, ScrollablePattern001, TestSize.Level1)
     EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_START));
     pattern_->OnScrollEnd();
     auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
-    auto event1 = [](double) { return true; };
-    auto event2 = [](bool) {};
-    auto event3 = [](double) {};
+    auto event1 = [](float, float) { return true; };
+    auto event2 = [](bool, float) {};
+    auto event3 = [](float) {};
     coordinationEvent->SetOnScrollEvent(event1);
     coordinationEvent->SetOnScrollStartEvent(event2);
     coordinationEvent->SetOnScrollEndEvent(event3);
@@ -1216,6 +1216,70 @@ HWTEST_F(GridTestNg, ScrollablePattern001, TestSize.Level1)
     EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT));
     EXPECT_TRUE(pattern_->OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT * 2));
+}
+
+/**
+ * @tc.name: EdgeEffectOption001
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, EdgeEffectOption001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    });
+    EXPECT_FALSE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
+}
+
+/**
+ * @tc.name: EdgeEffectOption002
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, EdgeEffectOption002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    });
+    EXPECT_TRUE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
+}
+
+/**
+ * @tc.name: EdgeEffectOption003
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, EdgeEffectOption003, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(3); // 3 is item count
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    });
+    EXPECT_FALSE(pattern_->GetAlwaysEnabled());
+    EXPECT_FALSE(pattern_->scrollable_);
+}
+
+/**
+ * @tc.name: EdgeEffectOption004
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, EdgeEffectOption004, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(3); // 3 is item count
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    });
+    EXPECT_TRUE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
 }
 
 /**
@@ -2905,7 +2969,7 @@ HWTEST_F(GridTestNg, PositionController004, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateColItem(20);
     });
-    pattern_->gridLayoutInfo_.axis_ = Axis::NONE;
+    pattern_->SetAxis(Axis::NONE);
     auto controller = pattern_->positionController_;
     controller->ScrollPage(true, true);
     controller->GetCurrentOffset();

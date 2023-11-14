@@ -596,6 +596,8 @@ enum class PositionMode {
 
 enum class XComponentType { SURFACE = 0, COMPONENT, TEXTURE };
 
+enum class WebType { SURFACE = 0, TEXTURE };
+
 inline constexpr uint32_t STATE_NORMAL = 0;
 inline constexpr uint32_t STATE_PRESSED = 1;
 inline constexpr uint32_t STATE_FOCUS = 1 << 1;
@@ -665,6 +667,12 @@ enum class RenderFit : int32_t {
 enum class KeyBoardAvoidMode : int32_t {
     OFFSET = 0,
     RESIZE,
+};
+
+enum class SwipeActionState : uint32_t {
+    COLLAPSED = 0,
+    EXPANDED,
+    ACTIONING,
 };
 
 } // namespace OHOS::Ace

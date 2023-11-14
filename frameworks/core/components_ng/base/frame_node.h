@@ -31,6 +31,7 @@
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/ui_node.h"
@@ -47,6 +48,10 @@
 #include "core/components_ng/render/render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/inspector_node.h"
+
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+}
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
@@ -85,6 +90,15 @@ public:
         return 1;
     }
 
+    void SetCheckboxFlag(const bool checkboxFlag)
+    {
+        checkboxFlag_ = checkboxFlag;
+    }
+
+    bool GetCheckboxFlag() const
+    {
+        return checkboxFlag_;
+    }
     void OnInspectorIdUpdate(const std::string& /*unused*/) override;
 
     struct ZIndexComparator {
@@ -432,8 +446,10 @@ public:
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
 
+    RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName) const;
     void CreateAnimatablePropertyFloat(
         const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent);
+    void DeleteAnimatablePropertyFloat(const std::string& propertyName);
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
     void CreateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value,
         std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
@@ -458,11 +474,6 @@ public:
 
     std::optional<RectF> GetViewPort() const;
 
-    enum class SceneStatus {
-        START,
-        RUNNING,
-        END,
-    };
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
     // speed is measured by millimeter/second
     void AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status);
@@ -565,6 +576,9 @@ public:
         return nullptr;
     }
 
+    virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
+    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
+
     bool IsFirstBuilding() const
     {
         return isFirstBuilding_;
@@ -574,6 +588,22 @@ public:
     {
         isFirstBuilding_ = false;
     }
+
+    Matrix4 GetLocalMatrix() const
+    {
+        return localMat_;
+    }
+
+    int32_t GetUiExtensionId();
+    int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId);
+    void SearchExtensionElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
+        int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
+        int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void FindFocusedExtensionElementInfoNG(int32_t elementId, int32_t focusType,
+        int32_t offset, Accessibility::AccessibilityElementInfo& output);
+    void FocusMoveSearchNG(int32_t elementId, int32_t direction,
+        int32_t offset, Accessibility::AccessibilityElementInfo& output);
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -614,8 +644,6 @@ private:
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     bool GetTouchable() const;
-    virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
-    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     void ProcessAllVisibleCallback(
         std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
@@ -630,6 +658,7 @@ private:
     void UpdatePercentSensitive();
 
     void UpdateParentAbsoluteOffset();
+    void AddFrameNodeSnapshot(bool isHit, int32_t parentId);
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -686,8 +715,10 @@ private:
     bool customerSet_ = false;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
+    Matrix4 localMat_ = Matrix4::CreateIdentity();
 
     bool isRestoreInfoUsed_ = false;
+    bool checkboxFlag_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

@@ -64,12 +64,26 @@ public:
         circlesAndBackArrowOpacity_->Set(circlesAndBackArrowOpacity);
     }
 
+    void SetFirstHandleIsShow(bool isShow)
+    {
+        CHECK_NULL_VOID(firstHandleIsShow_);
+        firstHandleIsShow_->Set(isShow);
+    }
+
+    void SetSecondHandleIsShow(bool isShow)
+    {
+        CHECK_NULL_VOID(secondHandleIsShow_);
+        secondHandleIsShow_->Set(isShow);
+    }
+
 private:
     void SetDefaultCircleAndLineEndOffset();
 
     void DrawbBackArrow(DrawingContext& context);
     void DrawbCircles(DrawingContext& context);
 
+    RefPtr<PropertyBool> firstHandleIsShow_;
+    RefPtr<PropertyBool> secondHandleIsShow_;
     RefPtr<PropertyOffsetF> menuOptionOffset_;
     RefPtr<AnimatablePropertyFloat> pointRadius_;
     RefPtr<AnimatablePropertyFloat> headPointRadius_;

@@ -1712,7 +1712,7 @@ HWTEST_F(GaugeTestNg, GaugeModelNGTest001, TestSize.Level1)
     gauge.SetIsShowLimitValue(SHOW_LIMIT_VALUE);
     gauge.SetIsShowDescription(SHOW_DESCRIPTION);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     /**

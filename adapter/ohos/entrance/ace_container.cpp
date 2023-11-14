@@ -17,10 +17,10 @@
 
 #include <fstream>
 #include <functional>
-#include <mutex>
 
 #include "ability_context.h"
 #include "ability_info.h"
+
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
 #include "wm/wm_common.h"
@@ -982,24 +982,14 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     }
     ContainerScope scope(instanceId_);
     auto result = false;
-    if (!SystemProperties::GetDebugEnabled()) {
-        std::unique_ptr<std::ostream> ss = std::make_unique<std::ostringstream>();
-        CHECK_NULL_RETURN(ss, false);
-        DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        result = DumpInfo(params);
-        const auto& infoFile = DumpLog::GetInstance().GetDumpFile();
-        auto* ostringstream = static_cast<std::ostringstream*>(infoFile.get());
-        info.emplace_back(ostringstream->str());
-        DumpLog::GetInstance().Reset();
-    } else {
-        auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
-        std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(dumpFilePath);
-        CHECK_NULL_RETURN(ss, false);
-        DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        result = DumpInfo(params);
-        info.emplace_back("dumpFilePath: " + dumpFilePath);
-        DumpLog::GetInstance().Reset();
-    }
+    std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
+    CHECK_NULL_RETURN(ostream, false);
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    result = DumpInfo(params);
+    const auto& infoFile = DumpLog::GetInstance().GetDumpFile();
+    auto* ostringstream = static_cast<std::ostringstream*>(infoFile.get());
+    info.emplace_back(ostringstream->str());
+    DumpLog::GetInstance().Reset();
     if (!result) {
         DumpLog::ShowDumpHelp(info);
     }
@@ -1911,6 +1901,81 @@ void AceContainer::RegisterStopDragCallback(int32_t pointerId, StopDragCallback&
         std::list<StopDragCallback> list;
         list.emplace_back(std::move(stopDragCallback));
         stopDragCallbackMap_.emplace(pointerId, list);
+    }
+}
+
+void AceContainer::SearchElementInfoByAccessibilityIdNG(
+    int32_t instanceId, int32_t elementId, int32_t mode,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (ngPipeline) {
+        auto frontend = container->GetFrontend();
+        CHECK_NULL_VOID(frontend);
+        auto accessibilityManager = frontend->GetAccessibilityManager();
+        if (accessibilityManager) {
+            accessibilityManager->SearchElementInfoByAccessibilityIdNG(
+                elementId, mode, output, ngPipeline, baseParent);
+        }
+    }
+}
+
+void AceContainer::SearchElementInfosByTextNG(
+    int32_t instanceId, int32_t elementId, const std::string& text,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (ngPipeline) {
+        auto frontend = container->GetFrontend();
+        CHECK_NULL_VOID(frontend);
+        auto accessibilityManager = frontend->GetAccessibilityManager();
+        if (accessibilityManager) {
+            accessibilityManager->SearchElementInfosByTextNG(
+                elementId, text, output, ngPipeline, baseParent);
+        }
+    }
+}
+
+void AceContainer::FindFocusedElementInfoNG(
+    int32_t instanceId, int32_t elementId, int32_t focusType,
+    int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (ngPipeline) {
+        auto frontend = container->GetFrontend();
+        CHECK_NULL_VOID(frontend);
+        auto accessibilityManager = frontend->GetAccessibilityManager();
+        if (accessibilityManager) {
+            accessibilityManager->FindFocusedElementInfoNG(
+                elementId, focusType, output, ngPipeline, baseParent);
+        }
+    }
+}
+
+void AceContainer::FocusMoveSearchNG(
+    int32_t instanceId, int32_t elementId, int32_t direction,
+    int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (ngPipeline) {
+        auto frontend = container->GetFrontend();
+        CHECK_NULL_VOID(frontend);
+        auto accessibilityManager = frontend->GetAccessibilityManager();
+        if (accessibilityManager) {
+            accessibilityManager->FocusMoveSearchNG(elementId, direction, output, ngPipeline, baseParent);
+        }
     }
 }
 

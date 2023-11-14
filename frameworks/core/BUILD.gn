@@ -71,11 +71,13 @@ template("ace_core_source_set") {
       "common/ace_engine.cpp",
       "common/ace_engine_ext.cpp",
       "common/anr_thread.cpp",
+      "common/asset_manager_impl.cpp",
       "common/card_scope.cpp",
       "common/clipboard/clipboard_proxy.cpp",
       "common/container.cpp",
       "common/container_scope.cpp",
       "common/environment/environment_proxy.cpp",
+      "common/event_dump.cpp",
       "common/event_manager.cpp",
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
@@ -437,7 +439,7 @@ template("ace_core_source_set") {
         }
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
-      if (is_cross_platform_build) {
+      if (is_arkui_x) {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
         if (ace_use_rosen_drawing) {
@@ -457,7 +459,7 @@ template("ace_core_source_set") {
     }
 
     if (defined(config.web_components_support) &&
-        config.web_components_support && !is_cross_platform_build) {
+        config.web_components_support && !is_arkui_x) {
       deps += [
         "$ace_root/frameworks/core/components/text_overlay:ace_core_components_text_overlay_for_web_$platform",
         "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform",
@@ -507,7 +509,7 @@ template("ace_core_source_set") {
     if (defined(config.build_container_scope_lib) &&
         config.build_container_scope_lib) {
       sources -= [ "common/container_scope.cpp" ]
-      if (is_cross_platform_build) {
+      if (is_arkui_x) {
         deps += [ "$ace_napi:ace_container_scope_static" ]
       } else {
         external_deps += [ "napi:ace_container_scope" ]
@@ -530,7 +532,7 @@ template("ace_core_source_set") {
 
     include_dirs +=
         [ "//foundation/window/window_manager/interfaces/innerkits" ]
-    if (is_cross_platform_build) {
+    if (is_arkui_x) {
       include_dirs += [
         "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
         "//foundation/appframework/ability/ability_runtime/cross_platform/interfaces/inner_api/error",
@@ -626,11 +628,13 @@ template("ace_core_ng_source_set") {
       "common/ace_engine.cpp",
       "common/ace_engine_ext.cpp",
       "common/anr_thread.cpp",
+      "common/asset_manager_impl.cpp",
       "common/card_scope.cpp",
       "common/clipboard/clipboard_proxy.cpp",
       "common/container.cpp",
       "common/container_scope.cpp",
       "common/environment/environment_proxy.cpp",
+      "common/event_dump.cpp",
       "common/event_manager.cpp",
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
@@ -774,7 +778,7 @@ template("ace_core_ng_source_set") {
       "components/declaration/common/declaration.cpp",
     ]
     include_dirs = []
-    if (is_cross_platform_build) {
+    if (is_arkui_x) {
       include_dirs += [
         "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
         "//foundation/appframework/ability/ability_runtime/cross_platform/interfaces/inner_api/error",
@@ -812,7 +816,7 @@ template("ace_core_ng_source_set") {
     ]
     external_deps = []
 
-    if (is_cross_platform_build) {
+    if (is_arkui_x) {
       deps += [ "$ace_flutter_engine_root:flutter_for_ng" ]
     }
     if (is_ohos) {
@@ -833,7 +837,7 @@ template("ace_core_ng_source_set") {
     if (defined(config.build_container_scope_lib) &&
         config.build_container_scope_lib) {
       sources -= [ "common/container_scope.cpp" ]
-      if (is_cross_platform_build) {
+      if (is_arkui_x) {
         deps += [ "$ace_napi:ace_container_scope_static" ]
       } else {
         external_deps += [ "napi:ace_container_scope" ]
@@ -855,7 +859,7 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
     ]
-    if (is_cross_platform_build) {
+    if (is_arkui_x) {
       deps -= [ "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform" ]
     }
 
@@ -874,7 +878,7 @@ template("ace_core_ng_source_set") {
     }
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      if (!is_cross_platform_build) {
+      if (!is_arkui_x) {
         include_dirs += [
           "$ability_runtime_path/interfaces/kits/native/appkit/app",
           "//foundation/window/window_manager/interfaces/innerkits/wm",
@@ -930,7 +934,7 @@ template("ace_core_ng_source_set") {
         }
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
-      if (is_cross_platform_build) {
+      if (is_arkui_x) {
         deps += [
           "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform",
           "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",

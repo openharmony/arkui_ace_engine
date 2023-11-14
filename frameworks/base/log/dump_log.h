@@ -18,8 +18,9 @@
 
 #include <cstdio>
 #include <memory>
-#include <streambuf>
 #include <sstream>
+#include <streambuf>
+#include <string>
 #include <vector>
 
 #include "base/log/log.h"
@@ -89,7 +90,8 @@ public:
     void Print(int32_t depth, const std::string& className, int32_t childSize);
     void Print(const std::string& content);
     void Print(int32_t depth, const std::string& content);
-
+    void Append(int32_t depth, const std::string& className, int32_t childSize);
+    bool OutPutBySize();
     void Reset();
 
     template<typename T>
@@ -136,6 +138,7 @@ public:
 private:
     std::vector<std::string> description_;
     std::unique_ptr<std::ostream> ostream_ { nullptr };
+    std::string result_;
     ACE_DISALLOW_MOVE(DumpLog);
 };
 

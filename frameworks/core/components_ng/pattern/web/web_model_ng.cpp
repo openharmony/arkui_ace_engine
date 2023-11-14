@@ -30,18 +30,20 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& webController)
+void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& webController, WebType type)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::WEB_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
-        [src, webController]() { return AceType::MakeRefPtr<WebPattern>(src, webController); });
+        [src, webController, type]() { return AceType::MakeRefPtr<WebPattern>(src, webController, type); });
     stack->Push(frameNode);
 
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->SetWebSrc(src);
     webPattern->SetWebController(webController);
+    webPattern->SetWebType(type);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
@@ -50,12 +52,14 @@ void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& web
 }
 
 void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
-    std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup)
+    std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup, WebType type)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
-        [src, setWebIdCallback]() { return AceType::MakeRefPtr<WebPattern>(src, std::move(setWebIdCallback)); });
+        [src, setWebIdCallback, type]() {
+            return AceType::MakeRefPtr<WebPattern>(src, std::move(setWebIdCallback), type);
+        });
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
@@ -64,6 +68,7 @@ void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& s
     webPattern->SetSetWebIdCallback(std::move(setWebIdCallback));
     webPattern->SetSetHapPathCallback(std::move(setHapPathCallback));
     webPattern->SetParentNWebId(parentWebId);
+    webPattern->SetWebType(type);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
@@ -848,11 +853,11 @@ void WebModelNG::SetOverScrollId(std::function<void(const BaseEventInfo* info)>&
     webEventHub->SetOnOverScrollEvent(std::move(uiCallback));
 }
 
-void WebModelNG::SetWrapContent(bool isWrapContentEnabled)
+void WebModelNG::SetLayoutMode(WebLayoutMode mode)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->SetWrapContent(isWrapContentEnabled);
+    webPattern->SetLayoutMode(mode);
 }
 
 void WebModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
@@ -860,5 +865,12 @@ void WebModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->SetNestedScroll(nestedOpt);
+}
+
+void WebModelNG::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->JavaScriptOnDocumentStart(scriptItems);
 }
 } // namespace OHOS::Ace::NG

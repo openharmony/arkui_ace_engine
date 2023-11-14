@@ -449,7 +449,7 @@ void ListPattern::CheckScrollable()
     } else {
         if ((itemPosition_.begin()->first == 0) && (itemPosition_.rbegin()->first == maxListItemIndex_) &&
             !IsScrollSnapAlignCenter()) {
-            scrollable_ = GreatNotEqual((endMainPos_ - startMainPos_), contentMainSize_);
+            scrollable_ = GetAlwaysEnabled() || GreatNotEqual((endMainPos_ - startMainPos_), contentMainSize_);
         } else {
             scrollable_ = true;
         }
@@ -774,6 +774,10 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
         endPos += GetChainDelta(endIndex_);
     }
     bool outOfStart = (startIndex_ == 0) && Positive(startPos) && GreatNotEqual(endPos, contentMainSize_);
+    if (GetAlwaysEnabled()) {
+        outOfStart = (startIndex_ == 0) && Positive(startPos);
+    }
+
     bool outOfEnd = (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos, contentMainSize_) && Negative(startPos);
     if (IsScrollSnapAlignCenter()) {
         auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
@@ -1273,15 +1277,6 @@ void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign
     isScrollEnd_ = true;
 }
 
-void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
-{
-    if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
-        ScrollToIndex(0, smooth_, ScrollAlign::START);
-    } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
-        ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth_, ScrollAlign::END);
-    }
-}
-
 bool ListPattern::ScrollPage(bool reverse)
 {
     StopAnimate();
@@ -1373,7 +1368,7 @@ Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
         indexInGroup > groupPattern->GetDisplayEndIndexInGroup()) {
         return Rect();
     }
-    auto groupItem = itemGroup->GetChildByIndex(indexInGroup);
+    auto groupItem = itemGroup->GetChildByIndex(indexInGroup + groupPattern->GetItemStartIndex());
     CHECK_NULL_RETURN(groupItem, Rect());
     auto groupItemGeometry = groupItem->GetGeometryNode();
     CHECK_NULL_RETURN(groupItemGeometry, Rect());
@@ -1394,6 +1389,9 @@ void ListPattern::UpdateScrollBarOffset()
     float currentOffset = itemsSize / itemPosition_.size() * itemPosition_.begin()->first - startMainPos_;
     Offset scrollOffset = { currentOffset, currentOffset }; // fit for w/h switched.
     auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1);
+    if (GetAlwaysEnabled()) {
+        estimatedHeight = estimatedHeight - spaceWidth_;
+    }
 
     // calculate padding offset of list
     auto host = GetHost();
@@ -1736,6 +1734,7 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("itemStartPos", itemPosition_.begin()->second.startPos);
     }
     json->Put("friction", GetFriction());
+    json->Put("edgeEffectAlwaysEnabled", GetAlwaysEnabled());
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -1894,6 +1893,14 @@ std::string ListPattern::ProvideRestoreInfo()
     return std::to_string(startIndex_);
 }
 
+void ListPattern::CloseAllSwipeActions(OnFinishFunc&& onFinishCallback)
+{
+    auto item = swiperItem_.Upgrade();
+    if (item) {
+        return item->CloseSwipeAction(std::move(onFinishCallback));
+    }
+}
+
 void ListPattern::OnRestoreInfo(const std::string& restoreInfo)
 {
     jumpIndex_ = StringUtils::StringToInt(restoreInfo);
@@ -1906,7 +1913,7 @@ void ListPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(endIndex_));
     DumpLog::GetInstance().AddDesc("centerIndex:" + std::to_string(centerIndex_));
     DumpLog::GetInstance().AddDesc("startMainPos:" + std::to_string(startMainPos_));
-    DumpLog::GetInstance().AddDesc("endMainPos_:" + std::to_string(endMainPos_));
+    DumpLog::GetInstance().AddDesc("endMainPos:" + std::to_string(endMainPos_));
     DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(currentOffset_));
     DumpLog::GetInstance().AddDesc("contentMainSize:" + std::to_string(contentMainSize_));
     DumpLog::GetInstance().AddDesc("contentStartOffset:" + std::to_string(contentStartOffset_));

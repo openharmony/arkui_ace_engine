@@ -272,14 +272,8 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (info[0]->IsString() || info[0]->IsUndefined()) {
-        std::string title;
-        if (info[0]->IsUndefined()) {
-            title = "";
-        } else {
-            title = info[0]->ToString();
-        }
-        NavigationModel::GetInstance()->SetTitle(title);
+    if (info[0]->IsString()) {
+        NavigationModel::GetInstance()->SetTitle(info[0]->ToString());
     } else if (info[0]->IsObject()) {
         if (ParseCommonTitle(info[0])) {
             return;
@@ -290,6 +284,30 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         }
         // CustomBuilder | NavigationCustomTitle
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        do {
+            if (!jsObj->HasProperty("height")) {
+                break;
+            }
+            JSRef<JSVal> height = jsObj->GetProperty("height");
+            CalcDimension titleHeight;
+            bool isValid = JSContainerBase::ParseJsDimensionVp(height, titleHeight);
+            if (height->IsString()) {
+                std::string heightValue;
+                ParseJsString(height, heightValue);
+                if (heightValue == NG::TITLE_MAIN_WITH_SUB) {
+                    NavigationModel::GetInstance()->SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
+                    break;
+                }
+                if (heightValue == NG::TITLE_MAIN) {
+                    NavigationModel::GetInstance()->SetTitleHeight(NG::SINGLE_LINE_TITLEBAR_HEIGHT);
+                    break;
+                }
+            }
+            if (!isValid || titleHeight.Value() < 0) {
+                return;
+            }
+            NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
+        } while (0);
         JSRef<JSVal> builderObject = jsObj->GetProperty("builder");
         if (builderObject->IsFunction()) {
             ViewStackModel::GetInstance()->NewScope();
@@ -299,29 +317,8 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
             auto customNode = ViewStackModel::GetInstance()->Finish();
             NavigationModel::GetInstance()->SetCustomTitle(customNode);
         }
-
-        JSRef<JSVal> height = jsObj->GetProperty("height");
-        if (height->IsNumber()) {
-            CalcDimension titleHeight;
-            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() < 0) {
-                return;
-            }
-            NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
-        } else if (height->IsString()) {
-            std::string heightValue;
-            ParseJsString(height, heightValue);
-            if (heightValue == NG::TITLE_MAIN_WITH_SUB) {
-                NavigationModel::GetInstance()->SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
-            } else if (heightValue == NG::TITLE_MAIN) {
-                NavigationModel::GetInstance()->SetTitleHeight(NG::SINGLE_LINE_TITLEBAR_HEIGHT);
-            }
-        } else {
-            CalcDimension titleHeight;
-            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() <= 0) {
-                return;
-            }
-            NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
-        }
+    } else {
+        NavigationModel::GetInstance()->SetTitle("");
     }
 }
 
@@ -361,7 +358,10 @@ void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
         pixMap = CreatePixelMapFromNapiValue(info[0]);
     }
 #endif
-    NavigationModel::GetInstance()->SetBackButtonIcon(src, noPixMap, pixMap);
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(info[0], bundleName, moduleName);
+    NavigationModel::GetInstance()->SetBackButtonIcon(src, noPixMap, pixMap, bundleName, moduleName);
 }
 
 void JSNavigation::SetHideBackButton(bool hide)

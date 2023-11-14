@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 #undef private
 #undef protected
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -43,6 +44,7 @@ inline const std::string CLOCK_FORMAT = "aa h:m:s";
 inline const std::string UTC_1 = "1000000000000";
 inline const std::string UTC_2 = "2000000000000";
 inline const std::string FORMAT_DATA = "08:00:00";
+inline const std::string FORM_FORMAT = "hm";
 inline const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const std::string EMPTY_TEXT = "";
 const std::string TEXTCLOCK_CONTENT = "08:00:00";
@@ -60,6 +62,8 @@ struct TestProperty {
     std::optional<Ace::FontStyle> italicFontStyle = std::nullopt;
     std::optional<Ace::FontWeight> fontWeight = std::nullopt;
     std::optional<std::vector<std::string>> fontFamily = std::nullopt;
+    std::optional<std::vector<Shadow>> textShadow = std::nullopt;
+    std::optional<FONT_FEATURES_MAP> fontFeature = std::nullopt;
 };
 
 class TextClockTestNG : public testing::Test {
@@ -103,6 +107,12 @@ RefPtr<FrameNode> TextClockTestNG::CreateTextClockParagraph(const TestProperty& 
     if (testProperty.fontFamily.has_value()) {
         textClockModel.SetFontFamily(testProperty.fontFamily.value());
     }
+    if (testProperty.textShadow.has_value()) {
+        textClockModel.SetTextShadow(testProperty.textShadow.value());
+    }
+    if (testProperty.fontFeature.has_value()) {
+        textClockModel.SetFontFeature(testProperty.fontFeature.value());
+    }
     return ViewStackProcessor::GetInstance()->GetMainFrameNode();
 }
 
@@ -143,6 +153,39 @@ HWTEST_F(TextClockTestNG, TextClockTest001, TestSize.Level1)
     auto json = JsonUtil::Create(true);
     textClockLayoutProperty->ToJsonValue(json);
     EXPECT_EQ(textClockLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
+    
+    Shadow shadow;
+    shadow.SetBlurRadius(10);
+    shadow.SetOffsetX(10);
+    shadow.SetOffsetY(10);
+    shadow.SetColor(Color(Color::RED));
+    shadow.SetShadowType(ShadowType::COLOR);
+    std::vector<Shadow> setShadows;
+    setShadows.emplace_back(shadow);
+    textClockLayoutProperty->UpdateTextShadow(setShadows);
+    EXPECT_EQ(textClockLayoutProperty->GetTextShadow(), setShadows);
+
+    Shadow errShadow;
+    errShadow.SetBlurRadius(-0.1f);
+    errShadow.SetOffsetX(10);
+    errShadow.SetOffsetY(10);
+    errShadow.SetColor(Color(Color::RED));
+    errShadow.SetShadowType(ShadowType::COLOR);
+    std::vector<Shadow> errSetShadows;
+    errSetShadows.emplace_back(errShadow);
+    textClockLayoutProperty->UpdateTextShadow(errSetShadows);
+    EXPECT_EQ(textClockLayoutProperty->GetTextShadow(), errSetShadows);
+    EXPECT_EQ(errShadow.GetBlurRadius(), 0);
+
+    FONT_FEATURES_MAP fontFeatures;
+    fontFeatures.try_emplace("ss01", 1);
+    textClockLayoutProperty->UpdateFontFeature(fontFeatures);
+    EXPECT_EQ(textClockLayoutProperty->GetFontFeature(), fontFeatures);
+
+    FONT_FEATURES_MAP errFontFeatures;
+    errFontFeatures.try_emplace("ss02", 1);
+    textClockLayoutProperty->UpdateFontFeature(fontFeatures);
+    EXPECT_EQ(textClockLayoutProperty->GetFontFeature(), fontFeatures);
 }
 
 /**
@@ -204,10 +247,8 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     pattern->UpdateTimeText();
     pattern->textClockController_ = nullptr;
     pattern->InitUpdateTimeTextCallBack();
-    pattern->timeCallback_ = nullptr;
     pattern->UpdateTimeTextCallBack();
     EXPECT_EQ(pattern->textClockController_, nullptr);
-    EXPECT_EQ(pattern->timeCallback_, nullptr);
     EXPECT_EQ(textLayoutProperty->GetContent(), FORMAT_DATA);
 }
 
@@ -477,6 +518,19 @@ HWTEST_F(TextClockTestNG, TextClockTest008, TestSize.Level1)
     testProperty.textColor = std::make_optional(TEXT_COLOR_VALUE);
     testProperty.italicFontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
     testProperty.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
+    Shadow shadow;
+    shadow.SetBlurRadius(10);
+    shadow.SetOffsetX(20);
+    shadow.SetOffsetY(20);
+    shadow.SetColor(Color(Color::BLACK));
+    shadow.SetShadowType(ShadowType::COLOR);
+    std::vector<Shadow> setShadows;
+    setShadows.emplace_back(shadow);
+    testProperty.textShadow = std::make_optional(setShadows);
+    FONT_FEATURES_MAP fontFeatures;
+    fontFeatures.try_emplace("ss02", 1);
+    testProperty.fontFeature = std::make_optional(fontFeatures);
+    
     RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
 
@@ -504,6 +558,8 @@ HWTEST_F(TextClockTestNG, TextClockTest008, TestSize.Level1)
     EXPECT_EQ(textLayoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(textLayoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(textLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetTextShadow(), setShadows);
+    EXPECT_EQ(textLayoutProperty->GetFontFeature(), fontFeatures);
 }
 
 /**
@@ -567,5 +623,169 @@ HWTEST_F(TextClockTestNG, TextClockTest009, TestSize.Level1)
     strDateTimeValue = "1970/01/01, 01:01:01.001";
     str = pattern->ParseDateTimeValue(strDateTimeValue);
     EXPECT_EQ(str, strVec3);
+}
+
+/**
+ * @tc.name: TextClockTest010
+ * @tc.desc: Test time format in card.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textclock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and textClockLayoutProperty.
+     * @tc.expected: step3.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textClockLayoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(textClockLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. set is form render.
+     */
+    MockPipelineBase::SetUp();
+    auto pipeline = MockPipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetIsFormRender(true);
+    EXPECT_FALSE(pattern->isForm_);
+
+    /**
+     * @tc.steps: step4. isForm_ is change to true.
+     * @tc.expected: check default time format is correct
+     */
+    pattern->isStart_ = false;
+    pattern->InitUpdateTimeTextCallBack();
+    EXPECT_TRUE(pattern->isForm_);
+    // textClockLayoutProperty.format is std::nullopt
+    auto format = pattern->GetFormat();
+    EXPECT_EQ(format, FORM_FORMAT);
+
+    /**
+     * @tc.steps: step5. check time format in card.
+     * @tc.expected: get crrect time format,format split function is crrect.
+     */
+    textClockLayoutProperty->UpdateFormat(CLOCK_FORMAT);
+    format = pattern->GetFormat();
+    EXPECT_EQ(format, FORM_FORMAT);
+    textClockLayoutProperty->UpdateFormat("mm:SS");
+    format = pattern->GetFormat();
+    EXPECT_EQ(format, FORM_FORMAT);
+    int32_t weekType = 0;
+    bool is24H = false;
+    int32_t month = 0;
+    int32_t day = 0;
+    bool isMilliSecond = false;
+    pattern->GetWeek(true, 3);
+    pattern->GetWeek(false, 5);
+    std::vector<std::string> inputFormatSplitter =
+        pattern->ParseInputFormat(is24H, weekType, month, day, isMilliSecond);
+    EXPECT_EQ(is24H, false);
+    EXPECT_EQ(weekType, 0);
+    EXPECT_EQ(month, 0);
+    EXPECT_EQ(day, 0);
+    EXPECT_EQ(isMilliSecond, false);
+
+    /**
+     * @tc.steps: step6. isForm_ is change to false.
+     * @tc.expected: check default time format is correct
+     */
+    pattern->isForm_ = false;
+    pipeline->SetIsFormRender(false);
+    pattern->InitUpdateTimeTextCallBack();
+    EXPECT_FALSE(pattern->isForm_);
+    EXPECT_EQ(textClockLayoutProperty->GetFormat(), "mm:SS");
+
+    pipeline = nullptr;
+    MockPipelineBase::TearDown();
+}
+
+/**
+ * @tc.name: TextClockTest011
+ * @tc.desc: Test event function when TextClock visible be changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textclock and set event.
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    std::string utc = UTC_1;
+    auto onChange = [&utc](const std::string& isUtc) { utc = UTC_2; };
+    textClockModel.SetOnDateChange(onChange);
+
+    /**
+     * @tc.steps: step2. get textclock frameNode and event.
+     * @tc.expected: function is called.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step3. get pattern.
+     * @tc.expected: step4.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isStart_ = false;
+    MockPipelineBase::SetUp();
+    pattern->InitUpdateTimeTextCallBack();
+    pattern->RegistVisibleAreaChangeCallback();
+
+    /**
+     * @tc.steps: step4. VisibleArea be changed, call the event entry function.
+     * @tc.expected: check whether the value is correct.
+     */
+    pattern->OnVisibleAreaChange(false);
+    pattern->UpdateTimeTextCallBack();
+    EXPECT_EQ(utc, UTC_1);
+    pattern->OnVisibleAreaChange(true);
+    pattern->UpdateTimeTextCallBack();
+    EXPECT_EQ(utc, UTC_2);
+
+    /**
+     * @tc.steps: step5. visible attribute be changed, call the event entry function.
+     * @tc.expected: check whether the value is correct.
+     */
+    utc = UTC_1;
+    pattern->OnVisibleChange(false);
+    pattern->UpdateTimeTextCallBack();
+    EXPECT_EQ(utc, UTC_1);
+    pattern->OnVisibleChange(true);
+    pattern->UpdateTimeTextCallBack();
+    EXPECT_EQ(utc, UTC_1);
+    pattern->prevTime_ = "";
+    pattern->OnVisibleChange(true);
+    pattern->UpdateTimeTextCallBack();
+    EXPECT_EQ(utc, UTC_2);
+
+    /**
+     * @tc.steps: step6. form visible be changed, call the event entry function.
+     * @tc.expected: check whether the value is correct.
+     */
+    utc = UTC_1;
+    pattern->OnFormVisibleChange(false);
+    pattern->UpdateTimeTextCallBack();
+    EXPECT_EQ(utc, UTC_1);
+    pattern->OnFormVisibleChange(true);
+    pattern->UpdateTimeTextCallBack();
+    EXPECT_EQ(utc, UTC_1);
+    pattern->prevTime_ = "";
+    pattern->OnFormVisibleChange(true);
+    pattern->UpdateTimeTextCallBack();
+    EXPECT_EQ(utc, UTC_2);
+    MockPipelineBase::TearDown();
 }
 } // namespace OHOS::Ace::NG

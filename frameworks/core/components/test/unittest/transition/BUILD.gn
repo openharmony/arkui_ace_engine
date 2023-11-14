@@ -249,7 +249,7 @@ ohos_unittest("TransitionElementTest") {
     external_deps = [
       "hilog:libhilog",
       "hitrace:hitrace_meter",
-      "init_lite:libbegetutil",
+      "init:libbegetutil",
     ]
   }
   external_deps += [ "c_utils:utils" ]
@@ -306,7 +306,7 @@ ohos_unittest("SharedTransitionElementTest") {
     external_deps = [
       "hilog:libhilog",
       "hitrace:hitrace_meter",
-      "init_lite:libbegetutil",
+      "init:libbegetutil",
     ]
   }
   external_deps += [ "c_utils:utils" ]
@@ -366,7 +366,7 @@ ohos_unittest("TransitionPropertyElementTest") {
     external_deps = [
       "hilog:libhilog",
       "hitrace:hitrace_meter",
-      "init_lite:libbegetutil",
+      "init:libbegetutil",
     ]
   }
   external_deps += [ "c_utils:utils" ]

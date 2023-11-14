@@ -313,12 +313,12 @@ void GridItemPattern::DumpAdvanceInfo()
     enableOpacity_.has_value()
         ? DumpLog::GetInstance().AddDesc("enableOpacity:" + std::to_string(enableOpacity_.value()))
         : DumpLog::GetInstance().AddDesc("enableOpacity:null");
-    selectable_ ? DumpLog::GetInstance().AddDesc("selectable_:true")
-                : DumpLog::GetInstance().AddDesc("selectable_:false");
-    isSelected_ ? DumpLog::GetInstance().AddDesc("isSelected_:true")
-                : DumpLog::GetInstance().AddDesc("isSelected_:false");
-    isHover_ ? DumpLog::GetInstance().AddDesc("isHover_:true") : DumpLog::GetInstance().AddDesc("isHover_:false");
-    isPressed_ ? DumpLog::GetInstance().AddDesc("isPressed_:true") : DumpLog::GetInstance().AddDesc("isPressed_:false");
+    selectable_ ? DumpLog::GetInstance().AddDesc("selectable:true")
+                : DumpLog::GetInstance().AddDesc("selectable:false");
+    isSelected_ ? DumpLog::GetInstance().AddDesc("isSelected:true")
+                : DumpLog::GetInstance().AddDesc("isSelected:false");
+    isHover_ ? DumpLog::GetInstance().AddDesc("isHover:true") : DumpLog::GetInstance().AddDesc("isHover:false");
+    isPressed_ ? DumpLog::GetInstance().AddDesc("isPressed:true") : DumpLog::GetInstance().AddDesc("isPressed:false");
     switch (gridItemStyle_) {
         case GridItemStyle::NONE: {
             DumpLog::GetInstance().AddDesc("GridItemStyle:NONE");

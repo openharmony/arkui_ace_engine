@@ -30,7 +30,7 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 namespace {
 const int64_t PLUGIN_ID = 10000;
-const int64_t PARENT_ID = 1000;
+const int32_t PARENT_ID = 1000;
 } // namespace
 class PluginManagerTest : public testing::Test {
 public:

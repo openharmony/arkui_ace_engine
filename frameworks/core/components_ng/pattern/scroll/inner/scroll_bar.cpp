@@ -162,7 +162,7 @@ void ScrollBar::SetRectTrickRegion(
     const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight)
 {
     double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
-    barRegionSize_ = std::max(mainSize - NormalizeToPx(endReservedHeight_), 0.0);
+    barRegionSize_ = std::max(mainSize - NormalizeToPx(endReservedHeight_) - NormalizeToPx(startReservedHeight_), 0.0);
     if (LessOrEqual(estimatedHeight, 0.0)) {
         return;
     }
@@ -190,9 +190,10 @@ void ScrollBar::SetRectTrickRegion(
         double lastMainOffset =
             std::max(positionMode_ == PositionMode::BOTTOM ? lastOffset.GetX() : lastOffset.GetY(), 0.0);
         offsetScale_ = (barRegionSize_ - activeSize) / (estimatedHeight - mainSize);
-        double activeMainOffset = offsetScale_ * lastMainOffset + NormalizeToPx(startReservedHeight_);
+        // Avoid crossing the top or bottom boundary.
+        double activeMainOffset = std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize)
+                                  + NormalizeToPx(startReservedHeight_);
         bool canUseAnimation = !isOutOfBoundary_ && !positionModeUpdate_;
-        activeMainOffset = std::min(activeMainOffset, barRegionSize_ - activeSize);
         double inactiveSize = 0.0;
         double inactiveMainOffset = 0.0;
         scrollableOffset_ = activeMainOffset;
@@ -329,6 +330,7 @@ void ScrollBar::SetGestureEvent()
                     inRegion = scrollBar->InBarTouchRegion(point);
                 } else if (info.GetSourceDevice() == SourceType::MOUSE) {
                     inRegion = scrollBar->InBarHoverRegion(point);
+                    scrollBar->MarkNeedRender();
                 }
                 scrollBar->SetPressed(inRegion);
                 if (inRegion && !scrollBar->IsHover()) {
@@ -342,6 +344,7 @@ void ScrollBar::SetGestureEvent()
                     scrollBar->ScheduleDisappearDelayTask();
                 }
                 scrollBar->SetPressed(false);
+                scrollBar->MarkNeedRender();
             }
         });
     }
