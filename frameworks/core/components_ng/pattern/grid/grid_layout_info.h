@@ -116,6 +116,7 @@ struct GridLayoutInfo {
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
     float totalHeightOfItemsInView_ = 0.0f;
+    float contentEndPadding_ = 0.0f;
 
     std::optional<int32_t> lastCrossCount_;
     // index of first and last GridItem in viewport
