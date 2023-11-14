@@ -2266,12 +2266,10 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int32_t elementId, const
 {
     auto mainContext = context_.Upgrade();
     CHECK_NULL_VOID(mainContext);
-
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_VOID(ngPipeline);
     auto rootNode = ngPipeline->GetRootElement();
     CHECK_NULL_VOID(rootNode);
-
 #ifdef WINDOW_SCENE_SUPPORTED
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
@@ -2281,14 +2279,11 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int32_t elementId, const
         return;
     }
 #endif
-
     auto node = GetInspectorById(rootNode, elementId);
     CHECK_NULL_VOID(node);
-
     std::list<RefPtr<NG::FrameNode>> frameNodesWithText;
     std::list<RefPtr<NG::FrameNode>> uiExtensionsNodes;
     FindText(node, text, frameNodesWithText, uiExtensionsNodes);
-
     int32_t pageId = 0;
     std::string pagePath;
     if (context->GetWindowId() == mainContext->GetWindowId()) {
@@ -2301,14 +2296,13 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int32_t elementId, const
     }
     CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
         GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
-
     if (!uiExtensionsNodes.empty()) {
         for (const auto& node : uiExtensionsNodes) {
             auto infosByIPC = OHOS::Ace::Framework::SearchElementInfosByTextNG(
                 0, text, node, uiExtensionOffset / UI_EXTENSION_ID_10);
             if (!infosByIPC.empty()) {
-                ConvertExtensionAccessibilityNodeId(infosByIPC, node, uiExtensionOffset);                
-                for (auto& info : infosByIPC){                    
+                ConvertExtensionAccessibilityNodeId(infosByIPC, node, uiExtensionOffset);
+                for (auto& info : infosByIPC) {
                     infos.emplace_back(info);
                 }
             }
