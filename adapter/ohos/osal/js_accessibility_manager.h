@@ -247,8 +247,6 @@ private:
 
     void DumpTreeNodeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
         NodeId nodeID, const CommonProperty& commonProperty);
-    void GetResultNode(const std::list<RefPtr<NG::FrameNode>> nodeList, const RefPtr<AccessibilityNode> node,
-        const int32_t direction, RefPtr<NG::FrameNode>& resultNode);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;
