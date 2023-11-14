@@ -42,6 +42,8 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationG
     auto index = hostNode->GetChildIndexById(titleBarNode->GetId());
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(titleBarNode)->GetTitle();
+    CHECK_NULL_RETURN(titleNode, 0.0f);
     auto constraint = navDestinationLayoutProperty->CreateChildConstraint();
     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
@@ -49,14 +51,16 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationG
         return 0.0f;
     }
 
-    if (hostNode->GetSubtitle()) {
-        constraint.selfIdealSize = OptionalSizeF(
-            size.Width(), static_cast<float>(DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+    if (navDestinationLayoutProperty->HasTitleBarHeight()) {
+        auto titleHeight = static_cast<float>(navDestinationLayoutProperty->GetTitleBarHeightValue().
+            ConvertToPxWithSize(constraint.percentReference.Height()));
+        constraint.selfIdealSize.SetHeight((titleHeight));
         titleBarWrapper->Measure(constraint);
-        return static_cast<float>(DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+        return titleHeight;
     }
 
-    auto titleHeight = navDestinationLayoutProperty->GetTitleBarHeightValue(SINGLE_LINE_TITLEBAR_HEIGHT);
+    auto titleHeight = navDestinationLayoutProperty->GetTitleBarHeightValue(hostNode->GetSubtitle() ?
+        DOUBLE_LINE_TITLEBAR_HEIGHT : SINGLE_LINE_TITLEBAR_HEIGHT);
     constraint.selfIdealSize = OptionalSizeF(size.Width(),
         static_cast<float>(titleHeight.ConvertToPxWithSize(constraint.percentReference.Height())));
     titleBarWrapper->Measure(constraint);

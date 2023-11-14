@@ -54,6 +54,8 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     CHECK_NULL_RETURN(titleBarFrameNode, 0.0f);
     auto titleBarLayoutProperty = titleBarFrameNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_RETURN(titleBarLayoutProperty, 0.0f);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(titleBarNode)->GetTitle();
+    CHECK_NULL_RETURN(titleNode, 0.0f);
     if (titleBarLayoutProperty->HasTitleHeight()) {
         auto titleHeight =
             titleBarLayoutProperty->GetTitleHeightValue().ConvertToPxWithSize(constraint.percentReference.Height());

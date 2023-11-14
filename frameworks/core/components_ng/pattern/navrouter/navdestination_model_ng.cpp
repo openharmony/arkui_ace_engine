@@ -322,6 +322,7 @@ void NavDestinationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
         } else {
             navDestinationNode->SetTitle(customTitle);
             navDestinationNode->UpdateTitleNodeOperation(ChildNodeOperation::REPLACE);
+            navDestinationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         return;
     }
