@@ -3347,7 +3347,6 @@ void SwiperPattern::DumpAdvanceInfo()
                    : DumpLog::GetInstance().AddDesc("moveDirection:false");
     indicatorDoingAnimation_ ? DumpLog::GetInstance().AddDesc("indicatorDoingAnimation:true")
                              : DumpLog::GetInstance().AddDesc("indicatorDoingAnimation:false");
-    isInit_ ? DumpLog::GetInstance().AddDesc("isInit:true") : DumpLog::GetInstance().AddDesc("isInit:false");
     hasVisibleChangeRegistered_ ? DumpLog::GetInstance().AddDesc("hasVisibleChangeRegistered:true")
                                 : DumpLog::GetInstance().AddDesc("hasVisibleChangeRegistered:false");
     isVisible_ ? DumpLog::GetInstance().AddDesc("isVisible:true") : DumpLog::GetInstance().AddDesc("isVisible:false");
@@ -3409,19 +3408,31 @@ void SwiperPattern::DumpAdvanceInfo()
                             : DumpLog::GetInstance().AddDesc("stopIndicatorAnimation:false");
     isTouchPad_ ? DumpLog::GetInstance().AddDesc("isTouchPad:true")
                 : DumpLog::GetInstance().AddDesc("isTouchPad:false");
-    surfaceChangedCallbackId_ ? DumpLog::GetInstance().AddDesc(
-                                    "surfaceChangedCallbackId:" + std::to_string(surfaceChangedCallbackId_.value()))
-                              : DumpLog::GetInstance().AddDesc("surfaceChangedCallbackId:null");
-    lastSwiperIndicatorType_ ? DumpLog::GetInstance().AddDesc(
-                                   "lastSwiperIndicatorType:" + std::to_string(surfaceChangedCallbackId_.value()))
-                             : DumpLog::GetInstance().AddDesc("lastSwiperIndicatorType:null");
-    DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(startIndex_));
-    DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(endIndex_));
+    surfaceChangedCallbackId_.has_value()
+        ? DumpLog::GetInstance().AddDesc(
+              "surfaceChangedCallbackId:" + std::to_string(surfaceChangedCallbackId_.value()))
+        : DumpLog::GetInstance().AddDesc("surfaceChangedCallbackId:null");
+    if (lastSwiperIndicatorType_.has_value()) {
+        switch (lastSwiperIndicatorType_.value()) {
+            case SwiperIndicatorType::DOT: {
+                DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DOT");
+                break;
+            }
+            case SwiperIndicatorType::DIGIT: {
+                DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DIGIT");
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    } else {
+        DumpLog::GetInstance().AddDesc("lastSwiperIndicatorType:null");
+    }
     DumpLog::GetInstance().AddDesc("currentIndex:" + std::to_string(currentIndex_));
     DumpLog::GetInstance().AddDesc("oldIndex:" + std::to_string(oldIndex_));
     DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(currentOffset_));
     DumpLog::GetInstance().AddDesc("fadeOffset:" + std::to_string(fadeOffset_));
-    DumpLog::GetInstance().AddDesc("turnPageRate:" + std::to_string(turnPageRate_));
     DumpLog::GetInstance().AddDesc("touchBottomRate:" + std::to_string(touchBottomRate_));
     DumpLog::GetInstance().AddDesc("currentIndexOffset:" + std::to_string(currentIndexOffset_));
     DumpLog::GetInstance().AddDesc("gestureSwipeIndex:" + std::to_string(gestureSwipeIndex_));
