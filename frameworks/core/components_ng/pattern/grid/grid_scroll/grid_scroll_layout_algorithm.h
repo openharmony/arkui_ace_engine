@@ -110,6 +110,7 @@ private:
     void ScrollToIndexStart(LayoutWrapper* layoutWrapper, int32_t targetIndex);
     void ScrollToIndexAuto(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex);
     void UpdateCurrentOffsetForJumpTo(LayoutWrapper* layoutWrapper, float mainSize);
+    void SkipRegularLines(bool forward);
 
 protected:
     uint32_t crossCount_ = 0;

@@ -344,7 +344,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             gridLayoutInfo_.currentOffset_ += offset;
             overScroll += offset;
         }
-        HandleScrollBarOutBoundary(overScroll);
+        if (IsOutOfBoundary()) {
+            HandleScrollBarOutBoundary(overScroll);
+        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (GreatNotEqual(gridLayoutInfo_.currentOffset_, GetMainContentSize() - itemsHeight)) {
@@ -364,7 +366,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             gridLayoutInfo_.currentOffset_ += offset;
         }
         overScroll = gridLayoutInfo_.currentOffset_;
-        HandleScrollBarOutBoundary(overScroll);
+        if (IsOutOfBoundary()) {
+            HandleScrollBarOutBoundary(overScroll);
+        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (LessNotEqual(gridLayoutInfo_.currentOffset_, 0.0)) {
