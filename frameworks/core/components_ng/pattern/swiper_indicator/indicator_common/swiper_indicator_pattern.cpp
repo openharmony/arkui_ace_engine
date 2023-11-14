@@ -668,26 +668,6 @@ void SwiperIndicatorPattern::DumpAdvanceInfo()
     isClicked_ ? DumpLog::GetInstance().AddDesc("isClicked:true") : DumpLog::GetInstance().AddDesc("isClicked:false");
     isRepeatClicked_ ? DumpLog::GetInstance().AddDesc("isRepeatClicked:true")
                      : DumpLog::GetInstance().AddDesc("isRepeatClicked:false");
-    mouseClickIndex_.has_value()
-        ? DumpLog::GetInstance().AddDesc("mouseClickIndex:" + std::to_string(mouseClickIndex_.value()))
-        : DumpLog::GetInstance().AddDesc("mouseClickIndex:null");
-    switch (touchBottomType_) {
-        case TouchBottomType::NONE: {
-            DumpLog::GetInstance().AddDesc("TouchBottomType:NONE");
-            break;
-        }
-        case TouchBottomType::START: {
-            DumpLog::GetInstance().AddDesc("TouchBottomType:START");
-            break;
-        }
-        case TouchBottomType::END: {
-            DumpLog::GetInstance().AddDesc("TouchBottomType:END");
-            break;
-        }
-        default: {
-            break;
-        }
-    }
     switch (swiperIndicatorType_) {
         case SwiperIndicatorType::DOT: {
             DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DOT");
