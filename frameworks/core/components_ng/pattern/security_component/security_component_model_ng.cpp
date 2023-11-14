@@ -76,6 +76,7 @@ void SecurityComponentModelNG::CreateCommon(const std::string& tag, int32_t text
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(tag, nodeId, patternCreator);
     CHECK_NULL_VOID(frameNode);
 

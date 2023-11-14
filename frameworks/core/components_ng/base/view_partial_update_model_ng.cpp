@@ -27,9 +27,9 @@ namespace OHOS::Ace::NG {
 
 RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
 {
-    ACE_SCOPED_TRACE("JSView::CreateSpecializedComponent");
     // create component, return new something, need to set proper ID
     auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", info.jsViewName.c_str(), viewId);
     auto viewIdStr = std::to_string(viewId);
     if (info.updateViewIdFunc) {
         info.updateViewIdFunc(viewIdStr);

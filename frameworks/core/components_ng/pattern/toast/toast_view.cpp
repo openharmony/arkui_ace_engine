@@ -40,6 +40,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
     auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
     // make toast node
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TOAST_ETS_TAG, toastId);
     auto toastNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<ToastPattern>());
     CHECK_NULL_RETURN(toastNode, nullptr);
     auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();

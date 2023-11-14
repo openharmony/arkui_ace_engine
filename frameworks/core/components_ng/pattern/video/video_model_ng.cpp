@@ -29,6 +29,7 @@ void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::VIDEO_ETS_TAG, nodeId);
     auto videoNode = VideoNode::GetOrCreateVideoNode(
         V2::VIDEO_ETS_TAG, nodeId, [videoController]() { return AceType::MakeRefPtr<VideoPattern>(videoController); });
     CHECK_NULL_VOID(videoNode);
