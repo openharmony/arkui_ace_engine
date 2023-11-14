@@ -1127,15 +1127,8 @@ void ViewAbstract::BindPopup(
     if (showInSubWindow) {
         if (isShow) {
             SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
-            if (popupPattern) {
-                popupPattern->SetContainerId(Container::CurrentId());
-                popupPattern->StartEnteringAnimation(nullptr);
-            }
         } else {
-            if (popupPattern) {
-                popupPattern->StartExitingAnimation(
-                    [targetId]() { SubwindowManager::GetInstance()->HidePopupNG(targetId); });
-            }
+            SubwindowManager::GetInstance()->HidePopupNG(targetId);
         }
         return;
     }
@@ -1144,19 +1137,9 @@ void ViewAbstract::BindPopup(
             AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     }
     if (isShow) {
-        overlayManager->UpdatePopupNode(targetId, popupInfo);
-        if (popupPattern) {
-            popupPattern->StartEnteringAnimation(nullptr);
-        }
+        overlayManager->ShowPopup(targetId, popupInfo);
     } else {
-        if (popupPattern) {
-            popupPattern->StartExitingAnimation(
-                [targetId, popupInfo, weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
-                    auto overlay = weakOverlayManger.Upgrade();
-                    CHECK_NULL_VOID(overlay);
-                    overlay->UpdatePopupNode(targetId, popupInfo);
-                });
-        }
+        overlayManager->HidePopup(targetId, popupInfo);
     }
 }
 
