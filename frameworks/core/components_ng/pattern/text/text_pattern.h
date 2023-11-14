@@ -95,6 +95,7 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void DumpInfo() override;
 
     TextSelector GetTextSelector() const
     {
