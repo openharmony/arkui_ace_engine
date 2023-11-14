@@ -33,6 +33,7 @@ ohos_unittest("event_manager_test_ng") {
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/event_dump.cpp",
     "$ace_root/frameworks/core/common/event_manager.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",

@@ -929,6 +929,86 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 #endif
 }
 
+void PipelineContext::OnVirtualKeyboardHeightChange(
+    float keyboardHeight, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    CHECK_RUN_ON(UI);
+    // prevent repeated trigger with same keyboardHeight
+    CHECK_NULL_VOID(safeAreaManager_);
+    if (keyboardHeight == safeAreaManager_->GetKeyboardInset().Length()) {
+        return;
+    }
+
+    ACE_FUNCTION_TRACE();
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
+    }
+#endif
+
+    auto weak = WeakClaim(this);
+    auto func = [weak, keyboardHeight, positionY, height]() mutable {
+        auto context = weak.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+        if (keyboardHeight > 0) {
+            // add height of navigation bar
+            keyboardHeight += context->safeAreaManager_->GetSystemSafeArea().bottom_.Length();
+        }
+
+        auto manager = DynamicCast<TextFieldManagerNG>(context->PipelineBase::GetTextFieldManager());
+        CHECK_NULL_VOID(manager);
+        float uiExtensionHeight = 0.0f;
+        if (manager) {
+            uiExtensionHeight = static_cast<float>(manager->GetHeight());
+            if (uiExtensionHeight == 0) {
+                LOGE("UIExtension Component Height equals zero");
+                return;
+            }
+            if (positionY + height > uiExtensionHeight) {
+                height = uiExtensionHeight - positionY;
+            }
+            positionY += static_cast<float>(manager->GetClickPosition().GetY());
+        }
+        SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
+        float keyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
+        float positionYWithOffset = positionY - keyboardOffset;
+        float offsetFix = (rootSize.Height() - positionY - height) < keyboardHeight
+                                ? keyboardHeight - (rootSize.Height() - positionY - height)
+                                : keyboardHeight;
+        if (NearZero(keyboardHeight)) {
+            context->safeAreaManager_->UpdateKeyboardOffset(0.0f);
+        } else if (LessOrEqual(rootSize.Height() - positionYWithOffset - height, height) &&
+                   LessOrEqual(rootSize.Height() - positionYWithOffset, keyboardHeight)) {
+            context->safeAreaManager_->UpdateKeyboardOffset(-keyboardHeight);
+        } else if (positionYWithOffset + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0f) {
+            context->safeAreaManager_->UpdateKeyboardOffset(-offsetFix);
+        } else if ((positionYWithOffset + height > rootSize.Height() - keyboardHeight &&
+                       positionYWithOffset < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
+                   NearZero(context->rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
+            context->safeAreaManager_->UpdateKeyboardOffset(-height - offsetFix / 2.0f);
+        } else {
+            context->safeAreaManager_->UpdateKeyboardOffset(0.0f);
+        }
+        context->SyncSafeArea(true);
+        // layout immediately
+        context->FlushUITasks();
+
+        manager->ScrollTextFieldToSafeArea();
+        context->FlushUITasks();
+    };
+
+    AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
+    Animate(option, option.GetCurve(), func);
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
+}
+
 bool PipelineContext::OnBackPressed()
 {
     LOGD("OnBackPressed");
@@ -1084,8 +1164,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     HandleEtsCardTouchEvent(point);
 
     auto scalePoint = point.CreateScalePoint(GetViewScale());
-    LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
-        scalePoint.type);
+    if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE) {
+        eventManager_->GetEventTreeRecord().AddTouchPoint(scalePoint);
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "TouchEvent Process in ace_container: "
+            "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
+            "type=%{public}d", scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type);
+    }
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type == TouchType::DOWN) {
         // Set focus state inactive while touch down event received
@@ -1123,11 +1207,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         if (container && container->IsScenceBoardWindow() && IsWindowSceneConsumed()) {
             FlushTouchEvents();
             return;
-        } else {
-            hasIdleTasks_ = true;
-            RequestFrame();
-            return;
         }
+        hasIdleTasks_ = true;
+        RequestFrame();
+        return;
     }
 
     if (scalePoint.type == TouchType::UP) {
@@ -1206,16 +1289,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         } else {
             rootNode_->DumpTree(0);
         }
-    } else if (params[0] == "-render") {
     } else if (params[0] == "-focus") {
         if (rootNode_->GetFocusHub()) {
             rootNode_->GetFocusHub()->DumpFocusTree(0);
         }
-    } else if (params[0] == "-layer") {
-    } else if (params[0] == "-frontend") {
-#ifndef WEARABLE_PRODUCT
-    } else if (params[0] == "-multimodal") {
-#endif
     } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
         auto accessibilityManager = GetAccessibilityManager();
         if (accessibilityManager) {
@@ -1236,6 +1313,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 
         for (const auto& func : dumpListeners_) {
             func(jsParams);
+        }
+    } else if (params[0] == "-event") {
+        if (eventManager_) {
+            eventManager_->DumpEvent();
         }
     }
 
@@ -1557,6 +1638,12 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
     OnMouseEvent(mouseEvent);
 }
 
+bool PipelineContext::HasDifferentDirectionGesture() const
+{
+    CHECK_NULL_RETURN(eventManager_, false);
+    return eventManager_->HasDifferentDirectionGesture();
+}
+
 void PipelineContext::AddVisibleAreaChangeNode(
     const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback)
 {
@@ -1586,6 +1673,33 @@ void PipelineContext::HandleVisibleAreaChangeEvent()
     auto nodes = FrameNode::GetNodesById(onVisibleAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
         frameNode->TriggerVisibleAreaChangeCallback();
+    }
+}
+
+void PipelineContext::AddFormVisibleChangeNode(
+    const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback)
+{
+    CHECK_NULL_VOID(node);
+    onFormVisibleChangeNodeIds_.emplace(node->GetId());
+    onFormVisibleChangeEvents_.insert_or_assign(node->GetId(), callback);
+}
+
+void PipelineContext::RemoveFormVisibleChangeNode(int32_t nodeId)
+{
+    onFormVisibleChangeNodeIds_.erase(nodeId);
+    auto iter = onFormVisibleChangeEvents_.find(nodeId);
+    if (iter != onFormVisibleChangeEvents_.end()) {
+        onFormVisibleChangeEvents_.erase(iter);
+    }
+}
+
+void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible)
+{
+    auto nodes = FrameNode::GetNodesById(onFormVisibleChangeNodeIds_);
+    for (auto& pair : onFormVisibleChangeEvents_) {
+        if (pair.second) {
+            pair.second(isVisible);
+        }
     }
 }
 
@@ -1672,6 +1786,12 @@ void PipelineContext::WindowFocus(bool isFocus)
         auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
         if (rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
             rootFocusHub->RequestFocusImmediately();
+        }
+        if (focusWindowId_.has_value()) {
+            auto curMainView = FocusHub::GetCurrentMainView();
+            if (curMainView) {
+                curMainView->HandleFocusOnMainView();
+            }
         }
     }
     FlushWindowFocusChangedCallback(isFocus);

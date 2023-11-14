@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
-#include <cstdint>
-#include <memory>
-
 #include "key_event.h"
 #include "pointer_event.h"
 #include "configuration.h"
@@ -102,7 +99,10 @@ private:
     WeakPtr<UIExtensionPattern> uiExtensionPattern_;
 };
 
-UIExtensionPattern::UIExtensionPattern() = default;
+thread_local int32_t UIExtensionPattern::currentUiExtensionId_ = 1;
+
+UIExtensionPattern::UIExtensionPattern() : uiExtensionId_(currentUiExtensionId_++)
+{}
 
 UIExtensionPattern::~UIExtensionPattern()
 {
@@ -272,12 +272,16 @@ bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 
 void UIExtensionPattern::OnWindowShow()
 {
-    RequestExtensionSessionActivation();
+    if (isVisible_) {
+        RequestExtensionSessionActivation();
+    }
 }
 
 void UIExtensionPattern::OnWindowHide()
 {
-    RequestExtensionSessionBackground();
+    if (isVisible_) {
+        RequestExtensionSessionBackground();
+    }
 }
 
 void UIExtensionPattern::RequestExtensionSessionActivation()
@@ -529,8 +533,8 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
         auto touchOffsetToWindow = info.GetTouches().front().GetGlobalLocation();
         auto touchOffsetToFrameNode = info.GetTouches().front().GetLocalLocation();
         auto rectToWindow = host->GetTransformRectRelativeToWindow();
-        UpdateTextFieldManager({ rectToWindow.GetOffset().GetX(), touchOffsetToWindow.GetY() },
-            rectToWindow.Height() - touchOffsetToFrameNode.GetY());
+        UpdateTextFieldManager(
+            { rectToWindow.GetOffset().GetX(), rectToWindow.GetOffset().GetY() }, rectToWindow.Height());
     }
     DispatchPointerEvent(pointerEvent);
 }
@@ -773,6 +777,7 @@ void UIExtensionPattern::SetOnReceiveCallback(const std::function<void(const AAF
 
 void UIExtensionPattern::OnVisibleChange(bool visible)
 {
+    isVisible_ = visible;
     if (visible) {
         RequestExtensionSessionActivation();
     } else {
@@ -861,6 +866,34 @@ void UIExtensionPattern::TransferFocusState(bool focusState)
     session_->TransferFocusStateEvent(focusState);
 }
 
+void UIExtensionPattern::SearchExtensionElementInfoByAccessibilityId(int32_t elementId, int32_t mode,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferSearchElementInfo(elementId, mode, baseParent, output);
+}
+
+void UIExtensionPattern::SearchElementInfosByText(int32_t elementId, const std::string& text,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferSearchElementInfosByText(elementId, text, baseParent, output);
+}
+
+void UIExtensionPattern::FindFocusedElementInfo(int32_t elementId, int32_t focusType,
+    int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, output);
+}
+
+void UIExtensionPattern::FocusMoveSearch(int32_t elementId, int32_t direction,
+    int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferFocusMoveSearch(elementId, direction, baseParent, output);
+}
+
 void UIExtensionPattern::ProcessUIExtensionSessionActivationResult(OHOS::Rosen::WSError errcode)
 {
     if (errcode != OHOS::Rosen::WSError::WS_OK) {
@@ -917,5 +950,15 @@ void UIExtensionPattern::OnLanguageConfigurationUpdate()
 void UIExtensionPattern::OnColorConfigurationUpdate()
 {
     onConfigurationUpdate();
+}
+
+int32_t UIExtensionPattern::GetUiExtensionId()
+{
+    return uiExtensionId_;
+}
+
+int32_t UIExtensionPattern::WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
+{
+    return uiExtensionId_ * extensionOffset + abilityId;
 }
 } // namespace OHOS::Ace::NG

@@ -147,6 +147,27 @@ struct AxisEvent final {
     {
         return (static_cast<uint32_t>(direction) & static_cast<uint32_t>(AxisDirection::RIGHT));
     }
+
+    Offset ConvertToOffset(bool isShiftKeyPressed = false, bool hasDifferentDirectionGesture = false) const
+    {
+        Offset result;
+        if (sourceTool == SourceTool::MOUSE) {
+            // Axis event is made by mouse.
+            if (isShiftKeyPressed) {
+                result = Offset(-verticalAxis, -horizontalAxis);
+            } else {
+                if (hasDifferentDirectionGesture) {
+                    result = Offset(-horizontalAxis, -verticalAxis);
+                } else {
+                    result = Offset(-verticalAxis, -verticalAxis);
+                }
+            }
+        } else {
+            // Axis event is made by others. Include touch-pad.
+            result = Offset(-horizontalAxis, -verticalAxis);
+        }
+        return result * (LINE_HEIGHT_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES).ConvertToPx();
+    }
 };
 
 class AxisInfo : public BaseEventInfo {

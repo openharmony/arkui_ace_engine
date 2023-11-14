@@ -43,6 +43,8 @@ void TextPattern::OnVisibleChange(bool isVisible) {}
 
 void TextPattern::DumpAdvanceInfo() {}
 
+void TextPattern::DumpInfo() {}
+
 float TextPattern::GetLineHeight() const
 {
     return {};

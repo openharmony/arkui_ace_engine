@@ -236,6 +236,11 @@ public:
         userSetNavBarWidthFlag_ = userSetNavBarWidthFlag;
     }
 
+    void SetInitNavBarWidth(const Dimension& initNavBarWidth)
+    {
+        realNavBarWidth_ = static_cast<float>(initNavBarWidth.ConvertToPx());
+    }
+    
     void UpdateContextRect(
         const RefPtr<NavDestinationGroupNode>& curDestination, const RefPtr<NavigationGroupNode>& navigation);
 

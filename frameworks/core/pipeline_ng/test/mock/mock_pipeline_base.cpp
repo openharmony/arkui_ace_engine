@@ -149,6 +149,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
 
+void PipelineContext::OnVirtualKeyboardHeightChange(
+    float keyboardHeight, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{}
+
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
@@ -295,6 +299,12 @@ void PipelineContext::AddVisibleAreaChangeNode(
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
+void PipelineContext::AddFormVisibleChangeNode(
+    const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback) {}
+void PipelineContext::RemoveFormVisibleChangeNode(int32_t nodeId) {}
+void PipelineContext::HandleVisibleAreaChangeEvent() {}
+void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible) {}
+
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
     return true;
@@ -347,6 +357,11 @@ void PipelineContext::AddIsFocusActiveUpdateEvent(
 {}
 
 void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node) {}
+
+bool PipelineContext::HasDifferentDirectionGesture() const
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG
 
 // pipeline base

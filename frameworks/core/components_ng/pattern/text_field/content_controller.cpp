@@ -112,6 +112,14 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::string& res
             textChanged |= FilterWithAscii(result);
             break;
         }
+        case TextInputType::NUMBER_PASSWORD: {
+            textChanged |= FilterWithEvent(DIGIT_WHITE_LIST, result);
+            break;
+        }
+        case TextInputType::SCREEN_LOCK_PASSWORD: {
+            textChanged |= FilterWithAscii(result);
+            break;
+        }
         default: {
             break;
         }

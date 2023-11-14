@@ -48,12 +48,13 @@ class ModelAdapterWrapper : public virtual AceType {
 public:
     using PaintFinishCallback = std::function<void()>;
 
-    ModelAdapterWrapper(uint32_t key, Render3D::SurfaceType surfaceType);
+    ModelAdapterWrapper(uint32_t key, Render3D::SurfaceType surfaceType, const std::string& bundleName,
+        const std::string& moduleName);
     ~ModelAdapterWrapper() override;
 
     void SetPaintFinishCallback(PaintFinishCallback callback);
     bool NeedsRepaint();
-    bool HandleTouchEvent(const TouchEventInfo& info);
+    bool HandleTouchEvent(const TouchEventInfo& info, const RefPtr<ModelPaintProperty>& modelPaintProperty);
 
     void OnPaint3D(const RefPtr<ModelPaintProperty>& modelPaintProperty);
     void OnPaintFinish();
@@ -61,7 +62,13 @@ public:
     void OnAttachToFrameNode(const RefPtr<RenderContext>& context);
     void OnDirtyLayoutWrapperSwap(float offsetX, float offsetY, float width, float height, float scale,
         bool recreateWindow);
+    void OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeInfo& windowChangeInfo);
     void OnPaint3DSceneTexture(SkCanvas* skCanvas);
+
+    OHOS::Render3D::SurfaceType GetSurfaceType()
+    {
+        return surfaceType_;
+    }
 
 private:
     void CreateTextureLayer();
@@ -82,6 +89,7 @@ private:
     void UpdateImageTexturePaths(const RefPtr<ModelPaintProperty>& modelPaintProperty);
     void UpdateShaderInputBuffers(const RefPtr<ModelPaintProperty>& modelPaintProperty);
     void HandleCameraMove(const Render3D::PointerEvent& event);
+    Render3D::HapInfo SetHapInfo();
 
     uint32_t key_ = UINT32_MAX;
     PaintFinishCallback callback_ = nullptr;
@@ -92,6 +100,8 @@ private:
     RefPtr<ModelTouchHandler> touchHandler_;
     Render3D::SurfaceType surfaceType_;
 
+    std::string bundleName_;
+    std::string moduleName_;
     ACE_DISALLOW_COPY_AND_MOVE(ModelAdapterWrapper);
 };
 } // namespace OHOS::Ace::NG

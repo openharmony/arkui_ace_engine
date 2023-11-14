@@ -143,7 +143,11 @@ public:
         const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
+    void AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback);
+    void RemoveFormVisibleChangeNode(int32_t nodeId);
+
     void HandleVisibleAreaChangeEvent();
+    void HandleFormVisibleChangeEvent(bool isVisible);
 
     void HandleSubwindow(bool isShow);
 
@@ -260,6 +264,8 @@ public:
     void AddWindowSizeChangeCallback(int32_t nodeId);
 
     void RemoveWindowSizeChangeCallback(int32_t nodeId);
+
+    bool HasDifferentDirectionGesture() const;
 
     bool IsKeyInPressed(KeyCode tarCode) const
     {
@@ -425,6 +431,9 @@ protected:
 
     void OnVirtualKeyboardHeightChange(
         float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
+    void OnVirtualKeyboardHeightChange(
+        float keyboardHeight, double positionY, double height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
@@ -501,6 +510,7 @@ private:
 
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
+    std::unordered_set<int32_t> onFormVisibleChangeNodeIds_;
 
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
@@ -536,6 +546,7 @@ private:
     std::function<void()> dragCleanTask_;
 
     std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
+    std::map<int32_t, std::function<void(bool)>> onFormVisibleChangeEvents_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

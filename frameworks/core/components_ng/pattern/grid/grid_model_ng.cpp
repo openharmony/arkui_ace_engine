@@ -34,6 +34,7 @@ void GridModelNG::Create(const RefPtr<ScrollControllerBase>& positionController,
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::GRID_ETS_TAG, nodeId);
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::GRID_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridPattern>(); });
     stack->Push(frameNode);
@@ -177,6 +178,7 @@ void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetAlwaysEnabled(alwaysEnabled);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void GridModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)

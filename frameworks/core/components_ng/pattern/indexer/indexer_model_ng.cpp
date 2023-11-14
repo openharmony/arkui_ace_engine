@@ -30,6 +30,7 @@ void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t select
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::INDEXER_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
     int32_t indexerSize = arrayValue.size();

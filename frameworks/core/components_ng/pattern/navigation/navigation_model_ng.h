@@ -34,7 +34,8 @@ public:
     void SetSubtitle(const std::string& subtitle) override;
     void SetHideTitleBar(bool hideTitleBar) override;
     void SetHideNavBar(bool hideNavBar) override;
-    void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap) override;
+    void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+        const std::string& bundleName, const std::string& moduleName) override;
     void SetHideBackButton(bool hideBackButton) override;
     void SetHideToolBar(bool hideToolBar) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
@@ -58,6 +59,8 @@ public:
     RefPtr<NG::NavigationStack> GetNavigationStack() override;
     void SetMenuCount(int32_t menuCount) override;
     void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onModeChange) override;
+private:
+    bool setDefaultNavBarWidthFlag_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_NG_H

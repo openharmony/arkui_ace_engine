@@ -38,7 +38,8 @@ class ModelView {
 public:
     static ModelView* GetInstance();
     virtual ~ModelView() = default;
-    virtual void Create(const std::string& src, Render3D::SurfaceType surfaceType) = 0;
+    virtual void Create(const std::string& src, const std::string& bundleName, const std::string& moduleName,
+        Render3D::SurfaceType surfaceType) = 0;
     virtual void SetBackground(const std::string& src) = 0;
     virtual void SetHandleCameraMove(bool value) = 0;
     virtual void SetTransparent(bool value) = 0;
@@ -54,6 +55,9 @@ public:
     virtual void AddCustomRender(const std::shared_ptr<Render3D::CustomRenderDescriptor>& customRender) = 0;
     virtual void SetWidth(Dimension& width) = 0;
     virtual void SetHeight(Dimension& height) = 0;
+    virtual void SetRenderWidth(Dimension& width) = 0;
+    virtual void SetRenderHeight(Dimension& height) = 0;
+    virtual void SetRenderFrameRate(float rate) = 0;
     virtual void SetShader(const std::string& path) = 0;
     virtual void AddShaderImageTexture(const std::string& path) = 0;
     virtual void AddShaderInputBuffer(const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer) = 0;

@@ -71,7 +71,6 @@ void JSShape::InitBox(const JSCallbackInfo& info)
 void JSShape::SetViewPort(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     if (info[0]->IsObject()) {
@@ -97,7 +96,6 @@ void JSShape::SetViewPort(const JSCallbackInfo& info)
 void JSShape::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -113,7 +111,6 @@ void JSShape::JsWidth(const JSRef<JSVal>& jsValue)
 void JSShape::JsHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -129,12 +126,10 @@ void JSShape::JsHeight(const JSRef<JSVal>& jsValue)
 void JSShape::JsSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
         return;
     }
 
@@ -146,13 +141,11 @@ void JSShape::JsSize(const JSCallbackInfo& info)
 void JSShape::SetStrokeDashArray(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsArray()) {
-        LOGE("info is not array");
         return;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(info[0]);
     int32_t length = static_cast<int32_t>(array->Length());
     if (length <= 0) {
-        LOGE("info is invalid");
         return;
     }
     std::vector<Dimension> dashArray;
@@ -164,7 +157,6 @@ void JSShape::SetStrokeDashArray(const JSCallbackInfo& info)
         }
     }
     if (length != static_cast<int32_t>(dashArray.size())) {
-        LOGE("ParseJsDimensionVp failed");
         return;
     }
     // if odd,add twice
@@ -180,7 +172,6 @@ void JSShape::SetStrokeDashArray(const JSCallbackInfo& info)
 void JSShape::SetStroke(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color strokeColor = Color::TRANSPARENT;
@@ -191,7 +182,6 @@ void JSShape::SetStroke(const JSCallbackInfo& info)
 void JSShape::SetFill(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     if (info[0]->IsString() && info[0]->ToString() == "none") {
@@ -207,7 +197,6 @@ void JSShape::SetFill(const JSCallbackInfo& info)
 void JSShape::SetStrokeDashOffset(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension offset;
@@ -230,20 +219,16 @@ void JSShape::SetStrokeLineJoin(int lineJoin)
 void JSShape::SetStrokeMiterLimit(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     double miterLimit = STROKE_MITERLIMIT_DEFAULT;
-    if (!ParseJsDouble(info[0], miterLimit)) {
-        LOGI("strokeMiterLimit error. now use default value");
-    }
+    ParseJsDouble(info[0], miterLimit);
     ShapeModel::GetInstance()->SetStrokeMiterLimit(miterLimit);
 }
 
 void JSShape::SetStrokeOpacity(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     double strokeOpacity = DEFAULT_OPACITY;
@@ -254,7 +239,6 @@ void JSShape::SetStrokeOpacity(const JSCallbackInfo& info)
 void JSShape::SetFillOpacity(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     double fillOpacity = DEFAULT_OPACITY;
@@ -265,7 +249,6 @@ void JSShape::SetFillOpacity(const JSCallbackInfo& info)
 void JSShape::SetStrokeWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     // the default value is 1.0_vp
@@ -290,7 +273,6 @@ void JSShape::SetAntiAlias(bool antiAlias)
 void JSShape::SetBitmapMesh(const JSCallbackInfo& info)
 {
     if (info.Length() != 3) {
-        LOGE("The arg is wrong, it is supposed to have at least 3 argument");
         return;
     }
     std::vector<double> mesh;
@@ -328,7 +310,6 @@ void JSShape::SetBitmapMesh(const JSCallbackInfo& info)
 void JSShape::SetForegroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color foregroundColor;

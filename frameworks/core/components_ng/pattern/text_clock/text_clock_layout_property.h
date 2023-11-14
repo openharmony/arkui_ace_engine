@@ -45,6 +45,8 @@ public:
         value->propItalicFontStyle_ = CloneItalicFontStyle();
         value->propFontWeight_ = CloneFontWeight();
         value->propFontFamily_ = CloneFontFamily();
+        value->propTextShadow_ = CloneTextShadow();
+        value->propFontFeature_ = CloneFontFeature();
         return value;
     }
 
@@ -58,6 +60,8 @@ public:
         ResetItalicFontStyle();
         ResetFontWeight();
         ResetFontFamily();
+        ResetTextShadow();
+        ResetFontFeature();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -69,6 +73,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextShadow, std::vector<Shadow>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFeature, FONT_FEATURES_MAP, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TextClockLayoutProperty);

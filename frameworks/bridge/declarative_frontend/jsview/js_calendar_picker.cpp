@@ -300,14 +300,15 @@ void JSCalendarPicker::Create(const JSCallbackInfo& info)
             dayRadius = calendarTheme->GetCalendarDayRadius();
         }
         auto selected = obj->GetProperty("selected");
-        if (selected->IsObject()) {
+        auto parseSelectedDate = ParseDate(selected);
+        if (selected->IsObject() && parseSelectedDate.GetYear() != 0) {
             JSRef<JSObject> selectedDateObj = JSRef<JSObject>::Cast(selected);
             JSRef<JSVal> changeEventVal = selectedDateObj->GetProperty("changeEvent");
             if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
                 ParseSelectedDateObject(info, selectedDateObj);
                 settingData.selectedDate = ParseDate(selectedDateObj->GetProperty("value"));
             } else {
-                settingData.selectedDate = ParseDate(selectedDateObj);
+                settingData.selectedDate = parseSelectedDate;
             }
         }
     } else {
@@ -505,8 +506,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     NG::CalendarSettingData settingData;
     auto selectedDate = paramObj->GetProperty("selected");
     auto parseSelectedDate = ParseDate(selectedDate);
-
-    if (selectedDate->IsObject()) {
+    if (selectedDate->IsObject() && parseSelectedDate.GetYear() != 0) {
         settingData.selectedDate = parseSelectedDate;
     }
 

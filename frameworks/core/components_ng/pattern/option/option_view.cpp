@@ -37,6 +37,7 @@ namespace {
 RefPtr<FrameNode> Create(int32_t index)
 {
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::OPTION_ETS_TAG, Id);
     auto node = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<OptionPattern>(index));
 
     // set border radius

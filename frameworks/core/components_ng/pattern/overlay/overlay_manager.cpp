@@ -478,7 +478,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                 auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
                 menuWrapperPattern->CallMenuDisappearCallback();
                 auto mainPipeline = PipelineContext::GetMainPipelineContext();
-                if (mainPipeline) {
+                if (mainPipeline && menuWrapperPattern->GetMenuDisappearCallback()) {
                     mainPipeline->FlushPipelineImmediately();
                 }
                 // clear contextMenu then return

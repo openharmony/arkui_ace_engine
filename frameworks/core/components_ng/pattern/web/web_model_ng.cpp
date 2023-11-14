@@ -34,6 +34,7 @@ void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& web
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::WEB_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
         [src, webController, type]() { return AceType::MakeRefPtr<WebPattern>(src, webController, type); });
     stack->Push(frameNode);
@@ -852,11 +853,11 @@ void WebModelNG::SetOverScrollId(std::function<void(const BaseEventInfo* info)>&
     webEventHub->SetOnOverScrollEvent(std::move(uiCallback));
 }
 
-void WebModelNG::SetWrapContent(bool isWrapContentEnabled)
+void WebModelNG::SetLayoutMode(WebLayoutMode mode)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->SetWrapContent(isWrapContentEnabled);
+    webPattern->SetLayoutMode(mode);
 }
 
 void WebModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)

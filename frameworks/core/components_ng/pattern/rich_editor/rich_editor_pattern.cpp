@@ -22,6 +22,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -1319,6 +1321,7 @@ bool RichEditorPattern::CloseKeyboard(bool forceClose)
         if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
             return CloseCustomKeyboard();
         }
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Request close soft keyboard.");
 #if defined(ENABLE_STANDARD_INPUT)
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         if (!imeAttached_) {
@@ -1343,26 +1346,33 @@ bool RichEditorPattern::CloseKeyboard(bool forceClose)
     return false;
 }
 
-void RichEditorPattern::HandleLongPress(GestureEvent& info)
+bool RichEditorPattern::JudgeDraggable(GestureEvent& info)
 {
-    HandleUserLongPressEvent(info);
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
     auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
+    CHECK_NULL_RETURN(hub, false);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
 #ifdef ENABLE_DRAG_FRAMEWORK
         gestureHub->SetIsTextDraggable(true);
 #endif
-        return;
+        return true;
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
     gestureHub->SetIsTextDraggable(false);
 #endif
+    return false;
+}
+
+void RichEditorPattern::HandleLongPress(GestureEvent& info)
+{
+    HandleUserLongPressEvent(info);
+    if (JudgeDraggable(info)) {
+        return;
+    }
     if (isMousePressed_) {
         return;
     }
@@ -1371,16 +1381,23 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
     InitSelection(textOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
-    if (!BetweenSelectedPosition(info.GetGlobalLocation())) {
-        textSelector_.Update(selectEnd, selectEnd);
-    }
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
+    if (!BetweenSelectedPosition(info.GetGlobalLocation())) {
+        if (selectStart == 0) {
+            textSelector_.Update(selectStart, selectStart);
+        } else {
+            textSelector_.Update(selectEnd, selectEnd);
+            selectStart = selectEnd;
+        }
+    }
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     UpdateSelectionType(textSelectInfo);
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay();
     selectionMenuOffset_ = info.GetGlobalLocation();
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1709,6 +1726,8 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
     CHECK_NULL_RETURN(inputMethod, false);
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_RETURN(miscTextConfig.has_value(), false);
+    TAG_LOGI(
+        AceLogTag::ACE_RICH_TEXT, "RequestKeyboard set calling window id is : %{public}u", miscTextConfig->windowId);
     inputMethod->Attach(richEditTextChangeListener_, needShowSoftKeyboard, miscTextConfig.value());
     if (context) {
         inputMethod->SetCallingWindow(context->GetWindowId());
@@ -1799,6 +1818,12 @@ void RichEditorPattern::UpdateCaretInfoToController()
     MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
         StringUtils::Str8ToStr16(text), textSelector_.GetStart(), textSelector_.GetEnd());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "Caret position update, left %{public}f, top %{public}f, width %{public}f, height %{public}f; textSelector_ "
+        "Start "
+        "%{public}d, end %{public}d",
+        cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height, textSelector_.GetStart(),
+        textSelector_.GetEnd());
 #else
     if (HasConnection()) {
         TextEditingValue editingValue;
@@ -1852,6 +1877,9 @@ bool RichEditorPattern::CloseCustomKeyboard()
 
 void RichEditorPattern::InsertValue(const std::string& insertValue)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Insert value '%{public}s'", insertValue.c_str());
+    }
     bool isSelector = false;
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
@@ -1878,6 +1906,7 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ScrollToSafeArea();
     RefPtr<SpanNode> spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex()));
     if (spanNode == nullptr && info.GetSpanIndex() == 0) {
         CreateTextSpanNode(spanNode, info, insertValueTemp);
@@ -2144,6 +2173,7 @@ void RichEditorPattern::DeleteBackward(int32_t length)
     if (!caretVisible_) {
         StartTwinkling();
     }
+    ScrollToSafeArea();
 }
 
 void RichEditorPattern::DeleteForward(int32_t length)
@@ -2175,6 +2205,33 @@ void RichEditorPattern::DeleteForward(int32_t length)
     if (!caretVisible_) {
         StartTwinkling();
     }
+}
+
+bool RichEditorPattern::OnBackPressed()
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_RETURN(tmpHost, false);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "RichEditor %{public}d receives back press event", tmpHost->GetId());
+    if (SelectOverlayIsOn()) {
+        CloseSelectOverlay();
+        textSelector_.Update(textSelector_.destinationOffset);
+        StartTwinkling();
+        return true;
+    }
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    if (!imeShown_ && !isCustomKeyboardAttached_) {
+#else
+    if (!isCustomKeyboardAttached_) {
+#endif
+        return false;
+    }
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    CloseKeyboard(true);
+#if defined(ANDROID_PLATFORM)
+    return false;
+#else
+    return true;
+#endif
 }
 
 void RichEditorPattern::SetInputMethodStatus(bool keyboardShown)
@@ -2738,6 +2795,8 @@ void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHa
             selectMenuInfo_.showCopyAll = true;
             selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
         }
+        selectOverlayProxy_ = nullptr;
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
         return;
     }
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
@@ -2914,7 +2973,7 @@ RichEditorSelection RichEditorPattern::GetSpansInfo(int32_t start, int32_t end, 
 
 void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
 {
-    auto selectType = selectedType_.value_or(RichEditorType::TEXT);
+    auto selectType = selectedType_.value_or(RichEditorType::NONE);
     std::shared_ptr<SelectionMenuParams> menuParams = nullptr;
     if (selectType == RichEditorType::TEXT) {
         menuParams = GetMenuParams(selectInfo.isUsingMouse, RichEditorType::TEXT);
@@ -2922,9 +2981,6 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
         menuParams = GetMenuParams(selectInfo.isUsingMouse, RichEditorType::IMAGE);
     } else if (selectType == RichEditorType::MIXED) {
         menuParams = GetMenuParams(selectInfo.isUsingMouse, RichEditorType::MIXED);
-        if (menuParams == nullptr) {
-            menuParams = GetMenuParams(selectInfo.isUsingMouse, RichEditorType::TEXT);
-        }
     }
 
     if (menuParams == nullptr) {
@@ -3563,7 +3619,7 @@ float RichEditorPattern::GetLineHeight() const
 
 void RichEditorPattern::UpdateSelectionType(RichEditorSelection& selection)
 {
-    selectedType_.reset();
+    selectedType_ = RichEditorType::NONE;
     auto list = selection.GetSelection().resultObjects;
     bool imageSelected = false;
     bool textSelected = false;
@@ -3593,5 +3649,25 @@ std::shared_ptr<SelectionMenuParams> RichEditorPattern::GetMenuParams(bool using
         return it->second;
     }
     return nullptr;
+}
+
+RectF RichEditorPattern::GetCaretRect() const
+{
+    RectF rect;
+    CHECK_NULL_RETURN(overlayMod_, rect);
+    auto richEditorOverlay = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+    CHECK_NULL_RETURN(richEditorOverlay, rect);
+    rect.SetOffset(richEditorOverlay->GetCaretOffset());
+    rect.SetHeight(richEditorOverlay->GetCaretHeight());
+    return rect;
+}
+
+void RichEditorPattern::ScrollToSafeArea() const
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->ScrollTextFieldToSafeArea();
 }
 } // namespace OHOS::Ace::NG

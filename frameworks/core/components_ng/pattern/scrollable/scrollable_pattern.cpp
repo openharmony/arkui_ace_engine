@@ -172,7 +172,8 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
         OnScrollCallback(offset, source);
         isRefreshInReactive_ = true;
         if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS);
+            refreshCoordination_->OnScrollStart(
+                source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS, GetVelocity());
         }
     }
     if (IsAtTop() &&
@@ -181,17 +182,19 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
         !isRefreshInReactive_ && (axis_ == Axis::VERTICAL)) {
         isRefreshInReactive_ = true;
         if (refreshCoordination_) {
-            refreshCoordination_->OnScrollStart(source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS);
+            refreshCoordination_->OnScrollStart(
+                source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS, GetVelocity());
         }
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
         (refreshCoordination_ && refreshCoordination_->InCoordination()) && source != SCROLL_FROM_UPDATE &&
         source != SCROLL_FROM_AXIS && isRefreshInReactive_) {
         isRefreshInReactive_ = false;
-        refreshCoordination_->OnScrollEnd(0.0f);
+        refreshCoordination_->OnScrollEnd(GetVelocity());
     }
     if (refreshCoordination_ && refreshCoordination_->InCoordination() && isRefreshInReactive_) {
-        if (!refreshCoordination_->OnScroll(GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {
+        if (!refreshCoordination_->OnScroll(
+                GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset, GetVelocity())) {
             isRefreshInReactive_ = false;
             coordinationMode = RefreshCoordinationMode::SCROLLABLE_SCROLL;
         }
@@ -1134,9 +1137,10 @@ void ScrollablePattern::LimitMouseEndOffset()
 {
     float limitedMainOffset = -1.0f;
     float limitedCrossOffset = -1.0f;
-    auto hostSize = GetHostFrameSize();
-    auto mainSize = hostSize->MainSize(axis_);
-    auto crossSize = hostSize->CrossSize(axis_);
+    auto host = GetHost();
+    auto hostSize = host->GetGeometryNode()->GetFrameSize();
+    auto mainSize = hostSize.MainSize(axis_);
+    auto crossSize = hostSize.CrossSize(axis_);
     auto mainOffset = mouseEndOffset_.GetMainOffset(axis_);
     auto crossOffset = mouseEndOffset_.GetCrossOffset(axis_);
     if (LessNotEqual(mainOffset, 0.0f)) {
@@ -1421,7 +1425,7 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity)
 bool ScrollablePattern::HandleOverScroll(float velocity)
 {
     auto parent = parent_.Upgrade();
-    if (!parent || !nestedScroll_.NeedParent()) {
+    if (!parent || !nestedScroll_.NeedParent(velocity < 0)) {
         if (GetEdgeEffect() == EdgeEffect::SPRING) {
             // trigger onScrollEnd later, when spring animation finishes
             ProcessSpringEffect(velocity);

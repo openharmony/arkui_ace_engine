@@ -118,6 +118,8 @@ private:
     void ReleaseRenderer();
     void HideImageNode();
     void HandleStaticFormEvent(const PointF& touchPoint);
+    void RegistVisibleAreaChangeCallback();
+    void OnVisibleAreaChange(bool visible);
 
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
@@ -131,6 +133,7 @@ private:
     bool isUnTrust_ = false;
     bool isDynamic_ = true;
     bool isSnapshot_ = false;
+    bool isRegistedAreaCallback_ = false;
     RefPtr<PixelMap> pixelMap_ = nullptr;
     int32_t scopeId_;
     std::string localeTag_ = AceApplicationInfo::GetInstance().GetLocaleTag();

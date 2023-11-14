@@ -115,8 +115,7 @@ void WindowPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
 
     auto state = session_->GetSessionState();
-    LOGI("Session id: %{public}d, state: %{public}u, bundle name: %{public}s",
-        session_->GetPersistentId(), state, session_->GetSessionInfo().bundleName_.c_str());
+    LOGI("bundle name: %{public}s", session_->GetSessionInfo().bundleName_.c_str());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         if (!HasStartingPage()) {
             return;

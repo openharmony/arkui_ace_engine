@@ -26,6 +26,7 @@ void WaterFlowModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::WATERFLOW_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::WATERFLOW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WaterFlowPattern>(); });
     stack->Push(frameNode);
@@ -204,5 +205,10 @@ void WaterFlowModelNG::SetFriction(double friction)
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetFriction(friction);
+}
+
+void WaterFlowModelNG::SetCachedCount(int32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value);
 }
 } // namespace OHOS::Ace::NG

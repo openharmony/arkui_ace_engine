@@ -324,6 +324,8 @@ public:
 
     virtual void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) {};
 
+    virtual void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) {};
+
     virtual void PaintAccessibilityFocus() {};
 
     virtual void ClearAccessibilityFocus() {};

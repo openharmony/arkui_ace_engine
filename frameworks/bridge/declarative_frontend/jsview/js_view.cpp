@@ -105,11 +105,19 @@ void JSView::RenderJSExecution()
         ACE_SCORING_EVENT("Component.AboutToRender");
         jsViewFunction_->ExecuteAboutToRender();
     }
+    if (!jsViewFunction_) {
+        LOGE("JSView: After ExecuteAboutToRender jsViewFunction_ error");
+        return;
+    }
     {
         ACE_SCORING_EVENT("Component.Build");
         ViewStackModel::GetInstance()->PushKey(viewId_);
         jsViewFunction_->ExecuteRender();
         ViewStackModel::GetInstance()->PopKey();
+    }
+    if (!jsViewFunction_) {
+        LOGE("JSView: After ExecuteRender jsViewFunction_ error");
+        return;
     }
     {
         ACE_SCORING_EVENT("Component.OnRenderDone");
@@ -917,6 +925,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "findChildByIdForPreview", &JSViewPartialUpdate::FindChildByIdForPreview);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "resetRecycleCustomNode", &JSViewPartialUpdate::JSResetRecycleCustomNode);
+    JSClass<JSViewPartialUpdate>::Method("invalidateLayout", &JSViewPartialUpdate::JsInvalidateLayout);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 
@@ -1014,4 +1023,9 @@ void JSViewPartialUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
     return;
 }
 
+void JSViewPartialUpdate::JsInvalidateLayout()
+{
+    ACE_FUNCTION_TRACE();
+    ViewPartialUpdateModel::GetInstance()->InvalidateLayout(viewNode_);
+}
 } // namespace OHOS::Ace::Framework

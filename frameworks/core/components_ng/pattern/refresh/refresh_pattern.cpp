@@ -64,6 +64,7 @@ constexpr int32_t STATE_PROGRESS_LOADING = 1;
 constexpr int32_t STATE_PROGRESS_RECYCLE = 2;
 constexpr int32_t STATE_PROGRESS_DRAG = 3;
 const RefPtr<Curve> FADE_AWAY_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+const std::string REFRESH_DRAG_SCENE = "refresh_drag_scene";
 } // namespace
 
 void RefreshPattern::OnAttachToFrameNode()
@@ -260,20 +261,20 @@ void RefreshPattern::TriggerFinish()
 
 void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleDragStart();
+        pattern->HandleDragStart(true, static_cast<float>(info.GetMainVelocity()));
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleDragUpdate(static_cast<float>(info.GetMainDelta()));
+        pattern->HandleDragUpdate(static_cast<float>(info.GetMainDelta()), static_cast<float>(info.GetMainVelocity()));
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleDragEnd(info.GetSpeed());
+        pattern->HandleDragEnd(info.GetMainVelocity());
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -291,8 +292,9 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
-void RefreshPattern::HandleDragStart(bool isDrag)
+void RefreshPattern::HandleDragStart(bool isDrag, float mainSpeed)
 {
+    UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, mainSpeed, SceneStatus::START);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         UpdateFirstChildDragStart(isDrag);
         return;
@@ -313,8 +315,9 @@ void RefreshPattern::HandleDragStart(bool isDrag)
     frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
-void RefreshPattern::HandleDragUpdate(float delta)
+void RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
 {
+    UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, mainSpeed, SceneStatus::RUNNING);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         QuiteAnimation();
         scrollOffset_.SetY(GetScrollOffset(delta));
@@ -491,6 +494,7 @@ void RefreshPattern::LoadingProgressExit()
 
 void RefreshPattern::HandleDragEnd(float speed)
 {
+    UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, speed, SceneStatus::END);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         SpeedTriggerAnimation(speed);
         return;
@@ -805,10 +809,10 @@ void RefreshPattern::SetAccessibilityAction()
         if (pattern->IsRefreshing()) {
             return;
         }
-        pattern->HandleDragStart();
+        pattern->HandleDragStart(true, 0.0f);
         for (float delta = 0.0f; delta < MAX_SCROLL_DISTANCE.ConvertToPx();
              delta += TRIGGER_LOADING_DISTANCE.ConvertToPx()) {
-            pattern->HandleDragUpdate(delta);
+            pattern->HandleDragUpdate(delta, 0.0f);
         }
         pattern->HandleDragEnd(0.0f);
     });
@@ -823,20 +827,20 @@ void RefreshPattern::UpdateCustomBuilderIndex(int32_t index)
 
 void RefreshPattern::InitCoordinationEvent(RefPtr<ScrollableCoordinationEvent>& coordinationEvent)
 {
-    auto onScrollEvent = [weak = WeakClaim(this)](double offset) -> bool {
+    auto onScrollEvent = [weak = WeakClaim(this)](float offset, float mainSpeed) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        pattern->HandleDragUpdate(static_cast<float>(offset));
+        pattern->HandleDragUpdate(offset, mainSpeed);
         return Positive(pattern->scrollOffset_.GetY()) || NonNegative(offset);
     };
     coordinationEvent->SetOnScrollEvent(onScrollEvent);
-    auto onScrollStartEvent = [weak = WeakClaim(this)](bool isDrag) {
+    auto onScrollStartEvent = [weak = WeakClaim(this)](bool isDrag, float mainSpeed) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleDragStart(isDrag);
+        pattern->HandleDragStart(isDrag, mainSpeed);
     };
     coordinationEvent->SetOnScrollStartEvent(onScrollStartEvent);
-    auto onScrollEndEvent = [weak = WeakClaim(this)](double speed) {
+    auto onScrollEndEvent = [weak = WeakClaim(this)](float speed) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd(speed);
@@ -1146,6 +1150,7 @@ void RefreshPattern::InitChildNode()
     if (isCustomBuilderExist_ && HasCustomBuilderIndex()) {
         if (!customBuilder_) {
             customBuilder_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(customBuilderIndex_.value_or(0)));
+            CHECK_NULL_VOID(customBuilder_);
             if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 UpdateBuilderHeight(0.0f);
             } else {
@@ -1157,6 +1162,7 @@ void RefreshPattern::InitChildNode()
         }
     } else if (!progressChild_) {
         progressChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 1));
+        CHECK_NULL_VOID(progressChild_);
         auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
         CHECK_NULL_VOID(progressPaintProperty);
         progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
@@ -1266,5 +1272,12 @@ RefreshAnimationState RefreshPattern::GetLoadingProgressStatus()
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_RETURN(progressPaintProperty, defaultValue);
     return progressPaintProperty->GetRefreshAnimationState().value_or(defaultValue);
+}
+
+void RefreshPattern::UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->AddFRCSceneInfo(scene, std::abs(speed), sceneStatus);
 }
 } // namespace OHOS::Ace::NG

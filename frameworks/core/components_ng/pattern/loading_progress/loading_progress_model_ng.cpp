@@ -26,6 +26,7 @@ void LoadingProgressModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::LOADING_PROGRESS_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::LOADING_PROGRESS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
     stack->Push(frameNode);

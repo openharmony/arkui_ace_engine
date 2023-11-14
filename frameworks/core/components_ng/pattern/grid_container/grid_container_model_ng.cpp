@@ -28,6 +28,7 @@ void GridContainerModelNG::Create(const RefPtr<GridContainerInfo>& containerInfo
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::GRIDCONTAINER_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::GRIDCONTAINER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridContainerLayoutPattern>(); });
     stack->Push(frameNode);

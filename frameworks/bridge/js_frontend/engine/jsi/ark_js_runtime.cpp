@@ -277,6 +277,12 @@ bool ArkJSRuntime::HasPendingException()
 void ArkJSRuntime::HandleUncaughtException(panda::TryCatch& trycatch,
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
+    Local<ObjectRef> exception = trycatch.GetAndClearException();
+    if (!exception.IsEmpty() && !exception->IsHole() && errorCallback != nullptr) {
+        errorCallback("loading js file has crash or the uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
+        return;
+    }
+
     // Handle the uncaught exception by native engine created by ability runtime in the stage model project.
     if (nativeEngine_) {
         nativeEngine_->HandleUncaughtException();
@@ -284,12 +290,6 @@ void ArkJSRuntime::HandleUncaughtException(panda::TryCatch& trycatch,
     }
 
     if (uncaughtErrorHandler_ == nullptr) {
-        return;
-    }
-
-    Local<ObjectRef> exception = trycatch.GetAndClearException();
-    if (!exception.IsEmpty() && !exception->IsHole() && errorCallback != nullptr) {
-        errorCallback("loading js file has crash or the uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
         return;
     }
 

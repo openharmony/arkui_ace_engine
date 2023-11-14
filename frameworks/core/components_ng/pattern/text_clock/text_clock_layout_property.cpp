@@ -40,6 +40,39 @@ std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
     result = result.substr(0, result.size() - 1);
     return result;
 }
+
+std::string CovertShadowToString(const Shadow& shadow)
+{
+    std::string result;
+    result += std::string("radius") + std::to_string(shadow.GetBlurRadius());
+    result += std::string("color") + shadow.GetColor().ColorToString();
+    result += std::string("offsetX") + std::to_string(shadow.GetOffset().GetX());
+    result += std::string("offsetY") + std::to_string(shadow.GetOffset().GetY());
+    result += std::string("type") + std::to_string(static_cast<int32_t>(shadow.GetShadowType()));
+    return result;
+}
+
+std::string ConvertTextShadow(const std::vector<Shadow>& textShadow)
+{
+    std::string result;
+    for (const auto& item : textShadow) {
+        result += CovertShadowToString(item);
+        result += ",";
+    }
+    result = result.substr(0, result.size() - 1);
+    return result;
+}
+
+std::string ConvertFeature(const FONT_FEATURES_MAP& fontFeaTures)
+{
+    std::string result;
+    for (const auto& item : fontFeaTures) {
+        result += item.first + std::string(" ") + std::to_string(item.second);
+        result += ",";
+    }
+    result = result.substr(0, result.size() - 1);
+    return result;
+}
 } // namespace
 
 void TextClockLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -53,5 +86,7 @@ void TextClockLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) cons
     json->Put(
         "fontStyle", V2::ConvertWrapFontStyleToStirng(GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str());
     json->Put("fontFamily", ConvertFontFamily(GetFontFamily().value_or(std::vector<std::string>())).c_str());
+    json->Put("textShadow", ConvertTextShadow(GetTextShadow().value_or(std::vector<Shadow>())).c_str());
+    json->Put("fontFeature", ConvertFeature(GetFontFeature().value_or(FONT_FEATURES_MAP())).c_str());
 }
 } // namespace OHOS::Ace::NG

@@ -36,7 +36,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 const Dimension MARGIN_TEXT_LEFT = 24.0_vp;
-const Dimension MARGIN_TEXT_RIGHT = 72.0_vp;
+const Dimension MARGIN_TEXT_RIGHT = 0.1_pct;
 const Dimension MARGIN_BUTTON = 12.0_vp;
 const Dimension MARGIN_BACK_BUTTON_RIGHT = -20.0_vp;
 

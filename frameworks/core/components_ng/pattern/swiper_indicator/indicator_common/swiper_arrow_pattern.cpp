@@ -337,11 +337,8 @@ void SwiperArrowPattern::UpdateArrowContent()
 void SwiperArrowPattern::DumpAdvanceInfo()
 {
     DumpLog::GetInstance().AddDesc("index:" + std::to_string(index_));
-    isFirstCreate_ ? DumpLog::GetInstance().AddDesc("isFirstCreate:true")
-                   : DumpLog::GetInstance().AddDesc("isFirstCreate:false");
     isTouch_ ? DumpLog::GetInstance().AddDesc("isTouch:true") : DumpLog::GetInstance().AddDesc("isTouch:false");
     isHover_ ? DumpLog::GetInstance().AddDesc("isHover:true") : DumpLog::GetInstance().AddDesc("isHover:false");
-    isVisible_ ? DumpLog::GetInstance().AddDesc("isVisible:true") : DumpLog::GetInstance().AddDesc("isVisible:false");
     hoverOnClickFlag_ ? DumpLog::GetInstance().AddDesc("hoverOnClickFlag:true")
                       : DumpLog::GetInstance().AddDesc("hoverOnClickFlag:false");
 }

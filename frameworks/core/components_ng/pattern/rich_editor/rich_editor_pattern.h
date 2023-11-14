@@ -176,6 +176,7 @@ public:
     void CreateHandles() override;
     void HandleOnSelectAll() override;
     void HandleOnCopy() override;
+    bool JudgeDraggable(GestureEvent& info);
 
     bool IsUsingMouse() const
     {
@@ -217,6 +218,7 @@ public:
         return paragraphs_.GetParagraphs();
     }
 
+    RectF GetCaretRect() const override;
     void CloseSelectOverlay() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo);
@@ -261,6 +263,7 @@ public:
     bool IsDisabled() const;
     float GetLineHeight() const override;
     std::vector<RectF> GetTextBoxes() override;
+    bool OnBackPressed() override;
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
@@ -308,6 +311,7 @@ private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void UseHostToUpdateTextFieldManager();
     void UpdateTextFieldManager(const Offset& offset, float height);
+    void ScrollToSafeArea() const override;
 #ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);

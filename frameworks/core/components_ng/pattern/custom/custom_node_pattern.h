@@ -43,8 +43,10 @@ public:
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    void UpdateActiveChildren(const std::set<int32_t>& activeChildren);
 private:
     RenderFunction renderFunction_;
+    std::set<int32_t> activeChildren_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CustomNodePattern);
 };

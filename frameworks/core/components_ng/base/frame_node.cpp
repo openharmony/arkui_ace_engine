@@ -30,6 +30,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -435,6 +436,10 @@ void FrameNode::DumpCommonInfo()
     if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
         DumpLog::GetInstance().AddDesc(
             std::string("BackgroundColor: ").append(renderContext_->GetBackgroundColor()->ColorToString()));
+    }
+    if (renderContext_ && renderContext_->GetBorder() && renderContext_->GetBorder()->GetBorderRadius().has_value()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("BorderRadius: ").append(renderContext_->GetBorder()->GetBorderRadius()->ToString().c_str()));
     }
 
     DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
@@ -1540,6 +1545,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto localMat = renderContext_->GetLocalTransformMatrix();
     auto param = renderContext_->GetTrans();
+    localMat_ = localMat;
     if (param.empty()) {
         translateCfg[GetId()] = { .id = GetId(), .localMat = localMat };
     } else {
@@ -1552,11 +1558,12 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         translateCfg[GetId()].degree = 0.0;
         translateCfg[GetId()].localMat = Matrix4();
     }
-
+    int32_t parentId = -1;
     auto parent = GetAncestorNodeOfFrame();
     if (parent) {
         AncestorNodeInfo ancestorNodeInfo { parent->GetId() };
         translateIds[GetId()] = ancestorNodeInfo;
+        parentId = parent->GetId();
     }
 
     auto responseRegionList = GetResponseRegionList(origRect, static_cast<int32_t>(touchRestrict.sourceType));
@@ -1570,7 +1577,9 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
-        if (IsOutOfTouchTestRegion(parentRevertPoint, static_cast<int32_t>(touchRestrict.sourceType))) {
+        bool isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, static_cast<int32_t>(touchRestrict.sourceType));
+        AddFrameNodeSnapshot(!isOutOfRegion, parentId);
+        if (isOutOfRegion) {
             return HitTestResult::OUT_OF_REGION;
         }
     }
@@ -2142,6 +2151,15 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     return hitFrameNodes.rbegin()->second;
 }
 
+RefPtr<NodeAnimatablePropertyBase> FrameNode::GetAnimatablePropertyFloat(const std::string& propertyName) const
+{
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter == nodeAnimatablePropertyMap_.end()) {
+        return nullptr;
+    }
+    return iter->second;
+}
+
 void FrameNode::CreateAnimatablePropertyFloat(
     const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent)
 {
@@ -2154,6 +2172,17 @@ void FrameNode::CreateAnimatablePropertyFloat(
     auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(value, std::move(onCallbackEvent));
     context->AttachNodeAnimatableProperty(property);
     nodeAnimatablePropertyMap_.emplace(propertyName, property);
+}
+
+void FrameNode::DeleteAnimatablePropertyFloat(const std::string& propertyName)
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    RefPtr<NodeAnimatablePropertyBase> propertyRef = GetAnimatablePropertyFloat(propertyName);
+    if (propertyRef) {
+        context->DetachNodeAnimatableProperty(propertyRef);
+        nodeAnimatablePropertyMap_.erase(propertyName);
+    }
 }
 
 void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, float value)
@@ -2225,6 +2254,12 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
 
 void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        const std::string sceneStatusStrs[] = {"START", "RUNNING", "END"};
+        LOGI("%{public}s  AddFRCSceneInfo scene:%{public}s   speed:%{public}f  status:%{public}s", GetTag().c_str(),
+            scene.c_str(), speed, sceneStatusStrs[static_cast<int32_t>(status)].c_str());
+    }
+
     if (status == SceneStatus::RUNNING) {
         return;
     }
@@ -2314,6 +2349,8 @@ void FrameNode::UpdatePercentSensitive()
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
+    ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", GetTag().c_str(),
+        GetId(), GetParent() ? GetParent()->GetId() : 0);
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();
@@ -2378,14 +2415,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         geometryNode_->SetContentSize(size.value());
     }
     GetPercentSensitive();
-    {
-        ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", GetTag().c_str(),
-            GetId(), GetParent() ? GetParent()->GetId() : 0);
-        layoutAlgorithm_->Measure(this);
-    }
+    layoutAlgorithm_->Measure(this);
     if (overlayNode_) {
-        ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", overlayNode_->GetTag().c_str(),
-            overlayNode_->GetId(), overlayNode_->GetParent() ? overlayNode_->GetParent()->GetId() : 0);
         overlayNode_->Measure(layoutProperty_->CreateChildConstraint());
     }
     UpdatePercentSensitive();
@@ -2412,6 +2443,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 // Called to perform layout children.
 void FrameNode::Layout()
 {
+    ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(),
+        GetId(), GetParent() ? GetParent()->GetId() : 0);
     int64_t time = GetSysTimestamp();
     OffsetNodeToSafeArea();
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
@@ -2433,11 +2466,7 @@ void FrameNode::Layout()
             }
             layoutProperty_->UpdateContentConstraint();
         }
-        {
-            ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(),
-                GetId(), GetParent() ? GetParent()->GetId() : 0);
-            GetLayoutAlgorithm()->Layout(this);
-        }
+        GetLayoutAlgorithm()->Layout(this);
         if (overlayNode_) {
             LayoutOverlay();
         }
@@ -2699,8 +2728,6 @@ void FrameNode::LayoutOverlay()
     auto childSize = overlayNode_->GetGeometryNode()->GetMarginFrameSize();
     auto translate = Alignment::GetAlignPosition(size, childSize, align) + offset;
     overlayNode_->GetGeometryNode()->SetMarginFrameOffset(translate);
-    ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", overlayNode_->GetTag().c_str(),
-        GetId(), overlayNode_->GetParent() ? overlayNode_->GetParent()->GetId() : 0);
     overlayNode_->Layout();
 }
 
@@ -2718,4 +2745,68 @@ void FrameNode::OnInspectorIdUpdate(const std::string& /*unused*/)
     }
 }
 
+void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto eventMgr = context->GetEventManager();
+    CHECK_NULL_VOID(eventMgr);
+
+    FrameNodeSnapshot info = {
+        .nodeId = GetId(),
+        .parentNodeId = parentId,
+        .tag = GetTag(),
+        .comId = propInspectorId_.value_or(""),
+        .isHit = isHit,
+        .hitTestMode = static_cast<int32_t>(GetHitTestMode())
+    };
+    eventMgr->GetEventTreeRecord().AddFrameNodeSnapshot(std::move(info));
+}
+int32_t FrameNode::GetUiExtensionId()
+{
+    if (pattern_) {
+        return pattern_->GetUiExtensionId();
+    }
+    return -1;
+}
+
+int32_t FrameNode::WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
+{
+    if (pattern_) {
+        return pattern_->WrapExtensionAbilityId(extensionOffset, abilityId);
+    }
+    return -1;
+}
+
+void FrameNode::SearchExtensionElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
+    int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    if (pattern_) {
+        pattern_->SearchExtensionElementInfoByAccessibilityId(elementId, mode, offset, output);
+    }
+}
+
+void FrameNode::SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
+    int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    if (pattern_) {
+        pattern_->SearchElementInfosByText(elementId, text, offset, output);
+    }
+}
+
+void FrameNode::FindFocusedExtensionElementInfoNG(int32_t elementId, int32_t focusType,
+    int32_t offset, Accessibility::AccessibilityElementInfo& output)
+{
+    if (pattern_) {
+        pattern_->FindFocusedElementInfo(elementId, focusType, offset, output);
+    }
+}
+
+void FrameNode::FocusMoveSearchNG(int32_t elementId, int32_t direction,
+    int32_t offset, Accessibility::AccessibilityElementInfo& output)
+{
+    if (pattern_) {
+        pattern_->FocusMoveSearch(elementId, direction, offset, output);
+    }
+}
 } // namespace OHOS::Ace::NG

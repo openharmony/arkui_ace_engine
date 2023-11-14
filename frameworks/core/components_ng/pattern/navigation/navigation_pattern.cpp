@@ -120,6 +120,10 @@ void NavigationPattern::OnAttachToFrameNode()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowStateChangedCallback(host->GetId());
+    auto theme = NavigationGetTheme();
+    if (theme && theme->GetNavBarUnfocusEffectEnable()) {
+        pipelineContext->AddWindowFocusChangedCallback(host->GetId());
+    }
 }
 
 void NavigationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -397,6 +401,16 @@ void NavigationPattern::DoNavigationTransitionAnimation(const RefPtr<NavDestinat
     CHECK_NULL_VOID(navigationNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto isReplace = navigationStack_->IsReplace();
+    if (isReplace) {
+        if (newTopNavDestination && preTopNavDestination) {
+            navigationNode->TransitionWithReplace(preTopNavDestination, newTopNavDestination, false);
+        } else if (newTopNavDestination) {
+            navigationNode->TransitionWithReplace(navBarNode, newTopNavDestination, true);
+        }
+        navigationStack_->UpdateIsReplace(false);
+        return;
+    }
     if (newTopNavDestination && preTopNavDestination) {
         if (isPopPage) {
             navigationNode->ExitTransitionWithPop(preTopNavDestination);
@@ -552,6 +566,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                         navigationGroupNode->GetNeedSetInvisible())) {
                     navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
                 } else {
+                    navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
                     navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
                 }
             },
@@ -572,7 +587,7 @@ void NavigationPattern::UpdateContextRect(
     CHECK_NULL_VOID(curDestination);
     CHECK_NULL_VOID(hostNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
-    CHECK_NULL_VOID(hostNode);
+    CHECK_NULL_VOID(navBarNode);
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     CHECK_NULL_VOID(navigationPattern);
     auto size = curDestination->GetGeometryNode()->GetFrameSize();

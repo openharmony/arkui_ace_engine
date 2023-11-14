@@ -262,15 +262,16 @@ public:
     std::vector<double> GetTrans() override;
 #ifndef USE_ROSEN_DRAWING
     bool GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr);
-#else
-    bool GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr);
-#endif
-#ifndef USE_ROSEN_DRAWING
     bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
         std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr, SkRect* rect = nullptr);
+#else
+    bool GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr);
+    bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
+        std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr, Rosen::Drawing::Rect* rect = nullptr);
 #endif
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
+    void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
 
     void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;

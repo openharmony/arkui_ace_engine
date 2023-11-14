@@ -67,6 +67,9 @@ public:
         paintProperty->propModelSource_ = CloneModelSource();
         paintProperty->propModelBackground_ = CloneModelBackground();
         paintProperty->propModelCameraMove_ = CloneModelCameraMove();
+        paintProperty->propRenderHeight_ = CloneRenderHeight();
+        paintProperty->propRenderWidth_ = CloneRenderWidth();
+        paintProperty->propRenderFrameRate_ = CloneRenderFrameRate();
 
         paintProperty->needsCameraSetup_ = CloneNeedsCameraSetup();
         paintProperty->needsLightsSetup_ = CloneNeedsLightsSetup();
@@ -124,6 +127,9 @@ public:
         ResetModelSource();
         ResetModelBackground();
         ResetModelCameraMove();
+        ResetRenderHeight();
+        ResetRenderWidth();
+        ResetRenderFrameRate();
         ResetFlagProperties();
     }
 
@@ -192,6 +198,9 @@ public:
     DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(ModelSource, std::string, ModelSource, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
         ShaderPath, std::string, ShaderPath, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(RenderWidth, float, RenderWidth, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(RenderHeight, float, RenderHeight, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(RenderFrameRate, float, RenderFrameRate, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
         ModelCustomRender, std::shared_ptr<Render3D::CustomRenderDescriptor>, CustomRender,
         PROPERTY_UPDATE_RENDER);
@@ -228,6 +237,9 @@ public:
     DEFINE_NEEDS_SETUP_FLAG_PROPERTY(ImageTexturePaths, false, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_PROPERTY(ShaderInputBuffer, false, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_PROPERTY(ModelSource, false, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_PROPERTY(RenderWidth, false, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_PROPERTY(RenderHeight, false, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_PROPERTY(RenderFrameRate, false, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_PROPERTY(ModelBackground, false, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_PROPERTY(ModelCameraMove, false, PROPERTY_UPDATE_RENDER);
 

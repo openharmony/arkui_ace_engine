@@ -27,18 +27,11 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
     }
     auto themeStyle = themeConstants->GetThemeStyle();
     if (!themeStyle) {
-        theme->backgroundColor_ = themeConstants->GetColor(THEME_APP_BACKGROUND);
         return theme;
     }
-    if (themeStyle->HasAttr(THEME_ATTR_BG_COLOR) && !themeConstants->HasCustomStyle(THEME_APP_BACKGROUND)) {
-        // Get from resource.
-        theme->backgroundColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_BG_COLOR, Color::BLACK);
-    } else {
-        // Get from prebuild or custom color.
-        theme->backgroundColor_ = themeConstants->GetColor(THEME_APP_BACKGROUND);
-    }
 
-    auto color = themeConstants->GetColor(THEME_OHOS_CONTROL_FOCUSED_OUTLINE);
+    theme->backgroundColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_BG_COLOR, Color::BLACK);
+    auto color = themeStyle->GetAttr<Color>("focus_color", Color());
     if (color != Color(0xff000000)) {
         theme->focusColor_ = color;
     }

@@ -31,6 +31,7 @@ void NavRouterModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVROUTER_VIEW_ETS_TAG, nodeId);
     auto navRouterNode = NavRouterGroupNode::GetOrCreateGroupNode(
         V2::NAVROUTER_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavRouterPattern>(); });
     stack->Push(navRouterNode);

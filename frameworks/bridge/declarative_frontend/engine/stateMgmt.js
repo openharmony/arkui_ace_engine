@@ -1849,7 +1849,7 @@ class stateMgmtConsole {
         // aceConsole.debug(...args);
     }
     static applicationError(...args) {
-        aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
+        aceConsole.warn(`FIX THIS APPLICATION ERROR \n`, ...args);
     }
 }
 class stateMgmtTrace {
@@ -5382,6 +5382,7 @@ class ViewPU extends NativeViewPartialUpdate {
         let nodeInfo = entry.node;
         if (nodeInfo === undefined) {
             nodeInfo = builder();
+            entry.node = nodeInfo;
         }
         return nodeInfo;
     }

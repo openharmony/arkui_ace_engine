@@ -20,6 +20,7 @@
 #include <functional>
 #include <memory>
 #include <refbase.h>
+#include <list>
 
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
@@ -34,6 +35,10 @@ class Session;
 class ILifecycleListener;
 enum class WSError;
 } // namespace OHOS::Rosen
+
+namespace OHOS::Accessibility {
+    class AccessibilityElementInfo;
+}
 
 namespace OHOS::MMI {
 class KeyEvent;
@@ -92,7 +97,24 @@ public:
     void RequestExtensionSessionBackground();
     void RequestExtensionSessionDestruction();
 
+    virtual void SearchExtensionElementInfoByAccessibilityId(int32_t elementId, int32_t mode,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) override;
+    virtual void SearchElementInfosByText(int32_t elementId, const std::string& text,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) override;
+    virtual void FindFocusedElementInfo(int32_t elementId, int32_t focusType,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
+    virtual void FocusMoveSearch(int32_t elementId, int32_t direction,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
+
     int32_t GetSessionId();
+
+    int32_t GetUiExtensionId() override;
+
+    int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId) override;
+    const RefPtr<FrameNode>& GetUiExtensionNode()
+    {
+        return contentNode_;
+    }
 
 private:
     enum ReleaseCode {
@@ -170,6 +192,10 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 
     bool transferringCaller_ = false;
+    bool isVisible_ = true;
+
+    int32_t uiExtensionId_ = -1;
+    static thread_local int32_t currentUiExtensionId_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H

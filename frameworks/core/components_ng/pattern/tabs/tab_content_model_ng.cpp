@@ -49,6 +49,7 @@ void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
         }
         return deepChild;
     };
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId);
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId,
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
             return AceType::MakeRefPtr<TabContentPattern>(shallowBuilder);
@@ -66,6 +67,7 @@ void TabContentModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId);
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(
         V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
     stack->Push(frameNode);

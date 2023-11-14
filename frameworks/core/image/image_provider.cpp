@@ -23,6 +23,7 @@
 #ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #include "drawing/engine_adapter/skia_adapter/skia_image.h"
+#include "drawing/engine_adapter/skia_adapter/skia_graphics.h"
 #endif
 
 #include "base/log/ace_trace.h"
@@ -447,8 +448,65 @@ void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> contex
     const std::shared_ptr<RSImage>& image, const std::shared_ptr<RSData>& data,
     const std::function<void(std::shared_ptr<RSImage>, std::shared_ptr<RSData>)>&& callback, const std::string src)
 {
-    LOGE("Drawing is not supported");
+#ifdef UPLOAD_GPU_DISABLED
+    // If want to dump draw command or gpu disabled, should use CPU image.
     callback(image, nullptr);
+#else
+    if (data && ImageCompressor::GetInstance()->CanCompress()) {
+        LOGI("use astc cache %{public}s %{public}d * %{public}d", src.c_str(), image->GetWidth(), image->GetHeight());
+        callback(image, data);
+        return;
+    }
+    auto task = [context, image, callback, src]() {
+        ACE_DCHECK(!image->isTextureBacked());
+        bool needRaster = ImageCompressor::GetInstance()->CanCompress();
+        if (!needRaster) {
+            callback(image, nullptr);
+            return;
+        } else {
+            auto rasterizedImage = image->IsLazyGenerated() ? image->MakeRasterImage() : image;
+            if (!rasterizedImage) {
+                LOGW("Rasterize image failed. callback.");
+                callback(image, nullptr);
+                return;
+            }
+            if (!rasterizedImage->CanPeekPixels()) {
+                LOGW("Could not peek pixels of image for texture upload.");
+                callback(rasterizedImage, nullptr);
+                return;
+            }
+
+            RSBitmap rsBitmap;
+            RSBitmapFormat rsBitmapFormat { image->GetColorType(), image->GetAlphaType() };
+            rsBitmap.Build(image->GetWidth(), image->GetHeight(), rsBitmapFormat);
+            if (!image->ReadPixels(rsBitmap, 0, 0)) {
+                callback(image, nullptr);
+                return;
+            }
+
+            int32_t width = static_cast<int32_t>(rsBitmap.GetWidth());
+            int32_t height = static_cast<int32_t>(rsBitmap.GetHeight());
+            std::shared_ptr<RSData> compressData;
+            if (ImageCompressor::GetInstance()->CanCompress()) {
+                compressData = ImageCompressor::GetInstance()->GpuCompress(src, rsBitmap, width, height);
+                ImageCompressor::GetInstance()->WriteToFile(src, compressData, { width, height });
+                auto pipelineContext = context.Upgrade();
+                if (pipelineContext && pipelineContext->GetTaskExecutor()) {
+                    auto taskExecutor = pipelineContext->GetTaskExecutor();
+                    taskExecutor->PostDelayedTask(ImageCompressor::GetInstance()->ScheduleReleaseTask(),
+                        TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs);
+                } else {
+                    BackgroundTaskExecutor::GetInstance().PostTask(
+                        ImageCompressor::GetInstance()->ScheduleReleaseTask());
+                }
+            }
+            callback(image, compressData);
+            // Trigger purge cpu bitmap resource, after image upload to gpu.
+            Rosen::Drawing::SkiaGraphics::PurgeResourceCache();
+        }
+    };
+    BackgroundTaskExecutor::GetInstance().PostTask(task);
+#endif
 }
 #endif
 
@@ -813,6 +871,7 @@ RSColorType ImageProvider::PixelFormatToDrawingColorType(const RefPtr<PixelMap>&
         case PixelFormat::ALPHA_8:
             return RSColorType::COLORTYPE_ALPHA_8;
         case PixelFormat::RGBA_F16:
+            return RSColorType::COLORTYPE_RGBA_F16;
         case PixelFormat::UNKNOWN:
         case PixelFormat::ARGB_8888:
         case PixelFormat::RGB_888:

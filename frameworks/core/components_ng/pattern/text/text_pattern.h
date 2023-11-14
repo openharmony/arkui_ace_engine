@@ -95,6 +95,7 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void DumpInfo() override;
 
     TextSelector GetTextSelector() const
     {
@@ -316,6 +317,7 @@ public:
     }
 
     void OnAreaChangedInner() override;
+    void RemoveAreaChangeInner();
 
 protected:
     virtual void HandleOnCopy();

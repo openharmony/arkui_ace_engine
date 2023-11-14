@@ -574,11 +574,13 @@ void NavigationModelNG::Create()
     // navigation node
     int32_t nodeId = stack->ClaimNodeId();
     auto theme = NavigationGetTheme();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVIGATION_VIEW_ETS_TAG, nodeId);
     auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     // navBar node
     if (!navigationGroupNode->GetNavBarNode()) {
         int32_t navBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVBAR_ETS_TAG, navBarNodeId);
         auto navBarNode = NavBarNode::GetOrCreateNavBarNode(
             V2::NAVBAR_ETS_TAG, navBarNodeId, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
         auto navBarRenderContext = navBarNode->GetRenderContext();
@@ -590,6 +592,7 @@ void NavigationModelNG::Create()
         // titleBar node
         if (!navBarNode->GetTitleBarNode()) {
             int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+            ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TITLE_BAR_ETS_TAG, titleBarNodeId);
             auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
                 V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
             navBarNode->AddChild(titleBarNode);
@@ -599,6 +602,7 @@ void NavigationModelNG::Create()
         // navBar content node
         if (!navBarNode->GetNavBarContentNode()) {
             int32_t navBarContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+            ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId);
             auto navBarContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId,
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
             auto navBarContentRenderContext = navBarContentNode->GetRenderContext();
@@ -611,6 +615,7 @@ void NavigationModelNG::Create()
         // toolBar node
         if (!navBarNode->GetToolBarNode()) {
             int32_t toolBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+            ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TOOL_BAR_ETS_TAG, toolBarNodeId);
             auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(
                 V2::TOOL_BAR_ETS_TAG, toolBarNodeId, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
             navBarNode->AddChild(toolBarNode);
@@ -626,6 +631,7 @@ void NavigationModelNG::Create()
     // divider node
     if (!navigationGroupNode->GetDividerNode()) {
         int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::DIVIDER_ETS_TAG, dividerNodeId);
         auto dividerNode = FrameNode::GetOrCreateFrameNode(
             V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
         navigationGroupNode->AddChild(dividerNode);
@@ -647,13 +653,14 @@ void NavigationModelNG::Create()
     // content node
     if (!navigationGroupNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId);
         auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId,
             []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
         contentNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
         contentNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
             HitTestMode::HTMTRANSPARENT_SELF);
         auto renderContext = contentNode->GetRenderContext();
-        if (theme) {
+        if (theme && !renderContext->HasBackgroundColor()) {
             renderContext->UpdateBackgroundColor(theme->GetNavigationGroupColor());
         }
         navigationGroupNode->AddChild(contentNode);
@@ -997,7 +1004,8 @@ void NavigationModelNG::SetHideNavBar(bool hideNavBar)
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideNavBar, hideNavBar);
 }
 
-void NavigationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+void NavigationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+    const std::string& bundleName, const std::string& moduleName)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1009,7 +1017,7 @@ void NavigationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap,
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    ImageSourceInfo imageSourceInfo(src);
+    ImageSourceInfo imageSourceInfo(src, bundleName, moduleName);
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NoPixMap, noPixMap);
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, ImageSource, imageSourceInfo);
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, PixelMap, pixMap);
@@ -1268,6 +1276,10 @@ void NavigationModelNG::SetNavBarWidth(const Dimension& value)
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     navigationPattern->SetUserSetNavBarWidthFlag(true);
+    if (!setDefaultNavBarWidthFlag_) {
+        navigationPattern->SetInitNavBarWidth(value);
+        setDefaultNavBarWidthFlag_ = true;
+    }
 }
 
 void NavigationModelNG::SetMinNavBarWidth(const Dimension& value)
