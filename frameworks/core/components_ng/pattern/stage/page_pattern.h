@@ -155,7 +155,6 @@ private:
     }
 
     RefPtr<PageInfo> pageInfo_;
-    RefPtr<Animator> controller_;
 
     std::function<void()> onPageShow_;
     std::function<void()> onPageHide_;

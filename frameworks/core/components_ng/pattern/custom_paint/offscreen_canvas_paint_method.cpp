@@ -459,21 +459,19 @@ void OffscreenCanvasPaintMethod::GetImageData(const std::shared_ptr<Ace::ImageDa
     CHECK_NULL_VOID(rawData);
     subBitmap.readPixels(imageInfo, rawData, dirtyWidth * imageInfo.bytesPerPixel(), dx, dy);
 #else
+// Drawing: need be adapted further
     RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
-    int32_t size = dirtyWidth * dirtyHeight;
     auto srcRect =
         RSRect(scaledLeft, scaledTop, dirtyWidth * viewScale + scaledLeft, dirtyHeight * viewScale + scaledTop);
     auto dstRect = RSRect(0.0, 0.0, dirtyWidth, dirtyHeight);
     RSBitmap tempCache;
-    tempCache.Build(width, height, format);
+    tempCache.Build(dirtyWidth * viewScale, dirtyHeight * viewScale, format);
     RSCanvas tempCanvas;
     tempCanvas.Bind(tempCache);
     RSImage rsImage;
     rsImage.BuildFromBitmap(bitmap_);
     tempCanvas.DrawImageRect(
         rsImage, srcRect, dstRect, RSSamplingOptions(), RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
-    // write color
-    uint8_t* pixels = static_cast<uint8_t*>(tempCache.GetPixels());
 #endif
 }
 

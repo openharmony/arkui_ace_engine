@@ -227,10 +227,21 @@ void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal
             length = listItemTheme->GetDeleteDistance();
         }
     }
+    auto onStateChange = deleteAreaObj->GetProperty("onStateChange");
+    std::function<void(SwipeActionState state)> onStateChangeCallback;
+    if (onStateChange->IsFunction()) {
+        onStateChangeCallback = [execCtx = args.GetExecutionContext(),
+                                    func = JSRef<JSFunc>::Cast(onStateChange)](SwipeActionState state) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(state);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            return;
+        };
+    }
 
     ListItemModel::GetInstance()->SetDeleteArea(std::move(builderAction), useDefaultDeleteAnimation,
-        std::move(onActionCallback), std::move(onEnterActionAreaCallback), std::move(onExitActionAreaCallback), length,
-        isStartArea);
+        std::move(onActionCallback), std::move(onEnterActionAreaCallback), std::move(onExitActionAreaCallback),
+        std::move(onStateChangeCallback), length, isStartArea);
 }
 
 void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
@@ -263,7 +274,20 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
     if (edgeEffect->IsNumber()) {
         swipeEdgeEffect = static_cast<V2::SwipeEdgeEffect>(edgeEffect->ToNumber<int32_t>());
     }
-    ListItemModel::GetInstance()->SetSwiperAction(std::move(startAction), std::move(endAction), swipeEdgeEffect);
+
+    auto onOffsetChangeFunc = obj->GetProperty("onOffsetChange");
+    std::function<void(int32_t offset)> onOffsetChangeCallback;
+    if (onOffsetChangeFunc->IsFunction()) {
+        onOffsetChangeCallback = [execCtx = args.GetExecutionContext(),
+                                     func = JSRef<JSFunc>::Cast(onOffsetChangeFunc)](int32_t offset) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(offset);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            return;
+        };
+    }
+    ListItemModel::GetInstance()->SetSwiperAction(std::move(startAction), std::move(endAction),
+        std::move(onOffsetChangeCallback), swipeEdgeEffect);
 }
 
 void JSListItem::SelectCallback(const JSCallbackInfo& args)

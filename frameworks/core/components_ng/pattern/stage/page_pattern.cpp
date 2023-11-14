@@ -26,6 +26,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+std::string KEY_PAGE_TRANSITION_PROPERTY = "pageTransitionProperty";
 void IterativeAddToSharedMap(const RefPtr<UINode>& node, SharedTransitionMap& map)
 {
     const auto& children = node->GetChildren();
@@ -79,37 +80,28 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         if (sharedFinish == pattern->pageTransitionFinish_) {
             // ensure this is exactly the finish callback saved in pagePattern,
             // otherwise means new pageTransition started
             pattern->FirePageTransitionFinish();
+            host->DeleteAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
         }
     };
     if (effect && effect->GetUserCallback()) {
-        if (!controller_) {
-            controller_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
-        }
-        if (!controller_->IsStopped()) {
-            controller_->Finish();
-        }
-        controller_->ClearInterpolators();
         RouteType routeType = (type == PageTransitionType::ENTER_POP || type == PageTransitionType::EXIT_POP)
                                   ? RouteType::POP
                                   : RouteType::PUSH;
-        auto floatAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, 1.0f, effect->GetCurve());
-        floatAnimation->AddListener(
-            [routeType, handler = effect->GetUserCallback(), weak = WeakClaim(this)](const float& progress) {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                handler(routeType, progress);
-            });
-        if (effect->GetDelay() >= 0) {
-            controller_->SetStartDelay(effect->GetDelay());
-        }
-        controller_->SetDuration(effect->GetDuration());
-        controller_->AddInterpolator(floatAnimation);
-        controller_->AddStopListener(wrappedOnFinish);
-        controller_->Forward();
+        host->CreateAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY, 0.0f,
+            [routeType, handler = effect->GetUserCallback()](const float& progress) { handler(routeType, progress); });
+        auto handler = effect->GetUserCallback();
+        handler(routeType, 0.0f);
+        AnimationOption option(effect->GetCurve(), effect->GetDuration());
+        option.SetDelay(effect->GetDelay());
+        AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), wrappedOnFinish);
+        host->UpdateAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY, 1.0f);
+        AnimationUtils::CloseImplicitAnimation();
         return renderContext->TriggerPageTransition(type, nullptr);
     }
     return renderContext->TriggerPageTransition(type, wrappedOnFinish);
@@ -272,10 +264,18 @@ void PagePattern::FirePageTransitionFinish()
 
 void PagePattern::StopPageTransition()
 {
-    if (controller_ && !controller_->IsStopped()) {
-        controller_->Finish();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto property = host->GetAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
+    if (property) {
+        FirePageTransitionFinish();
         return;
     }
+    AnimationOption option(Curves::LINEAR, 0);
+    AnimationUtils::Animate(
+        option, [host]() { host->UpdateAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY, 0.0f); },
+        nullptr);
+    host->DeleteAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
     FirePageTransitionFinish();
 }
 

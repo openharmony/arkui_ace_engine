@@ -271,8 +271,7 @@ private:
     void HandleDragMove(const GestureEvent& event);
     void HandleDragEnd();
     void CreateAnimation();
-    RefPtr<CurveAnimation<double>> CreateAnimation(double from, double to);
-    void HandleCurveStopped();
+    void CreateAnimation(double from, double to);
     void ScrollOption(double delta);
     std::vector<TextPickerOptionProperty> optionProperties_;
     std::vector<int32_t> algorithmOffset_;
@@ -357,12 +356,11 @@ private:
     bool pressed_ = false;
     double scrollDelta_ = 0.0;
     bool animationCreated_ = false;
-    RefPtr<Animator> toController_;
-    RefPtr<Animator> fromController_;
-    RefPtr<CurveAnimation<double>> fromBottomCurve_;
-    RefPtr<CurveAnimation<double>> fromTopCurve_;
     RefPtr<TextPickerTossAnimationController> tossAnimationController_ =
         AceType::MakeRefPtr<TextPickerTossAnimationController>();
+    RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
+    RefPtr<NodeAnimatablePropertyFloat> aroundClickProperty_;
+    std::shared_ptr<AnimationUtils::Animation> animation_;
     std::vector<TextProperties> animationProperties_;
     float dividerSpacing_ = 0.0f;
     float gradientHeight_ = 0.0f;

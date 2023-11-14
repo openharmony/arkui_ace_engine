@@ -43,13 +43,13 @@ public:
     virtual void SetSelectable(bool selectable) = 0;
     virtual void SetSelected(bool selected) = 0;
     virtual void SetSelectChangeEvent(std::function<void(bool)>&& changeEvent) = 0;
-    virtual void SetSwiperAction(
-        std::function<void()>&& startAction, std::function<void()>&& endAction, V2::SwipeEdgeEffect edgeEffect) = 0;
+    virtual void SetSwiperAction(std::function<void()>&& startAction, std::function<void()>&& endAction,
+        OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect) = 0;
     virtual void SetSelectCallback(OnSelectFunc&& selectCallback) = 0;
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
     virtual void SetDeleteArea(std::function<void()>&& builderAction, bool useDefaultDeleteAnimation,
         OnDeleteEvent&& onDelete, OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
-        const Dimension& length, bool isStartArea) = 0;
+        OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea) = 0;
 
 private:
     static std::unique_ptr<ListItemModel> instance_;

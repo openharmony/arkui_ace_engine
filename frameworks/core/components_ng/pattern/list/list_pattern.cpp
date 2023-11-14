@@ -1893,6 +1893,14 @@ std::string ListPattern::ProvideRestoreInfo()
     return std::to_string(startIndex_);
 }
 
+void ListPattern::CloseAllSwipeActions(OnFinishFunc&& onFinishCallback)
+{
+    auto item = swiperItem_.Upgrade();
+    if (item) {
+        return item->CloseSwipeAction(std::move(onFinishCallback));
+    }
+}
+
 void ListPattern::OnRestoreInfo(const std::string& restoreInfo)
 {
     jumpIndex_ = StringUtils::StringToInt(restoreInfo);

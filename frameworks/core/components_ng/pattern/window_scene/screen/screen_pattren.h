@@ -33,12 +33,18 @@ public:
         return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
     }
 
+    sptr<Rosen::ScreenSession> GetScreenSession()
+    {
+        return screenSession_;
+    }
+
 protected:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig) override;
 
 private:
     void UpdateDisplayInfo();
+    void DeduplicateDisplayInfo();
 
     sptr<Rosen::ScreenSession> screenSession_;
 

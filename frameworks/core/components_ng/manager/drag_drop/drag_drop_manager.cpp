@@ -182,14 +182,15 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     if (parentFrameNode && (!parentFrameNode->IsActive() || !parentFrameNode->IsVisible())) {
         return nullptr;
     }
-    auto children = parentNode->GetChildren();
+    auto children = parentFrameNode->GetFrameChildren();
 
     for (auto iter = children.rbegin(); iter != children.rend(); iter++) {
-        auto child = *iter;
+        auto child = iter->Upgrade();
         if (child == nullptr) {
             continue;
         }
-        auto childFindResult = FindTargetInChildNodes(child, hitFrameNodes, findDrop);
+        auto childNode = AceType::DynamicCast<UINode>(child);
+        auto childFindResult = FindTargetInChildNodes(childNode, hitFrameNodes, findDrop);
         if (childFindResult) {
             return childFindResult;
         }

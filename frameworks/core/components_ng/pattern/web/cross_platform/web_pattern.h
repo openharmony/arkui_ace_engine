@@ -39,6 +39,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/render/render_surface.h"
+#include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 
 #include "core/components_ng/pattern/web/web_delegate_interface.h"
 
@@ -247,6 +248,11 @@ public:
         return 1;
     }
 
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt);
+    /**
+     *  End of NestableScrollContainer implementations
+     */
+
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
@@ -287,7 +293,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, HorizontalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
-
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverScrollMode, int32_t);
+    
     void RequestFullScreen();
     void ExitFullScreen();
     bool IsFullScreen() const
@@ -299,6 +306,8 @@ public:
     void OnResizeNotWork();
     bool OnBackPressed() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
+    void UpdateJavaScriptOnDocumentStart();
+    void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool NotifyStartDragTask();
     bool IsImageDrag();
@@ -379,6 +388,7 @@ private:
     void OnHorizontalScrollBarAccessEnabledUpdate(bool value);
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
     void OnScrollBarColorUpdate(const std::string& value);
+    void OnOverScrollModeUpdate(const int32_t value);
 
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);

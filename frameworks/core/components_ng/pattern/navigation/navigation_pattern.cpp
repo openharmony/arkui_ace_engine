@@ -401,6 +401,18 @@ void NavigationPattern::DoNavigationTransitionAnimation(const RefPtr<NavDestinat
     CHECK_NULL_VOID(navigationNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto isReplace = navigationStack_->IsReplace();
+    if (isReplace) {
+        if (newTopNavDestination && preTopNavDestination) {
+            navigationNode->TransitionWithReplaceExit(preTopNavDestination, false);
+            navigationNode->TransitionWithReplaceEnter(newTopNavDestination);
+        } else if (newTopNavDestination) {
+            navigationNode->TransitionWithReplaceExit(navBarNode, true);
+            navigationNode->TransitionWithReplaceEnter(newTopNavDestination);
+        }
+        navigationStack_->UpdateIsReplace(false);
+        return;
+    }
     if (newTopNavDestination && preTopNavDestination) {
         if (isPopPage) {
             navigationNode->ExitTransitionWithPop(preTopNavDestination);
@@ -556,6 +568,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                         navigationGroupNode->GetNeedSetInvisible())) {
                     navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
                 } else {
+                    navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
                     navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
                 }
             },
@@ -576,7 +589,7 @@ void NavigationPattern::UpdateContextRect(
     CHECK_NULL_VOID(curDestination);
     CHECK_NULL_VOID(hostNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
-    CHECK_NULL_VOID(hostNode);
+    CHECK_NULL_VOID(navBarNode);
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     CHECK_NULL_VOID(navigationPattern);
     auto size = curDestination->GetGeometryNode()->GetFrameSize();

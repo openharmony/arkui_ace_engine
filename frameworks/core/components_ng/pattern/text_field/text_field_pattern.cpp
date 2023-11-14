@@ -255,7 +255,7 @@ TextFieldPattern::~TextFieldPattern()
     // If soft keyboard is still exist, close it.
     if (HasConnection()) {
 #if defined(ENABLE_STANDARD_INPUT)
-        LOGI("Destruction of text field, close input method.");
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Destruction of text field, close input method.");
         MiscServices::InputMethodController::GetInstance()->Close();
 #else
         connection_->Close(GetInstanceId());
@@ -384,7 +384,8 @@ void TextFieldPattern::UpdateCaretInfoToController() const // todo确定更新�
         StringUtils::Str8ToStr16(contentController_->GetTextValue()), selectController_->GetStartIndex(),
         selectController_->GetEndIndex());
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-        "Caret position update, left %{public}f, top %{public}f, width %{public}f, height %{public}f, Start "
+        "Caret position update, left %{public}f, top %{public}f, width %{public}f, height %{public}f; "
+        "selectController_ Start "
         "%{public}d, end %{public}d",
         cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height, selectController_->GetStartIndex(),
         selectController_->GetEndIndex());
@@ -867,7 +868,7 @@ void TextFieldPattern::HandleOnCopy()
     if (!IsSelected()) {
         return;
     }
-    if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD) {
+    if (IsInPasswordMode()) {
         UpdateSelection(selectController_->GetEndIndex());
         StartTwinkling();
         return;
@@ -953,7 +954,8 @@ void TextFieldPattern::HandleOnCameraInput()
         auto optionalTextConfig = GetMiscTextConfig();
         CHECK_NULL_VOID(optionalTextConfig.has_value());
         MiscServices::TextConfig textConfig = optionalTextConfig.value();
-        LOGI("HandleOnCameraInput set calling window id is : %{public}u", textConfig.windowId);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnCameraInput set calling window id is : %{public}u",
+            textConfig.windowId);
         inputMethod->Attach(textChangeListener_, false, textConfig);
         inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
         inputMethod->ShowTextInput();
@@ -1146,7 +1148,7 @@ void TextFieldPattern::InitDragEvent()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD &&
+    if (!IsInPasswordMode() &&
         layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None && host->IsDraggable()) {
         InitDragDropEvent();
         AddDragFrameNodeToManager(host);
@@ -2042,8 +2044,7 @@ bool TextFieldPattern::AllowCopy()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None &&
-           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD;
+    return layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None && !IsInPasswordMode();
 }
 
 void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
@@ -3584,6 +3585,12 @@ bool TextFieldPattern::OnBackPressed()
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d receives back press event", tmpHost->GetId());
+    if (SelectOverlayIsOn()) {
+        selectController_->UpdateCaretIndex(std::max(
+            selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
+        CloseSelectOverlay();
+        return true;
+    }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (!imeShown_ && !isCustomKeyboardAttached_) {
 #else
@@ -3592,7 +3599,6 @@ bool TextFieldPattern::OnBackPressed()
         return false;
     }
 
-    selectController_->ResetHandles();
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     CloseKeyboard(true);
 #if defined(ANDROID_PLATFORM)
@@ -4006,8 +4012,7 @@ void TextFieldPattern::SetShowError()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto passWordMode =
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
+    auto passWordMode = IsInPasswordMode();
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     auto tmpHost = GetHost();
@@ -4382,7 +4387,10 @@ bool TextFieldPattern::IsInPasswordMode() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
+    auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+    return inputType == TextInputType::VISIBLE_PASSWORD
+        || inputType == TextInputType::NUMBER_PASSWORD
+        || inputType == TextInputType::SCREEN_LOCK_PASSWORD;
 }
 
 void TextFieldPattern::RestorePreInlineStates()
@@ -4903,8 +4911,7 @@ bool TextFieldPattern::IsShowPasswordIcon() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetShowPasswordIconValue(true) &&
-           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
+    return layoutProperty->GetShowPasswordIconValue(true) && IsInPasswordMode();
 }
 
 void TextFieldPattern::ProcessResponseArea()

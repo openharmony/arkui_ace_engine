@@ -221,6 +221,8 @@ public:
         return predictLayoutParam_;
     }
 
+    void CloseAllSwipeActions(OnFinishFunc&&);
+
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void DumpAdvanceInfo() override;

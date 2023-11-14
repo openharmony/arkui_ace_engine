@@ -1554,11 +1554,12 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         translateCfg[GetId()].degree = 0.0;
         translateCfg[GetId()].localMat = Matrix4();
     }
-
+    int32_t parentId = -1;
     auto parent = GetAncestorNodeOfFrame();
     if (parent) {
         AncestorNodeInfo ancestorNodeInfo { parent->GetId() };
         translateIds[GetId()] = ancestorNodeInfo;
+        parentId = parent->GetId();
     }
 
     auto responseRegionList = GetResponseRegionList(origRect, static_cast<int32_t>(touchRestrict.sourceType));
@@ -1572,7 +1573,9 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
-        if (IsOutOfTouchTestRegion(parentRevertPoint, static_cast<int32_t>(touchRestrict.sourceType))) {
+        bool isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, static_cast<int32_t>(touchRestrict.sourceType));
+        AddFrameNodeSnapshot(!isOutOfRegion, parentId);
+        if (isOutOfRegion) {
             return HitTestResult::OUT_OF_REGION;
         }
     }
@@ -2144,6 +2147,15 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     return hitFrameNodes.rbegin()->second;
 }
 
+RefPtr<NodeAnimatablePropertyBase> FrameNode::GetAnimatablePropertyFloat(const std::string& propertyName) const
+{
+    auto iter = nodeAnimatablePropertyMap_.find(propertyName);
+    if (iter == nodeAnimatablePropertyMap_.end()) {
+        return nullptr;
+    }
+    return iter->second;
+}
+
 void FrameNode::CreateAnimatablePropertyFloat(
     const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent)
 {
@@ -2156,6 +2168,17 @@ void FrameNode::CreateAnimatablePropertyFloat(
     auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(value, std::move(onCallbackEvent));
     context->AttachNodeAnimatableProperty(property);
     nodeAnimatablePropertyMap_.emplace(propertyName, property);
+}
+
+void FrameNode::DeleteAnimatablePropertyFloat(const std::string& propertyName)
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    RefPtr<NodeAnimatablePropertyBase> propertyRef = GetAnimatablePropertyFloat(propertyName);
+    if (propertyRef) {
+        context->DetachNodeAnimatableProperty(propertyRef);
+        nodeAnimatablePropertyMap_.erase(propertyName);
+    }
 }
 
 void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, float value)
@@ -2718,4 +2741,68 @@ void FrameNode::OnInspectorIdUpdate(const std::string& /*unused*/)
     }
 }
 
+void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto eventMgr = context->GetEventManager();
+    CHECK_NULL_VOID(eventMgr);
+
+    FrameNodeSnapshot info = {
+        .nodeId = GetId(),
+        .parentNodeId = parentId,
+        .tag = GetTag(),
+        .comId = propInspectorId_.value_or(""),
+        .isHit = isHit,
+        .hitTestMode = static_cast<int32_t>(GetHitTestMode())
+    };
+    eventMgr->GetEventTreeRecord().AddFrameNodeSnapshot(std::move(info));
+}
+int32_t FrameNode::GetUiExtensionId()
+{
+    if (pattern_) {
+        return pattern_->GetUiExtensionId();
+    }
+    return -1;
+}
+
+int32_t FrameNode::WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
+{
+    if (pattern_) {
+        return pattern_->WrapExtensionAbilityId(extensionOffset, abilityId);
+    }
+    return -1;
+}
+
+void FrameNode::SearchExtensionElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
+    int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    if (pattern_) {
+        pattern_->SearchExtensionElementInfoByAccessibilityId(elementId, mode, offset, output);
+    }
+}
+
+void FrameNode::SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
+    int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    if (pattern_) {
+        pattern_->SearchElementInfosByText(elementId, text, offset, output);
+    }
+}
+
+void FrameNode::FindFocusedExtensionElementInfoNG(int32_t elementId, int32_t focusType,
+    int32_t offset, Accessibility::AccessibilityElementInfo& output)
+{
+    if (pattern_) {
+        pattern_->FindFocusedElementInfo(elementId, focusType, offset, output);
+    }
+}
+
+void FrameNode::FocusMoveSearchNG(int32_t elementId, int32_t direction,
+    int32_t offset, Accessibility::AccessibilityElementInfo& output)
+{
+    if (pattern_) {
+        pattern_->FocusMoveSearch(elementId, direction, offset, output);
+    }
+}
 } // namespace OHOS::Ace::NG

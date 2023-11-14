@@ -36,4 +36,9 @@ bool ClickRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& /* recogn
 {
     return true;
 }
+
+RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

@@ -21,7 +21,7 @@
 #include "native_engine/native_value.h"
 #include "ui_content.h"
 #include "iremote_object.h"
-
+#include "accessibility_element_info.h"
 namespace OHOS {
 namespace Ace {
 class MockUIContent : public UIContent {
@@ -81,6 +81,20 @@ public:
     MOCK_METHOD1(CloseModalUIExtension, void(int32_t sessionId));
     MOCK_METHOD1(SetParentToken, void(sptr<IRemoteObject> token));
     MOCK_METHOD0(GetParentToken, sptr<IRemoteObject>());
+#ifndef PREVIEW
+    MOCK_METHOD4(
+        SearchElementInfoByAccessibilityId, void(int32_t elementId,
+        int32_t mode, int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output));
+    MOCK_METHOD4(
+        SearchElementInfosByText, void(int32_t elementId,
+        const std::string& text, int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output));
+    MOCK_METHOD4(
+        FindFocusedElementInfo, void(int32_t elementId,
+        int32_t focusType, int32_t baseParent, Accessibility::AccessibilityElementInfo& output));
+    MOCK_METHOD4(
+        FocusMoveSearch, void(int32_t elementId, int32_t direction,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output));
+#endif
 };
 } // namespace Ace
 } // namespace OHOS
