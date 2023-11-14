@@ -330,6 +330,8 @@ HWTEST_F(TextInputCursorTest, CaretPosition002, TestSize.Level1)
     testItems.emplace_back(TextInputType::PHONE, 12, "TextInputType::PHONE");
     testItems.emplace_back(TextInputType::EMAIL_ADDRESS, text.length() - 2, "TextInputType::EMAIL_ADDRESS");
     testItems.emplace_back(TextInputType::VISIBLE_PASSWORD, text.length(), "TextInputType::VISIBLE_PASSWORD");
+    testItems.emplace_back(TextInputType::NUMBER_PASSWORD, 10, "TextInputType::NUMBER_PASSWORD");
+    testItems.emplace_back(TextInputType::SCREEN_LOCK_PASSWORD, text.length(), "TextInputType::SCREEN_LOCK_PASSWORD");
 
     /**
      * @tc.expected: Check if the text filter rules for the input box are compliant
@@ -1240,6 +1242,8 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
         "openharmony#15612932075*.com",
         "open_harmony@@huawei.com*+$helloworld",
         "open_harmony123 password*+#",
+        "openharmony123456*+&@huawei.com",
+        "open_harmony123 password*+#",
     };
     std::vector<TestItem<TextInputType, std::string>> testItems;
     testItems.emplace_back(TextInputType::TEXT, "openharmony123_ *+%$", "TextInputType::TEXT");
@@ -1249,6 +1253,10 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
         TextInputType::EMAIL_ADDRESS, "open_harmony@huawei.comhelloworld", "TextInputType::EMAIL_ADDRESS");
     testItems.emplace_back(
         TextInputType::VISIBLE_PASSWORD, "open_harmony123 password*+#", "TextInputType::VISIBLE_PASSWORD");
+    testItems.emplace_back(
+        TextInputType::NUMBER_PASSWORD, "123456", "TextInputType::NUMBER_PASSWORD");
+    testItems.emplace_back(
+        TextInputType::SCREEN_LOCK_PASSWORD, "open_harmony123 password*+#", "TextInputType::SCREEN_LOCK_PASSWORD");
 
     /**
      * @tc.expected: Check if text filtering meets expectations
