@@ -86,8 +86,13 @@ template("ace_core_source_set") {
       "common/resource/resource_manager.cpp",
       "common/sharedata/share_data.cpp",
       "common/storage/storage_proxy.cpp",
+      "common/task_executor_impl.cpp",
+      "common/task_runner_adapter_factory.cpp",
+      "common/task_runners.cpp",
       "common/text_field_manager.cpp",
       "common/thread_checker.cpp",
+      "common/thread_container.cpp",
+      "common/thread_model_impl.cpp",
       "common/vibrator/vibrator_proxy.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
@@ -260,6 +265,7 @@ template("ace_core_source_set") {
       sources += [
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
+        "common/task_runner_adapter_impl.cpp",
       ]
     } else {
       sources += [
@@ -642,8 +648,13 @@ template("ace_core_ng_source_set") {
       "common/resource/resource_manager.cpp",
       "common/sharedata/share_data.cpp",
       "common/storage/storage_proxy.cpp",
+      "common/task_executor_impl.cpp",
+      "common/task_runner_adapter_factory.cpp",
+      "common/task_runners.cpp",
       "common/text_field_manager.cpp",
       "common/thread_checker.cpp",
+      "common/thread_container.cpp",
+      "common/thread_model_impl.cpp",
       "common/vibrator/vibrator_proxy.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
@@ -821,6 +832,7 @@ template("ace_core_ng_source_set") {
       sources += [
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
+        "common/task_runner_adapter_impl.cpp",
       ]
     }
 
