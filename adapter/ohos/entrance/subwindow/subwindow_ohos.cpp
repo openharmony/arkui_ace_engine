@@ -14,7 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
-
+#include "core/components_ng/base/frame_node.h"
 #include "dm/display_manager.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
@@ -480,6 +480,9 @@ void SubwindowOhos::AddMenu(const RefPtr<Component>& newComponent)
 
 void SubwindowOhos::ClearMenu()
 {
+    if (haveDialog_) {
+        return;
+    }
 #ifndef NG_BUILD
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Subwindow Clear menu start.");
     auto stack = GetStack();
@@ -605,6 +608,18 @@ RefPtr<StackElement> SubwindowOhos::GetStack()
 #endif
 }
 
+void SubwindowOhos::DeleteHotAreas(int32_t overlayId)
+{
+    hotAreasMap_.erase(overlayId);
+    std::vector<Rosen::Rect> hotAreas;
+    for (auto it = hotAreasMap_.begin(); it != hotAreasMap_.end(); it++) {
+        for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+            hotAreas.emplace_back(*it2);
+        }
+    }
+    window_->SetTouchHotAreas(hotAreas);
+}
+
 void SubwindowOhos::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId)
 {
     CHECK_NULL_VOID(window_);
@@ -620,6 +635,31 @@ void SubwindowOhos::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayI
     }
 
     window_->SetTouchHotAreas(hotAreas);
+}
+
+void SubwindowOhos::SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId)
+{
+    CHECK_NULL_VOID(window_);
+    std::vector<Rosen::Rect> hotAreas;
+    Rosen::Rect rosenRect {};
+    for (const auto& rect : rects) {
+        RectConverter(rect, rosenRect);
+        hotAreas.emplace_back(rosenRect);
+    }
+    if (overlayId >= 0) {
+        hotAreasMap_[overlayId] = hotAreas;
+    }
+    std::vector<Rosen::Rect> hotAreas2;
+    for (auto it = hotAreasMap_.begin(); it != hotAreasMap_.end(); it++) {
+        for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+            hotAreas2.emplace_back(*it2);
+        }
+    }
+    OHOS::Rosen::WMError ret = window_->SetTouchHotAreas(hotAreas2);
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Set hot areas failed with errCode: %{public}d", static_cast<int32_t>(ret));
+        return;
+    }
 }
 
 void SubwindowOhos::RectConverter(const Rect& rect, Rosen::Rect& rosenRect)
@@ -642,11 +682,27 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     CHECK_NULL_RETURN(context, nullptr);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, nullptr);
+    std::map<int32_t, RefPtr<NG::FrameNode>> DialogMap(overlay->GetDialogMap().begin(), overlay->GetDialogMap().end());
+    int dialogMapSize = static_cast<int>(DialogMap.size());
+    if (dialogMapSize == 0) {
+        auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+        CHECK_NULL_RETURN(parentAceContainer, nullptr);
+        auto parentcontext = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
+        CHECK_NULL_RETURN(parentcontext, nullptr);
+        auto parentOverlay = parentcontext->GetOverlayManager();
+        CHECK_NULL_RETURN(parentOverlay, nullptr);
+        parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+    }
+    SubwindowManager::GetInstance()->SetDialogSubWindowId(
+        SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     ShowWindow();
     window_->SetFullScreen(true);
     ResizeWindow();
     ContainerScope scope(childContainerId_);
-    return overlay->ShowDialog(dialogProps, std::move(buildFunc));
+    auto dialog = overlay->ShowDialog(dialogProps, std::move(buildFunc));
+    CHECK_NULL_RETURN(dialog, nullptr);
+    haveDialog_ = true;
+    return dialog;
 }
 
 void SubwindowOhos::HideSubWindowNG()
