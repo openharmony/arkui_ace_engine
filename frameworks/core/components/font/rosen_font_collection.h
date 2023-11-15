@@ -41,6 +41,8 @@ public:
 
     void LoadFontFromList(const uint8_t* fontData, size_t length, std::string familyName);
 
+    void LoadFontFamily(const char* fontFamily, const char* familySrc);
+
     void VaryFontCollectionWithFontWeightScale(float fontWeightScale);
 
     void LoadSystemFont();
@@ -56,6 +58,12 @@ public:
 #endif
 
 private:
+    void LoadThemeFont(const char* fontFamily, std::unique_ptr<char[]> buffer, size_t size);
+
+    void InitializeFontCollection();
+
+    bool StdFilesystemExists(const std::string &path);
+
 #ifndef USE_GRAPHIC_TEXT_GINE
     std::shared_ptr<txt::FontCollection> fontCollection_;
 #ifndef USE_ROSEN_DRAWING

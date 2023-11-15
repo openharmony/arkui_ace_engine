@@ -60,6 +60,11 @@ void RosenFontLoader::AddFont(const RefPtr<PipelineBase>& context)
     }
 }
 
+void RosenFontLoader::SetDefaultFontFamily(const char* fontFamily, const char* familySrc)
+{
+    RosenFontCollection::GetInstance().LoadFontFamily(fontFamily, familySrc);
+}
+
 void RosenFontLoader::LoadFromNetwork(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase>& context)
 {
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(context));

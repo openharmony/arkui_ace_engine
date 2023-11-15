@@ -55,6 +55,11 @@ void FontManager::RegisterFont(
     });
 }
 
+void FontManager::SetFontFamily(const char* familyName, const char* familySrc)
+{
+    RefPtr<FontLoader> fontLoader = FontLoader::Create(familyName, familySrc);
+    fontLoader->SetDefaultFontFamily(familyName, familySrc);
+}
 
 void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
 {
