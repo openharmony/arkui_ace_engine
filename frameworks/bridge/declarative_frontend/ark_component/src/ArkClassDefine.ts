@@ -216,8 +216,8 @@ class ArkLabelFont {
     }
 
     isEqual(another: ArkLabelFont): boolean {
-        return (this.size === another.size && this.weight === another.weight && this.family === another.family &&
-            this.style === another.style);
+        return (this.size === another.size && this.weight === another.weight 
+            && this.family === another.family && this.style === another.style);
     }
 }
 
