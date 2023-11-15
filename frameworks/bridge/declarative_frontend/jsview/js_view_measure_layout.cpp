@@ -114,12 +114,14 @@ JSRef<JSObject> GenSelfLayoutInfo(RefPtr<NG::LayoutProperty> layoutProperty)
     if (parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
         layoutProperty = parentNode->GetLayoutProperty();
     }
-    auto width = layoutProperty->GetCalcLayoutConstraint()
-                     ? layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Width()->GetDimension().ConvertToVp()
-                     : 0.0f;
-    auto height = layoutProperty->GetCalcLayoutConstraint()
-                      ? layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height()->GetDimension().ConvertToVp()
-                      : 0.0f;
+    auto width =
+        layoutProperty->GetLayoutConstraint()
+            ? layoutProperty->GetLayoutConstraint()->selfIdealSize.Width().value_or(0.0) / pipeline->GetDipScale()
+            : 0.0f;
+    auto height =
+        layoutProperty->GetLayoutConstraint()
+            ? layoutProperty->GetLayoutConstraint()->selfIdealSize.Height().value_or(0.0) / pipeline->GetDipScale()
+            : 0.0f;
 
     const std::unique_ptr<NG::PaddingProperty> defaultPadding = std::make_unique<NG::PaddingProperty>();
     const std::unique_ptr<NG::BorderWidthProperty>& defaultEdgeWidth = std::make_unique<NG::BorderWidthProperty>();
