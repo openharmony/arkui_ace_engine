@@ -213,7 +213,7 @@ public:
     bool IsAccessibilityClickable();
     bool IsAccessibilityLongClickable();
 
-    bool ActClick();
+    bool ActClick(std::shared_ptr<JsonValue> secComphandle = nullptr);
 
     void CheckClickActuator();
     // Set by user define, which will replace old one.

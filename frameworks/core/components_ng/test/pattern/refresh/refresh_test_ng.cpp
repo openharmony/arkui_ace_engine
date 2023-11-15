@@ -295,7 +295,7 @@ HWTEST_F(RefreshTestNg, Drag003, TestSize.Level1)
      */
     pattern_->HandleDragUpdate(0.f);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
-    
+
     /**
      * @tc.steps: step2. drag to refresh
      * @tc.expected: refreshStatus_ is REFRESH
@@ -535,7 +535,7 @@ HWTEST_F(RefreshTestNg, OnKeyEvent001, TestSize.Level1)
         KeyEvent(KeyCode::KEY_UNKNOWN,
         KeyAction::UNKNOWN,
         { KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_UNKNOWN },
-        0, TimeStamp(std::chrono::milliseconds(0)), 0, 0, SourceType::KEYBOARD
+        0, TimeStamp(std::chrono::milliseconds(0)), 0, 0, SourceType::KEYBOARD, {}
     )));
 }
 
@@ -568,7 +568,7 @@ HWTEST_F(RefreshTestNg, OnKeyEvent002, TestSize.Level1)
         KeyEvent(KeyCode::KEY_UNKNOWN,
         KeyAction::UNKNOWN,
         { KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_R },
-        0, TimeStamp(std::chrono::milliseconds(0)), 0, 0, SourceType::KEYBOARD
+        0, TimeStamp(std::chrono::milliseconds(0)), 0, 0, SourceType::KEYBOARD, {}
     )));
     EXPECT_FALSE(isTrigger);
 }

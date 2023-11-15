@@ -946,7 +946,7 @@ OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()
     return callback;
 }
 
-bool GestureEventHub::ActClick()
+bool GestureEventHub::ActClick(std::shared_ptr<JsonValue> secComphandle)
 {
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, false);
@@ -958,6 +958,9 @@ bool GestureEventHub::ActClick()
     EventTarget clickEventTarget;
     clickEventTarget.id = host->GetId();
     clickEventTarget.type = host->GetTag();
+#ifdef SECURITY_COMPONENT_ENABLE
+    info.SetSecCompHandleEvent(secComphandle);
+#endif
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto offset = geometryNode->GetFrameOffset();

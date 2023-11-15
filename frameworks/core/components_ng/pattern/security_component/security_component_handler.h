@@ -15,17 +15,14 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H
-
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
-#ifdef SECURITY_COMPONENT_ENABLE
 #include "core/components_ng/pattern/security_component/security_component_probe.h"
 #include "location_button.h"
 #include "paste_button.h"
 #include "save_button.h"
 #include "sec_comp_err.h"
 #include "sec_comp_kit.h"
-#endif
 
 namespace OHOS::Ace::NG {
 class SecurityComponentHandler {
@@ -34,13 +31,15 @@ public:
     static int32_t UpdateSecurityComponent(RefPtr<FrameNode>& node, int32_t scId);
     static int32_t UnregisterSecurityComponent(int32_t scId);
     static int32_t ReportSecurityComponentClickEvent(int32_t scId, RefPtr<FrameNode>& node, GestureEvent& event);
-#ifdef SECURITY_COMPONENT_ENABLE
+    static int32_t ReportSecurityComponentClickEvent(int32_t scId, RefPtr<FrameNode>& node, const KeyEvent& event);
     static bool InitButtonInfo(std::string& componentInfo,
         RefPtr<FrameNode>& node, Security::SecurityComponent::SecCompType& scType);
     static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY);
     static bool GetWindowRect(RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompRect& winRect);
     static OHOS::Security::SecurityComponent::SecCompUiRegister uiRegister;
     static SecurityComponentProbe probe;
+    static int32_t ReportSecurityComponentClickEventInner(int32_t scId,
+        RefPtr<FrameNode>& node, Security::SecurityComponent::SecCompClickEvent& event);
 
 private:
     static bool CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
@@ -65,7 +64,6 @@ private:
     static double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
     static bool InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
-#endif
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H

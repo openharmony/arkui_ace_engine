@@ -18,18 +18,11 @@
 #include "base/geometry/ng/offset_t.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
+#include "core/components_ng/pattern/security_component/security_component_layout_element.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 
 namespace OHOS::Ace::NG {
-struct SecurityComponentLayoutPaddingParams {
-    double top = 0.0;
-    double right = 0.0;
-    double bottom = 0.0;
-    double left = 0.0;
-    double textIconSpace = 0.0;
-};
-
 class ACE_EXPORT SecurityComponentLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(SecurityComponentLayoutAlgorithm, BoxLayoutAlgorithm);
 
@@ -38,31 +31,48 @@ public:
     ~SecurityComponentLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
+    void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
     RefPtr<LayoutWrapper> GetChildWrapper(LayoutWrapper* layoutWrapper, const std::string& tag);
     void UpdateChildPosition(LayoutWrapper* layoutWrapper, const std::string& tag,
-        OffsetT<Dimension>& offset);
-    void InitLayoutParams(RefPtr<SecurityComponentLayoutProperty>& property);
-    void MeasureIcon(LayoutWrapper* layoutWrapper, RefPtr<SecurityComponentLayoutProperty>& securityComponentProperty);
-    void MeasureText(LayoutWrapper* layoutWrapper, RefPtr<SecurityComponentLayoutProperty>& securityComponentProperty);
-    void UpdateFrameMeasure(LayoutWrapper* layoutWrapper,
-        RefPtr<SecurityComponentLayoutProperty>& securityComponentProperty);
+        OffsetF& offset);
     void MeasureButton(LayoutWrapper* layoutWrapper,
         RefPtr<SecurityComponentLayoutProperty>& securityComponentProperty);
-    void FillPaddingParams(RefPtr<SecurityComponentLayoutProperty>& securityComponentProperty,
-        SecurityComponentLayoutPaddingParams& res);
-    void UpdateHorizontal(OffsetT<Dimension>& offsetIcon, OffsetT<Dimension>& offsetText,
-        const SecurityComponentLayoutPaddingParams& params);
-    void UpdateVertical(OffsetT<Dimension>& offsetIcon, OffsetT<Dimension>& offsetText,
-        const SecurityComponentLayoutPaddingParams& params);
-    void UpdateCircleBackground(OffsetT<Dimension>& offsetIcon, OffsetT<Dimension>& offsetText);
+    void UpdateHorizontalOffset(OffsetF& offsetIcon, OffsetF& offsetText);
+    void UpdateVerticalOffset(OffsetF& offsetIcon, OffsetF& offsetText);
+    void InitPadding(RefPtr<SecurityComponentLayoutProperty>& property);
+    double ShrinkWidth(double diff);
+    double EnlargeWidth(double diff);
+    double ShrinkHeight(double diff);
+    double EnlargeHeight(double diff);
+    void AdaptWidth();
+    void AdaptHeight();
+    void MeasureIntegralSize();
+    void UpdateCircleButtonConstraint();
+    void FillBlank();
+
     double componentWidth_ = 0.0;
     double componentHeight_ = 0.0;
-    SizeF iconSizeF_;
-    SizeF textSizeF_;
-    SizeF buttonSizeF_;
-    int32_t buttonType_ = static_cast<int32_t>(ButtonType::NORMAL);
+    IconLayoutElement icon_;
+    TextLayoutElement text_;
+    PaddingLayoutElement left_;
+    PaddingLayoutElement top_;
+    PaddingLayoutElement right_;
+    PaddingLayoutElement bottom_;
+    PaddingLayoutElement middle_;
+
+    double idealWidth_ = 0.0;
+    double idealHeight_ = 0.0;
+    double minWidth_ = 0.0;
+    double minHeight_ = 0.0;
+    double maxWidth_ = 1000000.0; // Infinity
+    double maxHeight_ = 1000000.0; // Infinity
+
+    std::optional<LayoutConstraintF> constraint_;
+    bool isNeedReadaptWidth_ = false;
+    bool isVertical_ = false;
+    bool isNobg_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SecurityComponentLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

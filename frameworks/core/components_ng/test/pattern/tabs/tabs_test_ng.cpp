@@ -4674,7 +4674,7 @@ HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent002, TestSize.Level1)
     SourceType sourceType = SourceType::NONE;
     tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>()->UpdateAxis(Axis::HORIZONTAL);
 
-    auto event = KeyEvent(code, action, pressedCodes, repeatTime, time, metaKey, deviceId, sourceType);
+    auto event = KeyEvent(code, action, pressedCodes, repeatTime, time, metaKey, deviceId, sourceType, {});
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             for (int k = 0; k <= 1; k++) {
@@ -5738,7 +5738,7 @@ HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent003, TestSize.Level1)
     SourceType sourceType = SourceType::NONE;
     tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>()->UpdateAxis(Axis::HORIZONTAL);
     tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>()->UpdateIndicator(1);
-    auto event = KeyEvent(code, action, pressedCodes, repeatTime, time, metaKey, deviceId, sourceType);
+    auto event = KeyEvent(code, action, pressedCodes, repeatTime, time, metaKey, deviceId, sourceType, {});
     tabBarPattern->OnKeyEvent(event);
 }
 

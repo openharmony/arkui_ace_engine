@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/security_component/security_component_accessibility_property.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_algorithm.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
+#include "core/components_ng/pattern/security_component/security_component_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -55,6 +56,11 @@ public:
         return MakeRefPtr<SecurityComponentLayoutProperty>();
     }
 
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<SecurityComponentPaintProperty>();
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<SecurityComponentLayoutAlgorithm>();
@@ -65,22 +71,29 @@ public:
         return MakeRefPtr<SecurityComponentAccessibilityProperty>();
     }
 
+    FocusPattern GetFocusPattern() const override;
+
     int32_t scId_ = -1;
 protected:
+    void InitOnKeyEvent();
+    bool OnKeyEvent(const KeyEvent& event);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnModifyDone() override;
     void SetNodeHitTestMode(RefPtr<FrameNode>& node, HitTestMode mode);
-    void InitSecurityComponentOnClick(RefPtr<FrameNode>& secCompNode, RefPtr<FrameNode>& icon,
+    void InitOnClick(RefPtr<FrameNode>& secCompNode, RefPtr<FrameNode>& icon,
         RefPtr<FrameNode>& text, RefPtr<FrameNode>& button);
     void RegisterOrUpdateSecurityComponent(RefPtr<FrameNode>& frameNode, int32_t& scId);
     void UnregisterSecurityComponent();
-    void InitSecurityComponentAppearCallback(RefPtr<FrameNode>& frameNode);
-#ifdef SECURITY_COMPONENT_ENABLE
+    void InitAppearCallback(RefPtr<FrameNode>& frameNode);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void ToJsonValueRect(std::unique_ptr<JsonValue>& json) const;
-#endif
 private:
+    void UpdateIconProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& iconNode);
+    void UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode);
+    void UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode);
+
     RefPtr<ClickEvent> clickListener_;
+    bool isSetOnKeyEvent = false;
     bool isAppearCallback_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SecurityComponentPattern);
 };
