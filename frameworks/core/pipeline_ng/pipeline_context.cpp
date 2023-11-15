@@ -1449,6 +1449,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             }
         } else {
             rootNode_->DumpTree(0);
+            DumpLog::GetInstance().OutPutBySize();
         }
     } else if (params[0] == "-focus") {
         if (rootNode_->GetFocusHub()) {
