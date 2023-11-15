@@ -386,6 +386,8 @@ public:
     static void SetMargin(FrameNode *frameNode, const PaddingProperty &value);
     static void SetPadding(FrameNode *frameNode, const CalcLength &value);
     static void SetPadding(FrameNode *frameNode, const PaddingProperty &value);
+    static void SetAllowDrop(FrameNode* frameNode, const std::set<std::string>& allowDrop);
+
 private:
     static void AddDragFrameNodeToManager();
 };

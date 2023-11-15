@@ -2167,4 +2167,10 @@ void ViewAbstract::SetMargin(FrameNode *frameNode, const PaddingProperty &value)
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, value, frameNode);
 }
+
+void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::set<std::string>& allowDrop)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetAllowDrop(allowDrop);
+}
 } // namespace OHOS::Ace::NG
