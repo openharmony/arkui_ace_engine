@@ -170,6 +170,12 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     useStageModel_ = true;
 }
 
+AceContainer::~AceContainer()
+{
+    std::lock_guard lock(destructMutex_);
+    LOG_DESTROY();
+}
+
 void AceContainer::InitializeTask()
 {
     auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
@@ -199,6 +205,7 @@ bool AceContainer::MaybeRelease()
         LOGI("Destroy AceContainer on PLATFORM thread.");
         return true;
     } else {
+        std::lock_guard lock(destructMutex_);
         LOGI("Post Destroy AceContainer Task to PLATFORM thread.");
         return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::PLATFORM);
     }

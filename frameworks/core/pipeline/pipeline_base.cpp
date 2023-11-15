@@ -97,6 +97,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
 
 PipelineBase::~PipelineBase()
 {
+    std::lock_guard lock(destructMutex_);
     LOG_DESTROY();
 }
 
@@ -782,6 +783,7 @@ bool PipelineBase::MaybeRelease()
         LOGI("Destroy Pipeline on UI thread.");
         return true;
     } else {
+        std::lock_guard lock(destructMutex_);
         LOGI("Post Destroy Pipeline Task to UI thread.");
         return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI);
     }

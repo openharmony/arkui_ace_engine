@@ -1057,6 +1057,7 @@ protected:
     RefPtr<SharedImageManager> sharedImageManager_;
     mutable std::shared_mutex imageMtx_;
     mutable std::shared_mutex themeMtx_;
+    mutable std::mutex destructMutex_;
     RefPtr<ThemeManager> themeManager_;
     RefPtr<DataProviderManagerInterface> dataProviderManager_;
     RefPtr<FontManager> fontManager_;
