@@ -417,10 +417,11 @@ float RefreshPattern::GetFollowRatio(float scrollOffset)
 void RefreshPattern::TransitionPeriodAnimation()
 {
     CHECK_NULL_VOID(progressChild_);
+    animationId_++;
     UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, 0.0f);
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineContext::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAnimationClosure([weak = AceType::WeakClaim(this)]() {
+    pipeline->AddAnimationClosure([weak = AceType::WeakClaim(this), animationId = animationId_]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -431,9 +432,12 @@ void RefreshPattern::TransitionPeriodAnimation()
         option.SetCurve(curve);
         option.SetIteration(1);
 
-        AnimationUtils::OpenImplicitAnimation(option, curve, [weak]() {
+        AnimationUtils::OpenImplicitAnimation(option, curve, [weak, animationId]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            if (pattern->animationId_ != animationId) {
+                return;
+            }
             pattern->UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, 1.0f);
         });
         auto distance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
@@ -448,6 +452,7 @@ void RefreshPattern::TransitionPeriodAnimation()
 void RefreshPattern::LoadingProgressAppear()
 {
     CHECK_NULL_VOID(progressChild_);
+    animationId_++;
     UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, 1.0f);
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineContext::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
@@ -471,6 +476,7 @@ void RefreshPattern::LoadingProgressAppear()
 void RefreshPattern::LoadingProgressExit()
 {
     CHECK_NULL_VOID(progressChild_);
+    animationId_++;
     UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio(scrollOffset_.GetY()));
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -479,11 +485,15 @@ void RefreshPattern::LoadingProgressExit()
     AnimationOption option;
     option.SetDuration(LOADING_EXIT_DURATION);
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
-    AnimationUtils::OpenImplicitAnimation(option, curve, [weak = AceType::WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnExitAnimationFinish();
-    });
+    AnimationUtils::OpenImplicitAnimation(
+        option, curve, [weak = AceType::WeakClaim(this), animationId = animationId_]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->animationId_ != animationId) {
+                return;
+            }
+            pattern->OnExitAnimationFinish();
+        });
     scrollOffset_.SetY(0.0f);
     UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, 0.0f);
     UpdateLoadingProgress(STATE_PROGRESS_LOADING, 0.0f);
@@ -612,6 +622,7 @@ void RefreshPattern::CustomBuilderAppear()
     if (GreatOrEqual(static_cast<double>(customBuilderOffset_), refreshingDistance)) {
         return;
     }
+    animationId_++;
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     option.SetDuration(CUSTOM_BUILDER_RECYCLE_DURATION);
@@ -632,6 +643,7 @@ void RefreshPattern::CustomBuilderExit()
     if (LessNotEqual(static_cast<double>(customBuilderOffset_), static_cast<double>(triggerLoadingDistance_))) {
         return;
     }
+    animationId_++;
     AnimationOption option;
     option.SetDuration(CUSTOM_BUILDER_EXIT_DURATION);
     auto finishCallback = [weak = AceType::WeakClaim(this)]() {
@@ -744,6 +756,7 @@ void RefreshPattern::CustomBuilderRefreshingAnimation()
     if (LessNotEqual(static_cast<double>(customBuilderOffset_), refreshingDistance)) {
         return;
     }
+    animationId_++;
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     option.SetDuration(CUSTOM_BUILDER_RECYCLE_DURATION);
