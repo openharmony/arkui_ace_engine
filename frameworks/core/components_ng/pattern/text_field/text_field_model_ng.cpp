@@ -554,4 +554,28 @@ void TextFieldModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc
         pattern->SetCustomKeyboard(std::move(buildFunc));
     }
 }
+
+void TextFieldModelNG::SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCleanNodeStyle(cleanNodeStyle);
+}
+
+void TextFieldModelNG::SetCancelIconSize(const CalcDimension& iconSize)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, iconSize);
+}
+
+void TextFieldModelNG::SetCanacelIconSrc(const std::string& iconSrc)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, iconSrc);
+}
+
+void TextFieldModelNG::SetCancelIconColor(const Color& iconColor)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, iconColor);
+}
 } // namespace OHOS::Ace::NG

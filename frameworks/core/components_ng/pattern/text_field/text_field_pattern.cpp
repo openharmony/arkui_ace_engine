@@ -617,6 +617,10 @@ void TextFieldPattern::HandleFocusEvent()
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
         renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
     }
+    auto cleanNodeResponseArea = DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+    if (cleanNodeStyle_ == CleanNodeStyle::INPUT) {
+        cleanNodeResponseArea->UpdateCleanNode(true);
+    }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }
@@ -772,6 +776,10 @@ void TextFieldPattern::HandleBlurEvent()
     CloseKeyboard(true);
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
+    auto cleanNodeResponseArea = DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+    if (cleanNodeStyle_ == CleanNodeStyle::INPUT) {
+        cleanNodeResponseArea->UpdateCleanNode(false);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -4917,6 +4925,15 @@ bool TextFieldPattern::IsShowPasswordIcon() const
 
 void TextFieldPattern::ProcessResponseArea()
 {
+    if (!cleanNodeResponseArea_ && !IsTextArea()) {
+        cleanNodeResponseArea_ = AceType::MakeRefPtr<CleanNodeResponseArea>(WeakClaim(this));
+        cleanNodeResponseArea_->InitResponseArea();
+        auto cleanNodeResponseArea = DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+        if (cleanNodeStyle_ == CleanNodeStyle::CONSTANT) {
+            cleanNodeResponseArea->UpdateCleanNode(true);
+        }
+    }
+
     if (IsShowPasswordIcon()) {
         auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
         if (passwordArea) {

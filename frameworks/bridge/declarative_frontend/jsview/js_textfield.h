@@ -90,6 +90,7 @@ public:
     static bool ParseJsCustomKeyboardBuilder(const JSCallbackInfo& info,
         int32_t index, std::function<void()>& buildFunc);
     static void SetCustomKeyboard(const JSCallbackInfo& info);
+    static void SetCancelButton(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
