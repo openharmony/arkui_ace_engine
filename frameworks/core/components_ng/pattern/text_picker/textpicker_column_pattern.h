@@ -67,7 +67,15 @@ enum class ScrollDirection {
     DOWN,
 };
 
-enum class OptionIndex { COLUMN_INDEX_0 = 0, COLUMN_INDEX_1, COLUMN_INDEX_2, COLUMN_INDEX_3, COLUMN_INDEX_4 };
+enum class OptionIndex {
+    COLUMN_INDEX_0 = 0,
+    COLUMN_INDEX_1,
+    COLUMN_INDEX_2,
+    COLUMN_INDEX_3,
+    COLUMN_INDEX_4,
+    COLUMN_INDEX_5,
+    COLUMN_INDEX_6
+};
 
 class TextPickerColumnPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(TextPickerColumnPattern, LinearLayoutPattern);

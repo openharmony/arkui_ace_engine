@@ -46,6 +46,7 @@ const Dimension ICON_TEXT_SPACE = 8.0_vp;
 const std::string REGULAR_FONT_FAMILY = "sans-serif";
 const std::string MEASURE_STRING = "TEST";
 const int32_t HALF_NUMBER = 2;
+const int32_t BUFFER_NODE_NUMBER = 2;
 } // namespace
 
 void TextPickerColumnPattern::OnAttachToFrameNode()
@@ -89,7 +90,7 @@ void TextPickerColumnPattern::OnModifyDone()
     auto theme = pipeline->GetTheme<PickerTheme>();
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
-    auto showCount = theme->GetShowOptionCount();
+    auto showCount = GetShowOptionCount();
     InitMouseAndPressEvent();
     SetAccessibilityAction();
     if (optionProperties_.size() <= 0) {
@@ -107,7 +108,7 @@ void TextPickerColumnPattern::OnModifyDone()
                 auto selectedOptionSize = theme->GetOptionStyle(true, false).GetFontSize();
                 measureContext.fontSize = selectedOptionSize;
                 measureContext.fontFamily = REGULAR_FONT_FAMILY;
-            } else if (childIndex % midIndex == 1 && (childIndex != 0 || childIndex != (showCount - 1))) {
+            } else if ((childIndex == (midIndex + 1)) || (childIndex == (midIndex - 1))) {
                 auto focusOptionSize = theme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
                 measureContext.fontSize = focusOptionSize;
                 measureContext.fontFamily = REGULAR_FONT_FAMILY;
@@ -116,7 +117,7 @@ void TextPickerColumnPattern::OnModifyDone()
                 measureContext.fontSize = normalOptionSize;
                 measureContext.fontFamily = REGULAR_FONT_FAMILY;
             }
-            if (childIndex == showCount / HALF_NUMBER) {
+            if (childIndex == midIndex) {
                 prop.height = dividerSpacing_;
             } else {
                 prop.height = gradientHeight_;
@@ -322,7 +323,7 @@ uint32_t TextPickerColumnPattern::GetShowOptionCount() const
     CHECK_NULL_RETURN(context, 0);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, 0);
-    auto showCount = pickerTheme->GetShowOptionCount();
+    auto showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     return showCount;
 }
 
@@ -1024,11 +1025,7 @@ void TextPickerColumnPattern::CalcAlgorithmOffset(ScrollDirection dir, double di
 
 double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection dir)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, 0.0);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_RETURN(theme, 0.0);
-    int32_t optionCounts = theme->GetShowOptionCount();
+    int32_t optionCounts = GetShowOptionCount();
     if (optionCounts == 0) {
         return 0.0;
     }
@@ -1043,30 +1040,39 @@ double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection 
                                                       : (0.0 - optionProperties_[index].height);
             break;
         case OptionIndex::COLUMN_INDEX_1:
+            distance = (dir == ScrollDirection::DOWN) ? optionProperties_[index].height
+                                                      : (0.0 - optionProperties_[index].height);
+            break;
+        case OptionIndex::COLUMN_INDEX_2:
             if (dir == ScrollDirection::UP) {
                 distance = -optionProperties_[nextIndex].height;
             } else {
-                distance =
-                    optionProperties_[index].height +
+                val = optionProperties_[index].height +
                     (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
+                distance = std::ceil(val);
             }
             break;
 
-        case OptionIndex::COLUMN_INDEX_2:
+        case OptionIndex::COLUMN_INDEX_3:
             val = optionProperties_[index].height / HALF_NUMBER + optionProperties_[nextIndex].height -
                   optionProperties_[nextIndex].fontheight / HALF_NUMBER;
             distance = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
+            distance = std::floor(distance);
             break;
-        case OptionIndex::COLUMN_INDEX_3:
+        case OptionIndex::COLUMN_INDEX_4:
             if (dir == ScrollDirection::DOWN) {
                 distance = optionProperties_[nextIndex].height;
             } else {
                 val = optionProperties_[index].height +
                       (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
-                distance = 0.0 - val;
+                distance = std::ceil(0.0f - val);
             }
             break;
-        case OptionIndex::COLUMN_INDEX_4: // last
+        case OptionIndex::COLUMN_INDEX_5:
+            distance = (dir == ScrollDirection::DOWN) ? optionProperties_[index].height
+                                                      : (0.0 - optionProperties_[index].height);
+            break;
+        case OptionIndex::COLUMN_INDEX_6: // last
             distance = (dir == ScrollDirection::DOWN) ? optionProperties_[index].height
                                                       : (0.0 - optionProperties_[index].height);
             break;
@@ -1079,11 +1085,7 @@ double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection 
 
 double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, ScrollDirection dir)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, 0.0);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_RETURN(theme, 0.0);
-    int32_t optionCounts = theme->GetShowOptionCount();
+    int32_t optionCounts = GetShowOptionCount();
     if (optionCounts == 0) {
         return 0.0;
     }
@@ -1107,6 +1109,7 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
             val = optionProperties_[index].height / HALF_NUMBER + optionProperties_[nextIndex].height -
                   optionProperties_[nextIndex].fontheight / HALF_NUMBER;
             distance = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
+            distance = std::floor(distance);
             break;
 
         case OptionIndex::COLUMN_INDEX_2:
@@ -1127,12 +1130,8 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
 
 void TextPickerColumnPattern::SetOptionShiftDistance()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-    int32_t itemCounts = theme->GetShowOptionCount();
-    bool isLanscape = itemCounts == OPTION_COUNT_PHONE_LANDSCAPE;
+    int32_t itemCounts = GetShowOptionCount();
+    bool isLanscape = itemCounts == OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER;
     for (int32_t i = 0; i < itemCounts; i++) {
         TextPickerOptionProperty& prop = optionProperties_[i];
         if (isLanscape) {

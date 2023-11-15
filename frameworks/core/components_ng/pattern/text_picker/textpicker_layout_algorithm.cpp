@@ -27,9 +27,10 @@ namespace OHOS::Ace::NG {
 namespace {
 const int32_t DIVIDER_SIZE = 2;
 const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-const float PICKER_HEIGHT_HALF = 2.5f;
+const float PICKER_HEIGHT_HALF = 3.5f;
 const float ITEM_HEIGHT_HALF = 2.0f;
 const int32_t MAX_HALF_DISPLAY_COUNT = 2;
+const int32_t BUFFER_NODE_NUMBER = 2;
 } // namespace
 void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -173,8 +174,8 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 0, MAX_HALF_DISPLAY_COUNT);
     } else {
         childStartCoordinate += static_cast<float>(pickerItemHeight_ / ITEM_HEIGHT_HALF -
-                                                   pickerTheme->GetGradientHeight().ConvertToPx() * ITEM_HEIGHT_HALF -
-                                                   pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF);
+                                    pickerTheme->GetGradientHeight().ConvertToPx() * (ITEM_HEIGHT_HALF + 1) -
+                                    pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF);
         halfDisplayCounts_ = std::clamp(
             static_cast<int32_t>(std::ceil((pickerItemHeight_ / ITEM_HEIGHT_HALF -
                                                pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF) /
@@ -182,7 +183,7 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             0, MAX_HALF_DISPLAY_COUNT);
     }
     int32_t i = 0;
-    int32_t showCount = pickerTheme->GetShowOptionCount();
+    int32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     for (const auto& child : children) {
         if (i >= showCount) {
             break;
