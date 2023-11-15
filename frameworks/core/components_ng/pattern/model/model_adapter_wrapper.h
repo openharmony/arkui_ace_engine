@@ -94,6 +94,7 @@ private:
     uint32_t key_ = UINT32_MAX;
     PaintFinishCallback callback_ = nullptr;
     bool needsSyncPaint_ = true;
+    bool needsRepaint_ = true;
 
     std::shared_ptr<Render3D::WidgetAdapter> widgetAdapter_;
     std::unique_ptr<Render3D::TextureLayer> textureLayer_;

@@ -204,6 +204,14 @@ void ModelAdapterWrapper::OnPaint3DSceneTexture(SkCanvas* skCanvas)
 void ModelAdapterWrapper::DrawFrame()
 {
     ACE_FUNCTION_TRACE();
+    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
+        auto adapter = weak.Upgrade();
+        CHECK_NULL_VOID(adapter);
+        CHECK_NULL_VOID(adapter->widgetAdapter_);
+
+        adapter->needsRepaint_ = adapter->widgetAdapter_->NeedsRepaint();
+    });
+
     const auto& msg = [weak = WeakClaim(this)] {
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
@@ -244,16 +252,7 @@ void ModelAdapterWrapper::UnloadSceneAndBackground()
 
 bool ModelAdapterWrapper::NeedsRepaint()
 {
-    bool needsRepaint = false;
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &needsRepaint] {
-        auto adapter = weak.Upgrade();
-        CHECK_NULL_VOID(adapter);
-        CHECK_NULL_VOID(adapter->widgetAdapter_);
-
-        needsRepaint = adapter->widgetAdapter_->NeedsRepaint();
-    });
-
-    return needsRepaint;
+    return needsRepaint_;
 }
 
 ModelAdapterWrapper::~ModelAdapterWrapper()
