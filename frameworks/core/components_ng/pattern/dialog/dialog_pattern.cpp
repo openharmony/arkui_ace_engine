@@ -520,7 +520,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     // add scale animation
     auto inputHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_RETURN(inputHub, nullptr);
-    inputHub->SetHoverEffect(HoverEffectType::NONE);
+    inputHub->SetHoverEffect(HoverEffectType::AUTO);
 
     // update background color
     auto renderContext = buttonNode->GetRenderContext();
