@@ -63,6 +63,7 @@ constexpr int32_t HALF_INDEX_NUM = 5;
 constexpr int32_t INDEX_NUM = 10;
 constexpr int32_t CURRENT_INDEX = 8;
 constexpr int32_t CURRENT_END_INDEX = 3;
+constexpr int32_t BUFFER_NODE_NUMBER = 2;
 constexpr size_t FIVE_CHILDREN = 5;
 constexpr size_t THREE = 3;
 constexpr size_t SECOND = 2;
@@ -228,7 +229,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions001, TestSi
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("3", content);
+    EXPECT_EQ("2", content);
 }
 
 /**
@@ -282,7 +283,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp001, TestSi
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("2", content);
+    EXPECT_EQ("3", content);
 }
 
 /**
@@ -336,7 +337,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown001, Test
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("4", content);
+    EXPECT_EQ("3", content);
 }
 
 /**
@@ -513,7 +514,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions003, TestSi
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("test3", content);
+    EXPECT_EQ("test2", content);
 }
 
 /**
@@ -1049,7 +1050,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp003, TestSi
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("test3", content);
+    EXPECT_EQ("test1", content);
 }
 
 /**
@@ -1164,7 +1165,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown003, Test
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     std::string content = textLayoutProperty->GetContent().value_or("");
-    EXPECT_EQ("test1", content);
+    EXPECT_EQ("test3", content);
     ASSERT_TRUE(textLayoutProperty->HasFontSize());
     double fontSize = textLayoutProperty->GetFontSize().value().Value();
     EXPECT_EQ(FONT_SIZE_5, fontSize);
@@ -1369,7 +1370,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll005, TestSize
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    EXPECT_EQ("5", textLayoutProperty->GetContent().value());
+    EXPECT_EQ("1", textLayoutProperty->GetContent().value());
 }
 
 /**
@@ -2346,7 +2347,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate001, TestSize.Level1)
     auto columnNode = AceType::DynamicCast<FrameNode>(stackNode->GetLastChild());
     ASSERT_NE(columnNode, nullptr);
     auto columnChildren = columnNode->GetChildren();
-    EXPECT_EQ(FIVE_CHILDREN, columnChildren.size());
+    EXPECT_EQ(FIVE_CHILDREN + BUFFER_NODE_NUMBER, columnChildren.size());
 }
 
 /**
@@ -2367,7 +2368,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate002, TestSize.Level1)
     auto columnNode = AceType::DynamicCast<FrameNode>(stackNode->GetLastChild());
     ASSERT_NE(columnNode, nullptr);
     auto columnChildren = columnNode->GetChildren();
-    EXPECT_EQ(FIVE_CHILDREN, columnChildren.size());
+    EXPECT_EQ(FIVE_CHILDREN + BUFFER_NODE_NUMBER, columnChildren.size());
 }
 
 /**
@@ -3519,6 +3520,35 @@ HWTEST_F(TextPickerTestNg, TextPickerPaintTest002, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
     canvasDrawFunction(rsCanvas);
+}
+
+/**
+ * @tc.name: TextPickerPatternTest001
+ * @tc.desc: test OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerPatternTest001, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto focusHub = frameNode->GetEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+
+    /**
+     * @tc.cases: case1. up KeyEvent.
+     */
+    KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventUp));
+
+    /**
+     * @tc.cases: case1. down KeyEvent.
+     */
+    KeyEvent keyEventDown(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventDown));
 }
 
 /**
@@ -5374,41 +5404,34 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest008, TestSize.Level1)
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
 
     /**
-     * @tc.cases: case. cover branch totalOptionCount more than 0.
-     */
-    auto pickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
-    std::vector<RangeContent> options { { "icon", "text" } };
-    pickerColumnPattern->SetOptions(options);
-
-    /**
      * @tc.cases: case1. KeyCode : KEY_DPAD_UP.
      */
     bool ret = textPickerPattern->HandleDirectionKey(KeyCode::KEY_DPAD_UP);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 
     /**
      * @tc.cases: case2. KeyCode : KEY_DPAD_DOWN.
      */
     bool retOne = textPickerPattern->HandleDirectionKey(KeyCode::KEY_DPAD_DOWN);
-    EXPECT_TRUE(retOne);
+    EXPECT_FALSE(retOne);
 
     /**
      * @tc.cases: case3. KeyCode : KEY_ENTER.
      */
     bool retTwo = textPickerPattern->HandleDirectionKey(KeyCode::KEY_ENTER);
-    EXPECT_TRUE(retTwo);
+    EXPECT_FALSE(retTwo);
 
     /**
      * @tc.cases: case4. KeyCode : KEY_DPAD_LEFT.
      */
     bool retThree = textPickerPattern->HandleDirectionKey(KeyCode::KEY_DPAD_LEFT);
-    EXPECT_TRUE(retThree);
+    EXPECT_FALSE(retThree);
 
     /**
      * @tc.cases: case5. KeyCode : KEY_DPAD_RIGHT.
      */
     bool retFour = textPickerPattern->HandleDirectionKey(KeyCode::KEY_DPAD_RIGHT);
-    EXPECT_TRUE(retFour);
+    EXPECT_FALSE(retFour);
 }
 
 /**
@@ -5904,7 +5927,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest007, TestSize.Level1)
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
-    EXPECT_EQ(textPickerColumnPattern->GetShiftDistance(COLUMN_INDEX_0, dir), 0.0f);
+    EXPECT_EQ(textPickerColumnPattern->GetShiftDistance(COLUMN_INDEX_0, dir), -2.0f);
 }
 
 /**
@@ -5932,7 +5955,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest008, TestSize.Level1)
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->CalcAlgorithmOffset(dir, DISTANCE);
-    EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.size(), 5);
+    EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.size() - BUFFER_NODE_NUMBER, 5);
 }
 
 /**
@@ -6008,7 +6031,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest011, TestSize.Level1)
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->ScrollOption(20.0f);
-    EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.size(), 4);
+    EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.size() - BUFFER_NODE_NUMBER, 4);
 }
 
 /**
