@@ -1322,6 +1322,9 @@ void EventManager::DumpEvent() const
 
 void EventManager::AddGestureSnapshot(int32_t finger, const RefPtr<TouchEventTarget>& target)
 {
+    if (!target) {
+        return;
+    }
     RefPtr<GestureSnapshot> info = target->Dump();
     auto frameNode = target->GetAttachedNode().Upgrade();
     if (frameNode) {
