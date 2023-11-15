@@ -2455,4 +2455,9 @@ void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& no
         isFocusActiveUpdateEvents_.erase(iter);
     }
 }
+
+void PipelineContext::SetJSViewActive(bool active, WeakPtr<CustomNode> custom)
+{
+    taskScheduler_->SetJSViewActive(active, custom);
+}
 } // namespace OHOS::Ace::NG

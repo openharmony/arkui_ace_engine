@@ -28,6 +28,7 @@
 
 namespace OHOS::Ace::NG {
 
+class CustomNode;
 class FrameNode;
 
 using TaskThread = uint32_t;
@@ -117,6 +118,8 @@ public:
         return isLayouting_;
     }
 
+    void SetJSViewActive(bool active, WeakPtr<CustomNode> custom);
+
 private:
     bool NeedAdditionalLayout();
 
@@ -153,6 +156,8 @@ private:
     bool isLayouting_ = false;
 
     FrameInfo* frameInfo_ = nullptr;
+
+    std::map<WeakPtr<CustomNode>, bool> delayJsActiveNodes_;
 
     static uint64_t frameId_;
 

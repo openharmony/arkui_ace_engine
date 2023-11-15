@@ -477,6 +477,8 @@ void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
     textFieldManager_ = manager;
 }
 
+void NG::PipelineContext::SetJSViewActive(bool active, WeakPtr<NG::CustomNode> custom) {}
+
 RefPtr<NG::FrameNode> NG::PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<NG::UINode>& node)
 {
     return nullptr;

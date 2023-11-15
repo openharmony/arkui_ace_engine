@@ -146,9 +146,28 @@ void UITaskScheduler::FlushTask()
     FlushRenderTask();
 }
 
+void UITaskScheduler::SetJSViewActive(bool active, WeakPtr<CustomNode> custom)
+{
+    auto iter = delayJsActiveNodes_.find(custom);
+    if (iter != delayJsActiveNodes_.end()) {
+        iter->second = active;
+    } else {
+        delayJsActiveNodes_.emplace(custom, active);
+    }
+}
+
 void UITaskScheduler::FlushDelayJsActive()
 {
-    CustomNode::FlushDelayJsActive();
+    auto nodes = std::move(delayJsActiveNodes_);
+    for (auto [node, active] : nodes) {
+        auto customNode = node.Upgrade();
+        if (customNode) {
+            if (customNode->GetJsActive() != active) {
+                customNode->SetJsActive(active);
+                customNode->FireSetActiveFunc(active);
+            }
+        }
+    }
 }
 
 void UITaskScheduler::AddPredictTask(PredictTask&& task)
