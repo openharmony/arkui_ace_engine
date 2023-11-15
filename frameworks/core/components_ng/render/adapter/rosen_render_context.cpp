@@ -3600,7 +3600,9 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
                 auto taskExecutor = pipeline->GetTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
                 taskExecutor->PostTask(
-                    [id, nodeId, context]() {
+                    [id, nodeId, weakThis]() {
+                        auto context = weakThis.Upgrade();
+                        CHECK_NULL_VOID(context);
                         ContainerScope scope(id);
                         // update transition out count
                         context->OnTransitionOutFinish();
