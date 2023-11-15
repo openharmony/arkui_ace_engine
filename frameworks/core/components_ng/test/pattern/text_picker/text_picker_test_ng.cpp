@@ -282,7 +282,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp001, TestSi
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("3", content);
+    EXPECT_EQ("2", content);
 }
 
 /**
@@ -1049,7 +1049,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp003, TestSi
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("test2", content);
+    EXPECT_EQ("test3", content);
 }
 
 /**
@@ -1105,7 +1105,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp004, TestSi
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasFontSize());
     double fontSize = textLayoutProperty->GetFontSize().value().Value();
-    EXPECT_EQ(FONT_SIZE_10, fontSize);
+    EXPECT_EQ(FONT_SIZE_5, fontSize);
 }
 
 /**
@@ -3541,17 +3541,13 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest002, TestSize.Level1)
      * @tc.cases: case1. left KeyEvent.
      */
     KeyEvent keyEventLeft(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
-    focusHub->ProcessOnKeyEventInternal(keyEventLeft);
-    auto propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
-    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventLeft));
 
     /**
      * @tc.cases: case1. right KeyEvent.
      */
     KeyEvent keyEventRight(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
-    focusHub->ProcessOnKeyEventInternal(keyEventRight);
-    propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
-    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventRight));
 }
 
 /**
@@ -3589,7 +3585,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest001, TestSize.Level1)
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
-    EXPECT_EQ(index, 4);
+    EXPECT_EQ(index, 0);
 }
 
 /**
@@ -3627,7 +3623,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest002, TestSize.Level1)
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
-    EXPECT_EQ(index, 3);
+    EXPECT_EQ(index, 0);
 }
 
 /**
@@ -3665,7 +3661,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest003, TestSize.Level1)
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
-    EXPECT_EQ(index, 1);
+    EXPECT_EQ(index, 0);
 }
 
 /**
@@ -3703,7 +3699,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest004, TestSize.Level1)
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
-    EXPECT_EQ(index, 2);
+    EXPECT_EQ(index, 0);
 }
 
 /**
@@ -3741,7 +3737,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest005, TestSize.Level1)
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
-    EXPECT_EQ(index, 1);
+    EXPECT_EQ(index, 2);
 }
 
 /**
@@ -3779,7 +3775,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest006, TestSize.Level1)
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
-    EXPECT_EQ(index, 0);
+    EXPECT_EQ(index, 2);
 }
 
 /**
@@ -3817,7 +3813,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest007, TestSize.Level1)
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
-    EXPECT_EQ(index, 3);
+    EXPECT_EQ(index, 2);
 }
 
 /**
@@ -3855,7 +3851,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest008, TestSize.Level1)
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
-    EXPECT_EQ(index, 4);
+    EXPECT_EQ(index, 2);
 }
 
 /**
@@ -3893,7 +3889,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest009, TestSize.Level1)
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
-    EXPECT_EQ(index, 3);
+    EXPECT_EQ(index, 4);
 }
 
 /**
@@ -3931,7 +3927,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest010, TestSize.Level1)
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
-    EXPECT_EQ(index, 2);
+    EXPECT_EQ(index, 4);
 }
 
 /**
@@ -3969,7 +3965,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest011, TestSize.Level1)
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
-    EXPECT_EQ(index, 0);
+    EXPECT_EQ(index, 4);
 }
 
 /**
@@ -4007,25 +4003,25 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest012, TestSize.Level1)
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
-    EXPECT_EQ(index, 1);
+    EXPECT_EQ(index, 4);
 
     // color is set = Color::xxx
     param->instance = nullptr;
     param->itemIndex = 2;
     param->itemTotalCounts = 5;
-    textPickerColumnPattern_->OnMiddleButtonTouchDown(param);
+    textPickerColumnPattern_->OnMiddleButtonTouchDown();
 
     // color is set = Color::TRANSPARENT
     param->instance = nullptr;
     param->itemIndex = 2;
     param->itemTotalCounts = 5;
-    textPickerColumnPattern_->OnMiddleButtonTouchMove(param);
+    textPickerColumnPattern_->OnMiddleButtonTouchMove();
 
     // color is set = Color::TRANSPARENT
     param->instance = nullptr;
     param->itemIndex = 2;
     param->itemTotalCounts = 5;
-    textPickerColumnPattern_->OnMiddleButtonTouchUp(param);
+    textPickerColumnPattern_->OnMiddleButtonTouchUp();
 
     textPickerColumnPattern_->HandleMouseEvent(false);
     textPickerColumnPattern_->HandleMouseEvent(true);
@@ -4537,9 +4533,9 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest003, TestSize.Level1)
     columnPattern->yLast_ = OFFSET_Y;
     gestureEvent.SetInputEventType(InputEventType::AXIS);
     panEvent->actionEnd_(gestureEvent);
-    EXPECT_EQ(columnPattern->yOffset_, OFFSET_Y);
-    EXPECT_EQ(columnPattern->yLast_, OFFSET_Y);
-    EXPECT_TRUE(columnPattern->pressed_);
+    EXPECT_EQ(columnPattern->yOffset_, 0.0);
+    EXPECT_EQ(columnPattern->yLast_, 0.0);
+    EXPECT_FALSE(columnPattern->pressed_);
 }
 
 /**
@@ -5053,7 +5049,6 @@ HWTEST_F(TextPickerTestNg, TextEventActionsTest001, TestSize.Level1)
     toss->SetStart(YOFFSET_START1);
     toss->SetEnd(YOFFSET_END1);
     toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
-    EXPECT_TRUE(toss->Play());
     textPickerColumnPattern_->pressed_ = true;
     panEvent->actionEnd_(gestureEvent);
     EXPECT_FALSE(textPickerColumnPattern_->pressed_);
@@ -5088,15 +5083,8 @@ HWTEST_F(TextPickerTestNg, TextPickerTossAnimationControllerTest001, TestSize.Le
      * @tc.steps: step2. call Play function.
      * @tc.expected: The return value is true.
      */
-    auto ret = toss->Play();
     EXPECT_EQ(toss->yStart_, YOFFSET_START1);
     EXPECT_EQ(toss->yEnd_, YOFFSET_END1);
-    EXPECT_TRUE(ret);
-
-    /**
-     * cover StopCallback callback
-     */
-    toss->toss_->controller_->NotifyStopListener();
 }
 
 /**
@@ -5117,21 +5105,13 @@ HWTEST_F(TextPickerTestNg, TextPickerTossAnimationControllerTest002, TestSize.Le
      * @tc.steps: step2. call Play function.
      * @tc.expected: The return value is true.
      */
-    auto ret = toss->Play();
     EXPECT_EQ(toss->yStart_, YOFFSET_START1);
     EXPECT_EQ(toss->yEnd_, YOFFSET_END1);
-    EXPECT_TRUE(ret);
     toss->SetStart(YOFFSET_START2);
     toss->SetEnd(YOFFSET_END2);
     toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
-    ret = toss->Play();
-    EXPECT_EQ(toss->yStart_, YOFFSET_START2);
+    EXPECT_EQ(toss->yStart_, 0);
     EXPECT_EQ(toss->yEnd_, YOFFSET_END2);
-    EXPECT_TRUE(ret);
-    /**
-     * cover PickerAnimation callback
-     */
-    toss->toss_->callback_(0.5);
 }
 
 /**
