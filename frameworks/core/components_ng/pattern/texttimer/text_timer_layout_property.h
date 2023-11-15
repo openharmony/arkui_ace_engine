@@ -62,9 +62,9 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Format, std::string, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCountDown, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InputCount, double, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(Format, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(IsCountDown, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(InputCount, double, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
@@ -72,6 +72,21 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
 
 private:
+    void ResetCount();
+    void OnFormatUpdate(const std::string& formateStr)
+    {
+        ResetCount();
+    }
+
+    void OnIsCountDownUpdate(bool isCountDown)
+    {
+        ResetCount();
+    }
+
+    void OnInputCountUpdate(double inputCountUpdate)
+    {
+        ResetCount();
+    }
     ACE_DISALLOW_COPY_AND_MOVE(TextTimerLayoutProperty);
 };
 } // namespace OHOS::Ace::NG

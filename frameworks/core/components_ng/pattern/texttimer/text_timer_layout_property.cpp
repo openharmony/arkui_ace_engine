@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
-
+#include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -32,6 +32,15 @@ std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
     return result;
 }
 } // namespace
+
+void TextTimerLayoutProperty::ResetCount()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<TextTimerPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetCount();
+}
 
 void TextTimerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
