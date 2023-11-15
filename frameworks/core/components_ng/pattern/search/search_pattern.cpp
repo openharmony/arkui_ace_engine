@@ -186,7 +186,6 @@ void SearchPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
     InitClickEvent();
-
 }
 
 void SearchPattern::InitTextFieldValueChangeEvent()
