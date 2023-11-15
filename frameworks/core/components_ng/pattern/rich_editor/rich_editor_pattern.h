@@ -155,6 +155,8 @@ public:
     void ClearContent(const RefPtr<UINode>& child);
     void CloseSelectionMenu();
     bool SetCaretOffset(int32_t caretPosition);
+    void ResetFirstNodeStyle();
+    void FireOnDeleteComplete(const RichEditorDeleteValue& info);
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
