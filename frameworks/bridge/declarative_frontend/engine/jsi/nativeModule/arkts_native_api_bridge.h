@@ -22,8 +22,8 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
-#include "core/components/common/properties/text_style.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::NG {
 using ArkUINativeModuleValue = panda::Local<panda::JSValueRef>;

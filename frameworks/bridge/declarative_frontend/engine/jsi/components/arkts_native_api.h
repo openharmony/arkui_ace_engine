@@ -167,6 +167,13 @@ struct ArkUINavDestinationModifierAPI {
     void (*ResetHideTitleBar)(NodeHandle node);
 };
 
+struct ArkUICounterModifierAPI {
+    void (*SetEnableInc)(NodeHandle node, bool value);
+    void (*ReSetEnableInc)(NodeHandle node);
+    void (*SetEnableDec)(NodeHandle node, bool value);
+    void (*ReSetEnableDec)(NodeHandle node);
+};
+
 struct ArkUIImageSpanModifierAPI {
     void (*SetImageSpanVerticalAlign)(NodeHandle node, int32_t value);
     void (*ResetImageSpanVerticalAlign)(NodeHandle node);
@@ -316,6 +323,7 @@ struct ArkUIDividerModifierAPI {
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
+    ArkUICounterModifierAPI (*GetCounterModifier)();
     ArkUITextModifierAPI (*GetTextModifier)();
     ArkUIButtonModifierAPI (*GetButtonModifier)();
     ArkUIToggleModifierAPI (*GetToggleModifier)();

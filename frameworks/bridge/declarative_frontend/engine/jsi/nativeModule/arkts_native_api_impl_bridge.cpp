@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blank_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
@@ -232,6 +233,17 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetForegroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetForegroundColor));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
+
+    auto counter = panda::ObjectRef::New(vm);
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableInc"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetEnableInc));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableInc"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetEnableInc));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableDec"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetEnableDec));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDec"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetEnableDec));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "counter"), counter);
 
     auto text = panda::ObjectRef::New(vm);
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
