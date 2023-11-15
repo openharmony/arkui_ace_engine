@@ -34,6 +34,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const int32_t BUFFER_NODE_NUMBER = 2;
+
 void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPickerDialog,
                          const RefPtr<DialogTheme>& theme)
 {
@@ -66,7 +68,7 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetColumnsKind(columnKind);
     CHECK_NULL_VOID(pickerTheme);
-    uint32_t showCount = pickerTheme->GetShowOptionCount();
+    uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
 
     if (textPickerNode->GetChildren().empty()) {
         auto columnNode = CreateColumnNode(columnKind, showCount);
@@ -302,7 +304,7 @@ void TextPickerModelNG::MultiInit(const RefPtr<PickerTheme> pickerTheme)
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
 
     CHECK_NULL_VOID(pickerTheme);
-    showCount_ = pickerTheme->GetShowOptionCount();
+    showCount_ = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     stack->Push(textPickerNode);
     rangeValue_.clear();
 }
