@@ -236,7 +236,8 @@ private:
         Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
         const RefPtr<NG::FrameNode>& root);
     void FocusExtensionElementMoveSearchNG(const SearchParameter& searchParam,
-        Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context);
+        Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
+        const RefPtr<NG::FrameNode>& root, RefPtr<NG::FrameNode>& outputExtensionNode);
     void TransferExecuteAction(int32_t elementId, RefPtr<NG::FrameNode>& node,
         const std::map<std::string, std::string>& actionArguments,
         Accessibility::ActionType& action, int32_t uiExtensionOffset);

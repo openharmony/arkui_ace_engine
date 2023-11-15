@@ -2518,7 +2518,6 @@ void JsAccessibilityManager::FindFocusedExtensionElementInfoNG(const SearchParam
     const RefPtr<PipelineBase>& context, const RefPtr<NG::FrameNode>& root)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_VOID(ngPipeline);
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
@@ -3173,35 +3172,47 @@ bool JsAccessibilityManager::ClearCurrentFocus()
     return currentFocusNode->ActionAccessibilityFocus(false);
 }
 
-void FocusExtensionElementMoveSearchNG(int32_t elementId, int32_t direction, RefPtr<NG::FrameNode>& node,
-    Accessibility::AccessibilityElementInfo& info, const int32_t uiExtensionOffset)
+void FocusExtensionElementMoveSearchNG(const SearchParameter& searchParam,
+    const RefPtr<NG::FrameNode>& node, Accessibility::AccessibilityElementInfo& info)
 {
-    if (UI_EXTENSION_OFFSET_MIN < (uiExtensionOffset + 1)) {
-        node->FocusMoveSearchNG(elementId, direction, uiExtensionOffset, info);
+    if (UI_EXTENSION_OFFSET_MIN < (searchParam.uiExtensionOffset + 1)) {
+        node->FocusMoveSearchNG(searchParam.nodeId, searchParam.mode,
+            searchParam.uiExtensionOffset / UI_EXTENSION_ID_10, info);
     } else {
         info.SetValidElement(false);
     }
 }
 
 void JsAccessibilityManager::FocusMoveSearchNG(int32_t elementId, int32_t direction,
-    Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context, const int32_t uiExtensionOffset)
+    Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
+    const int32_t uiExtensionOffset)
 {
     auto mainContext = context_.Upgrade();
     CHECK_NULL_VOID(mainContext);
-
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_VOID(ngPipeline);
     auto rootNode = ngPipeline->GetRootElement();
     CHECK_NULL_VOID(rootNode);
-
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    if (uiExtensionManager->IsWrapExtensionAbilityId(elementId)) {
+        SearchParameter param {elementId, "", direction, uiExtensionOffset};
+        RefPtr<NG::FrameNode> extensionNode;
+        FocusExtensionElementMoveSearchNG(param, info, context, rootNode, extensionNode);
+        if (info.GetAccessibilityId() > -1) {
+            return;
+        }
+        CHECK_NULL_VOID(extensionNode);
+        elementId = extensionNode->GetAccessibilityId();
+    }
+#endif
     auto node = GetInspectorById(rootNode, elementId);
     if (!node) {
-        info.SetValidElement(false);
-        return;
+        return info.SetValidElement(false);
     }
     std::list<RefPtr<NG::FrameNode>> nodeList;
     Framework::AddFocusableNode(nodeList, rootNode);
-
     RefPtr<NG::FrameNode> resultNode;
     switch (direction) {
         case FocusMoveDirection::FORWARD:
@@ -3228,33 +3239,22 @@ void JsAccessibilityManager::FocusMoveSearchNG(int32_t elementId, int32_t direct
 }
 
 void JsAccessibilityManager::FocusExtensionElementMoveSearchNG(const SearchParameter& searchParam,
-    Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context)
+    Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
+    const RefPtr<NG::FrameNode>& root, RefPtr<NG::FrameNode>& outputExtensionNode)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto mainContext = context_.Upgrade();
-    CHECK_NULL_VOID(mainContext);
-
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_VOID(ngPipeline);
-
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
     auto elementIdPair =
         uiExtensionManager->UnWrapExtensionAbilityId(searchParam.uiExtensionOffset, searchParam.nodeId);
-    int32_t nextElementId = elementIdPair.second;
-    auto uiExtensionNode = uiExtensionManager->GetFocusUiExtensionNode();
-    CHECK_NULL_VOID(uiExtensionNode);
-    OHOS::Ace::Framework::FocusExtensionElementMoveSearchNG(
-        nextElementId, searchParam.mode, uiExtensionNode, info, searchParam.uiExtensionOffset / UI_EXTENSION_ID_10);
-    ConvertExtensionAccessibilityId(info, uiExtensionNode, searchParam.uiExtensionOffset);
-    CommonProperty commonProperty;
-    GenerateCommonProperty(ngPipeline, commonProperty);
-    if (context->GetWindowId() != mainContext->GetWindowId()) {
-        commonProperty.pageId = 0;
-        commonProperty.pagePath = "";
-    }
-    UpdateAccessibilityElementInfo(uiExtensionNode, commonProperty, info, ngPipeline, searchParam.uiExtensionOffset);
-
+    outputExtensionNode = FindNodeFromRootByExtensionId(root, elementIdPair.first);
+    CHECK_NULL_VOID(outputExtensionNode);
+    SearchParameter transferSearchParam {elementIdPair.second, "",
+        searchParam.mode, searchParam.uiExtensionOffset};
+    OHOS::Ace::Framework::FocusExtensionElementMoveSearchNG(transferSearchParam, outputExtensionNode, info);
+    ConvertExtensionAccessibilityId(info, outputExtensionNode, searchParam.uiExtensionOffset);
 #endif
 }
 
