@@ -40,6 +40,14 @@ const Dimension MARGIN_TEXT_RIGHT = 0.1_pct;
 const Dimension MARGIN_BUTTON = 12.0_vp;
 const Dimension MARGIN_BACK_BUTTON_RIGHT = -20.0_vp;
 
+bool HasNavigation(const RefPtr<UINode>& node)
+{
+    if (node->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+        return true;
+    }
+    const auto& children = node->GetChildren();
+    return std::any_of(children.begin(), children.end(), [](const auto& node) { return HasNavigation(node); });
+}
 } // namespace
 
 RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
@@ -68,6 +76,9 @@ RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
                 return;
             }
             backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+            if (HasNavigation(content)) {
+                titleBar->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+            }
         });
     }
     return atom;
