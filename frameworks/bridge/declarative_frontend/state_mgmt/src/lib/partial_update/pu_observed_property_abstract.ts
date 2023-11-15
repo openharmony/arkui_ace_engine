@@ -203,17 +203,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   protected notifyPropertyHasBeenReadPU() {
     stateMgmtProfiler.begin("ObservedPropertyAbstractPU.notifyPropertyHasBeenRead");
     stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasBeenReadPU.`)
-    this.subscriberRefs_.forEach((subscriber) => {
-      if (subscriber) {
-        // TODO
-        // propertyHasBeenReadPU is not use in the code
-        // defined by interface that is not used either: PropertyReadEventListener
-        // Maybe compiler generated code has it?
-        if ('propertyHasBeenReadPU' in subscriber) {
-          (subscriber as unknown as PropertyReadEventListener<T>).propertyHasBeenReadPU(this);
-        }
-      }
-    });
     this.recordDependentUpdate();
     stateMgmtProfiler.end();
   } 
