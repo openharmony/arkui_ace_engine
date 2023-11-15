@@ -1660,48 +1660,61 @@ void JsAccessibilityManager::ProcessParameters(
     }
 }
 
+bool TransferExecuteAction(int32_t elementId, const RefPtr<NG::FrameNode>& node,
+    const std::map<std::string, std::string>& actionArguments,
+    ActionType action, int32_t uiExtensionOffset)
+{
+    bool isExecuted = false;
+    if ((uiExtensionOffset + 1) > UI_EXTENSION_OFFSET_MIN) {
+        isExecuted = node->TransferExecuteAction(
+            elementId, actionArguments, static_cast<int>(action),
+            uiExtensionOffset / UI_EXTENSION_ID_10);
+    }
+    return isExecuted;
+}
+
 void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& params)
 {
     if (params.size() > EVENT_DUMP_PARAM_LENGTH_UPPER + 1) {
-        DumpLog::GetInstance().Print("Error: params length is illegal!");
-        return;
+        return DumpLog::GetInstance().Print("Error: params length is illegal!");
     }
     if (params[EVENT_DUMP_ORDER_INDEX] != DUMP_ORDER && params[EVENT_DUMP_ORDER_INDEX] != DUMP_INSPECTOR) {
-        DumpLog::GetInstance().Print("Error: not accessibility dump order!");
-        return;
+        return DumpLog::GetInstance().Print("Error: not accessibility dump order!");
     }
-
     auto pipeline = context_.Upgrade();
     CHECK_NULL_VOID(pipeline);
     int32_t nodeId = StringUtils::StringToInt(params[EVENT_DUMP_ID_INDEX]);
     auto action = static_cast<AceAction>(StringUtils::StringToInt(params[EVENT_DUMP_ACTION_INDEX]));
     auto op = ConvertAceAction(action);
-
     if ((op != ActionType::ACCESSIBILITY_ACTION_SET_SELECTION) && (params.size() > EVENT_DUMP_PARAM_LENGTH_UPPER + 1)) {
-        DumpLog::GetInstance().Print("Error: params is illegal!");
-        return;
+        return DumpLog::GetInstance().Print("Error: params is illegal!");
     }
-
     std::map<std::string, std::string> paramsMap;
     ProcessParameters(op, params, paramsMap);
     if (AceType::InstanceOf<NG::PipelineContext>(pipeline)) {
         RefPtr<NG::FrameNode> node;
+#ifdef WINDOW_SCENE_SUPPORTED
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+        auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+        CHECK_NULL_VOID(uiExtensionManager);
+        if (uiExtensionManager->IsWrapExtensionAbilityId(nodeId)) {
+            ExecuteActionNG(nodeId, paramsMap, op, ngPipeline, UI_EXTENSION_OFFSET_MAX);
+            return;
+        }
+#endif
         pipeline = FindPipelineByElementId(nodeId, node);
         CHECK_NULL_VOID(pipeline);
-        CHECK_NULL_VOID(node);
         pipeline->GetTaskExecutor()->PostTask(
             [weak = WeakClaim(this), op, nodeId, paramsMap, pipeline]() {
                 auto jsAccessibilityManager = weak.Upgrade();
                 CHECK_NULL_VOID(jsAccessibilityManager);
-                jsAccessibilityManager->ExecuteActionNG(nodeId, paramsMap, op, pipeline);
+                jsAccessibilityManager->ExecuteActionNG(nodeId, paramsMap, op, pipeline, UI_EXTENSION_OFFSET_MAX);
             },
             TaskExecutor::TaskType::UI);
         return;
     }
-
     auto node = GetAccessibilityNodeFromPage(nodeId);
     CHECK_NULL_VOID(node);
-
     pipeline->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), op, node, paramsMap, pipeline]() {
             auto jsAccessibilityManager = weak.Upgrade();
@@ -2704,12 +2717,35 @@ bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std
     return false;
 }
 
+bool JsAccessibilityManager::ExecuteExtensionActionNG(int32_t elementId,
+    const std::map<std::string, std::string>& actionArguments, int32_t action, const RefPtr<PipelineBase>& context,
+    int32_t uiExtensionOffset)
+{
+    return ExecuteActionNG(elementId, actionArguments, static_cast<ActionType>(action), context, uiExtensionOffset);
+}
+
 bool JsAccessibilityManager::ExecuteActionNG(int32_t elementId,
-    const std::map<std::string, std::string>& actionArguments, ActionType action, const RefPtr<PipelineBase>& context)
+    const std::map<std::string, std::string>& actionArguments, ActionType action, const RefPtr<PipelineBase>& context,
+    int32_t uiExtensionOffset)
 {
     bool result = false;
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_RETURN(ngPipeline, result);
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_RETURN(uiExtensionManager, result);
+    if (uiExtensionManager->IsWrapExtensionAbilityId(elementId)) {
+        auto unWrapIdPair = uiExtensionManager->UnWrapExtensionAbilityId(uiExtensionOffset, elementId);
+        int32_t childWrapId = unWrapIdPair.second;
+        int32_t uiExtensionId = unWrapIdPair.first;
+        auto rootNode = ngPipeline->GetRootElement();
+        CHECK_NULL_RETURN(rootNode, result);
+        auto uiExtensionNode = FindNodeFromRootByExtensionId(rootNode, uiExtensionId);
+        CHECK_NULL_RETURN(uiExtensionNode, result);
+        return OHOS::Ace::Framework::TransferExecuteAction(
+            childWrapId, uiExtensionNode, actionArguments, action, uiExtensionOffset);
+    }
+#endif
     ContainerScope instance(ngPipeline->GetInstanceId());
     auto frameNode = GetInspectorById(ngPipeline->GetRootElement(), elementId);
     CHECK_NULL_RETURN(frameNode, result);
@@ -2717,7 +2753,18 @@ bool JsAccessibilityManager::ExecuteActionNG(int32_t elementId,
     if (!enabled) {
         return result;
     }
+    result = ConvertActionTypeToBoolen(action, frameNode, elementId, ngPipeline, result);
+    if (!result) {
+        auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_RETURN(accessibilityProperty, false);
+        result = ActAccessibilityAction(action, actionArguments, accessibilityProperty);
+    }
+    return result;
+}
 
+bool JsAccessibilityManager::ConvertActionTypeToBoolen(ActionType action, RefPtr<NG::FrameNode>& frameNode,
+    int32_t elementId, RefPtr<NG::PipelineContext>& context, bool result)
+{
     switch (action) {
         case ActionType::ACCESSIBILITY_ACTION_FOCUS: {
             result = RequestFocus(frameNode);
@@ -2736,20 +2783,15 @@ bool JsAccessibilityManager::ExecuteActionNG(int32_t elementId,
             break;
         }
         case ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS: {
-            result = ActAccessibilityFocus(elementId, frameNode, ngPipeline, currentFocusNodeId_, false);
+            result = ActAccessibilityFocus(elementId, frameNode, context, currentFocusNodeId_, false);
             break;
         }
         case ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
-            result = ActAccessibilityFocus(elementId, frameNode, ngPipeline, currentFocusNodeId_, true);
+            result = ActAccessibilityFocus(elementId, frameNode, context, currentFocusNodeId_, true);
             break;
         }
         default:
             break;
-    }
-    if (!result) {
-        auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        CHECK_NULL_RETURN(accessibilityProperty, false);
-        result = ActAccessibilityAction(action, actionArguments, accessibilityProperty);
     }
     return result;
 }
@@ -2768,7 +2810,7 @@ void JsAccessibilityManager::ExecuteAction(const int32_t elementId, const Action
     }
 
     if (AceType::InstanceOf<NG::PipelineContext>(context)) {
-        actionResult = ExecuteActionNG(elementId, actionArguments, action, context);
+        actionResult = ExecuteActionNG(elementId, actionArguments, action, context, UI_EXTENSION_OFFSET_MAX);
     } else {
         auto node = GetAccessibilityNodeFromPage(elementId);
         if (!node) {

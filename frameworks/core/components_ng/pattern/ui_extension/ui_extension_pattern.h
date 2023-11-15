@@ -105,6 +105,8 @@ public:
         int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
     virtual void FocusMoveSearch(int32_t elementId, int32_t direction,
         int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
+    virtual bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t offset) override;
 
     int32_t GetSessionId();
 

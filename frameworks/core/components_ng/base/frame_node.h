@@ -604,7 +604,8 @@ public:
         int32_t offset, Accessibility::AccessibilityElementInfo& output);
     void FocusMoveSearchNG(int32_t elementId, int32_t direction,
         int32_t offset, Accessibility::AccessibilityElementInfo& output);
-
+    bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t offset);
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(

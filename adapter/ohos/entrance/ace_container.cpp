@@ -1979,6 +1979,26 @@ void AceContainer::FocusMoveSearchNG(
     }
 }
 
+bool AceContainer::NotifyExecuteAction(int32_t instanceId, int32_t elementId,
+    const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
+{
+    bool IsExecuted = false;
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, IsExecuted);
+    auto pipelineContext = container->GetPipelineContext();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (ngPipeline) {
+        auto frontend = container->GetFrontend();
+        CHECK_NULL_RETURN(frontend, IsExecuted);
+        auto accessibilityManager = frontend->GetAccessibilityManager();
+        if (accessibilityManager) {
+            IsExecuted =
+            accessibilityManager->ExecuteExtensionActionNG(elementId, actionArguments, action, ngPipeline, offset);
+        }
+    }
+    return IsExecuted;
+}
+
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {

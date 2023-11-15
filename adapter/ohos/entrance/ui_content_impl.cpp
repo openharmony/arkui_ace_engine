@@ -1969,4 +1969,11 @@ void UIContentImpl::FocusMoveSearch(
 {
     Platform::AceContainer::FindFocusedElementInfoNG(instanceId_, elementId, direction, baseParent, output);
 }
+
+bool UIContentImpl::NotifyExecuteAction(
+    int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
+{
+    return Platform::AceContainer::NotifyExecuteAction(instanceId_, elementId, actionArguments, action, offset);
+}
 } // namespace OHOS::Ace
+

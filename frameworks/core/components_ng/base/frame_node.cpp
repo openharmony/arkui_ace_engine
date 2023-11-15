@@ -2809,4 +2809,13 @@ void FrameNode::FocusMoveSearchNG(int32_t elementId, int32_t direction,
         pattern_->FocusMoveSearch(elementId, direction, offset, output);
     }
 }
+bool FrameNode::TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+    int32_t action, int32_t offset)
+{
+    bool isExecuted = false;
+    if (pattern_) {
+        isExecuted = pattern_->TransferExecuteAction(elementId, actionArguments, action, offset);
+    }
+    return isExecuted;
+}
 } // namespace OHOS::Ace::NG

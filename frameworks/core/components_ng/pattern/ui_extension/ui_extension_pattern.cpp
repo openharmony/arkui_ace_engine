@@ -961,4 +961,16 @@ int32_t UIExtensionPattern::WrapExtensionAbilityId(int32_t extensionOffset, int3
 {
     return uiExtensionId_ * extensionOffset + abilityId;
 }
+bool UIExtensionPattern::TransferExecuteAction(
+    int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+    int32_t action, int32_t offset)
+{
+    bool isExecuted = false;
+    CHECK_NULL_RETURN(session_, isExecuted);
+    OHOS::Rosen::WSError errcode = session_->TransferExecuteAction(elementId, actionArguments, action, offset);
+    if (OHOS::Rosen::WSError::WS_OK == errcode) {
+        isExecuted = true;
+    }
+    return isExecuted;
+}
 } // namespace OHOS::Ace::NG
