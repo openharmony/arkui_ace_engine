@@ -878,6 +878,7 @@ void SearchModelNG::SetMaxLength(uint32_t value)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateMaxLength(value);
+    textFieldChild->MarkModifyDone();
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
