@@ -2051,3 +2051,9 @@ var WebLayoutMode;
   WebLayoutMode[WebLayoutMode["NONE"] = 0] = "NONE";
   WebLayoutMode[WebLayoutMode["FIT_CONTENT"] = 1] = "FIT_CONTENT";
 })(WebLayoutMode || (WebLayoutMode = {}));
+
+var OptionWidthMode;
+(function (OptionWidthMode) {
+  OptionWidthMode["FIT_CONTENT"] = "fit_content";
+  OptionWidthMode["FIT_TRIGGER"] = "fit_trigger";
+})(OptionWidthMode || (OptionWidthMode = {}));

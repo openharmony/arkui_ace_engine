@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/pattern/option/option_pattern.h"
 
 namespace OHOS::Ace::NG {
 void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -60,6 +61,22 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         idealSize.SetWidth(idealWidth.value());
     }
     idealSize.SetHeight(std::max(minOptionHeight, idealSize.Height()));
+    
+    auto optionNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(optionNode);
+    auto optionPattern = optionNode->GetPattern<OptionPattern>();
+    CHECK_NULL_VOID(optionPattern);
+    if (optionPattern->IsSelectOption()) {
+        auto selectOptionWidth = optionPattern->GetSelectOptionWidth();
+        idealSize.SetWidth(selectOptionWidth);
+    
+        if (optionPattern->IsHeightModifiedBySelect()) {
+            auto optionPatintProperty = optionNode->GetPaintProperty<OptionPaintProperty>();
+            CHECK_NULL_VOID(optionPatintProperty);
+            auto selectModifiedHeight = optionPatintProperty->GetSelectModifiedHeight();
+            idealSize.SetHeight(selectModifiedHeight.value());
+        }
+    }
     LOGD("option frame size set to %{public}s", idealSize.ToString().c_str());
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
 }

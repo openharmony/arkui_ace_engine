@@ -76,6 +76,15 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     AddPaddingToSize(padding, idealSize);
     auto selfSize = idealSize.ConvertToSizeT();
     selfSize.Constrain(constraint->minSize, constraint->maxSize);
+    
+    auto scrollNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    if (scrollPattern->IsSelectScroll()) {
+        auto selectScrollWidth = scrollPattern->GetSelectScrollWidth();
+        selfSize.SetWidth(selectScrollWidth);
+    }
+    
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
 }
 

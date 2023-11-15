@@ -21,6 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/animation/curves.h"
 #include "core/components/common/properties/color.h"
@@ -28,16 +29,21 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
@@ -49,6 +55,9 @@ namespace {
 
 constexpr uint32_t SELECT_ITSELF_TEXT_LINES = 1;
 
+constexpr float OPTION_MARGIN = 8.0f;
+
+constexpr float FONT_SIZE_GET_ERROR = 0.0f;
 } // namespace
 
 void SelectPattern::OnAttachToFrameNode()
@@ -86,6 +95,47 @@ void SelectPattern::ShowSelectMenu()
     auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuLayoutProps);
     menuLayoutProps->UpdateTargetSize(selectSize_);
+    
+    auto select = GetHost();
+    CHECK_NULL_VOID(select);
+    auto selectGeometry = select->GetGeometryNode();
+    CHECK_NULL_VOID(selectGeometry);
+    auto selectProps = select->GetLayoutProperty();
+    CHECK_NULL_VOID(selectProps);
+    
+    if (isFitTrigger_) {
+        auto selectWidth = selectSize_.Width();
+        
+        auto menuPattern = menu->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        menuPattern->SetIsWidthModifiedBySelect(true);
+        menuLayoutProps->UpdateSelectMenuModifiedWidth(selectWidth);
+        
+        auto scroll = DynamicCast<FrameNode>(menu->GetFirstChild());
+        CHECK_NULL_VOID(scroll);
+        auto scrollPattern = scroll->GetPattern<ScrollPattern>();
+        CHECK_NULL_VOID(scrollPattern);
+        scrollPattern->SetIsWidthModifiedBySelect(true);
+        auto scrollLayoutProps = scroll->GetLayoutProperty<ScrollLayoutProperty>();
+        CHECK_NULL_VOID(scrollLayoutProps);
+        scrollLayoutProps->UpdateScrollWidth(selectWidth);
+    
+        for (size_t i = 0; i < options_.size(); ++i) {
+            auto optionGeoNode = options_[i]->GetGeometryNode();
+            CHECK_NULL_VOID(optionGeoNode);
+    
+            Dimension horizonPadding = Dimension(OPTION_MARGIN, DimensionUnit::VP);
+            auto optionWidth = selectWidth - horizonPadding.ConvertToPx();
+        
+            auto optionPattern = options_[i]->GetPattern<OptionPattern>();
+            CHECK_NULL_VOID(optionPattern);
+            optionPattern->SetIsWidthModifiedBySelect(true);
+            auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
+            CHECK_NULL_VOID(optionPaintProperty);
+            optionPaintProperty->UpdateSelectModifiedWidth(optionWidth);
+        }
+    }
+    
     auto offset = GetHost()->GetPaintRectOffset();
     offset.AddY(selectSize_.Height());
     overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
@@ -970,5 +1020,89 @@ void SelectPattern::OnLanguageConfigurationUpdate()
             pattern->UpdateText(pattern->selected_);
         },
         TaskExecutor::TaskType::UI);
+}
+
+Dimension SelectPattern::GetFontSize()
+{
+    Dimension defaultRet = Dimension(FONT_SIZE_GET_ERROR);
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(props, defaultRet);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, defaultRet);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, defaultRet);
+    return props->GetFontSize().value_or(selectTheme->GetFontSize());
+}
+
+void SelectPattern::SetSelectDefaultTheme()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+
+    auto select = GetHost();
+    CHECK_NULL_VOID(select);
+    auto renderContext = select->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    
+    if (selectDefaultBgColor_ == Color::TRANSPARENT) {
+        renderContext->UpdateBackgroundColor(selectTheme->GetSelectDefaultBgColor());
+    } else {
+        renderContext->UpdateBackgroundColor(selectDefaultBgColor_);
+    }
+    BorderRadiusProperty border;
+    border.SetRadius(selectTheme->GetSelectDefaultBorderRadius());
+    renderContext->UpdateBorderRadius(border);
+}
+
+void SelectPattern::SetOptionWidth(const Dimension& value)
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->SetIsWidthModifiedBySelect(true);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    Dimension horizonPadding = Dimension(OPTION_MARGIN, DimensionUnit::VP);
+    menuLayoutProps->UpdateSelectMenuModifiedWidth(value.ConvertToPx() + horizonPadding.ConvertToPx());
+    
+    auto scroll = DynamicCast<FrameNode>(menu->GetFirstChild());
+    CHECK_NULL_VOID(scroll);
+    auto scrollPattern = scroll->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    scrollPattern->SetIsWidthModifiedBySelect(true);
+    auto scrollLayoutProps = scroll->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_VOID(scrollLayoutProps);
+    scrollLayoutProps->UpdateScrollWidth(value.ConvertToPx() + horizonPadding.ConvertToPx());
+    
+    for (size_t i = 0; i < options_.size(); ++i) {
+        auto optionWidth = value.ConvertToPx();
+        auto optionPattern = options_[i]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        optionPattern->SetIsWidthModifiedBySelect(true);
+        auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
+        CHECK_NULL_VOID(optionPaintProperty);
+        optionPaintProperty->UpdateSelectModifiedWidth(optionWidth);
+    }
+}
+
+void SelectPattern::SetOptionWidthFitTrigger(bool isFitTrigger)
+{
+    isFitTrigger_ = isFitTrigger;
+}
+
+void SelectPattern::SetOptionHeight(const Dimension& value)
+{
+    for (size_t i = 0; i < options_.size(); ++i) {
+        auto optionHeight = value.ConvertToPx();
+        auto optionPattern = options_[i]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        optionPattern->SetIsHeightModifiedBySelect(true);
+        auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
+        CHECK_NULL_VOID(optionPaintProperty);
+        optionPaintProperty->UpdateSelectModifiedHeight(optionHeight);
+    }
 }
 } // namespace OHOS::Ace::NG

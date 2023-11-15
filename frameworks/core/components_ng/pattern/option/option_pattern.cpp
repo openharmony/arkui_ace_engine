@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -30,6 +31,11 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+    constexpr MIN_OPTION_WIDTH = 56.0f;
+    constexpr OPTION_MARGIN = 8.0f;
+} // namespace
+
 void OptionPattern::OnAttachToFrameNode()
 {
     RegisterOnKeyEvent();
@@ -460,5 +466,32 @@ void OptionPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern);
         pattern->OnSelectProcess();
     });
+}
+
+float OptionPattern::GetSelectOptionWidth()
+{
+    auto minWidth = Dimension(MIN_OPTION_WIDTH, DimensionUnit::VP);
+    auto margin = Dimension(OPTION_MARGIN, DimensionUnit::VP);
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    auto parent = columnInfo->GetParent();
+    CHECK_NULL_RETURN(parent, minWidth.ConvertToPx());
+    parent->BuildColumnWidth();
+    auto defaultWidth = static_cast<float>(columnInfo->GetWidth(2)) - margin.ConvertToPx();
+    auto optionNode = GetHost();
+    CHECK_NULL_RETURN(optionNode, minWidth.ConvertToPx());
+    float finalWidth;
+    
+    if (IsWidthModifiedBySelect()) {
+        auto optionPatintProperty = optionNode->GetPaintProperty<OptionPaintProperty>();
+        CHECK_NULL_RETURN(optionPatintProperty, minWidth.ConvertToPx());
+        auto selectmodifiedwidth = optionPatintProperty->GetSelectModifiedWidth();
+        finalWidth = selectmodifiedwidth.value();
+    } else {
+        finalWidth = defaultWidth;
+    }
+    
+    if (finalWidth < minWidth.ConvertToPx()) {
+        finalWidth = defaultWidth;
+    }
 }
 } // namespace OHOS::Ace::NG

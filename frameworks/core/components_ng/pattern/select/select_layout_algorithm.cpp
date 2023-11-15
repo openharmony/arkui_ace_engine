@@ -23,6 +23,10 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+    constexpr float MIN_SPACE = 8.0f;
+    constexpr float MIN_CHAR_VAL = 2.0f;
+} // namespace
 void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -48,13 +52,27 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (childConstraint.parentIdealSize.Width().has_value()) {
         // Make the spinner icon layout at the right end
         textSize.SetWidth(childConstraint.parentIdealSize.Width().value() - spinnerSize.Width() - space);
-        textLayoutProperty->UpdateMarginSelfIdealSize(textSize);
-        textLayoutConstraint.selfIdealSize = OptionalSize<float>(textSize.Width(), textSize.Height());
-        textWrapper->Measure(textLayoutConstraint);
     }
+
+    auto textProps = DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textProps);
+    auto fontSize = textProps->GetFontSize().value().ConvertToPx();
+    if (textSize.Width() < fontSize * MIN_CHAR_VAL) {
+        textSize.SetWidth(fontSize * MIN_CHAR_VAL);
+    }
+
+    textLayoutProperty->UpdateMarginSelfIdealSize(textSize);
+    textLayoutConstraint.selfIdealSize = OptionalSize<float>(textSize.Width(), textSize.Height());
+    textWrapper->Measure(textLayoutConstraint);
 
     auto rowGeometry = rowWrapper->GetGeometryNode();
     CHECK_NULL_VOID(rowGeometry);
+    auto minSpace = Dimension(MIN_SPACE, DimensionUnit::VP);
+    if (space < minSpace.ConvertToPx()) {
+        space = minSpace.ConvertToPx();
+        rowProps->UpdateSpace(minSpace);
+    }
+
     auto rowWidth = textSize.Width() + space + spinnerSize.Width();
     auto rowHeight = std::max(textSize.Height(), spinnerSize.Height());
     rowGeometry->SetFrameSize(SizeF(rowWidth, rowHeight));

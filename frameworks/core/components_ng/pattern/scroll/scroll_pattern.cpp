@@ -39,6 +39,7 @@ constexpr int32_t SCROLL_TOUCH_DOWN = 1;
 constexpr int32_t SCROLL_TOUCH_UP = 2;
 constexpr float SCROLL_BY_SPEED = 250.0f; // move 250 pixels per second
 constexpr float UNIT_CONVERT = 1000.0f;   // 1s convert to 1000ms
+constexpr float SELECT_SCROLL_MIN_WIDTH = 64.0f;
 
 float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
 {
@@ -864,5 +865,31 @@ Rect ScrollPattern::GetItemRect(int32_t index) const
 void ScrollPattern::registerScrollUpdateListener(const std::shared_ptr<IScrollUpdateCallback>& listener)
 {
     listenerVector_.emplace_back(listener);
+}
+
+float ScrollPattern::GetSelectScrollWidth()
+{
+    auto minWidth = Dimension(SELECT_SCROLL_MIN_WIDTH, DimensionUnit::VP);
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    auto parent = columnInfo->GetParent();
+    CHECK_NULL_RETURN(parent, minWidth.ConvertToPx());
+    parent->BuildColumnWidth();
+    auto defaultWidth = static_cast<float>(columnInfo->GetWidth(2));
+    auto scrollNode = GetHost();
+    CHECK_NULL_RETURN(scrollNode, minWidth.ConvertToPx());
+    float finalWidth;
+    
+    if (IsWidthModifiedBySelect()) {
+        auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+        CHECK_NULL_RETURN(scrollLayoutProperty, minWidth.ConvertToPx());
+        auto selectModifiedWidth = scrollLayoutProperty->GetScrollWidth();
+        finalWidth = selectModifiedWidth.value();
+    } else {
+        finalWidth = defaultWidth;
+    }
+    
+    if (finalWidth < minWidth.ConvertToPx()) {
+        finalWidth = defaultWidth;
+    }
 }
 } // namespace OHOS::Ace::NG
