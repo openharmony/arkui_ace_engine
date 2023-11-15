@@ -317,6 +317,9 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
                 TaskExecutor::TaskType::UI);
         });
     auto ctx = node->GetRenderContext();
+    option.SetFinishCallbackType(dialogPattern->GetOpenAnimation().has_value()
+                            ? dialogPattern->GetOpenAnimation().value().GetFinishCallbackType()
+                            : FinishCallbackType::REMOVED);
     CHECK_NULL_VOID(ctx);
     ctx->OpacityAnimation(option, theme->GetOpacityStart(), theme->GetOpacityEnd());
     // scale animation on dialog content
@@ -365,6 +368,9 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
+    option.SetFinishCallbackType(dialogPattern->GetOpenAnimation().has_value()
+                            ? dialogPattern->GetOpenAnimation().value().GetFinishCallbackType()
+                            : FinishCallbackType::REMOVED);
     ctx->OpacityAnimation(option, theme->GetOpacityEnd(), theme->GetOpacityStart());
 
     // scale animation
