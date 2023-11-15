@@ -391,11 +391,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         CHECK_NULL_VOID(pattern);
         pattern->OnHandleMoveDone(handleRect, isFirst);
     };
-    if (!selectInfo.firstHandle.isShow && !selectInfo.secondHandle.isShow) {
-        selectInfo.menuInfo.menuIsShow = false;
-    } else {
-        selectInfo.menuInfo.menuIsShow = true;
-    }
+    selectInfo.menuInfo.menuIsShow = selectInfo.firstHandle.isShow || selectInfo.secondHandle.isShow;
     selectInfo.menuInfo.showCut = false;
     selectInfo.menuInfo.showPaste = false;
     selectInfo.menuInfo.showCopyAll = !IsSelectAll();
@@ -1112,11 +1108,6 @@ void TextPattern::PreCreateLayoutWrapper()
     if (children.empty()) {
         return;
     }
-
-    if (paragraph_) {
-        // because ParagraphStyle can't be set directly yet, paragraph always needs to be rebuilt
-        paragraph_.Reset();
-    }
     spans_.clear();
 
     // Depth-first iterates through all host's child nodes to collect the SpanNode object, building a text rendering
@@ -1146,17 +1137,6 @@ void TextPattern::PreCreateLayoutWrapper()
 
 void TextPattern::BeforeCreateLayoutWrapper()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    const auto& layoutProperty = host->GetLayoutProperty();
-    auto flag = layoutProperty ? layoutProperty->GetPropertyChangeFlag() : PROPERTY_UPDATE_NORMAL;
-    // when updating the scenario, needs to determine whether the SpanNode is refreshed.
-    if (paragraph_ && (flag & PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST) != PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST) {
-        LOGD("no need to refresh span node");
-        return;
-    }
-
     PreCreateLayoutWrapper();
 }
 
