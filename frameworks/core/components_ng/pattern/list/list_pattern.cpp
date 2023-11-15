@@ -695,6 +695,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         return false;
     }
     SetScrollSource(source);
+    FireAndCleanScrollingListener();
     currentDelta_ = currentDelta_ - offset;
     MarkDirtyNodeSelf();
     if (!IsOutOfBoundary() || !scrollable_) {
@@ -1261,6 +1262,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
         MarkDirtyNodeSelf();
     }
     isScrollEnd_ = true;
+    FireAndCleanScrollingListener();
 }
 
 void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align)
@@ -1275,6 +1277,7 @@ void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign
         MarkDirtyNodeSelf();
     }
     isScrollEnd_ = true;
+    FireAndCleanScrollingListener();
 }
 
 bool ListPattern::ScrollPage(bool reverse)

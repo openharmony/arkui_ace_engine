@@ -37,6 +37,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t /* source */)
     layoutInfo_.prevOffset_ = layoutInfo_.currentOffset_;
     layoutInfo_.currentOffset_ += delta;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FireAndCleanScrollingListener();
     return true;
 };
 
@@ -286,5 +287,6 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool /* smooth */, ScrollAli
     }
     StopAnimate();
     UpdateStartIndex(index);
+    FireAndCleanScrollingListener();
 }
 } // namespace OHOS::Ace::NG
