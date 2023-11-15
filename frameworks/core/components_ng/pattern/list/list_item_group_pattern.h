@@ -74,6 +74,7 @@ public:
             itemStartIndex_++;
         } else {
             host->ReplaceChild(host->GetChildAtIndex(headerIndex_), header);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
         auto frameNode  = AceType::DynamicCast<FrameNode>(header);
         CHECK_NULL_VOID(frameNode);
@@ -92,6 +93,7 @@ public:
             itemStartIndex_++;
         } else {
             host->ReplaceChild(host->GetChildAtIndex(footerIndex_), footer);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
         auto frameNode  = AceType::DynamicCast<FrameNode>(footer);
         CHECK_NULL_VOID(frameNode);
