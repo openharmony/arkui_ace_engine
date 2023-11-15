@@ -189,6 +189,9 @@ void NGGestureRecognizer::AddGestureProcedure(const std::string& procedure) cons
 void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
     const RefPtr<NGGestureRecognizer>& recognizer) const
 {
+    if (!recognizer) {
+        return;
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto eventMgr = context->GetEventManager();
