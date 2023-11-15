@@ -110,7 +110,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives touch end event");
-    if (static_cast<int32_t>(activeFingers_.size()) < fingers_) {
+    if (static_cast<int32_t>(activeFingers_.size()) < fingers_ && refereeState_ != RefereeState::SUCCEED) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
