@@ -95,6 +95,8 @@ public:
         const int32_t uiExtensionOffset = 0) = 0;
     virtual void FocusMoveSearchNG(int32_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info,
         const RefPtr<PipelineBase>& context, const int32_t uiExtensionOffset = 0) = 0;
+    virtual bool ExecuteExtensionActionNG(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, const RefPtr<PipelineBase>& context, int32_t uiExtensionOffset) = 0;
 #endif
     void SetVersion(AccessibilityVersion version)
     {

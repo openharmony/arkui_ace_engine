@@ -120,7 +120,8 @@ public:
         const RefPtr<PipelineBase>& context, const int32_t uiExtensionOffset = 0) override;
     void FocusMoveSearchNG(int32_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info,
         const RefPtr<PipelineBase>& context, const int32_t uiExtensionOffset = 0) override;
-
+    bool ExecuteExtensionActionNG(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, const RefPtr<PipelineBase>& context, int32_t uiExtensionOffset) override;
     std::string GetPagePath();
 
 protected:
@@ -205,8 +206,9 @@ private:
         const std::list<RefPtr<AccessibilityNode>>& nodeList, RefPtr<AccessibilityNode>& node);
 
     bool ExecuteActionNG(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-        Accessibility::ActionType action, const RefPtr<PipelineBase>& context);
-
+        Accessibility::ActionType action, const RefPtr<PipelineBase>& context, int32_t uiExtensionOffset);
+    bool ConvertActionTypeToBoolen(Accessibility::ActionType action, RefPtr<NG::FrameNode>& frameNode,
+        int32_t elementId, RefPtr<NG::PipelineContext>& context, bool result);
     void SetSearchElementInfoByAccessibilityIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,
         const std::list<Accessibility::AccessibilityElementInfo>& infos, const int32_t requestId);
 
@@ -235,6 +237,9 @@ private:
         const RefPtr<NG::FrameNode>& root);
     void FocusExtensionElementMoveSearchNG(const SearchParameter& searchParam,
         Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context);
+    void TransferExecuteAction(int32_t elementId, RefPtr<NG::FrameNode>& node,
+        const std::map<std::string, std::string>& actionArguments,
+        Accessibility::ActionType& action, int32_t uiExtensionOffset);
     RefPtr<NG::FrameNode> FindNodeFromRootByExtensionId(const RefPtr<NG::FrameNode>& root, const int32_t uiExtensionId);
 
     void DumpProperty(const RefPtr<AccessibilityNode>& node);

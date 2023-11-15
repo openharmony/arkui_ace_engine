@@ -419,7 +419,11 @@ public:
         int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
     virtual void FocusMoveSearch(int32_t elementId, int32_t direction,
         int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
-
+    virtual bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t offset)
+    {
+        return false;
+    }
     virtual int32_t GetUiExtensionId()
     {
         return -1;
