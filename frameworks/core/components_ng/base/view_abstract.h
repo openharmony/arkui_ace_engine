@@ -310,6 +310,13 @@ public:
         const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
     static void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts);
 
+    // global light
+    static void SetLightPosition(
+        const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
+    static void SetLightIntensity(const float value);
+    static void SetLightIlluminated(const uint32_t value);
+    static void SetBloom(const float value);
+
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);
     static void SetHeight(FrameNode* frameNode, const CalcLength& height);
@@ -329,12 +336,17 @@ public:
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
-    // global light
-    static void SetLightPosition(
-        const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
-    static void SetLightIntensity(const float value);
-    static void SetLightIlluminated(const uint32_t value);
-    static void SetBloom(const float value);
+    static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius);
+    static void SetInvert(FrameNode* frameNode, const InvertVariant& invert);
+    static void SetSepia(FrameNode* frameNode, const Dimension& sepia);
+    static void SetSaturate(FrameNode* frameNode, const Dimension& saturate);
+    static void SetColorBlend(FrameNode* frameNode, const Color& colorBlend);
+    static void SetGrayScale(FrameNode* frameNode, const Dimension& grayScale);
+    static void SetContrast(FrameNode* frameNode, const Dimension& contrast);
+    static void SetBrightness(FrameNode* frameNode, const Dimension& brightness);
+    static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius);
+    static void SetHueRotate(FrameNode* frameNode, float hueRotate);
+
 
 private:
     static void AddDragFrameNodeToManager();

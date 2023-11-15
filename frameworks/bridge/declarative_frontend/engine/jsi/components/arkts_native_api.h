@@ -50,6 +50,26 @@ struct ArkUICommonModifierAPI {
     void (*ResetOpacity)(NodeHandle node);
     void (*SetAlign)(NodeHandle node, int32_t align);
     void (*ResetAlign)(NodeHandle node);
+    void (*SetBackdropBlur)(NodeHandle node, double value);
+    void (*ResetBackdropBlur)(NodeHandle node);
+    void (*SetHueRotate)(NodeHandle node, float deg);
+    void (*ResetHueRotate)(NodeHandle node);
+    void (*SetInvert)(NodeHandle node, double invert);
+    void (*ResetInvert)(NodeHandle node);
+    void (*SetSepia)(NodeHandle node, double sepia);
+    void (*ResetSepia)(NodeHandle node);
+    void (*SetSaturate)(NodeHandle node, double saturate);
+    void (*ResetSaturate)(NodeHandle node);
+    void (*SetColorBlend)(NodeHandle node, uint32_t color);
+    void (*ResetColorBlend)(NodeHandle node);
+    void (*SetGrayscale)(NodeHandle node, double grayScale);
+    void (*ResetGrayscale)(NodeHandle node);
+    void (*SetContrast)(NodeHandle node, double contrast);
+    void (*ResetContrast)(NodeHandle node);
+    void (*SetBrightness)(NodeHandle node, double brightness);
+    void (*ResetBrightness)(NodeHandle node);
+    void (*SetBlur)(NodeHandle node, double value);
+    void (*ResetBlur)(NodeHandle node);
 };
 
 struct ArkUITextModifierAPI {
