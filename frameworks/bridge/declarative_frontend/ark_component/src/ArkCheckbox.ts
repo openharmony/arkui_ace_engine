@@ -4,10 +4,10 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
         throw new Error("Method not implemented.");
     }
     select(value: boolean): this {
-        if (typeof value === "boolean") {
+        if (!isUndefined(value)) {
             modifier(this._modifiers, CheckboxSelectModifier, value);
         } else {
-            modifier(this._modifiers, CheckboxSelectModifier, false);
+            modifier(this._modifiers, CheckboxSelectModifier, undefined);
         }
         return this;
     }
@@ -86,7 +86,7 @@ class CheckboxSelectModifier extends Modifier<boolean> {
     }
 }
 
-class CheckboxSelectedColorModifier extends Modifier<number | undefined> {
+class CheckboxSelectedColorModifier extends Modifier<number> {
     static identity: Symbol = Symbol("checkboxSelectedColor");
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {
@@ -98,7 +98,7 @@ class CheckboxSelectedColorModifier extends Modifier<number | undefined> {
     }
 }
 
-class CheckboxUnselectedColorModifier extends Modifier<number | undefined> {
+class CheckboxUnselectedColorModifier extends Modifier<number> {
     static identity: Symbol = Symbol("checkboxUnselectedColor");
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {

@@ -28,6 +28,7 @@ const int POS_0 = 0;
 const int POS_1 = 1;
 const int POS_2 = 1;
 const char* ERR_CODE = "-1";
+const int SIZE_OF_TWO = 2;
 const int DEFAULT_SELECT = -1;
 
 void SetSpace(NodeHandle node, float value, int unit)
@@ -85,13 +86,14 @@ void SetArrowPosition(NodeHandle node, const int32_t arrowPosition)
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetArrowPosition(frameNode, static_cast<ArrowPosition>(arrowPosition));
 }
-void SetMenuAlign(NodeHandle node, const int32_t alignType, const float* values, const int* units)
+void SetMenuAlign(
+    NodeHandle node, const int32_t alignType, const float* values, const int* units, const int32_t size)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuAlign menuAlignObj;
     menuAlignObj.alignType = static_cast<MenuAlignType>(alignType);
-    if (values != nullptr && units != nullptr) {
+    if (values != nullptr && units != nullptr && size == SIZE_OF_TWO) {
         Dimension dx = Dimension(values[POS_0], static_cast<OHOS::Ace::DimensionUnit>(units[POS_0]));
         Dimension dy = Dimension(values[POS_1], static_cast<OHOS::Ace::DimensionUnit>(units[POS_1]));
 
@@ -108,7 +110,7 @@ void SetFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DELIMITER, res);
-    if (res.size() == 0 || res.size() != SIZE_OF_FONT_INFO) {
+    if (res.size() != SIZE_OF_FONT_INFO) {
         return;
     }
 
@@ -139,7 +141,7 @@ void SetOptionFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DELIMITER, res);
-    if (res.size() == 0 || res.size() != SIZE_OF_FONT_INFO) {
+    if (res.size() != SIZE_OF_FONT_INFO) {
         return;
     }
 
@@ -170,7 +172,7 @@ void SetSelectedOptionFont(NodeHandle node, const char* fontInfo, int32_t styleV
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DELIMITER, res);
-    if (res.size() == 0 || res.size() != SIZE_OF_FONT_INFO) {
+    if (res.size() != SIZE_OF_FONT_INFO) {
         return;
     }
 

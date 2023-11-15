@@ -14,6 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_timepicker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_textpicker_modifier.h"
+
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/pipeline/base/element_register.h"
@@ -21,10 +22,8 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components/common/layout/constants.h"
 
-
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_BG_COLOR = 0xFF007DFF;
-
 void SetTimepickerBackgroundColor(NodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

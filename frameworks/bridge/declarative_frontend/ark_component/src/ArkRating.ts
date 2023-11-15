@@ -43,18 +43,14 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
     }
     stars(value: number): this {
         if (isUndefined(value)) {
-            let stars = 0;
-            if (isNumber (value) && value > 0) {
-                stars = value;
-            }
-            modifier(this._modifiers, RatingStarsModifier, stars);
+            modifier(this._modifiers, RatingStarsModifier, value);
         } else {
             modifier(this._modifiers, RatingStarsModifier, undefined);
         }
         return this;
     }
     stepSize(value: number): this {
-        if (isNumber (value) && value >= 0.1) {
+        if (isNumber (value)) {
             modifier(this._modifiers, RatingStepSizeModifier, value);
         } else {
             modifier(this._modifiers, RatingStepSizeModifier, undefined);
@@ -63,7 +59,7 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
     }
     starStyle(value: { backgroundUri: string; foregroundUri: string; secondaryUri?: string | undefined; }): this {
         let starStyle = new ArkStarStyle();
-        if (value !== undefined && isObject(value)) {
+        if (!isUndefined(value)) {
             starStyle.backgroundUri = value.backgroundUri;
             starStyle.foregroundUri = value.foregroundUri;
             starStyle.secondaryUri = value.secondaryUri;

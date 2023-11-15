@@ -19,6 +19,8 @@
 
 namespace OHOS::Ace::NG {
 constexpr double STEPS_DEFAULT = 0.5;
+constexpr double STEPS_MIN_SIZE = 0.1;
+constexpr int32_t STARS_DEFAULT = 5;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -40,6 +42,9 @@ ArkUINativeModuleValue RatingBridge::SetStars(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     int32_t stars = secondArg->Int32Value(vm);
+    if (LessNotEqual(stars, 0.0)) {
+        stars = STARS_DEFAULT;
+    }
     GetArkUIInternalNodeAPI()->GetRatingModifier().SetStars(nativeNode, stars);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -65,9 +70,8 @@ ArkUINativeModuleValue RatingBridge::SetRatingStepSize(ArkUIRuntimeCallInfo* run
         GetArkUIInternalNodeAPI()->GetRatingModifier().ResetRatingStepSize(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    static const double stepSizeMin = 0.1;
     auto steps  = secondArg->ToNumber(vm)->Value();
-    if (LessNotEqual(steps, stepSizeMin)) {
+    if (LessNotEqual(steps, STEPS_MIN_SIZE)) {
         steps = STEPS_DEFAULT;
     }
     GetArkUIInternalNodeAPI()->GetRatingModifier().SetRatingStepSize(nativeNode, steps);

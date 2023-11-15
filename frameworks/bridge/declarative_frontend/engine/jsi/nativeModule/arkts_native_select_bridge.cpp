@@ -194,24 +194,26 @@ ArkUINativeModuleValue SelectBridge::SetMenuAlign(ArkUIRuntimeCallInfo* runtimeC
     if (secondArg->IsNumber()) {
         alignType = secondArg->Int32Value(vm);
     }
-    if (offsetDx->IsNull() || offsetDy->IsNull()) {
-        GetArkUIInternalNodeAPI()->GetSelectModifier().SetMenuAlign(nativeNode, alignType, nullptr, nullptr);
-        return panda::JSValueRef::Undefined(vm);
+    CalcDimension menuAlignOffsetDx = Dimension(0.0);
+    CalcDimension menuAlignOffsetDy = Dimension(0.0);
+
+    if (offsetDx->IsNull() || !ParseJsDimensionFp(vm, offsetDx, menuAlignOffsetDx)) {
+        menuAlignOffsetDx = Dimension(0.0);
     }
 
-    CalcDimension menuAlignOffsetDx;
-    CalcDimension menuAlignOffsetDy;
-    if (ParseJsDimensionFp(vm, offsetDx, menuAlignOffsetDx) && ParseJsDimensionFp(vm, offsetDy, menuAlignOffsetDy)) {
-        uint32_t size = SIZE_OF_TWO;
-        float values[size];
-        int units[size];
-
-        values[0] = menuAlignOffsetDx.Value();
-        units[0] = static_cast<int>(menuAlignOffsetDx.Unit());
-        values[1] = menuAlignOffsetDy.Value();
-        units[1] = static_cast<int>(menuAlignOffsetDy.Unit());
-        GetArkUIInternalNodeAPI()->GetSelectModifier().SetMenuAlign(nativeNode, alignType, values, units);
+    if (offsetDy->IsNull() || !ParseJsDimensionFp(vm, offsetDy, menuAlignOffsetDy)) {
+        menuAlignOffsetDx = Dimension(0.0);
     }
+
+    uint32_t size = SIZE_OF_TWO;
+    float values[size];
+    int units[size];
+    values[0] = menuAlignOffsetDx.Value();
+    units[0] = static_cast<int>(menuAlignOffsetDx.Unit());
+    values[1] = menuAlignOffsetDy.Value();
+    units[1] = static_cast<int>(menuAlignOffsetDy.Unit());
+    GetArkUIInternalNodeAPI()->GetSelectModifier().SetMenuAlign(nativeNode, alignType, values, units, SIZE_OF_TWO);
+    
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue SelectBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo)

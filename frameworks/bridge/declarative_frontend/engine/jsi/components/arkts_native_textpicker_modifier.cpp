@@ -77,21 +77,22 @@ void SetTextpickerSelectedIndex(NodeHandle node, uint32_t* values, int size)
     CHECK_NULL_VOID(frameNode);
 
     if (TextPickerModel::GetInstance()->IsSingle()) {
-        SetSelectedIndexSingle(frameNode, values);
+        SetSelectedIndexSingle(frameNode, values, size);
     } else {
         SetSelectedIndexMulti(frameNode, values, size);
     }
 }
 
-void SetSelectedIndexSingle(FrameNode* frameNode, uint32_t* selectedValues)
+void SetSelectedIndexSingle(FrameNode* frameNode, uint32_t* selectedValues, const int32_t size)
 {
-    // Single
     std::vector<NG::RangeContent> rangeResult;
     TextPickerModel::GetInstance()->GetSingleRange(rangeResult);
-    if (selectedValues[0] >= rangeResult.size()) {
-        TextPickerModelNG::SetSelected(frameNode, 0);
-    } else {
-    TextPickerModelNG::SetSelected(frameNode, selectedValues[0]);
+    if (size > 0) {
+        if (selectedValues[0] >= rangeResult.size()) {
+            TextPickerModelNG::SetSelected(frameNode, 0);
+        } else {
+            TextPickerModelNG::SetSelected(frameNode, selectedValues[0]);
+        }
     }
 }
 
@@ -127,7 +128,7 @@ void SetSelectedInternal(
     }
 }
 
-void SetSelectedIndexMulti(FrameNode* frameNode, uint32_t* inputs, int size)
+void SetSelectedIndexMulti(FrameNode* frameNode, uint32_t* inputs, const int32_t size)
 {
     std::vector<NG::TextCascadePickerOptions> options;
     TextPickerModel::GetInstance()->GetMultiOptions(options);
@@ -275,7 +276,7 @@ NG::PickerTextStyle GetPickerTextStyle(uint32_t color, const char* fontInfo, int
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, ':', res);
 
-    if (res.size() == 0 || res.size() != SIZE_OF_THREE) {
+    if (res.size() != SIZE_OF_THREE) {
         return textStyle;
     }
 

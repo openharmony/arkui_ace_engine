@@ -22,8 +22,8 @@
 namespace OHOS::Ace::NG {
 ArkUITextpickerModifierAPI GetTextpickerModifier();
 NG::PickerTextStyle GetPickerTextStyle(uint32_t color, const char* fontInfo, int32_t styleVal);
-void SetSelectedIndexSingle(FrameNode* frameNode, uint32_t* selectedValues);
-void SetSelectedIndexMulti(FrameNode* frameNode, uint32_t* selectedValues, int size);
+void SetSelectedIndexSingle(FrameNode* frameNode, uint32_t* selectedValues, const int32_t size);
+void SetSelectedIndexMulti(FrameNode* frameNode, uint32_t* selectedValues, const int32_t size);
 void SetSelectedIndexMultiInternal(
     FrameNode* frameNode, uint32_t count,
     std::vector<NG::TextCascadePickerOptions>& options,

@@ -1183,8 +1183,8 @@ class ArkLabelFont {
         this.style = undefined;
     }
     isEqual(another) {
-        return (this.size === another.size && this.weight === another.weight && this.family === another.family &&
-            this.style === another.style);
+        return (this.size === another.size && this.weight === another.weight
+            && this.family === another.family && this.style === another.style);
     }
 }
 function ArkDeepCompareArrays(arr1, arr2) {
@@ -3418,11 +3418,7 @@ class ArkRatingComponent extends ArkComponent {
     }
     stars(value) {
         if (isUndefined(value)) {
-            let stars = 0;
-            if (isNumber(value) && value > 0) {
-                stars = value;
-            }
-            modifier(this._modifiers, RatingStarsModifier, stars);
+            modifier(this._modifiers, RatingStarsModifier, value);
         }
         else {
             modifier(this._modifiers, RatingStarsModifier, undefined);
@@ -3430,7 +3426,7 @@ class ArkRatingComponent extends ArkComponent {
         return this;
     }
     stepSize(value) {
-        if (isNumber(value) && value >= 0.1) {
+        if (isNumber(value)) {
             modifier(this._modifiers, RatingStepSizeModifier, value);
         }
         else {
@@ -3440,7 +3436,7 @@ class ArkRatingComponent extends ArkComponent {
     }
     starStyle(value) {
         let starStyle = new ArkStarStyle();
-        if (value !== undefined && isObject(value)) {
+        if (!isUndefined(value)) {
             starStyle.backgroundUri = value.backgroundUri;
             starStyle.foregroundUri = value.foregroundUri;
             starStyle.secondaryUri = value.secondaryUri;
@@ -3471,11 +3467,11 @@ class ArkCheckboxComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
     select(value) {
-        if (typeof value === "boolean") {
+        if (!isUndefined(value)) {
             modifier(this._modifiers, CheckboxSelectModifier, value);
         }
         else {
-            modifier(this._modifiers, CheckboxSelectModifier, false);
+            modifier(this._modifiers, CheckboxSelectModifier, undefined);
         }
         return this;
     }

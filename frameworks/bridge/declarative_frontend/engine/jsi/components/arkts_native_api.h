@@ -146,7 +146,8 @@ struct ArkUISelectModifierAPI {
     void (*SetOptionFontColor)(NodeHandle node, const uint32_t colorVal);
     void (*SetSelectedOptionFontColor)(NodeHandle node, const uint32_t colorVal);
     void (*SetArrowPosition)(NodeHandle node, const int32_t arrowPosition);
-    void (*SetMenuAlign)(NodeHandle node, const int32_t alignType, const float* values, const int* units);
+    void (*SetMenuAlign)(
+        NodeHandle node, const int32_t alignType, const float* values, const int* units, const int32_t size);
     void (*SetFont)(NodeHandle node, const char* fontInfo, int32_t style);
     void (*SetOptionFont)(NodeHandle node, const char* fontInfo, int32_t style);
     void (*SetSelectedOptionFont)(NodeHandle node, const char* fontInfo, int32_t style);
