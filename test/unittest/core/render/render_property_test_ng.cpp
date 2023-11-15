@@ -227,6 +227,31 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GraphicsPropertyTest003
+ * @tc.desc: Test cast to RenderPropertyTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object graphicsProperty.
+     */
+    NG::GraphicsProperty graphicsProperty;
+    auto json = JsonUtil::Create(true);
+    Shadow shadow(VALUE_TEST, OFFSETS, WHITE, ShadowStyle::None);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.push propBackShadow colorStrategy_ == ShadowColorStrategy::AVERAGE.
+     * @tc.expected: Return expected results.
+     */
+    shadow.colorStrategy_ = ShadowColorStrategy::AVERAGE;
+    graphicsProperty.propBackShadow = shadow;
+    graphicsProperty.ToJsonValue(json);
+    EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("color"), "ColoringStrategy.AVERAGE");
+    json->Delete(SHADOW_TEST);
+}
+
+/**
  * @tc.name: BackgroundPropertyTest001
  * @tc.desc: Test cast to RenderPropertyTestNg
  * @tc.type: FUNC
