@@ -6176,7 +6176,8 @@ HWTEST_F(ListTestNg, ListLayout_SafeArea001, TestSize.Level1)
     EXPECT_CALL(*MockPipelineBase::pipeline_, GetSafeArea)
         .Times(1)
         .WillOnce(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
-    layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
+    layoutProperty_->UpdateSafeAreaExpandOpts(
+        { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
     RunMeasureAndLayout(frameNode_);
     EXPECT_EQ(pattern_->contentEndOffset_, 100);
     EXPECT_EQ(frameNode_->geometryNode_->GetFrameSize(), SizeF(480, 800));
@@ -6198,7 +6199,8 @@ HWTEST_F(ListTestNg, ListLayout_SafeArea002, TestSize.Level1)
     });
 
     EXPECT_CALL(*MockPipelineBase::pipeline_, GetSafeArea).Times(0);
-    layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP });
+    layoutProperty_->UpdateSafeAreaExpandOpts(
+        { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP });
     RunMeasureAndLayout(frameNode_);
     EXPECT_EQ(pattern_->contentEndOffset_, 0);
     EXPECT_EQ(frameNode_->geometryNode_->GetFrameSize(), SizeF(480, 800));

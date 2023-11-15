@@ -20,8 +20,8 @@ float ScrollableUtils::CheckHeightExpansion(const RefPtr<LayoutProperty>& layout
 {
     float expandHeight = 0.0f;
     auto&& safeAreaOpts = layoutProps->GetSafeAreaExpandOpts();
-    bool canExpand = axis == Axis::VERTICAL && safeAreaOpts && safeAreaOpts->edges & SAFE_AREA_EDGE_BOTTOM &&
-                     safeAreaOpts->type & SAFE_AREA_TYPE_SYSTEM;
+    bool canExpand = axis == Axis::VERTICAL && safeAreaOpts && (safeAreaOpts->edges & SAFE_AREA_EDGE_BOTTOM) &&
+                     (safeAreaOpts->type & SAFE_AREA_TYPE_SYSTEM);
     if (canExpand) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, {});
