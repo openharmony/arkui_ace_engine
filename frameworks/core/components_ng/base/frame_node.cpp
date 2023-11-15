@@ -2762,6 +2762,7 @@ void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId)
     };
     eventMgr->GetEventTreeRecord().AddFrameNodeSnapshot(std::move(info));
 }
+
 int32_t FrameNode::GetUiExtensionId()
 {
     if (pattern_) {
