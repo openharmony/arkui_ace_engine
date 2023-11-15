@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/geometry/ng/point_t.h"
 #define private public
 #define protected public
 #include "gtest/gtest.h"
@@ -805,5 +806,131 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest011, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->HasAxis(), false);
     EXPECT_EQ(layoutProperty_->HasDisplayMode(), false);
     EXPECT_EQ(layoutProperty_->HasVisibility(), false);
+}
+
+/**
+ * @tc.name: ScrollBarTest012
+ * @tc.desc: Test OnCollectTouchTarget of ScrollBarPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBar(true, true, -1, -1, layoutConstraint);
+
+    /**
+     * @tc.steps: step2. Verify the OnCollectTouchTarget function of ScrollBarPattern.
+     * @tc.expected: step2. Compare the value with expected value.
+     */
+    const RectF& rect = pattern_->childRect_;
+    PointF localPoint = PointF(rect.Width() + rect.GetX(), rect.Height() + rect.GetY());
+    const SourceType source = SourceType::TOUCH;
+    OffsetF coordinateOffset;
+    GetEventTargetImpl getEventTargetImpl;
+    TouchTestResult result;
+    const int32_t size = result.size();
+    EXPECT_EQ(pattern_->scrollableEvent_->InBarRegion(localPoint, source), true);
+
+    pattern_->scrollableEvent_->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
+    EXPECT_FLOAT_EQ(pattern_->panRecognizer_->GetCoordinateOffset().GetX(), coordinateOffset.GetX());
+    EXPECT_FLOAT_EQ(pattern_->panRecognizer_->GetCoordinateOffset().GetY(), coordinateOffset.GetY());
+    EXPECT_EQ(result.size(), size + 1);
+
+    localPoint.SetX(localPoint.GetX() + 1);
+    localPoint.SetY(localPoint.GetY() + 1);
+    EXPECT_EQ(pattern_->scrollableEvent_->InBarRegion(localPoint, source), false);
+
+    pattern_->panRecognizer_ = nullptr;
+    pattern_->scrollableEvent_->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
+    EXPECT_EQ(result.size(), size + 1);
+}
+
+/**
+ * @tc.name: ScrollBarTest013
+ * @tc.desc: Test StartDisappearAnimator of ScrollBarPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBar(true, true, -1, 0, layoutConstraint);
+
+    /**
+     * @tc.steps: step2. Verify the StartDisappearAnimator function of ScrollBarPattern.
+     * @tc.expected: step2. Compare the value with expected value.
+     */
+    pattern_->SetControlDistance(10.f);
+    layoutProperty_->UpdateDisplayMode(DisplayMode::AUTO);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->GetDisplayMode(), DisplayMode::AUTO);
+    EXPECT_EQ(pattern_->opacity_, 0);
+
+    layoutProperty_->UpdateDisplayMode(DisplayMode::OFF);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->GetDisplayMode(), DisplayMode::OFF);
+
+    layoutProperty_->UpdateDisplayMode(DisplayMode::AUTO);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->GetDisplayMode(), DisplayMode::AUTO);
+    EXPECT_EQ(pattern_->opacity_, 0);
+    EXPECT_NE(pattern_->disappearAnimation_, nullptr);
+
+    /**
+     * @tc.steps: step2. Verify the StopDisappearAnimator function of ScrollBarPattern.
+     * @tc.expected: step2. Compare the value with expected value.
+     */
+    layoutProperty_->UpdateDisplayMode(DisplayMode::ON);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->GetDisplayMode(), DisplayMode::ON);
+    EXPECT_NE(pattern_->disappearAnimation_, nullptr);
+    EXPECT_EQ(pattern_->opacity_, UINT8_MAX);
+}
+
+/**
+ * @tc.name: ScrollBarTest014
+ * @tc.desc: Test ProcessFrictionMotion of ScrollBarPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBar(true, true, -1, -1, layoutConstraint);
+
+    /**
+     * @tc.steps: step2. Verify the ProcessFrictionMotion function of ScrollBarPattern.
+     * @tc.expected: step2. Compare the value with expected value.
+     */
+    pattern_->ProcessFrictionMotion(10.0);
+    pattern_->ProcessFrictionMotionStop();
+    EXPECT_DOUBLE_EQ(pattern_->frictionPosition_, 10.0);
+
+    pattern_->scrollBarProxy_ = nullptr;
+    pattern_->scrollPositionCallback_ = nullptr;
+    pattern_->ProcessFrictionMotion(20.0);
+    pattern_->ProcessFrictionMotionStop();
+    EXPECT_DOUBLE_EQ(pattern_->frictionPosition_, 20.0);
+
+    pattern_->scrollEndCallback_ = nullptr;
+    pattern_->scrollableEvent_ = nullptr;
+    pattern_->ProcessFrictionMotionStop();
+    pattern_->OnModifyDone();
+    EXPECT_NE(pattern_->scrollEndCallback_, nullptr);
+    EXPECT_NE(pattern_->scrollPositionCallback_, nullptr);
+    EXPECT_NE(pattern_->scrollableEvent_, nullptr);
 }
 } // namespace OHOS::Ace::NG
