@@ -68,19 +68,10 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
                 stateStyleMgr->ResetPressedState();
             }
         }
-        if (type == TouchType::MOVE) {
-            auto node = stateStyleMgr->host_.Upgrade();
-            CHECK_NULL_VOID(node);
+        if ((type == TouchType::MOVE) &&
+                (stateStyleMgr->IsCurrentStateOn(UI_STATE_PRESSED) || stateStyleMgr->IsPressedStatePending())) {
             int32_t sourceType = static_cast<int32_t>(touches.front().GetSourceDevice());
-            auto renderContext = node->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-
-            auto paintRect = renderContext->GetPaintRectWithoutTransform();
-            auto responseRegionList = node->GetResponseRegionList(paintRect, sourceType);
-            Offset offset = { paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY() };
-            auto parentPoint = lastPoint.GetLocalLocation() + offset;
-
-            if (!node->InResponseRegionList({ parentPoint.GetX(), parentPoint.GetY() }, responseRegionList)) {
+            if (stateStyleMgr->IsOutOfPressedRegion(sourceType, lastPoint.GetGlobalLocation())) {
                 stateStyleMgr->pointerId_.erase(lastPoint.GetFingerId());
                 if (stateStyleMgr->pointerId_.size() == 0) {
                     stateStyleMgr->ResetPressedState();
@@ -180,5 +171,48 @@ bool StateStyleManager::HandleScrollingParent()
     }
 
     return hasScrollingParent;
+}
+
+void StateStyleManager::Transform(PointF& localPointF, const WeakPtr<FrameNode>& node) const
+{
+    if (node.Invalid()) {
+        return;
+    }
+
+    std::vector<Matrix4> vTrans {};
+    auto host = node.Upgrade();
+    while (host) {
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        auto localMat = context->GetLocalTransformMatrix();
+        vTrans.emplace_back(localMat);
+        host = host->GetAncestorNodeOfFrame();
+    }
+
+    Point temp(localPointF.GetX(), localPointF.GetY());
+    for (auto iter = vTrans.rbegin(); iter != vTrans.rend(); iter++) {
+        temp = *iter * temp;
+    }
+    localPointF.SetX(temp.GetX());
+    localPointF.SetY(temp.GetY());
+}
+
+bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& location) const
+{
+    auto node = host_.Upgrade();
+    CHECK_NULL_RETURN(node, false);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    auto responseRegionList = node->GetResponseRegionList(paintRect, sourceType);
+    Offset offset = { paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY() };
+    PointF current = { location.GetX(), location.GetY() };
+    Transform(current, node);
+    PointF parentPoint = { current.GetX() + offset.GetX(), current.GetY() + offset.GetY() };
+    if (!node->InResponseRegionList(parentPoint, responseRegionList)) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG
