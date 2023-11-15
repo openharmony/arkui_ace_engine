@@ -212,6 +212,7 @@ private:
     float nextMargin_ = 0.0f;
 
     PositionMap itemPosition_;
+    PositionMap prevItemPosition_;
     float currentOffset_ = 0.0f;
     float currentDelta_ = 0.0f;
     float startMainPos_ = 0.0f;
