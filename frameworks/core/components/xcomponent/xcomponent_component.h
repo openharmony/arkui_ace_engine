@@ -23,7 +23,7 @@
 #include "core/components/declaration/xcomponent/xcomponent_declaration.h"
 #include "core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "core/components/xcomponent/resource/native_texture.h"
-#include "core/components/xcomponent/xcomponent_controller.h"
+#include "core/components_ng/pattern/xcomponent/inner_xcomponent_controller.h"
 #include "core/pipeline/base/element.h"
 
 namespace OHOS::Ace {
@@ -210,12 +210,12 @@ public:
         texture_ = texture;
     }
 
-    RefPtr<XComponentController> GetXComponentController() const
+    std::shared_ptr<InnerXComponentController> GetXComponentController() const
     {
         return xcomponentController_;
     }
 
-    void SetXComponentController(const RefPtr<XComponentController>& xcomponentController)
+    void SetXComponentController(const std::shared_ptr<InnerXComponentController>& xcomponentController)
     {
         xcomponentController_ = xcomponentController;
     }
@@ -259,7 +259,7 @@ private:
     DeleteCallback deleteCallback_ = nullptr;
     ErrorCallback errorCallback_ = nullptr;
     RefPtr<XComponentTaskPool> pool_;
-    RefPtr<XComponentController> xcomponentController_;
+    std::shared_ptr<InnerXComponentController> xcomponentController_;
     std::string type_;
     std::optional<std::string> soPath_;
     int64_t textureId_ = -1;

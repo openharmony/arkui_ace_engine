@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 void XComponentModelNG::Create(const std::string& id, XComponentType type, const std::string& libraryname,
-    const RefPtr<XComponentController>& xcomponentController)
+    const std::shared_ptr<InnerXComponentController>& xcomponentController)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();

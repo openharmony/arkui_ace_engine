@@ -23,6 +23,7 @@
 #include "base/log/log.h"
 #include "core/components/xcomponent/render_xcomponent.h"
 #include "core/components/xcomponent/resource/xcomponent_delegate.h"
+#include "core/components/xcomponent/xcomponent_controller_impl.h"
 #include "core/components/xcomponent/xcomponent_element.h"
 
 namespace OHOS::Ace {
@@ -35,7 +36,7 @@ XComponentComponent::XComponentComponent(const std::string& type) : type_(type)
     }
     pool_ = AceType::MakeRefPtr<XComponentTaskPool>();
     pool_->component_ = AceType::WeakClaim(this);
-    xcomponentController_ = AceType::MakeRefPtr<XComponentController>();
+    xcomponentController_ = std::make_shared<XComponentControllerImpl>();
 }
 
 RefPtr<RenderNode> XComponentComponent::CreateRenderNode()

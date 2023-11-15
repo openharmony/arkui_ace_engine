@@ -146,6 +146,15 @@
                 },
                 {
                     "header": {
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/xcomponent_controller/",
+                        "header_files": [
+                            "xcomponent_controller.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller"
+                },
+                {
+                    "header": {
                         "header_base": "//foundation/arkui/ace_engine/",
                         "header_files": [
                             "adapter/preview/entrance/ace_ability.h",

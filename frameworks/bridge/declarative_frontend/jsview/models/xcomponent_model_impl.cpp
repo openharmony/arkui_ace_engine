@@ -23,7 +23,7 @@
 namespace OHOS::Ace::Framework {
 
 void XComponentModelImpl::Create(const std::string& id, XComponentType /* type */, const std::string& libraryname,
-    const RefPtr<XComponentController>& xcomponentController)
+    const std::shared_ptr<InnerXComponentController>& xcomponentController)
 {
     auto xcomponentComponent = AceType::MakeRefPtr<OHOS::Ace::XComponentComponent>("xcomponent");
     xcomponentComponent->SetId(id);
