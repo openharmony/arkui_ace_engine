@@ -16,6 +16,7 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+#include "mock_navigation_stack.h"
 
 #include "base/memory/ace_type.h"
 
@@ -44,6 +45,7 @@
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
@@ -3067,5 +3069,223 @@ HWTEST_F(NavigationTestNg, TitleBarPatternProcessTitleAssociatedUpdateTest001, T
     titleBarPattern->AttachToFrameNode(frameNode);
     titleBarPattern->ProcessTitleAssociatedUpdate(NEGATIVE_TITLE_BAR_OFFSET);
     EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
+}
+
+HWTEST_F(NavigationTestNg, NavigationStackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create navigation, and set the navigation stack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+
+    /**
+     * @tc.steps: step2.add page A
+     */
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    auto stack = pattern->GetNavigationStack();
+    stack->Add("A", frameNode);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    navigationPattern->OnModifyDone();
+    auto targetNode = navigationPattern->GetNavigationStack()->Get();
+    ASSERT_EQ(frameNode, targetNode);
+
+    /**
+     * @tc.steps: step3. replace pageA
+     */
+    RefPtr<FrameNode> replaceNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
+    stack->Pop();
+    stack->Add("C", replaceNode);
+    navigationPattern->OnModifyDone();
+    ASSERT_EQ(replaceNode, stack->Get());
+}
+
+HWTEST_F(NavigationTestNg, NavigationStackTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create navigation, and set the navigation stack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+
+    /**
+     * @tc.steps: step2.add page A
+     */
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    auto stack = pattern->GetNavigationStack();
+    stack->Add("A", frameNode);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    navigationPattern->OnModifyDone();
+    ASSERT_EQ(stack->Size(), 1);
+
+    /**
+     * @tc.steps: step3. replace pageA
+     */
+    RefPtr<FrameNode> replaceNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
+    stack->Remove();
+    stack->Add("B", replaceNode);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "tongshijia current size is %{public}d", stack->Size());
+    navigationPattern->OnModifyDone();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "tongshijia current1111 size is %{public}d", stack->Size());
+    ASSERT_EQ(stack->Size(), 1);
+
+    /**
+     * @tc.steps: step4. push pageC
+     */
+    stack->Add("C", frameNode);
+    navigationPattern->OnModifyDone();
+    ASSERT_EQ(stack->Size(), 2);
+}
+
+HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create navigation, and set the navigation stack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(navigationStack);
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    auto stack = pattern->GetNavigationStack();
+    ASSERT_FALSE(stack->IsReplace());
+
+    /**
+     * @tc.steps: step2.add page A to stack
+     */
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
+    stack->Add("A", frameNode);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    navigationPattern->SetNavigationMode(NavigationMode::STACK);
+    navigationPattern->OnModifyDone();
+    ASSERT_FALSE(stack->IsReplace());
+
+    /**
+     * @tc.steps: step2.replace page A in stack
+     */
+    RefPtr<FrameNode> replaceNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
+    stack->Remove();
+    stack->Add("B", replaceNode);
+    stack->UpdateIsReplace(true);
+    ASSERT_TRUE(stack->IsReplace());
+    navigationPattern->OnModifyDone();
+    ASSERT_FALSE(stack->IsReplace());
+
+    /**
+     * @tc.steps: step2.push A
+     */
+    stack->Add("C", frameNode);
+    navigationPattern->OnModifyDone();
+    ASSERT_FALSE(stack->IsReplace());
+}
+
+HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create navigation, and set the navigation stack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(navigationStack);
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    auto stack = pattern->GetNavigationStack();
+    ASSERT_FALSE(stack->IsReplace());
+
+    /**
+     * @tc.steps: step2.add page A to stack
+     */
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
+    stack->Add("A", frameNode);
+    stack->Add("A", frameNode);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    navigationPattern->SetNavigationMode(NavigationMode::STACK);
+    navigationPattern->OnModifyDone();
+    ASSERT_FALSE(stack->IsReplace());
+
+    /**
+     * @tc.steps: step2.replace page A in stack
+     */
+    RefPtr<FrameNode> replaceNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
+    stack->Remove();
+    stack->Add("B", replaceNode);
+    stack->UpdateIsReplace(true);
+    ASSERT_TRUE(stack->IsReplace());
+    navigationPattern->OnModifyDone();
+    ASSERT_FALSE(stack->IsReplace());
+
+    /**
+     * @tc.steps: step3.pop page B
+     */
+    stack->Remove();
+    navigationPattern->OnModifyDone();
+    ASSERT_FALSE(stack->IsReplace());
+}
+
+HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create navigation, and set the navigation stack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(navigationStack);
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    auto stack = pattern->GetNavigationStack();
+    ASSERT_FALSE(stack->IsReplace());
+
+    /**
+     * @tc.steps: step2.add page A to stack
+     */
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
+    stack->Add("A", frameNode);
+    stack->Add("A", frameNode);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    navigationPattern->SetNavigationMode(NavigationMode::STACK);
+    navigationPattern->OnModifyDone();
+    ASSERT_FALSE(stack->IsReplace());
+
+    /**
+     * @tc.steps: step2.replace page A in stack
+     */
+    RefPtr<FrameNode> replaceNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
+    stack->Remove();
+    stack->Add("B", replaceNode);
+    stack->UpdateIsReplace(true);
+    ASSERT_TRUE(stack->IsReplace());
+    navigationPattern->OnModifyDone();
+    ASSERT_FALSE(stack->IsReplace());
+
+    /**
+     * @tc.steps: step3.pop page B
+     */
+    stack->Clear();
+    navigationPattern->OnModifyDone();
+    ASSERT_FALSE(stack->IsReplace());
 }
 } // namespace OHOS::Ace::NG
