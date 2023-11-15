@@ -28,6 +28,7 @@
 #include "base/memory/referenced.h"
 #include "core/common/frontend.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
@@ -416,6 +417,22 @@ public:
         dragCleanTask_ = std::move(task);
     }
 
+    void AddGestureTask(const DelayedTask& task)
+    {
+        delayedTasks_.emplace_back(task);
+    }
+
+    void RemoveGestureTask(const DelayedTask& task)
+    {
+        for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end();) {
+            if (iter->recognizer == task.recognizer) {
+                delayedTasks_.erase(iter++);
+            } else {
+                ++iter;
+            }
+        }
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -445,6 +462,8 @@ private:
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
     void FlushTouchEvents();
+
+    void ProcessDelayTasks();
 
     void InspectDrew();
 
@@ -480,6 +499,19 @@ private:
             return false;
         }
     };
+
+    std::pair<float, float> LinearInterpolation(const std::tuple<float, float, uint64_t>& history,
+        const std::tuple<float, float, uint64_t>& current, const uint64_t nanoTimeStamp);
+
+    std::pair<float, float> GetResampleCoord(const std::vector<TouchEvent>& history,
+        const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen);
+
+    std::tuple<float, float, uint64_t> GetAvgPoint(const std::vector<TouchEvent>& events, const bool isScreen);
+
+    TouchEvent GetResampleTouchEvent(const std::vector<TouchEvent>& history,
+        const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
+
+    TouchEvent GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
@@ -527,6 +559,7 @@ private:
     WeakPtr<FrameNode> dirtyDefaultFocusNode_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
+    uint64_t resampleTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
@@ -541,12 +574,15 @@ private:
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
 
+    std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById_;
+
     std::list<FrameInfo> dumpFrameInfos_;
     std::list<std::function<void()>> animationClosuresList_;
     std::function<void()> dragCleanTask_;
 
     std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
     std::map<int32_t, std::function<void(bool)>> onFormVisibleChangeEvents_;
+    std::list<DelayedTask> delayedTasks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

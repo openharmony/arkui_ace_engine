@@ -393,36 +393,64 @@ void SideBarContainerPattern::CreateAndMountNodes()
     if (HasControlButton()) {
         return;
     }
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto sideBarTheme = context->GetTheme<SideBarTheme>();
-    CHECK_NULL_VOID(sideBarTheme);
+
     auto sideBarNode = children.front();
-    auto contentNode = host->GetChildAtIndex(1);
     sideBarNode->MovePosition(DEFAULT_NODE_SLOT);
     auto sideBarFrameNode = AceType::DynamicCast<FrameNode>(sideBarNode);
     if (sideBarFrameNode) {
         auto renderContext = sideBarFrameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         if (!renderContext->HasBackgroundColor()) {
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            auto sideBarTheme = context->GetTheme<SideBarTheme>();
+            CHECK_NULL_VOID(sideBarTheme);
             Color bgColor = sideBarTheme->GetSideBarBackgroundColor();
             renderContext->UpdateBackgroundColor(bgColor);
         }
-        renderContext->UpdateZIndex(DEFAULT_SIDE_BAR_ZINDEX);
-    }
-    auto contentFrameNode = AceType::DynamicCast<FrameNode>(contentNode);
-    if (contentFrameNode) {
-        auto renderContext = contentFrameNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        if (!renderContext->HasBackgroundColor()) {
-            Color bgColor = sideBarTheme->GetSideBarBackgroundColor();
-            renderContext->UpdateBackgroundColor(bgColor);
-        }
-        renderContext->UpdateZIndex(DEFAULT_CONTENT_ZINDEX);
     }
     host->RebuildRenderContextTree();
+
     CreateAndMountDivider(host);
     CreateAndMountControlButton(host);
+    UpdateDividerShadow();
+}
+
+void SideBarContainerPattern::UpdateDividerShadow() const
+{
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto sidebarTheme = context->GetTheme<SideBarTheme>();
+    CHECK_NULL_VOID(sidebarTheme);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!sidebarTheme->GetDividerShadowEnable() ||
+        SideBarContainerType::EMBED != layoutProperty->GetSideBarContainerType()) {
+        return;
+    }
+    auto sidebarNode = GetSideBarNode(host);
+    if (sidebarNode) {
+        auto renderContext = sidebarNode->GetRenderContext();
+        renderContext->UpdateZIndex(DEFAULT_SIDE_BAR_ZINDEX);
+    }
+    auto dividerNode = GetDividerNode();
+    if (dividerNode) {
+        auto renderContext = dividerNode->GetRenderContext();
+        renderContext->UpdateZIndex(DEFAULT_DIVIDER_ZINDEX);
+        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowXS);
+    }
+    auto contentNode = GetContentNode(host);
+    if (contentNode) {
+        auto renderContext = contentNode->GetRenderContext();
+        renderContext->UpdateZIndex(DEFAULT_CONTENT_ZINDEX);
+    }
+    auto controlBtnNode = GetControlButtonNode();
+    if (controlBtnNode) {
+        auto renderContext = controlBtnNode->GetRenderContext();
+        renderContext->UpdateZIndex(DEFAULT_CONTROL_BUTTON_ZINDEX);
+    }
 }
 
 void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode)

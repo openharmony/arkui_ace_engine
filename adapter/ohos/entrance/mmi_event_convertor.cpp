@@ -344,6 +344,9 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     event.key = MMI::KeyEvent::KeyCodeToString(keyEvent->GetKeyCode());
     event.deviceId = keyEvent->GetDeviceId();
     event.sourceType = SourceType::KEYBOARD;
+#ifdef SECURITY_COMPONENT_ENABLE
+    event.enhanceData = keyEvent->GetEnhanceData();
+#endif
     std::string pressedKeyStr = "Pressed Keys: ";
     for (const auto& curCode : keyEvent->GetPressedKeys()) {
         pressedKeyStr += (std::to_string(curCode) + " ");

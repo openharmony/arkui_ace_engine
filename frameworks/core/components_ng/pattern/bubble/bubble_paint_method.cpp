@@ -156,6 +156,7 @@ void BubblePaintMethod::PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper
     // TODO: color is not correct
     RSBrush brush;
     brush.SetColor(static_cast<int>(backgroundColor_.GetValue()));
+    brush.SetAntiAlias(true);
     canvas.AttachPen(paint);
     canvas.AttachBrush(brush);
     if (enableArrow_ && showArrow_) {

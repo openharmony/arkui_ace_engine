@@ -41,6 +41,9 @@ struct TextProperties {
     Color upColor;
     Color currentColor;
     Color downColor;
+    FontWeight upFontWeight;
+    FontWeight fontWeight;
+    FontWeight downFontWeight;
 };
 
 struct TextPickerOptionProperty {
@@ -55,8 +58,8 @@ class EventParam : public virtual AceType {
 
 public:
     WeakPtr<FrameNode> instance;
-    int32_t itemIndex;
-    int32_t itemTotalCounts;
+    int32_t itemIndex = 0;
+    int32_t itemTotalCounts = 0;
 };
 
 enum class ScrollDirection {
@@ -95,7 +98,8 @@ public:
         return MakeRefPtr<LinearLayoutProperty>(true);
     }
 
-    void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false, bool isDirectlyClear = false);
+    void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false, bool isDirectlyClear = false,
+        bool isUpdateAnimationProperties = false);
 
     void InitilaScorllEvent();
 
@@ -107,7 +111,7 @@ public:
 
     bool NotLoopOptions() const;
 
-    bool InnerHandleScroll(int32_t step, bool isUpatePropertiesOnly = false);
+    bool InnerHandleScroll(bool isDown, bool isUpatePropertiesOnly = false, bool isUpdateAnimationProperties = false);
 
     void SetDefaultPickerItemHeight(double defaultPickerItemHeight)
     {
@@ -258,6 +262,57 @@ public:
         return halfDisplayCounts_;
     }
 
+    double GetOffset() const
+    {
+        return offsetCurSet_;
+    }
+
+    void SetYLast(double value)
+    {
+        yLast_ = value;
+    }
+
+    void UpdateFinishToss(double offsetY);
+
+    void TossAnimationStoped();
+
+    void PlayResetAnimation();
+
+    std::vector<TextPickerOptionProperty> GetMidShiftDistance() const
+    {
+        return optionProperties_;
+    }
+
+    void SetMainVelocity(double mainVelocity)
+    {
+        mainVelocity_ = mainVelocity;
+    }
+
+    double GetMainVelocity() const
+    {
+        return mainVelocity_;
+    }
+
+    void SetTossStatus(bool status)
+    {
+        isTossStatus_ = status;
+    }
+
+    bool GetTossStatus() const
+    {
+        return isTossStatus_;
+    }
+
+    void SetYOffset(double value)
+    {
+        yOffset_ = value;
+    }
+
+    bool GetTouchBreakStatus() const
+    {
+        return touchBreak_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -313,11 +368,11 @@ private:
         bool isUpateTextContentOnly, bool isDirectlyClear);
 
     RefPtr<TextPickerLayoutProperty> GetParentLayout() const;
-    RefPtr<TouchEventImpl> CreateItemTouchEventListener(RefPtr<EventParam> param);
+    RefPtr<TouchEventImpl> CreateItemTouchEventListener();
     void OnAroundButtonClick(RefPtr<EventParam> param);
-    void OnMiddleButtonTouchDown(RefPtr<EventParam> param);
-    void OnMiddleButtonTouchMove(RefPtr<EventParam> param);
-    void OnMiddleButtonTouchUp(RefPtr<EventParam> param);
+    void OnMiddleButtonTouchDown();
+    void OnMiddleButtonTouchMove();
+    void OnMiddleButtonTouchUp();
     int32_t GetMiddleButtonIndex();
 
     bool touchEventInit_ = false;
@@ -369,6 +424,14 @@ private:
     ColumnChangeCallback changeCallback_;
 
     int32_t halfDisplayCounts_ = 0;
+
+    float mainVelocity_ = 0.0f;
+    float offsetCurSet_ = 0.0f;
+    float distancePercent_ = 0.0f;
+    bool isTossStatus_ = false;
+    bool clickBreak_ = false;
+    bool touchBreak_ = false;
+    bool animationBreak_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

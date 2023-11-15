@@ -22,6 +22,16 @@
 namespace OHOS::Ace {
 
 namespace {
+Rosen::FinishCallbackType ToAnimationFinishCallbackType(const FinishCallbackType finishCallbackType)
+{
+    if (finishCallbackType == FinishCallbackType::LOGICALLY) {
+        return Rosen::FinishCallbackType::LOGICALLY;
+    } else if (finishCallbackType == FinishCallbackType::REMOVED) {
+        return Rosen::FinishCallbackType::TIME_SENSITIVE;
+    } else {
+        return Rosen::FinishCallbackType::TIME_SENSITIVE;
+    }
+}
 Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& option)
 {
     Rosen::RSAnimationTimingProtocol timingProtocol;
@@ -34,6 +44,7 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
     timingProtocol.SetAutoReverse(option.GetAnimationDirection() == AnimationDirection::ALTERNATE ||
                                   option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
     timingProtocol.SetFillMode(static_cast<Rosen::FillMode>(option.GetFillMode()));
+    timingProtocol.SetFinishCallbackType(ToAnimationFinishCallbackType(option.GetFinishCallbackType()));
     return timingProtocol;
 }
 } // namespace

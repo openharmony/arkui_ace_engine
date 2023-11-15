@@ -33,7 +33,12 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     if (touchEvents_.empty() && !userCallback_) {
         return true;
     }
-    auto lastPoint = point.history.size() > 0 ? point.history.back() : point;
+    TouchEvent lastPoint;
+    if (point.isInterpolated) {
+        lastPoint = point;
+    } else {
+        lastPoint = !point.history.empty() ? point.history.back() : point;
+    }
     TouchEventInfo event("touchEvent");
     event.SetTimeStamp(lastPoint.time);
     event.SetPointerEvent(lastPoint.pointerEvent);

@@ -17,10 +17,10 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -46,15 +46,14 @@ RefPtr<LayoutWrapper> SecurityComponentLayoutAlgorithm::GetChildWrapper(LayoutWr
 }
 
 void SecurityComponentLayoutAlgorithm::UpdateChildPosition(LayoutWrapper* layoutWrapper, const std::string& tag,
-    OffsetT<Dimension>& offset)
+    OffsetF& offset)
 {
     auto childWrapper = GetChildWrapper(layoutWrapper, tag);
     CHECK_NULL_VOID(childWrapper);
     auto childNode = childWrapper->GetHostNode();
     CHECK_NULL_VOID(childNode);
-    auto childRenderContext = childNode->GetRenderContext();
-    CHECK_NULL_VOID(childRenderContext);
-    childRenderContext->UpdatePosition(offset);
+    childNode->GetGeometryNode()->SetMarginFrameOffset(
+        OffsetF(std::round(offset.GetX()), std::round(offset.GetY())));
 }
 
 static LayoutConstraintF CreateDefaultChildConstraint(
@@ -66,29 +65,6 @@ static LayoutConstraintF CreateDefaultChildConstraint(
     return constraint;
 }
 
-void SecurityComponentLayoutAlgorithm::MeasureIcon(LayoutWrapper* layoutWrapper,
-    RefPtr<SecurityComponentLayoutProperty>& securityComponentProperty)
-{
-    auto iconWrapper = GetChildWrapper(layoutWrapper, V2::IMAGE_ETS_TAG);
-    CHECK_NULL_VOID(iconWrapper);
-
-    auto iconConstraint = CreateDefaultChildConstraint(securityComponentProperty);
-    iconWrapper->Measure(std::optional<LayoutConstraintF>(iconConstraint));
-    iconSizeF_ = iconWrapper->GetGeometryNode()->GetFrameSize();
-}
-
-void SecurityComponentLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper,
-    RefPtr<SecurityComponentLayoutProperty>& securityComponentProperty)
-{
-    auto textWrapper = GetChildWrapper(layoutWrapper, V2::TEXT_ETS_TAG);
-    CHECK_NULL_VOID(textWrapper);
-    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto textConstraint = CreateDefaultChildConstraint(securityComponentProperty);
-    textWrapper->Measure(std::optional<LayoutConstraintF>(textConstraint));
-    textSizeF_ = textWrapper->GetGeometryNode()->GetFrameSize();
-}
-
 void SecurityComponentLayoutAlgorithm::MeasureButton(LayoutWrapper* layoutWrapper,
     RefPtr<SecurityComponentLayoutProperty>& securityComponentProperty)
 {
@@ -97,135 +73,346 @@ void SecurityComponentLayoutAlgorithm::MeasureButton(LayoutWrapper* layoutWrappe
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(buttonWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(buttonLayoutProperty);
     auto buttonConstraint = CreateDefaultChildConstraint(securityComponentProperty);
-
-    if (buttonType_ == static_cast<int32_t>(ButtonType::CIRCLE)) {
+    if (securityComponentProperty->GetBackgroundType() == static_cast<int32_t>(ButtonType::CIRCLE)) {
         buttonConstraint.selfIdealSize.SetSize(SizeF(std::max(componentWidth_, componentHeight_),
             std::max(componentWidth_, componentHeight_)));
+        if (GreatNotEqual(componentWidth_, componentHeight_)) {
+            top_.EnlargeHeight((componentWidth_ / HALF) - (componentHeight_ / HALF));
+        } else if (GreatNotEqual(componentHeight_, componentWidth_)) {
+            left_.EnlargeWidth((componentHeight_ / HALF) - (componentWidth_ / HALF));
+        }
+        componentWidth_ = componentHeight_ = std::max(componentWidth_, componentHeight_);
     } else {
         buttonConstraint.selfIdealSize.SetSize(SizeF(componentWidth_, componentHeight_));
     }
 
     buttonWrapper->Measure(std::optional<LayoutConstraintF>(buttonConstraint));
-    buttonSizeF_ = buttonWrapper->GetGeometryNode()->GetFrameSize();
 }
 
-void SecurityComponentLayoutAlgorithm::FillPaddingParams(
-    RefPtr<SecurityComponentLayoutProperty>& securityComponentProperty, SecurityComponentLayoutPaddingParams& res)
+void SecurityComponentLayoutAlgorithm::InitPadding(RefPtr<SecurityComponentLayoutProperty>& property)
 {
-    res.top = securityComponentProperty->GetBackgroundTopPadding().value().ConvertToPx();
-    res.right = securityComponentProperty->GetBackgroundRightPadding().value().ConvertToPx();
-    res.bottom = securityComponentProperty->GetBackgroundBottomPadding().value().ConvertToPx();
-    res.left = securityComponentProperty->GetBackgroundLeftPadding().value().ConvertToPx();
-    res.textIconSpace = securityComponentProperty->GetTextIconSpace().value().ConvertToPx();
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<SecurityComponentTheme>();
+    CHECK_NULL_VOID(theme);
+
+    double borderWidth = property->GetBackgroundBorderWidth().value_or(Dimension(0.0)).ConvertToPx();
+    double size = property->GetBackgroundLeftPadding().value_or(theme->GetBackgroundLeftPadding()).ConvertToPx() +
+        borderWidth;
+    left_.Init(false,
+        property->GetBackgroundLeftPadding().has_value(), size, borderWidth);
+
+    size = property->GetBackgroundTopPadding().value_or(theme->GetBackgroundTopPadding()).ConvertToPx() +
+        borderWidth;
+    top_.Init(true,
+        property->GetBackgroundTopPadding().has_value(), size, borderWidth);
+
+    size = property->GetBackgroundRightPadding().value_or(theme->GetBackgroundRightPadding()).ConvertToPx() +
+        borderWidth;
+    right_.Init(false,
+        property->GetBackgroundRightPadding().has_value(), size, borderWidth);
+
+    size = property->GetBackgroundBottomPadding().value_or(theme->GetBackgroundBottomPadding()).ConvertToPx() +
+        borderWidth;
+    bottom_.Init(true,
+        property->GetBackgroundBottomPadding().has_value(), size, borderWidth);
+
+    size = property->GetTextIconSpace().value_or(theme->GetTextIconSpace()).ConvertToPx();
+    middle_.Init(isVertical_, property->GetTextIconSpace().has_value(), size, 0.0);
 }
 
-void SecurityComponentLayoutAlgorithm::UpdateVertical(OffsetT<Dimension>& offsetIcon,
-    OffsetT<Dimension>& offsetText, const SecurityComponentLayoutPaddingParams& params)
+double SecurityComponentLayoutAlgorithm::ShrinkWidth(double diff)
 {
-    componentHeight_ = params.top + iconSizeF_.Height() + params.textIconSpace +
-        textSizeF_.Height() + params.bottom;
-    componentWidth_ = params.left +
-        ((iconSizeF_.Width() > textSizeF_.Width()) ? iconSizeF_.Width() : textSizeF_.Width()) + params.right;
-    offsetText = offsetIcon + OffsetT<Dimension>(Dimension(0.0F),
-        Dimension(iconSizeF_.Height() + params.textIconSpace));
-    if (iconSizeF_.Width() > textSizeF_.Width()) {
-        offsetText += OffsetT<Dimension>(Dimension((iconSizeF_.Width() - textSizeF_.Width()) / HALF), Dimension(0.0F));
+    // first shrink left and right padding
+    double remain = left_.ShrinkWidth(diff / HALF);
+    remain = right_.ShrinkWidth(remain + (diff / HALF));
+    remain = left_.ShrinkWidth(remain);
+    if (NearEqual(remain, 0.0)) {
+        MeasureIntegralSize();
+        return componentWidth_;
+    }
+
+    // if horizontal shrink IconTextSpace
+    remain = middle_.ShrinkWidth(remain);
+    if (NearEqual(remain, 0.0)) {
+        MeasureIntegralSize();
+        return componentWidth_;
+    }
+
+    double iconWidth = icon_.width_;
+    double textWidth = text_.width_;
+    if (isVertical_) {
+        // Shrink max width, then shrink another proportionally if vertical
+        if (GreatNotEqual(textWidth, iconWidth)) {
+            double textRemain = text_.ShrinkWidth(remain);
+            double iconRemain = (remain - textRemain) * iconWidth / textWidth;
+            icon_.ShrinkWidth(iconRemain);
+        } else {
+            double iconRemain = icon_.ShrinkWidth(remain);
+            double textRemain = (remain - iconRemain) * textWidth / iconWidth;
+            text_.ShrinkWidth(textRemain);
+        }
     } else {
-        offsetIcon += OffsetT<Dimension>(Dimension((textSizeF_.Width() - iconSizeF_.Width()) / HALF), Dimension(0.0F));
+        // Shrink proportional text and icon if horizontal
+        double iconRemain = iconWidth * remain / (iconWidth + textWidth);
+        double textRemain = textWidth * remain / (iconWidth + textWidth);
+        double resIcon = icon_.ShrinkWidth(iconRemain);
+        double resText = text_.ShrinkWidth(textRemain);
+        if (!NearEqual(resIcon, 0.0)) {
+            text_.ShrinkWidth(resIcon);
+        } else if (!NearEqual(resText, 0.0)) {
+            icon_.ShrinkWidth(resText);
+        }
+    }
+    MeasureIntegralSize();
+    return componentWidth_;
+}
+
+double SecurityComponentLayoutAlgorithm::EnlargeWidth(double diff)
+{
+    double remain = left_.EnlargeWidth(diff / HALF);
+    remain = right_.EnlargeWidth(remain + (diff / HALF));
+    remain = left_.EnlargeWidth(remain);
+    if (GreatNotEqual(remain, 0.0) && !isVertical_) {
+        middle_.EnlargeWidth(remain);
+    }
+    MeasureIntegralSize();
+    return componentWidth_;
+}
+
+double SecurityComponentLayoutAlgorithm::ShrinkHeight(double diff)
+{
+    // first shrink left and right padding
+    double remain = top_.ShrinkHeight(diff / HALF);
+    remain = bottom_.ShrinkHeight(remain + (diff / HALF));
+    remain = top_.ShrinkHeight(remain);
+    if (NearEqual(remain, 0.0)) {
+        MeasureIntegralSize();
+        return componentHeight_;
+    }
+
+    // if vertical shrink IconTextSpace
+    remain = middle_.ShrinkHeight(remain);
+    if (NearEqual(remain, 0.0)) {
+        MeasureIntegralSize();
+        return componentHeight_;
+    }
+
+    double iconHeight = icon_.height_;
+    double textHeight = text_.height_;
+    if (!isVertical_) {
+         // Shrink max width, then shrink another proportionally if horizontal
+        if (GreatNotEqual(textHeight, iconHeight)) {
+            double textRemain = text_.ShrinkHeight(remain);
+            double iconRemain = (remain - textRemain) * iconHeight / textHeight;
+            icon_.ShrinkHeight(iconRemain);
+        } else {
+            double iconRemain = icon_.ShrinkHeight(remain);
+            double textRemain = (remain - iconRemain) * textHeight / iconHeight;
+            text_.ShrinkHeight(textRemain);
+        }
+    } else {
+        double iconRemain = iconHeight * remain / (iconHeight + textHeight);
+        double textRemain = textHeight * remain / (iconHeight + textHeight);
+        double resIcon = icon_.ShrinkHeight(iconRemain);
+        double resText = text_.ShrinkHeight(textRemain);
+        if (!NearEqual(resIcon, 0.0)) {
+            text_.ShrinkHeight(resIcon);
+        } else if (!NearEqual(resText, 0.0)) {
+            icon_.ShrinkHeight(resText);
+        }
+    }
+    isNeedReadaptWidth_ = true;
+    MeasureIntegralSize();
+    return componentWidth_;
+}
+
+double SecurityComponentLayoutAlgorithm::EnlargeHeight(double diff)
+{
+    double remain = top_.EnlargeHeight(diff / HALF);
+    remain = bottom_.EnlargeHeight(remain + (diff / HALF));
+    remain = top_.EnlargeHeight(remain);
+    if (GreatNotEqual(remain, 0.0) && isVertical_) {
+        middle_.EnlargeHeight(remain);
+    }
+    MeasureIntegralSize();
+    return componentWidth_;
+}
+
+void SecurityComponentLayoutAlgorithm::AdaptWidth()
+{
+    if (idealWidth_ != 0.0) {
+        if (componentWidth_ > idealWidth_) {
+            ShrinkWidth(componentWidth_ - idealWidth_);
+        } else if (componentWidth_ < idealWidth_) {
+            EnlargeWidth(idealWidth_ - componentWidth_);
+        }
+        return;
+    }
+
+    if (componentWidth_ > maxWidth_) {
+        ShrinkWidth(componentWidth_ - maxWidth_);
+    } else if (componentWidth_ < minWidth_) {
+        EnlargeWidth(minWidth_ - componentWidth_);
     }
 }
 
-void SecurityComponentLayoutAlgorithm::UpdateHorizontal(OffsetT<Dimension>& offsetIcon,
-    OffsetT<Dimension>& offsetText, const SecurityComponentLayoutPaddingParams& params)
+void SecurityComponentLayoutAlgorithm::AdaptHeight()
 {
-    componentHeight_ =
-        params.top + ((iconSizeF_.Height() > textSizeF_.Height()) ? iconSizeF_.Height() : textSizeF_.Height()) +
-        params.bottom;
-    componentWidth_ = params.left + iconSizeF_.Width() + params.textIconSpace + textSizeF_.Width() + params.right;
+    if (idealHeight_ != 0.0) {
+        if (componentHeight_ > idealHeight_) {
+            ShrinkHeight(componentHeight_ - idealHeight_);
+        } else if (componentHeight_ < idealHeight_) {
+            EnlargeHeight(idealHeight_ - componentHeight_);
+        }
+        return;
+    }
+    if (componentHeight_ > maxHeight_) {
+        ShrinkHeight(componentHeight_ - maxHeight_);
+    } else if (componentHeight_ < minHeight_) {
+        EnlargeHeight(minHeight_ - componentHeight_);
+    }
+}
+
+void SecurityComponentLayoutAlgorithm::MeasureIntegralSize()
+{
+    if (isVertical_) {
+        double contextWidth = std::max(text_.width_, icon_.width_);
+        componentHeight_ = top_.height_ + text_.height_ +
+            middle_.height_ + icon_.height_ + bottom_.height_;
+        componentWidth_ = left_.width_ + contextWidth + right_.width_;
+    } else {
+        double contextHeight = std::max(text_.height_, icon_.height_);
+        componentHeight_ = top_.height_ + contextHeight + bottom_.height_;
+        componentWidth_ = left_.width_ + icon_.width_ +
+            middle_.width_ + text_.width_ + right_.width_;
+    }
+}
+
+void SecurityComponentLayoutAlgorithm::UpdateVerticalOffset(OffsetF& offsetIcon,
+    OffsetF& offsetText)
+{
+    offsetText = offsetIcon + OffsetF(0.0, icon_.height_ + middle_.height_);
+    if (icon_.width_ > text_.width_) {
+        offsetText += OffsetF((icon_.width_ - text_.width_) / HALF, 0.0);
+    } else {
+        offsetIcon += OffsetF((text_.width_ - icon_.width_) / HALF, 0.0);
+    }
+}
+
+void SecurityComponentLayoutAlgorithm::UpdateHorizontalOffset(OffsetF& offsetIcon,
+    OffsetF& offsetText)
+{
     offsetText = offsetIcon +
-        OffsetT<Dimension>(Dimension(iconSizeF_.Width() + params.textIconSpace), Dimension(0.0F));
-    if (iconSizeF_.Height() > textSizeF_.Height()) {
+        OffsetF(icon_.width_ + middle_.width_, 0.0);
+    if (icon_.height_ > text_.height_) {
         offsetText +=
-            OffsetT<Dimension>(Dimension(0.0F), Dimension((iconSizeF_.Height() - textSizeF_.Height()) / HALF));
+            OffsetF(0.0, (icon_.height_ - text_.height_) / HALF);
     } else {
         offsetIcon +=
-            OffsetT<Dimension>(Dimension(0.0F), Dimension((textSizeF_.Height() - iconSizeF_.Height()) / HALF));
+            OffsetF(0.0, (text_.height_ - icon_.height_) / HALF);
     }
 }
 
-void SecurityComponentLayoutAlgorithm::UpdateCircleBackground(OffsetT<Dimension>& offsetIcon,
-    OffsetT<Dimension>& offsetText)
+void SecurityComponentLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    if (componentHeight_ > componentWidth_) {
-        OffsetT<Dimension> rightMove(Dimension((componentHeight_ - componentWidth_) / HALF), Dimension(0.0F));
-        offsetIcon += rightMove;
-        offsetText += rightMove;
-        componentWidth_ = componentHeight_;
+    CHECK_NULL_VOID(layoutWrapper);
+    OffsetF offsetIcon = OffsetF(left_.width_, top_.height_);
+    OffsetF offsetText = OffsetF(left_.width_, top_.height_);
+    if (isVertical_) {
+        UpdateVerticalOffset(offsetIcon, offsetText);
     } else {
-        OffsetT<Dimension> downMove(Dimension(0.0F), Dimension((componentWidth_ - componentHeight_) / HALF));
-        offsetIcon += downMove;
-        offsetText += downMove;
-        componentHeight_ = componentWidth_;
-    }
-}
-
-void SecurityComponentLayoutAlgorithm::UpdateFrameMeasure(LayoutWrapper* layoutWrapper,
-    RefPtr<SecurityComponentLayoutProperty>& securityComponentProperty)
-{
-    SecurityComponentLayoutPaddingParams params;
-    FillPaddingParams(securityComponentProperty, params);
-
-    OffsetT<Dimension> offsetIcon = OffsetT<Dimension>(Dimension(params.left), Dimension(params.top));
-    OffsetT<Dimension> offsetText = OffsetT<Dimension>(Dimension(params.left), Dimension(params.top));
-    if (securityComponentProperty->GetTextIconLayoutDirection().value() ==
-        SecurityComponentLayoutDirection::VERTICAL) {
-        UpdateVertical(offsetIcon, offsetText, params);
-    } else {
-        UpdateHorizontal(offsetIcon, offsetText, params);
+        UpdateHorizontalOffset(offsetIcon, offsetText);
     }
 
-    if (buttonType_ == static_cast<int32_t>(ButtonType::CIRCLE)) {
-        UpdateCircleBackground(offsetIcon, offsetText);
-    }
     UpdateChildPosition(layoutWrapper, V2::IMAGE_ETS_TAG, offsetIcon);
     UpdateChildPosition(layoutWrapper, V2::TEXT_ETS_TAG, offsetText);
+
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Layout();
+    }
 }
 
-void SecurityComponentLayoutAlgorithm::InitLayoutParams(RefPtr<SecurityComponentLayoutProperty>& property)
+void SecurityComponentLayoutAlgorithm::UpdateCircleButtonConstraint()
 {
-    componentWidth_ = 0.0F;
-    componentHeight_ = 0.0F;
-    iconSizeF_.Reset();
-    textSizeF_.Reset();
-    buttonSizeF_.Reset();
-    buttonType_ = property->GetBackgroundType().value();
+    double circleIdealSize = std::max(componentWidth_, componentHeight_);
+    if ((idealWidth_ != 0.0) && (idealHeight_ != 0.0)) {
+        circleIdealSize = std::min(idealWidth_, idealHeight_);
+    } else if (idealWidth_ != 0.0) {
+        circleIdealSize = idealWidth_;
+    } else if (idealHeight_ != 0.0) {
+        circleIdealSize = idealHeight_;
+    } else {
+        if ((componentWidth_ < minWidth_) || (componentHeight_ < minHeight_)) {
+            circleIdealSize = std::max(minWidth_, minHeight_);
+        } else if ((componentWidth_ > maxWidth_) || (componentHeight_ > maxHeight_)) {
+            circleIdealSize = std::min(maxWidth_, maxHeight_);
+        }
+    }
+    idealWidth_ = idealHeight_ = circleIdealSize;
+}
+
+void SecurityComponentLayoutAlgorithm::FillBlank()
+{
+    if (isNobg_) {
+        return;
+    }
+    if (GreatNotEqual(idealWidth_, componentWidth_)) {
+        left_.width_ += ((idealWidth_ - componentWidth_) / HALF);
+        right_.width_ += ((idealWidth_ - componentWidth_) / HALF);
+    } else if (GreatNotEqual(minWidth_, componentWidth_)) {
+        left_.width_ += ((minWidth_ - componentWidth_) / HALF);
+        right_.width_ += ((minWidth_ - componentWidth_) / HALF);
+    }
+    if (GreatNotEqual(idealHeight_, componentHeight_)) {
+        top_.height_ += ((idealHeight_ - componentHeight_) / HALF);
+        bottom_.height_ += ((idealHeight_ - componentHeight_) / HALF);
+    } else if (GreatNotEqual(minHeight_, componentHeight_)) {
+        top_.height_ += ((minHeight_ - componentHeight_) / HALF);
+        bottom_.height_ += ((minHeight_ - componentHeight_) / HALF);
+    }
+    MeasureIntegralSize();
 }
 
 void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     auto securityComponentLayoutProperty =
-        DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        AceType::DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(securityComponentLayoutProperty);
 
-    InitLayoutParams(securityComponentLayoutProperty);
-    if (securityComponentLayoutProperty->GetIconStyle().value() !=
-        static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
-        MeasureIcon(layoutWrapper, securityComponentLayoutProperty);
-    }
+    auto iconWrapper = GetChildWrapper(layoutWrapper, V2::IMAGE_ETS_TAG);
+    icon_.Init(securityComponentLayoutProperty, iconWrapper);
 
-    if (securityComponentLayoutProperty->GetSecurityComponentDescription().value() !=
-        static_cast<int32_t>(SecurityComponentDescription::TEXT_NULL)) {
-        MeasureText(layoutWrapper, securityComponentLayoutProperty);
-    }
+    auto textWrapper = GetChildWrapper(layoutWrapper, V2::TEXT_ETS_TAG);
+    text_.Init(securityComponentLayoutProperty, textWrapper);
 
-    UpdateFrameMeasure(layoutWrapper, securityComponentLayoutProperty);
+    constraint_ = securityComponentLayoutProperty->GetContentLayoutConstraint();
+    CHECK_NULL_VOID(constraint_);
+    isVertical_ = (securityComponentLayoutProperty->GetTextIconLayoutDirection().value() ==
+        SecurityComponentLayoutDirection::VERTICAL);
+    isNobg_ = (securityComponentLayoutProperty->GetBackgroundType().value() == BUTTON_TYPE_NULL);
+    idealWidth_ = constraint_->selfIdealSize.Width().value_or(0.0);
+    idealHeight_ = constraint_->selfIdealSize.Height().value_or(0.0);
+    minWidth_ = constraint_->minSize.Width();
+    minHeight_ = constraint_->minSize.Height();
+    maxWidth_ = constraint_->maxSize.Width();
+    maxHeight_ = constraint_->maxSize.Height();
+    InitPadding(securityComponentLayoutProperty);
+
+    MeasureIntegralSize();
+
+    if (securityComponentLayoutProperty->GetBackgroundType() == static_cast<int32_t>(ButtonType::CIRCLE)) {
+        UpdateCircleButtonConstraint();
+    }
+    AdaptWidth();
+    AdaptHeight();
+    if (isNeedReadaptWidth_) {
+        AdaptWidth();
+    }
+    // fill blank when all paddings can not be enlarged because it has been set
+    FillBlank();
+
+    icon_.DoMeasure();
     MeasureButton(layoutWrapper, securityComponentLayoutProperty);
-    componentWidth_ = buttonSizeF_.Width();
-    componentHeight_ = buttonSizeF_.Height();
-
-    LOGD("security components size %{public}f %{public}f icon %{public}f %{public}f text %{public}f %{public}f",
-        componentWidth_, componentHeight_, iconSizeF_.Width(),
-        iconSizeF_.Height(), textSizeF_.Width(), textSizeF_.Height());
     layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(componentWidth_, componentHeight_));
 }
 } // namespace OHOS::Ace::NG

@@ -42,6 +42,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -536,37 +537,10 @@ HWTEST_F(EventManagerTestNg, EventManagerTest009, TestSize.Level1)
 
 /**
  * @tc.name: EventManagerTest010
- * @tc.desc: Test TouchTest with RenderNode
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, EventManagerTest010, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create EventManager.
-     * @tc.expected: eventManager is not null.
-     */
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-
-    /**
-     * @tc.steps: step2. Call TouchTest
-     * @tc.expected: touchTestResults_ has the touchPoint.id of instance
-     */
-    TouchEvent touchPoint;
-    auto renderNode = RenderAbilityComponent::Create();
-    TouchRestrict touchRestrict;
-    Offset offset;
-    EXPECT_EQ(eventManager->touchTestResults_.count(touchPoint.id), 0);
-    eventManager->TouchTest(touchPoint, renderNode, touchRestrict, offset, 0, true);
-    EXPECT_GT(eventManager->touchTestResults_.count(touchPoint.id), 0);
-}
-
-/**
- * @tc.name: EventManagerTest011
  * @tc.desc: Test TouchTest with FrameNode
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest011, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -602,11 +576,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest012
+ * @tc.name: EventManagerTest011
  * @tc.desc: Test TouchTest with FrameNode
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest012, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -632,11 +606,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest012, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest013
+ * @tc.name: EventManagerTest012
  * @tc.desc: Test HandleGlobalEventNG
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest013, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -671,11 +645,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest013, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest014
+ * @tc.name: EventManagerTest013
  * @tc.desc: Test HandleOutOfRectCallback
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest014, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -717,40 +691,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest015
- * @tc.desc: Test TouchTest
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, EventManagerTest015, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create EventManager.
-     * @tc.expected: eventManager is not null.
-     */
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-
-    /**
-     * @tc.steps: step2. Call TouchTest.
-     * @tc.expected: eventManager is not null.
-     */
-    AxisEvent axisEvent;
-    axisEvent.sourceType = SourceType::TOUCH;
-
-    auto renderNode = RenderAbilityComponent::Create();
-    TouchRestrict touchRestrict;
-
-    EXPECT_EQ(eventManager->axisTouchTestResults_.count(axisEvent.id), 0);
-    eventManager->TouchTest(axisEvent, renderNode, touchRestrict);
-    EXPECT_GT(eventManager->axisTouchTestResults_.count(axisEvent.id), 0);
-}
-
-/**
- * @tc.name: EventManagerTest016
+ * @tc.name: EventManagerTest014
  * @tc.desc: Test DispatchTouchEvent
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest016, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest014, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -791,11 +736,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest016, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest017
+ * @tc.name: EventManagerTest015
  * @tc.desc: Test DispatchTabIndexEventNG
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest017, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest015, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -821,11 +766,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest018
+ * @tc.name: EventManagerTest016
  * @tc.desc: Test DispatchKeyEventNG
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest016, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -854,154 +799,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest019
- * @tc.desc: Test MouseTest
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, EventManagerTest019, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create EventManager.
-     * @tc.expected: eventManager is not null.
-     */
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-
-    /**
-     * @tc.steps: step2. Call MouseTest with MouseAction::WINDOW_LEAVE
-     * @tc.expected: retFlag is false
-     */
-    auto renderNode = RenderAbilityComponent::Create();
-
-    MouseEvent event;
-    event.action = MouseAction::WINDOW_LEAVE;
-    eventManager->mouseHoverTestResults_.push_back(renderNode);
-    ASSERT_FALSE(eventManager->mouseHoverTestResults_.empty());
-    eventManager->MouseTest(event, renderNode);
-    ASSERT_TRUE(eventManager->mouseHoverTestResults_.empty());
-
-    /**
-     * @tc.steps: step3. Call MouseTest with MouseAction::WINDOW_LEAVE
-     * @tc.expected: retFlag is false
-     */
-    event.action = MouseAction::WINDOW_ENTER;
-    eventManager->mouseHoverTestResultsPre_.push_back(renderNode);
-    ASSERT_FALSE(eventManager->mouseHoverTestResultsPre_.empty());
-    eventManager->MouseTest(event, renderNode);
-    ASSERT_TRUE(eventManager->mouseHoverTestResultsPre_.empty());
-
-    /**
-     * @tc.steps: step4. Call MouseTest with MouseAction::HOVER
-     * @tc.expected: retFlag is false
-     */
-    event.action = MouseAction::HOVER;
-    eventManager->mouseHoverTestResults_.push_back(renderNode);
-    ASSERT_TRUE(eventManager->mouseHoverTestResultsPre_.empty());
-    ASSERT_FALSE(eventManager->mouseHoverTestResults_.empty());
-    eventManager->MouseTest(event, renderNode);
-    ASSERT_FALSE(eventManager->mouseHoverTestResultsPre_.empty());
-    ASSERT_TRUE(eventManager->mouseHoverTestResults_.empty());
-}
-
-/**
- * @tc.name: EventManagerTest020
- * @tc.desc: Test MouseTest
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, EventManagerTest020, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create EventManager.
-     * @tc.expected: eventManager is not null.
-     */
-    auto renderNode = RenderAbilityComponent::Create();
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-    eventManager->mouseHoverTestResults_.push_back(renderNode);
-
-    /**
-     * @tc.steps: step2. Call DispatchMouseEvent with MouseAction::PRESS
-     * @tc.expected: retFlag is true
-     */
-    MouseEvent event;
-
-    event.action = MouseAction::PRESS;
-    auto retFlag = eventManager->DispatchMouseEvent(event);
-    EXPECT_TRUE(retFlag);
-
-    /**
-     * @tc.steps: step3. Call DispatchMouseEvent with MouseAction::RELEASE
-     * @tc.expected: retFlag is true
-     */
-    event.action = MouseAction::RELEASE;
-    retFlag = eventManager->DispatchMouseEvent(event);
-    EXPECT_TRUE(retFlag);
-
-    /**
-     * @tc.steps: step4. Call DispatchMouseEvent with MouseAction::MOVE
-     * @tc.expected: retFlag is true
-     */
-    event.action = MouseAction::MOVE;
-    retFlag = eventManager->DispatchMouseEvent(event);
-    EXPECT_TRUE(retFlag);
-
-    /**
-     * @tc.steps: step5. Call DispatchMouseEvent with MouseAction::HOVER
-     * @tc.expected: retFlag is false
-     */
-    event.action = MouseAction::HOVER;
-    retFlag = eventManager->DispatchMouseEvent(event);
-    EXPECT_FALSE(retFlag);
-}
-
-/**
- * @tc.name: EventManagerTest021
- * @tc.desc: Test DispatchMouseHoverEvent
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, EventManagerTest021, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create EventManager.
-     * @tc.expected: eventManager is not null.
-     */
-    auto renderNode = RenderAbilityComponent::Create();
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-    eventManager->mouseHoverTestResultsPre_.push_back(renderNode);
-
-    /**
-     * @tc.steps: step2. Call DispatchMouseHoverEvent with mouseHoverTestResults empty
-     * @tc.expected: retFlag is true
-     */
-    MouseEvent event;
-    auto retFlag = eventManager->DispatchMouseHoverEvent(event);
-    EXPECT_TRUE(retFlag);
-
-    /**
-     * @tc.steps: step3. Call DispatchMouseHoverEvent with mouseHoverTestResults not empty
-     * @tc.expected: retFlag is true
-     */
-    eventManager->mouseHoverTestResults_.push_back(renderNode);
-    retFlag = eventManager->DispatchMouseHoverEvent(event);
-    EXPECT_TRUE(retFlag);
-
-    /**
-     * @tc.steps: step4. Call DispatchMouseHoverEvent with mouseHoverTestResultsPre_ empty
-     * @tc.expected: retFlag is true
-     */
-    eventManager->mouseHoverTestResultsPre_.clear();
-    eventManager->mouseHoverTestResults_.push_back(renderNode);
-    retFlag = eventManager->DispatchMouseHoverEvent(event);
-    EXPECT_TRUE(retFlag);
-}
-
-/**
- * @tc.name: EventManagerTest022
+ * @tc.name: EventManagerTest017
  * @tc.desc: Test MouseTest (frameNode)
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest022, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest017, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -1048,11 +850,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest022, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest023
+ * @tc.name: EventManagerTest018
  * @tc.desc: Test DispatchMouseEventNG
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest023, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -1113,11 +915,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest023, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest024
+ * @tc.name: EventManagerTest019
  * @tc.desc: Test DispatchMouseHoverEventNG
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest024, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest019, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -1157,11 +959,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest024, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest025
+ * @tc.name: EventManagerTest020
  * @tc.desc: Test DispatchAxisEventNG
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest025, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest020, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -1203,11 +1005,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest025, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest026
+ * @tc.name: EventManagerTest021
  * @tc.desc: Test DispatchAxisEventNG
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest026, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest021, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -1256,11 +1058,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest026, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest027
+ * @tc.name: EventManagerTest022
  * @tc.desc: Test DispatchAxisEventNG
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest027, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest022, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -1309,11 +1111,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest027, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest028
+ * @tc.name: EventManagerTest023
  * @tc.desc: Test DispatchTouchEvent
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest028, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest023, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -1356,11 +1158,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest028, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest029
+ * @tc.name: EventManagerTest024
  * @tc.desc: Test DispatchTouchEvent
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest029, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest024, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -1420,11 +1222,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest029, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest030
+ * @tc.name: EventManagerTest025
  * @tc.desc: Test FlushTouchEventsBegin
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest030, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest025, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -1445,11 +1247,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest030, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest031
+ * @tc.name: EventManagerTest026
  * @tc.desc: Test FlushTouchEventsBegin
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest031, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest026, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -1470,11 +1272,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest031, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest032
+ * @tc.name: EventManagerTest027
  * @tc.desc: Test FlushTouchEventsBegin
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest032, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest027, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -1491,29 +1293,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest032, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest033
- * @tc.desc: Test DispatchMouseHoverAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, EventManagerTest033, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create EventManager.
-     * @tc.expected: eventManager is not null.
-     */
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-
-    eventManager->mouseHoverNode_ = RenderAbilityComponent::Create();
-    eventManager->mouseHoverNodePre_ = RenderAbilityComponent::Create();
-}
-
-/**
- * @tc.name: EventManagerTest034
+ * @tc.name: EventManagerTest028
  * @tc.desc: Test DispatchTouchEvent:hoverNodeCur and hoverNodePre both null
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest034, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest028, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.
@@ -1577,153 +1361,420 @@ HWTEST_F(EventManagerTestNg, EventManagerTest034, TestSize.Level1)
 }
 
 /**
- * @tc.name: DispatchMouseHoverAnimation001
- * @tc.desc: Test EventManager DispatchMouseHoverAnimation
+ * @tc.name: PanRecognizerAxisDirection001
+ * @tc.desc: Test GetAxisDirection() of PanRecognizer.
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, DispatchMouseHoverAnimation001, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, PanRecognizerAxisDirection001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create EventManager.
-     * @tc.expected: eventManager is not null.
+     * @tc.steps: step1. Create pan recognizers.
+     * @tc.expected: recognizers is not null and axis direction is correct.
      */
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
+    auto panHorizontal = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panHorizontal, nullptr);
+    EXPECT_EQ(panHorizontal->GetAxisDirection(), Axis::HORIZONTAL);
 
-    /**
-     * @tc.steps: step2. Assign values to mouseHoverNode_ and mouseHoverNodePre_.
-     * @tc.expected: mouseHoverNode_ and mouseHoverNodePre_ both non null.
-     */
-    eventManager->mouseHoverNode_ = RenderAbilityComponent::Create();
-    eventManager->mouseHoverNodePre_ = RenderAbilityComponent::Create();
+    auto panVertical = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::VERTICAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panVertical, nullptr);
+    EXPECT_EQ(panVertical->GetAxisDirection(), Axis::VERTICAL);
 
-    /**
-     * @tc.cases: case. cover branch action is true PRESS.
-     */
-    MouseEvent event;
-    event.action = MouseAction::PRESS;
-    eventManager->DispatchMouseHoverAnimation(event);
-    EXPECT_EQ(eventManager->mouseHoverNode_.Upgrade(), nullptr);
+    auto panLeft = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::LEFT }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panLeft, nullptr);
+    EXPECT_EQ(panLeft->GetAxisDirection(), Axis::HORIZONTAL);
 
-    /**
-     * @tc.cases: case. cover branch action is RELEASE.
-     */
-    event.action = MouseAction::RELEASE;
-    eventManager->DispatchMouseHoverAnimation(event);
-    EXPECT_EQ(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+    auto panRight = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::RIGHT }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panRight, nullptr);
+    EXPECT_EQ(panRight->GetAxisDirection(), Axis::HORIZONTAL);
 
-    /**
-     * @tc.cases: case. cover branch action is MOVE and event button is NONE_BUTTON.
-     */
-    event.button = MouseButton::NONE_BUTTON;
-    event.action = MouseAction::MOVE;
-    eventManager->DispatchMouseHoverAnimation(event);
-    EXPECT_EQ(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+    auto panUp = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::UP }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panUp, nullptr);
+    EXPECT_EQ(panUp->GetAxisDirection(), Axis::VERTICAL);
 
-    /**
-     * @tc.cases: case. cover branch action is not MOVE and event button is NONE_BUTTON.
-     */
-    event.button = MouseButton::NONE_BUTTON;
-    event.action = MouseAction::RELEASE;
-    eventManager->DispatchMouseHoverAnimation(event);
-    EXPECT_EQ(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+    auto panDown = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::DOWN }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panDown, nullptr);
+    EXPECT_EQ(panDown->GetAxisDirection(), Axis::VERTICAL);
 
-    /**
-     * @tc.cases: case. cover branch action is WINDOW_ENTER.
-     */
-    event.action = MouseAction::WINDOW_ENTER;
-    eventManager->DispatchMouseHoverAnimation(event);
-    EXPECT_EQ(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
-
-    /**
-     * @tc.cases: case. cover branch action is WINDOW_ENTER.
-     */
-    event.action = MouseAction::WINDOW_LEAVE;
-    eventManager->DispatchMouseHoverAnimation(event);
-    EXPECT_EQ(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
-
-    /**
-     * @tc.cases: case. cover branch action is HOVER.
-     */
-    event.action = MouseAction::HOVER;
-    eventManager->DispatchMouseHoverAnimation(event);
-    EXPECT_EQ(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+    auto panFree = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::ALL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panFree, nullptr);
+    EXPECT_EQ(panFree->GetAxisDirection(), Axis::FREE);
 }
 
 /**
- * @tc.name: DispatchMouseHoverAnimation002
- * @tc.desc: Test EventManager DispatchMouseHoverAnimation:hoverNodeCur and hoverNodePre not null
+ * @tc.name: SwipeRecognizerAxisDirection001
+ * @tc.desc: Test GetAxisDirection() of SwipeRecognizer.
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, DispatchMouseHoverAnimation002, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, SwipeRecognizerAxisDirection001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create EventManager.
+     * @tc.steps: step1. Create swipe recognizers.
+     * @tc.expected: recognizers is not null and axis direction is correct.
+     */
+    auto swipeHorizontal = AceType::MakeRefPtr<SwipeRecognizer>(1, SwipeDirection { SwipeDirection::HORIZONTAL }, 0.0);
+    ASSERT_NE(swipeHorizontal, nullptr);
+    EXPECT_EQ(swipeHorizontal->GetAxisDirection(), Axis::HORIZONTAL);
+
+    auto swipeVertical = AceType::MakeRefPtr<SwipeRecognizer>(1, SwipeDirection { SwipeDirection::VERTICAL }, 0.0);
+    ASSERT_NE(swipeVertical, nullptr);
+    EXPECT_EQ(swipeVertical->GetAxisDirection(), Axis::VERTICAL);
+
+    auto swipeFree = AceType::MakeRefPtr<SwipeRecognizer>(1, SwipeDirection { SwipeDirection::ALL }, 0.0);
+    ASSERT_NE(swipeFree, nullptr);
+    EXPECT_EQ(swipeFree->GetAxisDirection(), Axis::FREE);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerAxisDirection001
+ * @tc.desc: Test GetAxisDirection() of ExclusiveRecognizer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, ExclusiveRecognizerAxisDirection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pan recognizers.
+     * @tc.expected: recognizers is not null and axis direction is correct.
+     */
+    auto panHorizontal1 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panHorizontal1, nullptr);
+    auto panHorizontal2 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panHorizontal2, nullptr);
+
+    auto panVertical1 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::VERTICAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panVertical1, nullptr);
+    auto panVertical2 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::VERTICAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panVertical2, nullptr);
+
+    auto panFree1 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::ALL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panFree1, nullptr);
+    auto panFree2 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::ALL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panFree2, nullptr);
+
+    /**
+     * @tc.steps: step2. Create exclusive recognizers.
+     * @tc.expected: recognizers is not null and axis direction is correct.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers;
+    recognizers.clear();
+    recognizers.emplace_back(panHorizontal1);
+    recognizers.emplace_back(panHorizontal2);
+    auto exclusiveDoubleHorizontal = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    ASSERT_NE(exclusiveDoubleHorizontal, nullptr);
+    EXPECT_EQ(exclusiveDoubleHorizontal->GetAxisDirection(), Axis::HORIZONTAL);
+
+    recognizers.clear();
+    recognizers.emplace_back(panVertical1);
+    recognizers.emplace_back(panVertical2);
+    auto exclusiveDoubleVertical = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    ASSERT_NE(exclusiveDoubleVertical, nullptr);
+    EXPECT_EQ(exclusiveDoubleVertical->GetAxisDirection(), Axis::VERTICAL);
+
+    recognizers.clear();
+    recognizers.emplace_back(panFree1);
+    recognizers.emplace_back(panFree2);
+    auto exclusiveDoubleFree = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    ASSERT_NE(exclusiveDoubleFree, nullptr);
+    EXPECT_EQ(exclusiveDoubleFree->GetAxisDirection(), Axis::FREE);
+
+    recognizers.clear();
+    recognizers.emplace_back(panHorizontal1);
+    recognizers.emplace_back(panVertical1);
+    auto exclusiveHorizontalVertical = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    ASSERT_NE(exclusiveHorizontalVertical, nullptr);
+    EXPECT_EQ(exclusiveHorizontalVertical->GetAxisDirection(), Axis::FREE);
+
+    recognizers.clear();
+    recognizers.emplace_back(panHorizontal1);
+    recognizers.emplace_back(panFree1);
+    auto exclusiveHorizontalFree = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    ASSERT_NE(exclusiveHorizontalFree, nullptr);
+    EXPECT_EQ(exclusiveHorizontalFree->GetAxisDirection(), Axis::FREE);
+
+    recognizers.clear();
+    recognizers.emplace_back(panVertical1);
+    recognizers.emplace_back(panFree1);
+    auto exclusiveVerticalFree = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    ASSERT_NE(exclusiveVerticalFree, nullptr);
+    EXPECT_EQ(exclusiveVerticalFree->GetAxisDirection(), Axis::FREE);
+}
+
+/**
+ * @tc.name: ParallelRecognizerAxisDirection001
+ * @tc.desc: Test GetAxisDirection() of ParallelRecognizer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, ParallelRecognizerAxisDirection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pan recognizers.
+     * @tc.expected: recognizers is not null and axis direction is correct.
+     */
+    auto panHorizontal1 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panHorizontal1, nullptr);
+    auto panHorizontal2 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panHorizontal2, nullptr);
+
+    auto panVertical1 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::VERTICAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panVertical1, nullptr);
+    auto panVertical2 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::VERTICAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panVertical2, nullptr);
+
+    auto panFree1 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::ALL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panFree1, nullptr);
+    auto panFree2 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::ALL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panFree2, nullptr);
+
+    /**
+     * @tc.steps: step2. Create parallel recognizers.
+     * @tc.expected: recognizers is not null and axis direction is correct.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers;
+    recognizers.clear();
+    recognizers.emplace_back(panHorizontal1);
+    recognizers.emplace_back(panHorizontal2);
+    auto parallelDoubleHorizontal = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    ASSERT_NE(parallelDoubleHorizontal, nullptr);
+    EXPECT_EQ(parallelDoubleHorizontal->GetAxisDirection(), Axis::HORIZONTAL);
+
+    recognizers.clear();
+    recognizers.emplace_back(panVertical1);
+    recognizers.emplace_back(panVertical2);
+    auto parallelDoubleVertical = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    ASSERT_NE(parallelDoubleVertical, nullptr);
+    EXPECT_EQ(parallelDoubleVertical->GetAxisDirection(), Axis::VERTICAL);
+
+    recognizers.clear();
+    recognizers.emplace_back(panFree1);
+    recognizers.emplace_back(panFree2);
+    auto parallelDoubleFree = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    ASSERT_NE(parallelDoubleFree, nullptr);
+    EXPECT_EQ(parallelDoubleFree->GetAxisDirection(), Axis::FREE);
+
+    recognizers.clear();
+    recognizers.emplace_back(panHorizontal1);
+    recognizers.emplace_back(panVertical1);
+    auto parallelHorizontalVertical = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    ASSERT_NE(parallelHorizontalVertical, nullptr);
+    EXPECT_EQ(parallelHorizontalVertical->GetAxisDirection(), Axis::FREE);
+
+    recognizers.clear();
+    recognizers.emplace_back(panHorizontal1);
+    recognizers.emplace_back(panFree1);
+    auto parallelHorizontalFree = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    ASSERT_NE(parallelHorizontalFree, nullptr);
+    EXPECT_EQ(parallelHorizontalFree->GetAxisDirection(), Axis::FREE);
+
+    recognizers.clear();
+    recognizers.emplace_back(panVertical1);
+    recognizers.emplace_back(panFree1);
+    auto parallelVerticalFree = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    ASSERT_NE(parallelVerticalFree, nullptr);
+    EXPECT_EQ(parallelVerticalFree->GetAxisDirection(), Axis::FREE);
+}
+
+/**
+ * @tc.name: SequenceRecognizerAxisDirection001
+ * @tc.desc: Test GetAxisDirection() of SequenceRecognizer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, SequenceRecognizerAxisDirection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pan recognizers.
+     * @tc.expected: recognizers is not null and axis direction is correct.
+     */
+    auto panHorizontal1 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panHorizontal1, nullptr);
+    auto panHorizontal2 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panHorizontal2, nullptr);
+
+    auto panVertical1 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::VERTICAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panVertical1, nullptr);
+    auto panVertical2 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::VERTICAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panVertical2, nullptr);
+
+    auto panFree1 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::ALL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panFree1, nullptr);
+    auto panFree2 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::ALL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panFree2, nullptr);
+
+    /**
+     * @tc.steps: step2. Create sequence recognizers.
+     * @tc.expected: recognizers is not null and axis direction is correct.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers;
+    recognizers.clear();
+    recognizers.emplace_back(panHorizontal1);
+    recognizers.emplace_back(panHorizontal2);
+    auto sequenceDoubleHorizontal = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    ASSERT_NE(sequenceDoubleHorizontal, nullptr);
+    EXPECT_EQ(sequenceDoubleHorizontal->GetAxisDirection(), Axis::HORIZONTAL);
+
+    recognizers.clear();
+    recognizers.emplace_back(panVertical1);
+    recognizers.emplace_back(panVertical2);
+    auto sequenceDoubleVertical = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    ASSERT_NE(sequenceDoubleVertical, nullptr);
+    EXPECT_EQ(sequenceDoubleVertical->GetAxisDirection(), Axis::VERTICAL);
+
+    recognizers.clear();
+    recognizers.emplace_back(panFree1);
+    recognizers.emplace_back(panFree2);
+    auto sequenceDoubleFree = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    ASSERT_NE(sequenceDoubleFree, nullptr);
+    EXPECT_EQ(sequenceDoubleFree->GetAxisDirection(), Axis::FREE);
+
+    recognizers.clear();
+    recognizers.emplace_back(panHorizontal1);
+    recognizers.emplace_back(panVertical1);
+    auto sequenceHorizontalVertical = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    ASSERT_NE(sequenceHorizontalVertical, nullptr);
+    EXPECT_EQ(sequenceHorizontalVertical->GetAxisDirection(), Axis::FREE);
+
+    recognizers.clear();
+    recognizers.emplace_back(panHorizontal1);
+    recognizers.emplace_back(panFree1);
+    auto sequenceHorizontalFree = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    ASSERT_NE(sequenceHorizontalFree, nullptr);
+    EXPECT_EQ(sequenceHorizontalFree->GetAxisDirection(), Axis::FREE);
+
+    recognizers.clear();
+    recognizers.emplace_back(panVertical1);
+    recognizers.emplace_back(panFree1);
+    auto sequenceVerticalFree = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    ASSERT_NE(sequenceVerticalFree, nullptr);
+    EXPECT_EQ(sequenceVerticalFree->GetAxisDirection(), Axis::FREE);
+}
+
+/**
+ * @tc.name: HasDifferentDirectionGesture001
+ * @tc.desc: Test HasDifferentDirectionGesture() of EventManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, HasDifferentDirectionGesture001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pan recognizers.
+     * @tc.expected: recognizers is not null and axis direction is correct.
+     */
+    auto panHorizontal1 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panHorizontal1, nullptr);
+    auto panHorizontal2 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panHorizontal2, nullptr);
+
+    auto panVertical1 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::VERTICAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panVertical1, nullptr);
+    auto panVertical2 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::VERTICAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panVertical2, nullptr);
+
+    auto panFree1 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::ALL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panFree1, nullptr);
+    auto panFree2 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::ALL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panFree2, nullptr);
+
+    /**
+     * @tc.steps: step2. Create EventManager.
      * @tc.expected: eventManager is not null.
      */
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
+    TouchTestResult hitTestResult;
 
     /**
-     * @tc.steps: step2. Assign values to mouseHoverNode_ and mouseHoverNodePre_.
-     * @tc.expected: hoverNodeCur and hoverNodePre both non null.
+     * @tc.steps: step3. Add 2 horizontal recognizer to axisTouchTestResults_
+     * @tc.expected: axisTouchTestResults_->HasDifferentDirectionGesture() is false.
      */
-    auto currentMouseHoverNode = RenderAbilityComponent::Create();
-    eventManager->mouseHoverNode_ = currentMouseHoverNode;
-    auto currentMouseHoverNodePre = RenderAbilityComponent::Create();
-    eventManager->mouseHoverNodePre_ = currentMouseHoverNodePre;
+    hitTestResult.clear();
+    eventManager->axisTouchTestResults_.clear();
+    hitTestResult.emplace_back(panHorizontal1);
+    hitTestResult.emplace_back(panHorizontal2);
+    eventManager->axisTouchTestResults_[MOUSE_BASE_ID] = std::move(hitTestResult);
+    EXPECT_FALSE(eventManager->HasDifferentDirectionGesture());
 
     /**
-     * @tc.cases: case. cover branch action is true PRESS.
+     * @tc.steps: step4. Add 2 vertical recognizer to axisTouchTestResults_
+     * @tc.expected: axisTouchTestResults_->HasDifferentDirectionGesture() is false.
      */
-    MouseEvent event;
-    event.action = MouseAction::PRESS;
-    eventManager->DispatchMouseHoverAnimation(event);
-    EXPECT_NE(eventManager->mouseHoverNode_.Upgrade(), nullptr);
+    hitTestResult.clear();
+    eventManager->axisTouchTestResults_.clear();
+    hitTestResult.emplace_back(panVertical1);
+    hitTestResult.emplace_back(panVertical2);
+    eventManager->axisTouchTestResults_[MOUSE_BASE_ID] = std::move(hitTestResult);
+    EXPECT_FALSE(eventManager->HasDifferentDirectionGesture());
 
     /**
-     * @tc.cases: case. cover branch action is RELEASE.
+     * @tc.steps: step5. Add horizontal and vertical recognizer to axisTouchTestResults_
+     * @tc.expected: axisTouchTestResults_->HasDifferentDirectionGesture() is true.
      */
-    event.action = MouseAction::RELEASE;
-    eventManager->DispatchMouseHoverAnimation(event);
-    EXPECT_NE(eventManager->mouseHoverNode_.Upgrade(), nullptr);
+    hitTestResult.clear();
+    eventManager->axisTouchTestResults_.clear();
+    hitTestResult.emplace_back(panHorizontal1);
+    hitTestResult.emplace_back(panVertical1);
+    eventManager->axisTouchTestResults_[MOUSE_BASE_ID] = std::move(hitTestResult);
+    EXPECT_TRUE(eventManager->HasDifferentDirectionGesture());
 
     /**
-     * @tc.cases: case. cover branch action is MOVE and event button is NONE_BUTTON.
+     * @tc.steps: step6. Add horizontal and free recognizer to axisTouchTestResults_
+     * @tc.expected: axisTouchTestResults_->HasDifferentDirectionGesture() is true.
      */
-    event.button = MouseButton::NONE_BUTTON;
-    event.action = MouseAction::MOVE;
-    eventManager->DispatchMouseHoverAnimation(event);
-    EXPECT_NE(eventManager->mouseHoverNode_.Upgrade(), nullptr);
+    hitTestResult.clear();
+    eventManager->axisTouchTestResults_.clear();
+    hitTestResult.emplace_back(panHorizontal1);
+    hitTestResult.emplace_back(panFree1);
+    eventManager->axisTouchTestResults_[MOUSE_BASE_ID] = std::move(hitTestResult);
+    EXPECT_TRUE(eventManager->HasDifferentDirectionGesture());
 
     /**
-     * @tc.cases: case. cover branch action is not MOVE and event button is NONE_BUTTON.
+     * @tc.steps: step6. Add vertical and free recognizer to axisTouchTestResults_
+     * @tc.expected: axisTouchTestResults_->HasDifferentDirectionGesture() is true.
      */
-    event.button = MouseButton::NONE_BUTTON;
-    event.action = MouseAction::RELEASE;
-    eventManager->DispatchMouseHoverAnimation(event);
-    EXPECT_NE(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+    hitTestResult.clear();
+    eventManager->axisTouchTestResults_.clear();
+    hitTestResult.emplace_back(panVertical1);
+    hitTestResult.emplace_back(panFree1);
+    eventManager->axisTouchTestResults_[MOUSE_BASE_ID] = std::move(hitTestResult);
+    EXPECT_TRUE(eventManager->HasDifferentDirectionGesture());
 
     /**
-     * @tc.cases: case. cover branch action is WINDOW_ENTER.
+     * @tc.steps: step6. Add free and free recognizer to axisTouchTestResults_
+     * @tc.expected: axisTouchTestResults_->HasDifferentDirectionGesture() is true.
      */
-    event.button = MouseButton::LEFT_BUTTON;
-    event.action = MouseAction::WINDOW_ENTER;
-    eventManager->DispatchMouseHoverAnimation(event);
-    EXPECT_NE(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
-
-    /**
-     * @tc.cases: case. cover branch action is WINDOW_LEAVE.
-     */
-    event.action = MouseAction::WINDOW_LEAVE;
-    eventManager->DispatchMouseHoverAnimation(event);
-    EXPECT_NE(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
-
-    /**
-     * @tc.cases: case. cover branch action is HOVER.
-     */
-    event.action = MouseAction::HOVER;
-    eventManager->DispatchMouseHoverAnimation(event);
-    EXPECT_NE(eventManager->mouseHoverNodePre_.Upgrade(), nullptr);
+    hitTestResult.clear();
+    eventManager->axisTouchTestResults_.clear();
+    hitTestResult.emplace_back(panFree1);
+    hitTestResult.emplace_back(panFree2);
+    eventManager->axisTouchTestResults_[MOUSE_BASE_ID] = std::move(hitTestResult);
+    EXPECT_TRUE(eventManager->HasDifferentDirectionGesture());
 }
 } // namespace OHOS::Ace::NG

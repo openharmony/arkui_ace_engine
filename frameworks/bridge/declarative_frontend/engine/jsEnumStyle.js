@@ -56,6 +56,14 @@ var TextAlign;
   TextAlign[TextAlign["JUSTIFY"] = 3] = "JUSTIFY";
 })(TextAlign || (TextAlign = {}));
 
+var TextDataDetectType;
+(function (TextDataDetectType) {
+  TextDataDetectType[TextDataDetectType["PHONE_NUMBER"] = 0] = "PHONE_NUMBER";
+  TextDataDetectType[TextDataDetectType["URL"] = 1] = "URL";
+  TextDataDetectType[TextDataDetectType["EMAIL"] = 2] = "EMAIL";
+  TextDataDetectType[TextDataDetectType["ADDRESS"] = 3] = "ADDRESS";
+})(TextDataDetectType || (TextDataDetectType = {}));
+
 var DataPanelType;
 (function (DataPanelType) {
   DataPanelType[DataPanelType["Line"] = 0] = "Line";
@@ -1996,6 +2004,11 @@ var CheckBoxShape;
   CheckBoxShape["ROUNDED_SQUARE"] = 1;
 })(CheckBoxShape || (CheckBoxShape = {}));
 
+var FinishCallbackType;
+(function (FinishCallbackType) {
+  FinishCallbackType["REMOVED"] = 0;
+  FinishCallbackType["LOGICALLY"] = 1;
+})(FinishCallbackType || (FinishCallbackType = {}));
 var WebLayoutMode;
 (function (WebLayoutMode) {
   WebLayoutMode[WebLayoutMode["NONE"] = 0] = "NONE";

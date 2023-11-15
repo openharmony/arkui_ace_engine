@@ -49,6 +49,7 @@ ohos_unittest("view_abstract_test_ng") {
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/event_manager.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_data_detector_mgr.cpp",
     "$ace_root/frameworks/core/common/watch_dog.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_container_info.cpp",

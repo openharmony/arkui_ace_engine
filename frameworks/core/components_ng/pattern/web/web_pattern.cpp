@@ -812,6 +812,55 @@ void WebPattern::HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info)
     delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_ENTER);
 }
 
+void WebPattern::HandleOnDragDropLink(RefPtr<UnifiedData> aceData)
+{
+    CHECK_NULL_VOID(aceData);
+    CHECK_NULL_VOID(delegate_);
+    CHECK_NULL_VOID(delegate_->dragData_);
+    // hyperlink
+    std::string linkUrl;
+    std::string linkTitle;
+    UdmfClient::GetInstance()->GetLinkRecord(aceData, linkUrl, linkTitle);
+    if (!linkUrl.empty()) {
+        delegate_->dragData_->SetLinkURL(linkUrl);
+        delegate_->dragData_->SetLinkTitle(linkTitle);
+        TAG_LOGD(AceLogTag::ACE_WEB,
+            "DragDrop event WebEventHub onDragDropId, linkUrl size:%{public}d", (int)linkUrl.size());
+    } else {
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "DragDrop event WebEventHub onDragDropId, linkUrl is empty");
+    }
+}
+
+void WebPattern::HandleOnDragDropFile(RefPtr<UnifiedData> aceData)
+{
+    CHECK_NULL_VOID(aceData);
+    CHECK_NULL_VOID(delegate_);
+    CHECK_NULL_VOID(delegate_->dragData_);
+    // file
+    std::vector<std::string> urlVec;
+    UdmfClient::GetInstance()->GetFileUriRecord(aceData, urlVec);
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
+        "url array size is:%{public}d", (int)urlVec.size());
+    delegate_->dragData_->ClearImageFileNames();
+    for (std::string url : urlVec) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
+            "url get from udmf:%{public}s", url.c_str());
+        AppFileService::ModuleFileUri::FileUri fileUri(url);
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
+            "fileUri ToString:%{public}s", fileUri.ToString().c_str());
+        std::string uriRealPath = FileUriHelper::GetRealPath(url);
+        if (!uriRealPath.empty() && access(uriRealPath.c_str(), F_OK) == 0) { // file exist
+            TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
+            "url real path:%{public}s", uriRealPath.c_str());
+            delegate_->dragData_->SetFileUri(uriRealPath);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
+                "url is empty or not exist, uriRealPath:%{public}s", uriRealPath.c_str());
+        }
+    }
+}
+
 void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
     isDragging_ = false;
@@ -829,7 +878,7 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
     RefPtr<UnifiedData> aceData = info->GetData();
     // get data from ace(from udmf), and send it to chromium
     if (aceData && aceData->GetSize() >= 1) {
-        TAG_LOGD(AceLogTag::ACE_WEB,
+        TAG_LOGI(AceLogTag::ACE_WEB,
             "DragDrop event WebEventHub onDragDropId, size:%{public}d", (int)aceData->GetSize());
         CHECK_NULL_VOID(delegate_->dragData_);
         // plain text
@@ -848,16 +897,10 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
             TAG_LOGD(AceLogTag::ACE_WEB,
                 "DragDrop event WebEventHub onDragDropId, htmlContent size:%{public}d", (int)htmlContent.size());
         }
-        // hyperlink
-        std::string linkUrl;
-        std::string linkTitle;
-        UdmfClient::GetInstance()->GetLinkRecord(aceData, linkUrl, linkTitle);
-        if (!linkUrl.empty()) {
-            delegate_->dragData_->SetLinkURL(linkUrl);
-            delegate_->dragData_->SetLinkTitle(linkTitle);
-            TAG_LOGD(AceLogTag::ACE_WEB,
-                "DragDrop event WebEventHub onDragDropId, linkUrl size:%{public}d", (int)linkUrl.size());
-        }
+        // link
+        HandleOnDragDropLink(aceData);
+        // file
+        HandleOnDragDropFile(aceData);
     } else {
         TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId get data failed");
     }
@@ -2616,9 +2659,8 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
             TAG_LOGD(AceLogTag::ACE_WEB, "FilterScrollEvent ScrollBy remainOffset = %{public}f", result.remain);
             return NearZero(result.remain);
         } else {
-            HandleScrollVelocity(velocity);
+            return HandleScrollVelocity(velocity);
         }
-        return true;
     } else if (nestedScrollMode_ == NestedScrollMode::PARALLEL) {
         if (offset != 0) {
             HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);

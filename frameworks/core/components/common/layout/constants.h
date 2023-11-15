@@ -188,6 +188,13 @@ enum class TextAlign {
     END = 2,
 };
 
+enum class TextDataDetectType {
+    PHONE_NUMBER = 0,
+    URL,
+    EMAIL,
+    ADDRESS,
+};
+
 enum class WhiteSpace {
     NORMAL,
     PRE,

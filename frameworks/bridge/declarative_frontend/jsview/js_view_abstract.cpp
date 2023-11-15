@@ -39,6 +39,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_focus_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
@@ -129,6 +130,7 @@ constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "address" };
 const std::string SHEET_HEIGHT_MEDIUM = "medium";
 const std::string SHEET_HEIGHT_LARGE = "large";
 const std::string SHEET_HEIGHT_AUTO = "auto";
@@ -5865,6 +5867,36 @@ bool JSViewAbstract::ParseJsonResource(const std::unique_ptr<JsonValue>& jsonVal
         return true;
     }
     return false;
+}
+
+bool JSViewAbstract::ParseDataDetectorConfig(const JSCallbackInfo& info, std::string& types,
+    std::function<void(const std::string&)>& onResult)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> typeValue = obj->GetProperty("types");
+    if (!typeValue->IsArray()) {
+        return false;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(typeValue);
+    for (size_t i = 0; i < array->Length(); i++) {
+        JSRef<JSVal> value = array->GetValueAt(i);
+        auto index = value->ToNumber<int32_t>();
+        if (index < 0 || index >= static_cast<int32_t>(TEXT_DETECT_TYPES.size())) {
+            LOGI("Text detect types(%d) is invalid value", index);
+            return false;
+        }
+        types.append(",").append(TEXT_DETECT_TYPES[index]);
+    }
+
+    JSRef<JSVal> resultCallback = obj->GetProperty("onDetectResultUpdate");
+    if (resultCallback->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(resultCallback));
+        onResult = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& result) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Execute(result);
+        };
+    }
+    return true;
 }
 
 void JSViewAbstract::GetAngle(

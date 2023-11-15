@@ -351,6 +351,7 @@ private:
     bool IsUniformHeightProbably();
     float CalculatePredictSnapEndPositionByIndex(uint32_t index, V2::ScrollSnapAlign scrollSnapAlign);
     void OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index);
+    void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;

@@ -16,8 +16,11 @@
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "base/log/ace_scoring_log.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#ifdef SECURITY_COMPONENT_ENABLE
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
+#endif
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components/common/layout/constants.h"
@@ -40,7 +43,53 @@ void SecurityComponentPattern::SetNodeHitTestMode(RefPtr<FrameNode>& node, HitTe
     gestureHub->SetHitTestMode(mode);
 }
 
-void SecurityComponentPattern::InitSecurityComponentOnClick(RefPtr<FrameNode>& secCompNode, RefPtr<FrameNode>& icon,
+bool SecurityComponentPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if ((event.code == KeyCode::KEY_SPACE) || (event.code == KeyCode::KEY_ENTER)) {
+        auto frameNode = GetHost();
+        CHECK_NULL_RETURN(frameNode, false);
+        int32_t res = 1;
+#ifdef SECURITY_COMPONENT_ENABLE
+        res = SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
+            frameNode, event);
+        if (res != 0) {
+            LOGE("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
+            res = 1;
+        }
+#endif
+        auto jsonNode = JsonUtil::Create(true);
+        jsonNode->Put("handleRes", res);
+        std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
+        auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+        gestureEventHub->ActClick(jsonShrd);
+        return true;
+    }
+    return false;
+}
+
+void SecurityComponentPattern::InitOnKeyEvent()
+{
+    if (isSetOnKeyEvent) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (!pattern) {
+            return false;
+        }
+        return pattern->OnKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+    isSetOnKeyEvent = true;
+}
+
+void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPtr<FrameNode>& icon,
     RefPtr<FrameNode>& text, RefPtr<FrameNode>& button)
 {
     if (clickListener_ != nullptr) {
@@ -49,21 +98,23 @@ void SecurityComponentPattern::InitSecurityComponentOnClick(RefPtr<FrameNode>& s
     auto secCompGesture = secCompNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(secCompGesture);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+#ifdef SECURITY_COMPONENT_ENABLE
         auto buttonPattern = weak.Upgrade();
         CHECK_NULL_VOID(buttonPattern);
         auto frameNode = buttonPattern->GetHost();
         CHECK_NULL_VOID(frameNode);
-        int32_t res = SecurityComponentHandler::ReportSecurityComponentClickEvent(buttonPattern->scId_,
-            frameNode, info);
-        if (res != 0) {
-            LOGE("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
-            res = 1;
+        if (!info.GetSecCompHandleEvent()) {
+            int res = SecurityComponentHandler::ReportSecurityComponentClickEvent(buttonPattern->scId_,
+                frameNode, info);
+            if (res != 0) {
+                LOGE("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
+                res = 1;
+            }
+            auto jsonNode = JsonUtil::Create(true);
+            jsonNode->Put("handleRes", res);
+            std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
+            info.SetSecCompHandleEvent(jsonShrd);
         }
-#ifdef SECURITY_COMPONENT_ENABLE
-        auto jsonNode = JsonUtil::Create(true);
-        jsonNode->Put("handleRes", res);
-        std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
-        info.SetSecCompHandleEvent(jsonShrd);
 #endif
     };
 
@@ -73,7 +124,6 @@ void SecurityComponentPattern::InitSecurityComponentOnClick(RefPtr<FrameNode>& s
     SetNodeHitTestMode(text, HitTestMode::HTMTRANSPARENT);
 }
 
-#ifdef SECURITY_COMPONENT_ENABLE
 void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     auto node = GetHost();
@@ -148,7 +198,87 @@ void SecurityComponentPattern::ToJsonValueRect(std::unique_ptr<JsonValue>& json)
         }
     }
 }
-#endif
+
+FocusPattern SecurityComponentPattern::GetFocusPattern() const
+{
+    auto frameNode = GetHost();
+    RefPtr<FrameNode> buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
+    if (buttonNode != nullptr) {
+        auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
+        return buttonPattern->GetFocusPattern();
+    }
+
+    return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
+}
+
+void SecurityComponentPattern::UpdateIconProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& iconNode)
+{
+    auto iconLayoutProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto scLayoutProp = scNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(scLayoutProp);
+    if (scLayoutProp->GetIconSize().has_value()) {
+        auto iconSize = scLayoutProp->GetIconSize().value();
+        iconLayoutProp->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(iconSize), NG::CalcLength(iconSize)));
+    }
+
+    auto scPaintProp = scNode->GetPaintProperty<SecurityComponentPaintProperty>();
+    CHECK_NULL_VOID(scPaintProp);
+    if (scPaintProp->GetIconColor().has_value()) {
+        auto iconSrcInfo = iconLayoutProp->GetImageSourceInfo().value();
+        iconSrcInfo.SetFillColor(scPaintProp->GetIconColor().value());
+        iconLayoutProp->UpdateImageSourceInfo(iconSrcInfo);
+    }
+}
+
+void SecurityComponentPattern::UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode)
+{
+    auto scLayoutProp = scNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    auto textLayoutProp = textNode->GetLayoutProperty<TextLayoutProperty>();
+    if (scLayoutProp->GetFontSize().has_value()) {
+        textLayoutProp->UpdateFontSize(scLayoutProp->GetFontSize().value());
+    }
+    if (scLayoutProp->GetFontStyle().has_value()) {
+        textLayoutProp->UpdateItalicFontStyle(scLayoutProp->GetFontStyle().value());
+    }
+    if (scLayoutProp->GetFontWeight().has_value()) {
+        textLayoutProp->UpdateFontWeight(scLayoutProp->GetFontWeight().value());
+    }
+    if (scLayoutProp->GetFontFamily().has_value()) {
+        textLayoutProp->UpdateFontFamily(scLayoutProp->GetFontFamily().value());
+    }
+    auto scPaintProp = scNode->GetPaintProperty<SecurityComponentPaintProperty>();
+    if (scPaintProp->GetFontColor().has_value()) {
+        textLayoutProp->UpdateTextColor(scPaintProp->GetFontColor().value());
+    }
+}
+
+void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode)
+{
+    auto scLayoutProp = scNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    auto scPaintProp = scNode->GetPaintProperty<SecurityComponentPaintProperty>();
+    auto buttonLayoutProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    const auto& buttonRender = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(buttonRender);
+
+    if (scLayoutProp->GetBackgroundBorderWidth().has_value()) {
+        BorderWidthProperty widthProp;
+        widthProp.SetBorderWidth(scLayoutProp->GetBackgroundBorderWidth().value());
+        buttonLayoutProp->UpdateBorderWidth(widthProp);
+    }
+
+    if (scLayoutProp->GetBackgroundBorderRadius().has_value()) {
+        buttonLayoutProp->UpdateBorderRadius(
+            BorderRadiusProperty(scLayoutProp->GetBackgroundBorderRadius().value()));
+    }
+    if (scPaintProp->GetBackgroundColor().has_value()) {
+        buttonRender->UpdateBackgroundColor(scPaintProp->GetBackgroundColor().value());
+    }
+    if (scPaintProp->GetBackgroundBorderColor().has_value()) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(scPaintProp->GetBackgroundBorderColor().value());
+        buttonRender->UpdateBorderColor(borderColor);
+    }
+}
 
 void SecurityComponentPattern::OnModifyDone()
 {
@@ -157,34 +287,40 @@ void SecurityComponentPattern::OnModifyDone()
 
     RefPtr<FrameNode> iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
     if (iconNode != nullptr) {
+        UpdateIconProperty(frameNode, iconNode);
         iconNode->MarkModifyDone();
     }
 
     RefPtr<FrameNode> textNode = GetSecCompChildNode(frameNode, V2::TEXT_ETS_TAG);
     if (textNode != nullptr) {
+        UpdateTextProperty(frameNode, textNode);
         textNode->MarkModifyDone();
     }
 
     RefPtr<FrameNode> buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
     if (buttonNode != nullptr) {
+        UpdateButtonProperty(frameNode, buttonNode);
         buttonNode->MarkModifyDone();
     }
 
-    InitSecurityComponentOnClick(frameNode, iconNode, textNode, buttonNode);
-    InitSecurityComponentAppearCallback(frameNode);
+    InitOnClick(frameNode, iconNode, textNode, buttonNode);
+    InitOnKeyEvent();
+    InitAppearCallback(frameNode);
     RegisterOrUpdateSecurityComponent(frameNode, scId_);
 }
 
 void SecurityComponentPattern::RegisterOrUpdateSecurityComponent(RefPtr<FrameNode>& frameNode, int32_t& scId)
 {
+#ifdef SECURITY_COMPONENT_ENABLE
     if (scId == -1) {
         SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId);
     } else {
         SecurityComponentHandler::UpdateSecurityComponent(frameNode, scId);
     }
+#endif
 }
 
-void SecurityComponentPattern::InitSecurityComponentAppearCallback(RefPtr<FrameNode>& frameNode)
+void SecurityComponentPattern::InitAppearCallback(RefPtr<FrameNode>& frameNode)
 {
     if (isAppearCallback_) {
         return;
@@ -193,17 +329,21 @@ void SecurityComponentPattern::InitSecurityComponentAppearCallback(RefPtr<FrameN
     CHECK_NULL_VOID(eventHub);
 
     auto onAppear = [weak = WeakClaim(this)]() {
+#ifdef SECURITY_COMPONENT_ENABLE
         auto securityComponentPattern = weak.Upgrade();
         CHECK_NULL_VOID(securityComponentPattern);
         auto frameNode = securityComponentPattern->GetHost();
         securityComponentPattern->RegisterOrUpdateSecurityComponent(frameNode,
             securityComponentPattern->scId_);
+#endif
     };
 
     auto onDisAppear = [weak = WeakClaim(this)]() {
+#ifdef SECURITY_COMPONENT_ENABLE
         auto securityComponentPattern = weak.Upgrade();
         CHECK_NULL_VOID(securityComponentPattern);
         SecurityComponentHandler::UnregisterSecurityComponent(securityComponentPattern->scId_);
+#endif
     };
     eventHub->SetOnAppear(std::move(onAppear));
     eventHub->SetOnDisappear(std::move(onDisAppear));
