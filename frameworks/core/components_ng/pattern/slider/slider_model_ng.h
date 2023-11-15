@@ -57,6 +57,40 @@ public:
     void ResetBlockShape() override;
     void ResetStepSize() override;
 
+    static void SetShowTips(FrameNode* frameNode, bool value, const std::optional<std::string>& content);
+    static void SetThickness(FrameNode* frameNode, const Dimension& value);
+    static void SetStepSize(FrameNode* frameNode, const Dimension& value);
+    static void SetBlockType(FrameNode* frameNode, BlockStyleType value);
+    static void SetBlockShape(FrameNode* frameNode, const RefPtr<BasicShape>& value);
+    static void SetBlockSize(FrameNode* frameNode, const Dimension& width, const Dimension& height);
+    static void SetTrackBorderRadius(FrameNode* frameNode, const Dimension& value);
+    static void SetStepColor(FrameNode* frameNode, const Color& value);
+    static void SetBlockBorderColor(FrameNode* frameNode, const Color& value);
+    static void SetBlockBorderWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetBlockColor(FrameNode* frameNode, const Color& value);
+    static void SetTrackBackgroundColor(FrameNode* frameNode, const Color& value);
+    static void SetSelectColor(FrameNode* frameNode, const Color& value);
+    static void SetShowSteps(FrameNode* frameNode, bool value);
+    static void SetBlockImage(
+        FrameNode* frameNode, const std::string& value, const std::string& bundleName, const std::string& moduleName);
+
+    static void ResetShowTips(FrameNode* frameNode);
+    static void ResetThickness(FrameNode* frameNode);
+    static void ResetStepSize(FrameNode* frameNode);
+    static void ResetBlockType(FrameNode* frameNode);
+    static void ResetBlockShape(FrameNode* frameNode);
+    static void ResetBlockSize(FrameNode* frameNode);
+    static void ResetTrackBorderRadius(FrameNode* frameNode);
+    static void ResetStepColor(FrameNode* frameNode);
+    static void ResetBlockBorderColor(FrameNode* frameNode);
+    static void ResetBlockBorderWidth(FrameNode* frameNode);
+    static void ResetBlockColor(FrameNode* frameNode);
+    static void ResetTrackBackgroundColor(FrameNode* frameNode);
+    static void ResetSelectColor(FrameNode* frameNode);
+    static void ResetShowSteps(FrameNode* frameNode);
+    static void ResetBlockStyle(FrameNode* frameNode);
+    static void ResetBlockImage(FrameNode* frameNode);
+
 private:
     void SetSliderValue(float value);
 };

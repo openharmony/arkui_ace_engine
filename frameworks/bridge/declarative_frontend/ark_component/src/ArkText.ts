@@ -60,10 +60,19 @@ class TextAlignModifier extends Modifier<number> {
 }
 
 class ArkTextComponent extends ArkComponent implements TextAttribute {
-    font(value: Font): TextAttribute {
+    enableDataDetector(enable: boolean): this {
         throw new Error("Method not implemented.");
     }
-    fontColor(value: ResourceColor): TextAttribute {
+    dataDetectorConfig(config: any): this {
+        throw new Error("Method not implemented.");
+    }
+    onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
+        throw new Error("Method not implemented.");
+    }
+    font(value: Font): this {
+        throw new Error("Method not implemented.");
+    }
+    fontColor(value: ResourceColor): this {
         var arkColor = new ArkColor();
         if (arkColor.parseColorValue(value)) {
             modifier(this._modifiers, FontColorModifier, arkColor.color);
@@ -72,7 +81,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
         }
         return this;
     }
-    fontSize(value: any): TextAttribute {
+    fontSize(value: any): this {
         if (!isNumber(value) && !isString(value)) {
             modifier(this._modifiers, FontSizeModifier, undefined);
         }
@@ -81,19 +90,19 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
         }
         return this;
     }
-    minFontSize(value: any): TextAttribute {
+    minFontSize(value: any): this {
         throw new Error("Method not implemented.");
     }
-    maxFontSize(value: any): TextAttribute {
+    maxFontSize(value: any): this {
         throw new Error("Method not implemented.");
     }
-    fontStyle(value: FontStyle): TextAttribute {      
+    fontStyle(value: FontStyle): this {      
         if(isNumber(value)){
             modifier(this._modifiers, FontStyleModifier, value);
         }
         return this;
     }
-    fontWeight(value: any): TextAttribute {
+    fontWeight(value: any): this {
         let fontWeightStr: string = "400";
         if(isNumber(value)){
             if(value === 0){
@@ -124,7 +133,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
         modifier(this._modifiers, FontWeightModifier, fontWeightStr);
         return this;
     }
-    textAlign(value: TextAlign): TextAttribute {
+    textAlign(value: TextAlign): this {
         let textAlignNum = 0
         if(isNumber(value)){
             textAlignNum = value
@@ -132,52 +141,52 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
         modifier(this._modifiers, TextAlignModifier, textAlignNum);
         return this 
     }
-    lineHeight(value: any): TextAttribute {
+    lineHeight(value: any): this {
         throw new Error("Method not implemented.");
     }
-    textOverflow(value: { overflow: TextOverflow; }): TextAttribute {
+    textOverflow(value: { overflow: TextOverflow; }): this {
         throw new Error("Method not implemented.");
     }
-    fontFamily(value: any): TextAttribute {
+    fontFamily(value: any): this {
         throw new Error("Method not implemented.");
     }
-    maxLines(value: number): TextAttribute {
+    maxLines(value: number): this {
         throw new Error("Method not implemented.");
     }
-    decoration(value: { type: TextDecorationType; color?: any; }): TextAttribute {
+    decoration(value: { type: TextDecorationType; color?: any; }): this {
         throw new Error("Method not implemented.");
     }
-    letterSpacing(value: string | number): TextAttribute {
+    letterSpacing(value: string | number): this {
         throw new Error("Method not implemented.");
     }
-    textCase(value: TextCase): TextAttribute {
+    textCase(value: TextCase): this {
         throw new Error("Method not implemented.");
     }
-    baselineOffset(value: string | number): TextAttribute {
+    baselineOffset(value: string | number): this {
         throw new Error("Method not implemented.");
     }
-    copyOption(value: CopyOptions): TextAttribute {
+    copyOption(value: CopyOptions): this {
         throw new Error("Method not implemented.");
     }
-    textShadow(value: ShadowOptions): TextAttribute {
+    textShadow(value: ShadowOptions): this {
         throw new Error("Method not implemented.");
     }
-    heightAdaptivePolicy(value: TextHeightAdaptivePolicy): TextAttribute {
+    heightAdaptivePolicy(value: TextHeightAdaptivePolicy): this {
         throw new Error("Method not implemented.");
     }
-    textIndent(value: Length): TextAttribute {
+    textIndent(value: Length): this {
         throw new Error("Method not implemented.");
     }
-    wordBreak(value: WordBreak): TextAttribute {
+    wordBreak(value: WordBreak): this {
         throw new Error("Method not implemented.");
     }
-    onCopy(callback: (value: string) => void): TextAttribute {
+    onCopy(callback: (value: string) => void): this {
         throw new Error("Method not implemented.");
     }
-    selection(selectionStart: number, selectionEnd: number): TextAttribute {
+    selection(selectionStart: number, selectionEnd: number): this {
         throw new Error("Method not implemented.");
     }
-    ellipsisMode(value: EllipsisMode): TextAttribute {
+    ellipsisMode(value: EllipsisMode): this {
         throw new Error("Method not implemented.");
     }
 }

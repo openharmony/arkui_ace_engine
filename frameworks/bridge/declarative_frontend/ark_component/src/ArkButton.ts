@@ -1,6 +1,9 @@
 /// <reference path="./import.ts" />
 class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
-  type (value: ButtonType): ButtonAttribute {
+  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
+    throw new Error("Method not implemented.");
+  }
+  type (value: ButtonType): this {
     if (typeof value === "number") {
       modifier(this._modifiers, ButtonTypeModifier, value);
     }
@@ -9,7 +12,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     }
     return this;
   }
-  stateEffect(value: boolean): ButtonAttribute {
+  stateEffect(value: boolean): this {
     if (typeof value === "boolean") {
       modifier(this._modifiers, ButtonStateEffectModifier, value);
     } else {
@@ -17,7 +20,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     }
     return this;
   }
-  fontColor(value: ResourceColor): ButtonAttribute {
+  fontColor(value: ResourceColor): this {
     var arkColor = new ArkColor();
     if (arkColor.parseColorValue(value)) {
       modifier(this._modifiers, ButtonFontColorModifier, arkColor.color);
@@ -26,7 +29,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     }
     return this;
   }
-  fontSize(value: Length): ButtonAttribute {
+  fontSize(value: Length): this {
     if (typeof value === "number" || typeof value === "string") {
       modifier(this._modifiers, ButtonFontSizeModifier, value);
     } else {
@@ -34,7 +37,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     }
     return this;
   }
-  fontWeight(value: string | number | FontWeight): ButtonAttribute {
+  fontWeight(value: string | number | FontWeight): this {
     if (typeof value === "string") {
       modifier(this._modifiers, ButtonFontWeightModifier, value);
     } else {
@@ -42,7 +45,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     }
     return this;
   }
-  fontStyle(value: FontStyle): ButtonAttribute {
+  fontStyle(value: FontStyle): this {
     if (typeof value === "number" && value >= 0 && value < 2) {
       modifier(this._modifiers, ButtonFontStyleModifier, value);
     } else {
@@ -50,7 +53,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     }
     return this;
   }
-  fontFamily(value: string | Resource): ButtonAttribute {
+  fontFamily(value: string | Resource): this {
     if (typeof value === "string") {
       modifier(this._modifiers, ButtonFontFamilyModifier, value);
     } else {
@@ -58,7 +61,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     }
     return this;
   }
-  labelStyle(value: ArkLabelStyle): ButtonAttribute {
+  labelStyle(value: ArkLabelStyle): this {
     if (typeof value === "object") {
       modifier(this._modifiers, ButtonLabelStyleModifier, value);
     } else {

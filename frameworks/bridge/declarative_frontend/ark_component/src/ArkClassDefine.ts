@@ -313,3 +313,235 @@ class ArkBackgroundBlurStyle {
             (this.scale === another.scale));
     }
 }
+
+
+class ArkFont implements Equable{
+    size: string | number | Resource;
+    weight: string;
+    family: string | Resource | undefined;
+    style: number | undefined;
+
+    constructor() {
+        this.size = "16fp"
+        this.weight = "400";
+    }
+
+    setFamily(family:string | Resource){
+        this.family = family;
+    }
+
+    setSize(size: string | number | Resource){
+        this.size = size;
+    }
+
+    setStyle(style:number){
+        this.style = style;
+    }
+
+    isEqual(another: ArkFont): boolean {
+        return this.size === another.size && this.weight === another.weight && this.family === another.family && this.style === another.style;
+    }
+    
+    parseFontWeight(value: string | number){
+        if(typeof value === 'number'){
+            if(value === 0){
+                this.weight = "Lighter"
+            }
+            else if(value === 1){
+                this.weight = "Normal"
+            }
+            else if(value === 2){
+                this.weight = "Regular"
+            }
+            else if(value === 3){
+                this.weight = "Medium"
+            }
+            else if(value === 4){
+                this.weight = "Bold"
+            }
+            else if(value === 5){
+                this.weight = "Bolder"
+            }
+            else{
+                this.weight = value.toString()            
+            }
+        }       
+        else if(typeof value === 'string'){
+            this.weight =  value
+        }
+        else {
+            this.weight = "400";
+        }
+    }
+}
+
+class ArkMenuAlignType implements Equable{
+    alignType: number;
+    dx: number;
+    dy: number;
+
+    constructor(){
+        this.alignType = 2;
+        this.dx = 0;
+        this.dy = 0;
+    }
+
+    isEqual(another: ArkMenuAlignType): boolean {
+        return (this.alignType === another.alignType) && (this.dx === another.dx) && (this.dy === another.dy);
+    }
+}
+
+class ArkSliderTips implements Equable {
+    showTip: boolean;
+    tipText: string | undefined;
+    
+    constructor() {
+        this.showTip = false;
+        this.tipText = undefined;
+    }
+
+    isEqual(another: ArkSliderTips): boolean {
+        return this.showTip === another.showTip && this.tipText === another.tipText
+    }
+
+}
+
+class ArkTextStyle implements Equable {
+    color : number | string | undefined
+    font : ArkFont | undefined
+
+    constructor(){
+        this.color = undefined;
+        this.font = new ArkFont();
+    }
+
+    parseTextStyle(value: PickerTextStyle, defaultColor: string, defaultSize: string, defaultWeight: string){
+        if (isObject(value)){
+            let color = new ArkColor();
+            let inputFont = value.font;
+            let inputColor = value.color;
+
+            if(!isUndefined(inputColor) && (isNumber(inputColor) || isString(inputColor))){                
+                color.parseColorValue(inputColor);
+                this.color = color.getColor();              
+            }
+            
+            if (!isUndefined(inputFont) && isObject(inputFont)) {
+                
+                if (!isUndefined(inputFont.size) ) {
+                    this.font.size = inputFont.size;
+                }
+
+                if (!isUndefined(inputFont.weight) ) {
+                    this.font.parseFontWeight(inputFont.weight);
+                } 
+                this.font.family = inputFont.family;
+                this.font.style = inputFont.style;
+            }
+        } else {
+            this.color = defaultColor;
+            this.font.size = defaultSize;
+            this.font.parseFontWeight(defaultWeight);
+        }
+    }
+
+    isEqual(another: ArkTextStyle): boolean {
+        return this.color === another.color && this.font.isEqual(another.font)
+    }
+}
+
+class ArkRadioStyle {
+    checkedBackgroundColor: number | undefined;
+    uncheckedBorderColor: number | undefined;
+    indicatorColor: number | undefined;
+
+    constructor() {
+        this.checkedBackgroundColor = undefined;
+        this.uncheckedBorderColor = undefined;
+        this.indicatorColor = undefined;
+    }
+
+    isEqual(another: ArkRadioStyle): boolean {
+        return (this.checkedBackgroundColor === another.checkedBackgroundColor 
+            && this.uncheckedBorderColor === another.uncheckedBorderColor 
+            && this.indicatorColor === another.indicatorColor);
+    }
+}
+
+class ArkStarStyle implements Equable {
+    backgroundUri: string | undefined;
+    foregroundUri: string | undefined;
+    secondaryUri: string | undefined;
+
+    constructor() {
+        this.backgroundUri = undefined;
+        this.foregroundUri = undefined;
+        this.secondaryUri = undefined;
+    }
+
+    isEqual(another: ArkStarStyle): boolean {
+        return this.backgroundUri === another.backgroundUri
+            && this.foregroundUri === another.foregroundUri 
+            && this.secondaryUri === another.secondaryUri;
+    }
+}
+
+class ArkMarkStyle {
+    strokeColor: number | undefined;
+    size: number | string;
+    strokeWidth: number | string;
+
+    constructor() {
+        this.strokeColor = undefined;
+        this.size = undefined;
+        this.strokeWidth = undefined;
+    }
+
+    isEqual(another: ArkMarkStyle): boolean {
+        return (this.strokeColor === another.strokeColor) && (this.size === another.size) && (this.strokeWidth === another.strokeWidth);
+    }
+
+    parseMarkStyle(options: object): boolean {
+        var arkColor = new ArkColor();
+        if (!arkColor.parseColorValue((options as ArkMarkStyle).strokeColor)) {
+            return false
+        }
+        this.strokeColor = arkColor.getColor();
+        this.size = (options as ArkMarkStyle).size;
+        this.strokeWidth = (options as ArkMarkStyle).strokeWidth;
+        return true
+    }
+}
+
+class ArkSelectedIndices implements Equable {
+    selectedValues: number []
+
+    constructor(){
+        this.selectedValues = [];
+    }
+
+    compareArrays(arr1:number [], arr2:number []): boolean {
+        return Array.isArray(arr1)
+            && Array.isArray(arr2)
+            && arr1.length === arr2.length
+            && arr1.every((value, index) => value === arr2[index]);
+    }
+
+    isEqual(another: ArkSelectedIndices): boolean {
+        return this.compareArrays(this.selectedValues, another.selectedValues)
+    }
+}
+
+class ArkBlockSize {
+    width: number | string | Resource | undefined;
+    height: number | string | Resource | undefined;
+
+    constructor() {
+        this.width = undefined;
+        this.height = undefined;
+    }
+
+    isEqual(another: ArkBlockSize): boolean {
+        return (this.width === another.width) && (this.height === another.height);
+    }
+}
