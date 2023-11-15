@@ -1710,10 +1710,10 @@ bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     auto viewScale = context->GetViewScale();
-    if (info.GetTouches().empty()) {
+    if (info.GetChangedTouches().empty()) {
         return false;
     }
-    for (const auto& point : info.GetTouches()) {
+    for (const auto& point : info.GetChangedTouches()) {
         TouchInfo touchInfo;
         touchInfo.id = point.GetFingerId();
         const Offset& location = point.GetLocalLocation();
