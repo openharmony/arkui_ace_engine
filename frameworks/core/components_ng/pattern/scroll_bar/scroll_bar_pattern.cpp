@@ -139,6 +139,10 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
             }
             return true;
         }
+        if (!Positive(controlDistance_)) {
+            SetOpacity(0);
+            return true;
+        }
     }
     return false;
 }
