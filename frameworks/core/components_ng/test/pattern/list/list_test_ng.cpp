@@ -6282,4 +6282,18 @@ HWTEST_F(ListTestNg, EdgeEffectOption004, TestSize.Level1)
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->scrollable_);
 }
+
+/**
+ * @tc.name: FRCCallback001
+ * @tc.desc: Test FRC callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, FRCCallback001, TestSize.Level1)
+{
+    Create([](ListModelNG model) {});
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    frameNode_->renderContext_ = renderContext;
+    EXPECT_CALL(*renderContext, AddFRCSceneInfo(_, _)).Times(1);
+    pattern_->NotifyFRCSceneInfo(0.0f, SceneStatus::START);
+}
 } // namespace OHOS::Ace::NG
