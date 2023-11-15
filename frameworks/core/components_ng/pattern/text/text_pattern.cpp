@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "base/window/drag_window.h"
 #include "core/common/font_manager.h"
+#include "core/common/ai/data_detector_mgr.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
@@ -938,6 +939,7 @@ void TextPattern::OnModifyDone()
     textForDisplay_ = textLayoutProperty->GetContent().value_or("");
     if (textCache != textForDisplay_) {
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
+        InitTextDetect();
     }
 
     auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
@@ -973,6 +975,38 @@ void TextPattern::OnModifyDone()
     if (onClick_ || copyOption_ != CopyOptions::None) {
         InitClickEvent(gestureEventHub);
     }
+}
+
+void TextPattern::InitTextDetect()
+{
+    if (!GetTextDetectEnable()) {
+        return;
+    }
+
+    TextDataDetectInfo info;
+    info.text = textForDisplay_;
+    info.module = GetTextDetectTypes();
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    int32_t instanceID = context->GetInstanceId();
+    auto textFunc = [weak = WeakClaim(this), instanceID](const TextDataDetectResult result) {
+        ContainerScope scope(instanceID);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(
+            host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([result, weak, instanceID] {
+            ContainerScope scope(instanceID);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetTextDetectResult(result);
+            pattern->FireOnResult(result.entity);
+        });
+    };
+    DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
 }
 
 void TextPattern::ActSetSelection(int32_t start, int32_t end)

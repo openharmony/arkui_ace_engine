@@ -637,6 +637,39 @@ void JSText::JsMenuOptionsExtension(const JSCallbackInfo& info)
     }
 }
 
+void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    if (!info[0]->IsBoolean()) {
+        TextModel::GetInstance()->SetTextDetectEnable(false);
+        return;
+    }
+    auto enable = info[0]->ToBoolean();
+    TextModel::GetInstance()->SetTextDetectEnable(enable);
+}
+
+void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
+    std::string textTypes;
+    std::function<void(const std::string&)> onResult;
+    if (!ParseDataDetectorConfig(info, textTypes, onResult)) {
+        return;
+    }
+    TextModel::GetInstance()->SetTextDetectEnable(true);
+    TextModel::GetInstance()->SetTextDetectConfig(textTypes, std::move(onResult));
+}
+
 void JSText::JSBind(BindingTarget globalObj)
 {
     JSClass<JSText>::Declare("Text");
@@ -685,6 +718,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("textMenuOptions", &JSText::JsMenuOptionsExtension);
+    JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);
+    JSClass<JSText>::StaticMethod("dataDetectorConfig", &JSText::JsDataDetectorConfig);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

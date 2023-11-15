@@ -207,6 +207,8 @@ public:
     static void GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow);
     static bool ParseJsonResource(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result);
+    static bool ParseDataDetectorConfig(const JSCallbackInfo& info, std::string& types,
+        std::function<void(const std::string&)>& onResult);
 
     static std::pair<CalcDimension, CalcDimension> ParseSize(const JSCallbackInfo& info);
     static void JsUseAlign(const JSCallbackInfo& info);
