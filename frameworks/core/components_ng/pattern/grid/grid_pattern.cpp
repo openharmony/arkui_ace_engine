@@ -1641,6 +1641,10 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
     }
     if (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) {
         auto endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
+        if (GreatNotEqual(GetMainContentSize(),
+            gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_)) {
+            endPos = gridLayoutInfo_.currentOffset_ + GetMainContentSize();
+        }
         auto newEndPos = endPos + delta;
         if (endPos < gridLayoutInfo_.lastMainSize_ && newEndPos < gridLayoutInfo_.lastMainSize_) {
             offset.end = delta;
