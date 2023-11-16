@@ -41,10 +41,15 @@ void RichEditorModelNG::Create()
     richEditorPattern->InitSurfacePositionChangedCallback();
     richEditorPattern->ClearSelectionMenu();
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto draggable = pipeline->GetDraggable<RichEditorTheme>();
-    SetDraggable(draggable);
+    if (frameNode->IsFirstBuilding()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto draggable = pipeline->GetDraggable<RichEditorTheme>();
+        SetDraggable(draggable);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetTextDraggable(true);
+    }
 }
 
 void RichEditorModelNG::SetDraggable(bool draggable)

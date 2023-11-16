@@ -35,12 +35,17 @@ void TextModelNG::Create(const std::string& content)
         FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     stack->Push(frameNode);
 
-    // set draggable for framenode
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto draggable = pipeline->GetDraggable<TextTheme>();
-    frameNode->SetDraggable(draggable);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
+    // set draggable for framenode
+    if (frameNode->IsFirstBuilding()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto draggable = pipeline->GetDraggable<TextTheme>();
+        frameNode->SetDraggable(draggable);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetTextDraggable(true);
+    }
 }
 
 void TextModelNG::SetFont(const Font& value)

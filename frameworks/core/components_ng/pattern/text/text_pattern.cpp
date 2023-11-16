@@ -647,6 +647,7 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
 
         if (info.GetAction() == MouseAction::MOVE) {
             if (blockPress_) {
+                dragBoxes_ = GetTextBoxes();
                 return;
             }
             mouseStatus_ = MouseStatus::MOVE;
@@ -838,11 +839,12 @@ void TextPattern::InitDragEvent()
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
     if (eventHub->HasOnDragStart()) {
+        gestureHub->SetTextDraggable(false);
         return;
     }
-
-    auto gestureHub = host->GetOrCreateGestureEventHub();
     gestureHub->InitDragDropEvent();
     gestureHub->SetTextDraggable(true);
     gestureHub->SetThumbnailCallback(GetThumbnailCallback());

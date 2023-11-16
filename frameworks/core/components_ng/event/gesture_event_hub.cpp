@@ -35,6 +35,7 @@
 #include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
 #include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
+#include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -43,7 +44,6 @@
 
 #include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
 #include "core/common/udmf/udmf_client.h"
-#include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #endif // ENABLE_DRAG_FRAMEWORK
 namespace OHOS::Ace::NG {
@@ -524,16 +524,6 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     } else if (needScale) {
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(PIXELMAP_DRAG_DEFAULT_HEIGHT);
-    } else if (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
-               frameTag == V2::TEXTINPUT_ETS_TAG) {
-        auto hostPattern = frameNode->GetPattern<TextDragBase>();
-        if (hostPattern) {
-            auto frameNodeOffset = hostPattern->GetDragUpperLeftCoordinates();
-            auto coordinateX = frameNodeOffset.GetX();
-            auto coordinateY = frameNodeOffset.GetY();
-            result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
-            result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
-        }
     } else {
         auto coordinateX = frameNodeOffset_.GetX() > SystemProperties::GetDevicePhysicalWidth()
                                ? frameNodeOffset_.GetX() - SystemProperties::GetDevicePhysicalWidth()
@@ -689,11 +679,18 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     event->SetScreenX(info.GetScreenLocation().GetX());
     event->SetScreenY(info.GetScreenLocation().GetY());
 
+    auto frameTag = frameNode->GetTag();
+    auto hostPattern = frameNode->GetPattern<TextDragBase>();
+    if (hostPattern && (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
+                        frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG)) {
+        frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
+    } else {
+        frameNodeOffset_ = frameNode->GetOffsetRelativeToWindow();
+    }
     /*
      * Users may remove frameNode in the js callback function "onDragStart "triggered below,
      * so save the offset of the framenode relative to the window in advance
      */
-    frameNodeOffset_ = frameNode->GetOffsetRelativeToWindow();
     auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
     auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams);
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)

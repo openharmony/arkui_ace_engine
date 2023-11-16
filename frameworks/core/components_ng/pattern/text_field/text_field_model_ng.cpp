@@ -82,9 +82,14 @@ void TextFieldModelNG::CreateNode(
     AddDragFrameNodeToManager();
     PaddingProperty paddings;
     ProcessDefaultPadding(paddings);
-    auto draggable = pipeline->GetDraggable<TextFieldTheme>();
-    SetDraggable(draggable);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, paddings);
+    if (frameNode->IsFirstBuilding()) {
+        auto draggable = pipeline->GetDraggable<TextFieldTheme>();
+        SetDraggable(draggable);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetTextDraggable(true);
+    }
 }
 
 void TextFieldModelNG::SetDraggable(bool draggable)
