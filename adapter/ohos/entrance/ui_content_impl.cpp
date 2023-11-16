@@ -268,7 +268,7 @@ public:
         taskExecutor->PostTask(
             [instanceId = instanceId_] {
                 SubwindowManager::GetInstance()->ClearMenu();
-                SubwindowManager::GetInstance()->HidePopupNG(-1, instanceId);
+                SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
             },
             TaskExecutor::TaskType::UI);
     }

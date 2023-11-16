@@ -264,7 +264,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     ShowWindow(false);
     ResizeWindow();
     ContainerScope scope(childContainerId_);
-    overlayManager->UpdatePopupNode(targetId, popupInfo);
+    overlayManager->ShowPopup(targetId, popupInfo);
 }
 
 void SubwindowOhos::HidePopupNG(int32_t targetId)
@@ -280,7 +280,6 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     ContainerScope scope(childContainerId_);
     overlayManager->HidePopup(targetId == -1 ? popupTargetId_ : targetId, popupInfo);
     context->FlushPipelineImmediately();
-    HideWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
     HideEventColumn();
     HidePixelMap();
@@ -571,6 +570,19 @@ void SubwindowOhos::ClearMenuNG(bool inWindow, bool showAnimation)
     HidePixelMap(false, 0, 0, false);
     HideFilter();
 #endif // ENABLE_DRAG_FRAMEWORK
+}
+
+void SubwindowOhos::ClearPopupNG()
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->CleanPopupInSubWindow();
+    HideWindow();
+    context->FlushPipelineImmediately();
 }
 
 void SubwindowOhos::ShowMenu(const RefPtr<Component>& newComponent)
