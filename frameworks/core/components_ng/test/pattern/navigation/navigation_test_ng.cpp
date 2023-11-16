@@ -1625,20 +1625,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG006, TestSize.Level1)
     preNavDestinationPattern->isOnShow_ = true;
     ASSERT_NE(preTopNavDestination->GetEventHub<NavDestinationEventHub>(), nullptr);
 
-    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
-    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath, true);
-    ASSERT_FALSE(preNavDestinationPattern->isOnShow_);
-
-    preNavDestinationPattern->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(
-        []() { return FrameNode::CreateFrameNode("child1", 102, AceType::MakeRefPtr<ButtonPattern>()); });
-    preTopNavDestination->contentNode_ =
-        FrameNode::CreateFrameNode("child1", 103, AceType::MakeRefPtr<ButtonPattern>());
-    preTopNavDestination->parent_ = AceType::WeakClaim(AceType::RawPtr(navigation));
-    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
-    preNavDestinationPattern->isOnShow_ = true;
-    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath, true);
-    ASSERT_FALSE(preNavDestinationPattern->isOnShow_);
-
     navigationPattern->navigationStack_->Add("preTopNavDestination", preTopNavDestination);
     navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath, false);
     ASSERT_FALSE(preNavDestinationPattern->isOnShow_);
@@ -2145,14 +2131,14 @@ HWTEST_F(NavigationTestNg, NavigationModelNG007, TestSize.Level1)
     auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
 
-    navigationPattern->DoNavigationTransitionAnimation(nullptr, nullptr, false);
-    navigationPattern->DoNavigationTransitionAnimation(preTopNavDestination, nullptr, false);
+    navigationPattern->DoStackModeTransitionAnimation(nullptr, nullptr, false);
+    navigationPattern->DoStackModeTransitionAnimation(preTopNavDestination, nullptr, false);
     ASSERT_EQ(preTopNavDestination->transitionType_, PageTransitionType::EXIT_POP);
-    navigationPattern->DoNavigationTransitionAnimation(nullptr, newTopNavDestination, false);
+    navigationPattern->DoStackModeTransitionAnimation(nullptr, newTopNavDestination, false);
     ASSERT_EQ(newTopNavDestination->transitionType_, PageTransitionType::ENTER_PUSH);
-    navigationPattern->DoNavigationTransitionAnimation(preTopNavDestination, newTopNavDestination, false);
+    navigationPattern->DoStackModeTransitionAnimation(preTopNavDestination, newTopNavDestination, false);
     ASSERT_EQ(newTopNavDestination->transitionType_, PageTransitionType::ENTER_PUSH);
-    navigationPattern->DoNavigationTransitionAnimation(preTopNavDestination, newTopNavDestination, true);
+    navigationPattern->DoStackModeTransitionAnimation(preTopNavDestination, newTopNavDestination, true);
     ASSERT_EQ(preTopNavDestination->transitionType_, PageTransitionType::EXIT_POP);
 }
 
@@ -2947,6 +2933,45 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0025, TestSize.Level1)
     navBarPattern->isTitleMenuNodeShowing_ = true;
     navBarPattern->OnWindowSizeChanged(20, 20, WindowSizeChangeReason::RECOVER);
     ASSERT_FALSE(barItem->isMoreItemNode_);
+}
+
+
+/**
+ * @tc.name: NavigationModelNG026
+ * @tc.desc: Test NavigationPattern::CheckTopNavPathChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    ASSERT_NE(AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode()), nullptr);
+    /**
+     * @tc.steps: step2. construct correct arguments of navigationPattern->CheckTopNavPathChange then call it.
+     * @tc.expected: check whether the properties is correct.
+     */
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 100, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+
+    navigationPattern->DoSplitModeTransitionAnimation(nullptr, nullptr, false);
+    navigationPattern->DoSplitModeTransitionAnimation(preTopNavDestination, nullptr, false);
+    ASSERT_EQ(preTopNavDestination->transitionType_, PageTransitionType::EXIT_POP);
+    navigationPattern->DoSplitModeTransitionAnimation(nullptr, newTopNavDestination, false);
+    ASSERT_NE(newTopNavDestination->transitionType_, PageTransitionType::ENTER_PUSH);
+    navigationPattern->DoSplitModeTransitionAnimation(preTopNavDestination, newTopNavDestination, false);
+    ASSERT_EQ(newTopNavDestination->transitionType_, PageTransitionType::ENTER_PUSH);
+    navigationPattern->DoSplitModeTransitionAnimation(preTopNavDestination, newTopNavDestination, true);
+    ASSERT_EQ(preTopNavDestination->transitionType_, PageTransitionType::EXIT_POP);
 }
 
 /**
