@@ -1151,4 +1151,15 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
     }
 }
+
+void JSTextField::SetSelectAllValue(const JSCallbackInfo& info)
+{
+    auto infoValue = info[0];
+    if (!infoValue->IsBoolean() || infoValue->IsUndefined() || infoValue->IsNull()) {
+        return;
+    }
+
+    bool isSetSelectAllValue = infoValue->ToBoolean();
+    TextFieldModel::GetInstance()->SetSelectAllValue(isSetSelectAllValue);
+}
 } // namespace OHOS::Ace::Framework

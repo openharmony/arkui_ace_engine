@@ -71,6 +71,7 @@ public:
         ResetIconSize();
         ResetIconSrc();
         ResetIconColor();
+        ResetSelectAllValue();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -81,6 +82,7 @@ public:
         json->Put("showErrorText", propShowErrorText_.value_or(false));
         json->Put("showCounter", propShowCounter_.value_or(false));
         json->Put("showUnderline", propShowUnderline_.value_or(false));
+        json->Put("selectAll", propSelectAllValue_.value_or(false));
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
@@ -143,11 +145,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HidePasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectionMenuHidden, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectAllValue, bool, PROPERTY_UPDATE_NORMAL);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CleanNodeStyle, CleanNodeStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSize, CalcDimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSrc, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconColor, Color, PROPERTY_UPDATE_MEASURE);
+
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
     {
@@ -181,6 +185,7 @@ protected:
         value->propIconSize_ = CloneIconSize();
         value->propIconSrc_ = CloneIconSrc();
         value->propIconColor_ = CloneIconColor();
+        value->propSelectAllValue_ = CloneSelectAllValue();
     }
 
 private:
