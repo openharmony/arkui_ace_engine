@@ -581,6 +581,8 @@ bool RatingPattern::OnKeyEvent(const KeyEvent& event)
 
 void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
+    focusHub->SetFocusable(!IsIndicator());
+    CHECK_NULL_VOID(!IsIndicator());
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
@@ -653,6 +655,9 @@ void RatingPattern::HandleHoverEvent(bool isHover)
 {
     isHover_ = isHover;
     state_ = isHover_ ? RatingModifier::RatingAnimationType::HOVER : RatingModifier::RatingAnimationType::NONE;
+    if (!isHover) {
+        UpdateRatingScore(lastRatingScore_);
+    }
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -675,7 +680,7 @@ void RatingPattern::HandleMouseEvent(MouseInfo& info)
         ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM)) -
             1);
     ratingRenderProperty->UpdateTouchStar(touchStar);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX(), false);
 }
 
 void RatingPattern::LoadForeground()
