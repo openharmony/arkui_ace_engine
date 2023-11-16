@@ -2285,6 +2285,26 @@ void TextFieldPattern::OnHover(bool isHover)
     }
 }
 
+void TextFieldPattern::ChangeMouseState(const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId)
+{
+    auto responseAreaWidth = responseArea_ ? responseArea_->GetAreaRect().Width() : 0.0f;
+    auto x = location.GetX();
+    auto y = location.GetY();
+    if (GreatNotEqual(x, 0) && LessNotEqual(x, frameRect_.Width()) && GreatNotEqual(y, 0) &&
+        LessNotEqual(y, frameRect_.Height())) {
+        if (GreatNotEqual(location.GetX(), frameRect_.Width() - responseAreaWidth)) {
+            pipeline->SetMouseStyleHoldNode(frameId);
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        } else {
+            pipeline->SetMouseStyleHoldNode(frameId);
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
+        }
+    } else {
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(frameId);
+    }
+}
+
 void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
 {
     auto tmpHost = GetHost();
@@ -2292,13 +2312,9 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     auto frameId = tmpHost->GetId();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->SetMouseStyleHoldNode(frameId);
     info.SetStopPropagation(true);
-    auto responseAreaWidth = responseArea_ ? responseArea_->GetAreaRect().Width() : 0.0f;
-    if (info.GetLocalLocation().GetX() > (frameRect_.Width() - responseAreaWidth)) {
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
-        return;
-    }
+    ChangeMouseState(info.GetLocalLocation(), pipeline, frameId);
+
     isUsingMouse_ = true;
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleRightMouseEvent(info);
