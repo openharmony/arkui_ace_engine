@@ -18,6 +18,7 @@
 #include <chrono>
 #include <functional>
 #include <iterator>
+#include <string>
 #include <utility>
 
 #include "base/geometry/dimension.h"
@@ -407,7 +408,8 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPa
     spanItem->SetTextStyle(options.style);
     AddSpanItem(spanItem, offset);
     if (options.paraStyle) {
-        int32_t start, end;
+        int32_t start = 0;
+        int32_t end = 0;
         spanItem->GetIndex(start, end);
         UpdateParagraphStyle(start, end, *options.paraStyle);
     }
@@ -1155,7 +1157,6 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
         CloseSelectOverlay();
         ResetSelection();
     }
-    UseHostToUpdateTextFieldManager();
     auto contentRect = GetTextRect();
     contentRect.SetTop(contentRect.GetY() - std::min(baselineOffset_, 0.0f));
     contentRect.SetHeight(contentRect.Height() - std::max(baselineOffset_, 0.0f));
@@ -1176,6 +1177,7 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
             }
         }
     }
+    UseHostToUpdateTextFieldManager();
     CalcCaretInfoByClick(info);
 }
 
@@ -1759,7 +1761,9 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
         .cursorInfo = cursorInfo,
         .range = { .start = textSelector_.GetStart(), .end = textSelector_.GetEnd() },
-        .windowId = pipeline->GetFocusWindowId() };
+        .windowId = pipeline->GetFocusWindowId(),
+        .positionY = (GetHost()->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY(),
+        .height = frameRect_.Height() };
     return textConfig;
 }
 #else
@@ -2935,7 +2939,7 @@ ResultObject RichEditorPattern::GetImageResultObject(RefPtr<UINode> uinode, int3
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
         resultObject.type = RichEditorSpanType::TYPEIMAGE;
         if (!imageLayoutProperty->GetImageSourceInfo()->GetPixmap()) {
-            resultObject.valueString = imageLayoutProperty->GetImageSourceInfo()->GetSrc().c_str();
+            resultObject.valueString = imageLayoutProperty->GetImageSourceInfo()->GetSrc();
         } else {
             resultObject.valuePixelMap = imageLayoutProperty->GetImageSourceInfo()->GetPixmap();
         }
@@ -3509,6 +3513,16 @@ void RichEditorPattern::DumpInfo()
                                            .append(", Attached: ")
                                            .append(std::to_string(isCustomKeyboardAttached_)));
     }
+    auto context = GetHost()->GetContext();
+    CHECK_NULL_VOID(context);
+    auto richEditorTheme = context->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(richEditorTheme);
+    DumpLog::GetInstance().AddDesc(std::string("caret offset: ").append(GetCaretRect().GetOffset().ToString()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("caret height: ")
+            .append(std::to_string(NearZero(GetCaretRect().Height())
+                                       ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx()
+                                       : GetCaretRect().Height())));
 }
 
 bool RichEditorPattern::HasFocus() const
@@ -3525,10 +3539,15 @@ void RichEditorPattern::UpdateTextFieldManager(const Offset& offset, float heigh
     }
     auto context = GetHost()->GetContext();
     CHECK_NULL_VOID(context);
+    auto richEditorTheme = context->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(richEditorTheme);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
-    textFieldManager->SetClickPosition(offset);
-    textFieldManager->SetHeight(height);
+    textFieldManager->SetClickPosition(
+        { offset.GetX() + GetCaretRect().GetX(), offset.GetY() + GetCaretRect().GetY() });
+    textFieldManager->SetHeight(NearZero(GetCaretRect().Height())
+                                    ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx()
+                                    : GetCaretRect().Height());
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
 }
 
@@ -3547,7 +3566,7 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     nextPosition = std::min(nextPosition, GetTextContentLength());
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
-    if (selectedRects.size() == 0 && !spans_.empty()) {
+    if (selectedRects.empty() && !spans_.empty()) {
         auto it = std::find_if(
             spans_.begin(), spans_.end(), [caretPosition = currentPosition](const RefPtr<SpanItem>& spanItem) {
                 return (spanItem->position - static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length()) <=
@@ -3563,7 +3582,7 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     }
     bool selectedSingle =
         selectedRects.size() == 1 && (pos.GetX() < selectedRects[0].Left() || pos.GetY() < selectedRects[0].Top());
-    bool selectedLast = selectedRects.size() == 0 && currentPosition == GetTextContentLength();
+    bool selectedLast = selectedRects.empty() && currentPosition == GetTextContentLength();
     if (selectedSingle || selectedLast) {
         if (selectedLast) {
             nextPosition = currentPosition + 1;

@@ -62,7 +62,7 @@ public:
     bool UpdatePanelForVirtualKeyboard(double offsetY, double fullHeight);
     void SetHeight(float height)
     {
-        height_ = height;
+        height_ = height * 3;
     }
 
     float GetHeight() const

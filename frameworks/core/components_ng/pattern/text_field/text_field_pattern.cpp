@@ -1157,8 +1157,8 @@ void TextFieldPattern::InitDragEvent()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!IsInPasswordMode() &&
-        layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None && host->IsDraggable()) {
+    if (!IsInPasswordMode() && layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None &&
+        host->IsDraggable()) {
         InitDragDropEvent();
         AddDragFrameNodeToManager(host);
     } else {
@@ -1432,8 +1432,6 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 
 void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
 {
-    // emulate clicking bottom of the textField
-    UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     if (mouseStatus_ != MouseStatus::NONE && IsNormalInlineState()) {
         return;
     }
@@ -1463,6 +1461,8 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
     }
+    // emulate clicking bottom of the textField
+    UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -2005,8 +2005,8 @@ bool TextFieldPattern::OnPreShowSelectOverlay(
     overlayInfo.menuInfo.menuDisable = isHideSelectionMenu;
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
-    isSupportCameraInput_ = inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT)
-        && !IsInPasswordMode();
+    isSupportCameraInput_ =
+        inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT) && !IsInPasswordMode();
 #else
     isSupportCameraInput_ = false;
 #endif
@@ -2445,8 +2445,9 @@ void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height
     CHECK_NULL_VOID(context);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
-    textFieldManager->SetClickPosition(offset);
-    textFieldManager->SetHeight(height);
+    textFieldManager->SetClickPosition({ offset.GetX() + selectController_->GetCaretRect().GetX(),
+        offset.GetY() + selectController_->GetCaretRect().GetY() });
+    textFieldManager->SetHeight(selectController_->GetCaretRect().Height());
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
 }
 
@@ -2540,8 +2541,7 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .cursorInfo = cursorInfo,
         .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },
         .windowId = pipeline->GetFocusWindowId(),
-        .positionY =
-            (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY(),
+        .positionY = (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY(),
         .height = frameRect_.Height() };
     return textConfig;
 }
@@ -3598,8 +3598,8 @@ bool TextFieldPattern::OnBackPressed()
     CHECK_NULL_RETURN(tmpHost, false);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield %{public}d receives back press event", tmpHost->GetId());
     if (SelectOverlayIsOn()) {
-        selectController_->UpdateCaretIndex(std::max(
-            selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
+        selectController_->UpdateCaretIndex(
+            std::max(selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
         CloseSelectOverlay();
         return true;
     }
@@ -4400,9 +4400,8 @@ bool TextFieldPattern::IsInPasswordMode() const
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
-    return inputType == TextInputType::VISIBLE_PASSWORD
-        || inputType == TextInputType::NUMBER_PASSWORD
-        || inputType == TextInputType::SCREEN_LOCK_PASSWORD;
+    return inputType == TextInputType::VISIBLE_PASSWORD || inputType == TextInputType::NUMBER_PASSWORD ||
+           inputType == TextInputType::SCREEN_LOCK_PASSWORD;
 }
 
 void TextFieldPattern::RestorePreInlineStates()
