@@ -191,8 +191,8 @@ float GridLayoutInfo::GetContentHeight(float mainGap) const
             lineHeight = item.second;
             break;
         }
-        auto lines = (childrenCount_ - 1) / crossCount_;
-        if ((childrenCount_ - 1) % crossCount_ == 0) {
+        auto lines = (childrenCount_) / crossCount_;
+        if (childrenCount_ % crossCount_ == 0) {
             return lines * lineHeight + (lines - 1) * mainGap;
         }
         return (lines + 1) * lineHeight + lines * mainGap;
