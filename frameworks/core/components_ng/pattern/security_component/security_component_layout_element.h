@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 class SecurityComponentLayoutElement {
@@ -150,11 +151,13 @@ public:
 private:
     void UpdateSize(bool isWidth);
     void MeasureMinTextSize();
+    void ChooseExactFontSize(RefPtr<TextLayoutProperty>& property, bool isWidth);
     std::optional<SizeF> GetMeasureTextSize(const std::string& data,
         const Dimension& fontSize, FontWeight fontWeight);
 
     bool isExist_ = false;
     Dimension minFontSize_;
+    Dimension defaultFontSize_;
     RefPtr<SecurityComponentLayoutProperty> secCompProperty_;
     RefPtr<LayoutWrapper> textWrap_;
     std::optional<SizeF> minTextSize_;
