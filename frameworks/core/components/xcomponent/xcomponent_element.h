@@ -92,7 +92,7 @@ private:
     bool hasSendDestroyEvent_ = false;
     bool isExternalResource_ = false;
     RefPtr<NativeTexture> texture_;
-    RefPtr<XComponentController> xcomponentController_;
+    std::shared_ptr<InnerXComponentController> xcomponentController_;
 
 #ifdef OHOS_STANDARD_SYSTEM
     void CreateSurface();

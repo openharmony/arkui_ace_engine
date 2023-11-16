@@ -117,7 +117,7 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     auto type = paramObject->GetProperty("type");
     auto libraryname = paramObject->GetProperty("libraryname");
     auto controllerObj = paramObject->GetProperty("controller");
-    RefPtr<XComponentController> xcomponentController = nullptr;
+    std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
     if (controllerObj->IsObject()) {
         auto* jsXComponentController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSXComponentController>();
         if (jsXComponentController) {

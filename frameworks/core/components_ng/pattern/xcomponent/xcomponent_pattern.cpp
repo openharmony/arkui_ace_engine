@@ -16,9 +16,11 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #include "base/geometry/ng/size_t.h"
+#include "base/log/log_wrapper.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #ifdef NG_BUILD
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #else
@@ -118,7 +120,7 @@ OH_NativeXComponent_KeyEvent ConvertNativeXComponentKeyEvent(const KeyEvent& eve
 } // namespace
 
 XComponentPattern::XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
-    const RefPtr<XComponentController>& xcomponentController)
+    const std::shared_ptr<InnerXComponentController>& xcomponentController)
     : id_(id), type_(type), libraryname_(libraryname), xcomponentController_(xcomponentController)
 {}
 
@@ -148,6 +150,10 @@ void XComponentPattern::OnAttachToFrameNode()
                 extSurfaceClient_ = MakeRefPtr<XComponentExtSurfaceCallbackClient>(WeakClaim(this));
                 renderSurface_->SetExtSurfaceCallback(extSurfaceClient_);
             }
+            handlingSurfaceRenderContext_ = renderContextForSurface_;
+            auto* controllerNG = static_cast<XComponentControllerNG*>(xcomponentController_.get());
+            CHECK_NULL_VOID(controllerNG);
+            controllerNG->SetPattern(AceType::Claim(this));
         } else if (type_ == XComponentType::TEXTURE) {
             renderSurface_->SetRenderContext(renderContext);
             renderSurface_->SetIsTexture(true);
@@ -188,8 +194,8 @@ void XComponentPattern::OnRebuildFrame()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    CHECK_NULL_VOID(renderContextForSurface_);
-    renderContext->AddChild(renderContextForSurface_, 0);
+    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+    renderContext->AddChild(handlingSurfaceRenderContext_, 0);
 }
 
 void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -222,9 +228,9 @@ void XComponentPattern::SetMethodCall()
             });
         });
 
-    xcomponentController_->surfaceId_ = renderSurface_->GetUniqueId();
-    TAG_LOGD(
-        AceLogTag::ACE_XCOMPONENT, "XComponent set surfaceId = %{public}s", xcomponentController_->surfaceId_.c_str());
+    xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "XComponent set surfaceId = %{public}s",
+        xcomponentController_->GetSurfaceId().c_str());
 }
 
 void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
@@ -239,46 +245,48 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
-    auto drawSize = geometryNode->GetContentSize();
-    if (drawSize.IsNonPositive()) {
+    drawSize_ = geometryNode->GetContentSize();
+    if (drawSize_.IsNonPositive()) {
         return false;
     }
 
     if (!hasXComponentInit_) {
-        initSize_ = drawSize;
-        auto position = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
+        initSize_ = drawSize_;
+        globalPosition_ = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
         if (!SystemProperties::GetExtSurfaceEnabled()) {
             XComponentSizeInit();
         }
-        NativeXComponentOffset(position.GetX(), position.GetY());
+        NativeXComponentOffset(globalPosition_.GetX(), globalPosition_.GetY());
         hasXComponentInit_ = true;
     } else {
         if (config.frameOffsetChange || config.contentOffsetChange) {
-            auto position = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
-            NativeXComponentOffset(position.GetX(), position.GetY());
+            globalPosition_ = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
+            NativeXComponentOffset(globalPosition_.GetX(), globalPosition_.GetY());
         }
         if (config.contentSizeChange) {
             if (!SystemProperties::GetExtSurfaceEnabled()) {
-                XComponentSizeChange(drawSize.Width(), drawSize.Height());
+                XComponentSizeChange(drawSize_.Width(), drawSize_.Height());
             }
         }
     }
-    auto offset = geometryNode->GetContentOffset();
+    localposition_ = geometryNode->GetContentOffset();
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto transformRelativeOffset = host->GetTransformRelativeOffset();
-        renderSurface_->SetExtSurfaceBounds(static_cast<int32_t>(transformRelativeOffset.GetX() + offset.GetX()),
-            static_cast<int32_t>(transformRelativeOffset.GetY() + offset.GetY()),
-            static_cast<int32_t>(drawSize.Width()), static_cast<int32_t>(drawSize.Height()));
+        renderSurface_->SetExtSurfaceBounds(
+            static_cast<int32_t>(transformRelativeOffset.GetX() + localposition_.GetX()),
+            static_cast<int32_t>(transformRelativeOffset.GetY() + localposition_.GetY()),
+            static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
     }
-    if (renderContextForSurface_) {
-        renderContextForSurface_->SetBounds(offset.GetX(), offset.GetY(), drawSize.Width(), drawSize.Height());
+    if (handlingSurfaceRenderContext_) {
+        handlingSurfaceRenderContext_->SetBounds(
+            localposition_.GetX(), localposition_.GetY(), drawSize_.Width(), drawSize_.Height());
     }
     // XComponentType::SURFACE has set surface default size in RSSurfaceNode->SetBounds()
     if (type_ == XComponentType::TEXTURE) {
         renderSurface_->SetSurfaceDefaultSize(
-            static_cast<int32_t>(drawSize.Width()), static_cast<int32_t>(drawSize.Height()));
+            static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -701,5 +709,52 @@ ExternalEvent XComponentPattern::CreateExternalEvent()
         auto jsEngine = frontEnd->GetJsEngine();
         jsEngine->FireExternalEvent(componentId, nodeId, isDestroy);
     };
+}
+
+void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderContext>& otherRenderContext)
+{
+    CHECK_NULL_VOID(otherRenderContext);
+    handlingSurfaceRenderContext_ = otherRenderContext;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    renderContext->ClearChildren();
+    renderContext->AddChild(handlingSurfaceRenderContext_, 0);
+    handlingSurfaceRenderContext_->SetBounds(
+        localposition_.GetX(), localposition_.GetY(), drawSize_.Width(), drawSize_.Height());
+}
+
+void XComponentPattern::RestoreHandlingRenderContextForSurface()
+{
+    SetHandlingRenderContextForSurface(renderContextForSurface_);
+}
+
+XComponentControllerErrorCode XComponentPattern::SetExtController(const RefPtr<XComponentPattern>& extPattern)
+{
+    if (!extPattern) {
+        return XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    if (extPattern_.Upgrade()) {
+        return XCOMPONENT_CONTROLLER_REPEAT_SET;
+    }
+    extPattern->SetHandlingRenderContextForSurface(handlingSurfaceRenderContext_);
+    extPattern_ = extPattern;
+    handlingSurfaceRenderContext_.Reset();
+    return XCOMPONENT_CONTROLLER_NO_ERROR;
+}
+
+XComponentControllerErrorCode XComponentPattern::ResetExtController(const RefPtr<XComponentPattern>& extPattern)
+{
+    if (!extPattern) {
+        return XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    auto curExtPattern = extPattern_.Upgrade();
+    if (!curExtPattern || curExtPattern != extPattern) {
+        return XCOMPONENT_CONTROLLER_RESET_ERROR;
+    }
+    RestoreHandlingRenderContextForSurface();
+    extPattern->RestoreHandlingRenderContextForSurface();
+    extPattern_.Reset();
+    return XCOMPONENT_CONTROLLER_NO_ERROR;
 }
 } // namespace OHOS::Ace::NG

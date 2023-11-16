@@ -473,6 +473,7 @@ template("ace_core_source_set") {
     if (defined(config.xcomponent_components_support) &&
         config.xcomponent_components_support) {
       deps += [ "$ace_root/frameworks/core/components/xcomponent:ace_core_components_xcomponent_$platform" ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/xcomponent:ace_core_components_xcomponent_pattern_ng_$platform" ]
     }
 
     if (defined(config.enable_ability_component) &&
@@ -951,6 +952,11 @@ template("ace_core_ng_source_set") {
         "$ace_root/frameworks/core/components_ng/pattern/ui_extension:ace_core_components_ui_extension_pattern_ng_$platform",
         "$ace_root/frameworks/core/components_ng/pattern/window_scene:ace_core_components_window_scene_$platform",
       ]
+    }
+
+    if (defined(config.xcomponent_components_support) &&
+        config.xcomponent_components_support) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/xcomponent:ace_core_components_xcomponent_pattern_ng_$platform" ]
     }
 
     # add sources needed by phone, tv and wearable. previews do not need them

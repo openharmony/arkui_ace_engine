@@ -17,9 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_MODEL_H
 
 #include <mutex>
-#include <set>
 
-#include "core/components/xcomponent/xcomponent_controller.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/xcomponent/inner_xcomponent_controller.h"
 
 namespace OHOS::Ace {
 using LoadEvent = std::function<void(const std::string&)>;
@@ -31,7 +31,7 @@ public:
     virtual ~XComponentModel() = default;
 
     virtual void Create(const std::string& id, XComponentType type, const std::string& libraryname,
-        const RefPtr<XComponentController>& xcomponentController) = 0;
+        const std::shared_ptr<InnerXComponentController>& xcomponentController) = 0;
     virtual void SetSoPath(const std::string& soPath) = 0;
     virtual void SetOnLoad(LoadEvent&& onLoad) = 0;
     virtual void SetOnDestroy(DestroyEvent&& onDestroy) = 0;

@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
@@ -144,7 +145,7 @@ RefPtr<FrameNode> XComponentTestNg::CreateXComponentNode(TestProperty& testPrope
     auto xcId = testProperty.xcId.value();
     auto xcType = testProperty.xcType.value();
     auto libraryName = testProperty.libraryName.value();
-    auto xcomponentController = AceType::MakeRefPtr<XComponentController>();
+    auto xcomponentController = std::make_shared<XComponentControllerNG>();
     XComponentModelNG().Create(xcId, xcType, libraryName, xcomponentController);
 
     if (testProperty.soPath.has_value()) {
@@ -171,7 +172,7 @@ HWTEST_F(XComponentTestNg, XComponentPropertyTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. construct a XComponentModelNG
      */
-    const RefPtr<XComponentController> xComponentController;
+    const std::shared_ptr<InnerXComponentController> xComponentController;
     XComponentModelNG xComponent;
 
     /**
@@ -201,7 +202,7 @@ HWTEST_F(XComponentTestNg, XComponentPropertyTest001, TestSize.Level1)
      *            case: type = XCOMPONENT_COMPONENT_TYPE
      * @tc.expected: the properties are expected
      */
-    const RefPtr<XComponentController> xComponentController2;
+    const std::shared_ptr<InnerXComponentController> xComponentController2;
     XComponentModelNG xComponent2;
     xComponent2.Create(XCOMPONENT_ID, XCOMPONENT_COMPONENT_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
     xComponent2.SetSoPath(XCOMPONENT_SO_PATH);
@@ -282,7 +283,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
  */
 HWTEST_F(XComponentTestNg, XComponentNDKTest003, TestSize.Level1)
 {
-    RefPtr<XComponentController> const xComponentController;
+    std::shared_ptr<InnerXComponentController> const xComponentController;
     XComponentModelNG xComponent;
     xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
     xComponent.SetSoPath(XCOMPONENT_SO_PATH);
@@ -314,7 +315,7 @@ HWTEST_F(XComponentTestNg, XComponentNDKTest003, TestSize.Level1)
  */
 HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest004, TestSize.Level1)
 {
-    RefPtr<XComponentController> const xComponentController;
+    std::shared_ptr<InnerXComponentController> const xComponentController;
     XComponentModelNG xComponent;
     xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
     xComponent.SetSoPath(XCOMPONENT_SO_PATH);
@@ -379,7 +380,7 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest004, TestSize.Level1)
  */
 HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest005, TestSize.Level1)
 {
-    RefPtr<XComponentController> const xComponentController;
+    std::shared_ptr<InnerXComponentController> const xComponentController;
     XComponentModelNG xComponent;
     xComponent.Create(XCOMPONENT_ID, XCOMPONENT_COMPONENT_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
     xComponent.SetSoPath(XCOMPONENT_SO_PATH);
@@ -430,7 +431,7 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest005, TestSize.Level1)
     frameNode->AddChild(childFrameNode);
     layoutWrapper.AppendChild(childLayoutWrapper);
 
-    auto contentSize =  xComponentLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
+    auto contentSize = xComponentLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
     EXPECT_EQ(contentSize, std::nullopt);
 
     auto childLayoutWrapper2 = layoutWrapper.GetOrCreateChildByIndex(0);
