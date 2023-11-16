@@ -421,6 +421,14 @@ void NavigationPattern::DoSplitModeTransitionAnimation(const RefPtr<NavDestinati
     CHECK_NULL_VOID(navigationNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto isReplace = navigationStack_->IsReplace();
+    if (isReplace) {
+        if (newTopNavDestination && preTopNavDestination) {
+            navigationNode->TransitionWithReplace(preTopNavDestination, newTopNavDestination, false);
+        }
+        navigationStack_->UpdateIsReplace(false);
+        return;
+    }
     if (newTopNavDestination && preTopNavDestination) {
         if (isPopPage) {
             navigationNode->ExitTransitionWithPop(preTopNavDestination);
