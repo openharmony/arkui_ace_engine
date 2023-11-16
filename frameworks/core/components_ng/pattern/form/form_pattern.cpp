@@ -34,6 +34,8 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include "form_constants.h"
+
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/udmf_client.h"
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -42,6 +44,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT = 10000;
+constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -397,6 +400,12 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             return false;
         }
         cardInfo_ = info;
+        if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)) {
+            BorderRadiusProperty borderRadius;
+            Dimension diameter = std::min(info.width, info.height);
+            borderRadius.SetRadius(diameter / ARC_RADIUS_TO_DIAMETER);
+            host->GetRenderContext()->UpdateBorderRadius(borderRadius);
+        }
     } else {
         // for update form component
         if (cardInfo_.allowUpdate != info.allowUpdate) {
@@ -414,6 +423,12 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         if (cardInfo_.width != info.width || cardInfo_.height != info.height) {
             cardInfo_.width = info.width;
             cardInfo_.height = info.height;
+            if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)) {
+                BorderRadiusProperty borderRadius;
+                Dimension diameter = std::min(info.width, info.height);
+                borderRadius.SetRadius(diameter / ARC_RADIUS_TO_DIAMETER);
+                host->GetRenderContext()->UpdateBorderRadius(borderRadius);
+            }
             if (subContainer_) {
                 subContainer_->SetFormPattern(WeakClaim(this));
                 subContainer_->UpdateRootElementSize();
