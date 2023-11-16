@@ -17,6 +17,10 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H
 
 #include <cstdint>
+#include "interfaces/inner_api/ace/macros.h"
+#include "base/memory/ace_type.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/tabs/tabs_model.h"
 
 typedef void *NodeHandle;
 struct StringAndDouble {
@@ -404,6 +408,44 @@ struct ArkUITextAreaModifierAPI {
 struct ArkUINavigationModifierAPI {
     void (*SetHideToolBar)(NodeHandle node, bool hide);
     void (*ResetHideToolBar)(NodeHandle node);
+    void (*SetHideNavBar)(NodeHandle node, bool hideNavBar);
+    void (*ResetHideNavBar)(NodeHandle node);
+    void (*SetTitleMode)(NodeHandle node, int32_t value);
+    void (*ResetTitleMode)(NodeHandle node);
+    void (*SetHideBackButton)(NodeHandle node, bool hideBackButton);
+    void (*ResetHideBackButton)(NodeHandle node);
+    void (*SetSubtitle)(NodeHandle node, char* subtitle);
+    void (*ResetSubtitle)(NodeHandle node);
+    void (*ResetUsrNavigationMode)(NodeHandle node);
+    void (*SetUsrNavigationMode)(NodeHandle node, int32_t value);
+    void (*SetNavHideTitleBar)(NodeHandle node, bool hideTitle);
+    void (*ResetNavHideTitleBar)(NodeHandle node);
+    void (*SetNavBarPosition)(NodeHandle node, int32_t value);
+    void (*ResetNavBarPosition)(NodeHandle node);
+    void (*SetMinContentWidth)(NodeHandle node, double value, int unit);
+    void (*ResetMinContentWidth)(NodeHandle node);
+    void (*SetMaxNavBarWidth)(NodeHandle node, double maxValue, int maxUnit);
+    void (*ResetMaxNavBarWidth)(NodeHandle node);
+    void (*SetMinNavBarWidth)(NodeHandle node, double minValue, int minUnit);
+    void (*ResetMinNavBarWidth)(NodeHandle node);
+    void (*SetNavBarWidth)(NodeHandle node, double value, int unit);
+    void (*ResetNavBarWidth)(NodeHandle node);
+};
+
+struct ArkUINavRouterModifierAPI {
+    void (*SetNavRouteMode)(NodeHandle node, int32_t mode);
+    void (*ResetNavRouteMode)(NodeHandle node);
+};
+
+struct ArkUINavigatorModifierAPI {
+    void (*SetTarget)(NodeHandle node, char* value);
+    void (*ResetTarget)(NodeHandle node);
+    void (*SetType)(NodeHandle node, int32_t value);
+    void (*ResetType)(NodeHandle node);
+    void (*SetActive)(NodeHandle node, bool active);
+    void (*ResetActive)(NodeHandle node);
+    void (*SetParams)(NodeHandle node, char* args);
+    void (*ResetParams)(NodeHandle node);
 };
 
 struct ArkUIRichEditorModifierAPI {
@@ -455,6 +497,8 @@ struct ArkUINodeAPI {
     ArkUIRichEditorModifierAPI (*GetRichEditorModifier)();
     ArkUIImageModifierAPI (*GetImageModifier)();
     ArkUIVideoModifierAPI (*GetVideoModifier)();
+    ArkUINavigatorModifierAPI (*GetNavigatorModifier)();
+    ArkUINavRouterModifierAPI (*GetNavRouterModifier)();
 };
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H
