@@ -290,7 +290,7 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
             }
             JSRef<JSVal> height = jsObj->GetProperty("height");
             CalcDimension titleHeight;
-            bool isValid = JSContainerBase::ParseJsDimensionVp(height, titleHeight);
+            bool isValid = JSContainerBase::ParseJsDimensionVpNG(height, titleHeight);
             if (height->IsString()) {
                 std::string heightValue;
                 ParseJsString(height, heightValue);
