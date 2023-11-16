@@ -455,6 +455,11 @@ public:
         actionEnd_ = std::move(actionEnd);
     }
 
+    bool GetIsDragging() const
+    {
+        return isDragging_;
+    }
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
