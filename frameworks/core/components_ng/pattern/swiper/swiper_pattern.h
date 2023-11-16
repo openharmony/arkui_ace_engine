@@ -522,7 +522,8 @@ private:
     void PlayFadeAnimation();
 
     // use property animation feature
-    void PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity = 0.0f);
+    void PlayPropertyTranslateAnimation(
+        float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
     void StopPropertyTranslateAnimation(bool isBeforeCreateLayoutWrapper = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -535,6 +536,7 @@ private:
     void StopFadeAnimation();
 
     bool IsOutOfBoundary(float mainOffset = 0.0f) const;
+    bool AutoLinearIsOutOfBoundary(float mainOffset) const;
     float GetDistanceToEdge() const;
     float MainSize() const;
     float GetMainContentSize() const;
@@ -605,6 +607,9 @@ private:
     void MarkDirtyNodeSelf();
     void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
     int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
+    bool IsAutoLinear() const;
+    bool AutoLinearAnimationNeedReset(float translate) const;
+    void OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPlay);
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
 
     /**

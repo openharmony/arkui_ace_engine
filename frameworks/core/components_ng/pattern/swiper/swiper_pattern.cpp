@@ -643,11 +643,21 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                 float offset = isNeedOffset
                     ? CalculateVisibleSize() - iter->second.endPos + iter->second.startPos : 0.0;
                 targetPos -= offset;
+
+                auto nextIndex = iter->first;
+                auto stopAutoPlay = false;
+                if (AutoLinearAnimationNeedReset(targetPos)) {
+                    auto firstItem = GetFirstItemInfoInVisibleArea();
+                    nextIndex = firstItem.first;
+                    targetPos = firstItem.second.startPos;
+                    stopAutoPlay = true;
+                }
+
                 context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos, velocity = velocity_.value_or(0.0f),
-                                                nextIndex = iter->first]() {
+                                                nextIndex, stopAutoPlay]() {
                     auto swiper = weak.Upgrade();
                     CHECK_NULL_VOID(swiper);
-                    swiper->PlayPropertyTranslateAnimation(-targetPos, nextIndex, velocity);
+                    swiper->PlayPropertyTranslateAnimation(-targetPos, nextIndex, velocity, stopAutoPlay);
                     swiper->PlayIndicatorTranslateAnimation(-targetPos);
                 });
             } else {
@@ -678,6 +688,53 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
+}
+
+bool SwiperPattern::IsAutoLinear() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, false);
+    return !SwiperUtils::IsStretch(swiperLayoutProperty);
+}
+
+bool SwiperPattern::AutoLinearAnimationNeedReset(float translate) const
+{
+    if (!IsAutoLinear()) {
+        return false;
+    }
+
+    if (itemPosition_.empty() || static_cast<int32_t>(itemPosition_.size()) < TotalCount()) {
+        return false;
+    }
+
+    if (NonPositive(translate)) {
+        return false;
+    }
+
+    auto iter = itemPosition_.rbegin();
+    auto endPos = iter->second.endPos;
+    if (endPos - CalculateVisibleSize() < translate) {
+        return true;
+    }
+
+    return false;
+}
+
+void SwiperPattern::OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPlay)
+{
+    ResetAndUpdateIndexOnAnimationEnd(nextIndex);
+
+    if (!NeedAutoPlay() || !isUserFinish_) {
+        return;
+    }
+
+    if (stopAutoPlay) {
+        MarkDirtyNodeSelf();
+    } else {
+        auto delayTime = GetInterval() - GetDuration();
+        delayTime = std::clamp(delayTime, 0, delayTime);
+        PostTranslateTask(delayTime);
+    }
 }
 
 void SwiperPattern::FireChangeEvent() const
@@ -844,6 +901,11 @@ void SwiperPattern::ShowPrevious()
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         return;
     }
+
+    if (IsAutoLinear() && static_cast<int32_t>(itemPosition_.size()) == TotalCount()) {
+        return;
+    }
+
     indicatorDoingAnimation_ = false;
     auto childrenSize = TotalCount();
     std::optional<int32_t> preIndex;
@@ -1493,6 +1555,10 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
         return;
     }
 
+    if (IsAutoLinear() && AutoLinearIsOutOfBoundary(static_cast<float>(mainDelta))) {
+        return;
+    }
+
     HandleScroll(static_cast<float>(mainDelta), SCROLL_FROM_UPDATE, NestedState::GESTURE);
     UpdateItemRenderGroup(true);
     isTouchPad_ = false;
@@ -1516,6 +1582,10 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         pipeline->FlushUITasks();
     }
     if (itemPosition_.empty()) {
+        return;
+    }
+
+    if (IsAutoLinear() && AutoLinearIsOutOfBoundary(0.0f)) {
         return;
     }
 
@@ -1619,15 +1689,11 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
     return nextIndex;
 }
 
-void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity)
+void SwiperPattern::PlayPropertyTranslateAnimation(
+    float translate, int32_t nextIndex, float velocity, bool stopAutoPlay)
 {
     if (NearZero(translate)) {
-        ResetAndUpdateIndexOnAnimationEnd(nextIndex);
-        auto delayTime = GetInterval() - GetDuration();
-        delayTime = std::clamp(delayTime, 0, delayTime);
-        if (NeedAutoPlay() && isUserFinish_) {
-            PostTranslateTask(delayTime);
-        }
+        OnAnimationTranslateZero(nextIndex, stopAutoPlay);
         return;
     }
 
@@ -2116,6 +2182,22 @@ bool SwiperPattern::IsOutOfBoundary(float mainOffset) const
     auto endPos = itemPosition_.rbegin()->second.endPos + mainOffset;
     endPos = NearEqual(endPos, visibleWindowSize, PX_EPSILON) ? visibleWindowSize : endPos;
     auto isOutOfEnd = itemPosition_.rbegin()->first == TotalCount() - 1 && LessNotEqual(endPos, visibleWindowSize);
+
+    return isOutOfStart || isOutOfEnd;
+}
+
+bool SwiperPattern::AutoLinearIsOutOfBoundary(float mainOffset) const
+{
+    if (itemPosition_.empty() || static_cast<int32_t>(itemPosition_.size()) < TotalCount()) {
+        return false;
+    }
+
+    auto startPos = itemPosition_.begin()->second.startPos;
+    auto isOutOfStart = GreatNotEqual(startPos + mainOffset, 0.0);
+
+    auto visibleWindowSize = CalculateVisibleSize();
+    auto endPos = itemPosition_.rbegin()->second.endPos + mainOffset;
+    auto isOutOfEnd = LessNotEqual(endPos, visibleWindowSize);
 
     return isOutOfStart || isOutOfEnd;
 }
