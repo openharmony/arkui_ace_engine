@@ -86,6 +86,7 @@ void TextTimerPattern::InitTimerDisplay()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!scheduler_) {
+        resetCount_ = false;
         auto weak = AceType::WeakClaim(this);
         auto&& callback = [weak](uint64_t duration) {
             auto timer = weak.Upgrade();
@@ -98,6 +99,11 @@ void TextTimerPattern::InitTimerDisplay()
         scheduler_ = SchedulerBuilder::Build(callback, context);
         auto count = isCountDown_ ? inputCount_ : 0;
         UpdateTextTimer(static_cast<uint32_t>(count));
+        return;
+    }
+    if (resetCount_) {
+        resetCount_ = false;
+        HandleReset();
     }
 }
 
@@ -345,5 +351,10 @@ uint64_t TextTimerPattern::GetMillisecondsDuration(uint64_t duration) const
             break;
     }
     return duration;
+}
+
+void TextTimerPattern::ResetCount()
+{
+    resetCount_ = true;
 }
 } // namespace OHOS::Ace::NG
