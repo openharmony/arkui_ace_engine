@@ -72,15 +72,22 @@ void UpdateFontStyle(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayout
     }
 }
 
-void UpdateFontColor(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
+void UpdateFontColor(const RefPtr<FrameNode>& textNode, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<Color>& fontColor, const Color& defaultFontColor)
 {
+    auto textProperty = textNode ? textNode->GetLayoutProperty<TextLayoutProperty>() : nullptr;
+    CHECK_NULL_VOID(textProperty);
+    auto renderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (fontColor.has_value()) {
         textProperty->UpdateTextColor(fontColor.value());
+        renderContext->UpdateForegroundColor(fontColor.value());
     } else if (menuProperty && menuProperty->GetFontColor().has_value()) {
         textProperty->UpdateTextColor(menuProperty->GetFontColor().value());
+        renderContext->UpdateForegroundColor(menuProperty->GetFontColor().value());
     } else {
         textProperty->UpdateTextColor(defaultFontColor);
+        renderContext->UpdateForegroundColor(defaultFontColor);
     }
 }
 
@@ -666,7 +673,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     UpdateFontStyle(textProperty, menuProperty, fontStyle);
     auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
     UpdateFontColor(
-        textProperty, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
+        node, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
     auto fontFamily = isLabel ? itemProperty->GetLabelFontFamily() : itemProperty->GetFontFamily();
     UpdateFontFamily(textProperty, menuProperty, fontFamily);
     textProperty->UpdateContent(content);

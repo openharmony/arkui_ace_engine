@@ -869,6 +869,13 @@ var ResponseType;
   ResponseType[ResponseType["LongPress"] = 1] = "LongPress";
 })(ResponseType || (ResponseType = {}));
 
+var RichEditorResponseType;
+(function (RichEditorResponseType) {
+  RichEditorResponseType[RichEditorResponseType["RIGHT_CLICK"] = 0] = "RIGHT_CLICK";
+  RichEditorResponseType[RichEditorResponseType["LONG_PRESS"] = 1] = "LONG_PRESS";
+  RichEditorResponseType[RichEditorResponseType["SELECT"] = 2] = "SELECT";
+})(RichEditorResponseType || (RichEditorResponseType = {}));
+
 var MenuPreviewMode;
 (function (MenuPreviewMode) {
   MenuPreviewMode[MenuPreviewMode["NONE"] = 0] = "NONE";

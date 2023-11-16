@@ -81,6 +81,11 @@ public:
 
     void RemoveScrollCallback(int32_t callbackId);
 
+    SelectOverlayInfo GetSelectOverlayInfo()
+    {
+        return selectOverlayInfo_;
+    }
+
 private:
     void DestroyHelper(const RefPtr<FrameNode>& overlay, bool animation = false);
 

@@ -15,6 +15,8 @@
 
 #include "bridge/declarative_frontend/jsview/models/richeditor_model_impl.h"
 
+#include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+
 namespace OHOS::Ace::Framework {
 void RichEditorModelImpl::Create() {}
 
@@ -39,8 +41,9 @@ void RichEditorModelImpl::SetCustomKeyboard(std::function<void()>&& func) {}
 
 void RichEditorModelImpl::SetCopyOption(CopyOptions& copyOptions) {}
 
-void RichEditorModelImpl::BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
-    std::function<void()>& buildFunc, SelectMenuParam& menuParam) {}
+void RichEditorModelImpl::BindSelectionMenu(RichEditorType& editorType, RichEditorResponseType& responseType,
+    std::function<void()>& buildFunc, SelectMenuParam& menuParam)
+{}
 
 void RichEditorModelImpl::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) {}
 } // namespace OHOS::Ace::Framework

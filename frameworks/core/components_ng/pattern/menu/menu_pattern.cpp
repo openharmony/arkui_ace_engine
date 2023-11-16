@@ -172,6 +172,9 @@ void MenuPattern::OnModifyDone()
         // multiple inner menus, reset outer container's shadow for desktop UX
         ResetTheme(host, true);
     }
+    if (IsSelectOverlayCustomMenu()) {
+        ResetScrollTheme(host);
+    }
     auto menuFirstNode = GetFirstInnerMenu();
     if (menuFirstNode) {
         CopyMenuAttr(menuFirstNode);
@@ -582,6 +585,15 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
     scrollProp->UpdatePadding(PaddingProperty());
 }
 
+void MenuPattern::ResetScrollTheme(const RefPtr<FrameNode>& host)
+{
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(scroll);
+    scroll->GetRenderContext()->UpdateClipEdge(false);
+}
+
 void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
 {
     auto renderContext = host->GetRenderContext();
@@ -743,7 +755,7 @@ void MenuPattern::ShowPreviewMenuAnimation()
                 renderContext->UpdatePosition(
                     OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
             }
-            
+
             if (previewRenderContext) {
                 previewRenderContext->UpdatePosition(
                     OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
