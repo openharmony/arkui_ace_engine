@@ -353,6 +353,7 @@ double TextPickerPattern::CalculateHeight()
         auto textPickerColumnPattern = it.second->GetPattern<TextPickerColumnPattern>();
         CHECK_NULL_RETURN(textPickerColumnPattern, height);
         textPickerColumnPattern->SetDefaultPickerItemHeight(height);
+        textPickerColumnPattern->NeedResetOptionPropertyHeight(true);
     }
     return height;
 }

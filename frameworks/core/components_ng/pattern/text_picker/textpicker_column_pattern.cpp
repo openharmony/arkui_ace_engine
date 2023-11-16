@@ -327,9 +327,44 @@ uint32_t TextPickerColumnPattern::GetShowOptionCount() const
     return showCount;
 }
 
+void TextPickerColumnPattern::ResetOptionPropertyHeight()
+{
+    if (needOptionPropertyHeightReset_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto stackNode = DynamicCast<FrameNode>(host->GetParent());
+        CHECK_NULL_VOID(stackNode);
+        auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+        CHECK_NULL_VOID(parentNode);
+        auto textPickerLayoutProperty = parentNode->GetLayoutProperty<TextPickerLayoutProperty>();
+        CHECK_NULL_VOID(textPickerLayoutProperty);
+        bool isDefaultPickerItemHeight_ = false;
+        if (textPickerLayoutProperty->HasDefaultPickerItemHeight()) {
+            auto defaultPickerItemHeightValue = textPickerLayoutProperty->GetDefaultPickerItemHeightValue();
+            isDefaultPickerItemHeight_ = LessOrEqual(defaultPickerItemHeightValue.Value(), 0.0) ? false : true;
+        }
+        if (isDefaultPickerItemHeight_) {
+            auto pickerItemHeight = 0.0;
+            auto pattern = parentNode->GetPattern<TextPickerPattern>();
+            CHECK_NULL_VOID(pattern);
+            pickerItemHeight = pattern->GetResizeFlag() ? pattern->GetResizePickerItemHeight()
+                                                        : pattern->GetDefaultPickerItemHeight();
+            int32_t itemCounts = GetShowOptionCount();
+            for (int32_t i = 0; i < itemCounts; i++) {
+                TextPickerOptionProperty& prop = optionProperties_[i];
+                prop.height = pickerItemHeight;
+            }
+            SetOptionShiftDistance();
+        }
+        needOptionPropertyHeightReset_ = false;
+    }
+}
+
 void TextPickerColumnPattern::FlushCurrentOptions(
     bool isDown, bool isUpateTextContentOnly, bool isDirectlyClear, bool isUpdateAnimationProperties)
 {
+    ResetOptionPropertyHeight();
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto stackNode = DynamicCast<FrameNode>(host->GetParent());
