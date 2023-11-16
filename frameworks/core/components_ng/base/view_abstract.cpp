@@ -1397,7 +1397,15 @@ void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(ClipMask, basicShape);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->HasProgressMask()) {
+            target->UpdateProgressMask(nullptr);
+        }
+        target->UpdateClipMask(basicShape);
+    }
 }
 
 void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty>& progress)
@@ -1405,7 +1413,15 @@ void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty>& progress)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(ProgressMask, progress);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->HasClipMask()) {
+            target->UpdateClipMask(nullptr);
+        }
+        target->UpdateProgressMask(progress);
+    }
 }
 
 void ViewAbstract::SetBrightness(const Dimension& brightness)

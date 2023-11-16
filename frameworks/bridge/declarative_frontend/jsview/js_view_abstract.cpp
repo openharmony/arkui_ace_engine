@@ -4755,9 +4755,7 @@ void JSViewAbstract::JsClip(const JSCallbackInfo& info)
 void JSViewAbstract::JsMask(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
-        auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
-        progressMask->SetColor(Color::TRANSPARENT);
-        ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
+        ViewAbstractModel::GetInstance()->SetProgressMask(nullptr);
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
