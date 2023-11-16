@@ -23,6 +23,7 @@
         "src/ArkDivider.ts",
         "src/ArkNavDestination.ts",
         "src/ArkCounter.ts",
+        "src/ArkCheckboxGroup.ts",
     ],
 
     "compilerOptions": {
