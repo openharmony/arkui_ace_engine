@@ -2810,6 +2810,7 @@ void FrameNode::FocusMoveSearchNG(int32_t elementId, int32_t direction,
         pattern_->FocusMoveSearch(elementId, direction, offset, output);
     }
 }
+
 bool FrameNode::TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
     int32_t action, int32_t offset)
 {
@@ -2818,5 +2819,14 @@ bool FrameNode::TransferExecuteAction(int32_t elementId, const std::map<std::str
         isExecuted = pattern_->TransferExecuteAction(elementId, actionArguments, action, offset);
     }
     return isExecuted;
+}
+
+bool FrameNode::SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
+    std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline)
+{
+    if (pattern_) {
+        return pattern_->SendAccessibilityEventInfo(eventInfo, uiExtensionIdLevelList, pipeline);
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

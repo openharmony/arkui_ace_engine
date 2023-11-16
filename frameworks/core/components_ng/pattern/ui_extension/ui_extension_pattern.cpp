@@ -94,6 +94,22 @@ public:
         }, TaskExecutor::TaskType::UI);
     }
 
+    void OnAccessibilityEvent(
+        const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList) override
+    {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weak = uiExtensionPattern_, &info, uiExtensionIdLevelList]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->OnAccessibilityEvent(info, uiExtensionIdLevelList);
+            },
+            TaskExecutor::TaskType::UI);
+    }
+
 private:
     int32_t instanceId_;
     WeakPtr<UIExtensionPattern> uiExtensionPattern_;
@@ -201,6 +217,32 @@ void UIExtensionPattern::OnConnect()
         auto context = AceType::DynamicCast<PipelineContext>(pipeline);
         auto uiExtensionManager = context->GetUIExtensionManager();
         uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this));
+    }
+}
+
+void UIExtensionPattern::OnAccessibilityEvent(
+    const Accessibility::AccessibilityEventInfo& info, std::vector<int32_t> uiExtensionIdLevelList)
+{
+    CHECK_RUN_ON(UI);
+    LOGI("UIExtension OnAccessibilityEvent called");
+    CHECK_NULL_VOID(session_);
+    ContainerScope scope(instanceId_);
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (ngPipeline) {
+        auto window = container->GetUIWindow(instanceId_);
+        CHECK_NULL_VOID(window);
+        if (window->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
+            uiExtensionIdLevelList.insert(uiExtensionIdLevelList.begin(), uiExtensionId_);
+        }
+        auto frontend = container->GetFrontend();
+        CHECK_NULL_VOID(frontend);
+        auto accessibilityManager = frontend->GetAccessibilityManager();
+        if (accessibilityManager) {
+            accessibilityManager->SendAccessibilitySyncEvent(info, uiExtensionIdLevelList);
+        }
     }
 }
 
@@ -892,6 +934,16 @@ void UIExtensionPattern::FocusMoveSearch(int32_t elementId, int32_t direction,
 {
     CHECK_NULL_VOID(session_);
     session_->TransferFocusMoveSearch(elementId, direction, baseParent, output);
+}
+
+bool UIExtensionPattern::SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
+    std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline)
+{
+    auto instanceId = pipeline->GetInstanceId();
+    auto window = Platform::AceContainer::GetUIWindow(instanceId);
+    CHECK_NULL_RETURN(window, false);
+    OHOS::Rosen::WMError ret = window->TransferAccessibilityEvent(eventInfo, uiExtensionIdLevelList);
+    return ret == OHOS::Rosen::WMError::WM_OK;
 }
 
 void UIExtensionPattern::ProcessUIExtensionSessionActivationResult(OHOS::Rosen::WSError errcode)

@@ -65,6 +65,8 @@ constexpr int32_t UI_EXTENSION_OFFSET_MIN = 1000000;
 
 constexpr int32_t UI_EXTENSION_ID_21 = 21;
 constexpr int32_t UI_EXTENSION_ID_10 = 10;
+constexpr int32_t UI_EXTENSION_LEVEL_MAX = 3;
+constexpr int32_t UI_EXTENSION_LEVEL_OFFSET = 10;
 
 struct ActionTable {
     AceAction aceAction;
@@ -1583,7 +1585,69 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     eventInfo.SetItemCounts(static_cast<int>(accessibilityEvent.itemCount));
     eventInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_RETURN(pipeline, false);
+    RefPtr<NG::PipelineContext> ngPipeline;
+    ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(ngPipeline, false);
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_RETURN(uiExtensionManager, false);
+    if (uiExtensionManager->IsWindowTypeUIExtension(pipeline)) {
+        auto rootNode = ngPipeline->GetRootElement();
+        CHECK_NULL_RETURN(rootNode, false);
+        auto node = GetInspectorById(rootNode, accessibilityEvent.nodeId);
+        CHECK_NULL_RETURN(node, false);
+        std::vector<int32_t> uiExtensionIdLevelList;
+        return node->SendAccessibilityEventInfo(eventInfo, uiExtensionIdLevelList, pipeline);
+    }
+
     return client->SendEvent(eventInfo);
+}
+
+bool JsAccessibilityManager::SendAccessibilitySyncEvent(
+    const AccessibilityEventInfo& eventInfo, std::vector<int32_t>& uiExtensionIdLevelList)
+{
+    if (!IsRegister()) {
+        return false;
+    }
+
+    if (uiExtensionIdLevelList.size() > UI_EXTENSION_LEVEL_MAX) {
+        return false;
+    }
+    auto client = AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, false);
+    bool isEnabled = false;
+    client->IsEnabled(isEnabled);
+    if (!isEnabled) {
+        return false;
+    }
+
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_RETURN(pipeline, false);
+    RefPtr<NG::PipelineContext> ngPipeline;
+    ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(ngPipeline, false);
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_RETURN(uiExtensionManager, false);
+    if (uiExtensionManager->IsWindowTypeUIExtension(pipeline)) {
+        auto rootNode = ngPipeline->GetRootElement();
+        CHECK_NULL_RETURN(rootNode, false);
+        return rootNode->SendAccessibilityEventInfo(eventInfo, uiExtensionIdLevelList, pipeline);
+    }
+
+    int32_t wrapLevelid = 0;
+    int32_t startLevelOffset = UI_EXTENSION_OFFSET_MAX;
+    for (auto uiExtensionId : uiExtensionIdLevelList) {
+        if ((startLevelOffset == UI_EXTENSION_OFFSET_MAX && uiExtensionId >= UI_EXTENSION_ID_21) ||
+            (startLevelOffset != UI_EXTENSION_OFFSET_MAX && uiExtensionId >= UI_EXTENSION_ID_10)) {
+            return false;
+        }
+        wrapLevelid = wrapLevelid + uiExtensionId * startLevelOffset;
+        startLevelOffset = startLevelOffset / UI_EXTENSION_LEVEL_OFFSET;
+    }
+    AccessibilityEventInfo eventInfoNew = eventInfo;
+    eventInfoNew.SetSource(wrapLevelid + eventInfo.GetViewId());
+    return client->SendEvent(eventInfoNew);
 }
 
 void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent)

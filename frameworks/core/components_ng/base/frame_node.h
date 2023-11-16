@@ -51,6 +51,7 @@
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
+class AccessibilityEventInfo;
 }
 
 namespace OHOS::Ace::NG {
@@ -606,6 +607,9 @@ public:
         int32_t offset, Accessibility::AccessibilityElementInfo& output);
     bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset);
+    bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
+        std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline);
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(

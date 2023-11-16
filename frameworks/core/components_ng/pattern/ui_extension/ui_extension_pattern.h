@@ -37,8 +37,9 @@ enum class WSError;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Accessibility {
-    class AccessibilityElementInfo;
-}
+class AccessibilityElementInfo;
+class AccessibilityEventInfo;
+} // namespace OHOS::Accessibility
 
 namespace OHOS::MMI {
 class KeyEvent;
@@ -107,6 +108,8 @@ public:
         int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
     virtual bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset) override;
+    virtual bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
+        std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline) override;
 
     int32_t GetSessionId();
 
@@ -117,6 +120,9 @@ public:
     {
         return contentNode_;
     }
+
+    void OnAccessibilityEvent(
+        const Accessibility::AccessibilityEventInfo& info, std::vector<int32_t> uiExtensionIdLevelList);
 
 private:
     enum ReleaseCode {

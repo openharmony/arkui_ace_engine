@@ -33,6 +33,7 @@ public:
     bool OnBackPressed();
     const RefPtr<FrameNode> GetFocusUiExtensionNode();
     bool IsWrapExtensionAbilityId(int32_t elementId);
+    bool IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pipeline);
     std::pair<int32_t, int32_t> UnWrapExtensionAbilityId(int32_t extensionOffset, int32_t elementId);
 
 private:
