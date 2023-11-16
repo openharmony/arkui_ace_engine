@@ -658,6 +658,19 @@ class ForegroundColorModifier extends Modifier<ArkForegroundColor> {
     }
 }
 
+class MotionPathModifier extends Modifier<ArkMotionPath> {
+    static identity: Symbol = Symbol("motionPath");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetMotionPath(node);
+        }
+        else {
+            GetUINativeModule().common.setMotionPath(node, this.value.path, this.value.from,
+                this.value.to, this.value.rotatable);
+        }
+    }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType) => typeof val === 'string'
@@ -1631,7 +1644,25 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     motionPath(value: MotionPathOptions): this {
-        throw new Error("Method not implemented.");
+        let arkMotionPath = new ArkMotionPath();
+        arkMotionPath.path = "";
+        arkMotionPath.rotatable = false;
+        arkMotionPath.from = 0.0;
+        arkMotionPath.to = 1.0;
+        if (value) {
+            if (typeof value.path === "string") {
+                arkMotionPath.path = value.path;
+            }
+            if (typeof value.rotatable === "boolean") {
+                arkMotionPath.rotatable = value.rotatable;
+            }
+            if (typeof value.from === "number" && typeof value.to === "number") {
+                arkMotionPath.from = value.from;
+                arkMotionPath.to = value.to;
+            }
+        }
+        modifier(this._modifiers, MotionPathModifier, arkMotionPath);
+        return this;
     }
 
     shadow(value: ShadowOptions | ShadowStyle): this {

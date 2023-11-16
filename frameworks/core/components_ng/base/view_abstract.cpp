@@ -2067,4 +2067,9 @@ void ViewAbstract::SetBloom(const float value)
     ACE_UPDATE_RENDER_CONTEXT(Bloom, value);
 }
 
+
+void ViewAbstract::SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(MotionPath, motionPath, frameNode);
+}
 } // namespace OHOS::Ace::NG

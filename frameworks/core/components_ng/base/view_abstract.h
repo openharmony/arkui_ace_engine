@@ -373,6 +373,7 @@ public:
     static void SetUseEffect(FrameNode* frameNode, bool useEffect);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);
     static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
+    static void SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath);
 
 private:
     static void AddDragFrameNodeToManager();
