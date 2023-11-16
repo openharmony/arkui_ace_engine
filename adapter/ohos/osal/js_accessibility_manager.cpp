@@ -2966,6 +2966,7 @@ void JsAccessibilityManager::RegisterSubWindowInteractionOperation(int windowId)
     CHECK_NULL_VOID(instance);
     auto interactionOperation = std::make_shared<JsInteractionOperation>(windowId);
     interactionOperation->SetHandler(WeakClaim(this));
+    instance->RegisterElementOperator(windowId, interactionOperation);
 }
 
 void JsAccessibilityManager::DeregisterInteractionOperation()
