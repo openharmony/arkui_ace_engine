@@ -1083,7 +1083,7 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 
 void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    if (SelectOverlayIsOn()) {
+    if (SelectOverlayIsOn() && !isTouchCaret_) {
         return;
     }
     auto touchType = info.GetTouches().front().GetTouchType();
@@ -1091,6 +1091,8 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
         HandleTouchUp();
+    } else if (touchType == TouchType::MOVE) {
+        HandleTouchMove(info);
     }
 }
 
@@ -1100,6 +1102,8 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         return;
     }
     if (enableTouchAndHoverEffect_ && !isMousePressed_) {
+        auto lastCaretIndex = selectController_->GetCaretIndex();
+        isTouchCaret_ = RepeatClickCaret(offset, lastCaretIndex);
         auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
         CHECK_NULL_VOID(textfieldPaintProperty);
         auto tmpHost = GetHost();
@@ -1119,6 +1123,11 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
 
 void TextFieldPattern::HandleTouchUp()
 {
+    if (isTouchCaret_) {
+        isTouchCaret_ = false;
+        CloseSelectOverlay(true);
+        CheckScrollable();
+    }
     if (isMousePressed_) {
         isMousePressed_ = false;
     }
@@ -1148,6 +1157,24 @@ void TextFieldPattern::HandleTouchUp()
     }
     isLongPress_ = false;
 #endif
+}
+
+void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
+{
+    if (isTouchCaret_) {
+        UpdateCaretByTouchMove(info);
+    }
+}
+
+void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
+{
+    scrollable_ = false;
+    SetScrollEnable(scrollable_);
+    selectController_->UpdateCaretInfoByOffset(info.GetTouches().front().GetLocalLocation());
+    ProcessOverlay(false, true, false);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -1447,11 +1474,15 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
             return;
         }
     }
+    auto lastCaretIndex = selectController_->GetCaretIndex();
     selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
     StartTwinkling();
     SetIsSingleHandle(true);
     CloseSelectOverlay(true);
-    if (!contentController_->IsEmpty() && info.GetSourceDevice() != SourceType::MOUSE) {
+
+    if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex) && info.GetSourceDevice() != SourceType::MOUSE) {
+        ProcessOverlay(true, true);
+    } else if (!contentController_->IsEmpty() && info.GetSourceDevice() != SourceType::MOUSE) {
         if (GetNakedCharPosition() >= 0) {
             DelayProcessOverlay(true, true, false);
         } else {
@@ -4789,6 +4820,12 @@ void TextFieldPattern::UpdateSelectController()
 {
     selectController_->UpdateContentRect(contentRect_);
     selectController_->UpdateParagraph(paragraph_);
+}
+
+bool TextFieldPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex)
+{
+    auto touchDownIndex = selectController_->ConvertTouchOffsetToPosition(offset);
+    return lastCaretIndex == touchDownIndex && HasFocus();
 }
 
 bool TextFieldPattern::IsSingleHandle() const
