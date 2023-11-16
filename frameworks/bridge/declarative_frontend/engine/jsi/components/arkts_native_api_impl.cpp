@@ -27,6 +27,8 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_row_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_animator_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_span_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_menu_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_menu_item_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_nav_destination_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_navigation_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_panel_modifier.h"
@@ -109,6 +111,8 @@ static struct ArkUINodeAPI impl = {
     GetSideBarContainerModifier,
     GetCalendarPickerModifier,
     GetTextInputModifier,
+    GetMenuItemModifier,
+    GetMenuModifier,
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI()

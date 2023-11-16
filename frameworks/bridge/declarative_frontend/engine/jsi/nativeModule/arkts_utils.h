@@ -70,6 +70,7 @@ public:
         }
         return true;
     }
+    static std::string GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

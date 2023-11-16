@@ -894,6 +894,28 @@ struct ArkUITextInputModifierAPI {
     void (*ResetTextInputFontFamily)(NodeHandle node);
 };
 
+struct ArkUIMenuItemModifierAPI {
+    void (*SetMenuItemSelected)(NodeHandle node, bool value);
+    void (*ResetMenuItemSelected)(NodeHandle node);
+    void (*SetLabelFontColor)(NodeHandle node, const uint32_t colorVal);
+    void (*ResetLabelFontColor)(NodeHandle node);
+    void (*SetContentFontColor)(NodeHandle node, const uint32_t colorVal);
+    void (*ResetContentFontColor)(NodeHandle node);
+    void (*SetLabelFont)(NodeHandle node, const char* fontInfo, int32_t style);
+    void (*ResetLabelFont)(NodeHandle node);
+    void (*SetContentFont)(NodeHandle node, const char* fontInfo, int32_t style);
+    void (*ResetContentFont)(NodeHandle node);
+};
+
+struct ArkUIMenuModifierAPI {
+    void (*SetMenuFontColor)(NodeHandle node, uint32_t colorVal);
+    void (*ResetMenuFontColor)(NodeHandle node);
+    void (*SetFont)(NodeHandle node, const char* fontInfo, int32_t style);
+    void (*ResetFont)(NodeHandle node);
+    void (*SetRadius)(NodeHandle node, const double* values, const int* units, int32_t length);
+    void (*ResetRadius)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -935,6 +957,9 @@ struct ArkUINodeAPI {
     ArkUISideBarContainerModifierAPI (*GetSideBarContainerModifier)();
     ArkUICalendarPickerModifierAPI (*GetCalendarPickerModifier)();
     ArkUITextInputModifierAPI (*GetTextInputModifier)();
+    ArkUIMenuItemModifierAPI (*GetMenuItemModifier)();
+    ArkUIMenuModifierAPI (*GetMenuModifier)();
 };
+
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H

@@ -97,4 +97,61 @@ void MenuModelNG::SetFontFamily(const std::vector<std::string>& families)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontFamily, families);
 }
+
+void MenuModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    if (color.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, frameNode);
+    }
+}
+
+void MenuModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)
+{
+    if (fontSize.IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, fontSize, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, frameNode);
+    }
+}
+
+void MenuModelNG::SetFontWeight(FrameNode* frameNode, FontWeight weight)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontWeight, weight, frameNode);
+}
+
+void MenuModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle style)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItalicFontStyle, style, frameNode);
+}
+
+void MenuModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& families)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontFamily, families, frameNode);
+}
+
+void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const Dimension& radius)
+{
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = radius;
+    borderRadius.radiusTopRight = radius;
+    borderRadius.radiusBottomLeft = radius;
+    borderRadius.radiusBottomRight = radius;
+    borderRadius.multiValued = true;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, frameNode);
+}
+
+void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
+    const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+    const std::optional<Dimension>& radiusBottomRight)
+{
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = radiusTopLeft;
+    borderRadius.radiusTopRight = radiusTopRight;
+    borderRadius.radiusBottomLeft = radiusBottomLeft;
+    borderRadius.radiusBottomRight = radiusBottomRight;
+    borderRadius.multiValued = true;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, frameNode);
+}
 } // namespace OHOS::Ace::NG

@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 const std::regex FLOAT_PATTERN(R"(-?(0|[1-9]\d*)(\.\d+))", std::regex::icase);
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+const std::string DEFAULT_STR = "-1";
 enum class ResourceType : uint32_t {
     COLOR = 10001,
     FLOAT,
@@ -403,7 +404,11 @@ bool ArkTSUtils::ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value,
 
 void ArkTSUtils::ParseAllBorder(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result)
 {
-    if (ParseJsDimensionVp(vm, args, result) && result.IsNonNegative()) {
+    if (ParseJsDimensionVp(vm, args, result)) {
+        if (result.IsNegative()) {
+            result.Reset();
+        }
+
         if (result.Unit() == DimensionUnit::PERCENT) {
             result.Reset();
         }
@@ -469,5 +474,13 @@ bool ArkTSUtils::ParseJsFontFamilies(
         return true;
     }
     return true;
+}
+std::string ArkTSUtils::GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value)
+{
+    std::string result = DEFAULT_STR;
+    if (!value->IsNull() && value->IsString()) {
+        result = value->ToString(vm)->ToString();
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG
