@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "adapter/ohos/entrance/ace_container.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t UI_EXTENSION_OFFSET_MIN = 1000000;
@@ -35,6 +37,13 @@ bool UIExtensionManager::OnBackPressed()
 bool UIExtensionManager::IsWrapExtensionAbilityId(int32_t elementId)
 {
     return elementId > UI_EXTENSION_OFFSET_MIN;
+}
+
+bool UIExtensionManager::IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pipeline)
+{
+    auto instanceId = pipeline->GetInstanceId();
+    auto window = Platform::AceContainer::GetUIWindow(instanceId);
+    return window->GetType() == OHOS::Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION;
 }
 
 std::pair<int32_t, int32_t> UIExtensionManager::UnWrapExtensionAbilityId(

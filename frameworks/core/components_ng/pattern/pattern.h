@@ -31,6 +31,7 @@
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
+class AccessibilityEventInfo;
 }
 
 namespace OHOS::Ace::NG {
@@ -419,11 +420,17 @@ public:
         int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
     virtual void FocusMoveSearch(int32_t elementId, int32_t direction,
         int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
-    virtual bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int32_t offset)
+    virtual bool TransferExecuteAction(
+        int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
     {
         return false;
     }
+    virtual bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
+        std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline)
+    {
+        return false;
+    }
+
     virtual int32_t GetUiExtensionId()
     {
         return -1;
