@@ -67,7 +67,7 @@ public:
         std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool isSubContainer = false, bool useNewPipeline = false);
-    ~AceContainer() override = default;
+    ~AceContainer() override;
 
     void Initialize() override;
 
@@ -521,6 +521,7 @@ private:
 
     mutable std::mutex frontendMutex_;
     mutable std::mutex pipelineMutex_;
+    mutable std::mutex destructMutex_;
 
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;
