@@ -391,6 +391,7 @@ public:
     {
         draggable_ = draggable;
         userSet_ = true;
+        customerSet_ = false;
     }
 
     void SetCustomerDraggable(bool draggable) {
