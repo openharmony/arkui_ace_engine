@@ -40,6 +40,14 @@ public:
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
         const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
     void SetHoverEffect(const int32_t& hoverEffectNum) override;
+    static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
+    static void SetFontWeight(FrameNode* frameNode, const Ace::FontWeight& fontWeight);
+    static void SetFontStyle(FrameNode* frameNode, const Ace::FontStyle& fontStyle);
+    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& fontFamily);
+    static void SetFontColor(FrameNode* frameNode, const Color& textColor);
+    static void SetType(FrameNode* frameNode, const int value);
+    static void SetStateEffect(FrameNode* frameNode, const bool stateEffect);
+    static void SetLableStyle(FrameNode* frameNode, const ButtonParameters& buttonParameters);
 
 private:
     static void CreateWithLabel(const std::string& label);

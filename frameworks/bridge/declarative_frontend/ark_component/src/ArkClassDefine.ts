@@ -178,3 +178,45 @@ class ArkTransformMatrix implements Equable  {
         return this.compareArrays(this.matrix, another.matrix)
     }
 }
+
+class ArkLabelStyle {
+    overflow: number | undefined;
+    maxLines: number | undefined;
+    minFontSize: number | string | undefined| Resource;
+    maxFontSize: number | string | undefined| Resource;
+    heightAdaptivePolicy: number | undefined;
+    font: ArkLabelFont;
+
+    constructor() {
+        this.overflow = undefined;
+        this.maxLines = undefined;
+        this.minFontSize = undefined;
+        this.maxFontSize = undefined;
+        this.heightAdaptivePolicy = undefined;
+        this.font = undefined;
+    }
+
+    isEqual(another: ArkLabelStyle): boolean {
+        return (this.overflow === another.overflow && this.maxLines === another.maxLines &&
+            this.minFontSize === another.minFontSize && this.maxFontSize === another.maxFontSize &&
+            this.heightAdaptivePolicy === another.heightAdaptivePolicy && this.font.isEqual(another.font));
+    }
+}
+
+class ArkLabelFont {
+    size: number | string | undefined| Resource;
+    weight: string | undefined;
+    family: string | undefined;
+    style:  number | undefined;
+    constructor() {
+        this.size = undefined;
+        this.weight = undefined;
+        this.family = undefined;
+        this.style = undefined;
+    }
+
+    isEqual(another: ArkLabelFont): boolean {
+        return (this.size === another.size && this.weight === another.weight && this.family === another.family &&
+            this.style === another.style);
+    }
+}

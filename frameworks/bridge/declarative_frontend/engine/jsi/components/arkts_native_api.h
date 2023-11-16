@@ -65,12 +65,41 @@ struct ArkUITextModifierAPI {
     void (*ResetFontSize)(NodeHandle node);
 };
 
+struct ArkUIButtonModifierAPI {
+    void (*SetButtonType)(NodeHandle node, int type);
+    void (*ResetButtonType)(NodeHandle node);
+    void (*SetButtonStateEffect)(NodeHandle node, bool stateEffect);
+    void (*ResetButtonStateEffect)(NodeHandle node);
+    void (*SetButtonFontColor)(NodeHandle node, uint32_t fontColor);
+    void (*ResetButtonFontColor)(NodeHandle node);
+    void (*SetButtonFontSize)(NodeHandle node, double fontSizeValue, int fontSizeUnit);
+    void (*ResetButtonFontSize)(NodeHandle node);
+    void (*SetButtonFontWeight)(NodeHandle node, const char* fontWeight);
+    void (*ResetButtonFontWeight)(NodeHandle node);
+    void (*SetButtonFontStyle)(NodeHandle node, int32_t fontStyle);
+    void (*ResetButtonFontStyle)(NodeHandle node);
+    void (*SetButtonFontFamily)(NodeHandle node, const char* fontFamily);
+    void (*ResetButtonFontFamily)(NodeHandle node);
+    void (*SetButtonLabelStyle)(NodeHandle node, const char* fontFamily, const double* valueArray,
+        const double* dimensionValueArray, const int* dimensionUnitArray);
+    void (*ResetButtonLabelStyle)(NodeHandle node);
+};
+
+struct ArkUIToggleModifierAPI {
+    void (*SetToggleSelectedColor)(NodeHandle node, uint32_t selectedColor);
+    void (*ResetToggleSelectedColor)(NodeHandle node);
+    void (*SetToggleSwitchPointColor)(NodeHandle node, uint32_t switchPointColor);
+    void (*ResetToggleSwitchPointColor)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
     ArkUITextModifierAPI (*GetTextModifier)();
+    ArkUIButtonModifierAPI (*GetButtonModifier)();
+    ArkUIToggleModifierAPI (*GetToggleModifier)();
 };
 
-ArkUINodeAPI* GetArkUIInternalNodeAPI();
+ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H

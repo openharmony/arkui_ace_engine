@@ -18,10 +18,11 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
@@ -31,7 +32,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "core/components/toggle/toggle_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -338,5 +338,58 @@ void ToggleModelNG::SetHoverEffect(HoverEffectType hoverEffect)
         return;
     }
     NG::ViewAbstract::SetHoverEffect(hoverEffect);
+}
+
+void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor)
+{
+    CHECK_NULL_VOID(frameNode);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Color color;
+    if (selectedColor.has_value()) {
+        color = selectedColor.value();
+    }
+
+    auto checkboxPattern = AceType::DynamicCast<CheckBoxPattern>(frameNode->GetPattern());
+    if (checkboxPattern) {
+        if (!selectedColor.has_value()) {
+            auto theme = pipeline->GetTheme<CheckboxTheme>();
+            CHECK_NULL_VOID(theme);
+            color = theme->GetActiveColor();
+        }
+        CheckBoxModelNG checkBoxModelNG;
+        checkBoxModelNG.SetSelectedColor(frameNode, color);
+        return;
+    }
+
+    auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    if (buttonPattern) {
+        if (!selectedColor.has_value()) {
+            auto theme = pipeline->GetTheme<ToggleTheme>();
+            CHECK_NULL_VOID(theme);
+            color = theme->GetCheckedColor();
+        }
+        ToggleButtonModelNG::SetSelectedColor(frameNode, color);
+        return;
+    }
+
+    if (!selectedColor.has_value()) {
+        auto theme = pipeline->GetTheme<SwitchTheme>();
+        CHECK_NULL_VOID(theme);
+        color = theme->GetActiveColor();
+    }
+
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color, frameNode);
+}
+
+void ToggleModelNG::SetSwitchPointColor(FrameNode* frameNode, const Color& switchPointColor)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SwitchPointColor, switchPointColor, frameNode);
+}
+
+void ToggleModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
+{
+    ToggleButtonModelNG::SetBackgroundColor(frameNode, color);
 }
 } // namespace OHOS::Ace::NG
