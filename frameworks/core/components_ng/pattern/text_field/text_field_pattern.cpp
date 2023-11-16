@@ -849,6 +849,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     selectController_->MoveSecondHandleToContentRect(textSize);
     StopTwinkling();
+    showSelect_ = true;
     if (isKeyEvent || inlineSelectAllFlag_) {
         CloseSelectOverlay(true);
         return;
@@ -1749,11 +1750,23 @@ void TextFieldPattern::FireOnTextChangeEvent()
     CHECK_NULL_VOID(layoutProperty);
 
     auto textCache = layoutProperty->GetValueValue("");
-    if (textCache != contentController_->GetTextValue()) {
-        layoutProperty->UpdateValue(contentController_->GetTextValue());
-        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
-        eventHub->FireOnChange(contentController_->GetTextValue());
+    if (textCache == contentController_->GetTextValue()) {
+        return;
     }
+    layoutProperty->UpdateValue(contentController_->GetTextValue());
+    host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
+    eventHub->FireOnChange(contentController_->GetTextValue());
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ScrollToSafeArea();
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void TextFieldPattern::FilterInitializeText()
@@ -2654,7 +2667,6 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     }
     insertValueOperations_.emplace(insertValue);
     CloseSelectOverlay(true);
-    ScrollToSafeArea();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -3281,7 +3293,6 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     }
     deleteBackwardOperations_.emplace(length);
     CloseSelectOverlay();
-    ScrollToSafeArea();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
