@@ -109,7 +109,7 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
         }
         // right padding
         occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
-        return titleBarSize.Width() - occupiedWidth;
+        return titleBarSize.Width() < occupiedWidth ? 0 : titleBarSize.Width() - occupiedWidth;
     }
     auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
     CHECK_NULL_RETURN(navBarNode, 0.0f);
@@ -117,7 +117,7 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
     auto isCustom = navBarNode->GetPrevTitleIsCustomValue(false);
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI) {
         occupiedWidth = isCustom ? 0.0f : (maxPaddingStart_ + maxPaddingEnd_).ConvertToPx();
-        return titleBarSize.Width() - occupiedWidth;
+        return titleBarSize.Width() < occupiedWidth ? 0 : titleBarSize.Width() - occupiedWidth;
     }
     // mini mode
     if (titleBarLayoutProperty->GetHideBackButtonValue(false)) {
