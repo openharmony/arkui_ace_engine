@@ -729,6 +729,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     jumpIndex_ = index;
     uiCastJumpIndex_ = index;
     MarkDirtyNodeSelf();
+    FireAndCleanScrollingListener();
 }
 
 void SwiperPattern::StopSpringAnimationAndFlushImmediately()
@@ -1730,6 +1731,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
             swiper->FireAnimationStartEvent(swiper->GetLoopIndex(swiper->currentIndex_), nextIndex, info);
+            swiper->FireAndCleanScrollingListener();
         });
     }
 

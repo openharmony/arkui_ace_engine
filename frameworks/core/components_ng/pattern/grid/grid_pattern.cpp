@@ -327,6 +327,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return false;
     }
     SetScrollSource(source);
+    FireAndCleanScrollingListener();
 
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
@@ -1837,5 +1838,6 @@ void GridPattern::ScrollToIndex(int32_t index, bool /* smooth */, ScrollAlign al
     }
     StopAnimate();
     UpdateStartIndex(index, align);
+    FireAndCleanScrollingListener();
 }
 } // namespace OHOS::Ace::NG

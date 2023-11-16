@@ -433,6 +433,7 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
         listenerItem->OnScrollUpdate(frameSize);
     }
     SetScrollSource(source);
+    FireAndCleanScrollingListener();
     // TODO: ignore handle refresh
     if (source != SCROLL_FROM_JUMP && !HandleEdgeEffect(delta, source, viewSize_)) {
         if (IsOutOfBoundary()) {
