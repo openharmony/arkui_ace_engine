@@ -278,7 +278,9 @@ public:
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);
-    void DoNavigationTransitionAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+    void DoStackModeTransitionAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
+    void DoSplitModeTransitionAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode usrNavigationMode);
