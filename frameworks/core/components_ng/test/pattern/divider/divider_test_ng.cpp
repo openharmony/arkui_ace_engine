@@ -205,6 +205,7 @@ HWTEST_F(DividerTestNg, DividerModifierTest001, TestSize.Level1)
     DividerModifier dividerModifier;
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     DrawingContext context = { rsCanvas, 10.0f, 10.0f };
     dividerModifier.onDraw(context);
 }

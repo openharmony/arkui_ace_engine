@@ -217,6 +217,8 @@ HWTEST_F(ImageProviderTestNg, NotifiersTest001, TestSize.Level1)
         return ;
     };
     ctx->notifiers_ = LoadNotifier(std::move(callback1), std::move(callback2), std::move(callback3));
+    std::function<void()> func = [](){};
+    ctx->pendingMakeCanvasImageTask_ = func;
     ctx->OnLoadFail();
     EXPECT_EQ(callbackFlag, 3);
     ctx->OnDataReady();
@@ -456,6 +458,8 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg005, TestSize.Level1)
     ctx->imageObj_ =
         AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_128, LENGTH_128), nullptr);
     SizeF dstSize(LENGTH_100, LENGTH_100);
+    std::function<void()> func = [](){};
+    ctx->pendingMakeCanvasImageTask_ = func;
     auto res = ctx->MakeCanvasImageIfNeed(dstSize, true, ImageFit::COVER);
     EXPECT_TRUE(res);
     EXPECT_EQ(ctx->dstSize_, SizeF(LENGTH_100, LENGTH_100));
