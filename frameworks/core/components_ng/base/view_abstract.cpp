@@ -249,12 +249,22 @@ void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, src);
 }
 
+void ViewAbstract::SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, src, frameNode);
+}
+
 void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat);
+}
+
+void ViewAbstract::SetBackgroundImageRepeat(FrameNode* frameNode, const ImageRepeat& imageRepeat)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat, frameNode);
 }
 
 void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
@@ -265,12 +275,22 @@ void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize);
 }
 
+void ViewAbstract::SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize, frameNode);
+}
+
 void ViewAbstract::SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPosition);
+}
+
+void ViewAbstract::SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPosition, frameNode);
 }
 
 void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
@@ -944,6 +964,15 @@ void ViewAbstract::SetGeometryTransition(const std::string& id, bool followWitho
     }
 }
 
+void ViewAbstract::SetGeometryTransition(FrameNode* frameNode, const std::string& id, bool followWithoutTransition)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition);
+    }
+}
+
 void ViewAbstract::SetOpacity(double opacity)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -998,12 +1027,22 @@ void ViewAbstract::SetScale(const NG::VectorF& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformScale, value);
 }
 
+void ViewAbstract::SetScale(FrameNode* frameNode, const NG::VectorF& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformScale, value, frameNode);
+}
+
 void ViewAbstract::SetPivot(const DimensionOffset& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(TransformCenter, value);
+}
+
+void ViewAbstract::SetPivot(FrameNode* frameNode, const DimensionOffset& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformCenter, value, frameNode);
 }
 
 void ViewAbstract::SetTranslate(const NG::TranslateOptions& value)
@@ -1014,12 +1053,22 @@ void ViewAbstract::SetTranslate(const NG::TranslateOptions& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformTranslate, value);
 }
 
+void ViewAbstract::SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformTranslate, value, frameNode);
+}
+
 void ViewAbstract::SetRotate(const NG::Vector5F& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(TransformRotate, value);
+}
+
+void ViewAbstract::SetRotate(FrameNode* frameNode, const NG::Vector5F& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, value, frameNode);
 }
 
 void ViewAbstract::SetTransformMatrix(const Matrix4& matrix)
@@ -1399,12 +1448,36 @@ void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
     }
 }
 
+void ViewAbstract::SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetClipEdge().has_value()) {
+            target->UpdateClipEdge(false);
+        }
+        target->UpdateClipShape(basicShape);
+    }
+}
+
 void ViewAbstract::SetClipEdge(bool isClip)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetClipShape().has_value()) {
+            target->UpdateClipShape(nullptr);
+        }
+        target->UpdateClipEdge(isClip);
+    }
+}
+
+void ViewAbstract::SetClipEdge(FrameNode* frameNode, bool isClip)
+{
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {

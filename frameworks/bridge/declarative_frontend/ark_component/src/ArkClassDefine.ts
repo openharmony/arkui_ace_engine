@@ -314,7 +314,6 @@ class ArkBackgroundBlurStyle {
     }
 }
 
-
 class ArkFont implements Equable{
     size: string | number | Resource;
     weight: string;
@@ -543,5 +542,125 @@ class ArkBlockSize {
 
     isEqual(another: ArkBlockSize): boolean {
         return (this.width === another.width) && (this.height === another.height);
+    }
+}
+
+class ArkBorder implements Equable {
+    arkWidth: ArkBorderWidth
+    arkColor: ArkBorderColor
+    arkRadius: ArkBorderRadius
+    arkStyle: ArkBorderStyle
+
+    constructor() {
+        this.arkWidth = new ArkBorderWidth();
+        this.arkColor = new ArkBorderColor();
+        this.arkRadius = new ArkBorderRadius();
+        this.arkStyle = new ArkBorderStyle();
+    }
+    isEqual(another: ArkBorder): boolean {
+        return (this.arkWidth.isEqual(another.arkWidth) && this.arkColor.isEqual(another.arkColor) && this.arkRadius.isEqual(another.arkRadius) && this.arkStyle.isEqual(another.arkStyle));
+    }
+}
+
+class ArkBackgroundImagePosition implements Equable {
+    alignment: number | undefined | Position | Alignment
+    x: number | string | undefined | Resource
+    y: number | string | undefined | Resource
+    constructor() {
+        this.alignment = undefined
+        this.x = undefined
+        this.y = undefined
+    }
+    isEqual(another: ArkBackgroundImagePosition): boolean {
+        return (this.alignment === another.alignment) && (this.x === another.x) &&
+            (this.y === another.y);
+    }
+}
+
+class ArkBackgroundImageSize implements Equable {
+    imageSize: ImageSize | undefined | SizeOptions
+    width: number | string | undefined | Resource
+    height: number |string |  undefined | Resource
+    constructor() {
+        this.imageSize = undefined
+        this.width = undefined
+        this.height = undefined
+    }
+    isEqual(another: ArkBackgroundImageSize): boolean {
+        return (this.imageSize === another.imageSize) && (this.width === another.width) &&
+            (this.height === another.height);
+    }
+}
+
+class ArkBackgroundImage implements Equable {
+    src: string | undefined | Resource
+    repeat:  number | undefined
+    constructor() {
+        this.src = undefined
+        this.repeat = undefined
+    }
+    isEqual(another: ArkBackgroundImage): boolean {
+        return (this.src === another.src) && (this.repeat === another.repeat);
+    }
+}
+
+class ArkTranslate implements Equable {
+    x: number | string | undefined
+    y: number | string | undefined
+    z: number | string | undefined
+    constructor() {
+        this.x = undefined
+        this.y = undefined
+        this.z = undefined
+    }
+    isEqual(another: ArkTranslate): boolean {
+        return (this.x === another.x) && (this.y === another.y)  && (this.z === another.z) ;
+    }
+}
+
+class ArkScale implements Equable {
+    x: number |  undefined
+    y: number |  undefined
+    z: number |  undefined
+    centerX: number | string | undefined
+    centerY: number | string | undefined
+
+    constructor() {
+        this.x = undefined
+        this.y = undefined
+        this.z = undefined
+        this.centerX = undefined
+        this.centerY = undefined
+    }
+
+    isEqual(another: ArkRotate): boolean {
+        return (this.x === another.x) && (this.y === another.y)  && (this.z === another.z) && (this.centerX === another.centerX)  && (this.centerY === another.centerY) ;
+    }
+}
+
+class ArkRotate implements Equable {
+    x: number |  undefined
+    y: number |  undefined
+    z: number |  undefined
+    angle: number | string | undefined
+    centerX: number | string | undefined
+    centerY: number | string | undefined
+    centerZ: number | string | undefined
+    perspective: number |  undefined
+
+    constructor() {
+        this.x = undefined
+        this.y = undefined
+        this.z = undefined
+        this.angle = undefined
+        this.centerX = undefined
+        this.centerY = undefined
+        this.centerZ = undefined
+        this.perspective = undefined
+    }
+
+    isEqual(another: ArkRotate): boolean {
+        return (this.x === another.x) && (this.y === another.y)  && (this.z === another.z) && (this.angle === another.angle) && 
+        (this.centerX === another.centerX)  && (this.centerY === another.centerY) && (this.centerZ === another.centerZ) && (this.perspective === another.perspective) ;
     }
 }

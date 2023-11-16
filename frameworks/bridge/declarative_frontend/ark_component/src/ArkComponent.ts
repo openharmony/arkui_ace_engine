@@ -44,6 +44,42 @@ class Modifier<T extends number | string | boolean | Equable | Resource> {
     applyPeer(node: KNode, reset: boolean): void { }
 }
 
+class ModifierWithKey<T extends number | string | boolean | object> {
+    stageValue?: T;
+    value?: T;
+    constructor(value: T) {
+        this.stageValue = value;
+    }
+
+    applyStage(node: KNode): boolean {
+        if (this.stageValue === this.value) {  
+            this.applyPeer(node, true);
+            return true;
+        }
+        const stageTypeInfo: string = typeof this.stageValue;
+        const valueTypeInfo: string = typeof this.value;
+        let different: boolean = false;
+        if (stageTypeInfo !== valueTypeInfo) {
+            different = true;
+        } else if (stageTypeInfo === "number" || stageTypeInfo === "string" || stageTypeInfo === "boolean") {
+            different = (this.stageValue !== this.value);
+        } else {
+            different = this.checkObjectDiff();
+        }
+        if (different) {
+            this.value = this.stageValue;
+            this.applyPeer(node, false);
+        }
+        this.stageValue = undefined;
+        return false;
+    }
+
+    applyPeer(node: KNode, reset: boolean): void { }
+
+    checkObjectDiff(): boolean {
+        return true;
+    }
+}
 class BackgroundColorModifier extends Modifier<number | undefined > {
     static identity: Symbol = Symbol("backgroundColor");
     applyPeer(node: KNode, reset: boolean): void {
@@ -351,6 +387,22 @@ class LinearGradientModifier extends Modifier<ArkLinearGradient> {
     }
 }
 
+class BorderModifier extends Modifier<ArkBorder>{
+    static identity: Symbol = Symbol("border");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetBorder(node);
+        }
+        else {
+            GetUINativeModule().common.setBorder(node,
+                this.value.arkWidth.left, this.value.arkWidth.right, this.value.arkWidth.top, this.value.arkWidth.bottom,
+                this.value.arkColor.leftColor, this.value.arkColor.rightColor, this.value.arkColor.topColor, this.value.arkColor.bottomColor,
+                this.value.arkRadius.topLeft, this.value.arkRadius.topRight, this.value.arkRadius.bottomLeft, this.value.arkRadius.bottomRight,
+                this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left);
+        }
+    }
+}
+
 class ForegroundBlurStyleModifier extends Modifier<ArkForegroundBlurStyle> {
     static identity: Symbol = Symbol("foregroundBlurStyle");
     applyPeer(node: KNode, reset: boolean): void {
@@ -360,6 +412,18 @@ class ForegroundBlurStyleModifier extends Modifier<ArkForegroundBlurStyle> {
         else {
             GetUINativeModule().common.setForegroundBlurStyle(node,
                 this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
+            }
+        }
+    }
+
+class BackgroundImagePositionModifier extends Modifier<ArkBackgroundImagePosition>{
+    static identity: Symbol = Symbol("backgroundImagePosition");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetBackgroundImagePosition(node);
+        }
+        else {
+            GetUINativeModule().common.setBackgroundImagePosition(node, this.value.alignment, this.value.x, this.value.y);
         }
     }
 }
@@ -373,6 +437,18 @@ class LinearGradientBlurModifier extends Modifier<ArkLinearGradientBlur> {
         else {
             GetUINativeModule().common.setLinearGradientBlur(node,
                 this.value.blurRadius, this.value.fractionStops, this.value.direction);
+            }
+        }
+    }
+
+class BackgroundImageModifier extends Modifier<ArkBackgroundImage>{
+    static identity: Symbol = Symbol("backgroundImage");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetBackgroundImage(node);
+        }
+        else {
+            GetUINativeModule().common.setBackgroundImage(node, this.value.src, this.value.repeat);
         }
     }
 }
@@ -387,6 +463,84 @@ class BackgroundBlurStyleModifier extends Modifier<ArkBackgroundBlurStyle> {
             GetUINativeModule().common.setBackgroundBlurStyle(node,
                 this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
         }
+    }
+}
+
+
+class BackgroundImageSizeModifier extends Modifier<ArkBackgroundImageSize>{
+    static identity: Symbol = Symbol("backgroundImageSize");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetBackgroundImageSize(node);
+        }
+        else {
+            GetUINativeModule().common.setBackgroundImageSize(node, this.value.imageSize, this.value.width, this.value.height);
+        }
+    }
+}
+
+class TranslateModifier extends Modifier<ArkTranslate>{
+    static identity: Symbol = Symbol("translate");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetTranslate(node);
+        }
+        else {
+            GetUINativeModule().common.setTranslate(node, this.value.x, this.value.y, this.value.z);
+        }
+    }
+}
+
+class ScaleModifier extends Modifier<ArkScale>{
+    static identity: Symbol = Symbol("scale");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetScale(node);
+        }
+        else {
+            GetUINativeModule().common.setScale(node, this.value.x, this.value.y, this.value.z, this.value.centerX, this.value.centerY);
+        }
+    }
+}
+
+class RotateModifier extends Modifier<ArkRotate>{
+    static identity: Symbol = Symbol("rotate");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetRotate(node);
+        }
+        else {
+            GetUINativeModule().common.setRotate(node, this.value.x, this.value.y, this.value.z, this.value.angle, 
+                this.value.centerX, this.value.centerY, this.value.centerY, this.value.perspective);
+        }
+    }
+}
+
+class GeometryTransitionModifier extends Modifier<string>{
+    static identity: Symbol = Symbol("geometryTransition");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetGeometryTransition(node);
+        }
+        else {
+            GetUINativeModule().common.setGeometryTransition(node, this.value);
+        }
+    }
+}
+
+class ClipModifier extends ModifierWithKey<boolean | object> {
+    static identity: Symbol = Symbol("clip");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetClip(node);
+        }
+        else {
+            GetUINativeModule().common.setClip(node, this.value);
+        }
+    }
+
+    checkObjectDiff(): boolean {
+        return false;
     }
 }
 
@@ -447,25 +601,49 @@ function modifier<T extends number | string | boolean | Equable, M extends Modif
     }
 }
 
+function modifierWithKey<T extends number | string | boolean | object, M extends ModifierWithKey<T>>(
+    modifiers: Map<Symbol, ModifierWithKey<number | string | boolean | object>>,
+    identity: Symbol,
+    modifierClass: new (value: T) => M,
+    value: T
+) {
+    const item = modifiers.get(identity);
+    if (item) {
+        item.stageValue = value;
+    } else {
+        modifiers.set(identity, new modifierClass(value));
+    }
+}
+
 class ArkComponent implements CommonMethod<CommonAttribute> {
     _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
+    _modifiersWithKeys: Map<Symbol, ModifierWithKey<number | string | boolean | object>>;
     nativePtr: KNode;
 
     constructor(nativePtr: KNode) {
         this._modifiers = new Map();
+        this._modifiersWithKeys = new Map();        
         this.nativePtr = nativePtr;
     }
 
     applyModifierPatch(): void {
         let expiringItems = [];
+        let expiringItemsWithKeys = [];
         this._modifiers.forEach((value, key) => {
             if (value.applyStage(this.nativePtr)) {
                 expiringItems.push(key);
             }
         });
-
+        this._modifiersWithKeys.forEach((value, key) => {
+            if (value.applyStage(this.nativePtr)) {              
+                expiringItemsWithKeys.push(key);
+            }
+        });
         expiringItems.forEach(key => {
             this._modifiers.delete(key);
+        });
+        expiringItemsWithKeys.forEach(key => {
+            this._modifiersWithKeys.delete(key);
         });
     }
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
@@ -555,15 +733,55 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this {
-        throw new Error("Method not implemented.");
+        var arkBackgroundImage = new ArkBackgroundImage()
+        if (isString(src)) {
+            arkBackgroundImage.src = src
+        }
+        if (isNumber(repeat)) {
+            arkBackgroundImage.repeat = repeat
+        }
+        modifier(this._modifiers, BackgroundImageModifier, arkBackgroundImage);
+        return this;
     }
 
     backgroundImageSize(value: SizeOptions | ImageSize): this {
-        throw new Error("Method not implemented.");
+        if (isResource(value) || isUndefined(value)) {
+            modifier(this._modifiers, BackgroundImageSizeModifier, undefined);
+            return this
+        }
+        var arkBackgroundImageSize = new ArkBackgroundImageSize()
+        if (isNumber(value)) {
+            arkBackgroundImageSize.imageSize = value
+        } else {
+            if(isNumber((value as SizeOptions)?.width) || isString((value as SizeOptions)?.width)){
+                arkBackgroundImageSize.width = (value as SizeOptions)?.width;
+            }
+            if(isNumber((value as SizeOptions)?.height) || isString((value as SizeOptions)?.height)){
+                arkBackgroundImageSize.height = (value as SizeOptions)?.height;
+            }
+        }
+        modifier(this._modifiers, BackgroundImageSizeModifier, arkBackgroundImageSize);
+        return this;
     }
 
     backgroundImagePosition(value: Position | Alignment): this {
-        throw new Error("Method not implemented.");
+        if (isResource(value) || isUndefined(value)) {
+            modifier(this._modifiers, BackgroundImagePositionModifier, undefined);
+            return this
+        }
+        var arkBackgroundImagePosition = new ArkBackgroundImagePosition()
+        if (isNumber(value)) {
+            arkBackgroundImagePosition.alignment = value
+        } else {
+            if (isNumber((value as Position)?.x) || isString((value as Position)?.x)){
+                arkBackgroundImagePosition.x = (value as Position)?.x;
+            }
+            if (isNumber((value as Position)?.y) || isString((value as Position)?.y)){
+                arkBackgroundImagePosition.y = (value as Position)?.y;
+            }
+        }
+        modifier(this._modifiers, BackgroundImagePositionModifier, arkBackgroundImagePosition);
+        return this;
     }
 
     backgroundBlurStyle(value: BlurStyle, options?: BackgroundBlurStyleOptions): this {
@@ -613,7 +831,113 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     border(value: BorderOptions): this {
-        throw new Error("Method not implemented.");
+        var arkBorder = new ArkBorder()
+        if(!isResource(value?.width) && !isUndefined(value?.width) &&  value?.width !== null)
+        {
+            if (isNumber(value.width)) {
+                arkBorder.arkWidth.left = Number(value.width)
+                arkBorder.arkWidth.right = Number(value.width)
+                arkBorder.arkWidth.top = Number(value.width)
+                arkBorder.arkWidth.bottom = Number(value.width)
+            } else if (isString(value.width)) {
+                arkBorder.arkWidth.left = String(value.width)
+                arkBorder.arkWidth.right = String(value.width)
+                arkBorder.arkWidth.top = String(value.width)
+                arkBorder.arkWidth.bottom = String(value.width)
+            } else {
+                if (isNumber((value.width as EdgeWidths)?.left) || isString((value.width as EdgeWidths)?.left)) {
+                    arkBorder.arkWidth.left = (value.width as EdgeWidths).left
+                }
+                if (isNumber((value.width as EdgeWidths)?.right) || isString((value.width as EdgeWidths)?.right)) {
+                    arkBorder.arkWidth.right = (value.width as EdgeWidths).right
+                }
+                if (isNumber((value.width as EdgeWidths)?.top) || isString((value.width as EdgeWidths)?.top)) {
+                    arkBorder.arkWidth.top = (value.width as EdgeWidths).top
+                }
+                if (isNumber((value.width as EdgeWidths)?.bottom) || isString((value.width as EdgeWidths)?.bottom)) {
+                    arkBorder.arkWidth.bottom = (value.width as EdgeWidths).bottom
+                }
+            }
+        }
+        if (!isResource(value?.color) && !isUndefined(value?.color) && value?.color !== null) {
+            var arkColor = new ArkColor();
+            if (isNumber(value.color)) {
+                arkColor.parseColorValue(Number(value.color))
+                arkBorder.arkColor.leftColor = arkColor.color
+                arkBorder.arkColor.rightColor = arkColor.color
+                arkBorder.arkColor.topColor = arkColor.color
+                arkBorder.arkColor.bottomColor = arkColor.color
+            } else if (isString(value?.color)) {
+                arkColor.parseColorValue(String(value.color))
+                arkBorder.arkColor.leftColor = arkColor.color
+                arkBorder.arkColor.rightColor = arkColor.color
+                arkBorder.arkColor.topColor = arkColor.color
+                arkBorder.arkColor.bottomColor = arkColor.color
+            } else {
+                if (isNumber((value.color as EdgeColors)?.left) || isString((value.color as EdgeColors)?.left)) {
+                    arkColor.parseColorValue((value.color as EdgeColors).left)
+                    arkBorder.arkColor.leftColor = arkColor?.color
+                }
+                if (isNumber((value.color as EdgeColors)?.right) || isString((value.color as EdgeColors)?.right)) {
+                    arkColor.parseColorValue((value.color as EdgeColors).right)
+                    arkBorder.arkColor.rightColor = arkColor?.color
+                }
+                if (isNumber((value.color as EdgeColors)?.top) || isString((value.color as EdgeColors)?.top)) {
+                    arkColor.parseColorValue((value.color as EdgeColors).top)
+                    arkBorder.arkColor.topColor = arkColor?.color
+                }
+                if (isNumber((value.color as EdgeColors)?.bottom) || isString((value.color as EdgeColors)?.bottom)) {
+                    arkColor.parseColorValue((value.color as EdgeColors).bottom)
+                    arkBorder.arkColor.bottomColor = arkColor?.color
+                }
+            }
+        }
+
+        if(!isResource(value?.radius) && !isUndefined(value?.radius) && value?.radius !== null){
+            if (isNumber(value.radius)) {
+                arkBorder.arkRadius.topLeft = Number(value.radius)
+                arkBorder.arkRadius.topRight = Number(value.radius)
+                arkBorder.arkRadius.bottomLeft = Number(value.radius)
+                arkBorder.arkRadius.bottomRight = Number(value.radius)
+            } else if (isString(value.radius)) {
+                arkBorder.arkRadius.topLeft = String(value.radius)
+                arkBorder.arkRadius.topRight = String(value.radius)
+                arkBorder.arkRadius.bottomLeft = String(value.radius)
+                arkBorder.arkRadius.bottomRight = String(value.radius)
+            }
+            else {
+                if (isNumber((value.radius as BorderRadiuses)?.topLeft) || isString((value.radius as BorderRadiuses)?.topLeft)) {
+                    arkBorder.arkRadius.topLeft = (value.radius as BorderRadiuses)?.topLeft
+                }
+                if (isNumber((value.radius as BorderRadiuses)?.topRight) || isString((value.radius as BorderRadiuses)?.topRight)) {
+                    arkBorder.arkRadius.topRight = (value.radius as BorderRadiuses)?.topRight
+                }
+                if (isNumber((value.radius as BorderRadiuses)?.bottomLeft) || isString((value.radius as BorderRadiuses)?.bottomLeft)) {
+                    arkBorder.arkRadius.bottomLeft = (value.radius as BorderRadiuses)?.bottomLeft
+                }
+                if (isNumber((value.radius as BorderRadiuses)?.bottomRight) || isString((value.radius as BorderRadiuses)?.bottomRight)) {
+                    arkBorder.arkRadius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight
+                }
+            }
+        }
+        if (!isUndefined(value?.style) && value?.style !== null) {
+            var arkBorderStyle = new ArkBorderStyle();
+            if (arkBorderStyle.parseBorderStyle(value.style)) {
+                if (!isUndefined(arkBorderStyle.style)) {
+                    arkBorder.arkStyle.top = arkBorderStyle.style
+                    arkBorder.arkStyle.left = arkBorderStyle.style
+                    arkBorder.arkStyle.bottom = arkBorderStyle.style
+                    arkBorder.arkStyle.right = arkBorderStyle.style
+                } else {
+                    arkBorder.arkStyle.top = arkBorderStyle.top
+                    arkBorder.arkStyle.left = arkBorderStyle.left
+                    arkBorder.arkStyle.bottom = arkBorderStyle.bottom
+                    arkBorder.arkStyle.right = arkBorderStyle.right
+                }
+            }
+        }
+        modifier(this._modifiers, BorderModifier, arkBorder);
+        return this;
     }
 
     borderStyle(value: BorderStyle | EdgeStyles): this {
@@ -910,11 +1234,39 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     translate(value: TranslateOptions): this {
-        throw new Error("Method not implemented.");
+        var arkTranslate = new ArkTranslate()
+        if (isNumber(value?.x) || isString(value?.x)) {
+            arkTranslate.x = value.x
+        }
+        if (isNumber(value?.y) || isString(value?.y)) {
+            arkTranslate.y = value.y
+        }
+        if (isNumber(value?.z) || isString(value?.z)) {
+            arkTranslate.z = value.z
+        }
+        modifier(this._modifiers, TranslateModifier, arkTranslate);
+        return this;
     }
 
     scale(value: ScaleOptions): this {
-        throw new Error("Method not implemented.");
+        var arkScale = new ArkScale()
+        if (isNumber(value?.x)) {
+            arkScale.x = value?.x
+        }
+        if (isNumber(value?.y)) {
+            arkScale.y = value?.y
+        }
+        if (isNumber(value?.z)) {
+            arkScale.z = value?.z
+        }
+        if (isNumber(value?.centerX) || isString(value?.centerX)) {
+            arkScale.centerX = value?.centerX
+        }
+        if (isNumber(value?.centerY) || isString(value?.centerY)) {
+            arkScale.centerY = value?.centerY
+        }
+        modifier(this._modifiers, ScaleModifier, arkScale);
+        return this;
     }
 
     gridSpan(value: number): this {
@@ -926,7 +1278,33 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     rotate(value: RotateOptions): this {
-        throw new Error("Method not implemented.");
+        var arkRotate = new ArkRotate()
+        if ( isNumber(value?.x)){
+            arkRotate.x = value?.x
+        }
+        if ( isNumber(value?.y)){
+            arkRotate.y = value?.y
+        }
+        if ( isNumber(value?.z)){
+            arkRotate.z = value?.z
+        }
+        if ( isNumber(value?.angle) || isString(value?.angle)){
+            arkRotate.angle = value?.angle
+        }
+        if ( isNumber(value?.centerX) || isString(value?.centerX)){
+            arkRotate.centerX = value?.centerX
+        }
+        if ( isNumber(value?.centerY) || isString(value?.centerY)){
+            arkRotate.centerY = value?.centerY
+        }
+        if ( isNumber(value?.centerZ) || isString(value?.centerZ)){
+            arkRotate.centerZ = value?.centerZ
+        }
+        if ( isNumber(value?.perspective)){
+            arkRotate.perspective = value?.perspective
+        }
+        modifier(this._modifiers, RotateModifier, arkRotate);
+        return this;
     }
 
     transform(value: object): this {
@@ -1142,7 +1520,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     geometryTransition(id: string): this {
-        throw new Error("Method not implemented.");
+        if(isString(id))
+        {
+            modifier(this._modifiers, GeometryTransitionModifier, id);
+        }
+        return this;
     }
 
     bindPopup(show: boolean, popup: PopupOptions | CustomPopupOptions): this {
@@ -1166,7 +1548,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
-        throw new Error("Method not implemented.");
+        modifierWithKey(this._modifiersWithKeys, Symbol("clip"), ClipModifier, value);
+        return this
     }
 
     bindSheet(isShow: boolean, builder: CustomBuilder, options?: SheetOptions): this {

@@ -20,6 +20,9 @@
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -33,7 +36,22 @@ constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
+constexpr int NUM_8 = 8;
+constexpr int NUM_9 = 9;
+constexpr int NUM_10 = 10;
+constexpr int NUM_11 = 11;
+constexpr int NUM_12 = 12;
+constexpr int NUM_13 = 13;
+constexpr int NUM_14 = 14;
+constexpr int NUM_15 = 15;
+constexpr int NUM_16 = 16;
+constexpr int SIZE_OF_TWO = 2;
+constexpr int SIZE_OF_THREE = 3;
 constexpr int SIZE_OF_FOUR = 4;
+constexpr int SIZE_OF_FIVE = 5;
+constexpr int SIZE_OF_EIGHT = 8;
+constexpr double FULL_DIMENSION = 100.0;
+constexpr double HALF_DIMENSION = 50.0;
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
@@ -221,6 +239,231 @@ bool ParseJsDoublePair(const EcmaVM* vm, const Local<JSValueRef>& value, double&
     first = firstArg->ToNumber(vm)->Value();
     second = secondArg->ToNumber(vm)->Value();
     return true;
+}
+
+void ParseBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, double values[], int units[], int size)
+{
+    if (size != NUM_8) {
+        return;
+    }
+    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
+
+    CalcDimension left;
+    CalcDimension right;
+    CalcDimension top;
+    CalcDimension bottom;
+
+    ParseAllBorder(vm, leftArgs, left);
+    ParseAllBorder(vm, rightArgs, right);
+    ParseAllBorder(vm, topArgs, top);
+    ParseAllBorder(vm, bottomArgs, bottom);
+
+    values[NUM_0] = left.Value();
+    units[NUM_0] = static_cast<int>(left.Unit());
+    values[NUM_1] = right.Value();
+    units[NUM_1] = static_cast<int>(right.Unit());
+    values[NUM_2] = top.Value();
+    units[NUM_2] = static_cast<int>(top.Unit());
+    values[NUM_3] = bottom.Value();
+    units[NUM_3] = static_cast<int>(bottom.Unit());
+}
+
+void ParseBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, uint32_t arr[], int size)
+{
+    if (size != NUM_8) {
+        return;
+    }
+    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    Local<JSValueRef> rifghtArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(NUM_8);
+
+    uint32_t leftColor = leftArg->Uint32Value(vm);
+    uint32_t rightColor = rifghtArg->Uint32Value(vm);
+    uint32_t topColor = topArg->Uint32Value(vm);
+    uint32_t bottomColor = bottomArg->Uint32Value(vm);
+    arr[NUM_0] = leftColor;
+    arr[NUM_1] = rightColor;
+    arr[NUM_2] = topColor;
+    arr[NUM_3] = bottomColor;
+}
+
+void ParseBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, double values[], int units[], int size)
+{
+    if (size != NUM_8) {
+        return;
+    }
+    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(NUM_9);
+    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(NUM_10);
+    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(NUM_11);
+    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(NUM_12);
+
+    CalcDimension topLeft;
+    CalcDimension topRight;
+    CalcDimension bottomLeft;
+    CalcDimension bottomRight;
+
+    ParseAllBorder(vm, topLeftArgs, topLeft);
+    ParseAllBorder(vm, topRightArgs, topRight);
+    ParseAllBorder(vm, bottomLeftArgs, bottomLeft);
+    ParseAllBorder(vm, bottomRightArgs, bottomRight);
+
+    values[NUM_4] = topLeft.Value();
+    units[NUM_4] = static_cast<int>(topLeft.Unit());
+    values[NUM_5] = topRight.Value();
+    units[NUM_5] = static_cast<int>(topRight.Unit());
+    values[NUM_6] = bottomLeft.Value();
+    units[NUM_6] = static_cast<int>(bottomLeft.Unit());
+    values[NUM_7] = bottomRight.Value();
+    units[NUM_7] = static_cast<int>(bottomRight.Unit());
+}
+
+void ParseBorderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, uint32_t styles[], int size)
+{
+    if (size != NUM_8) {
+        return;
+    }
+    auto topArg = runtimeCallInfo->GetCallArgRef(NUM_13);
+    auto rightArg = runtimeCallInfo->GetCallArgRef(NUM_14);
+    auto bottomArg = runtimeCallInfo->GetCallArgRef(NUM_15);
+    auto leftArg = runtimeCallInfo->GetCallArgRef(NUM_16);
+
+    styles[NUM_4] = topArg->Int32Value(vm);
+    styles[NUM_5] = rightArg->Int32Value(vm);
+    styles[NUM_6] = bottomArg->Int32Value(vm);
+    styles[NUM_7] = leftArg->Int32Value(vm);
+}
+
+void SetBackgroundImagePositionAlign(
+    double& value, DimensionUnit& type, double valueContent, const DimensionUnit& typeContent)
+{
+    value = valueContent;
+    type = typeContent;
+}
+
+void ParseBackgroundImagePositionAlign(
+    const int32_t align, double& valueX, double& valueY, DimensionUnit& typeX, DimensionUnit& typeY)
+{
+    switch (align) {
+        case NUM_0:
+            SetBackgroundImagePositionAlign(valueX, typeX, 0.0, DimensionUnit::PERCENT);
+            SetBackgroundImagePositionAlign(valueY, typeY, 0.0, DimensionUnit::PERCENT);
+            break;
+        case NUM_1:
+            SetBackgroundImagePositionAlign(valueX, typeX, HALF_DIMENSION, DimensionUnit::PERCENT);
+            SetBackgroundImagePositionAlign(valueY, typeY, 0.0, DimensionUnit::PERCENT);
+            break;
+        case NUM_2:
+            SetBackgroundImagePositionAlign(valueX, typeX, FULL_DIMENSION, DimensionUnit::PERCENT);
+            SetBackgroundImagePositionAlign(valueY, typeY, 0.0, DimensionUnit::PERCENT);
+            break;
+        case NUM_3:
+            SetBackgroundImagePositionAlign(valueX, typeX, 0.0, DimensionUnit::PERCENT);
+            SetBackgroundImagePositionAlign(valueY, typeY, HALF_DIMENSION, DimensionUnit::PERCENT);
+            break;
+        case NUM_4:
+            SetBackgroundImagePositionAlign(valueX, typeX, HALF_DIMENSION, DimensionUnit::PERCENT);
+            SetBackgroundImagePositionAlign(valueY, typeY, HALF_DIMENSION, DimensionUnit::PERCENT);
+            break;
+        case NUM_5:
+            SetBackgroundImagePositionAlign(valueX, typeX, FULL_DIMENSION, DimensionUnit::PERCENT);
+            SetBackgroundImagePositionAlign(valueY, typeY, HALF_DIMENSION, DimensionUnit::PERCENT);
+            break;
+        case NUM_6:
+            SetBackgroundImagePositionAlign(valueX, typeX, 0.0, DimensionUnit::PERCENT);
+            SetBackgroundImagePositionAlign(valueY, typeY, FULL_DIMENSION, DimensionUnit::PERCENT);
+            break;
+        case NUM_7:
+            SetBackgroundImagePositionAlign(valueX, typeX, HALF_DIMENSION, DimensionUnit::PERCENT);
+            SetBackgroundImagePositionAlign(valueY, typeY, FULL_DIMENSION, DimensionUnit::PERCENT);
+            break;
+        case NUM_8:
+            SetBackgroundImagePositionAlign(valueX, typeX, FULL_DIMENSION, DimensionUnit::PERCENT);
+            SetBackgroundImagePositionAlign(valueY, typeY, FULL_DIMENSION, DimensionUnit::PERCENT);
+            break;
+        default:
+            break;
+    }
+}
+
+// ParseJsonDimensionVp
+bool ParseAxisDimensionVp(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result, bool checkIllegal = false)
+{
+    if (jsValue->IsNumber()) {
+        result = Dimension(jsValue->ToNumber(vm)->Value(), DimensionUnit::VP);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        if (checkIllegal) {
+            return StringUtils::StringToDimensionWithUnitNG(
+                jsValue->ToString(vm)->ToString(), result, DimensionUnit::VP);
+        }
+        result = StringUtils::StringToCalcDimension(jsValue->ToString(vm)->ToString(), false, DimensionUnit::VP);
+        return true;
+    }
+    return false;
+}
+
+void ParseDirection(EcmaVM* vm, const Local<JSValueRef>& directionArg, float& value)
+{
+    if (directionArg->IsNumber()) {
+        value = directionArg->ToNumber(vm)->Value();
+    }
+}
+
+void ParseRotate(ArkUIRuntimeCallInfo* runtimeCallInfo, double values[], int units[])
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> xDirectionArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> yDirectionArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> zDirectionArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> angleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> centerXArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    Local<JSValueRef> centerYArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> centerZArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    Local<JSValueRef> perspectiveArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    float xDirection = 0.0f;
+    float yDirection = 0.0f;
+    float zDirection = 0.0f;
+    float angle = 0.0f;
+    CalcDimension centerX = 0.5_pct;
+    CalcDimension centerY = 0.5_pct;
+    CalcDimension centerZ = CalcDimension(0.0f, DimensionUnit::VP);
+    float perspective = 0.0f;
+    if (!xDirectionArg->IsNumber() && !yDirectionArg->IsNumber() && !zDirectionArg->IsNumber()) {
+        xDirection = 0.0f;
+        yDirection = 0.0f;
+        zDirection = 1.0f;
+    }
+    ParseDirection(vm, xDirectionArg, xDirection);
+    ParseDirection(vm, yDirectionArg, yDirection);
+    ParseDirection(vm, zDirectionArg, zDirection);
+    if (angleArg->IsString()) {
+        angle = static_cast<float>(StringUtils::StringToDegree(angleArg->ToString(vm)->ToString()));
+    } else if (angleArg->IsNumber()) {
+        angle = static_cast<float>(angleArg->ToNumber(vm)->Value());
+    }
+    ParseAxisDimensionVp(vm, centerXArg, centerX, true);
+    ParseAxisDimensionVp(vm, centerYArg, centerY, true);
+    ParseAxisDimensionVp(vm, centerZArg, centerZ, true);
+    if (perspectiveArg->IsNumber()) {
+        perspective = static_cast<float>(perspectiveArg->ToNumber(vm)->Value());
+    }
+    values[NUM_0] = centerX.Value();
+    units[NUM_0] = static_cast<int>(centerX.Unit());
+    values[NUM_1] = centerY.Value();
+    units[NUM_1] = static_cast<int>(centerY.Unit());
+    values[NUM_2] = centerZ.Value();
+    units[NUM_2] = static_cast<int>(centerZ.Unit());
+    values[NUM_3] = xDirection;
+    values[NUM_4] = yDirection;
+    values[NUM_5] = zDirection;
+    values[NUM_6] = angle;
+    values[NUM_7] = perspective;
 }
 } // namespace
 
@@ -1156,4 +1399,391 @@ ArkUINativeModuleValue CommonBridge::ResetBackgroundBlurStyle(ArkUIRuntimeCallIn
     GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBackgroundBlurStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue CommonBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+
+    uint32_t size = SIZE_OF_EIGHT;
+    double values[size];
+    int units[size];
+
+    ParseBorderWidth(runtimeCallInfo, vm, values, units, size);
+    ParseBorderRadius(runtimeCallInfo, vm, values, units, size);
+
+    uint32_t colorAndStyle[size];
+    ParseBorderColor(runtimeCallInfo, vm, colorAndStyle, size);
+    ParseBorderStyle(runtimeCallInfo, vm, colorAndStyle, size);
+
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBorder(nativeNode, values, units, colorAndStyle, size);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetBorder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBorder(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetBackgroundImagePosition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> xArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> yArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    double valueX = 0.0;
+    double valueY = 0.0;
+    DimensionUnit typeX = DimensionUnit::PX;
+    DimensionUnit typeY = DimensionUnit::PX;
+    bool isAlign = false;
+
+    if (secondArg->IsNumber()) {
+        int32_t align = secondArg->ToNumber(vm)->Value();
+        ParseBackgroundImagePositionAlign(align, valueX, valueY, typeX, typeY);
+        isAlign = true;
+    } else if (xArg->IsNumber() || xArg->IsString() || yArg->IsNumber() || yArg->IsString()) {
+        CalcDimension x;
+        CalcDimension y;
+
+        bool hasX = ParseJsDimensionVp(vm, xArg, x);
+        bool hasY = ParseJsDimensionVp(vm, yArg, y);
+        if (hasX || hasY) {
+            valueX = x.Value();
+            valueY = y.Value();
+            typeX = DimensionUnit::PX;
+            typeY = DimensionUnit::PX;
+        }
+
+        if (x.Unit() == DimensionUnit::PERCENT) {
+            valueX = x.Value();
+            typeX = DimensionUnit::PERCENT;
+        }
+        if (y.Unit() == DimensionUnit::PERCENT) {
+            valueY = y.Value();
+            typeY = DimensionUnit::PERCENT;
+        }
+    }
+
+    double values[SIZE_OF_TWO];
+    int32_t types[SIZE_OF_TWO];
+    values[NUM_0] = valueX;
+    types[NUM_0] = static_cast<int32_t>(typeX);
+    values[NUM_1] = valueY;
+    types[NUM_1] = static_cast<int32_t>(typeY);
+
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundImagePosition(
+        nativeNode, values, types, isAlign, SIZE_OF_TWO);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetBackgroundImagePosition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBackgroundImagePosition(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetBackgroundImageSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> imageSizeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+
+    OHOS::Ace::BackgroundImageSizeType typeWidth = OHOS::Ace::BackgroundImageSizeType::AUTO;
+    double valueWidth = 0.0;
+    OHOS::Ace::BackgroundImageSizeType typeHeight = OHOS::Ace::BackgroundImageSizeType::AUTO;
+    double valueHeight = 0.0;
+
+    if (imageSizeArg->IsNumber()) {
+        auto sizeType = imageSizeArg->ToNumber(vm)->Value();
+        typeWidth = static_cast<OHOS::Ace::BackgroundImageSizeType>(sizeType);
+        typeHeight = static_cast<OHOS::Ace::BackgroundImageSizeType>(sizeType);
+    } else if (widthArg->IsNumber() || widthArg->IsString() || heightArg->IsNumber() || heightArg->IsString()) {
+        CalcDimension width;
+        CalcDimension height;
+
+        bool hasWidth = ParseJsDimensionVp(vm, widthArg, width);
+        bool hasHeight = ParseJsDimensionVp(vm, heightArg, height);
+        if (hasWidth || hasHeight) {
+            valueWidth = width.ConvertToPx();
+            valueHeight = height.ConvertToPx();
+            typeWidth = BackgroundImageSizeType::LENGTH;
+            typeHeight = BackgroundImageSizeType::LENGTH;
+
+            if (width.Unit() == DimensionUnit::PERCENT) {
+                typeWidth = BackgroundImageSizeType::PERCENT;
+                valueWidth = width.Value() * FULL_DIMENSION;
+            }
+            if (height.Unit() == DimensionUnit::PERCENT) {
+                typeHeight = BackgroundImageSizeType::PERCENT;
+                valueHeight = height.Value() * FULL_DIMENSION;
+            }
+        }
+    }
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundImageSize(
+        nativeNode, valueWidth, valueHeight, static_cast<int32_t>(typeWidth), static_cast<int32_t>(typeHeight));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetBackgroundImageSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBackgroundImageSize(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetBackgroundImage(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> srcArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> repeatArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    // Do NOT support bundle and module
+    std::string src;
+    int32_t repeatIndex = 0;
+    if (!srcArg->IsString()) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBackgroundImage(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    src = srcArg->ToString(vm)->ToString();
+    if (repeatArg->IsNumber()) {
+        repeatIndex = repeatArg->ToNumber(vm)->Value();
+    }
+
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundImage(nativeNode, src.c_str(), repeatIndex);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetBackgroundImage(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBackgroundImage(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetTranslate(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> xArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> yArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> zArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if (!xArg->IsNumber() && !xArg->IsString() && !yArg->IsNumber() && !yArg->IsString() && !zArg->IsNumber() &&
+        !zArg->IsString()) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetTranslate(nativeNode);
+    } else {
+        auto translateX = CalcDimension(0.0);
+        auto translateY = CalcDimension(0.0);
+        auto translateZ = CalcDimension(0.0);
+        bool hasX = ParseAxisDimensionVp(vm, xArg, translateX, true);
+        bool hasY = ParseAxisDimensionVp(vm, yArg, translateY, true);
+        bool hasZ = ParseAxisDimensionVp(vm, zArg, translateZ, true);
+        if (hasX || hasY || hasZ) {
+            uint32_t size = SIZE_OF_THREE;
+            double values[size];
+            int units[size];
+
+            values[NUM_0] = translateX.Value();
+            units[NUM_0] = static_cast<int>(translateX.Unit());
+            values[NUM_1] = translateY.Value();
+            units[NUM_1] = static_cast<int>(translateY.Unit());
+            values[NUM_2] = translateZ.Value();
+            units[NUM_2] = static_cast<int>(translateZ.Unit());
+            GetArkUIInternalNodeAPI()->GetCommonModifier().SetTranslate(nativeNode, values, units, size);
+        } else {
+            GetArkUIInternalNodeAPI()->GetCommonModifier().ResetTranslate(nativeNode);
+        }
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetTranslate(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetTranslate(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> xArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> yArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> zArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> centerXArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> centerYArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if (xArg->IsNumber() || yArg->IsNumber() || zArg->IsNumber()) {
+        auto scaleX = 1.0f;
+        auto scaleY = 1.0f;
+        auto scaleZ = 1.0f;
+
+        CalcDimension centerX = 0.5_pct;
+        CalcDimension centerY = 0.5_pct;
+
+        if (xArg->IsNumber()) {
+            scaleX = xArg->ToNumber(vm)->Value();
+        }
+        if (yArg->IsNumber()) {
+            scaleY = yArg->ToNumber(vm)->Value();
+        }
+        if (zArg->IsNumber()) {
+            scaleZ = zArg->ToNumber(vm)->Value();
+        }
+        if (centerXArg->IsNumber() || centerXArg->IsString()) {
+            ParseAxisDimensionVp(vm, centerXArg, centerX, true);
+        }
+        if (centerYArg->IsNumber() || centerYArg->IsString()) {
+            ParseAxisDimensionVp(vm, centerYArg, centerY, true);
+        }
+
+        double values[SIZE_OF_FIVE];
+        int units[SIZE_OF_TWO];
+
+        values[NUM_0] = centerX.Value();
+        units[NUM_0] = static_cast<int>(centerX.Unit());
+        values[NUM_1] = centerY.Value();
+        units[NUM_1] = static_cast<int>(centerY.Unit());
+        values[NUM_2] = scaleX;
+        values[NUM_3] = scaleY;
+        values[NUM_4] = scaleZ;
+        GetArkUIInternalNodeAPI()->GetCommonModifier().SetScale(nativeNode, values, SIZE_OF_FIVE, units, SIZE_OF_TWO);
+    } else {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetScale(nativeNode);
+    }
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetScale(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetRotate(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+
+    double values[SIZE_OF_EIGHT];
+    int units[SIZE_OF_THREE];
+
+    ParseRotate(runtimeCallInfo, values, units);
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetRotate(nativeNode, values, SIZE_OF_EIGHT, units, SIZE_OF_THREE);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetRotate(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetRotate(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetGeometryTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> idArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if (!idArg->IsString()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    std::string id = idArg->ToString(vm)->ToString();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetGeometryTransition(nativeNode, id.c_str());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetGeometryTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetGeometryTransition(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetClip(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    ViewAbstract::SetClipEdge(frameNode, false);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetClip(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (info[1]->IsUndefined()) {
+        ViewAbstract::SetClipEdge(frameNode, false);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (info[1]->IsObject()) {
+        Framework::JSShapeAbstract* clipShape =
+            Framework::JSRef<Framework::JSObject>::Cast(info[1])->Unwrap<Framework::JSShapeAbstract>();
+        if (clipShape == nullptr) {
+            LOGD("clipShape is null");
+            return panda::JSValueRef::Undefined(vm);
+        }
+        ViewAbstract::SetClipShape(frameNode, clipShape->GetBasicShape());
+    } else if (info[1]->IsBoolean()) {
+        ViewAbstract::SetClipEdge(frameNode, info[1]->ToBoolean());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG
+
