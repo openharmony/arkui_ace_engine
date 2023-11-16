@@ -90,10 +90,9 @@ void ScreenPattern::UpdateDisplayInfo()
 
     auto tempHeight = paintRect.Height();
     auto tempWidth = paintRect.Width();
-    auto temp = 0;
     auto displayNodeRotation = displayNode->GetStagingProperties().GetRotation();
     if (displayNodeRotation != DIRECTION0 && displayNodeRotation != -DIRECTION180) {
-        temp = tempWidth;
+        auto temp = tempWidth;
         tempWidth = tempHeight;
         tempHeight = temp;
     }
