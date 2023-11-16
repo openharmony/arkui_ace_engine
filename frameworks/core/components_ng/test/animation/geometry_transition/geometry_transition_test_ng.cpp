@@ -77,7 +77,7 @@ void GeometryTransitionTestNg::TearDown()
 
 void GeometryTransitionTestNg::Create(const WeakPtr<FrameNode>& node, bool followWithoutTransition)
 {
-    gt_ = AceType::MakeRefPtr<GeometryTransition>("test", node, followWithoutTransition);
+    gt_ = AceType::MakeRefPtr<GeometryTransition>("test", followWithoutTransition);
 }
 
 

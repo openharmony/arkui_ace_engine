@@ -632,7 +632,7 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool follow
 
     auto geometryTransitionOld = GetGeometryTransition();
     auto geometryTransitionNew =
-        ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_, followWithoutTransition);
+        ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, followWithoutTransition);
     CHECK_NULL_VOID(geometryTransitionOld != geometryTransitionNew);
     if (geometryTransitionOld) {
         geometryTransitionOld->OnFollowWithoutTransition();

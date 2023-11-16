@@ -240,7 +240,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg007, TestSize.Level1)
     EXPECT_EQ(node->GetBaselineDistance(), 0);
     auto nodeLayoutProperty = node->GetLayoutProperty();
     nodeLayoutProperty->geometryTransition_ =
-        ElementRegister::GetInstance()->GetOrCreateGeometryTransition("test", overlayNode, false);
+        ElementRegister::GetInstance()->GetOrCreateGeometryTransition("test", false);
     node->Layout();
     EXPECT_FALSE(node->IsRootMeasureNode());
     node->SetRootMeasureNode();
