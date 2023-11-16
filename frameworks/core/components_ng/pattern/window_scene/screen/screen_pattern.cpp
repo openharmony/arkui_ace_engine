@@ -90,9 +90,12 @@ void ScreenPattern::UpdateDisplayInfo()
 
     auto tempHeight = paintRect.Height();
     auto tempWidth = paintRect.Width();
-    auto temp = 0;
-    if (static_cast<int>(displayNode->GetStagingProperties().GetRotation()) != 0) {
-        temp = tempWidth;
+    auto displayNodeRotation = displayNode->GetStagingProperties().GetRotation();
+    if (displayNodeRotation < DIRECTION0) {
+        displayNodeRotation = -displayNodeRotation;
+    }
+    if (displayNodeRotation != DIRECTION0 && displayNodeRotation != DIRECTION180) {
+        auto temp = tempWidth;
         tempWidth = tempHeight;
         tempHeight = temp;
     }
@@ -115,10 +118,6 @@ void ScreenPattern::UpdateDisplayInfo()
         .flags = 0  // touchable
     };
 
-    float tempRotation = 0.0f;
-    if (static_cast<int>(displayNode->GetStagingProperties().GetRotation()) != 0) {
-        tempRotation = 90.0f;
-    }
     MMI::DisplayInfo displayInfo = {
         .id = screenId,
         .x = paintRect.Left(),
@@ -128,7 +127,7 @@ void ScreenPattern::UpdateDisplayInfo()
         .dpi = dpi,
         .name = "display" + std::to_string(screenId),
         .uniq = "default" + std::to_string(screenId),
-        .direction = ConvertDegreeToMMIRotation(tempRotation)
+        .direction = ConvertDegreeToMMIRotation(displayNodeRotation)
     };
 
     std::lock_guard<std::mutex> lock(g_vecLock);
