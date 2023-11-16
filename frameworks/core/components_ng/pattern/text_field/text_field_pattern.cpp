@@ -1705,9 +1705,6 @@ void TextFieldPattern::OnModifyDone()
     if (HasFocus() && IsNormalInlineState()) {
         preInputStyle_ == InputStyle::DEFAULT ? ApplyInlineStates(true) : ApplyInlineStates(false);
     }
-    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
-        ApplyUnderlineStates();
-    }
     if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT) {
         if (IsTextArea() && isTextInput_) {
             layoutProperty->UpdateMaxLines(1);
@@ -4790,6 +4787,9 @@ void TextFieldPattern::OnAttachToFrameNode()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+        ApplyUnderlineStates();
+    }
     layoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
     auto onTextSelectorChange = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
