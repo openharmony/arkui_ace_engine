@@ -1,4 +1,5 @@
 const KeyCode = requireNapi("multimodalInput.keyCode").KeyCode;
+
 export var ChipSize;
 !function(e){
     e.NORMAL = "NORMAL";
@@ -352,7 +353,7 @@ export class ChipComponent extends ViewPU {
     }
 
     isChipSizeEnum() {
-        return "number" == typeof this.chipSize
+        return "string" == typeof this.chipSize
     }
 
     getLabelFontSize() {
@@ -425,7 +426,7 @@ export class ChipComponent extends ViewPU {
 
     getChipNodeHeight() {
         var e, i;
-        if (this.isChipSizeEnum()) return this.chipSize == ChipSize.SMALL ? this.theme.chipNode.smallHeight : this.theme.chipNode.normalHeight;
+        if (this.isChipSizeEnum()) return this.chipSize === ChipSize.SMALL ? this.theme.chipNode.smallHeight : this.theme.chipNode.normalHeight;
         this.chipNodeSize = this.chipSize;
         return null !== (i = null === (e = this.chipNodeSize) || void 0 === e ? void 0 : e.height) && void 0 !== i ? i : this.theme.chipNode.normalHeight
     }
