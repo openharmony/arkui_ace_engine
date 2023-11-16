@@ -68,7 +68,8 @@ public:
     bool operator==(const Shadow& rhs) const
     {
         return color_ == rhs.color_ && NearEqual(blurRadius_, rhs.blurRadius_) && offset_ == rhs.offset_ &&
-               NearEqual(spreadRadius_, rhs.spreadRadius_) && NearEqual(elevation_, rhs.elevation_);
+               NearEqual(spreadRadius_, rhs.spreadRadius_) && NearEqual(elevation_, rhs.elevation_) &&
+               isFilled_ == rhs.isFilled_;
     }
 
     bool operator!=(const Shadow& rhs) const
@@ -152,6 +153,11 @@ public:
         isHardwareAcceleration_ = acceleration;
     }
 
+    void SetIsFilled(bool isFilled)
+    {
+        isFilled_ = isFilled;
+    }
+
     bool GetHardwareAcceleration() const
     {
         return isHardwareAcceleration_;
@@ -204,6 +210,11 @@ public:
         return blurRadius_ > 0.0 || spreadRadius_ > 0.0 || offset_ != Offset::Zero();
     }
 
+    bool GetIsFilled() const
+    {
+        return isFilled_;
+    }
+
 private:
     float lightHeight_ = LIGHT_HEIGHT;
     float lightRadius_ = LIGHT_RADIUS;
@@ -213,6 +224,7 @@ private:
     Offset offset_;
     Color color_ = Color::BLACK;
     bool isHardwareAcceleration_ = false;
+    bool isFilled_ = false;
     ShadowStyle style_ = ShadowStyle::None;
     ShadowType type_ = ShadowType::COLOR;
 };
