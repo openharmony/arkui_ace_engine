@@ -393,6 +393,11 @@ void SelectPattern::SetValue(const std::string& value)
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateContent(value);
+    auto pattern = text_->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto modifier = pattern->GetContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->ContentChange();
 }
 
 void SelectPattern::SetFontSize(const Dimension& value)
