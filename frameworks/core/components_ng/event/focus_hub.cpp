@@ -1652,7 +1652,7 @@ int32_t FocusHub::GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes) const
         }
         ++i;
     }
-    return NONE_TAB_FOCUSED_INDEX;
+    return DEFAULT_TAB_FOCUSED_INDEX;
 }
 
 bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event)
