@@ -144,6 +144,7 @@ public:
         prePageId_ = pageId;
     }
 
+    void MarkIsSelected(bool isSelected);
     void SetLastSelect(bool select)
     {
         lastSelect_ = select;
@@ -201,6 +202,7 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
+    void SetAccessibilityAction();
 
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;

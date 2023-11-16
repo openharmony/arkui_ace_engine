@@ -64,6 +64,7 @@ public:
         return MakeRefPtr<MenuItemLayoutAlgorithm>();
     }
 
+    void MarkIsSelected(bool isSelected);
     void SetSelected(bool isSelected)
     {
         isSelected_ = isSelected;

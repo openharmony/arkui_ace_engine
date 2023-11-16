@@ -36,6 +36,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 void UpdateFontSize(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<Dimension>& fontSize, const Dimension& defaultFontSize)
 {
@@ -734,7 +735,10 @@ void MenuItemPattern::SetAccessibilityAction()
         if (onChange) {
             onChange(pattern->IsSelected());
         }
-
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        pattern->MarkIsSelected(true);
+        context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         if (pattern->GetSubBuilder() != nullptr) {
             pattern->ShowSubMenu();
             return;
@@ -742,6 +746,32 @@ void MenuItemPattern::SetAccessibilityAction()
 
         pattern->CloseMenu();
     });
+}
+
+void MenuItemPattern::MarkIsSelected(bool isSelected)
+{
+    if (isSelected_ != isSelected) {
+        isSelected_ = isSelected;
+        auto eventHub = GetEventHub<MenuItemEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto onChange = eventHub->GetOnChange();
+        auto selectedChangeEvent = eventHub->GetSelectedChangeEvent();
+        if (selectedChangeEvent) {
+            selectedChangeEvent(isSelected);
+        }
+        if (onChange) {
+            onChange(isSelected);
+        }
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (isSelected) {
+            eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
+            host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+        } else {
+            eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
+            host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+        }
+    }
 }
 
 bool MenuItemPattern::IsSelectOverlayMenu()

@@ -57,6 +57,11 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnClick();
     void OnColorConfigurationUpdate() override;
+    void MarkIsSelected(bool isSelected);
+    void SetSelected(bool isSelected)
+    {
+        isOn_ = isSelected;
+    }
 
 private:
     void OnAttachToFrameNode() override;
@@ -67,6 +72,7 @@ private:
     void InitButtonAndText();
     void InitOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
+    void SetAccessibilityAction();
 
     RefPtr<ClickEvent> clickListener_;
     std::optional<bool> isOn_;

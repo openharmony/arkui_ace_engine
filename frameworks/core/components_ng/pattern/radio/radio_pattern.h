@@ -123,6 +123,12 @@ public:
 
     void UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode);
 
+    void MarkIsSelected(bool isSelected);
+
+    void SetSelected(bool isSelected) {
+        preCheck_ = isSelected;
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         Pattern::ToJsonValue(json);
@@ -157,6 +163,7 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
+    void SetAccessibilityAction();
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;

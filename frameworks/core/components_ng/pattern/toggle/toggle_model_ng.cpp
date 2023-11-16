@@ -78,6 +78,7 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
             auto index = RemoveNode(childFrameNode, nodeId);
             childFrameNode->SetUndefinedNodeId();
             CreateSwitch(nodeId);
+            SetSwitchSelecte(childFrameNode, isOn);
             ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
             AddNewChild(parentFrame, nodeId, index);
             return;
@@ -93,6 +94,7 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
     }
     if (AceType::InstanceOf<SwitchPattern>(pattern)) {
         if (toggleType == ToggleType::SWITCH) {
+            SetSwitchSelecte(childFrameNode, isOn);
             stack->Push(childFrameNode);
             ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
             return;
@@ -139,9 +141,20 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
         auto index = RemoveNode(childFrameNode, nodeId);
         childFrameNode->SetUndefinedNodeId();
         CreateSwitch(nodeId);
+        SetSwitchSelecte(childFrameNode, isOn);
         ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
         AddNewChild(parentFrame, nodeId, index);
     }
+}
+
+void ToggleModelNG::SetSwitchSelecte(const RefPtr<FrameNode>& childFrameNode, bool isOn)
+{
+    auto childPattern = childFrameNode->GetPattern<SwitchPattern>();
+    CHECK_NULL_VOID(childPattern);
+    childPattern->SetSelect(isOn);
+    auto eventHub = childFrameNode->GetEventHub<SwitchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
 }
 
 void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)

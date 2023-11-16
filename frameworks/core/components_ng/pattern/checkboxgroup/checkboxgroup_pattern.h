@@ -148,6 +148,7 @@ public:
     void UpdateUIStatus(bool check);
     void UpdateModifierParam(CheckBoxGroupModifier::Parameters& paintParameters);
     void OnColorConfigurationUpdate() override;
+    void MarkIsSelected(bool isSelected);
 
 private:
     void OnAttachToFrameNode() override;
@@ -173,6 +174,7 @@ private:
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
     void InitializeModifierParam(CheckBoxGroupModifier::Parameters& paintParameters);
+    void SetAccessibilityAction();
 
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;

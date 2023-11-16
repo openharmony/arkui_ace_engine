@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,9 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+}
 
 void ToggleButtonPattern::OnAttachToFrameNode()
 {
@@ -99,6 +102,55 @@ void ToggleButtonPattern::OnModifyDone()
     InitTouchEvent();
     InitHoverEvent();
     InitOnKeyEvent();
+    SetAccessibilityAction();
+}
+
+void ToggleButtonPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        pattern->MarkIsSelected(true);
+        context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+    });
+
+    accessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        pattern->MarkIsSelected(false);
+        context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+    });
+}
+
+void ToggleButtonPattern::MarkIsSelected(bool isSelected)
+{
+    if (isOn_ != isSelected) {
+        isOn_ = isSelected;
+        auto eventHub = GetEventHub<ToggleButtonEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->UpdateChangeEvent(isSelected);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (isSelected) {
+            eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
+            host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+        } else {
+            eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
+            host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+        }
+    }
 }
 
 void ToggleButtonPattern::HandleEnabled()
