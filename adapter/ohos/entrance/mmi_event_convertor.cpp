@@ -183,9 +183,7 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
             events.action = MouseAction::MOVE;
-            if (isScenceBoardWindow) {
-                events.pullAction = MouseAction::PULL_MOVE;
-            }
+            events.pullAction = MouseAction::PULL_MOVE;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
             events.action = MouseAction::RELEASE;
