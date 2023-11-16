@@ -44,6 +44,10 @@ private:
     static void RegisterPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSideBarContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCalendarPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterTabAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterStepperItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterFormAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterMenuItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterMenuAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

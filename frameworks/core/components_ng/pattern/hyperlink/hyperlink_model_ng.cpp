@@ -80,4 +80,13 @@ void HyperlinkModelNG::SetDraggable(bool draggable)
     }
     frameNode->SetDraggable(draggable);
 }
+
+
+void HyperlinkModelNG::SetColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, ForegroundColor, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, value, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
+}
 } // namespace OHOS::Ace::NG

@@ -56,4 +56,13 @@ void StepperItemModelNG::ResetNextLabel()
     ACE_RESET_LAYOUT_PROPERTY(StepperItemLayoutProperty, RightLabel);
 }
 
+void StepperItemModelNG::SetNextLabel(FrameNode* frameNode, const std::string& rightLabel)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(StepperItemLayoutProperty, RightLabel, rightLabel, frameNode);
+}
+
+void StepperItemModelNG::ResetNextLabel(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(StepperItemLayoutProperty, RightLabel, frameNode);
+}
 } // namespace OHOS::Ace::NG

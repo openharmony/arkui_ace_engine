@@ -25,6 +25,8 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_col_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_row_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_hyperlink_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_router_bridge.h"
@@ -51,11 +53,15 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_item_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabs_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_split_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_side_bar_container_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_alphabet_indexer_bridge.h"
-
+#ifdef FORM_SUPPORTED
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.h"
+#endif
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeById(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -1250,10 +1256,17 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterPanelAttributes(object, vm);
     RegisterSideBarContainerAttributes(object, vm);
     RegisterCalendarPickerAttributes(object, vm);
+    RegisterTabAttributes(object, vm);
+    RegisterStepperItemAttributes(object, vm);
+    RegisterHyperlinkAttributes(object, vm);
     RegisterMenuItemAttributes(object, vm);
     RegisterMenuAttributes(object, vm);
     RegisterDatePickerAttributes(object, vm);
     RegisterAlphabetIndexerAttributes(object, vm);
+
+#ifdef FORM_SUPPORTED
+    RegisterFormAttributes(object, vm);
+#endif
 
     return object;
 }
@@ -1637,6 +1650,116 @@ void ArkUINativeModule::RegisterMenuAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetRadius));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "menu"), menu);
 }
+
+void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto tabs = panda::ObjectRef::New(vm);
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabBarMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabBarMode));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabBarMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabBarMode));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollableBarModeOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetScrollableBarModeOptions));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollableBarModeOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetScrollableBarModeOptions));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBarGridAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetBarGridAlign));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarGridAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetBarGridAlign));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetDivider));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetDivider));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFadingEdge"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetFadingEdge));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFadingEdge"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetFadingEdge));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBarBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetBarBackgroundColor));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetBarBackgroundColor));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBarOverlap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetBarOverlap));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarOverlap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetBarOverlap));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIsVertical"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetIsVertical));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIsVertical"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetIsVertical));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabBarWidth));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabBarWidth));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabBarPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabBarPosition));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabBarPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabBarPosition));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetScrollable));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetScrollable));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabBarHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabBarHeight));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabBarHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabBarHeight));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBarAdaptiveHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetBarAdaptiveHeight));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarAdaptiveHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetBarAdaptiveHeight));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAnimationDuration"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetAnimationDuration));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAnimationDuration"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetAnimationDuration));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabs"), tabs);
+}
+
+void ArkUINativeModule::RegisterStepperItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto stepperItem = panda::ObjectRef::New(vm);
+    stepperItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setNextLabel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperItemBridge::SetNextLabel));
+    stepperItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetNextLabel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperItemBridge::ResetNextLabel));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "stepperItem"), stepperItem);
+}
+
+void ArkUINativeModule::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto hyperlink = panda::ObjectRef::New(vm);
+    hyperlink->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::SetColor));
+    hyperlink->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::ResetColor));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "hyperlink"), hyperlink);
+}
+
+#ifdef FORM_SUPPORTED
+void ArkUINativeModule::RegisterFormAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto formComponent = panda::ObjectRef::New(vm);
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVisibility"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FormComponentBridge::SetVisibility));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVisibility"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FormComponentBridge::ResetVisibility));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAllowUpdate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FormComponentBridge::AllowUpdate));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAllowUpdate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FormComponentBridge::DisallowUpdate));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDimension"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FormComponentBridge::SetDimension));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDimension"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FormComponentBridge::ResetDimension));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setModuleName"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FormComponentBridge::SetModuleName));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetModuleName"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FormComponentBridge::ResetModuleName));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FormComponentBridge::SetSize));
+    formComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FormComponentBridge::ResetSize));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "formComponent"), formComponent);
+}
+#endif
 
 void ArkUINativeModule::RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {

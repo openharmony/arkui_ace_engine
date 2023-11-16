@@ -551,7 +551,7 @@ enum class CopyOptions {
 };
 
 enum class VisibleType {
-    VISIBLE,
+    VISIBLE = 0,
     INVISIBLE,
     GONE,
 };

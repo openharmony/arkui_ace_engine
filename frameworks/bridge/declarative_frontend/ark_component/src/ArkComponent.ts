@@ -2789,3 +2789,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         return this;
     }
 }
+
+const isNull = (val: any) => typeof val === 'object' && val === null;
+const isArray = (val: any) => Array.isArray(val);
+const isDate = (val: any) => val instanceof Date;
+const isRegExp = (val: any) => val instanceof RegExp;
+const isError = (val: any) => val instanceof Error;
+const isFloat = (val: any) => Number.isFinite(val) && !Number.isInteger(val);
+const isInteger = (val: any) => Number.isInteger(val);
+const isNonEmptyMap = (val: any) => val instanceof Map && val.size > 0;
+const isTruthyString = (val: any) => typeof val === 'string' && val.trim() !== '';
