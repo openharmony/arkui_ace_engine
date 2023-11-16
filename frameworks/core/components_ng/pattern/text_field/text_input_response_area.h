@@ -140,7 +140,6 @@ public:
         CHECK_NULL_VOID(host);
         CHECK_NULL_VOID(unitNode_);
         host->RemoveChildAndReturnIndex(unitNode_);
-        unitNode_.Reset();
     }
 
 private:
