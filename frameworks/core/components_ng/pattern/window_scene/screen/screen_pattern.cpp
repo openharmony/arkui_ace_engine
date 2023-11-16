@@ -116,7 +116,7 @@ void ScreenPattern::UpdateDisplayInfo()
     };
 
     float tempRotation = 0.0f;
-    if (displayNodeRotation != DIRECTION0) {
+    if (displayNodeRotation < DIRECTION0) {
         tempRotation = -displayNodeRotation;
     }
     MMI::DisplayInfo displayInfo = {
