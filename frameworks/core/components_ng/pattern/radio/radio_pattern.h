@@ -125,7 +125,8 @@ public:
 
     void MarkIsSelected(bool isSelected);
 
-    void SetSelected(bool isSelected) {
+    void SetSelected(bool isSelected)
+	{
         preCheck_ = isSelected;
     }
 
