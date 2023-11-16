@@ -1102,4 +1102,53 @@ void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
     }
 }
+
+static CleanNodeStyle ConvertStrToCleanNodeStyle(const std::string& value)
+{
+    if (value == "CONSTANT") {
+        return CleanNodeStyle::CONSTANT;
+    } else if (value == "INVISIBLE") {
+        return CleanNodeStyle::INVISIBLE;
+    } else {
+        return CleanNodeStyle::INPUT;
+    }
+}
+
+void JSTextField::SetCancelButton(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+    auto param = JSRef<JSObject>::Cast(info[0]);
+    std::string styleStr;
+    CleanNodeStyle cleanNodeStyle;
+    auto styleProp = param->GetProperty("style");
+    if (!styleProp->IsUndefined() && !styleProp->IsNull() && ParseJsString(styleProp, styleStr)) {
+        cleanNodeStyle = ConvertStrToCleanNodeStyle(styleStr);
+    } else {
+        cleanNodeStyle = CleanNodeStyle::INPUT;
+    }
+    TextFieldModel::GetInstance()->SetCleanNodeStyle(cleanNodeStyle);
+    auto iconJsVal = param->GetProperty("icon");
+    if (iconJsVal->IsUndefined() || iconJsVal->IsNull() || !iconJsVal->IsObject()) {
+        return;
+    }
+    auto iconParam = JSRef<JSObject>::Cast(iconJsVal);
+    CalcDimension iconSize;
+    auto iconSizeProp = iconParam->GetProperty("size");
+    if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVpNG(iconSizeProp, iconSize) &&
+        iconSize.Unit() != DimensionUnit::PERCENT) {
+        TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
+    }
+    std::string iconSrc;
+    auto iconSrcProp = iconParam->GetProperty("src");
+    if (!iconSrcProp->IsUndefined() && !iconSrcProp->IsNull() && ParseJsMedia(iconSrcProp, iconSrc)) {
+        TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc);
+    }
+    Color iconColor;
+    auto iconColorProp = iconParam->GetProperty("color");
+    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
+        TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
+    }
+}
 } // namespace OHOS::Ace::Framework

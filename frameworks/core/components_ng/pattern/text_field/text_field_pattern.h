@@ -921,6 +921,17 @@ public:
     {
         return responseArea_;
     }
+
+    const RefPtr<TextInputResponseArea>& GetCleanNodeResponseArea()
+    {
+        return cleanNodeResponseArea_;
+    }
+
+    void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
+    {
+        cleanNodeStyle_ = cleanNodeStyle;
+    }
+
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
     bool IsInPasswordMode() const;
@@ -1201,8 +1212,10 @@ private:
     RefPtr<TextSelectController> selectController_;
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
+    RefPtr<TextInputResponseArea> cleanNodeResponseArea_;
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
+    CleanNodeStyle cleanNodeStyle_ = CleanNodeStyle::INVISIBLE;
 };
 } // namespace OHOS::Ace::NG
 

@@ -62,6 +62,12 @@ enum class InputStyle {
     INLINE,
 };
 
+enum class CleanNodeStyle {
+    CONSTANT,
+    INVISIBLE,
+    INPUT,
+};
+
 class ACE_EXPORT TextFieldControllerBase : public AceType {
     DECLARE_ACE_TYPE(TextFieldControllerBase, AceType);
 
@@ -210,6 +216,10 @@ public:
     virtual void SetFocusableAndFocusNode() {};
     virtual void SetSelectionMenuHidden(bool contextMenuHidden) = 0;
     virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc) = 0;
+    virtual void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) = 0;
+    virtual void SetCancelIconSize(const CalcDimension& iconSize) = 0;
+    virtual void SetCanacelIconSrc(const std::string& iconSrc) = 0;
+    virtual void SetCancelIconColor(const Color& iconColor) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;
