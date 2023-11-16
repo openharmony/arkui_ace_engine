@@ -91,7 +91,8 @@ void ScreenPattern::UpdateDisplayInfo()
     auto tempHeight = paintRect.Height();
     auto tempWidth = paintRect.Width();
     auto temp = 0;
-    if (static_cast<int>(displayNode->GetStagingProperties().GetRotation()) != 0) {
+    auto displayNodeRotation = displayNode->GetStagingProperties().GetRotation();
+    if (displayNodeRotation != DIRECTION0 && displayNodeRotation != -DIRECTION180) {
         temp = tempWidth;
         tempWidth = tempHeight;
         tempHeight = temp;
@@ -116,8 +117,8 @@ void ScreenPattern::UpdateDisplayInfo()
     };
 
     float tempRotation = 0.0f;
-    if (static_cast<int>(displayNode->GetStagingProperties().GetRotation()) != 0) {
-        tempRotation = 90.0f;
+    if (displayNodeRotation != DIRECTION0) {
+        tempRotation = -displayNodeRotation;
     }
     MMI::DisplayInfo displayInfo = {
         .id = screenId,
