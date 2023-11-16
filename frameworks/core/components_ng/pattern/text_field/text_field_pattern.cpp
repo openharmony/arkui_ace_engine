@@ -3603,6 +3603,7 @@ bool TextFieldPattern::OnBackPressed()
         selectController_->UpdateCaretIndex(
             std::max(selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
         CloseSelectOverlay();
+        StartTwinkling();
         return true;
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
