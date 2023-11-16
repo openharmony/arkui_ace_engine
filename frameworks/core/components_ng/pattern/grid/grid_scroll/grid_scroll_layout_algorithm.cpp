@@ -1078,6 +1078,7 @@ void GridScrollLayoutAlgorithm::AddForwardLines(
     auto endIndex = gridLayoutInfo_.endIndex_;
     auto firstItem = GetStartingItem(layoutWrapper, currentIndex - 1);
     auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(firstItem);
+    CHECK_NULL_VOID(itemWrapper);
     AdjustRowColSpan(itemWrapper, layoutWrapper, firstItem);
     auto mainSpan = axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
     auto measureNumber = 0;
