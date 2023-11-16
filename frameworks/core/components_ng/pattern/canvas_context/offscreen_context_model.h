@@ -28,6 +28,10 @@ public:
 
     virtual RefPtr<AceType> CreateOffscreenPattern(int width, int height) = 0;
     virtual bool IsSucceed(RefPtr<AceType> offscreenPattern) = 0;
+    virtual size_t GetBitmapSize(RefPtr<AceType> offscreenPattern)
+    {
+        return 0;
+    }
 
 private:
     static std::unique_ptr<OffscreenContextModel> instance_;

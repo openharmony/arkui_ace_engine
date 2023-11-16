@@ -267,9 +267,19 @@ public:
         return info_->GetVM();
     }
 
-private:
-    panda::JsiRuntimeCallInfo* info_ = nullptr;
+    void SetSize(size_t size) const
+    {
+        size_ = size;
+    }
 
+    size_t GetSize() const
+    {
+        return size_;
+    }
+
+private:
+    mutable size_t size_ = 0;
+    panda::JsiRuntimeCallInfo* info_ = nullptr;
     mutable std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal_;
 };
 
