@@ -811,7 +811,7 @@ void AceContainer::SetView(AceViewPreview* view, double density, int32_t width, 
         return;
     }
 
-    std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
+    auto window = std::make_shared<Window>(std::move(platformWindow));
     container->AttachView(std::move(window), view, density, width, height);
 }
 #else
@@ -823,14 +823,14 @@ void AceContainer::SetView(AceViewPreview* view, sptr<Rosen::Window> rsWindow, d
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
     container->AttachView(std::move(window), view, density, width, height, callback);
 }
 #endif
 
 #ifndef ENABLE_ROSEN_BACKEND
 void AceContainer::AttachView(
-    std::unique_ptr<Window> window, AceViewPreview* view, double density, int32_t width, int32_t height)
+    std::shared_ptr<Window> window, AceViewPreview* view, double density, int32_t width, int32_t height)
 {
     ContainerScope scope(instanceId_);
     aceView_ = view;
@@ -921,7 +921,7 @@ void AceContainer::AttachView(
     AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
 }
 #else
-void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* view, double density, int32_t width,
+void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* view, double density, int32_t width,
     int32_t height, UIEnvCallback callback)
 {
     ContainerScope scope(instanceId_);
