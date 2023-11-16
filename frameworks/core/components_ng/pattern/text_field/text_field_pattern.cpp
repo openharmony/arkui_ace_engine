@@ -2102,6 +2102,7 @@ void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     CHECK_NULL_VOID(SelectOverlayIsOn());
     CHECK_NULL_VOID(!contentController_->IsEmpty());
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset_;
+    SetLocalOffset(localOffset);
     if (isSingleHandle_) {
         selectController_->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
     } else {
@@ -2175,6 +2176,7 @@ void TextFieldPattern::UpdateCopyAllStatus()
 void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFirstHandle)
 {
     UpdateCopyAllStatus();
+    UpdateShowMagnifier();
     auto proxy = GetSelectOverlayProxy();
     CHECK_NULL_VOID(proxy);
     if (!isSingleHandle_) {
@@ -4967,5 +4969,14 @@ void TextFieldPattern::ScrollToSafeArea() const
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     textFieldManager->ScrollTextFieldToSafeArea();
+}
+
+RefPtr<PixelMap> TextFieldPattern::GetPixelMap()
+{
+    auto context = GetHost()->GetRenderContext();
+    CHECK_NULL_RETURN(context, NULL);
+    auto pixelMap = context->GetThumbnailPixelMap();
+    CHECK_NULL_RETURN(pixelMap, NULL);
+    return pixelMap;
 }
 } // namespace OHOS::Ace::NG

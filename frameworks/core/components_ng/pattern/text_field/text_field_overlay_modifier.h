@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -69,6 +70,10 @@ private:
     void PaintCursor(DrawingContext& context) const;
     void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
     void PaintScrollBar(DrawingContext& context);
+    void PaintMagnifier(DrawingContext& context);
+    bool GetMagnifierRect(float& startX, float& startY, float& endX, float& endY, float& localOffsetX);
+    std::vector<TextPoint> GetTextPoints(float startX, float startY, float endX, float endY, bool haveOffset = false);
+    std::shared_ptr<RSPath> GetPathByPoints(std::vector<TextPoint> points);
 
     bool needPaintSelect_ = false;
     WeakPtr<Pattern> pattern_;
