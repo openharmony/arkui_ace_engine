@@ -2315,7 +2315,7 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int32_t elementId, const
         pageId = page->GetPageId();
         pagePath = GetPagePath();
     }
-    CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
+    CommonProperty commonProperty { ngPipeline->GetFocusWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
         GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
     for (const auto& node : uiExtensionsNodes) {
         auto infosByIPC = SearchElementInfosByTextNG(0, text, node, uiExtensionOffset / UI_EXTENSION_ID_10);
@@ -3317,7 +3317,7 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     CHECK_NULL_VOID(stageManager);
     auto page = stageManager->GetLastPage();
     CHECK_NULL_VOID(page);
-    output.windowId = ngPipeline->GetWindowId();
+    output.windowId = ngPipeline->GetFocusWindowId();
     output.windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
     output.windowTop = GetWindowTop(ngPipeline->GetWindowId());
     output.pageId = page->GetPageId();
