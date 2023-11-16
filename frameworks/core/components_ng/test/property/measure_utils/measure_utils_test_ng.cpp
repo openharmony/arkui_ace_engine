@@ -902,4 +902,55 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg028, TestSize.Level1)
     EXPECT_EQ(CHILDREN_SIZE.width_, -10.0);
     EXPECT_EQ(CHILDREN_SIZE.height_, 0);
 }
+
+/**
+ * @tc.name: MeasureUtilsTestNg029
+ * @tc.desc: Test cast to MeasureUtilsTestNg.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testPadding.
+     */
+    PaddingProperty testPadding;
+    std::optional<CalcDimension> top, bottom, left, right;
+
+    /**
+     * @tc.steps: step2. call ConvertToCalcPaddingProperty and set testPadding to have no value.
+     * @tc.expected: the input CHILDREN_SIZE is not changed.
+     */
+    PaddingProperty res = ConvertToCalcPaddingProperty(top, bottom, left, right);
+    EXPECT_EQ(testPadding, res);
+
+    /**
+     * @tc.steps: step3. call ConvertToCalcPaddingProperty and set testPadding to have CalcValue.
+     * @tc.expected: step1. the input CHILDREN_SIZE is changed to the expected value.
+     */
+    top = CALC_TEST;
+    bottom = CALC_TEST;
+    left = CALC_TEST;
+    right = CALC_TEST;
+    testPadding.top = NG::CalcLength(top.value().CalcValue());
+    testPadding.bottom = NG::CalcLength(bottom.value().CalcValue());
+    testPadding.left = NG::CalcLength(left.value().CalcValue());
+    testPadding.right = NG::CalcLength(right.value().CalcValue());
+    res = ConvertToCalcPaddingProperty(top, bottom, left, right);
+    EXPECT_EQ(testPadding, res);
+
+    /**
+     * @tc.steps: step4. call ConvertToCalcPaddingProperty and set testPadding to have value.
+     * @tc.expected: step1. the input CHILDREN_SIZE is changed to the expected value.
+     */
+    top = BORDER_WIDTH_PX;
+    bottom = BORDER_WIDTH_PX;
+    left = BORDER_WIDTH_PX;
+    right = BORDER_WIDTH_PX;
+    testPadding.top = NG::CalcLength(top.value());
+    testPadding.bottom = NG::CalcLength(bottom.value());
+    testPadding.left = NG::CalcLength(left.value());
+    testPadding.right = NG::CalcLength(right.value());
+    res = ConvertToCalcPaddingProperty(top, bottom, left, right);
+    EXPECT_EQ(testPadding, res);
+}
 } // namespace OHOS::Ace::NG

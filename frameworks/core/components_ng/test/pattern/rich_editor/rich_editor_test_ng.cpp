@@ -94,6 +94,10 @@ const std::string IMAGE_VALUE = "image1";
 const std::string BUNDLE_NAME = "bundleName";
 const std::string MODULE_NAME = "moduleName";
 const std::string ROOT_TAG = "root";
+const CalcLength CALC_LENGTH_CALC {10.0, DimensionUnit::CALC};
+const CalcLength ERROR_CALC_LENGTH_CALC {-10.0, DimensionUnit::CALC};
+const Dimension CALC_TEST {10.0, DimensionUnit::CALC};
+const Dimension ERROR_CALC_TEST {-10.0, DimensionUnit::CALC};
 } // namespace
 
 class RichEditorTestNg : public testing::Test {
@@ -616,6 +620,30 @@ HWTEST_F(RichEditorTestNg, RichEditorController001, TestSize.Level1)
     options.offset = std::nullopt;
     auto index3 = richEditorPattern->AddImageSpan(options, false, 0);
     EXPECT_EQ(index3, 0);
+
+    std::optional<Ace::NG::MarginProperty> marginProp = std::nullopt;
+    std::optional<Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
+    imageStyle.marginProp = marginProp;
+    imageStyle.borderRadius = borderRadius;
+    options.imageAttribute = imageStyle;
+    auto index4 = richEditorPattern->AddImageSpan(options, false, 0);
+    EXPECT_EQ(index4, 0);
+
+    marginProp = {CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC};
+    borderRadius = {CALC_TEST, CALC_TEST, CALC_TEST, CALC_TEST};
+    imageStyle.marginProp = marginProp;
+    imageStyle.borderRadius = borderRadius;
+    options.imageAttribute = imageStyle;
+    auto index5 = richEditorPattern->AddImageSpan(options, false, 0);
+    EXPECT_EQ(index5, 0);
+
+    marginProp = {ERROR_CALC_LENGTH_CALC, ERROR_CALC_LENGTH_CALC, ERROR_CALC_LENGTH_CALC, ERROR_CALC_LENGTH_CALC};
+    borderRadius = {ERROR_CALC_TEST, ERROR_CALC_TEST, ERROR_CALC_TEST, ERROR_CALC_TEST};
+    imageStyle.marginProp = marginProp;
+    imageStyle.borderRadius = borderRadius;
+    options.imageAttribute = imageStyle;
+    auto index6 = richEditorPattern->AddImageSpan(options, false, -1);
+    EXPECT_EQ(index6, 7);
 }
 
 /**
