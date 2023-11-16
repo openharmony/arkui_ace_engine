@@ -18,6 +18,10 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+const int32_t EDGE_EFFECT_PARAM_COUNT = 2;
+}
+
 EdgeEffect JSScrollable::ParseEdgeEffect(const JSCallbackInfo& info, EdgeEffect defaultValue)
 {
     if (info.Length() < 1) {
@@ -34,7 +38,7 @@ EdgeEffect JSScrollable::ParseEdgeEffect(const JSCallbackInfo& info, EdgeEffect 
 bool JSScrollable::ParseAlwaysEnable(const JSCallbackInfo& info, bool defaultValue)
 {
     auto alwaysEnabled = defaultValue;
-    if (info.Length() == 2) {
+    if (info.Length() == EDGE_EFFECT_PARAM_COUNT) {
         auto paramObject = JSRef<JSObject>::Cast(info[1]);
         if (!(info[1]->IsNull() || info[1]->IsUndefined())) {
             JSRef<JSVal> alwaysEnabledParam = paramObject->GetProperty("alwaysEnabled");

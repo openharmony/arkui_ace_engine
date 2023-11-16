@@ -101,6 +101,8 @@ public:
 
     void SetAccessibilityAction();
 
+    void OnAnimateStop() override;
+
     void ScrollPage(bool reverse);
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
@@ -126,8 +128,11 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitScrollableEvent();
     void CheckScrollable();
+    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;
+    void MarkDirtyNodeSelf();
+    void OnScrollEndCallback() override;
 
     WaterFlowLayoutInfo layoutInfo_;
 

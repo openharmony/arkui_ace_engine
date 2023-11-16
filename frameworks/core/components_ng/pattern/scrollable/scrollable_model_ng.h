@@ -18,11 +18,19 @@
 
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ScrollableModelNG {
 public:
     static void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled);
+
+    static void SetOnScroll(OnScrollEvent&& onScroll);
+    static void SetOnScrollStart(OnScrollStartEvent&& onScrollStart);
+    static void SetOnScrollStop(OnScrollStopEvent&& onScrollStop);
+    static void SetOnReachStart(OnReachEvent&& onReachStart);
+    static void SetOnReachEnd(OnReachEvent&& onReachEnd);
+    static void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

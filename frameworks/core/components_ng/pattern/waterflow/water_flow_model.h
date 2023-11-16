@@ -54,15 +54,20 @@ public:
     virtual void SetOnReachStart(OnReachEvent&& onReachStart) = 0;
     virtual void SetOnReachEnd(OnReachEvent&& onReachEnd) = 0;
     virtual void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin) = 0;
+    virtual void SetOnScroll(std::function<void(Dimension, ScrollState)>&& onScroll) = 0;
+    virtual void SetOnScrollStart(std::function<void()>&& onScrollStart) = 0;
+    virtual void SetOnScrollStop(std::function<void()>&& onScrollStop) = 0;
+    virtual void SetOnScrollIndex(std::function<void(int32_t, int32_t)>&& onScrollIndex) = 0;
+
     virtual void SetFriction(double friction) = 0;
     virtual void SetCachedCount(int32_t value) = 0;
 
     virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) = 0;
-    EdgeEffect GetEdgeEffect()
+    EdgeEffect GetEdgeEffect() const
     {
         return EdgeEffect::NONE;
     }
-    bool GetAlwaysEnableEdgeEffect()
+    bool GetAlwaysEnableEdgeEffect() const
     {
         return false;
     }

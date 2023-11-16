@@ -123,6 +123,11 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("cachedCount", &JSWaterFlow::SetCachedCount);
     JSClass<JSWaterFlow>::StaticMethod("edgeEffect", &JSWaterFlow::SetEdgeEffect);
 
+    JSClass<JSWaterFlow>::StaticMethod("onScroll", &JSWaterFlow::JsOnScroll);
+    JSClass<JSWaterFlow>::StaticMethod("onScrollStart", &JSWaterFlow::JsOnScrollStart);
+    JSClass<JSWaterFlow>::StaticMethod("onScrollStop", &JSWaterFlow::JsOnScrollStop);
+    JSClass<JSWaterFlow>::StaticMethod("onScrollIndex", &JSWaterFlow::JsOnScrollIndex);
+
     JSClass<JSWaterFlow>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -336,5 +341,58 @@ void JSWaterFlow::SetEdgeEffect(const JSCallbackInfo& info)
     auto alwaysEnabled =
         JSScrollable::ParseAlwaysEnable(info, WaterFlowModel::GetInstance()->GetAlwaysEnableEdgeEffect());
     WaterFlowModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
+}
+
+void JSWaterFlow::JsOnScroll(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                            const CalcDimension& scrollOffset, const ScrollState& scrollState) {
+            auto params = ConvertToJSValues(scrollOffset, scrollState);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            return;
+        };
+        WaterFlowModel::GetInstance()->SetOnScroll(std::move(onScroll));
+    }
+    args.ReturnSelf();
+}
+
+void JSWaterFlow::JsOnScrollStart(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        WaterFlowModel::GetInstance()->SetOnScrollStart(std::move(onScrollStart));
+    }
+    args.ReturnSelf();
+}
+
+void JSWaterFlow::JsOnScrollStop(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        WaterFlowModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
+    }
+    args.ReturnSelf();
+}
+
+void JSWaterFlow::JsOnScrollIndex(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                 const int32_t first, const int32_t last) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(first, last);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            return;
+        };
+        WaterFlowModel::GetInstance()->SetOnScrollIndex(std::move(onScrollIndex));
+    }
+    args.ReturnSelf();
 }
 } // namespace OHOS::Ace::Framework

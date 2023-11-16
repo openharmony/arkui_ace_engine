@@ -58,8 +58,10 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         if (layoutInfo_.offsetEnd_ && delta < 0) {
             overScroll = GetMainContentSize() - (layoutInfo_.GetMaxMainHeight() + layoutInfo_.currentOffset_ - delta);
         }
-        auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
-        delta *= friction;
+        if (source == SCROLL_FROM_UPDATE) {
+            auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
+            delta *= friction;
+        }
     } else {
         if (layoutInfo_.itemStart_ && delta > 0) {
             return false;
@@ -178,20 +180,32 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CHECK_NULL_RETURN(host, false);
     auto eventHub = host->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
+    auto onScroll = eventHub->GetOnScroll();
+    if (onScroll) {
+        FireOnScroll(layoutInfo.prevOffset_ - layoutInfo.currentOffset_, onScroll);
+    }
+    bool indexChanged =
+        layoutInfo_.startIndex_ != layoutInfo.startIndex_ || layoutInfo_.endIndex_ != layoutInfo.endIndex_;
+    if (indexChanged) {
+        auto onScrollIndex = eventHub->GetOnScrollIndex();
+        if (onScrollIndex) {
+            onScrollIndex(layoutInfo.startIndex_, layoutInfo.endIndex_);
+        }
+    }
     if (layoutInfo.itemStart_ && !layoutInfo_.itemStart_) {
-        // onReachStart
         auto onReachStart = eventHub->GetOnReachStart();
         if (onReachStart) {
             onReachStart();
         }
     }
     if (layoutInfo.offsetEnd_ && !layoutInfo_.offsetEnd_) {
-        // onReachEnd
         auto onReachEnd = eventHub->GetOnReachEnd();
         if (onReachEnd) {
             onReachEnd();
         }
     }
+    OnScrollStop(eventHub->GetOnScrollStop(), false);
+
     layoutInfo_ = std::move(layoutInfo);
     layoutInfo_.UpdateStartIndex();
 
@@ -348,6 +362,14 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool /* smooth */, ScrollAli
     FireAndCleanScrollingListener();
 }
 
+bool WaterFlowPattern::IsOutOfBoundary(bool useCurrentDelta)
+{
+    bool outOfStart = layoutInfo_.itemStart_ && Positive(layoutInfo_.currentOffset_);
+    bool outOfEnd = layoutInfo_.offsetEnd_ &&
+                    LessNotEqual(layoutInfo_.currentOffset_ + layoutInfo_.maxHeight_, layoutInfo_.lastMainSize_);
+    return outOfStart || outOfEnd;
+}
+
 void WaterFlowPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
 {
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
@@ -358,14 +380,41 @@ void WaterFlowPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scr
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, 0.0);
+        if (pattern->GetAlwaysEnabled() &&
+            GreatNotEqual(pattern->GetMainContentSize(), pattern->layoutInfo_.maxHeight_)) {
+            return 0.0;
+        }
         return pattern->GetMainContentSize() - pattern->layoutInfo_.maxHeight_;
     });
     scrollEffect->SetTrailingCallback([]() -> double { return 0.0; });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, 0.0);
+        if (pattern->GetAlwaysEnabled() &&
+            GreatNotEqual(pattern->GetMainContentSize(), pattern->layoutInfo_.maxHeight_)) {
+            return 0.0;
+        }
         return pattern->GetMainContentSize() - pattern->layoutInfo_.maxHeight_;
     });
     scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
+}
+
+void WaterFlowPattern::MarkDirtyNodeSelf()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void WaterFlowPattern::OnScrollEndCallback()
+{
+    scrollStop_ = true;
+    MarkDirtyNodeSelf();
+}
+
+void WaterFlowPattern::OnAnimateStop()
+{
+    scrollStop_ = true;
+    MarkDirtyNodeSelf();
 }
 } // namespace OHOS::Ace::NG

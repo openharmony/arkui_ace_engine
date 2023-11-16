@@ -39,6 +39,11 @@ protected:
     static void SetFriction(const JSCallbackInfo& info);
     static void SetCachedCount(const JSCallbackInfo& info);
     static void SetEdgeEffect(const JSCallbackInfo& info);
+
+    static void JsOnScroll(const JSCallbackInfo& args);
+    static void JsOnScrollStart(const JSCallbackInfo& args);
+    static void JsOnScrollStop(const JSCallbackInfo& args);
+    static void JsOnScrollIndex(const JSCallbackInfo& args);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WATER_FLOW_H

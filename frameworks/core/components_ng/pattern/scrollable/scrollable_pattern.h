@@ -95,7 +95,8 @@ public:
         return scrollableEvent_;
     }
     virtual bool OnScrollCallback(float offset, int32_t source);
-    virtual void OnScrollStartCallback() {};
+    virtual void OnScrollStartCallback();
+    virtual void FireOnScrollStart();
     bool ScrollableIdle()
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
@@ -314,6 +315,8 @@ public:
         return scrollSource_;
     }
 
+    ScrollState GetScrollState() const;
+
     static float CalculateFriction(float gamma)
     {
         constexpr float RATIO = 1.848f;
@@ -362,11 +365,6 @@ public:
         edgeEffectAlwaysEnabled_ = alwaysEnabled;
     }
 
-    void GetEdgeEffect()
-    {
-        return edgeEffect_;
-    }
-
     bool GetAlwaysEnabled() const
     {
         return edgeEffectAlwaysEnabled_;
@@ -386,6 +384,12 @@ protected:
         return scrollBarProxy_;
     }
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
+
+    EdgeEffect GetEdgeEffect() const;
+
+    virtual void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const;
+
+    virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, bool withPerf);
 
     // select with mouse
     struct ItemSelectedStatus {
@@ -428,6 +432,8 @@ protected:
     }
     // just for hold ScrollableController
     RefPtr<ScrollableController> positionController_;
+
+    bool scrollStop_ = false;
 
 private:
     virtual void OnScrollEndCallback() {};
@@ -476,8 +482,6 @@ private:
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
-
-    EdgeEffect GetEdgeEffect() const;
 
     void SetCanOverScroll(bool val);
     bool GetCanOverScroll() const;

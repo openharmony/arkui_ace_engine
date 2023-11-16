@@ -174,29 +174,41 @@ void WaterFlowModelNG::SetScrollEnabled(bool scrollEnabled)
 
 void WaterFlowModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnReachStart(std::move(onReachStart));
+    ScrollableModelNG::SetOnReachStart(std::move(onReachStart));
 }
 
 void WaterFlowModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnReachEnd(std::move(onReachEnd));
+    ScrollableModelNG::SetOnReachEnd(std::move(onReachEnd));
 }
 
 void WaterFlowModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin)
+{
+    ScrollableModelNG::SetOnScrollFrameBegin(std::move(ScrollFrameBegin));
+}
+
+void WaterFlowModelNG::SetOnScroll(std::function<void(Dimension, ScrollState)>&& onScroll)
+{
+    ScrollableModelNG::SetOnScroll(std::move(onScroll));
+}
+
+void WaterFlowModelNG::SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
+{
+    ScrollableModelNG::SetOnScrollStart(std::move(onScrollStart));
+}
+
+void WaterFlowModelNG::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
+{
+    ScrollableModelNG::SetOnScrollStop(std::move(onScrollStop));
+}
+
+void WaterFlowModelNG::SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScrollFrameBegin(std::move(ScrollFrameBegin));
+    eventHub->SetOnScrollIndex(std::move(onScrollIndex));
 }
 
 void WaterFlowModelNG::SetFriction(double friction)
