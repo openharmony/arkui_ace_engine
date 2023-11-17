@@ -249,6 +249,14 @@ void GridPattern::FireOnScrollStart()
     if (GetScrollAbort()) {
         return;
     }
+    if (scrollStop_) {
+        // onScrollStart triggers immediately on gesture dragStart, but onScrollStop marks scrollStop_ to true on
+        // gesture dragEnd, and consumes it/fires onScrollStop after layout. When the user quickly swipes twice, the
+        // second onScrollStart can trigger before the first onScrollEnd. In this case, we let the two events annihilate
+        // each other and fire neither.
+        scrollStop_ = false;
+        return;
+    }
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
         scrollBar->PlayScrollBarAppearAnimation();
