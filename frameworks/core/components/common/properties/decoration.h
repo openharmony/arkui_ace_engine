@@ -141,10 +141,11 @@ struct EffectOption {
     double saturation { 1.0f };
     double brightness { 1.0f };
     Color color { Color::TRANSPARENT };
+    AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
     bool operator == (const EffectOption& other) const
     {
         return radius == other.radius && NearEqual(saturation, other.saturation) &&
-            NearEqual(brightness, other.brightness) && color == other.color;
+            NearEqual(brightness, other.brightness) && color == other.color && adaptiveColor == other.adaptiveColor;
     }
 };
 

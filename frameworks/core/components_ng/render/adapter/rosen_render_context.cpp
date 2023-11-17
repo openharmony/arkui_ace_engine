@@ -700,7 +700,8 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
 #endif
     std::shared_ptr<Rosen::RSFilter> backFilter =
         Rosen::RSFilter::CreateMaterialFilter(backblurRadius, static_cast<float>(effectOption->saturation),
-            static_cast<float>(effectOption->brightness), effectOption->color.GetValue());
+            static_cast<float>(effectOption->brightness), effectOption->color.GetValue(),
+            static_cast<Rosen::BLUR_COLOR_MODE>(effectOption->adaptiveColor));
     rsNode_->SetBackgroundFilter(backFilter);
 }
 
