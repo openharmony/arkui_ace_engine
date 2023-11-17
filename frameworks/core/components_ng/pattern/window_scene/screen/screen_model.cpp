@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/window_scene/screen/screen_model.h"
 
-#include "session_manager/include/screen_session_manager.h"
+#include "screen_session_manager/include/screen_session_manager_client.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/window_scene/screen/screen_node.h"
@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 void ScreenModel::Create(uint64_t screenId)
 {
-    auto screenSession = Rosen::ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+    auto screenSession = Rosen::ScreenSessionManagerClient::GetInstance().GetScreenSession(screenId);
     if (screenSession == nullptr) {
         LOGE("screenSession is nullptr");
         return;
