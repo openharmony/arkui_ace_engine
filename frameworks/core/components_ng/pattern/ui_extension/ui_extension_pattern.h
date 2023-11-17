@@ -107,6 +107,10 @@ public:
         int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
 
     int32_t GetSessionId();
+    void SetModalFlag(bool isModal)
+    {
+        isModal_ = isModal;
+    }
 
     int32_t GetUiExtensionId() override;
 
@@ -193,6 +197,7 @@ private:
 
     bool transferringCaller_ = false;
     bool isVisible_ = true;
+    bool isModal_ = false;
 
     int32_t uiExtensionId_ = -1;
     static thread_local int32_t currentUiExtensionId_;
