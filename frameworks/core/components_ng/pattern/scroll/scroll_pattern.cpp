@@ -338,7 +338,7 @@ void ScrollPattern::ValidateOffset(int32_t source)
 
     // restrict position between top and bottom
     if (IsRestrictBoundary() || source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING ||
-        source == SCROLL_FROM_ROTATE) {
+        source == SCROLL_FROM_ROTATE || source == SCROLL_FROM_AXIS) {
         if (GetAxis() == Axis::HORIZONTAL) {
             if (IsRowReverse()) {
                 currentOffset_ = std::clamp(currentOffset_, 0.0f, scrollableDistance_);
