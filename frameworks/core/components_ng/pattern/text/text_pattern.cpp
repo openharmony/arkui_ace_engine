@@ -1010,7 +1010,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     return true;
 }
 
-void TextPattern::BeforeCreateLayoutWrapper()
+void TextPattern::PreCreateLayoutWrapper()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1025,12 +1025,6 @@ void TextPattern::BeforeCreateLayoutWrapper()
     const auto& children = host->GetChildren();
     if (children.empty()) {
         return;
-    }
-
-    if (paragraph_) {
-        // because ParagraphStyle can't be set directly yet, paragraph always needs to be rebuilt
-        LOGD("reset before create layoutwrapper");
-        paragraph_.Reset();
     }
     spans_.clear();
 
@@ -1057,6 +1051,11 @@ void TextPattern::BeforeCreateLayoutWrapper()
         auto gestureEventHub = host->GetOrCreateGestureEventHub();
         InitClickEvent(gestureEventHub);
     }
+}
+
+void TextPattern::BeforeCreateLayoutWrapper()
+{
+    PreCreateLayoutWrapper();
 }
 
 void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick)

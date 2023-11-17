@@ -121,7 +121,7 @@ void RichEditorPattern::HandleEnabled()
 
 void RichEditorPattern::BeforeCreateLayoutWrapper()
 {
-    TextPattern::BeforeCreateLayoutWrapper();
+    TextPattern::PreCreateLayoutWrapper();
 }
 
 bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

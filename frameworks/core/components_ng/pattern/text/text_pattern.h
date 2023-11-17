@@ -77,6 +77,8 @@ public:
 
     void OnModifyDone() override;
 
+    void PreCreateLayoutWrapper();
+
     void BeforeCreateLayoutWrapper() override;
 
     void AddChildSpanItem(const RefPtr<UINode>& child);
