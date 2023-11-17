@@ -25,11 +25,11 @@
 
 namespace OHOS::Ace::Framework {
 
-void ImageModelImpl::SetAlt(const std::string& src)
+void ImageModelImpl::SetAlt(const ImageSourceInfo& src)
 {
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {
-        image->SetAlt(src);
+        image->SetAlt(src.GetSrc());
     }
 }
 

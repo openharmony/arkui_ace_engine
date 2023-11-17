@@ -17,6 +17,7 @@
 #include <utility>
 #include <vector>
 #include "gtest/gtest.h"
+#include "core/image/image_source_info.h"
 
 #define private public
 #define protected public
@@ -131,7 +132,7 @@ RefPtr<FrameNode> ImageTestNg::CreateImageNode(const std::string& src, const std
 {
     ImageModelNG image;
     image.Create(src, pixMap, BUNDLE_NAME, MODULE_NAME);
-    image.SetAlt(alt);
+    image.SetAlt(ImageSourceInfo{ alt });
     auto onError = [](const LoadImageFailEvent& info) {};
     image.SetOnError(std::move(onError));
     auto onComplete = [](const LoadImageSuccessEvent& info) {};
@@ -145,7 +146,7 @@ RefPtr<FrameNode> ImageTestNg::CreateImageNodeWithDefaultProp(
 {
     ImageModelNG image;
     image.Create(src, pixMap, BUNDLE_NAME, MODULE_NAME);
-    image.SetAlt(alt);
+    image.SetAlt(ImageSourceInfo{ alt });
     image.SetImageFill(SVG_FILL_COLOR_DEFAULT);
     image.SetImageFit(IMAGE_FIT_DEFAULT);
     image.SetImageRenderMode(IMAGE_RENDERMODE_DEFAULT);
@@ -166,7 +167,7 @@ RefPtr<FrameNode> ImageTestNg::CreateSyncImageNode()
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     image.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
-    image.SetAlt(ALT_SRC_URL);
+    image.SetAlt(ImageSourceInfo{ ALT_SRC_URL });
     image.SetSyncMode(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     return frameNode;
@@ -177,7 +178,7 @@ RefPtr<FrameNode> ImageTestNg::CreateSyncWebImageNode()
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     image.Create(WEB_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
-    image.SetAlt(ALT_SRC_URL);
+    image.SetAlt(ImageSourceInfo{ ALT_SRC_URL });
     image.SetSyncMode(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     return frameNode;
@@ -888,7 +889,7 @@ HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level1)
     RefPtr<PixelMap> pixMap = nullptr;
     image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetImageFit(IMAGE_FIT_DEFAULT);
-    image.SetAlt(ALT_SRC_URL);
+    image.SetAlt(ImageSourceInfo{ ALT_SRC_URL });
     image.SetSyncMode(SYNCMODE_DEFAULT);
     image.SetCopyOption(COPYOPTIONS_DEFAULT);
     image.SetAutoResize(AUTORESIZE_DEFAULT);
@@ -994,7 +995,7 @@ HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
-    image.SetAlt(RESOURCE_URL);
+    image.SetAlt(ImageSourceInfo{ RESOURCE_URL });
     image.SetImageFill(Color::BLUE);
     auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
     ASSERT_NE(imageRenderProperty, nullptr);
