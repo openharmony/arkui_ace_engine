@@ -18,7 +18,7 @@
 namespace OHOS::Ace {
 bool AceTraceEnabled()
 {
-    return true;
+    return false;
 }
 
 void AceTraceBegin(const char* name) {}
