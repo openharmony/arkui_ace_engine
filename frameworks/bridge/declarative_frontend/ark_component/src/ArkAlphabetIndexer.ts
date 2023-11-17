@@ -1,5 +1,5 @@
 /// <reference path="./import.ts" />
-class ArkAlphabetIndexerComponent extends ArkComponent implements this{
+class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexerAttribute{
   onSelected(callback: (index: number) => void): this {
     throw new Error("Method not implemented.");
   }

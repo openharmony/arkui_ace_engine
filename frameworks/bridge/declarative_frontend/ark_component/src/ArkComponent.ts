@@ -115,14 +115,13 @@ class ModifierWithKey<T extends number | string | boolean | object> {
         return true;
     }
 }
-class BackgroundColorModifier extends Modifier<number | undefined > {
+
 class BackgroundColorModifier extends ModifierWithKey<ResourceColor> {
     static identity: Symbol = Symbol("backgroundColor");
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
             GetUINativeModule().common.resetBackgroundColor(node);
         } else {
-            GetUINativeModule().common.setBackgroundColor(node, this.value!);
             GetUINativeModule().common.setBackgroundColor(node, this.value);
         }
     }

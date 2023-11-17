@@ -350,21 +350,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxGroupBridge::ResetGroupMark));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "checkboxgroup"), checkboxgroup);
 
-    auto panel = panda::ObjectRef::New(vm);
-    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowCloseIcon"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetShowCloseIcon));
-    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShowCloseIcon"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetShowCloseIcon));
-    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDragBar"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetDragBar));
-    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDragBar"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetDragBar));
-    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShow"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetShow));
-    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShow"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetShow));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "panel"), panel);
-
     auto text = panda::ObjectRef::New(vm);
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetFontColor));
@@ -724,8 +709,55 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterImageAttributes(object, vm);
     RegisterNavRouterAttributes(object, vm);
     RegisterNavigatorAttributes(object, vm);
+    RegisterPanelAttributes(object, vm);
 
     return object;
+}
+
+void ArkUINativeModule::RegisterPanelAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
+    auto panel = panda::ObjectRef::New(vm);
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetPanelMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetPanelMode));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetPanelMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetPanelMode));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetPanelFullHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetPanelFullHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetPanelFullHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetPanelFullHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetPanelHalfHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetPanelHalfHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetPanelHalfHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetPanelHalfHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetPanelMiniHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetPanelMiniHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetPanelMiniHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetPanelMiniHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetPanelBackgroundMask"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetPanelBackgroundMask));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetPanelBackgroundMask"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetPanelBackgroundMask));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetPanelType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetPanelType));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetPanelType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetPanelType));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetPanelCustomHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetPanelCustomHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetPanelCustomHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetPanelCustomHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowCloseIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetShowCloseIcon));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShowCloseIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetShowCloseIcon));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDragBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetDragBar));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDragBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetDragBar));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetShow));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetShow));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "panel"), panel);
 }
 
 void ArkUINativeModule::RegisterButtonAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
