@@ -416,6 +416,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (hasAnimation) {
         RequestFrame();
     }
+    FlushFrameRate();
     FlushMessages();
     if (dragCleanTask_) {
         dragCleanTask_();
@@ -579,6 +580,16 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     FlushAnimationClosure();
     FlushMessages();
     FlushFocus();
+}
+
+void PipelineContext::FlushFrameRate()
+{
+    if (frameRateManager_->IsRateChanged()) {
+        auto rate = frameRateManager_->GetExpectedRate();
+        ACE_SCOPED_TRACE("FlushFrameRate Expected frameRate = %d", rate);
+        window_->FlushFrameRate(rate);
+        frameRateManager_->SetIsRateChanged(false);
+    }
 }
 
 void PipelineContext::FlushBuild()

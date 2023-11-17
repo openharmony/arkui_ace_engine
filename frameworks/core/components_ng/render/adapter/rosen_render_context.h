@@ -284,7 +284,7 @@ public:
     void SetUsingContentRectForRenderFrame(bool value) override;
     void SetFrameGravity(OHOS::Rosen::Gravity gravity) override;
 
-    void AddFRCSceneInfo(const std::string& scene, float speed) override;
+    int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

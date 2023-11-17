@@ -34,7 +34,6 @@ public:
     MOCK_METHOD1(AnimateHoverEffectScale, void(bool));
     MOCK_METHOD1(SetVisible, void(bool));
     MOCK_METHOD0(GetLocalTransformMatrix, Matrix4());
-    MOCK_METHOD2(AddFRCSceneInfo, void(const std::string&, float));
 
     void ResetBlendBgColor() override
     {

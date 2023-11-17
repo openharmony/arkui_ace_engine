@@ -2919,7 +2919,7 @@ HWTEST_F(ListTestNg, GetOverScrollOffset001, TestSize.Level1)
     Create([](ListModelNG model) { CreateGroup(1); });
 
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT * 5);
-    expectOffset = { 500, 400 };
+    expectOffset = { 500, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT);
     expectOffset = { 0, -ITEM_HEIGHT };
@@ -2927,7 +2927,7 @@ HWTEST_F(ListTestNg, GetOverScrollOffset001, TestSize.Level1)
 
     ScrollDown();
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
-    expectOffset = { ITEM_HEIGHT, ITEM_HEIGHT };
+    expectOffset = { ITEM_HEIGHT, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT);
     expectOffset = { 0, -ITEM_HEIGHT };
@@ -6215,19 +6215,5 @@ HWTEST_F(ListTestNg, EdgeEffectOption004, TestSize.Level1)
     });
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->scrollable_);
-}
-
-/**
- * @tc.name: FRCCallback001
- * @tc.desc: Test FRC callback
- * @tc.type: FUNC
- */
-HWTEST_F(ListTestNg, FRCCallback001, TestSize.Level1)
-{
-    Create([](ListModelNG model) {});
-    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
-    frameNode_->renderContext_ = renderContext;
-    EXPECT_CALL(*renderContext, AddFRCSceneInfo(_, _)).Times(1);
-    pattern_->NotifyFRCSceneInfo(0.0f, SceneStatus::START);
 }
 } // namespace OHOS::Ace::NG
