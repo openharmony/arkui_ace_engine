@@ -340,6 +340,7 @@ private:
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
 
     void OnUseEffectUpdate(bool useEffect) override;
+    void OnUseShadowBatchingUpdate(bool useShadowBatching) override;
     void OnFreezeUpdate(bool isFreezed) override;
     void OnRenderGroupUpdate(bool isRenderGroup) override;
     void OnSuggestedRenderGroupUpdate(bool isRenderGroup) override;

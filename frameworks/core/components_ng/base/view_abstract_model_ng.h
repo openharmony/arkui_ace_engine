@@ -646,6 +646,11 @@ public:
         ViewAbstract::SetUseEffect(useEffect);
     }
 
+    void SetUseShadowBatching(bool useShadowBatching) override
+    {
+        ViewAbstract::SetUseShadowBatching(useShadowBatching);
+    }
+
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override
     {
         ViewAbstract::SetClickEffectLevel(level, scaleValue);

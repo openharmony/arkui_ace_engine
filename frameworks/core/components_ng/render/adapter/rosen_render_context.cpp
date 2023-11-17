@@ -1680,6 +1680,12 @@ void RosenRenderContext::OnUseEffectUpdate(bool useEffect)
     rsNode_->SetUseEffect(useEffect);
 }
 
+void RosenRenderContext::OnUseShadowBatchingUpdate(bool useShadowBatching)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetUseShadowBatching(useShadowBatching);
+}
+
 void RosenRenderContext::OnFreezeUpdate(bool isFreezed)
 {
     CHECK_NULL_VOID(rsNode_);

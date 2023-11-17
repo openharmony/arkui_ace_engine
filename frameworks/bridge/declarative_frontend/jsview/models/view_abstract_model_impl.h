@@ -136,6 +136,7 @@ public:
     void SetInvert(const Dimension& value) override;
     void SetHueRotate(float value) override;
     void SetUseEffect(bool) override {}
+    void SetUseShadowBatching(bool) override {}
 
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
