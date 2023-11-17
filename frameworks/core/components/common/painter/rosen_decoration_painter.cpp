@@ -3011,8 +3011,7 @@ void RosenDecorationPainter::PaintShadow(const RSPath& path, const Shadow& shado
 
         // LightPos is the location of a spot light source, which is by default located directly above the center
         // of the component.
-        auto tmpPath = drPath.GetCmdList()->Playback();
-        auto drRect = tmpPath->GetBounds();
+        auto drRect = drPath.GetBounds();
         RSPoint3 lightPos = RSPoint3(drRect.GetLeft() * FLOAT_HALF + drRect.GetRight() * FLOAT_HALF,
             drRect.GetTop() * FLOAT_HALF + drRect.GetBottom() * FLOAT_HALF, shadow.GetLightHeight());
 

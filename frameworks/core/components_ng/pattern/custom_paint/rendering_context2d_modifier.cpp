@@ -67,6 +67,7 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
         return;
     }
     drawCmdList->Playback(recordingCanvas);
+    rsRecordingCanvas_->Clear();
 #endif
 }
 } // namespace OHOS::Ace::NG

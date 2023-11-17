@@ -106,9 +106,7 @@ Size RosenRenderShape::CreateRect()
     path_.Reset();
     RSRoundRect roundRect(rect, fRadii);
     path_.AddRoundRect(roundRect);
-    auto cmdList = path_.GetCmdList();
-    auto path = cmdList->Playback();
-    auto drRect = path->GetBounds();
+    auto drRect = path_.GetBounds();
 
     return Size(drRect.GetRight(), drRect.GetBottom());
 #endif
@@ -235,9 +233,7 @@ Size RosenRenderShape::CreatePath()
     }
     return Size(right, bottom);
 #else
-    auto cmdList = path_.GetCmdList();
-    auto path = cmdList->Playback();
-    auto rect = path->GetBounds();
+    auto rect = path_.GetBounds();
 
     auto right = rect.GetRight();
     auto bottom = rect.GetBottom();
