@@ -159,7 +159,7 @@ struct GraphicsProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontContrast, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontSaturate, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontSepia, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontInvert, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontInvert, InvertVariant);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontColorBlend, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBlurRadius, Dimension);

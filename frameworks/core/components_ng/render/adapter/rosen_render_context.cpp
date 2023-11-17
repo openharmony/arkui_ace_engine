@@ -2823,10 +2823,17 @@ void RosenRenderContext::OnFrontSepiaUpdate(const Dimension& sepia)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnFrontInvertUpdate(const Dimension& invert)
+void RosenRenderContext::OnFrontInvertUpdate(const InvertVariant& invert)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetInvert(invert.Value());
+    if (invert.index() == 0) {
+        rsNode_->SetInvert(std::get<float>(invert));
+    } else {
+        InvertOption option = std::get<InvertOption>(invert);
+        Rosen::Vector4f invertVector;
+        invertVector.SetValues(option.low_, option.high_, option.threshold_, option.thresholdRange_);
+        rsNode_->SetAiInvert(invertVector);
+    }
     RequestNextFrame();
 }
 

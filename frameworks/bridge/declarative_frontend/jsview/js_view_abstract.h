@@ -210,6 +210,7 @@ public:
     static bool ParseJsonResource(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result);
     static bool ParseDataDetectorConfig(const JSCallbackInfo& info, std::string& types,
         std::function<void(const std::string&)>& onResult);
+    static bool ParseInvertProps(const JSRef<JSVal>& jsValue, InvertVariant& invert);
 
     static std::pair<CalcDimension, CalcDimension> ParseSize(const JSCallbackInfo& info);
     static void JsUseAlign(const JSCallbackInfo& info);

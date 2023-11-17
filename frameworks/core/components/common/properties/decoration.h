@@ -34,6 +34,7 @@
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/invert.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/components/theme/theme_utils.h"
 

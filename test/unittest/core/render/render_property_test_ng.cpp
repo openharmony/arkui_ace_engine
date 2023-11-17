@@ -39,6 +39,7 @@ const Dimension OFFSET_X { 40.0, DimensionUnit::PX };
 const Dimension OFFSET_Y { 80.0, DimensionUnit::PX };
 const Dimension ANCHOR_X { 100.0, DimensionUnit::PX };
 const Dimension ANCHOR_Y { 200.0, DimensionUnit::PX };
+const InvertVariant invert = 0.0f;
 
 const float VALUE_TEST = 720.0f;
 const Color WHITE = Color(0xffffffff);
@@ -61,7 +62,7 @@ void MakeGraphicsProperty(NG::GraphicsProperty& graphicsProperty)
     graphicsProperty.propFrontBrightness = POSITION_X;
     graphicsProperty.propFrontSaturate = POSITION_X;
     graphicsProperty.propFrontContrast = POSITION_X;
-    graphicsProperty.propFrontInvert = POSITION_X;
+    graphicsProperty.propFrontInvert = invert;
     graphicsProperty.propFrontSepia = POSITION_X;
     graphicsProperty.propFrontHueRotate = VALUE_TEST;
     graphicsProperty.propFrontColorBlend = WHITE;
