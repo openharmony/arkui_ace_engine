@@ -48,7 +48,8 @@ void CustomNode::Render()
     bool needMarkParentBak = needMarkParent_;
     needMarkParent_ = false;
     if (renderFunction_) {
-        auto renderFunction = std::move(renderFunction_);
+        RenderFunction renderFunction = nullptr;
+        std::swap(renderFunction, renderFunction_);
         {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
             FireOnAppear();
