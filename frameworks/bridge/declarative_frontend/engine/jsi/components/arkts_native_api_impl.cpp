@@ -47,6 +47,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_timepicker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rich_editor_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_video_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_side_bar_container_modifier.h"
 #include "core/components/common/layout/constants.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_nav_destination_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_navigation_modifier.h"
@@ -103,6 +104,7 @@ static struct ArkUINodeAPI impl = {
     GetColumnSplitModifier,
     GetSpanModifier,
     GetImageAnimatorModifier,
+    GetSideBarContainerModifier,
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI()
