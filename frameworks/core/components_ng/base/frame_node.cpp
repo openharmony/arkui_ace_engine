@@ -339,6 +339,10 @@ FrameNode::~FrameNode()
             dragManager->UnRegisterDragStatusListener(GetId());
 #endif // ENABLE_DRAG_FRAMEWORK
         }
+        auto frameRateManager = pipeline->GetFrameRateManager();
+        if (frameRateManager) {
+            frameRateManager->RemoveNodeRate(GetId());
+        }
     }
 }
 
@@ -2293,6 +2297,16 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
     return nodes;
 }
 
+int32_t FrameNode::GetNodeExpectedRate()
+{
+    if (sceneRateMap_.empty()) {
+        return 0;
+    }
+    auto iter = std::max_element(
+        sceneRateMap_.begin(), sceneRateMap_.end(), [](auto a, auto b) { return a.second < b.second; });
+    return iter->second;
+}
+
 void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status)
 {
     if (SystemProperties::GetDebugEnabled()) {
@@ -2301,12 +2315,50 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
             scene.c_str(), speed, sceneStatusStrs[static_cast<int32_t>(status)].c_str());
     }
 
-    if (status == SceneStatus::RUNNING) {
-        return;
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto frameRateManager = pipelineContext->GetFrameRateManager();
+    CHECK_NULL_VOID(frameRateManager);
+
+    auto expectedRate = renderContext->CalcExpectedFrameRate(scene, speed);
+    auto nodeId = GetId();
+    auto iter = sceneRateMap_.find(scene);
+    switch (status) {
+        case SceneStatus::START: {
+            if (iter == sceneRateMap_.end()) {
+                if (sceneRateMap_.empty()) {
+                    frameRateManager->AddNodeRate(nodeId);
+                }
+                sceneRateMap_.emplace(scene, expectedRate);
+                frameRateManager->UpdateNodeRate(nodeId, GetNodeExpectedRate());
+            }
+            return;
+        }
+        case SceneStatus::RUNNING: {
+            if (iter != sceneRateMap_.end() && iter->second != expectedRate) {
+                iter->second = expectedRate;
+                auto nodeExpectedRate = GetNodeExpectedRate();
+                frameRateManager->UpdateNodeRate(nodeId, nodeExpectedRate);
+            }
+            return;
+        }
+        case SceneStatus::END: {
+            if (iter != sceneRateMap_.end()) {
+                sceneRateMap_.erase(iter);
+                if (sceneRateMap_.empty()) {
+                    frameRateManager->RemoveNodeRate(nodeId);
+                } else {
+                    auto nodeExpectedRate = GetNodeExpectedRate();
+                    frameRateManager->UpdateNodeRate(nodeId, nodeExpectedRate);
+                }
+            }
+            return;
+        }
+        default:
+            return;
     }
-    auto context = GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->AddFRCSceneInfo(scene, speed);
 }
 
 void FrameNode::CheckSecurityComponentStatus(std::vector<RectF>& rect)

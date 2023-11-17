@@ -488,7 +488,10 @@ public:
     }
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
-    virtual void AddFRCSceneInfo(const std::string& scene, float speed) {}
+    virtual int32_t CalcExpectedFrameRate(const std::string& scene, float speed)
+    {
+        return 0;
+    }
 
 protected:
     RenderContext() = default;

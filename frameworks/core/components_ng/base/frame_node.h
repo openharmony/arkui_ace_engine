@@ -672,6 +672,8 @@ private:
     void UpdateParentAbsoluteOffset();
     void AddFrameNodeSnapshot(bool isHit, int32_t parentId);
 
+    int32_t GetNodeExpectedRate();
+
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
@@ -733,6 +735,8 @@ private:
     bool checkboxFlag_ = false;
 
     RefPtr<FrameNode> overlayNode_;
+
+    std::unordered_map<std::string, int32_t> sceneRateMap_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

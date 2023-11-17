@@ -31,6 +31,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -248,6 +249,11 @@ public:
 #endif
 
     const RefPtr<DragDropManager>& GetDragDropManager();
+
+    const RefPtr<FrameRateManager>& GetFrameRateManager()
+    {
+        return frameRateManager_;
+    }
 
     void FlushBuild() override;
 
@@ -490,6 +496,8 @@ private:
 
     // only used for static form.
     void UpdateFormLinkInfos();
+    
+    void FlushFrameRate();
 
     template<typename T>
     struct NodeCompare {
@@ -559,6 +567,7 @@ private:
     RefPtr<DragDropManager> dragDropManager_;
     RefPtr<SharedOverlayManager> sharedTransitionManager_;
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
+    RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
 #ifdef WINDOW_SCENE_SUPPORTED
     RefPtr<UIExtensionManager> uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
 #endif
