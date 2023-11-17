@@ -67,6 +67,8 @@ public:
         ResetDisplayMode();
         ResetMaxViewLines();
         ResetSelectionMenuHidden();
+        ResetPasswordRules();
+        ResetEnableAutoFill();
         ResetCleanNodeStyle();
         ResetIconSize();
         ResetIconSrc();
@@ -145,6 +147,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HidePasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectionMenuHidden, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PasswordRules, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableAutoFill, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectAllValue, bool, PROPERTY_UPDATE_NORMAL);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CleanNodeStyle, CleanNodeStyle, PROPERTY_UPDATE_MEASURE);
@@ -181,14 +185,14 @@ protected:
         value->propMaxViewLines_ = CloneMaxViewLines();
         value->propIsEnabled_ = CloneIsEnabled();
         value->propSelectionMenuHidden_ = CloneSelectionMenuHidden();
+        value->propPasswordRules_ = ClonePasswordRules();
+        value->propEnableAutoFill_ = CloneEnableAutoFill();
         value->propCleanNodeStyle_ = CloneCleanNodeStyle();
         value->propIconSize_ = CloneIconSize();
-        value->propIconSrc_ = CloneIconSrc();
         value->propIconColor_ = CloneIconColor();
         value->propSelectAllValue_ = CloneSelectAllValue();
     }
 
-private:
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutProperty);
 };
 } // namespace OHOS::Ace::NG

@@ -220,6 +220,10 @@ std::string TextInputComposedElement::GetTextinputType() const
         return "InputType.Password";
     } else if (keyboard == TextInputType::EMAIL_ADDRESS) {
         return "InputType.Email";
+    } else if (keyboard == TextInputType::USER_NAME) {
+        return "InputType.USER_NAME";
+    } else if (keyboard == TextInputType::NEW_PASSWORD) {
+        return "InputType.NEW_PASSWORD";
     }
     return "InputType.Normal";
 }

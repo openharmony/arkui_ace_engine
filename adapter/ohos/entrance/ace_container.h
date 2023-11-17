@@ -29,6 +29,7 @@
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
+#include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/common/js_message_dispatcher.h"
@@ -450,6 +451,9 @@ public:
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         StopDragCallback&& stopDragCallback) override;
+    
+    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType) override;
+    bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
 
     static void SearchElementInfoByAccessibilityIdNG(
         int32_t instanceId, int32_t elementId, int32_t mode,

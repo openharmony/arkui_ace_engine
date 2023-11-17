@@ -26,6 +26,7 @@
 #include "base/log/frame_info.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
+#include "base/view_data/view_data_wrap.h"
 #include "core/common/frontend.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -411,6 +412,11 @@ public:
     void FlushAnimationClosure();
     void RegisterDumpInfoListener(const std::function<void(const std::vector<std::string>&)>& callback);
     void DumpJsInfo(const std::vector<std::string>& params) const;
+
+    bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap);
+    bool CheckNeedAutoSave();
+    void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
+    void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode);
 
     void SetDragCleanTask(std::function<void()>&& task)
     {

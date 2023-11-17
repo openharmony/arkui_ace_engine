@@ -371,6 +371,16 @@ public:
         return false;
     }
 
+    virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType)
+    {
+        return false;
+    }
+
+    virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node)
+    {
+        return false;
+    }
+
     static bool LessThanAPIVersion(PlatformVersion version)
     {
         return PipelineBase::GetCurrentContext() &&

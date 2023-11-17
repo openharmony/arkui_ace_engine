@@ -82,6 +82,7 @@ ohos_source_set("preview_osal_source") {
       "system_properties.cpp",
       "task/task_runner_adapter_impl.cpp",
       "trace_id_impl.cpp",
+      "view_data_wrap_impl.cpp",
     ]
 
     cflags_cc = [

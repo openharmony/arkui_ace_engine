@@ -596,6 +596,10 @@ public:
         return localMat_;
     }
 
+    RefPtr<FrameNode> GetPageNode();
+    void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
+    void NotifyFillRequestFailed(int32_t errCode);
+
     int32_t GetUiExtensionId();
     int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId);
     void SearchExtensionElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
@@ -644,6 +648,8 @@ private:
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpAdvanceInfo() override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    bool CheckAutoSave() override;
     void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;

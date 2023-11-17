@@ -28,6 +28,7 @@
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
@@ -46,6 +47,7 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -109,6 +111,7 @@ constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
+constexpr int32_t AUTO_FILL_FAILED = 1;
 
 // need to be moved to formatter
 const std::string DIGIT_WHITE_LIST = "[0-9]";
@@ -1497,7 +1500,8 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
             ProcessOverlay(true, true, false);
         }
     }
-    if (RequestKeyboard(false, true, true)) {
+    auto hasRequestAutoFill = ProcessAutoFill();
+    if (!hasRequestAutoFill && RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
     }
     // emulate clicking bottom of the textField
@@ -1507,6 +1511,54 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
         HandleOnSelectAll(true);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool TextFieldPattern::CheckAutoFill()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    bool isEnableAutoFill = layoutProperty->GetEnableAutoFillValue(true);
+    if (!isEnableAutoFill) {
+        return false;
+    }
+    auto pageNode = host->GetPageNode();
+    CHECK_NULL_RETURN(pageNode, false);
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, false);
+    auto autoFillType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+    if (autoFillType == TextInputType::USER_NAME || autoFillType == TextInputType::VISIBLE_PASSWORD) {
+        return !pagePattern->IsAutoFillPasswordTriggered();
+    } else if (autoFillType == TextInputType::NEW_PASSWORD) {
+        return !pagePattern->IsAutoFillNewPasswordTriggered();
+    }
+    return false;
+}
+
+bool TextFieldPattern::ProcessAutoFill()
+{
+    if (!CheckAutoFill()) {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "No nedd to auto fill.");
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pageNode = host->GetPageNode();
+    CHECK_NULL_RETURN(pageNode, false);
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, false);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto autoFillType = ConvertToAceAutoFillType(layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    if (autoFillType == AceAutoFillType::ACE_NEW_PASSWORD) {
+        pagePattern->SetAutoFillNewPasswordTriggered(true);
+    } else {
+        pagePattern->SetAutoFillPasswordTriggered(true);
+    }
+    return container->RequestAutoFill(host, autoFillType);
 }
 
 void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
@@ -2545,7 +2597,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             config.action = GetTextInputActionValue(GetDefaultTextInputAction());
             config.inputFilter = GetInputFilter();
             config.maxLength = GetMaxLength();
-            if (keyboard_ == TextInputType::VISIBLE_PASSWORD) {
+            if (keyboard_ == TextInputType::VISIBLE_PASSWORD || keyboard_ == TextInputType::NEW_PASSWORD) {
                 config.obscureText = textObscured_;
             }
             connection_ = TextInputProxy::GetInstance().Attach(
@@ -2592,6 +2644,19 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     return textConfig;
 }
 #endif
+
+AceAutoFillType TextFieldPattern::ConvertToAceAutoFillType(TextInputType type)
+{
+    static std::unordered_map<TextInputType, AceAutoFillType> convertMap = {
+        { TextInputType::VISIBLE_PASSWORD, AceAutoFillType::ACE_PASSWORD },
+        { TextInputType::USER_NAME, AceAutoFillType::ACE_USER_NAME },
+        { TextInputType::NEW_PASSWORD, AceAutoFillType::ACE_NEW_PASSWORD }
+    };
+    if (convertMap.find(type) != convertMap.end()) {
+        return convertMap[type];
+    }
+    return AceAutoFillType::ACE_UNSPECIFIED;
+}
 
 bool TextFieldPattern::CloseKeyboard(bool forceClose)
 {
@@ -3692,6 +3757,10 @@ std::string TextFieldPattern::TextInputTypeToString() const
             return "InputType.Email";
         case TextInputType::VISIBLE_PASSWORD:
             return "InputType.Password";
+        case TextInputType::USER_NAME:
+            return "InputType.USER_NAME";
+        case TextInputType::NEW_PASSWORD:
+            return "InputType.NEW_PASSWORD";
         default:
             return "InputType.Normal";
     }
@@ -4448,7 +4517,7 @@ bool TextFieldPattern::IsInPasswordMode() const
     CHECK_NULL_RETURN(layoutProperty, false);
     auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
     return inputType == TextInputType::VISIBLE_PASSWORD || inputType == TextInputType::NUMBER_PASSWORD ||
-           inputType == TextInputType::SCREEN_LOCK_PASSWORD;
+           inputType == TextInputType::SCREEN_LOCK_PASSWORD || inputType == TextInputType::NEW_PASSWORD;
 }
 
 void TextFieldPattern::RestorePreInlineStates()
@@ -4758,6 +4827,89 @@ void TextFieldPattern::DumpAdvanceInfo()
                                        .append(" y:")
                                        .append(std::to_string(contentRect_.GetY())));
     DumpLog::GetInstance().AddDesc(textSelector_.ToString());
+}
+
+void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap)
+{
+    CHECK_NULL_VOID(viewDataWrap);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto autoFillType = ConvertToAceAutoFillType(layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
+    auto info = PageNodeInfoWrap::CreatePageNodeInfoWrap();
+    CHECK_NULL_VOID(info);
+    info->SetId(host->GetId());
+    info->SetDepth(host->GetDepth());
+    info->SetAutoFillType(autoFillType);
+    info->SetTag(host->GetTag());
+    info->SetValue(contentController_->GetTextValue());
+    info->SetPlaceholder(GetPlaceHolder());
+    info->SetPasswordRules(layoutProperty->GetPasswordRulesValue(""));
+    info->SetEnableAutoFill(layoutProperty->GetEnableAutoFillValue(true));
+    viewDataWrap->AddPageNodeInfoWrap(info);
+}
+
+void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
+{
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "autoFillType:%{public}d", static_cast<int32_t>(autoFillType));
+    CHECK_NULL_VOID(nodeWrap);
+    if (!contentController_ || contentController_->GetTextValue() == nodeWrap->GetValue()) {
+        return;
+    }
+    contentController_->SetTextValue(nodeWrap->GetValue());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    NotifyOnEditChanged(true);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto type = ConvertToAceAutoFillType(layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
+    if (!(type == AceAutoFillType::ACE_NEW_PASSWORD && type == autoFillType)) {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "Set last auto fill text value.");
+        lastAutoFillPasswordTextValue_ = nodeWrap->GetValue();
+    }
+}
+
+void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode)
+{
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "errCode:%{public}d", errCode);
+    if (errCode == AUTO_FILL_FAILED) {
+        return;
+    }
+    if (RequestKeyboard(false, true, true)) {
+        NotifyOnEditChanged(true);
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool TextFieldPattern::CheckAutoSave()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    if (!layoutProperty->GetEnableAutoFillValue(true)) {
+        return false;
+    }
+    if (!contentController_ || contentController_->GetTextValue().empty()) {
+        return false;
+    }
+    auto autoFillType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+    if (autoFillType == TextInputType::USER_NAME) {
+        if (!lastAutoFillPasswordTextValue_.empty() &&
+            contentController_->GetTextValue() != lastAutoFillPasswordTextValue_) {
+            return true;
+        }
+    }
+    if ((autoFillType == TextInputType::VISIBLE_PASSWORD || autoFillType == TextInputType::NEW_PASSWORD)) {
+        if (contentController_->GetTextValue() != lastAutoFillPasswordTextValue_) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool TextFieldPattern::IsTouchAtLeftOffset(float currentOffsetX)

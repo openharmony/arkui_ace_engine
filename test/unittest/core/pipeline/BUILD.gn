@@ -284,6 +284,8 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/test/unittest/core/pipeline/pipeline_context_test_ng.cpp",
   ]
 
+  sources += [ "$ace_root/test/mock/adapter/mock_view_data_wrap_ohos.cpp" ]
+
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/frameworks/core/components/theme:ace_core_components_theme_ohos",

@@ -1103,6 +1103,24 @@ void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
     }
 }
 
+void JSTextField::SetPasswordRules(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsString()) {
+        return;
+    }
+    auto passwordRules = info[0]->ToString();
+    TextFieldModel::GetInstance()->SetPasswordRules(passwordRules);
+}
+
+void JSTextField::SetEnableAutoFill(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        TextFieldModel::GetInstance()->SetEnableAutoFill(true);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetEnableAutoFill(info[0]->ToBoolean());
+}
+
 static CleanNodeStyle ConvertStrToCleanNodeStyle(const std::string& value)
 {
     if (value == "CONSTANT") {

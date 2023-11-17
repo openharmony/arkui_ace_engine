@@ -491,6 +491,10 @@ std::string ConvertInputTypeToString(AceTextCategory type)
             return "INPUT_TYPE_PASSWORD";
         case AceTextCategory::INPUT_TYPE_PHONENUMBER:
             return "INPUT_TYPE_PHONENUMBER";
+        case AceTextCategory::INPUT_TYPE_USER_NAME:
+            return "INPUT_TYPE_USER_NAME";
+        case AceTextCategory::INPUT_TYPE_NEW_PASSWORD:
+            return "INPUT_TYPE_NEW_PASSWORD";
         default:
             return "illegal input type";
     }

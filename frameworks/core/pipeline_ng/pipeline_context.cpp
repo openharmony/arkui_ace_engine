@@ -63,6 +63,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
@@ -1431,6 +1432,58 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
 void PipelineContext::RegisterDumpInfoListener(const std::function<void(const std::vector<std::string>&)>& callback)
 {
     dumpListeners_.push_back(callback);
+}
+
+bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap)
+{
+    CHECK_NULL_RETURN(viewDataWrap, false);
+    RefPtr<FrameNode> pageNode = nullptr;
+    if (node == nullptr) {
+        if (stageManager_) {
+            pageNode = stageManager_->GetLastPage();
+        }
+    } else {
+        pageNode = node->GetPageNode();
+    }
+    CHECK_NULL_RETURN(pageNode, false);
+    pageNode->DumpViewDataPageNodes(viewDataWrap);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, false);
+    auto pageInfo = pagePattern->GetPageInfo();
+    CHECK_NULL_RETURN(pageInfo, false);
+    viewDataWrap->SetPageUrl(pageInfo->GetPageUrl());
+    return true;
+}
+
+bool PipelineContext::CheckNeedAutoSave()
+{
+    CHECK_NULL_RETURN(stageManager_, false);
+    auto pageNode = stageManager_->GetLastPage();
+    CHECK_NULL_RETURN(pageNode, false);
+    return pageNode->NeedRequestAutoSave();
+}
+
+void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap)
+{
+    CHECK_NULL_VOID(viewDataWrap);
+    auto pageNodeInfoWraps = viewDataWrap->GetPageNodeInfoWraps();
+    for (const auto& item: pageNodeInfoWraps) {
+        if (item == nullptr) {
+            continue;
+        }
+        auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(item->GetId()));
+        if (frameNode == nullptr) {
+            TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "frameNode is not found, id=%{public}d", item->GetId());
+            continue;
+        }
+        frameNode->NotifyFillRequestSuccess(item, autoFillType);
+    }
+}
+
+void PipelineContext::NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode)
+{
+    CHECK_NULL_VOID(node);
+    node->NotifyFillRequestFailed(errCode);
 }
 
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const

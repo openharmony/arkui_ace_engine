@@ -20,7 +20,7 @@
 
 #include "ability_context.h"
 #include "ability_info.h"
-
+#include "auto_fill_manager.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
 #include "wm/wm_common.h"
@@ -30,8 +30,10 @@
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
+#include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
+#include "adapter/ohos/osal/view_data_wrap_ohos.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -949,6 +951,111 @@ bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::str
     auto context = container->GetPipelineContext();
     CHECK_NULL_RETURN(context, false);
     return context->CallRouterBackToPopPage();
+}
+
+class FillRequestCallback : public AbilityRuntime::IFillRequestCallback {
+public:
+    FillRequestCallback(WeakPtr<NG::PipelineContext> pipelineContext, const RefPtr<NG::FrameNode>& node,
+        AceAutoFillType autoFillType)
+        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType) {}
+    virtual ~FillRequestCallback() = default;
+    void OnFillRequestSuccess(const AbilityBase::ViewData& viewData) override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, pageUrl=[%{private}s]", viewData.pageUrl.c_str());
+        auto pipelineContext = pipelineContext_.Upgrade();
+        CHECK_NULL_VOID(pipelineContext);
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto viewDataWrap = ViewDataWrap::CreateViewDataWrap(viewData);
+        CHECK_NULL_VOID(viewDataWrap);
+        taskExecutor->PostTask(
+            [viewDataWrap, pipelineContext, autoFillType = autoFillType_]() {
+                if (pipelineContext) {
+                    pipelineContext->NotifyFillRequestSuccess(autoFillType, viewDataWrap);
+                }
+            },
+            TaskExecutor::TaskType::UI);
+    }
+
+    void OnFillRequestFailed(int32_t errCode) override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, errCode: %{public}d", errCode);
+        auto pipelineContext = pipelineContext_.Upgrade();
+        CHECK_NULL_VOID(pipelineContext);
+        auto node = node_.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [errCode, pipelineContext, node]() {
+                if (pipelineContext) {
+                    pipelineContext->NotifyFillRequestFailed(node, errCode);
+                }
+            },
+            TaskExecutor::TaskType::UI);
+    }
+private:
+    WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
+    WeakPtr<NG::FrameNode> node_ = nullptr;
+    AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
+};
+
+bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType)
+{
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, autoFillType: %{public}d", static_cast<int32_t>(autoFillType));
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_RETURN(pipelineContext, false);
+    CHECK_NULL_RETURN(uiWindow_, false);
+    auto uiContent = uiWindow_->GetUIContent();
+    auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
+    CHECK_NULL_RETURN(uiContentImpl, false);
+    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
+    uiContentImpl->DumpViewData(node, viewDataWrap);
+
+    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType);
+    auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
+    CHECK_NULL_RETURN(viewDataWrapOhos, false);
+    auto viewData = viewDataWrapOhos->GetViewData();
+    if (AbilityRuntime::AutoFillManager::GetInstance().RequestAutoFill(
+        static_cast<AbilityBase::AutoFillType>(autoFillType), uiContent, viewData, callback) != 0) {
+        return false;
+    }
+    return true;
+}
+
+class SaveRequestCallback : public AbilityRuntime::ISaveRequestCallback {
+public:
+    SaveRequestCallback() = default;
+    virtual ~SaveRequestCallback() = default;
+    void OnSaveRequestSuccess() override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+    }
+
+    void OnSaveRequestFailed() override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+    }
+};
+
+bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node)
+{
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+    CHECK_NULL_RETURN(uiWindow_, false);
+    auto uiContent = uiWindow_->GetUIContent();
+    auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
+    CHECK_NULL_RETURN(uiContentImpl, false);
+    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
+    uiContentImpl->DumpViewData(node, viewDataWrap);
+
+    auto callback = std::make_shared<SaveRequestCallback>();
+    auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
+    CHECK_NULL_RETURN(viewDataWrapOhos, false);
+    auto viewData = viewDataWrapOhos->GetViewData();
+    if (AbilityRuntime::AutoFillManager::GetInstance().RequestAutoSave(uiContent, viewData, callback) != 0) {
+        return false;
+    }
+    return true;
 }
 
 void AceContainer::SetHapPath(const std::string& hapPath)

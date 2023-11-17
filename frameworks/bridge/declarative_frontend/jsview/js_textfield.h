@@ -90,6 +90,8 @@ public:
     static bool ParseJsCustomKeyboardBuilder(
         const JSCallbackInfo& info, int32_t index, std::function<void()>& buildFunc);
     static void SetCustomKeyboard(const JSCallbackInfo& info);
+    static void SetPasswordRules(const JSCallbackInfo& info);
+    static void SetEnableAutoFill(const JSCallbackInfo& info);
     static void SetCancelButton(const JSCallbackInfo& info);
     static void SetSelectAllValue(const JSCallbackInfo& info);
 };

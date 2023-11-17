@@ -41,6 +41,11 @@ void FrameNode::OnAccessibilityEvent(
 {}
 void FrameNode::DumpInfo() {}
 void FrameNode::DumpAdvanceInfo() {}
+void FrameNode::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
+bool FrameNode::CheckAutoSave()
+{
+    return false;
+}
 void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::MouseToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const {}

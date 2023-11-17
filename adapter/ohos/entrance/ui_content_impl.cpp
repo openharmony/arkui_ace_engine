@@ -50,6 +50,7 @@
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/page_url_checker_ohos.h"
 #include "adapter/ohos/osal/pixel_map_ohos.h"
+#include "adapter/ohos/osal/view_data_wrap_ohos.h"
 #include "base/geometry/rect.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_checker.h"
@@ -141,6 +142,14 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateSubWindowUIContent(void* abilit
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Ace lib loaded, Create SubWindowUIContent.");
     return new UIContentImpl(reinterpret_cast<OHOS::AppExecFwk::Ability*>(ability));
+}
+
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_GetUIContent(int32_t instanceId)
+{
+    LOGI("Ace lib loaded, GetUIContent.");
+    auto uiWindow = Platform::AceContainer::GetUIWindow(instanceId);
+    CHECK_NULL_RETURN(uiWindow, nullptr);
+    return uiWindow->GetUIContent();
 }
 
 class OccupiedAreaChangeListener : public OHOS::Rosen::IOccupiedAreaChangeListener {
@@ -1924,6 +1933,81 @@ void UIContentImpl::SetParentToken(sptr<IRemoteObject> token)
 sptr<IRemoteObject> UIContentImpl::GetParentToken()
 {
     return parentToken_;
+}
+
+bool UIContentImpl::CheckNeedAutoSave()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    ContainerScope scope(instanceId_);
+    bool needAutoSave = false;
+    taskExecutor->PostSyncTask(
+        [&needAutoSave, container]() {
+            CHECK_NULL_VOID(container);
+            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipelineContext);
+            needAutoSave = pipelineContext->CheckNeedAutoSave();
+        },
+        TaskExecutor::TaskType::UI);
+
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "UIContentImpl CheckNeedAutoSave, value is %{public}d", needAutoSave);
+    return needAutoSave;
+}
+
+bool UIContentImpl::DumpViewData(AbilityBase::ViewData& viewData)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    ContainerScope scope(instanceId_);
+    bool ret = false;
+    taskExecutor->PostSyncTask(
+        [this, &ret, &viewData]() {
+            auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
+            CHECK_NULL_VOID(viewDataWrap);
+            ret = DumpViewData(nullptr, viewDataWrap);
+            auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
+            CHECK_NULL_VOID(viewDataWrapOhos);
+            viewData = viewDataWrapOhos->GetViewData();
+        },
+        TaskExecutor::TaskType::UI);
+
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "UIContentImpl DumpViewData, ret is %{public}d", ret);
+    return ret;
+}
+
+bool UIContentImpl::DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap)
+{
+    CHECK_NULL_RETURN(viewDataWrap, false);
+    auto context = context_.lock();
+    auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
+    std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> info;
+    if (abilityContext) {
+        info = abilityContext->GetAbilityInfo();
+    } else {
+        auto extensionContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::ExtensionContext>(context);
+        if (extensionContext) {
+            info = extensionContext->GetAbilityInfo();
+        } else {
+            TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "context is not AbilityContext or ExtensionContext.");
+            return false;
+        }
+    }
+    CHECK_NULL_RETURN(info, false);
+    viewDataWrap->SetAbilityName(info->name);
+    viewDataWrap->SetModuleName(info->moduleName);
+    viewDataWrap->SetBundleName(info->bundleName);
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "bundleName=[%{private}s], moduleName=[%{private}s], abilityName=[%{private}s]",
+        info->bundleName.c_str(), info->moduleName.c_str(), info->name.c_str());
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipelineContext, false);
+    return pipelineContext->DumpPageViewData(node, viewDataWrap);
 }
 
 void UIContentImpl::ProcessFormVisibleChange(bool isVisible)

@@ -80,6 +80,8 @@ public:
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetSelectionMenuHidden(bool contextMenuHidden) override;
     void SetCustomKeyboard(const std::function<void()>&& buildFunc) override;
+    void SetPasswordRules(const std::string& passwordRules) override;
+    void SetEnableAutoFill(bool enableAutoFill) override;
     void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) override;
     void SetCancelIconSize(const CalcDimension& iconSize) override;
     void SetCanacelIconSrc(const std::string& iconSrc) override;

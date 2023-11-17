@@ -164,6 +164,13 @@ OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
 }
 void TextFieldPattern::DumpAdvanceInfo() {}
 void TextFieldPattern::DumpInfo() {}
+void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
+void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
+void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode) {}
+bool TextFieldPattern::CheckAutoSave()
+{
+    return false;
+}
 void TextFieldPattern::OnColorConfigurationUpdate() {}
 
 void TextFieldPattern::InsertValue(const std::string& insertValue) {};
