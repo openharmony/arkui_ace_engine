@@ -3189,7 +3189,7 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
     SetLinearGradientBlur(blurPara);
 }
 
-void JSViewAbstract::JsDynamicLightUp(const JSCallbackInfo& info)
+void JSViewAbstract::JsBackgroundBrightness(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
         return;
@@ -5436,7 +5436,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("colorBlend", &JSViewAbstract::JsColorBlend);
     JSClass<JSViewAbstract>::StaticMethod("backdropBlur", &JSViewAbstract::JsBackdropBlur);
     JSClass<JSViewAbstract>::StaticMethod("linearGradientBlur", &JSViewAbstract::JsLinearGradientBlur);
-    JSClass<JSViewAbstract>::StaticMethod("dynamicLightUp", &JSViewAbstract::JsDynamicLightUp);
+    JSClass<JSViewAbstract>::StaticMethod("backgroundBrightness", &JSViewAbstract::JsBackgroundBrightness);
     JSClass<JSViewAbstract>::StaticMethod("windowBlur", &JSViewAbstract::JsWindowBlur);
     JSClass<JSViewAbstract>::StaticMethod("visibility", &JSViewAbstract::SetVisibility);
     JSClass<JSViewAbstract>::StaticMethod("flexBasis", &JSViewAbstract::JsFlexBasis);
