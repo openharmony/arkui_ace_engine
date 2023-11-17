@@ -196,10 +196,8 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
         if (layoutProperty->GetCalcLayoutConstraint()) {
             idealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
         }
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            constraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(), idealSize);
-        }
-        constraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(), idealSize, true);
+        auto greaterThanApiTen = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
+        constraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(), idealSize, greaterThanApiTen);
     }
 
     auto&& insets = layoutProperty->GetSafeAreaInsets();

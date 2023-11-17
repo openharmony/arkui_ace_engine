@@ -15,7 +15,8 @@
 
 namespace OHOS::Ace::NG {
 template<typename T>
-void LayoutConstraintT<T>::ApplyAspectRatio(float ratio, const std::optional<CalcSize>& calcSize, bool IsApiTen)
+void LayoutConstraintT<T>::ApplyAspectRatio(
+    float ratio, const std::optional<CalcSize>& calcSize, bool greaterThanApiTen)
 {
     if (!Positive(ratio)) {
         // just in case ratio is illegal value
@@ -68,7 +69,7 @@ void LayoutConstraintT<T>::ApplyAspectRatio(float ratio, const std::optional<Cal
     if (NearEqual(maxSize.Width(), Infinity<T>()) && NearEqual(maxSize.Height(), Infinity<T>())) {
         return;
     }
-    ApplyAspectRatioByMaxSize(ratio, useDefinedWidth, IsApiTen);
+    ApplyAspectRatioByMaxSize(ratio, useDefinedWidth, greaterThanApiTen);
 }
 
 template<typename T>
@@ -88,7 +89,8 @@ void LayoutConstraintT<T>::ApplyAspectRatioToParentIdealSize(bool useWidth, floa
 }
 
 template<typename T>
-void LayoutConstraintT<T>::ApplyAspectRatioByMaxSize(float ratio, std::optional<bool> useDefinedWidth, bool IsApiTen)
+void LayoutConstraintT<T>::ApplyAspectRatioByMaxSize(
+    float ratio, std::optional<bool> useDefinedWidth, bool greaterThanApiTen)
 {
     if (!Positive(ratio)) {
         return;
@@ -97,7 +99,7 @@ void LayoutConstraintT<T>::ApplyAspectRatioByMaxSize(float ratio, std::optional<
         ApplyAspectRatioWithCalcSize(ratio, useDefinedWidth.value());
         return;
     }
-    ApplyAspectRatioWithoutCalcSize(ratio, IsApiTen);
+    ApplyAspectRatioWithoutCalcSize(ratio, greaterThanApiTen);
 }
 
 template<typename T>
@@ -120,19 +122,26 @@ void LayoutConstraintT<T>::ApplyAspectRatioWithCalcSize(float ratio, bool useDef
 }
 
 template<typename T>
-void LayoutConstraintT<T>::ApplyAspectRatioWithoutCalcSize(float ratio, bool IsApiTen)
+void LayoutConstraintT<T>::ApplyAspectRatioWithoutCalcSize(float ratio, bool greaterThanApiTen)
 {
     if (!Positive(ratio)) {
         return;
     }
-    if (IsApiTen) {
-        if (percentReference.Height() / ratio > maxSize.Width()) {
+    if (greaterThanApiTen) {
+        if (percentReference.Height() * ratio > maxSize.Width()) {
             minSize.SetHeight(minSize.Width() / ratio);
             maxSize.SetHeight(maxSize.Width() / ratio);
             percentReference.SetHeight(percentReference.Width() / ratio);
             ApplyAspectRatioToParentIdealSize(true, ratio);
             return;
         }
+        if (percentReference.Width() / ratio > maxSize.Height()) {
+            minSize.SetWidth(minSize.Height() * ratio);
+            maxSize.SetWidth(maxSize.Height() * ratio);
+            percentReference.SetWidth(percentReference.Height() * ratio);
+            ApplyAspectRatioToParentIdealSize(false, ratio);
+        }
+        return;
     } else {
         if (maxSize.Width() < maxSize.Height()) {
             minSize.SetHeight(minSize.Width() / ratio);
