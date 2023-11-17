@@ -267,12 +267,12 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     CHECK_NULL_RETURN(gesture, -1);
     // Masked the default drag behavior of node image
     gesture->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
-    if (options.onClick) {
-        auto tmpFunc = options.onClick;
+    if (options.userGestureOption.onClick) {
+        auto tmpFunc = options.userGestureOption.onClick;
         gesture->SetUserOnClick(std::move(tmpFunc));
     }
-    if (options.onLongPress) {
-        auto tmpFunc = options.onLongPress;
+    if (options.userGestureOption.onLongPress) {
+        auto tmpFunc = options.userGestureOption.onLongPress;
         auto tmpFuncPtr = AceType::MakeRefPtr<LongPressEvent>(std::move(tmpFunc));
         gesture->SetLongPressEvent(tmpFuncPtr);
     }
@@ -413,12 +413,12 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPa
         spanItem->GetIndex(start, end);
         UpdateParagraphStyle(start, end, *options.paraStyle);
     }
-    if (options.onClick) {
-        auto tmpFunc = options.onClick;
+    if (options.userGestureOption.onClick) {
+        auto tmpFunc = options.userGestureOption.onClick;
         spanItem->SetOnClickEvent(std::move(tmpFunc));
     }
-    if (options.onLongPress) {
-        auto tmpFunc = options.onLongPress;
+    if (options.userGestureOption.onLongPress) {
+        auto tmpFunc = options.userGestureOption.onLongPress;
         spanItem->SetLongPressEvent(std::move(tmpFunc));
     }
     if (!isPaste && textSelector_.IsValid()) {
