@@ -116,6 +116,7 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/frame_rate/frame_rate_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_client.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_manager.cpp",

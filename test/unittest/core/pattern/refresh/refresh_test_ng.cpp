@@ -52,7 +52,6 @@ constexpr float PERCENT = 0.01; // Percent
 constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
 constexpr float DEFAULT_SPEED = 10.0f;
 constexpr float DEFAULT_OFFSET = 20.0f;
-constexpr int32_t CALL_TIMES = 2;
 } // namespace
 class RefreshTestNg : public testing::Test, public TestNG {
 public:
@@ -845,9 +844,6 @@ HWTEST_F(RefreshTestNg, RefreshDragFrameRatio001, TestSize.Level1)
     EXPECT_TRUE(!!frameNode);
     auto refreshPattern = frameNode->GetPattern<RefreshPattern>();
     EXPECT_TRUE(!!refreshPattern);
-    auto renderContext = AceType::DynamicCast<MockRenderContext>(frameNode->GetRenderContext());
-    EXPECT_TRUE(!!renderContext);
-    EXPECT_CALL(*renderContext, AddFRCSceneInfo(_, _)).Times(CALL_TIMES);
     refreshPattern->HandleDragStart(true, DEFAULT_SPEED);
     refreshPattern->HandleDragUpdate(DEFAULT_OFFSET, DEFAULT_SPEED);
     refreshPattern->HandleDragUpdate(DEFAULT_OFFSET, DEFAULT_SPEED);
