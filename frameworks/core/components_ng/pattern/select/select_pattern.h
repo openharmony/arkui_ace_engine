@@ -180,6 +180,7 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnColorConfigurationUpdate() override;
     void OnLanguageConfigurationUpdate() override;
+    void ShowSelectMenu();
 
 private:
     void OnAttachToFrameNode() override;
@@ -239,8 +240,6 @@ private:
     void CreateSelectedCallback();
     // change text and spinner color if disabled
     void SetDisabledStyle();
-
-    void ShowSelectMenu();
 
     // update text to selected option's text
     void UpdateText(int32_t index);

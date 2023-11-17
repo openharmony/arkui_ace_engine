@@ -91,6 +91,7 @@ private:
     bool HandleDirectionalMoveKey(const KeyEvent& keyEvent);
     void ParseAppendValue(KeyCode keycode, std::string& appendElement);
     bool IsCtrlShiftWith(const KeyEvent& keyEvent, const KeyCode expectCode);
+    bool HandleTabEvent(const KeyEvent& keyEvent);
     WeakPtr<Pattern> weakPattern_;
     ACE_DISALLOW_COPY_AND_MOVE(KeyEventHandler);
 };
