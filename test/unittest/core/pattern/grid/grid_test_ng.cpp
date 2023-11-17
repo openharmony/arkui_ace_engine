@@ -1625,6 +1625,45 @@ HWTEST_F(GridTestNg, Event006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Event007
+ * @tc.desc: Emulate consecutive swipes
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, Event007, TestSize.Level1)
+{
+    bool isScrollStartCalled = false;
+    bool isScrollStopCalled = false;
+    auto scrollStart = [&isScrollStartCalled]() { isScrollStartCalled = true; };
+    auto scrollStop = [&isScrollStopCalled]() { isScrollStopCalled = true; };
+    Create([scrollStart, scrollStop](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScrollStart(scrollStart);
+        model.SetOnScrollStop(scrollStop);
+        CreateColItem(10);
+    });
+
+    pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
+    EXPECT_TRUE(isScrollStartCalled);
+
+    // reset
+    isScrollStartCalled = false;
+
+    pattern_->OnScrollEndCallback();
+    EXPECT_TRUE(pattern_->scrollStop_);
+    EXPECT_FALSE(isScrollStopCalled);
+
+    // scrollStart again, before layout
+    pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
+    EXPECT_FALSE(isScrollStartCalled);
+    EXPECT_FALSE(pattern_->scrollStop_);
+    EXPECT_FALSE(isScrollStopCalled);
+
+    pattern_->OnScrollEndCallback();
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
+    EXPECT_TRUE(isScrollStopCalled);
+}
+
+/**
  * @tc.name: VerticalGridWithoutScrollBar001
  * @tc.desc: Test Grid(Axis::VERTICAL) Scroll Without Scroll Bar Without Animation
  * @tc.type: FUNC
