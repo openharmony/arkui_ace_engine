@@ -32,6 +32,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
+const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 } // namespace
 
 void ScrollablePattern::SetAxis(Axis axis)
@@ -343,6 +344,13 @@ void ScrollablePattern::AddScrollEvent()
         return pattern->NeedScrollSnapToSide(delta);
     };
     scrollable->SetNeedScrollSnapToSideCallback(std::move(needScrollSnapToSideCallback));
+
+    auto dragFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        return pattern->NotifyFRCSceneInfo(velocity, sceneStatus);
+    };
+    scrollable->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
 
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
     scrollableEvent_->SetScrollable(scrollable);
@@ -1529,5 +1537,12 @@ void ScrollablePattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
         // use LAST_ITEM for children count changed after scrollEdge(Edge.Bottom) and before layout
         ScrollToIndex(LAST_ITEM, smooth, ScrollAlign::END);
     }
+}
+
+void ScrollablePattern::NotifyFRCSceneInfo(double velocity, SceneStatus sceneStatus)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->AddFRCSceneInfo(SCROLLABLE_DRAG_SCENE, velocity, sceneStatus);
 }
 } // namespace OHOS::Ace::NG

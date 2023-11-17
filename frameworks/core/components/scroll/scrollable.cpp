@@ -361,6 +361,9 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
 {
     ACE_FUNCTION_TRACE();
     currentVelocity_ = info.GetMainVelocity();
+    if (dragFRCSceneCallback_) {
+        dragFRCSceneCallback_(currentVelocity_, NG::SceneStatus::START);
+    }
     if (continuousDragStatus_) {
         IncreaseContinueDragCount();
         task_.Cancel();
@@ -559,6 +562,9 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
 {
     ACE_FUNCTION_TRACE();
     currentVelocity_ = info.GetMainVelocity();
+    if (dragFRCSceneCallback_) {
+        dragFRCSceneCallback_(currentVelocity_, NG::SceneStatus::RUNNING);
+    }
     if (!NearZero(info.GetMainVelocity()) && dragCount_ >= FIRST_THRESHOLD) {
         if (Negative(lastVelocity_ / info.GetMainVelocity())) {
             ResetContinueDragCount();
@@ -600,6 +606,9 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, position is %{public}lf and %{public}lf, "
         "velocity is %{public}lf",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
+    if (dragFRCSceneCallback_) {
+        dragFRCSceneCallback_(info.GetMainVelocity(), NG::SceneStatus::END);
+    }
     isTouching_ = false;
     controller_->ClearAllListeners();
     springController_->ClearAllListeners();
