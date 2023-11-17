@@ -719,6 +719,7 @@ bool PipelineContext::OnBackPressed()
 
 RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
 {
+    CHECK_NULL_RETURN(stageManager_, nullptr);
     auto lastPage = stageManager_->GetLastPage();
     CHECK_NULL_RETURN(lastPage, nullptr);
     auto navigationNode = lastPage->FindChildNodeOfClass<NavigationGroupNode>();
