@@ -1077,7 +1077,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
     PopupInfo info = overlayManager->GetPopupInfo(targetNode->GetId());
     info.isCurrentOnShow = true;
     info.popupId = 1;
-    overlayManager->ShowPopup(targetNode->GetId(), info);
+    overlayManager->UpdatePopupNode(targetNode->GetId(), info);
 
     /**
      * @tc.steps: step3. Call BindPopup many times.
