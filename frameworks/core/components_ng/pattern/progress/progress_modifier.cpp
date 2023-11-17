@@ -1035,10 +1035,10 @@ void ProgressModifier::PaintRingProgressOrShadow(
     canvas.Rotate(-ANGLE_90, centerPt.GetX(), centerPt.GetY());
 #ifndef USE_ROSEN_DRAWING
     pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())), colors, pos, RSTileMode::CLAMP, 0, angle));
+        ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())), colors, pos, RSTileMode::CLAMP, 0, angle, nullptr));
 #else
     pen.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())), colors, pos, RSTileMode::CLAMP, 0, angle));
+        ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())), colors, pos, RSTileMode::CLAMP, 0, angle, nullptr));
 #endif
     canvas.AttachPen(pen);
     canvas.DrawArc(
@@ -1103,13 +1103,13 @@ void ProgressModifier::PaintRingSweeping(RSCanvas& canvas, const RingProgressDat
 #ifndef USE_ROSEN_DRAWING
     pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
         ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())), colors, pos,
-        RSTileMode::CLAMP, 0, ANGLE_45));
+        RSTileMode::CLAMP, 0, ANGLE_45, nullptr));
 
     RSPath path;
 #else
     pen.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
         ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())), colors, pos,
-        RSTileMode::CLAMP, 0, ANGLE_45));
+        RSTileMode::CLAMP, 0, ANGLE_45, nullptr));
 
     RSRecordingPath path;
 #endif

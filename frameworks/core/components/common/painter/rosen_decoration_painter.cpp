@@ -1009,7 +1009,7 @@ public:
 
         RSMatrix matrix;
         if (!NearZero(rotation_)) {
-            matrix.Rotate(rotation_, center_.GetX(), center_.GetY());
+            matrix.PreRotate(rotation_, center_.GetX(), center_.GetY());
         }
 
         std::vector<RSScalar> pos;
@@ -1019,7 +1019,8 @@ public:
         if (isRepeat_) {
             tileMode = RSTileMode::REPEAT;
         }
-        return RSRecordingShaderEffect::CreateSweepGradient(center_, colors, pos, tileMode, startAngle_, endAngle_);
+        return RSRecordingShaderEffect::CreateSweepGradient(
+            center_, colors, pos, tileMode, startAngle_, endAngle_, &matrix);
     }
 #endif
 
