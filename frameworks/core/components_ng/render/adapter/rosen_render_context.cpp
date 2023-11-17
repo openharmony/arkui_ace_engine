@@ -47,6 +47,7 @@
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/common/rosen/rosen_convert_helper.h"
+#include "core/components/common/properties/blur_parameter.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -141,6 +142,28 @@ Rosen::Gravity GetRosenGravity(RenderFit renderFit)
     };
     int64_t idx = BinarySearchFindIndex(gravityMap, ArraySize(gravityMap), renderFit);
     return idx != -1 ? gravityMap[idx].value : Rosen::Gravity::DEFAULT;
+}
+
+std::shared_ptr<Rosen::RSFilter> CreateRSMaterialFilter(const BlurStyleOption& blurStyleOption, float dipScale)
+{
+    ThemeColorMode colorMode = blurStyleOption.colorMode;
+    if (blurStyleOption.colorMode == ThemeColorMode::SYSTEM) {
+        colorMode = SystemProperties::GetColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
+    }
+    auto blurParam = GetBlurParameter(blurStyleOption.blurStyle, colorMode);
+    CHECK_NULL_RETURN(blurParam, nullptr);
+    auto ratio = blurStyleOption.scale;
+    auto maskColor = blurParam->maskColor.BlendOpacity(ratio);
+    auto radiusPx = blurParam->radius * dipScale;
+#ifndef USE_ROSEN_DRAWING
+    auto radiusBlur = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx) * ratio;
+#else
+    auto radiusBlur = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx) * ratio;
+#endif
+    auto saturation = (blurParam->saturation - 1) * ratio + 1.0;
+    auto brightness = (blurParam->brightness - 1) * ratio + 1.0;
+    return Rosen::RSFilter::CreateMaterialFilter(radiusBlur, saturation, brightness, maskColor.GetValue(),
+        static_cast<Rosen::BLUR_COLOR_MODE>(blurStyleOption.colorMode));
 }
 } // namespace
 
@@ -609,10 +632,10 @@ void RosenRenderContext::SetBackBlurFilter()
     CHECK_NULL_VOID(context);
     const auto& background = GetBackground();
     CHECK_NULL_VOID(background);
-    const auto& blurStyle = background->propBlurStyleOption;
+    const auto& blurStyleOption = background->propBlurStyleOption;
     std::shared_ptr<Rosen::RSFilter> backFilter;
-    auto dipScale_ = context->GetDipScale();
-    if (!blurStyle.has_value()) {
+    auto dipScale = context->GetDipScale();
+    if (!blurStyleOption.has_value()) {
         const auto& radius = background->propBlurRadius;
         if (radius.has_value() && radius->IsValid()) {
             float radiusPx = context->NormalizeToPx(radius.value());
@@ -623,12 +646,8 @@ void RosenRenderContext::SetBackBlurFilter()
 #endif
             backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
         }
-    } else if (GetRosenBlurStyleValue(blurStyle.value()) == MATERIAL_BLUR_STYLE::NO_MATERIAL) {
-        backFilter = nullptr;
     } else {
-        backFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(GetRosenBlurStyleValue(blurStyle.value())),
-            static_cast<float>(dipScale_), static_cast<Rosen::BLUR_COLOR_MODE>(blurStyle->adaptiveColor),
-            static_cast<float>(blurStyle->scale));
+        backFilter = CreateRSMaterialFilter(blurStyleOption.value(), dipScale);
     }
     rsNode_->SetBackgroundFilter(backFilter);
 }
@@ -639,10 +658,10 @@ void RosenRenderContext::SetFrontBlurFilter()
     CHECK_NULL_VOID(context);
     const auto& foreground = GetForeground();
     CHECK_NULL_VOID(foreground);
-    const auto& blurStyle = foreground->propBlurStyleOption;
+    const auto& blurStyleOption = foreground->propBlurStyleOption;
     std::shared_ptr<Rosen::RSFilter> frontFilter;
-    auto dipScale_ = context->GetDipScale();
-    if (!blurStyle.has_value()) {
+    auto dipScale = context->GetDipScale();
+    if (!blurStyleOption.has_value()) {
         const auto& radius = foreground->propBlurRadius;
         if (radius.has_value() && radius->IsValid()) {
             float radiusPx = context->NormalizeToPx(radius.value());
@@ -653,12 +672,8 @@ void RosenRenderContext::SetFrontBlurFilter()
 #endif
             frontFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
         }
-    } else if (GetRosenBlurStyleValue(blurStyle.value()) == MATERIAL_BLUR_STYLE::NO_MATERIAL) {
-        frontFilter = nullptr;
     } else {
-        frontFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(GetRosenBlurStyleValue(blurStyle.value())),
-            static_cast<float>(dipScale_), static_cast<Rosen::BLUR_COLOR_MODE>(blurStyle->adaptiveColor),
-            static_cast<float>(blurStyle->scale));
+        frontFilter = CreateRSMaterialFilter(blurStyleOption.value(), dipScale);
     }
 
     rsNode_->SetFilter(frontFilter);

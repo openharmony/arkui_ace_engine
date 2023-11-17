@@ -1095,6 +1095,11 @@ var BlurStyle;
   BlurStyle[BlurStyle["BACKGROUND_REGULAR"] = 5] = "BACKGROUND_REGULAR";
   BlurStyle[BlurStyle["BACKGROUND_THICK"] = 6] = "BACKGROUND_THICK";
   BlurStyle[BlurStyle["BACKGROUND_ULTRA_THICK"] = 7] = "BACKGROUND_ULTRA_THICK";
+  BlurStyle[BlurStyle["COMPONENT_ULTRA_THIN"] = 8] = "COMPONENT_ULTRA_THIN";
+  BlurStyle[BlurStyle["COMPONENT_THIN"] = 9] = "COMPONENT_THIN";
+  BlurStyle[BlurStyle["COMPONENT_REGULAR"] = 10] = "COMPONENT_REGULAR";
+  BlurStyle[BlurStyle["COMPONENT_THICK"] = 11] = "COMPONENT_THICK";
+  BlurStyle[BlurStyle["COMPONENT_ULTRA_THICK"] = 12] = "COMPONENT_ULTRA_THICK";
   BlurStyle[BlurStyle["NONE"] = 0] = "NONE";
 })(BlurStyle || (BlurStyle = {}));
 
