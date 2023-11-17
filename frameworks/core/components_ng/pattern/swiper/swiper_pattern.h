@@ -667,7 +667,7 @@ private:
     RefPtr<Animator> springController_;
 
     // Control fade animation when drag beyond boundary and drag end.
-    RefPtr<Animator> fadeController_;
+    std::shared_ptr<AnimationUtils::Animation> fadeAnimation_;
 
     // Control translate animation for indicator.
     RefPtr<Animator> indicatorController_;
@@ -749,6 +749,7 @@ private:
     bool isIndicatorLongPress_ = false;
     bool stopIndicatorAnimation_ = true;
     bool isTouchPad_ = false;
+    bool fadeAnimationIsRunning_ = false;
 
     float mainDeltaSum_ = 0.0f;
     std::optional<int32_t> cachedCount_;
