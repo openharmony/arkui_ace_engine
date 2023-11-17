@@ -165,7 +165,6 @@ public:
     std::string GetInspector(NodeId nodeId) override;
 
     void PushJsCallbackToRenderNode(NodeId id, double ratio, std::function<void(bool, double)>&& callback) override;
-    void RemoveVisibleChangeNode(NodeId id) override;
     // For async event.
     void SetCallBackResult(const std::string& callBackId, const std::string& result) override;
 

@@ -204,8 +204,6 @@ void PluginFrontendDelegate::TriggerPageUpdate(int32_t pageId, bool directExecut
 
 void PluginFrontendDelegate::PostJsTask(std::function<void()>&& task) {}
 
-void PluginFrontendDelegate::RemoveVisibleChangeNode(NodeId id) {}
-
 const std::string& PluginFrontendDelegate::GetAppID() const
 {
     return "";
