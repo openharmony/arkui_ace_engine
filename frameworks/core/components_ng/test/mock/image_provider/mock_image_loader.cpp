@@ -66,5 +66,4 @@ bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, cons
 
 void ImageLoader::WriteCacheToFile(const std::string& uri, const std::vector<uint8_t>& imageData) {}
 void ImageLoader::WriteCacheToFile(const std::string& uri, const std::string& imageData) {}
-void ImageLoader::WriteCacheToFileWithData(const std::string& uri, const void* const data, size_t size) {}
 } // namespace OHOS::Ace
