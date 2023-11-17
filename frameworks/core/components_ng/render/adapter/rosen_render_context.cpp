@@ -354,8 +354,7 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
     auto paintRect = AdjustPaintRect();
 
     if (needRoundToPixelGrid) {
-        RoundToPixelGrid(
-            geometryNode->GetParentAbsoluteOffset().GetX(), geometryNode->GetParentAbsoluteOffset().GetY());
+        RoundToPixelGrid(0, 0);
         paintRect.SetRect(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
     }
     SyncGeometryProperties(paintRect);
@@ -1643,6 +1642,7 @@ void RosenRenderContext::UpdateBorderWidthF(const BorderWidthPropertyF& value)
     cornerBorderWidth.SetValues(value.leftDimen.value_or(0), static_cast<float>(value.topDimen.value_or(0)),
         static_cast<float>(value.rightDimen.value_or(0)), static_cast<float>(value.bottomDimen.value_or(0)));
     rsNode_->SetBorderWidth(cornerBorderWidth);
+    borderWidth_ = cornerBorderWidth;
     RequestNextFrame();
 }
 
@@ -2020,13 +2020,14 @@ float RosenRenderContext::RoundValueToPixelGrid(float value, bool forceCeil, boo
         scaledValue = scaledValue - fractials;
     } else if (NearEqual(fractials, 1.0f)) {
         scaledValue = scaledValue - fractials + 1.0f;
-    } else if (forceCeil) {
-        scaledValue = scaledValue - fractials + 1.0f;
-    } else if (forceFloor) {
-        scaledValue = scaledValue - fractials;
     } else {
-        scaledValue =
-            (!std::isnan(fractials) && (GreatOrEqual(fractials, 0.5f)) ? 1.0f : 0.0f) + scaledValue - fractials;
+        if (GreatOrEqual(fractials, 0.75f)) {
+            scaledValue = scaledValue - fractials + 1.0f;
+        } else if (GreatOrEqual(fractials, 0.25f)) {
+            scaledValue = scaledValue - fractials + 0.5f;
+        } else {
+            scaledValue = scaledValue - fractials;
+        }
     }
     return scaledValue;
 }
@@ -2037,34 +2038,50 @@ void RosenRenderContext::RoundToPixelGrid(float absoluteLeft, float absoluteTop)
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto geometryNode = frameNode->GetGeometryNode();
-
+    bool textRounding = false;
     float nodeRelativedLeft = geometryNode->GetPixelGridRoundOffset().GetX();
     float nodeRelativedTop = geometryNode->GetPixelGridRoundOffset().GetY();
-
     float nodeWidth = geometryNode->GetFrameSize().Width();
     float nodeHeight = geometryNode->GetFrameSize().Height();
-
     float absoluteNodeLeft = absoluteLeft + nodeRelativedLeft;
     float absoluteNodeTop = absoluteTop + nodeRelativedTop;
-
     float absoluteNodeRight = absoluteNodeLeft + nodeWidth;
     float absoluteNodeBottom = absoluteNodeTop + nodeHeight;
-
-    bool textRounding = frameNode->GetTag() == V2::TEXT_ETS_TAG;
-
-    geometryNode->SetPixelGridRoundOffset(OffsetF(RoundValueToPixelGrid(nodeRelativedLeft, false, textRounding),
-        RoundValueToPixelGrid(nodeRelativedTop, false, textRounding)));
-
     bool hasFractionalWidth = !NearEqual(fmod(nodeWidth, 1.0f), 0.0f) && !NearEqual(fmod(nodeWidth, 1.0f), 1.0f);
     bool hasFractionalHeight = !NearEqual(fmod(nodeHeight, 1.0f), 0.0f) && !NearEqual(fmod(nodeHeight, 1.0f), 1.0f);
-
-    geometryNode->SetPixelGridRoundSize(
-        SizeF(RoundValueToPixelGrid(
-                  absoluteNodeRight, (textRounding && hasFractionalWidth), (textRounding && !hasFractionalWidth)) -
-                  RoundValueToPixelGrid(absoluteNodeLeft, false, textRounding),
-            RoundValueToPixelGrid(
-                absoluteNodeBottom, (textRounding && hasFractionalHeight), (textRounding && !hasFractionalHeight)) -
-                RoundValueToPixelGrid(absoluteNodeTop, false, textRounding)));
+    float nodeLeftI = RoundValueToPixelGrid(nodeRelativedLeft, false, textRounding);
+    float nodeTopI = RoundValueToPixelGrid(nodeRelativedTop, false, textRounding);
+    geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
+    // round node
+    float nodeWidthI = RoundValueToPixelGrid(
+        absoluteNodeRight, (textRounding && hasFractionalWidth), (textRounding && !hasFractionalWidth)) -
+            RoundValueToPixelGrid(absoluteNodeLeft, false, textRounding);
+    float nodeHeightI = RoundValueToPixelGrid(
+        absoluteNodeBottom, (textRounding && hasFractionalHeight), (textRounding && !hasFractionalHeight)) -
+            RoundValueToPixelGrid(absoluteNodeTop, false, textRounding);
+    geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
+    // round inner
+    float innerLeft = absoluteNodeLeft + borderWidth_[0];
+    float innerRight = absoluteNodeLeft + nodeWidth - borderWidth_[2];
+    float innerTop = absoluteNodeTop + borderWidth_[1];
+    float innerBottom = absoluteNodeTop + nodeHeight - borderWidth_[3];
+    float innerWidthI = RoundValueToPixelGrid(
+        innerRight, (textRounding && hasFractionalWidth), (textRounding && !hasFractionalWidth)) -
+            RoundValueToPixelGrid(innerLeft, false, textRounding);
+    float innerHeightI = RoundValueToPixelGrid(
+        innerBottom, (textRounding && hasFractionalHeight), (textRounding && !hasFractionalHeight)) -
+            RoundValueToPixelGrid(innerTop, false, textRounding);
+    // update border
+    float borderLeftI = RoundValueToPixelGrid(borderWidth_[0], false, false);
+    float borderTopI = RoundValueToPixelGrid(borderWidth_[1], false, false);
+    float borderRightI = nodeWidthI - innerWidthI - borderLeftI;
+    float borderBottomI = nodeHeightI - innerHeightI - borderTopI;
+    BorderWidthPropertyF borderWidthPropertyF;
+    borderWidthPropertyF.leftDimen = borderLeftI;
+    borderWidthPropertyF.topDimen = borderTopI;
+    borderWidthPropertyF.rightDimen = borderRightI;
+    borderWidthPropertyF.bottomDimen = borderBottomI;
+    UpdateBorderWidthF(borderWidthPropertyF);
 }
 
 void RosenRenderContext::CombineMarginAndPosition(Dimension& resultX, Dimension& resultY,
