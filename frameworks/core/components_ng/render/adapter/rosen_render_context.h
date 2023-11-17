@@ -505,6 +505,8 @@ private:
 
     RefPtr<TouchEventImpl> touchListener_;
     VectorF currentScale_ = VectorF(1.0f, 1.0f);
+    // borderLeft borderTop borderRight borderBottom
+    Rosen::Vector4f borderWidth_ = Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f);
     bool isTouchUpFinished_ = true;
 
     bool useContentRectForRSFrame_;
