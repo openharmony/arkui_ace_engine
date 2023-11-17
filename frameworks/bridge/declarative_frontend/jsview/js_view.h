@@ -315,6 +315,8 @@ public:
 
     void JSGetProxiedItemRenderState(const JSCallbackInfo& info);
 
+    void JSGetNavDestinationInfo(const JSCallbackInfo& info);
+
     // Release the UINode hold on the JS object and trigger the delete phase.
     void JSResetRecycleCustomNode(const JSCallbackInfo& info)
     {

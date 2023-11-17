@@ -475,6 +475,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(panda::JsiRuntimeCal
         return JsiValueConvertor::toJsiValueWithVM<R>(vm, result);
     } else if constexpr (!isVoid && !hasArguments) {
         // R C::MemberFunction()
+        LOGE("testtest R C::MemberFunction()");
         auto res = (instance->*fnPtr)();
         return JsiValueConvertor::toJsiValueWithVM<R>(vm, res);
     }

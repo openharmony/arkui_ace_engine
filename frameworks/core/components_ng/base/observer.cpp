@@ -19,17 +19,20 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
 namespace OHOS::Ace::NG {
-std::list<RefPtr<UIObserverListener>> UIObserver::unspecifiedNavigationListeners_;
-std::unordered_map<std::string, std::list<RefPtr<UIObserverListener>>> UIObserver::specifiedCNavigationListeners_;
+using namespace Framework;
+std::list<std::shared_ptr<UIObserverListener>> UIObserver::unspecifiedNavigationListeners_;
+std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedCNavigationListeners_;
 
 void UIObserverHandler::NotifyNavigationStateChange(
     const RefPtr<NavDestinationPattern>& pattern, NavDestinationState state)
 {
     LOGE("testtest UIObserverHandler NotifyNavigationStateChange");
-    std::string navigationId = "";
+    std::string navigationId;
     std::string navDestinationName = pattern->GetName();
     for (const auto& listener : UIObserver::unspecifiedNavigationListeners_) {
         listener->OnNavigationStateChange(navigationId, navDestinationName, state);
@@ -47,30 +50,53 @@ void UIObserverHandler::NotifyNavigationStateChange(
     }
 }
 
+std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto custom = AceType::DynamicCast<UINode>(node);
+    auto parent = custom->GetParent();
+    while (parent) {
+        if (parent->GetTag() == V2::NAVDESTINATION_CONTENT_ETS_TAG) {
+            break;
+        }
+        parent = parent->GetParent();
+    }
+    CHECK_NULL_RETURN(parent, nullptr);
+    auto nav = AceType::DynamicCast<FrameNode>(parent);
+    CHECK_NULL_RETURN(nav, nullptr);
+    auto pattern = nav->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return std::make_shared<NavDestinationInfo>(
+        "", pattern->GetName(), pattern->GetIsOnShow() ? NavDestinationState::ON_SHOW : NavDestinationState::ON_HIDDEN);
+}
+
 void UIObserverListener::OnNavigationStateChange(
     std::string navigationId, std::string navDestinationName, NG::NavDestinationState navState)
 {
     LOGE("testtest call OnNavigationStateChange %p", &env_);
-    if (!env_) {
+    if (!env_ || !callback_) {
         LOGE("testtest no env");
         return;
     }
-    // napi_value objValue = nullptr;
-    // napi_create_object(env_, &objValue);
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value objValue = nullptr;
+    napi_create_object(env_, &objValue);
     napi_value id = nullptr;
     napi_value name = nullptr;
     napi_value state = nullptr;
-    // napi_create_string_utf8(env_, navigationId.c_str(), navigationId.length(), &id);
-    // napi_create_string_utf8(env_, navDestinationName.c_str(), navDestinationName.length(), &name);
+    napi_create_string_utf8(env_, navigationId.c_str(), navigationId.length(), &id);
+    napi_create_string_utf8(env_, navDestinationName.c_str(), navDestinationName.length(), &name);
     napi_create_int32(env_, static_cast<int32_t>(navState), &state);
-    // napi_set_named_property(env_, objValue, "navigationId", id);
-    // napi_set_named_property(env_, objValue, "name", name);
-    // napi_set_named_property(env_, objValue, "state", state);
-    // napi_value argv[] = { state };
-    napi_call_function(env_, nullptr, callback_, 1, argv, nullptr);
+    napi_set_named_property(env_, objValue, "navigationId", id);
+    napi_set_named_property(env_, objValue, "name", name);
+    napi_set_named_property(env_, objValue, "state", state);
+    napi_value argv[] = { objValue };
+    LOGE("testtest call napi_call_function");
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
 }
 
-void UIObserver::RegisterNavigationCallback(const RefPtr<UIObserverListener>& listener)
+void UIObserver::RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener)
 {
     if (std::find(unspecifiedNavigationListeners_.begin(), unspecifiedNavigationListeners_.end(), listener) !=
         unspecifiedNavigationListeners_.end()) {
@@ -79,10 +105,11 @@ void UIObserver::RegisterNavigationCallback(const RefPtr<UIObserverListener>& li
     unspecifiedNavigationListeners_.emplace_back(listener);
 }
 
-void UIObserver::RegisterNavigationCallback(std::string navigationId, const RefPtr<UIObserverListener>& listener)
+void UIObserver::RegisterNavigationCallback(
+    std::string navigationId, const std::shared_ptr<UIObserverListener>& listener)
 {
     if (specifiedCNavigationListeners_.find(navigationId) == specifiedCNavigationListeners_.end()) {
-        specifiedCNavigationListeners_[navigationId] = std::list<RefPtr<UIObserverListener>>({ listener });
+        specifiedCNavigationListeners_[navigationId] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
         return;
     }
     auto holder = specifiedCNavigationListeners_[navigationId];
@@ -92,7 +119,7 @@ void UIObserver::RegisterNavigationCallback(std::string navigationId, const RefP
     holder.emplace_back(listener);
 }
 
-void UIObserver::UnRegisterNavigationCallback(const RefPtr<UIObserverListener>& listener)
+void UIObserver::UnRegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener)
 {
     if (listener == nullptr) {
         unspecifiedNavigationListeners_.clear();
@@ -100,12 +127,14 @@ void UIObserver::UnRegisterNavigationCallback(const RefPtr<UIObserverListener>& 
     }
     unspecifiedNavigationListeners_.erase(
         std::remove_if(unspecifiedNavigationListeners_.begin(), unspecifiedNavigationListeners_.end(),
-            [listener](
-                const RefPtr<UIObserverListener>& registeredListener) { return registeredListener == listener; }),
+            [listener](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener == listener;
+            }),
         unspecifiedNavigationListeners_.end());
 }
 
-void UIObserver::UnRegisterNavigationCallback(std::string navigationId, const RefPtr<UIObserverListener>& listener)
+void UIObserver::UnRegisterNavigationCallback(
+    std::string navigationId, const std::shared_ptr<UIObserverListener>& listener)
 {
     if (specifiedCNavigationListeners_.find(navigationId) == specifiedCNavigationListeners_.end()) {
         return;
@@ -116,7 +145,7 @@ void UIObserver::UnRegisterNavigationCallback(std::string navigationId, const Re
         return;
     }
     holder.erase(std::remove_if(holder.begin(), holder.end(),
-                     [listener](const RefPtr<UIObserverListener>& registeredListener) {
+                     [listener](const std::shared_ptr<UIObserverListener>& registeredListener) {
                          return registeredListener == listener;
                      }),
         holder.end());

@@ -20,47 +20,53 @@
 #include <string>
 #include <unordered_map>
 
-#include "observer_trigger.h"
-
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+#include "observer_trigger.h"
 
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
-
 class INavigationStateChangeListener {
 public:
     virtual void OnNavigationStateChange(std::string, std::string, NG::NavDestinationState) = 0;
 };
 
-class ACE_FORCE_EXPORT UIObserverListener final : public AceType, public INavigationStateChangeListener {
-    DECLARE_ACE_TYPE(UIObserverListener, AceType);
-
+class ACE_FORCE_EXPORT UIObserverListener final : public INavigationStateChangeListener {
 public:
-    UIObserverListener(napi_env env, napi_value callback) : env_(env), callback_(callback) {};
-    ~UIObserverListener() = default;
+    UIObserverListener(napi_env env, napi_value callback) : env_(env)
+    {
+        napi_create_reference(env_, callback, 1, &callback_);
+    }
+    ~UIObserverListener()
+    {
+        if (callback_) {
+            napi_delete_reference(env_, callback_);
+        }
+    }
     void OnNavigationStateChange(
         std::string navigationId, std::string navDestinationName, NG::NavDestinationState state) override;
 
+private:
     napi_env env_ = nullptr;
-    napi_value callback_ = nullptr;
+    napi_ref callback_ = nullptr;
 };
 
 class ACE_FORCE_EXPORT UIObserver {
 public:
-    static void RegisterNavigationCallback(const RefPtr<UIObserverListener>& listener);
-    static void RegisterNavigationCallback(std::string navigationId, const RefPtr<UIObserverListener>& listener);
-    static void UnRegisterNavigationCallback(const RefPtr<UIObserverListener>& listener = nullptr);
+    static void RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterNavigationCallback(
+        std::string navigationId, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener = nullptr);
     static void UnRegisterNavigationCallback(
-        std::string navigationId, const RefPtr<UIObserverListener>& listener = nullptr);
+        std::string navigationId, const std::shared_ptr<UIObserverListener>& listener = nullptr);
 
 private:
-    static std::list<RefPtr<UIObserverListener>> unspecifiedNavigationListeners_;
-    static std::unordered_map<std::string, std::list<RefPtr<UIObserverListener>>> specifiedCNavigationListeners_;
+    static std::list<std::shared_ptr<UIObserverListener>> unspecifiedNavigationListeners_;
+    static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedCNavigationListeners_;
 
     friend class UIObserverHandler;
 };
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_OBSERVER_H

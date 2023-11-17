@@ -49,9 +49,9 @@ napi_value ObserverOn(napi_env env, napi_callback_info info)
 
 
     if (argc == 2 && MatchValueType(env, argv[0], napi_string) && MatchValueType(env, argv[1], napi_function)) {
-        NG::UIObserverListener listener(env, argv[1]);
+        auto listener = std::make_shared<NG::UIObserverListener>(env, argv[1]);
         LOGE("testtest ObserverOn");
-        NG::UIObserver::RegisterNavigationCallback(AceType::Claim(&listener));
+        NG::UIObserver::RegisterNavigationCallback(listener);
     }
 
     // if (argc == 3 && MatchValueType(env, argv[0], napi_string) && MatchValueType(env, argv[1], napi_object) &&

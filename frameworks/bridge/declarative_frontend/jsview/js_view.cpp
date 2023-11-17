@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/components_ng/base/observer_trigger.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_full_update_model.h"
 #include "core/components_ng/base/view_full_update_model_ng.h"
@@ -909,6 +910,18 @@ void JSViewPartialUpdate::OnDumpInfo(const std::vector<std::string>& params)
     jsViewFunction_->ExecuteOnDumpInfo(params);
 }
 
+void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
+{
+    auto result = NG::UIObserverHandler::GetNavigationState(GetViewNode());
+    if (result) {
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        obj->SetProperty<std::string>("navigationId", result->navigationId);
+        obj->SetProperty<std::string>("name", result->name);
+        obj->SetProperty<int32_t>("state", static_cast<int32_t>(result->state));
+        info.SetReturnValue(obj);
+    }
+}
+
 void JSViewPartialUpdate::JSBind(BindingTarget object)
 {
     LOGD("JSViewPartialUpdate::Bind");
@@ -933,6 +946,8 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "resetRecycleCustomNode", &JSViewPartialUpdate::JSResetRecycleCustomNode);
     JSClass<JSViewPartialUpdate>::Method("invalidateLayout", &JSViewPartialUpdate::JsInvalidateLayout);
+    JSClass<JSViewPartialUpdate>::CustomMethod(
+        "queryNavDestinationInfo", &JSViewPartialUpdate::JSGetNavDestinationInfo);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 
