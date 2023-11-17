@@ -381,6 +381,21 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest004, TestSize.Level1)
     ImageAnimatorModelNG.SetIsReverse(ISREVERSE_BACKWARD);
     imageAnimatorPattern->OnModifyDone();
     EXPECT_TRUE(!startFlag);
+
+    /**
+     * @tc.steps: step6. add Element to cacheImages_
+     * @tc.expected: step6. cacheImages_.size() > cacheImageNum
+     */
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto imageLayoutProperty = imageNode->GetLayoutProperty();
+    imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    imageLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
+    imageAnimatorPattern->cacheImages_.emplace_back(ImageAnimatorPattern::CacheImageStruct(imageNode));
+    imageAnimatorPattern->OnModifyDone();
+    auto iTemp = ITERATION_DEFAULT / imageAnimatorPattern->images_.size();
+    size_t cacheImageNum = iTemp >= 50 ? 1 : 2;
+    cacheImageNum = std::min(imageAnimatorPattern->images_.size() - 1, cacheImageNum);
+    EXPECT_TRUE(imageAnimatorPattern->cacheImages_.size() >= cacheImageNum);
 }
 
 /**
@@ -811,6 +826,43 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest011, TestSize.Level1)
     pattern_->SetShowingIndex(1);
     EXPECT_EQ(pattern_->nowImageIndex_, 1);
 
+    // coverage fixedSize_ is false
+    pattern_->nowImageIndex_ = 0;
+    CreateImageAnimator(2);
+    pattern_->fixedSize_ = false;
+    pattern_->SetShowingIndex(1);
+    EXPECT_EQ(pattern_->nowImageIndex_, 1);
+    EXPECT_TRUE(pattern_->cacheImages_.size());
+    pattern_->fixedSize_ = true;
+
+    // expected:FindCacheImageNode(images_[index].src) != cacheImages_.end() && isLoaded = false
+    CreateImageAnimator(2);
+    EXPECT_TRUE(pattern_->images_.size() == 2);
+    for (auto iter = pattern_->cacheImages_.begin(); iter != pattern_->cacheImages_.end(); ++iter) {
+        RefPtr<FrameNode>& imageFrameNode = iter->imageNode;
+        auto imageLayoutProperty =
+            AccessibilityManager::DynamicCast<ImageLayoutProperty>(imageFrameNode->layoutProperty_);
+        if (imageLayoutProperty->HasImageSourceInfo()) {
+            if (static_cast<int32_t>(pattern_->images_.size()) > 1) {
+                pattern_->images_[1].src = imageLayoutProperty->GetImageSourceInfoValue().GetSrc();
+                iter->isLoaded = false;
+            }
+            break;
+        }
+    }
+    auto host = pattern_->GetHost();
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->ResetImageSourceInfo();
+    EXPECT_FALSE(pattern_->IsShowingSrc(imageFrameNode, pattern_->images_[1].src));
+    pattern_->SetShowingIndex(1);
+    EXPECT_EQ(pattern_->nowImageIndex_, 1);
+
+    // expected:coverage isLoaded = true
+    pattern_->cacheImages_.begin()->isLoaded = true;
+    pattern_->SetShowingIndex(1);
+    EXPECT_EQ(pattern_->nowImageIndex_, 1);
+
     /**
      * @tc.steps: step4. images Unit is PERCENT
      * @tc.expected: host size not change
@@ -842,15 +894,15 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest011, TestSize.Level1)
     std::vector<ImageProperties> images_2;
     ImageProperties imageProperties_2;
     imageProperties_2.src = IMAGE_SRC_URL;
-    imageProperties_2.width =  Dimension(100);
-    imageProperties_2.height =  Dimension(100);
+    imageProperties_2.width = Dimension(100);
+    imageProperties_2.height = Dimension(100);
     imageProperties_2.top = IMAGE_TOP;
     imageProperties_2.left = IMAGE_LEFT;
     images_2.push_back(imageProperties_2);
     ImageProperties imageProperties_3;
     imageProperties_3.src = IMAGE_SRC_URL;
-    imageProperties_3.width =  Dimension(50);
-    imageProperties_3.height =  Dimension(150);
+    imageProperties_3.width = Dimension(50);
+    imageProperties_3.height = Dimension(150);
     imageProperties_3.top = IMAGE_TOP;
     imageProperties_3.left = IMAGE_LEFT;
     images_2.push_back(imageProperties_3);
@@ -905,6 +957,22 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest012, TestSize.Level1)
     pipeline->SetIsFormRender(true);
     pattern_->SetDuration(1500);
     EXPECT_EQ(animator->GetDuration(), DURATION_DEFAULT);
+
+    /**
+     * @tc.steps: step3. set is form render and set duration,finalDuration < DEFAULT_DURATION
+     * @tc.expected: check duration is correct assign
+     */
+    pipeline->SetIsFormRender(true);
+    pattern_->SetDuration(900);
+    EXPECT_EQ(animator->GetDuration(), DURATION_DEFAULT);
+    /**
+     * @tc.steps: step4. set is form render and set duration
+     * @tc.expected: check duration is correct assign
+     */
+    pipeline->SetIsFormRender(true);
+    pattern_->animator_->status_ = Animator::Status::IDLE;
+    pattern_->SetDuration(0);
+    EXPECT_EQ(animator->GetDuration(), 0);
 }
 
 /**
@@ -1018,4 +1086,41 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest016, TestSize.Level1)
     pipeline->SetIsFormRender(true);
     EXPECT_EQ(pattern_->IsFormRender(), true);
 }
+
+/**
+ * @tc.name: ImageAnimatorTest017
+ * @tc.desc: frameNode->GetChildren() is not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest017, TestSize.Level1)
+{
+    ImageAnimatorModelNG imageAnimatorModelNG;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = static_cast<ElementIdType>(1);
+    stack->reservedNodeId_ = static_cast<ElementIdType>(1);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ANIMATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImageAnimatorPattern>(); });
+    CHECK_NULL_VOID(frameNode);
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
+    CHECK_NULL_VOID(imageNode);
+    frameNode->AddChild(imageNode);
+    frameNode->tag_ = V2::IMAGE_ANIMATOR_ETS_TAG;
+    ElementRegister::GetInstance()->itemMap_[nodeId] = frameNode;
+    imageAnimatorModelNG.Create();
+    EXPECT_FALSE(frameNode->GetChildren().empty());
+}
+/**
+ * @tc.name: ImageAnimatorTest018
+ * @tc.desc: UpdateCacheImageInfo::index < images_.size()
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest018, TestSize.Level1)
+{
+    CreateImageAnimator(1);
+    ImageAnimatorPattern::CacheImageStruct cTemp;
+    int32_t iIndex = 2;
+    pattern_->UpdateCacheImageInfo(cTemp, iIndex);
+    EXPECT_TRUE(iIndex >= static_cast<int32_t>(pattern_->images_.size()));
+}
+
 } // namespace OHOS::Ace::NG
