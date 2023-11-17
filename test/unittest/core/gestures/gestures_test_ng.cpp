@@ -45,11 +45,11 @@
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
-#include "core/components_ng/test/mock/render/mock_media_player.h"
-#include "core/components_ng/test/mock/render/mock_render_context.h"
+#include "test/mock/core/render/mock_media_player.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;

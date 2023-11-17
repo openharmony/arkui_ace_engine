@@ -23,7 +23,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 #undef private
 #undef protected

@@ -64,7 +64,7 @@ interface LabelTheme {
   smallMargin: Margin;
 }
 
-interface chipNodeOpacity {
+interface ChipNodeOpacity {
   normal: number;
   hover: number;
   pressed: number;
@@ -84,7 +84,7 @@ interface ChipNodeTheme {
   smallPadding: Padding;
   hoverBlendColor: ResourceColor;
   pressedBlendColor: ResourceColor;
-  opacity: chipNodeOpacity;
+  opacity: ChipNodeOpacity;
 }
 
 interface ChipTheme {
@@ -181,7 +181,7 @@ export struct ChipComponent {
   private useDefaultSuffixIcon: boolean = false
 
   private isChipSizeEnum(): boolean {
-    return typeof (this.chipSize) === 'number'
+    return typeof (this.chipSize) === 'string'
   }
 
   private getLabelFontSize(): Dimension {
@@ -246,7 +246,7 @@ export struct ChipComponent {
 
   private getChipNodeHeight(): Length {
     if (this.isChipSizeEnum()) {
-      return this.chipSize == ChipSize.SMALL ? this.theme.chipNode.smallHeight : this.theme.chipNode.normalHeight
+      return this.chipSize === ChipSize.SMALL ? this.theme.chipNode.smallHeight : this.theme.chipNode.normalHeight
     } else {
       this.chipNodeSize = this.chipSize as SizeOptions
       return this.chipNodeSize?.height ?? this.theme.chipNode.normalHeight

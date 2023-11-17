@@ -31,23 +31,23 @@ void AceAsyncTraceEnd(int32_t taskId, const char* name) {}
 
 void AceCountTrace(const char* key, int32_t count) {}
 
-bool AceTraceBeginWithArgv(const char* format, va_list args)
+bool AceTraceBeginWithArgv(const char* /* format */, va_list /* args */)
 {
     return false;
 }
 
-bool AceTraceBeginWithArgs(const char* format, ...)
+bool AceTraceBeginWithArgs(const char* /* format */, ...)
 {
     return false;
 }
 
 void AceCountTraceWidthArgs(int32_t count, const char* format, ...) {}
 
-AceScopedTrace::AceScopedTrace(const char* format, ...) : traceEnabled_(AceTraceEnabled()) {}
+AceScopedTrace::AceScopedTrace(const char* /* format */, ...) : traceEnabled_(AceTraceEnabled()) {}
 
 AceScopedTrace::~AceScopedTrace() = default;
 
-AceScopedTraceFlag::AceScopedTraceFlag(bool flag, const char* format, ...) {}
+AceScopedTraceFlag::AceScopedTraceFlag(bool /* flag */, const char* /* format */, ...) {}
 
 AceScopedTraceFlag::~AceScopedTraceFlag()
 {
@@ -56,19 +56,19 @@ AceScopedTraceFlag::~AceScopedTraceFlag()
     }
 }
 
-std::string ACE_EXPORT AceAsyncTraceBeginWithArgv(int32_t taskId, const char* format, va_list args)
+std::string ACE_EXPORT AceAsyncTraceBeginWithArgv(int32_t /* taskId */, const char* /* format */, va_list /* args */)
 {
     return {};
 }
 
-std::string ACE_EXPORT AceAsyncTraceBeginWithArgs(int32_t taskId, char* format, ...)
+std::string ACE_EXPORT AceAsyncTraceBeginWithArgs(int32_t /* taskId */, char* /* format */, ...)
 {
     return {};
 }
 
 std::atomic<std::int32_t> AceAsyncScopedTrace::id_ = 0;
 
-AceAsyncScopedTrace::AceAsyncScopedTrace(const char* format, ...)
+AceAsyncScopedTrace::AceAsyncScopedTrace(const char* /* format */, ...)
 {
     id_++;
     if (asyncTraceEnabled_) {

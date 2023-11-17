@@ -18,7 +18,7 @@
 #include "mock/gesture_mock.h"
 
 #include "base/test/mock/mock_asset_manager.h"
-#include "base/test/mock/mock_task_executor.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "core/common/platform_window.h"
 #include "core/common/test/mock/mock_resource_register.h"
 #include "core/common/window.h"

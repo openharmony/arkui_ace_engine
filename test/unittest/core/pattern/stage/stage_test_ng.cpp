@@ -25,7 +25,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
 #include "core/common/container.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"

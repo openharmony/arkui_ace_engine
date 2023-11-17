@@ -16,7 +16,7 @@
 #include "mock_subwindow.h"
 
 namespace OHOS::Ace {
-RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t instanceId)
+RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t /*instanceId*/)
 {
     return AceType::MakeRefPtr<MockSubwindow>();
 }

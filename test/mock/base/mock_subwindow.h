@@ -18,7 +18,7 @@
 
 #include "gmock/gmock.h"
 
-#include "frameworks/base/subwindow/subwindow.h"
+#include "base/subwindow/subwindow.h"
 
 namespace OHOS::Ace {
 class ACE_EXPORT MockSubwindow : public Subwindow {

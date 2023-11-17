@@ -22,7 +22,7 @@
 #include "frameworks/core/accessibility/accessibility_utils.h"
 #include "core/common/container.h"
 #include "test/mock/core/common/mock_container.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
 using namespace testing;
 using namespace testing::ext;
 

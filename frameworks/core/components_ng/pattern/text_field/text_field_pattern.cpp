@@ -1698,9 +1698,6 @@ void TextFieldPattern::OnModifyDone()
     CHECK_NULL_VOID(textFieldTheme);
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE && !IsNormalInlineState()) {
-        layoutProperty->UpdateTextInputType(TextInputType::TEXT);
-    }
     CheckIfNeedToResetKeyboard();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -4556,6 +4553,9 @@ void TextFieldPattern::RestorePreInlineStates()
         HandleCounterBorder();
     }
     ProcessInnerPadding();
+    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+        ApplyUnderlineStates();
+    }
 }
 
 bool TextFieldPattern::IsNormalInlineState() const

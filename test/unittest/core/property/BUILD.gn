@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,10 +11,73 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+
+ace_unittest("grid_property_test_ng") {
+  type = "new"
+  module_output = "property"
+  sources = [ "grid_property_test_ng.cpp" ]
+}
+
+ace_unittest("accessibility_property_test_ng") {
+  type = "new"
+  module_output = "property"
+  sources = [ "accessibility_property_test_ng.cpp" ]
+}
+
+ace_unittest("border_property_test_ng") {
+  type = "new"
+  module_output = "property"
+  sources = [ "border_property_test_ng.cpp" ]
+}
+
+ace_unittest("calc_length_test_ng") {
+  type = "new"
+  module_output = "property"
+  sources = [ "calc_length_test_ng.cpp" ]
+}
+
+ace_unittest("gradient_property_test_ng") {
+  type = "new"
+  module_output = "property"
+  sources = [ "gradient_property_test_ng.cpp" ]
+}
+
+ace_unittest("measure_utils_test_ng") {
+  type = "new"
+  module_output = "property"
+  sources = [ "measure_utils_test_ng.cpp" ]
+}
+
+ace_unittest("property_test_ng") {
+  type = "new"
+  module_output = "property"
+  sources = [ "property_test_ng.cpp" ]
+}
+
+ace_unittest("layout_constraint_test_ng") {
+  type = "new"
+  module_output = "property"
+  sources = [ "layout_constraint_test_ng.cpp" ]
+}
+
+ace_unittest("templates_parser_test_ng") {
+  type = "new"
+  module_output = "property"
+  sources = [ "templates_parser_test_ng.cpp" ]
+}
+
 group("core_property_unittest") {
   testonly = true
   deps = [
-    "layout_constraint:layout_constraint_test_ng",
-    "templates_parser:templates_parser_test_ng",
+    ":accessibility_property_test_ng",
+    ":border_property_test_ng",
+    ":calc_length_test_ng",
+    ":gradient_property_test_ng",
+    ":grid_property_test_ng",
+    ":layout_constraint_test_ng",
+    ":measure_utils_test_ng",
+    ":property_test_ng",
+    ":templates_parser_test_ng",
   ]
 }
