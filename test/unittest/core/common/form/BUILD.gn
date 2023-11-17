@@ -20,8 +20,8 @@ ohos_unittest("form_manager_test") {
 
   sources = [
     "$ace_root/frameworks/core/common/form_manager.cpp",
-    "$ace_root/frameworks/core/components_ng/test/pattern/form/mock/mock_sub_container.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
+    "$ace_root/test/unittest/core/pattern/form/mock/mock_sub_container.cpp",
     "form_manager_test.cpp",
   ]
   deps = [

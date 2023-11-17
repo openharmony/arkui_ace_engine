@@ -212,8 +212,8 @@ bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
-int32_t SystemProperties::deviceWidth_ = 0;
-int32_t SystemProperties::deviceHeight_ = 0;
+ACE_WEAK_SYM int32_t SystemProperties::deviceWidth_ = 0;
+ACE_WEAK_SYM int32_t SystemProperties::deviceHeight_ = 0;
 int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 ACE_WEAK_SYM double SystemProperties::resolution_ = 1.0;
@@ -237,7 +237,7 @@ ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
 bool SystemProperties::debugBoundaryEnabled_ = IsDebugBoundaryEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
-bool SystemProperties::debugEnabled_ = IsDebugEnabled();
+ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
 bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 bool SystemProperties::astcEnabled_ = GetAstcEnabled();
 int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
@@ -374,7 +374,7 @@ void SystemProperties::InitDeviceInfo(
     InitDeviceTypeBySystemProperty();
 }
 
-void SystemProperties::SetDeviceOrientation(int32_t orientation)
+ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
 {
     if (orientation == ORIENTATION_PORTRAIT && orientation_ != DeviceOrientation::PORTRAIT) {
         Swap(deviceWidth_, deviceHeight_);

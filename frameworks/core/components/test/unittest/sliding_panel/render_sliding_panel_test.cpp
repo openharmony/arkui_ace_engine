@@ -20,7 +20,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
-#include "base/test/mock/mock_task_executor.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/panel/render_sliding_panel.h"
 #include "core/components/panel/sliding_panel_component_v2.h"

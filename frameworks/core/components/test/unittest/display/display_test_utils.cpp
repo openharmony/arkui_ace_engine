@@ -16,7 +16,7 @@
 #include "core/components/test/unittest/display/display_test_utils.h"
 
 #include "base/test/mock/mock_asset_manager.h"
-#include "base/test/mock/mock_task_executor.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/box/box_component.h"
 #include "core/components/flex/flex_component.h"

@@ -18,7 +18,7 @@
 #include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/log/log.h"
 #include "base/test/mock/mock_asset_manager.h"
-#include "base/test/mock/mock_task_executor.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/friction_motion.h"
 #include "core/animation/scroll_motion.h"
