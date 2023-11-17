@@ -95,19 +95,6 @@ void UpdateTextProperties(const RefPtr<PopupParam>& param, const RefPtr<TextLayo
 }
 } // namespace
 
-void SetHitTestMode(RefPtr<FrameNode>& popupNode, bool isBlockEvent)
-{
-    auto hub = popupNode->GetEventHub<BubbleEventHub>();
-    if (hub) {
-        auto ges = hub->GetOrCreateGestureEventHub();
-        if (!isBlockEvent) {
-            ges->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
-        } else {
-            ges->SetHitTestMode(HitTestMode::HTMDEFAULT);
-        }
-    }
-}
-
 RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     const std::string& targetTag, int32_t targetId, const RefPtr<PopupParam>& param)
 {
@@ -135,7 +122,6 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     popupProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
     popupProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     popupProp->UpdateBlockEvent(param->IsBlockEvent());
-    SetHitTestMode(popupNode, param->IsBlockEvent());
     if (param->GetTargetSpace().has_value()) {
         popupProp->UpdateTargetSpace(param->GetTargetSpace().value());
     }
@@ -211,7 +197,6 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     layoutProps->UpdatePlacement(param->GetPlacement());
     layoutProps->UpdateShowInSubWindow(param->IsShowInSubWindow());
     layoutProps->UpdateBlockEvent(param->IsBlockEvent());
-    SetHitTestMode(popupNode, param->IsBlockEvent());
     auto displayWindowOffset = GetDisplayWindowRectOffset();
     layoutProps->UpdateDisplayWindowOffset(displayWindowOffset);
     layoutProps->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
@@ -230,7 +215,6 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     if (param->IsBackgroundColorSetted()) {
         popupPaintProps->UpdateBackgroundColor(param->GetBackgroundColor());
     }
-
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     customNode->MountToParent(columnNode);
@@ -302,7 +286,6 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     }
     popupLayoutProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
     popupLayoutProp->UpdateBlockEvent(param->IsBlockEvent());
-    SetHitTestMode(popupNode, param->IsBlockEvent());
     popupLayoutProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     if (param->IsMaskColorSetted()) {
         popupPaintProp->UpdateMaskColor(param->GetMaskColor());
@@ -316,8 +299,6 @@ RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsU
 {
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
-    // The buttons in popupNode can not get focus, if the textNode in the button is not focusable
-    textNode->GetOrCreateFocusHub()->SetFocusable(true);
     auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     layoutProperty->UpdateContent(message);
     auto popupTheme = GetPopupTheme();
@@ -419,6 +400,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(
 
     auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
     auto isUseCustom = param->IsUseCustom();
+    auto isShow = param->IsShow();
 
     auto buttonTextNode = BubbleView::CreateMessage(buttonParam.value, isUseCustom);
     auto textLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
@@ -445,7 +427,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
     buttonEventHub->AddClickEvent(buttonParam.action);
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
-    auto closeCallback = [popupNode, targetId](GestureEvent& /* info */) {
+    auto closeCallback = [popupNode, targetId, isShow](GestureEvent& /* info */) {
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
         auto pipelineContext = container->GetPipelineContext();
@@ -456,7 +438,8 @@ RefPtr<FrameNode> BubbleView::CreateButton(
         CHECK_NULL_VOID(overlayManager);
         auto popupInfo = overlayManager->GetPopupInfo(targetId);
         popupInfo.markNeedUpdate = true;
-        overlayManager->HidePopup(targetId, popupInfo);
+        popupInfo.markNeedUpdate = isShow;
+        overlayManager->UpdatePopupNode(targetId, popupInfo);
     };
     if (buttonParam.action) {
         buttonEventHub->AddClickEvent(buttonParam.action);

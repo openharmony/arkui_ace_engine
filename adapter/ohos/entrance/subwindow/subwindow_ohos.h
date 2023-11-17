@@ -69,7 +69,6 @@ public:
     void CloseMenu() override;
     void ClearMenu() override;
     void ClearMenuNG(bool inWindow, bool showAnimation = false) override;
-    void ClearPopupNG() override;
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc) override;
     void HideSubWindowNG() override;
     bool GetShown() override
