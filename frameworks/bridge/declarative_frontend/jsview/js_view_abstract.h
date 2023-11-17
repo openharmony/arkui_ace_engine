@@ -143,7 +143,7 @@ public:
     static void JsColorBlend(const JSCallbackInfo& info);
     static void JsBackdropBlur(const JSCallbackInfo& info);
     static void JsLinearGradientBlur(const JSCallbackInfo& info);
-    static void JsDynamicLightUp(const JSCallbackInfo& info);
+    static void JsBackgroundBrightness(const JSCallbackInfo& info);
     static void JsWindowBlur(const JSCallbackInfo& info);
     static void JsFlexBasis(const JSCallbackInfo& info);
     static void JsFlexGrow(const JSCallbackInfo& info);
