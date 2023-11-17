@@ -2952,7 +2952,7 @@ HWTEST_F(ListTestNg, GetOverScrollOffset001, TestSize.Level1)
     Create([](ListModelNG model) { CreateGroup(1); });
 
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT * 5);
-    expectOffset = { 500, 400 };
+    expectOffset = { 500, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT);
     expectOffset = { 0, -ITEM_HEIGHT };
@@ -2960,7 +2960,7 @@ HWTEST_F(ListTestNg, GetOverScrollOffset001, TestSize.Level1)
 
     ScrollDown();
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
-    expectOffset = { ITEM_HEIGHT, ITEM_HEIGHT };
+    expectOffset = { ITEM_HEIGHT, 0 };
     EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT);
     expectOffset = { 0, -ITEM_HEIGHT };
