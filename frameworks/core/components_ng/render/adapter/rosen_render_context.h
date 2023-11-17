@@ -464,6 +464,7 @@ private:
     bool hasDefaultTransition_ = false;
     bool measureTriggered_ = false;
     bool particleAnimationPlaying_ = false;
+    bool allowSandBox_ = true;
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;

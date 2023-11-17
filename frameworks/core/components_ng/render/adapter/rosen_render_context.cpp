@@ -320,7 +320,15 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
 void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool force)
 {
     CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (parentPosition.has_value()) {
+        RefPtr<FrameNode> parent = sandBoxCount_ == 0 ? host->GetAncestorNodeOfFrame() : nullptr;
+        while (parent) {
+            auto rosenRenderContext = DynamicCast<RosenRenderContext>(parent->GetRenderContext());
+            CHECK_NULL_VOID(rosenRenderContext && rosenRenderContext->allowSandBox_);
+            parent = parent->GetAncestorNodeOfFrame();
+        }
         if (!force) {
             sandBoxCount_++;
         }
@@ -1243,6 +1251,10 @@ bool RosenRenderContext::GetPixelMap(const std::shared_ptr<Media::PixelMap>& pix
 void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
 {
     CHECK_NULL_VOID(rsNode_);
+    auto curScale = rsNode_->GetStagingProperties().GetScale();
+    if (!NearEqual(curScale, Vector2f(1.0f, 1.0f)) && !NearEqual(scale, VectorF(1.0f, 1.0f))) {
+        allowSandBox_ = false;
+    }
     rsNode_->SetScale(scale.x, scale.y);
     RequestNextFrame();
 }
