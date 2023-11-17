@@ -41,7 +41,7 @@ private:
     static void CreateButton(int32_t nodeId);
     static void AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index);
     static int32_t RemoveNode(const RefPtr<FrameNode>& childFrameNode, int32_t nodeId);
-    static void SetSwitchSelecte(const RefPtr<FrameNode>& childFrameNode, bool isOn);
+    static void SetSwitchSelected(const RefPtr<FrameNode>& childFrameNode, bool isOn);
 };
 
 } // namespace OHOS::Ace::NG

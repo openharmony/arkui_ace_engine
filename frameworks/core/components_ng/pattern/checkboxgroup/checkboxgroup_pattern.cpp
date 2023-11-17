@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
+const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 }
 
 void CheckBoxGroupPattern::OnAttachToFrameNode()
@@ -114,21 +114,22 @@ void CheckBoxGroupPattern::SetAccessibilityAction()
 
 void CheckBoxGroupPattern::MarkIsSelected(bool isSelected)
 {
-    if (updateFlag_ != isSelected) {
-        updateFlag_ = isSelected;
-        auto eventHub = GetEventHub<CheckBoxGroupEventHub>();
-        std::vector<std::string> vec;
-        CheckboxGroupResult groupResult(vec, int(isSelected));
-        eventHub->UpdateChangeEvent(&groupResult);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        if (isSelected) {
-            eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
-            host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
-        } else {
-            eventHub->ResetCurrentUIState(UI_STATE_SELECTED);
-            host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
-        }
+    if (updateFlag_ == isSelected) {
+        return;
+    }
+    updateFlag_ = isSelected;
+    auto eventHub = GetEventHub<CheckBoxGroupEventHub>();
+    std::vector<std::string> vec;
+    CheckboxGroupResult groupResult(vec, int(isSelected));
+    eventHub->UpdateChangeEvent(&groupResult);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isSelected) {
+        eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
+        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+    } else {
+        eventHub->ResetCurrentUIState(UI_STATE_SELECTED);
+        host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     }
 }
 

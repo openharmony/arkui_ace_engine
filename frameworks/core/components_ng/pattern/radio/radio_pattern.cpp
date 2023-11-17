@@ -128,20 +128,21 @@ void RadioPattern::SetAccessibilityAction()
 
 void RadioPattern::MarkIsSelected(bool isSelected)
 {
-    if (preCheck_ != isSelected) {
-        preCheck_ = isSelected;
-        auto eventHub = GetEventHub<RadioEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->UpdateChangeEvent(isSelected);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        if (isSelected) {
-            eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
-            host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
-        } else {
-            eventHub->ResetCurrentUIState(UI_STATE_SELECTED);
-            host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
-        }
+    if (preCheck_ == isSelected) {
+        return;
+    }
+    preCheck_ = isSelected;
+    auto eventHub = GetEventHub<RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->UpdateChangeEvent(isSelected);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isSelected) {
+        eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
+        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+    } else {
+        eventHub->ResetCurrentUIState(UI_STATE_SELECTED);
+        host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     }
 }
 

@@ -165,20 +165,21 @@ void SwitchPattern::SetAccessibilityAction()
 
 void SwitchPattern::MarkIsSelected(bool isSelected)
 {
-    if (isOn_ != isSelected) {
-        isOn_ = isSelected;
-        auto eventHub = GetEventHub<SwitchEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->UpdateChangeEvent(isSelected);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        if (isSelected) {
-            eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
-            host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
-        } else {
-            eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
-            host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
-        }
+    if (isOn_ == isSelected) {
+        return;
+    }
+    isOn_ = isSelected;
+    auto eventHub = GetEventHub<SwitchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->UpdateChangeEvent(isSelected);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isSelected) {
+        eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
+        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+    } else {
+        eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
+        host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     }
 }
 

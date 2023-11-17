@@ -116,20 +116,21 @@ void CheckBoxPattern::SetAccessibilityAction()
 
 void CheckBoxPattern::MarkIsSelected(bool isSelected)
 {
-    if (lastSelect_ != isSelected) {
-        lastSelect_ = isSelected;
-        auto eventHub = GetEventHub<CheckBoxEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->UpdateChangeEvent(isSelected);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        if (isSelected) {
-            eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
-            host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
-        } else {
-            eventHub->ResetCurrentUIState(UI_STATE_SELECTED);
-            host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
-        }
+    if (lastSelect_ == isSelected) {
+        return;
+    }
+    lastSelect_ = isSelected;
+    auto eventHub = GetEventHub<CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->UpdateChangeEvent(isSelected);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isSelected) {
+        eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
+        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+    } else {
+        eventHub->ResetCurrentUIState(UI_STATE_SELECTED);
+        host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     }
 }
 
