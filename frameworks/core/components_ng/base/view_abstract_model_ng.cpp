@@ -342,14 +342,21 @@ void ViewAbstractModelNG::RegisterContextMenuKeyEvent(
 }
 
 void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-    std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
-    std::function<void()>&& onDisappear)
+    std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
+    std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
     auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
         NG::ScopedViewStackProcessor builderViewStackProcess;
         buildFunc();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
+    auto buildTitleNodeFunc = [titleBuildFunc]() -> RefPtr<UINode> {
+        CHECK_NULL_RETURN(titleBuildFunc, nullptr);
+        NG::ScopedViewStackProcessor builderViewStackProcess;
+        titleBuildFunc();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         return customNode;
     };
@@ -368,8 +375,17 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     };
     targetNode->PushDestroyCallback(destructor);
 
-    overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), sheetStyle,
-        std::move(onAppear), std::move(onDisappear), targetNode->GetId());
+    overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildTitleNodeFunc),
+        sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), targetNode->GetId());
+}
+
+void ViewAbstractModelNG::DismissSheet()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->DismissSheet();
 }
 
 void ViewAbstractModelNG::SetAccessibilityGroup(bool accessible)

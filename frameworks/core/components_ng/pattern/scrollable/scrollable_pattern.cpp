@@ -138,7 +138,9 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
     auto refreshCoordinateMode = CoordinateWithRefresh(offset, source, isAtTop);
     auto isDraggedDown = navBarPattern_ ? navBarPattern_->GetDraggedDown() : false;
     auto navigationInCoordination = CoordinateWithNavigation(isAtTop, isDraggedDown, offset, source);
-    if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination) {
+    auto modalSheetCoordinationMode = CoordinateWithSheet(offset, source, isAtTop);
+    if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination ||
+        (modalSheetCoordinationMode == ModalSheetCoordinationMode::SHEET_SCROLL)) {
         return false;
     }
 
@@ -214,6 +216,30 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
     return coordinationMode;
 }
 
+ModalSheetCoordinationMode ScrollablePattern::CoordinateWithSheet(double& offset, int32_t source, bool isAtTop)
+{
+    auto coordinationMode = ModalSheetCoordinationMode::UNKNOWN;
+    if ((!sheetPattern_) && (source == SCROLL_FROM_START)) {
+        GetParentModalSheet();
+    }
+    auto overOffsets = GetOverScrollOffset(offset);
+    if (IsAtTop() && (source == SCROLL_FROM_UPDATE) && !isSheetInReactive_ && (axis_ == Axis::VERTICAL)) {
+        isSheetInReactive_ = true;
+        if (sheetPattern_) {
+            sheetPattern_->OnCoordScrollStart();
+        }
+    }
+    if (sheetPattern_ && isSheetInReactive_) {
+        if (!sheetPattern_->OnCoordScrollUpdate(GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {
+            isSheetInReactive_ = false;
+            coordinationMode = ModalSheetCoordinationMode::SCROLLABLE_SCROLL;
+        } else {
+            coordinationMode = ModalSheetCoordinationMode::SHEET_SCROLL;
+        }
+    }
+    return coordinationMode;
+}
+
 bool ScrollablePattern::CoordinateWithNavigation(bool isAtTop, bool isDraggedDown, double& offset, int32_t source)
 {
     bool reactiveIn = false;
@@ -257,6 +283,12 @@ void ScrollablePattern::OnScrollEnd()
         if (refreshCoordination_) {
             isRefreshInReactive_ = false;
             refreshCoordination_->OnScrollEnd(GetVelocity());
+        }
+    }
+    if (isSheetInReactive_) {
+        isSheetInReactive_ = false;
+        if (sheetPattern_) {
+            sheetPattern_->OnCoordScrollEnd(GetVelocity());
         }
     }
     if (isReactInParentMovement_) {
@@ -699,6 +731,32 @@ void ScrollablePattern::GetParentNavigation()
         return;
     }
     navBarPattern_ = nullptr;
+    return;
+}
+
+void ScrollablePattern::GetParentModalSheet()
+{
+    if (sheetPattern_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    if (host->GetTag() != V2::SCROLL_ETS_TAG) {
+        return;
+    }
+
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        sheetPattern_ = frameNode->GetPattern<SheetPresentationPattern>();
+        if (!sheetPattern_) {
+            continue;
+        }
+        return;
+    }
     return;
 }
 
