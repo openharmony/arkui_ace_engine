@@ -29,6 +29,8 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
+#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
+#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
@@ -1944,19 +1946,27 @@ void TabBarPattern::InitTurnPageRateEvent()
         }
     };
     swiperController_->SetTurnPageRateCallback(std::move(turnPageRateCallback));
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
-    CHECK_NULL_VOID(tabsNode);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetAnimationEndEvent([weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
-        auto pattern = weak.Upgrade();
-        if (pattern && (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f))) {
-            pattern->isTouchingSwiper_ = false;
-        }
-    });
+
+    if (!animationEndEvent_) {
+        AnimationEndEvent animationEndEvent =
+            [weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
+                auto pattern = weak.Upgrade();
+                if (pattern && (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f))) {
+                    pattern->isTouchingSwiper_ = false;
+                }
+            };
+        animationEndEvent_ = std::make_shared<AnimationEndEvent>(std::move(animationEndEvent));
+
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+        CHECK_NULL_VOID(tabsNode);
+        auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+        CHECK_NULL_VOID(swiperNode);
+        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->AddAnimationEndEvent(animationEndEvent_);
+    }
 }
 
 float TabBarPattern::GetLeftPadding() const

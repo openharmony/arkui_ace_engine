@@ -1200,7 +1200,7 @@ HWTEST_F(SwiperTestNg, SwiperModelNg002, TestSize.Level1)
      */
     auto onAnimationEnd = [](int32_t index, const AnimationCallbackInfo& info) {};
     model.SetOnAnimationEnd(std::move(onAnimationEnd));
-    EXPECT_NE(eventHub->animationEndEvent_, nullptr);
+    EXPECT_NE(pattern->animationEndEvent_, nullptr);
 }
 
 /**
@@ -1243,10 +1243,10 @@ HWTEST_F(SwiperTestNg, SwiperModelNg003, TestSize.Level1)
 
     /**
      * @tc.steps: step3.4. Test SetOnChangeEvent function.
-     * @tc.expected: paintProperty->GetLoop() is not null.
+     * @tc.expected: pattern->onIndexChangeEvent_ is not null.
      */
-    auto onAnimationEnd = [](const BaseEventInfo* info) {};
-    model.SetOnChangeEvent(std::move(onAnimationEnd));
+    auto onChangeEvent = [](const BaseEventInfo* info) {};
+    model.SetOnChangeEvent(std::move(onChangeEvent));
     EXPECT_NE(pattern->onIndexChangeEvent_, nullptr);
 
     /**

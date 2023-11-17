@@ -4589,6 +4589,53 @@ HWTEST_F(TabsTestNg, TabsModelSetOnChange001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TabsModelNg001
+ * @tc.desc: Tabs Model NG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    ASSERT_NE(swiperNode, nullptr);
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto pattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2.1. Test SetOnAnimationStart function.
+     * @tc.expected:eventHub->animationStartEvent_ not null.
+     */
+    auto onAnimationStart = [](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {};
+    tabsModel.SetOnAnimationStart(std::move(onAnimationStart));
+    EXPECT_NE(eventHub->animationStartEvent_, nullptr);
+
+    /**
+     * @tc.steps: step2.2. Test SetOnAnimationEnd function.
+     * @tc.expected:pattern->animationEndEvent_ not null.
+     */
+    auto onAnimationEnd = [](int32_t index, const AnimationCallbackInfo& info) {};
+    tabsModel.SetOnAnimationEnd(std::move(onAnimationEnd));
+    EXPECT_NE(pattern->animationEndEvent_, nullptr);
+
+    /**
+     * @tc.steps: step2.3. Test SetOnGestureSwipe function.
+     * @tc.expected:eventHub->gestureSwipeEvent_ not null.
+     */
+    auto onGestureSwipe = [](int32_t index, const AnimationCallbackInfo& info) {};
+    tabsModel.SetOnGestureSwipe(std::move(onGestureSwipe));
+    EXPECT_NE(eventHub->gestureSwipeEvent_, nullptr);
+}
+
+/**
  * @tc.name: TabsModelSetScrollable001
  * @tc.desc: test SetScrollable
  * @tc.type: FUNC
@@ -9931,13 +9978,9 @@ HWTEST_F(TabsTestNg, TabBarPatternInitTurnPageRateEvent001, TestSize.Level1)
     int32_t testswipingIndex = 1;
     float testturnPageRate = 1.0f;
     tabBarPattern->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    ASSERT_NE(swiperNode, nullptr);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
-    ASSERT_NE(eventHub, nullptr);
     AnimationCallbackInfo info;
-    eventHub->animationEndEvent_(testswipingIndex, info);
-    EXPECT_NE(eventHub, nullptr);
+    (*(tabBarPattern->animationEndEvent_))(testswipingIndex, info);
+    EXPECT_NE(tabBarPattern, nullptr);
     tabBarPattern->axis_ = Axis::HORIZONTAL;
     tabBarPattern->isTouchingSwiper_ = true;
     tabBarPattern->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
@@ -10182,13 +10225,9 @@ HWTEST_F(TabsTestNg, TabBarPatternInitTurnPageRateEvent002, TestSize.Level1)
     int32_t testswipingIndex = 1;
     float testturnPageRate = 1.0f;
     tabBarPattern->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    ASSERT_NE(swiperNode, nullptr);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
-    ASSERT_NE(eventHub, nullptr);
     AnimationCallbackInfo info;
-    eventHub->animationEndEvent_(testswipingIndex, info);
-    EXPECT_NE(eventHub, nullptr);
+    (*(tabBarPattern->animationEndEvent_))(testswipingIndex, info);
+    EXPECT_NE(tabBarPattern, nullptr);
     tabBarPattern->axis_ = Axis::HORIZONTAL;
     tabBarPattern->isTouchingSwiper_ = true;
     tabBarPattern->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
@@ -10202,14 +10241,14 @@ HWTEST_F(TabsTestNg, TabBarPatternInitTurnPageRateEvent002, TestSize.Level1)
     tabBarPattern->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
     EXPECT_NE(tabBarPattern, nullptr);
     tabBarPattern->turnPageRate_ = 2.0f;
-    eventHub->animationEndEvent_(testswipingIndex, info);
+    (*(tabBarPattern->animationEndEvent_))(testswipingIndex, info);
     tabBarPattern->turnPageRate_ = 1.0f;
-    eventHub->animationEndEvent_(testswipingIndex, info);
+    (*(tabBarPattern->animationEndEvent_))(testswipingIndex, info);
     tabBarPattern->turnPageRate_ = 0.0f;
-    eventHub->animationEndEvent_(testswipingIndex, info);
+    (*(tabBarPattern->animationEndEvent_))(testswipingIndex, info);
     tabBarPattern->turnPageRate_ = -1.0f;
-    eventHub->animationEndEvent_(testswipingIndex, info);
-    EXPECT_NE(eventHub, nullptr);
+    (*(tabBarPattern->animationEndEvent_))(testswipingIndex, info);
+    EXPECT_NE(tabBarPattern, nullptr);
 }
 
 /**

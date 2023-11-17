@@ -23,6 +23,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 
@@ -64,6 +65,8 @@ public:
 
     void SetOnTabBarClickEvent(std::function<void(const BaseEventInfo*)>&& event);
 
+    void SetAnimationEndEvent(AnimationEndEvent&& event);
+
     ChangeEventPtr GetTabBarClickEvent()
     {
         return onTabBarClickEvent_;
@@ -86,6 +89,7 @@ private:
     ChangeEventPtr onChangeEvent_;
     ChangeEventPtr onTabBarClickEvent_;
     ChangeEventPtr onIndexChangeEvent_;
+    AnimationEndEventPtr animationEndEvent_;
 };
 
 } // namespace OHOS::Ace::NG
