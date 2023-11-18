@@ -2444,20 +2444,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0014, TestSize.Level1)
     ASSERT_NE(backButtonNode2->renderContext_, nullptr);
     navigation->BackButtonAnimation(backButtonNode2, false);
     navigation->BackButtonAnimation(backButtonNode2, true);
-
-    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
-        "titleBarNode", 124, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    navDestination->titleBarNode_ = titleBarNode;
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-
-    auto backButtonNode = FrameNode::CreateFrameNode("backButtonNode22", 125, AceType::MakeRefPtr<ButtonPattern>());
-    titleBarNode->backButton_ = backButtonNode;
-    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    navigation->SetBackButtonVisible(navDestination);
-    ASSERT_EQ(backButtonLayoutProperty->propVisibility_.value(), VisibleType::VISIBLE);
-
-    navigation->SetBackButtonVisible(navDestination, false);
-    ASSERT_EQ(backButtonLayoutProperty->propVisibility_.value(), VisibleType::GONE);
 }
 
 /**

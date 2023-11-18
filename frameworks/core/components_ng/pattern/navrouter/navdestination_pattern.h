@@ -103,6 +103,8 @@ public:
         return isOnShow_;
     }
 
+    bool GetBackButtonState();
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
