@@ -128,6 +128,8 @@ public:
             const double defaultDisableUnderlineAlpha = 0.4;
             const Color defaultUnderlineColor = Color(0x33182431);
             const Color defaultUnderlineTextColor = Color(0x99182431);
+            const Color defaultCounterColor = Color(0x66182431);
+            const Color overCounterColor = Color(0x99FA2A2D);
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp);
             theme->textColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());
             theme->focusTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_FOCUSED, Color());
@@ -145,6 +147,8 @@ public:
                 pattern->GetAttr<Color>(UNDERLINE_COLOR, defaultUnderlineColor)
                     .BlendOpacity(pattern->GetAttr<double>(DISABLE_UNDERLINE_ALPHA, defaultDisableUnderlineAlpha));
             theme->underlineTextColor_ = pattern->GetAttr<Color>(UNDERLINE_TEXT_COLOR, defaultUnderlineTextColor);
+            theme->defaultCounterColor_ = pattern->GetAttr<Color>(DEFAULT_COUNTER_COLOR, defaultCounterColor);
+            theme->overCounterColor_ = pattern->GetAttr<Color>(OVER_COUNTER_COLOR, overCounterColor);
             theme->underlineFontSize_ = pattern->GetAttr<Dimension>(UNDERLINE_FONT_SIZE, 0.0_fp);
             theme->errorTextStyle_.SetTextColor(pattern->GetAttr<Color>(ERROR_UNDERLINE_TEXT_COLOR, Color()));
             theme->errorTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(ERROR_UNDERLINE_TEXT_SIZE, 0.0_fp));
@@ -476,6 +480,16 @@ public:
         return draggable_;
     }
 
+    const Color& GetDefaultCounterColor() const
+    {
+        return defaultCounterColor_;
+    }
+
+    const Color& GetOverCounterColor() const
+    {
+        return overCounterColor_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -525,6 +539,8 @@ private:
     Radius inlineRadiusSize_;
     Color inlineBgColor_;
     Color inlineBorderColor_;
+    Color defaultCounterColor_;
+    Color overCounterColor_;
 
     // UX::disable state: opacity is set to 38% of the default
     double disableOpacityRatio_ = 1.0;

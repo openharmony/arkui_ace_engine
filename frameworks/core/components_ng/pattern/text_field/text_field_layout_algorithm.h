@@ -68,11 +68,12 @@ public:
     static void UpdatePlaceholderTextStyle(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& textStyle, bool isDisabled);
+    void CounterLayout(LayoutWrapper* layoutWrapper);
+    float CounterNodeMeasure(float contentWidth, LayoutWrapper* layoutWrapper);
+    void UpdateCounterTextMargin(LayoutWrapper* layoutWrapper);
 
-    virtual float CounterNodeMeasure(float contentWidth, LayoutWrapper* layoutWrapper)
-    {
-        return 0.0f;
-    }
+    void UpdateCounterNode(uint32_t textLength, uint32_t maxLength, const LayoutConstraintF& contentConstraint,
+        LayoutWrapper* layoutWrapper);
 
 protected:
     static void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies);
