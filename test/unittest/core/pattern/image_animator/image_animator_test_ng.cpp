@@ -1122,5 +1122,4 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest018, TestSize.Level1)
     pattern_->UpdateCacheImageInfo(cTemp, iIndex);
     EXPECT_TRUE(iIndex >= static_cast<int32_t>(pattern_->images_.size()));
 }
-
 } // namespace OHOS::Ace::NG
