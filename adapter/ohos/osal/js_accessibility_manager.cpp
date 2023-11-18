@@ -1597,14 +1597,9 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_RETURN(uiExtensionManager, false);
     if (uiExtensionManager->IsWindowTypeUIExtension(pipeline)) {
-        auto rootNode = ngPipeline->GetRootElement();
-        CHECK_NULL_RETURN(rootNode, false);
-        auto node = GetInspectorById(rootNode, accessibilityEvent.nodeId);
-        CHECK_NULL_RETURN(node, false);
         std::vector<int32_t> uiExtensionIdLevelList;
-        return node->SendAccessibilityEventInfo(eventInfo, uiExtensionIdLevelList, pipeline);
+        return uiExtensionManager->SendAccessibilityEventInfo(eventInfo, uiExtensionIdLevelList, pipeline);
     }
-
     return client->SendEvent(eventInfo);
 }
 
@@ -1634,11 +1629,8 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_RETURN(uiExtensionManager, false);
     if (uiExtensionManager->IsWindowTypeUIExtension(pipeline)) {
-        auto rootNode = ngPipeline->GetRootElement();
-        CHECK_NULL_RETURN(rootNode, false);
-        return rootNode->SendAccessibilityEventInfo(eventInfo, uiExtensionIdLevelList, pipeline);
+        return uiExtensionManager->SendAccessibilityEventInfo(eventInfo, uiExtensionIdLevelList, pipeline);
     }
-
     int32_t wrapLevelid = 0;
     int32_t startLevelOffset = UI_EXTENSION_OFFSET_MAX;
     for (auto uiExtensionId : uiExtensionIdLevelList) {

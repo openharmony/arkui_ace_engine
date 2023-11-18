@@ -21,6 +21,7 @@
 #include <memory>
 #include <refbase.h>
 #include <list>
+#include <vector>
 
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
@@ -108,8 +109,6 @@ public:
         int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
     virtual bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset) override;
-    virtual bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-        std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline) override;
 
     int32_t GetSessionId();
 
@@ -122,7 +121,7 @@ public:
     }
 
     void OnAccessibilityEvent(
-        const Accessibility::AccessibilityEventInfo& info, std::vector<int32_t> uiExtensionIdLevelList);
+        const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList);
 
 private:
     enum ReleaseCode {
