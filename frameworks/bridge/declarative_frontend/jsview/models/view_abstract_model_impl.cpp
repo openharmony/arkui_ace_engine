@@ -1004,10 +1004,13 @@ void ViewAbstractModelImpl::SetSepia(const Dimension& value)
     frontDecoration->SetSepia(value);
 }
 
-void ViewAbstractModelImpl::SetInvert(const Dimension& value)
+void ViewAbstractModelImpl::SetInvert(const InvertVariant& value)
 {
     auto frontDecoration = GetFrontDecoration();
-    frontDecoration->SetInvert(value);
+    if (value.index() == 0) {
+        float invert = std::get<float>(value);
+        frontDecoration->SetInvert(Dimension(invert, DimensionUnit::VP));
+    }
 }
 
 void ViewAbstractModelImpl::SetHueRotate(float value)

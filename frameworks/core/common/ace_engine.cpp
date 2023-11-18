@@ -30,22 +30,49 @@
 namespace OHOS::Ace {
 namespace {
 
-constexpr int SIGNAL_JS_HEAP = 39;
-constexpr int SIGNAL_JS_HEAP_PRIV = 40;
+#ifdef OHOS_STANDARD_SYSTEM
+enum class SignalType {
+    SIGNAL_JSHEAP_OLD,
+    SIGNAL_JSHEAP,
+    SIGNAL_JSHEAP_PRIV,
+    SIGNAL_START_SAMPLE,
+    SIGNAL_STOP_SAMPLE,
+};
 
-void HandleSignal(int signo)
+void HandleSignal(int signal, [[maybe_unused]] siginfo_t *siginfo, void *context)
 {
-    switch (signo) {
-        case SIGNAL_JS_HEAP:
+    LOGW("HandleSignal start, signal is %{public}d", signal);
+    if (signal != MUSL_SIGNAL_JSHEAP) {
+        LOGW("HandleSignal failed, signal is %{public}d", signal);
+        return;
+    }
+    LOGW("HandleSignal sival_int is %{public}d", siginfo->si_value.sival_int);
+    switch (static_cast<SignalType>(siginfo->si_value.sival_int)) {
+        case SignalType::SIGNAL_JSHEAP_OLD: {
             AceEngine::Get().DumpJsHeap(false);
             break;
-        case SIGNAL_JS_HEAP_PRIV:
+        }
+        case SignalType::SIGNAL_JSHEAP: {
+            AceEngine::Get().DumpJsHeap(false);
+            break;
+        }
+        case SignalType::SIGNAL_JSHEAP_PRIV: {
             AceEngine::Get().DumpJsHeap(true);
             break;
+        }
+        case SignalType::SIGNAL_START_SAMPLE: {
+            LOGW("HandleSignal failed, SIGNAL_START_SAMPLE is retained");
+            break;
+        }
+        case SignalType::SIGNAL_STOP_SAMPLE: {
+            LOGW("HandleSignal failed, SIGNAL_STOP_SAMPLE is retained");
+            break;
+        }
         default:
             break;
     }
 }
+#endif
 
 } // namespace
 
@@ -69,8 +96,13 @@ AceEngine& AceEngine::Get()
 
 void AceEngine::InitJsDumpHeadSignal()
 {
-    signal(SIGNAL_JS_HEAP, HandleSignal);
-    signal(SIGNAL_JS_HEAP_PRIV, HandleSignal);
+#ifdef OHOS_STANDARD_SYSTEM
+    struct sigaction sigAct;
+    sigemptyset(&sigAct.sa_mask);
+    sigAct.sa_flags = SA_SIGINFO;
+    sigAct.sa_sigaction = HandleSignal;
+    sigaction(MUSL_SIGNAL_JSHEAP, &sigAct, NULL);
+#endif
 }
 
 void AceEngine::AddContainer(int32_t instanceId, const RefPtr<Container>& container)

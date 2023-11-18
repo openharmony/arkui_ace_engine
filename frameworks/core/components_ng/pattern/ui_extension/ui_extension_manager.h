@@ -21,6 +21,10 @@
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
 
+namespace OHOS::Rosen {
+enum class WSError;
+}
+
 namespace OHOS::Ace::NG {
 class UIExtensionPattern;
 class UIExtensionManager : public AceType {
@@ -34,6 +38,8 @@ public:
     const RefPtr<FrameNode> GetFocusUiExtensionNode();
     bool IsWrapExtensionAbilityId(int32_t elementId);
     bool IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pipeline);
+    bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
+        std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline);
     std::pair<int32_t, int32_t> UnWrapExtensionAbilityId(int32_t extensionOffset, int32_t elementId);
 
 private:

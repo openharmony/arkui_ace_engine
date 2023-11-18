@@ -916,7 +916,7 @@ void ScrollablePattern::HandleInvisibleItemsSelectedStatus(const RectF& selected
 
 void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
 {
-    if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+    if (info.GetButton() != MouseButton::LEFT_BUTTON || (scrollBar_ && scrollBar_->IsHover())) {
         return;
     }
 

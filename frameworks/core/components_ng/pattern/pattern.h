@@ -434,11 +434,6 @@ public:
     {
         return false;
     }
-    virtual bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-        std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline)
-    {
-        return false;
-    }
 
     virtual int32_t GetUiExtensionId()
     {

@@ -53,6 +53,8 @@ private:
         const NG::RichEditorAbstractSpanResult& spanResult);
     static void ParseMenuParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, SelectMenuParam& menuParam);
+    static void ParseUserGesture(
+        const JSCallbackInfo& args, UserGestureOptions& gestureOption, const std::string& spanType);
 };
 
 class JSRichEditorController final : public Referenced {

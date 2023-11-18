@@ -34,6 +34,7 @@
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/invert.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/components/theme/theme_utils.h"
 
@@ -141,10 +142,11 @@ struct EffectOption {
     double saturation { 1.0f };
     double brightness { 1.0f };
     Color color { Color::TRANSPARENT };
+    AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
     bool operator == (const EffectOption& other) const
     {
         return radius == other.radius && NearEqual(saturation, other.saturation) &&
-            NearEqual(brightness, other.brightness) && color == other.color;
+            NearEqual(brightness, other.brightness) && color == other.color && adaptiveColor == other.adaptiveColor;
     }
 };
 

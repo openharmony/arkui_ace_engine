@@ -52,7 +52,7 @@ const Dimension RIGHT { 10.0, DimensionUnit::PX };
 const Dimension BOTTOM { 20.0, DimensionUnit::PX };
 const Dimension VALUE { -50.0, DimensionUnit::PX };
 const Dimension ZERO { 0.0, DimensionUnit::PX };
-
+const InvertVariant invert = 0.0f;
 const OffsetF OFFSETF { 1.0, 1.0 };
 const Offset OFFSET { 2.0, 2.0 };
 const float RATIO = 1.0f;
@@ -757,7 +757,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest017, TestSize.Level1)
     ViewAbstract::SetContrast(RADIUS);
     ViewAbstract::SetSaturate(RADIUS);
     ViewAbstract::SetSepia(RADIUS);
-    ViewAbstract::SetInvert(RADIUS);
+    ViewAbstract::SetInvert(invert);
     ViewAbstract::SetHueRotate(RATIO);
     ViewAbstract::SetBrightness(RADIUS);
     ViewAbstract::SetColorBlend(BLUE);
@@ -794,7 +794,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest018, TestSize.Level1)
     ViewAbstract::SetContrast(RADIUS);
     ViewAbstract::SetSaturate(RADIUS);
     ViewAbstract::SetSepia(RADIUS);
-    ViewAbstract::SetInvert(RADIUS);
+    ViewAbstract::SetInvert(invert);
     ViewAbstract::SetHueRotate(RATIO);
     ViewAbstract::SetBrightness(RADIUS);
     ViewAbstract::SetColorBlend(BLUE);
@@ -1434,7 +1434,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest034, TestSize.Level1)
     ViewAbstract::SetContrast(RADIUS);
     ViewAbstract::SetSaturate(RADIUS);
     ViewAbstract::SetSepia(RADIUS);
-    ViewAbstract::SetInvert(RADIUS);
+    ViewAbstract::SetInvert(invert);
     ViewAbstract::SetHueRotate(RATIO);
     ViewAbstract::SetColorBlend(BLUE);
     ViewAbstract::SetBackdropBlur(RADIUS);

@@ -151,7 +151,7 @@ public:
     static void SetContrast(const Dimension& value);
     static void SetSaturate(const Dimension& value);
     static void SetSepia(const Dimension& value);
-    static void SetInvert(const Dimension& value);
+    static void SetInvert(const InvertVariant& value);
     static void SetHueRotate(float value);
     static void SetColorBlend(const Color& value);
 

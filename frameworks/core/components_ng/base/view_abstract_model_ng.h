@@ -631,7 +631,7 @@ public:
         ViewAbstract::SetSepia(value);
     }
 
-    void SetInvert(const Dimension& value) override
+    void SetInvert(const InvertVariant& value) override
     {
         ViewAbstract::SetInvert(value);
     }

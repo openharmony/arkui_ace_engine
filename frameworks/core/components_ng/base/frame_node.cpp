@@ -2607,6 +2607,28 @@ void FrameNode::SyncGeometryNode()
         contentOffsetChange = geometryNode_->GetContentOffset() != oldGeometryNode_->GetContentOffset();
         oldGeometryNode_.Reset();
     }
+    
+    // update border.
+    if (layoutProperty_->GetBorderWidthProperty()) {
+        if (!renderContext_->HasBorderColor()) {
+            BorderColorProperty borderColorProperty;
+            borderColorProperty.SetColor(Color::BLACK);
+            renderContext_->UpdateBorderColor(borderColorProperty);
+        }
+        if (!renderContext_->HasBorderStyle()) {
+            BorderStyleProperty borderStyleProperty;
+            borderStyleProperty.SetBorderStyle(BorderStyle::SOLID);
+            renderContext_->UpdateBorderStyle(borderStyleProperty);
+        }
+        if (layoutProperty_->GetLayoutConstraint().has_value()) {
+            renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
+                ScaleProperty::CreateScaleProperty(),
+                layoutProperty_->GetLayoutConstraint()->percentReference.Width()));
+        } else {
+            renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
+                ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
+        }
+    }
 
     // clean layout flag.
     layoutProperty_->CleanDirty();
@@ -2639,28 +2661,6 @@ void FrameNode::SyncGeometryNode()
         needRerender || pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config.skipMeasure, config.skipLayout);
     if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
-    }
-
-    // update border.
-    if (layoutProperty_->GetBorderWidthProperty()) {
-        if (!renderContext_->HasBorderColor()) {
-            BorderColorProperty borderColorProperty;
-            borderColorProperty.SetColor(Color::BLACK);
-            renderContext_->UpdateBorderColor(borderColorProperty);
-        }
-        if (!renderContext_->HasBorderStyle()) {
-            BorderStyleProperty borderStyleProperty;
-            borderStyleProperty.SetBorderStyle(BorderStyle::SOLID);
-            renderContext_->UpdateBorderStyle(borderStyleProperty);
-        }
-        if (layoutProperty_->GetLayoutConstraint().has_value()) {
-            renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
-                ScaleProperty::CreateScaleProperty(),
-                layoutProperty_->GetLayoutConstraint()->percentReference.Width()));
-        } else {
-            renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
-                ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
-        }
     }
 
     // update background
@@ -2914,12 +2914,4 @@ bool FrameNode::TransferExecuteAction(int32_t elementId, const std::map<std::str
     return isExecuted;
 }
 
-bool FrameNode::SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-    std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline)
-{
-    if (pattern_) {
-        return pattern_->SendAccessibilityEventInfo(eventInfo, uiExtensionIdLevelList, pipeline);
-    }
-    return false;
-}
 } // namespace OHOS::Ace::NG
