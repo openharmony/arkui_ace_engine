@@ -75,10 +75,14 @@ public:
     void SetModalOnRemoteReadyCallback(
     const std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)>&& callback);
     void SetOnRemoteReadyCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
-    void SetOnSyncOnCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
-    void SetOnAsyncOnCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
-    void SetOnSyncOffCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
-    void SetOnAsyncOffCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
+    void SetOnSyncOnCallbackList(
+        const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
+    void SetOnAsyncOnCallbackList(
+        const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
+    void SetOnSyncOffCallbackList(
+        const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
+    void SetOnAsyncOffCallbackList(
+        const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
     void SetOnReleaseCallback(const std::function<void(int32_t)>&& callback);
     void SetOnResultCallback(const std::function<void(int32_t, const AAFwk::Want&)>&& callback);
     void SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback);
@@ -183,8 +187,8 @@ private:
     std::function<void()> onModalDestroy_;
     std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onModalRemoteReadyCallback_;
     std::function<void(const RefPtr<UIExtensionProxy>&)> onRemoteReadyCallback_;
-    std::function<void(const RefPtr<UIExtensionProxy>&)> onSyncOnCallback_;
-    std::function<void(const RefPtr<UIExtensionProxy>&)> onAsyncOnCallback_;
+    std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList_;
+    std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onAsyncOnCallbackList_;
     std::function<void(int32_t)> onReleaseCallback_;
     std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;

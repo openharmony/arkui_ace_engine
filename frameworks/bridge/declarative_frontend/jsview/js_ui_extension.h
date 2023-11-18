@@ -32,6 +32,14 @@ public:
     static void OnError(const JSCallbackInfo& info);
 };
 
+enum class RegisterType {
+    SYNC = 0,
+    ASYNC,
+    UNKNOWN
+};
+
+using CallbackFuncPairList = std::list<std::pair<napi_ref, std::function<void(const RefPtr<NG::UIExtensionProxy>&)>>>;
+
 class JSUIExtensionProxy : public Referenced {
 public:
     JSUIExtensionProxy() = default;
@@ -47,8 +55,19 @@ private:
     static void Constructor(const JSCallbackInfo& info);
     static void Destructor(JSUIExtensionProxy* uiExtensionProxy);
 
+    CallbackFuncPairList::const_iterator FindCbList(napi_env env, napi_value cb,
+        CallbackFuncPairList& callbackFuncPairList);
+    void AddCallbackToList(napi_env env, napi_value cb, napi_handle_scope scope, RegisterType type,
+        const std::function<void(const RefPtr<NG::UIExtensionProxy>&)>&& onFunc);
+    void DeleteCallbackFromList(int argc, napi_env env, napi_value cb, RegisterType type);
+    std::list<std::function<void(const RefPtr<NG::UIExtensionProxy>&)>> GetOnFuncList(RegisterType type);
+    RegisterType GetRegisterType(const std::string& strType);
+
     RefPtr<NG::UIExtensionProxy> proxy_;
     int32_t instanceId_ = -1;
+    CallbackFuncPairList onSyncOnCallbackList_;
+    CallbackFuncPairList onAsyncOnCallbackList_;
+    std::mutex callbackLisLock_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UI_EXTENSION_H
