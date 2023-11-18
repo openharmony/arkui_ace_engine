@@ -653,7 +653,8 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
                 return;
             }
         }
-        if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && (curOffset_ > width * threshold || reachRightSpeed)) {
+        if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD &&
+            width > 0 && (curOffset_ > width * threshold || reachRightSpeed)) {
             swiperIndex_ = ListItemSwipeIndex::SWIPER_START;
             FireSwipeActionStateChange(SwipeActionState::EXPANDED);
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_START &&
@@ -680,7 +681,8 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
                 return;
             }
         }
-        if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && (width * threshold < -curOffset_ || reachLeftSpeed)) {
+        if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD &&
+            width > 0 && (width * threshold < -curOffset_ || reachLeftSpeed)) {
             swiperIndex_ = ListItemSwipeIndex::SWIPER_END;
             FireSwipeActionStateChange(SwipeActionState::EXPANDED);
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_END &&
