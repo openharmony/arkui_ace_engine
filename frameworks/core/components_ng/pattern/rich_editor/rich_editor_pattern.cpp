@@ -2756,6 +2756,7 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     auto spanNode = DynamicCast<FrameNode>(GetChildByIndex(spanInfo.GetSpanIndex() - 1));
     if (spanNode && spanNode->GetTag() == V2::IMAGE_ETS_TAG && spanInfo.GetOffsetInSpan() == 0 &&
         selectEnd == selectStart + 1 && BetweenSelectedPosition(info.GetGlobalLocation())) {
+        selectedType_ = RichEditorType::IMAGE;
         FireOnSelect(selectStart, selectEnd);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         return;
@@ -2767,6 +2768,7 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     float caretHeight = 0.0f;
     OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
     SetCaretPosition(position);
+    selectedType_ = RichEditorType::TEXT;
     CHECK_NULL_VOID(overlayMod_);
     DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
     StartTwinkling();
