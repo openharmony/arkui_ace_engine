@@ -99,6 +99,7 @@ const CalcLength CALC_LENGTH_CALC {10.0, DimensionUnit::CALC};
 const CalcLength ERROR_CALC_LENGTH_CALC {-10.0, DimensionUnit::CALC};
 const Dimension CALC_TEST {10.0, DimensionUnit::CALC};
 const Dimension ERROR_CALC_TEST {-10.0, DimensionUnit::CALC};
+const Offset MOUSE_GLOBAL_LOCATION = {100, 200};
 } // namespace
 
 class RichEditorTestNg : public testing::Test {
@@ -1799,7 +1800,7 @@ HWTEST_F(RichEditorTestNg, CopySelectionMenuParams001, TestSize.Level1)
     selectInfo.isUsingMouse = false;
     richEditorPattern->selectedType_ = RichEditorType::MIXED;
     richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::RIGHT_CLICK);
-    EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
+    EXPECT_NE(selectInfo.menuCallback.onDisappear, nullptr);
 }
 
 /**
@@ -2324,5 +2325,111 @@ HWTEST_F(RichEditorTestNg, GetCaretRect002, TestSize.Level1)
 
     EXPECT_EQ(GreatNotEqual(manager->GetHeight(), 0.0f), true);
     EXPECT_EQ(LessNotEqual(manager->GetHeight(), 800.0f), true);
+}
+
+/**
+ * @tc.name: HandleMouseLeftButton002
+ * @tc.desc: test HandleMouseLeftButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleMouseLeftButton002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    AddSpan(INIT_VALUE_1);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    MouseInfo mouseInfo;
+    mouseInfo.action_ = MouseAction::RELEASE;
+    mouseInfo.SetGlobalLocation(MOUSE_GLOBAL_LOCATION);
+    richEditorPattern->mouseStatus_ = MouseStatus::NONE;
+    richEditorPattern->HandleMouseLeftButton(mouseInfo);
+    EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::RELEASED);
+    richEditorPattern->textSelector_ = TextSelector(0, 2);
+    std::vector<RichEditorType> selectType = { RichEditorType::TEXT, RichEditorType::IMAGE, RichEditorType::MIXED };
+    SelectOverlayInfo selectInfo;
+    selectInfo.isUsingMouse = true;
+    for (int32_t i = 0; i < selectType.size(); i++) {
+        richEditorPattern->selectedType_ = selectType[i];
+        richEditorPattern->HandleMouseLeftButton(mouseInfo);
+        EXPECT_NE(richEditorPattern->selectionMenuOffsetByMouse_.GetX(),
+            static_cast<float>(mouseInfo.GetGlobalLocation().GetX()));
+        EXPECT_NE(richEditorPattern->selectionMenuOffsetByMouse_.GetY(),
+            static_cast<float>(mouseInfo.GetGlobalLocation().GetY()));
+    }
+    std::function<void()> buildFunc = []() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = []() {
+        callBack3 = 3;
+        return;
+    };
+    for (int32_t i = 0; i < selectType.size(); i++) {
+        richEditorPattern->selectedType_ = selectType[i];
+        auto key = std::make_pair(selectType[i], RichEditorResponseType::SELECTED_BY_MOUSE);
+        std::shared_ptr<SelectionMenuParams> params1 = std::make_shared<SelectionMenuParams>(
+            selectType[i], buildFunc, onAppear, onDisappear, RichEditorResponseType::SELECTED_BY_MOUSE);
+        richEditorPattern->selectionMenuMap_[key] = params1;
+        richEditorPattern->HandleMouseLeftButton(mouseInfo);
+        EXPECT_EQ(richEditorPattern->selectionMenuOffsetByMouse_.GetX(),
+            static_cast<float>(mouseInfo.GetGlobalLocation().GetX()));
+        EXPECT_EQ(richEditorPattern->selectionMenuOffsetByMouse_.GetY(),
+            static_cast<float>(mouseInfo.GetGlobalLocation().GetY()));
+    }
+}
+
+/**
+ * @tc.name: SetSelection001
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, SetSelection001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    AddSpan(INIT_VALUE_1);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetSelection(0, 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->SetSelection(0, 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 1);
+    richEditorPattern->SetSelection(3, 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 1);
+    richEditorPattern->SetSelection(-1, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 6);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    richEditorPattern->SetSelection(0, 10);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 6);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    richEditorPattern->SetSelection(-2, 3);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 3);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 3);
+    richEditorPattern->SetSelection(-2, 8);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 6);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    richEditorPattern->SetSelection(-2, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+    richEditorPattern->SetSelection(1, 3);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 3);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 3);
 }
 } // namespace OHOS::Ace::NG

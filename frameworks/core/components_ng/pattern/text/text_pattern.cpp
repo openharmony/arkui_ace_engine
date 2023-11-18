@@ -424,7 +424,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
 
 void TextPattern::HandleOnSelectAll()
 {
-    auto textSize = GetWideText().length() + imageCount_;
+    auto textSize = static_cast<int32_t>(GetWideText().length()) + imageCount_;
     textSelector_.Update(0, textSize);
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
@@ -1008,7 +1008,7 @@ void TextPattern::InitTextDetect()
 void TextPattern::ActSetSelection(int32_t start, int32_t end)
 {
     int32_t min = 0;
-    int32_t textSize = GetWideText().length() + imageCount_;
+    int32_t textSize = static_cast<int32_t>(GetWideText().length()) + imageCount_;
     start = start < min ? min : start;
     end = end < min ? min : end;
     start = start > textSize ? textSize : start;
