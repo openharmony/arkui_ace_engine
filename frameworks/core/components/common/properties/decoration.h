@@ -114,11 +114,16 @@ enum class AdaptiveColor {
     AVERAGE,
 };
 
+struct BlurOption {
+    std::vector<float> grayscale;
+};
+
 struct BlurStyleOption {
     BlurStyle blurStyle = BlurStyle::NO_MATERIAL;
     ThemeColorMode colorMode = ThemeColorMode::SYSTEM;
     AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
     double scale = 1.0;
+    BlurOption blurOption;
     bool operator == (const BlurStyleOption& other) const
     {
         return blurStyle == other.blurStyle && colorMode == other.colorMode && adaptiveColor == other.adaptiveColor &&
@@ -149,6 +154,7 @@ struct EffectOption {
     double brightness { 1.0f };
     Color color { Color::TRANSPARENT };
     AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
+    BlurOption blurOption;
     bool operator == (const EffectOption& other) const
     {
         return radius == other.radius && NearEqual(saturation, other.saturation) &&

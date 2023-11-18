@@ -120,10 +120,10 @@ public:
     void SetClipEdge(bool isClip) override;
     void SetMask(const RefPtr<BasicShape>& shape) override;
 
-    void SetBackdropBlur(const Dimension& radius) override;
+    void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override {};
     void SetDynamicLightUp(float rate, float lightUpDegree) override {};
-    void SetFrontBlur(const Dimension& radius) override;
+    void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void SetBackShadow(const std::vector<Shadow>& shadows) override;
     void SetBlendMode(BlendMode blendMode) override;
     void SetColorBlend(const Color& value) override;

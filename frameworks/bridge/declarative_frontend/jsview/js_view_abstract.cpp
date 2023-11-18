@@ -2016,8 +2016,24 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackgroundImageRepeat(repeat);
 }
 
+void JSViewAbstract::ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOption& blurOption)
+{
+    if (jsBlurOption->GetProperty("grayscale")->IsArray()) {
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(jsBlurOption->GetProperty("grayscale"));
+        auto grey1 = params->GetValueAt(0)->ToNumber<uint32_t>();
+        auto grey2 = params->GetValueAt(1)->ToNumber<uint32_t>();
+        std::vector<float> greyVec(2);  // 2 number
+        greyVec[0] = grey1;
+        greyVec[1] = grey2;
+        blurOption.grayscale = greyVec;
+    }
+}
+
 void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
 {
+    if (info.Length() == 0) {
+        return;
+    }
     BlurStyleOption styleOption;
     if (info[0]->IsNumber()) {
         auto blurStyle = info[0]->ToNumber<int32_t>();
@@ -2043,6 +2059,13 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
         if (jsOption->GetProperty("scale")->IsNumber()) {
             double scale = jsOption->GetProperty("scale")->ToNumber<double>();
             styleOption.scale = std::clamp(scale, 0.0, 1.0);
+        }
+
+        if (jsOption->GetProperty("blurOption")->IsObject()) {
+            JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOption"));
+            BlurOption blurOption;
+            ParseBlurOption(jsBlurOption, blurOption);
+            styleOption.blurOption = blurOption;
         }
     }
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
@@ -2075,11 +2098,20 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
         adaptiveColorValue <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
         adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorValue);
     }
-    effectOption = { radius, saturation, brightness, color, adaptiveColor };
+
+    BlurOption blurOption;
+    if (jsOption->GetProperty("blurOption")->IsObject()) {
+        JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOption"));
+        ParseBlurOption(jsBlurOption, blurOption);
+    }
+    effectOption = { radius, saturation, brightness, color, adaptiveColor, blurOption };
 }
 
 void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
 {
+    if (info.Length() == 0) {
+        return;
+    }
     if (!info[0]->IsObject()) {
         return;
     }
@@ -2091,6 +2123,9 @@ void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsForegroundBlurStyle(const JSCallbackInfo& info)
 {
+    if (info.Length() == 0) {
+        return;
+    }
     BlurStyleOption styleOption;
     if (info[0]->IsNumber()) {
         auto blurStyle = info[0]->ToNumber<int32_t>();
@@ -2116,6 +2151,13 @@ void JSViewAbstract::JsForegroundBlurStyle(const JSCallbackInfo& info)
         if (jsOption->GetProperty("scale")->IsNumber()) {
             double scale = jsOption->GetProperty("scale")->ToNumber<double>();
             styleOption.scale = std::clamp(scale, 0.0, 1.0);
+        }
+ 
+        if (jsOption->GetProperty("blurOption")->IsObject()) {
+            JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOption"));
+            BlurOption blurOption;
+            ParseBlurOption(jsBlurOption, blurOption);
+            styleOption.blurOption = blurOption;
         }
     }
     ViewAbstractModel::GetInstance()->SetForegroundBlurStyle(styleOption);
@@ -3074,18 +3116,21 @@ void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
 
 void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
 {
-    double blur = 0.0;
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::STRING,
-        JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("Blur", info, checkList)) {
-        SetBlur(blur);
-        info.SetReturnValue(info.This());
+    if (info.Length() == 0) {
         return;
     }
+    double blur = 0.0;
     if (!ParseJsDouble(info[0], blur)) {
         return;
     }
-    SetBlur(blur);
+
+    BlurOption blurOption;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(info[1]);
+        ParseBlurOption(jsBlurOption, blurOption);
+    }
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+    ViewAbstractModel::GetInstance()->SetFrontBlur(dimensionRadius, blurOption);
     info.SetReturnValue(info.This());
 }
 
@@ -3113,18 +3158,21 @@ void JSViewAbstract::JsUseEffect(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
 {
-    double blur = 0.0;
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::STRING,
-        JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("BackdropBlur", info, checkList)) {
-        SetBackdropBlur(blur);
-        info.SetReturnValue(info.This());
+    if (info.Length() == 0) {
         return;
     }
+    double blur = 0.0;
     if (!ParseJsDouble(info[0], blur)) {
         return;
     }
-    SetBackdropBlur(blur);
+    BlurOption blurOption;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(info[1]);
+        ParseBlurOption(jsBlurOption, blurOption);
+    }
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+    ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius, blurOption);
+    
     info.SetReturnValue(info.This());
 }
 
@@ -5690,21 +5738,9 @@ void JSViewAbstract::SetPaddingRight(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetPaddings(std::nullopt, std::nullopt, std::nullopt, value);
 }
 
-void JSViewAbstract::SetBlur(float radius)
-{
-    CalcDimension dimensionRadius(radius, DimensionUnit::PX);
-    ViewAbstractModel::GetInstance()->SetFrontBlur(dimensionRadius);
-}
-
 void JSViewAbstract::SetColorBlend(Color color)
 {
     ViewAbstractModel::GetInstance()->SetColorBlend(color);
-}
-
-void JSViewAbstract::SetBackdropBlur(float radius)
-{
-    CalcDimension dimensionRadius(radius, DimensionUnit::PX);
-    ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius);
 }
 
 void JSViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)

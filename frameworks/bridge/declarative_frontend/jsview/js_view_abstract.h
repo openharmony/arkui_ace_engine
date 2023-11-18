@@ -100,6 +100,7 @@ public:
     static void JsBackgroundImage(const JSCallbackInfo& info);
     static void JsBackgroundImageSize(const JSCallbackInfo& info);
     static void JsBackgroundImagePosition(const JSCallbackInfo& info);
+    static void ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOption& blurOption);
     static void JsBackgroundBlurStyle(const JSCallbackInfo& info);
     static void JsBackgroundEffect(const JSCallbackInfo& info);
     static void ParseEffectOption(const JSRef<JSObject>& jsObj, EffectOption& effectOption);
@@ -344,9 +345,7 @@ public:
     static void SetBorderStyle(int32_t style);
     static void SetBorderColor(const Color& color, const AnimationOption& option);
     static void SetBorderWidth(const CalcDimension& value, const AnimationOption& option);
-    static void SetBlur(float radius);
     static void SetColorBlend(Color color);
-    static void SetBackdropBlur(float radius);
     static void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara);
     static void SetDynamicLightUp(float rate, float lightUpDegree);
     static void SetWindowBlur(float progress, WindowBlurStyle blurStyle);
