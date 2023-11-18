@@ -44,6 +44,7 @@ public:
     static void JsHandlerOnActionEnd(const JSCallbackInfo& args);
     static void JsHandlerOnActionCancel(const JSCallbackInfo& args);
     static void JsHandlerOnGestureEvent(Ace::GestureEventAction action, const JSCallbackInfo& args);
+    static void SetTag(const JSCallbackInfo& args);
 }; // JSGesture
 
 class JSTapGesture : public JSGesture {

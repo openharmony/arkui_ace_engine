@@ -189,6 +189,7 @@ public:
 
     // event
     static void SetOnClick(GestureEventFunc&& clickEventFunc);
+    static void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
     static void SetOnTouch(TouchEventFunc&& touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
     static void SetOnHover(OnHoverFunc&& onHoverEventFunc);

@@ -22,6 +22,7 @@
 #include "base/log/log.h"
 #include "base/utils/type_definition.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
@@ -143,11 +144,16 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             }
         } else {
             matchedTouch_.insert(event.id);
-            if (static_cast<int32_t>(matchedTouch_.size()) == fingers_) {
-                Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
-            } else {
+            if (static_cast<int32_t>(matchedTouch_.size()) != fingers_) {
                 Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
+                return;
             }
+            auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
+            if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+                Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+                return;
+            }
+            Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         }
     }
 }
@@ -179,6 +185,11 @@ void SwipeRecognizer::HandleTouchUpEvent(const AxisEvent& event)
         if (resultSpeed_ < speed_) {
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         } else {
+            auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
+            if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+                Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+                return;
+            }
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         }
     }
@@ -334,6 +345,40 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         auto callbackFunction = *callback;
         callbackFunction(info);
     }
+}
+
+GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
+{
+    auto targetComponent = GetTargetComponent();
+    CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
+    auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
+    CHECK_NULL_RETURN(callback, GestureJudgeResult::CONTINUE);
+    auto info = std::make_shared<SwipeGestureEvent>();
+    info->SetTimeStamp(time_);
+    UpdateFingerListInfo();
+    info->SetFingerList(fingerList_);
+    if (deviceType_ == SourceType::MOUSE) {
+        info->SetSpeed(0.0);
+    } else {
+        info->SetSpeed(resultSpeed_);
+    }
+    info->SetSourceDevice(deviceType_);
+    info->SetTarget(GetEventTarget().value_or(EventTarget()));
+    if (recognizerTarget_.has_value()) {
+        info->SetTarget(recognizerTarget_.value());
+    }
+    info->SetForce(lastTouchEvent_.force);
+    if (lastTouchEvent_.tiltX.has_value()) {
+        info->SetTiltX(lastTouchEvent_.tiltX.value());
+    }
+    if (lastTouchEvent_.tiltY.has_value()) {
+        info->SetTiltY(lastTouchEvent_.tiltY.value());
+    }
+    info->SetSourceTool(lastTouchEvent_.sourceTool);
+    if (prevAngle_) {
+        info->SetAngle(prevAngle_.value());
+    }
+    return callback(gestureInfo_, info);
 }
 
 bool SwipeRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)

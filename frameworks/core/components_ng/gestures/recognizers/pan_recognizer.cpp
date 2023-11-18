@@ -20,6 +20,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
@@ -287,7 +288,9 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::DETECTING) {
         auto result = IsPanGestureAccept();
         if (result == GestureAcceptResult::ACCEPT) {
-            Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+            if (HandlePanAccept()) {
+                return;
+            }
         } else if (result == GestureAcceptResult::REJECT) {
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
@@ -358,7 +361,9 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     if (refereeState_ == RefereeState::DETECTING) {
         auto result = IsPanGestureAccept();
         if (result == GestureAcceptResult::ACCEPT) {
-            Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+            if (HandlePanAccept()) {
+                return;
+            }
         } else if (result == GestureAcceptResult::REJECT) {
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
@@ -371,6 +376,30 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
         SendCallbackMsg(onActionUpdate_);
     }
+}
+
+bool PanRecognizer::HandlePanAccept()
+{
+    if (gestureInfo_ && gestureInfo_->GetType() == GestureTypeName::DRAG) {
+        auto dragEventActuator = GetDragEventActuator();
+        CHECK_NULL_RETURN(dragEventActuator, true);
+        if (dragEventActuator->IsDragUserReject()) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+            return true;
+        }
+    }
+    auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
+    if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        if (gestureInfo_ && gestureInfo_->GetType() == GestureTypeName::DRAG) {
+            auto dragEventActuator = GetDragEventActuator();
+            CHECK_NULL_RETURN(dragEventActuator, true);
+            dragEventActuator->SetIsDragUserReject(true);
+        }
+        return true;
+    }
+    Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+    return false;
 }
 
 void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& /*event*/)
@@ -539,6 +568,46 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
     }
 }
 
+GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
+{
+    auto targetComponent = GetTargetComponent();
+    CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
+    auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
+    CHECK_NULL_RETURN(callback, GestureJudgeResult::CONTINUE);
+    auto info = std::make_shared<PanGestureEvent>();
+    info->SetTimeStamp(time_);
+    UpdateFingerListInfo();
+    info->SetFingerList(fingerList_);
+    info->SetOffsetX(averageDistance_.GetX());
+    info->SetOffsetY(averageDistance_.GetY());
+    TouchEvent touchPoint = {};
+    if (!touchPoints_.empty()) {
+        touchPoint = touchPoints_.begin()->second;
+    }
+    info->SetSourceDevice(deviceType_);
+    if (inputEventType_ == InputEventType::AXIS) {
+        info->SetVelocity(Velocity());
+        info->SetMainVelocity(0.0);
+        info->SetSourceTool(lastAxisEvent_.sourceTool);
+    } else {
+        info->SetVelocity(velocityTracker_.GetVelocity());
+        info->SetMainVelocity(velocityTracker_.GetMainAxisVelocity());
+        info->SetSourceTool(lastTouchEvent_.sourceTool);
+    }
+    info->SetTarget(GetEventTarget().value_or(EventTarget()));
+    if (recognizerTarget_.has_value()) {
+        info->SetTarget(recognizerTarget_.value());
+    }
+    info->SetForce(lastTouchEvent_.force);
+    if (lastTouchEvent_.tiltX.has_value()) {
+        info->SetTiltX(lastTouchEvent_.tiltX.value());
+    }
+    if (lastTouchEvent_.tiltY.has_value()) {
+        info->SetTiltY(lastTouchEvent_.tiltY.value());
+    }
+    return callback(gestureInfo_, info);
+}
+
 bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     RefPtr<PanRecognizer> curr = AceType::DynamicCast<PanRecognizer>(recognizer);
@@ -626,6 +695,19 @@ RefPtr<GestureSnapshot> PanRecognizer::Dump() const
         << "fingers: " << fingers_;
     info->customInfo = oss.str();
     return info;
+}
+
+RefPtr<DragEventActuator> PanRecognizer::GetDragEventActuator()
+{
+    auto targetComponent = GetTargetComponent();
+    CHECK_NULL_RETURN(targetComponent, nullptr);
+    auto uiNode = targetComponent->GetUINode().Upgrade();
+    CHECK_NULL_RETURN(uiNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureEventHub, nullptr);
+    return gestureEventHub->GetDragEventActuator();
 }
 
 } // namespace OHOS::Ace::NG

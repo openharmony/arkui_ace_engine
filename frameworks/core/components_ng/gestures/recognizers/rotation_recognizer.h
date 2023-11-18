@@ -44,6 +44,7 @@ private:
     double ComputeAngle();
     void OnResetStatus() override;
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    GestureJudgeResult TriggerGestureJudgeCallback();
     static double ChangeValueRange(double value);
 
     double angle_ = 0.0;

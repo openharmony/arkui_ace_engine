@@ -26,6 +26,7 @@ RefPtr<NGGestureRecognizer> LongPressGesture::CreateRecognizer()
         duration_, fingers_, repeat_, isForDrag_, isDisableMouseLeft_);
     longPressRecognizer->SetPriority(priority_);
     longPressRecognizer->SetPriorityMask(gestureMask_);
+    longPressRecognizer->SetGestureInfo(gestureInfo_);
     if (onActionId_) {
         longPressRecognizer->SetOnAction(*onActionId_);
     }
