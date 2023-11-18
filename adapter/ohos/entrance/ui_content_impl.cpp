@@ -1233,6 +1233,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
     pipeline->SetHalfLeading(halfLeading);
+    container->CheckAndSetFontFamily();
     if (pipeline) {
         auto rsConfig = window_->GetKeyboardAnimationConfig();
         KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
@@ -1483,6 +1484,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             parsedConfig.languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
             parsedConfig.direction = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
             parsedConfig.densitydpi = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
+            parsedConfig.themeTag = config->GetItem("ohos.application.theme");
             container->UpdateConfiguration(parsedConfig, config->GetName());
             LOGI("UIContentImpl: UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
         },
