@@ -22,7 +22,9 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -748,6 +750,55 @@ void JSRichEditorController::ParseTextDecoration(
     }
 }
 
+void ParseUserGesture(
+    const JSCallbackInfo& args, UserGestureOptions& gestureOption, const std::string& spanType)
+{
+    if (args.Length() < 2) {
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(args[1]);
+    auto gesture = object->GetProperty("gesture");
+    if (!gesture->IsUndefined()) {
+        auto gestureObj = JSRef<JSObject>::Cast(gesture);
+        auto clickFunc = gestureObj->GetProperty("onClick");
+        if (clickFunc->IsUndefined() && IsDisableEventVersion()) {
+            gestureOption.onClick = nullptr;
+        } else if (!clickFunc->IsFunction()) {
+            gestureOption.onClick = nullptr;
+        } else {
+            auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
+            auto onClick = [
+                    execCtx = args.GetExecutionContext(), func = jsOnClickFunc, spanTypeInner = spanType
+                    ](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+                ACE_SCORING_EVENT(spanTypeInner + ".onClick");
+                func->Execute(*clickInfo);
+            };
+            auto tmpClickFunc = [func = std::move(onClick)](GestureEvent& info) { func(&info); };
+            gestureOption.onClick = std::move(tmpClickFunc);
+        }
+        auto onLongPressFunc = gestureObj->GetProperty("onLongPress");
+        if (onLongPressFunc->IsUndefined() && IsDisableEventVersion()) {
+            gestureOption.onLongPress = nullptr;
+        } else if (!onLongPressFunc->IsFunction()) {
+            gestureOption.onLongPress = nullptr;
+        } else {
+            auto jsLongPressFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(onLongPressFunc));
+            auto onLongPress = [
+                    execCtx = args.GetExecutionContext(), func = jsLongPressFunc, spanTypeInner = spanType
+                    ](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                const auto* longPressInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+                ACE_SCORING_EVENT(spanTypeInner + ".onLongPress");
+                func->Execute(*longPressInfo);
+            };
+            auto tmpOnLongPressFunc = [func = std::move(onLongPress)](GestureEvent& info) { func(&info); };
+            gestureOption.onLongPress = std::move(tmpOnLongPressFunc);
+        }
+    }
+}
+
 void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
@@ -794,43 +845,9 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
             ImageSpanAttribute imageStyle = ParseJsImageSpanAttribute(imageAttribute);
             options.imageAttribute = imageStyle;
         }
-    }
-    if (args.Length() > 2 && args[2]->IsObject()) {
-        JSRef<JSObject> imageObject = JSRef<JSObject>::Cast(args[2]);
-        auto clickFunc = imageObject->GetProperty("onClick");
-        if (clickFunc->IsUndefined() && IsDisableEventVersion()) {
-            options.onClick = nullptr;
-        } else if (!clickFunc->IsFunction()) {
-            options.onClick = nullptr;
-        } else {
-            auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
-            auto onClick = [execCtx = args.GetExecutionContext(), func = jsOnClickFunc](const BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
-                ACE_SCORING_EVENT("TextSpan.onClick");
-                func->Execute(*clickInfo);
-            };
-            auto tmpClickFunc = [func = std::move(onClick)](GestureEvent& info) { func(&info); };
-            options.onClick = std::move(tmpClickFunc);
-        }
-
-        auto onLongPressFunc = imageObject->GetProperty("onLongPress");
-        if (onLongPressFunc->IsUndefined() && IsDisableEventVersion()) {
-            options.onLongPress = nullptr;
-        } else if (!onLongPressFunc->IsFunction()) {
-            options.onLongPress = nullptr;
-        } else {
-            auto jsLongPressFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(onLongPressFunc));
-            auto onLongPress = [
-                    execCtx = args.GetExecutionContext(), func = jsLongPressFunc](const BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                const auto* longPressInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
-                ACE_SCORING_EVENT("ImageSpan.onLongPress");
-                func->Execute(*longPressInfo);
-            };
-            auto tmpOnLongPressFunc = [func = std::move(onLongPress)](GestureEvent& info) { func(&info); };
-            options.onLongPress = std::move(tmpOnLongPressFunc);
-        }
+        UserGestureOptions gestureOption;
+        ParseUserGesture(args, gestureOption, "ImageSpan");
+        options.userGestureOption = std::move(gestureOption);
     }
     auto controller = controllerWeak_.Upgrade();
     int32_t spanIndex = 0;
@@ -939,41 +956,9 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
                 options.paraStyle = style;
             }
         }
-    }
-    if (args.Length() > 2 && args[2]->IsObject()) {
-        JSRef<JSObject> spanObject = JSRef<JSObject>::Cast(args[2]);
-        auto clickFunc = spanObject->GetProperty("onClick");
-        if (clickFunc->IsUndefined() && IsDisableEventVersion()) {
-            options.onClick = nullptr;
-        } else if (!clickFunc->IsFunction()) {
-            options.onClick = nullptr;
-        } else {
-            auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
-            auto onClick = [execCtx = args.GetExecutionContext(), func = jsOnClickFunc](const BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
-                ACE_SCORING_EVENT("Text.onClick");
-                func->Execute(*clickInfo);
-            };
-            auto tmpClickFunc = [func = std::move(onClick)](GestureEvent& info) { func(&info); };
-            options.onClick = std::move(tmpClickFunc);
-        }
-        auto longPressFunc = spanObject->GetProperty("onLongPress");
-        if (longPressFunc->IsUndefined() && IsDisableEventVersion()) {
-            options.onLongPress = nullptr;
-        } else if (!longPressFunc->IsFunction()) {
-            options.onLongPress = nullptr;
-        } else {
-            auto jsLongPressFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(longPressFunc));
-            auto longPress = [execCtx = args.GetExecutionContext(), func = jsLongPressFunc](const BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                const auto* longPressInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
-                ACE_SCORING_EVENT("TextSpan.onLongPress");
-                func->Execute(*longPressInfo);
-            };
-            auto tmpLongPressFunc = [func = std::move(longPress)](GestureEvent& info) { func(&info); };
-            options.onLongPress = std::move(tmpLongPressFunc);
-        }
+        UserGestureOptions gestureOption;
+        ParseUserGesture(args, gestureOption, "TextSpan");
+        options.userGestureOption = std::move(gestureOption);
     }
     auto controller = controllerWeak_.Upgrade();
     int32_t spanIndex = 0;
@@ -1146,7 +1131,7 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
         // [LeadingMarginPlaceholder]
         JSRef<JSObject> leadingMarginObject = JSRef<JSObject>::Cast(lm);
         style.leadingMargin = std::make_optional<NG::LeadingMargin>();
-        JSRef<JSVal> placeholder = leadingMarginObject->GetProperty("placeholder");
+        JSRef<JSVal> placeholder = leadingMarginObject->GetProperty("pixelMap");
         if (IsPixelMap(placeholder)) {
 #if defined(PIXEL_MAP_SUPPORTED)
             auto pixelMap = CreatePixelMapFromNapiValue(placeholder);

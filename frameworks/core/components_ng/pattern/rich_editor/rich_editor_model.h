@@ -31,6 +31,11 @@
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace {
+struct UserGestureOptions {
+    GestureEventFunc onClick;
+    GestureEventFunc onLongPress;
+};
+
 struct ImageSpanSize {
     CalcDimension width;
     CalcDimension height;
@@ -50,8 +55,7 @@ struct ImageSpanOptions {
     std::optional<std::string> moduleName;
     std::optional<RefPtr<PixelMap>> imagePixelMap;
     std::optional<ImageSpanAttribute> imageAttribute;
-    GestureEventFunc onClick;
-    GestureEventFunc onLongPress;
+    UserGestureOptions userGestureOption;
 };
 
 struct SpanPositionInfo {
@@ -133,8 +137,7 @@ struct TextSpanOptions {
     std::string value;
     std::optional<TextStyle> style;
     std::optional<UpdateParagraphStyle> paraStyle;
-    GestureEventFunc onClick;
-    GestureEventFunc onLongPress;
+    UserGestureOptions userGestureOption;
 };
 
 class ACE_EXPORT RichEditorControllerBase : public AceType {
