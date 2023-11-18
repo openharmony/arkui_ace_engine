@@ -35,7 +35,7 @@ enum class RichEditorResponseType : int32_t {
     RIGHT_CLICK = 0,
     LONG_PRESS,
     SELECTED_BY_MOUSE,
-}
+};
 
 struct UserGestureOptions {
     GestureEventFunc onClick;
