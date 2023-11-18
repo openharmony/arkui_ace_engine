@@ -43,7 +43,18 @@ bool UIExtensionManager::IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pip
 {
     auto instanceId = pipeline->GetInstanceId();
     auto window = Platform::AceContainer::GetUIWindow(instanceId);
+    CHECK_NULL_RETURN(window, false);
     return window->GetType() == OHOS::Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION;
+}
+
+bool UIExtensionManager::SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
+    std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline)
+{
+    auto instanceId = pipeline->GetInstanceId();
+    auto window = Platform::AceContainer::GetUIWindow(instanceId);
+    CHECK_NULL_RETURN(window, false);
+    OHOS::Rosen::WMError ret = window->TransferAccessibilityEvent(eventInfo, uiExtensionIdLevelList);
+    return ret == OHOS::Rosen::WMError::WM_OK;
 }
 
 std::pair<int32_t, int32_t> UIExtensionManager::UnWrapExtensionAbilityId(

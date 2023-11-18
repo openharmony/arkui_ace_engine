@@ -2914,12 +2914,4 @@ bool FrameNode::TransferExecuteAction(int32_t elementId, const std::map<std::str
     return isExecuted;
 }
 
-bool FrameNode::SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-    std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline)
-{
-    if (pattern_) {
-        return pattern_->SendAccessibilityEventInfo(eventInfo, uiExtensionIdLevelList, pipeline);
-    }
-    return false;
-}
 } // namespace OHOS::Ace::NG
