@@ -1605,6 +1605,23 @@ void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, boo
         TaskExecutor::TaskType::UI);
 }
 
+void UIContentImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    LOGI("UIContentImpl: UpdateTitleInTargetPos, isShow %{public}d, height is %{public}d", isShow, height);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, isShow, height]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateTitleInTargetPos(isShow, height);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);

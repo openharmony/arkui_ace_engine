@@ -107,6 +107,8 @@ void PipelineContext::ContainerModalUnFocus() {}
 
 void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpdate) {}
 
+void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height) {}
+
 void PipelineContext::SetContainerWindow(bool isShow) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}

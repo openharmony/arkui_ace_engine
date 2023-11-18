@@ -39,6 +39,9 @@
 
 using namespace testing;
 using namespace testing::ext;
+namespace OHOS::Ace {
+    bool SystemProperties::changeTitleStyleEnabled_ = false;
+}
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0; // 5.0px

@@ -205,6 +205,11 @@ bool IsExtSurfaceEnabled()
     return false;
 #endif
 }
+
+bool IsTitleStyleEnabled()
+{
+    return system::GetBoolParameter("persist.ace.title.style.enabled", false);
+}
 } // namespace
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
@@ -245,6 +250,7 @@ int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 bool SystemProperties::resourceDecoupling_ = GetResourceDecoupling();
+bool SystemProperties::changeTitleStyleEnabled_ = IsTitleStyleEnabled();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {

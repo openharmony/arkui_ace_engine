@@ -974,6 +974,8 @@ public:
         return onFocus_;
     }
 
+    virtual void UpdateTitleInTargetPos(bool isShow = true, int32_t height = 0) {}
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

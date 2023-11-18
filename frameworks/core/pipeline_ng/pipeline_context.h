@@ -447,6 +447,8 @@ public:
 
     void SetJSViewActive(bool active, WeakPtr<CustomNode> custom);
 
+    void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);

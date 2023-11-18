@@ -55,6 +55,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -2080,6 +2081,19 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     } else {
         callback();
     }
+}
+
+void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->UpdateTitleInTargetPos(isShow, height);
 }
 
 void PipelineContext::SetContainerWindow(bool isShow)

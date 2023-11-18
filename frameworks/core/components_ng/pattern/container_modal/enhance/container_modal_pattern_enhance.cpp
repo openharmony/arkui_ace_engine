@@ -32,6 +32,7 @@ namespace {
     constexpr int32_t CLOSE_BUTTON_INDEX = 5;
     constexpr double UNFOCUS_ALPHA = 0.4;
     constexpr double FOCUS_ALPHA = 1.0;
+    constexpr int32_t TITLE_POPUP_DURATION = 200;
 } // namespace
 
 RefPtr<UINode> ContainerModalPatternEnhance::GetTitleItemByIndex(
@@ -198,5 +199,48 @@ bool ContainerModalPatternEnhance::CanHideFloatingTitle()
         return true;
     }
     return !subwindow->GetShown();
+}
+
+void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    auto containerNode = GetHost();
+    CHECK_NULL_VOID(containerNode);
+    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
+    CHECK_NULL_VOID(floatingTitleNode);
+    auto floatingLayoutProperty = floatingTitleNode->GetLayoutProperty();
+    CHECK_NULL_VOID(floatingLayoutProperty);
+    auto context = floatingTitleNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+
+    auto titlePopupDistance = CONTAINER_TITLE_HEIGHT.ConvertToPx();
+    AnimationOption option;
+    option.SetDuration(TITLE_POPUP_DURATION);
+    option.SetCurve(Curves::EASE_IN_OUT);
+
+    if (isShow && this->CanShowFloatingTitle()) {
+        context->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
+        floatingLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        AnimationUtils::Animate(option, [context, height]() {
+            context->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
+        });
+    }
+
+    if (!isShow && this->CanHideFloatingTitle()) {
+        AnimationUtils::Animate(
+            option,
+            [context, titlePopupDistance]() {
+                context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
+            },
+            [floatingLayoutProperty, id = Container::CurrentId()]() {
+                ContainerScope scope(id);
+                auto taskExecutor = Container::CurrentTaskExecutor();
+                CHECK_NULL_VOID(taskExecutor);
+                taskExecutor->PostTask(
+                    [floatingLayoutProperty]() {
+                        floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
+                    },
+                    TaskExecutor::TaskType::UI);
+            });
+    }
 }
 } // namespace OHOS::Ace::NG
