@@ -13,15 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ROSEN_ROSEN_CONVERT_HELPER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ROSEN_ROSEN_CONVERT_HELPER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_BLUR_PARAMETER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_BLUR_PARAMETER_H
 
-#include "core/common/rosen/rosen_enums.h"
-#include "core/components/common/properties/blur_parameter.h"
-#include "core/components/common/properties/decoration.h"
+#include "frameworks/core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
-MATERIAL_BLUR_STYLE GetRosenBlurStyleValue(const BlurStyleOption& option);
-std::optional<BlurParameter> GetBlurParameter(BlurStyle style, ThemeColorMode colorMode);
+struct BlurParameter {
+    float radius { 0.0f };
+    float saturation { 0.0f };
+    float brightness { 0.0f };
+    Color maskColor;
+};
 } // namespace OHOS::Ace
-#endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ROSEN_ROSEN_CONVERT_HELPER_H
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_BLUR_PARAMETER_H
