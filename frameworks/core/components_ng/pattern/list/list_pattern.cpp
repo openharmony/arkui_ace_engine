@@ -114,6 +114,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         relativeOffset += absoluteOffset - currentOffset_;
         isJump = true;
     }
+    targetIndex_ = listLayoutAlgorithm->GetTargetIndex();
     if (targetIndex_) {
         auto iter = itemPosition_.find(targetIndex_.value());
         if (iter != itemPosition_.end()) {
@@ -1245,20 +1246,11 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto totalItemCount = host->TotalChildCount();
     if ((index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM)) {
         currentDelta_ = 0.0f;
         smooth_ = smooth;
         if (smooth_) {
             targetIndex_ = index;
-            if (index == ListLayoutAlgorithm::LAST_ITEM) {
-                targetIndex_ = totalItemCount - 1;
-            } else if ((LessNotEqual(targetIndex_.value(), 0)) ||
-                       (GreatOrEqual(targetIndex_.value(), totalItemCount))) {
-                targetIndex_.reset();
-            }
         } else {
             jumpIndex_ = index;
         }
