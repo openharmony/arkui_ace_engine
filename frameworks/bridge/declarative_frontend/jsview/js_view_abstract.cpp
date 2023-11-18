@@ -5883,9 +5883,8 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     if (ParseJsShadowColorStrategy(jsObj->GetProperty("color"), shadowColorStrategy)) {
         shadow.SetShadowColorStrategy(shadowColorStrategy);
     } else if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
-        shadow.SetShadowColorStrategy(ShadowColorStrategy::NONE);
+        shadow.SetColor(color);
     }
-    shadow.SetColor(color);
     auto type = argsPtrItem->GetInt("type", static_cast<int32_t>(ShadowType::COLOR));
     type = std::clamp(type, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
     shadow.SetShadowType(static_cast<ShadowType>(type));
