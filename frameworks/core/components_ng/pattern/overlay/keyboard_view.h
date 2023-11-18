@@ -46,7 +46,7 @@ public:
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         builder();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-        auto keyboardNode = AceType::DynamicCast<FrameNode>(customNode);
+        auto keyboardNode = AceType::DynamicCast<UINode>(customNode);
         CHECK_NULL_RETURN(keyboardNode, nullptr);
 
         // put builder node to the bottom, and set the wrapper size match parent page
