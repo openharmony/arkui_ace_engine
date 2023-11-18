@@ -2067,3 +2067,10 @@ var OptionWidthMode;
   OptionWidthMode["FIT_CONTENT"] = "fit_content";
   OptionWidthMode["FIT_TRIGGER"] = "fit_trigger";
 })(OptionWidthMode || (OptionWidthMode = {}));
+
+var ArrowPlacement;
+(function (ArrowPlacement) {
+  ArrowPlacement["START"] = "Start";
+  ArrowPlacement["CENTER"] = "Center";
+  ArrowPlacement["END"] = "End";
+})(ArrowPlacement || (ArrowPlacement = {}));

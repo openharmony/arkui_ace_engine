@@ -63,8 +63,8 @@
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
-#include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/invert.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
@@ -140,6 +140,10 @@ const std::string SHEET_HEIGHT_LARGE = "large";
 const std::string SHEET_HEIGHT_AUTO = "auto";
 const std::string BLOOM_RADIUI_SYS_RES_NAME = "ohos_id_point_light_bloom_radius";
 const std::string BLOOM_COLOR_SYS_RES_NAME = "ohos_id_point_light_bloom_color";
+
+constexpr Dimension ARROW_ZERO_PERCENT_VALUE = 0.0_pct;
+constexpr Dimension ARROW_HALF_PERCENT_VALUE = 0.5_pct;
+constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = 1.0_pct;
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -680,6 +684,25 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
             popupParam->SetArrowOffset(offset);
         }
     }
+    auto arrowPlacement = popupObj->GetProperty("arrowPlacement");
+    if (arrowPlacement->IsString()) {
+        char* pEnd = nullptr;
+        std::strtod(arrowPlacement->ToString().c_str(), &pEnd);
+        if (pEnd != nullptr) {
+            if (std::strcmp(pEnd, "Start") == 0) {
+                offset = ARROW_ZERO_PERCENT_VALUE;
+            }
+            if (std::strcmp(pEnd, "Center") == 0) {
+                offset = ARROW_HALF_PERCENT_VALUE;
+            }
+            if (std::strcmp(pEnd, "End") == 0) {
+                offset = ARROW_ONE_HUNDRED_PERCENT_VALUE;
+            }
+            if (popupParam) {
+                popupParam->SetArrowOffset(offset);
+            }
+        }
+    }
 
     auto targetSpace = popupObj->GetProperty("targetSpace");
     if (!targetSpace->IsNull()) {
@@ -831,6 +854,25 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
             popupParam->SetTargetOffset(popupOffset);
         }
     }
+
+    Color backgroundColor;
+    auto popupColorVal = popupObj->GetProperty("popupColor");
+    if (JSViewAbstract::ParseJsColor(popupColorVal, backgroundColor)) {
+        popupParam->SetBackgroundColor(backgroundColor);
+    }
+
+    auto autoCancelVal = popupObj->GetProperty("autoCancel");
+    if (autoCancelVal->IsBoolean()) {
+        popupParam->SetHasAction(!autoCancelVal->ToBoolean());
+    }
+
+    auto childWidthVal = popupObj->GetProperty("width");
+    if (!childWidthVal->IsNull()) {
+        CalcDimension width;
+        if (JSViewAbstract::ParseJsDimensionVp(childWidthVal, width)) {
+            popupParam->SetChildWidth(width);
+        }
+    }
 }
 
 void ParseCustomPopupParam(
@@ -868,6 +910,25 @@ void ParseCustomPopupParam(
     CalcDimension offset;
     if (JSViewAbstract::ParseJsDimensionVp(arrowOffset, offset)) {
         popupParam->SetArrowOffset(offset);
+    }
+    auto arrowPlacement = popupObj->GetProperty("arrowPlacement");
+    if (arrowPlacement->IsString()) {
+        char* pEnd = nullptr;
+        std::strtod(arrowPlacement->ToString().c_str(), &pEnd);
+        if (pEnd != nullptr) {
+            if (std::strcmp(pEnd, "Start") == 0) {
+                offset = ARROW_ZERO_PERCENT_VALUE;
+            }
+            if (std::strcmp(pEnd, "Center") == 0) {
+                offset = ARROW_HALF_PERCENT_VALUE;
+            }
+            if (std::strcmp(pEnd, "End") == 0) {
+                offset = ARROW_ONE_HUNDRED_PERCENT_VALUE;
+            }
+            if (popupParam) {
+                popupParam->SetArrowOffset(offset);
+            }
+        }
     }
 
     auto targetSpace = popupObj->GetProperty("targetSpace");
@@ -955,6 +1016,14 @@ void ParseCustomPopupParam(
         }
         if (popupParam) {
             popupParam->SetTargetOffset(popupOffset);
+        }
+    }
+
+    auto childWidthVal = popupObj->GetProperty("width");
+    if (!childWidthVal->IsNull()) {
+        CalcDimension width;
+        if (JSViewAbstract::ParseJsDimensionVp(childWidthVal, width)) {
+            popupParam->SetChildWidth(width);
         }
     }
 }
@@ -2024,7 +2093,7 @@ void JSViewAbstract::ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOp
         JSRef<JSArray> params = JSRef<JSArray>::Cast(jsBlurOption->GetProperty("grayscale"));
         auto grey1 = params->GetValueAt(0)->ToNumber<uint32_t>();
         auto grey2 = params->GetValueAt(1)->ToNumber<uint32_t>();
-        std::vector<float> greyVec(2);  // 2 number
+        std::vector<float> greyVec(2); // 2 number
         greyVec[0] = grey1;
         greyVec[1] = grey2;
         blurOption.grayscale = greyVec;
@@ -2154,7 +2223,7 @@ void JSViewAbstract::JsForegroundBlurStyle(const JSCallbackInfo& info)
             double scale = jsOption->GetProperty("scale")->ToNumber<double>();
             styleOption.scale = std::clamp(scale, 0.0, 1.0);
         }
- 
+
         if (jsOption->GetProperty("blurOptions")->IsObject()) {
             JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
             BlurOption blurOption;
@@ -3181,7 +3250,7 @@ void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
     }
     CalcDimension dimensionRadius(blur, DimensionUnit::PX);
     ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius, blurOption);
-    
+
     info.SetReturnValue(info.This());
 }
 
@@ -6019,8 +6088,8 @@ bool JSViewAbstract::ParseJsonResource(const std::unique_ptr<JsonValue>& jsonVal
     return false;
 }
 
-bool JSViewAbstract::ParseDataDetectorConfig(const JSCallbackInfo& info, std::string& types,
-    std::function<void(const std::string&)>& onResult)
+bool JSViewAbstract::ParseDataDetectorConfig(
+    const JSCallbackInfo& info, std::string& types, std::function<void(const std::string&)>& onResult)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> typeValue = obj->GetProperty("types");
