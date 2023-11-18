@@ -3206,6 +3206,7 @@ void WebDelegate::UpdateAllowWindowOpenMethod(bool isAllowWindowOpenMethod)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutIsCreateWindowsByJavaScriptAllowed(isAllowWindowOpenMethod);
             }
         },
