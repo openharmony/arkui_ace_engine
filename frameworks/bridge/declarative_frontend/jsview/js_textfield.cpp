@@ -189,6 +189,10 @@ void JSTextField::SetType(const JSCallbackInfo& info)
         LOGI("SetType create error, info is non-valid");
         return;
     }
+    if (info[0]->IsUndefined()) {
+        TextFieldModel::GetInstance()->SetType(TextInputType::UNSPECIFIED);
+        return;
+    }
     if (!info[0]->IsNumber()) {
         LOGI("The inputType is not number");
         return;
