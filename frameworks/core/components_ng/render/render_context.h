@@ -414,7 +414,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontContrast, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontSaturate, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontSepia, Dimension);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, InvertVariant);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, LinearGradientBlur, NG::LinearGradientBlurPara);
@@ -544,7 +544,7 @@ protected:
     virtual void OnFrontContrastUpdate(const Dimension& value) {}
     virtual void OnFrontSaturateUpdate(const Dimension& value) {}
     virtual void OnFrontSepiaUpdate(const Dimension& value) {}
-    virtual void OnFrontInvertUpdate(const Dimension& value) {}
+    virtual void OnFrontInvertUpdate(const InvertVariant& value) {}
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
     virtual void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) {}

@@ -62,6 +62,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/invert.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -4704,19 +4705,50 @@ void JSViewAbstract::JsSepia(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetSepia(value);
 }
 
+bool JSViewAbstract::ParseInvertProps(const JSRef<JSVal>& jsValue, InvertVariant& invert)
+{
+    double invertValue = 0.0;
+    if (ParseJsDouble(jsValue, invertValue)) {
+        invert = static_cast<float>(invertValue);
+        return true;
+    }
+    auto argsPtrItem = JsonUtil::ParseJsonString(jsValue->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        return false;
+    }
+    InvertOption option;
+    double low = 0.0;
+    if (ParseJsonDouble(argsPtrItem->GetValue("low"), low)) {
+        option.low_ = std::clamp(low, 0.0, 1.0);
+    }
+    double high = 0.0;
+    if (ParseJsonDouble(argsPtrItem->GetValue("high"), high)) {
+        option.high_ = std::clamp(high, 0.0, 1.0);
+    }
+    double threshold = 0.0;
+    if (ParseJsonDouble(argsPtrItem->GetValue("threshold"), threshold)) {
+        option.threshold_ = std::clamp(threshold, 0.0, 1.0);
+    }
+    double thresholdRange = 0.0;
+    if (ParseJsonDouble(argsPtrItem->GetValue("thresholdRange"), thresholdRange)) {
+        option.thresholdRange_ = std::clamp(thresholdRange, 0.0, 1.0);
+    }
+    invert = option;
+    return true;
+}
+
 void JSViewAbstract::JsInvert(const JSCallbackInfo& info)
 {
-    CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        value.SetValue(0.0);
-        ViewAbstractModel::GetInstance()->SetInvert(value);
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::NUMBER };
+    InvertVariant invert = 0.0f;
+    if (!CheckJSCallbackInfo("JsInvert", info, checkList)) {
+        ViewAbstractModel::GetInstance()->SetInvert(invert);
         return;
     }
-    if (LessNotEqual(value.Value(), 0.0)) {
-        value.SetValue(0.0);
+    if (ParseInvertProps(info[0], invert)) {
+        ViewAbstractModel::GetInstance()->SetInvert(invert);
     }
-
-    ViewAbstractModel::GetInstance()->SetInvert(value);
+    ViewAbstractModel::GetInstance()->SetInvert(invert);
 }
 
 void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)

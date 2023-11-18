@@ -143,8 +143,8 @@ bool SecurityComponentHandler::CheckContrast(const RefPtr<FrameNode>& node, cons
 
 bool SecurityComponentHandler::CheckInvert(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
-    if (renderContext->GetFrontInvert().has_value() &&
-        !NearEqual(renderContext->GetFrontInvert().value().ConvertToVp(), 0.0f)) {
+    if (renderContext->GetFrontInvert().has_value() && renderContext->GetFrontInvert()->index() == 0 &&
+        !NearEqual(std::get<float>(renderContext->GetFrontInvert().value()), 0.0f)) {
         LOGW("Parent %{public}s set Invert, security component is invalid", node->GetTag().c_str());
         return true;
     }

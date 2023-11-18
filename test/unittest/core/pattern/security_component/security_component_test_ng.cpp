@@ -1907,10 +1907,11 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 
     auto renderContext = parentFrameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    renderContext->UpdateFrontInvert(0.0_vp);
+    InvertVariant invert = 0.0f;
+    renderContext->UpdateFrontInvert(invert);
     ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
     ASSERT_EQ(renderContext->GetFrontInvert().value().ConvertToVp(), 0.0f);
-    renderContext->UpdateFrontInvert(1.0_vp);
+    renderContext->UpdateFrontInvert(invert);
     ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
 }
 

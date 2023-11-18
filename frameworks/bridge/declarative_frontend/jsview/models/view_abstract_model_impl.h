@@ -133,7 +133,7 @@ public:
     void SetContrast(const Dimension& value) override;
     void SetSaturate(const Dimension& value) override;
     void SetSepia(const Dimension& value) override;
-    void SetInvert(const Dimension& value) override;
+    void SetInvert(const InvertVariant& invert) override;
     void SetHueRotate(float value) override;
     void SetUseEffect(bool) override {}
 
