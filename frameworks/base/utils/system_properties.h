@@ -393,6 +393,8 @@ public:
         return changeTitleStyleEnabled_;
     }
 
+    static std::string GetCustomTitleFilePath();
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;

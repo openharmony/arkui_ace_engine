@@ -168,7 +168,7 @@ JSViewFullUpdate::~JSViewFullUpdate()
     jsViewFunction_.Reset();
 };
 
-RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
+RefPtr<AceType> JSViewFullUpdate::CreateViewNode(bool isTitleNode)
 {
     auto appearFunc = [weak = AceType::WeakClaim(this)] {
         auto jsView = weak.Upgrade();
@@ -540,7 +540,7 @@ JSViewPartialUpdate::~JSViewPartialUpdate()
     jsViewFunction_.Reset();
 };
 
-RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
+RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
 {
     auto updateViewIdFunc = [weak = AceType::WeakClaim(this)](const std::string viewId) {
         auto jsView = weak.Upgrade();
@@ -736,6 +736,10 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         JSRef<JSVal> jsPage = jsViewExtraInfo->GetProperty("page");
         JSRef<JSVal> jsLine = jsViewExtraInfo->GetProperty("line");
         info.extraInfo = {.page = jsPage->ToString(), .line = jsLine->ToNumber<int32_t>()};
+    }
+    
+    if (isTitleNode) {
+        info.isCustomTitle = true;
     }
 
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(info));

@@ -1050,6 +1050,16 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
     return true;
 }
 
+bool JsiDeclarativeEngine::ExecuteJs(const uint8_t* content, int32_t size)
+{
+    auto runtime = engineInstance_->GetJsRuntime();
+    CHECK_NULL_RETURN(runtime, false);
+    if (!runtime->EvaluateJsCode(content, size)) {
+        return false;
+    }
+    return true;
+}
+
 bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t cardId)
 {
     auto runtime = engineInstance_->GetJsRuntime();

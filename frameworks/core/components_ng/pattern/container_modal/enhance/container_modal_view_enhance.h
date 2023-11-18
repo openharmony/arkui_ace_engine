@@ -28,15 +28,17 @@ public:
     {
         enableSplit_ = enableSplit;
     }
+
 protected:
     static RefPtr<FrameNode> BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle = false);
+    static RefPtr<FrameNode> SetTapGestureEvent(RefPtr<FrameNode>& containerNode, RefPtr<FrameNode>& containerTitleRow);
     static RefPtr<FrameNode> AddControlButtons(RefPtr<FrameNode>& containerNode, RefPtr<FrameNode>& containerTitleRow);
     static void BondingMaxBtnGestureEvent(RefPtr<FrameNode>& maximizeBtn, RefPtr<FrameNode>& containerNode);
     static void BondingMaxBtnInputEvent(RefPtr<FrameNode>& maximizeBtn, RefPtr<FrameNode>& containerNode);
     static RefPtr<FrameNode> ShowMaxMenu(const RefPtr<FrameNode>& targetNode, OffsetF menuPosition);
     static void BondingMenuItemEvent(RefPtr<FrameNode> item);
-    static RefPtr<FrameNode> BuildMenuItem(std::string title, InternalResource::ResourceId resourceId,
-        RefPtr<ClickEvent> event, bool chooseCurrent);
+    static RefPtr<FrameNode> BuildMenuItem(
+        std::string title, InternalResource::ResourceId resourceId, RefPtr<ClickEvent> event, bool chooseCurrent);
     static RefPtr<FrameNode> BuildMaximizeMenuItem();
     static RefPtr<FrameNode> BuildFullScreenMenuItem();
     static RefPtr<FrameNode> BuildDividerMenuItem();

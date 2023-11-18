@@ -21,12 +21,14 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/pattern/container_modal/container_modal_utils.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -38,6 +40,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
 #include "frameworks/bridge/common/utils/utils.h"
+
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -55,27 +58,30 @@ float ContainerModalView::baseScale = 1.0f;
  * The structure of container_modal is designed as follows :
  * |--container_modal(stack)
  *   |--column
- *      |--container_modal_title(row)
- *          |--icon(image), label(text), [leftSplit, maxRecover, minimize, close](button)
+ *      |--container_modal_custom_title(row)
+ *          |--custom_node(js)
  *      |--stack
  *          |--container_modal_content(stage)
  *              |--page
  *          |--dialog(when show)
- *   |--container_modal_floating_title(row)
- *          |--icon(image), label(text), [leftSplit, maxRecover, minimize, close](button)
+ *   |--container_modal_custom_floating_title(row)
+ *          |--custom_node(js)
+ *   |--container_modal_control_buttons(row)
+ *          |--[leftSplit, maxRecover, minimize, close](button)
  */
 
 RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_SCOPED_TRACE("Create[ContainerModal][self:%d]", nodeId);
-    auto containerModalNode = FrameNode::CreateFrameNode(
-        "ContainerModal", nodeId, MakeRefPtr<ContainerModalPattern>());
+    auto containerModalNode = FrameNode::CreateFrameNode("ContainerModal", nodeId, MakeRefPtr<ContainerModalPattern>());
     containerModalNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto stack = FrameNode::CreateFrameNode(
         V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StackPattern>());
     auto column = FrameNode::CreateFrameNode(
         V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(true));
+    auto controlButtonsRow = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(false));
 
     column->AddChild(BuildTitle(containerModalNode));
     stack->AddChild(content);
@@ -85,11 +91,14 @@ RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
+    containerModalNode->AddChild(AddControlButtons(controlButtonsRow));
 
     CHECK_NULL_RETURN(stack->GetLayoutProperty(), nullptr);
     stack->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     CHECK_NULL_RETURN(column->GetLayoutProperty(), nullptr);
     column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    CHECK_NULL_RETURN(controlButtonsRow->GetLayoutProperty(), nullptr);
+    controlButtonsRow->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
     auto containerPattern = containerModalNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_RETURN(containerPattern, nullptr);
@@ -102,63 +111,25 @@ RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
 RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle)
 {
     LOGI("ContainerModalView BuildTitle called");
-    auto titleContainer = BuildTitleContainer(containerNode, isFloatingTitle);
-    CHECK_NULL_RETURN(titleContainer, nullptr);
-    return AddControlButtons(titleContainer);
+    auto customTitleContainer = BuildTitleContainer(containerNode, isFloatingTitle);
+    CHECK_NULL_RETURN(customTitleContainer, nullptr);
+    return customTitleContainer;
 }
 
 RefPtr<FrameNode> ContainerModalView::BuildTitleContainer(RefPtr<FrameNode>& containerNode, bool isFloatingTitle)
 {
     auto containerTitleRow = BuildTitleRow(isFloatingTitle);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto themeConstants = themeManager->GetThemeConstants();
-    CHECK_NULL_RETURN(themeConstants, nullptr);
-    // create title icon
-    ImageSourceInfo imageSourceInfo;
-    auto titleIcon = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ImagePattern>());
-    auto titleFocus = titleIcon->GetFocusHub();
-    if (titleFocus) {
-        titleFocus->SetFocusable(false);
-    }
-    auto id = pipeline->GetWindowManager()->GetAppIconId();
-    auto pixelMap = themeConstants->GetPixelMap(id);
-    if (pixelMap) {
-        imageSourceInfo = ImageSourceInfo(PixelMap::CreatePixelMap(&pixelMap));
-    } else {
-        imageSourceInfo.SetSrc(themeConstants->GetMediaPath(id));
-    }
-    auto imageLayoutProperty = titleIcon->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
-    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(TITLE_ICON_SIZE), CalcLength(TITLE_ICON_SIZE)));
-    MarginProperty margin = { CalcLength(TITLE_PADDING_START), CalcLength(TITLE_ELEMENT_MARGIN_HORIZONTAL) };
-    imageLayoutProperty->UpdateMargin(margin);
-    // anti-alias
-    auto imagePaintProp = titleIcon->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_RETURN(imagePaintProp, nullptr);
-    imagePaintProp->UpdateImageInterpolation(ImageInterpolation::MEDIUM);
-    titleIcon->MarkModifyDone();
+    CHECK_NULL_RETURN(containerTitleRow, nullptr);
 
-    // create title label
-    auto titleLabel = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<TextPattern>());
-    auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(themeConstants->GetString(pipeline->GetWindowManager()->GetAppLabelId()));
-    textLayoutProperty->UpdateMaxLines(1);
-    textLayoutProperty->UpdateFontSize(TITLE_TEXT_FONT_SIZE);
-    textLayoutProperty->UpdateTextColor(TITLE_TEXT_COLOR);
-    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    textLayoutProperty->UpdateFontWeight(FontWeight::W500);
-    textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
-    textLayoutProperty->UpdateLayoutWeight(1.0f);
+    auto isSucc = ExecuteCustomTitleAbc();
+    if (!isSucc) {
+        return nullptr;
+    }
 
-    // add icon and label
-    containerTitleRow->AddChild(titleIcon);
-    containerTitleRow->AddChild(titleLabel);
+    // get custom node
+    auto customTitleBarNode = NG::ViewStackProcessor::GetInstance()->GetCustomTitleNode();
+    CHECK_NULL_RETURN(customTitleBarNode, nullptr);
+    containerTitleRow->AddChild(customTitleBarNode);
     return containerTitleRow;
 }
 
@@ -178,48 +149,31 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)
         CHECK_NULL_RETURN(renderContext, nullptr);
         renderContext->UpdateBackgroundColor(CONTAINER_BACKGROUND_COLOR);
     }
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, nullptr);
-    if (!isFloatingTitle) {
-        // touch the title to move the floating window
-        auto eventHub = containerTitleRow->GetOrCreateGestureEventHub();
-        CHECK_NULL_RETURN(eventHub, nullptr);
-        PanDirection panDirection;
-        panDirection.type = PanDirection::ALL;
-        auto panActionStart = [wk = WeakClaim(RawPtr(windowManager))](const GestureEvent&) {
-            auto windowManager = wk.Upgrade();
-            CHECK_NULL_VOID(windowManager);
-            if (windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-                LOGI("container window start move.");
-                windowManager->WindowStartMove();
-                SubwindowManager::GetInstance()->ClearToastInSubwindow();
-            }
-        };
-        auto panEvent = MakeRefPtr<PanEvent>(std::move(panActionStart), nullptr, nullptr, nullptr);
-        eventHub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
-    }
     return containerTitleRow;
 }
 
-RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& containerTitleRow)
+RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& controlButtonsRow)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
+    auto layoutProperty = controlButtonsRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
+    layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
+    layoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
 
     // add leftSplit / maxRecover / minimize / close button
-    containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT,
+    controlButtonsRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT,
         [wk = WeakClaim(RawPtr(windowManager))](GestureEvent& info) {
             auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID(windowManager);
             LOGI("left split button clicked");
             windowManager->FireWindowSplitCallBack();
         }));
-    containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
+    controlButtonsRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
         [wk = WeakClaim(RawPtr(windowManager))](GestureEvent& info) {
             auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID(windowManager);
@@ -232,14 +186,14 @@ RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& conta
                 windowManager->WindowMaximize();
             }
         }));
-    containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE,
+    controlButtonsRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE,
         [wk = WeakClaim(RawPtr(windowManager))](GestureEvent& info) {
             auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID(windowManager);
             LOGI("minimize button clicked");
             windowManager->WindowMinimize();
         }));
-    containerTitleRow->AddChild(BuildControlButton(
+    controlButtonsRow->AddChild(BuildControlButton(
         InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE,
         [wk = WeakClaim(RawPtr(windowManager))](GestureEvent& info) {
             auto windowManager = wk.Upgrade();
@@ -249,7 +203,7 @@ RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& conta
         },
         true));
 
-    return containerTitleRow;
+    return controlButtonsRow;
 }
 
 RefPtr<FrameNode> ContainerModalView::BuildControlButton(
@@ -356,8 +310,8 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
         auto icurve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.2f, 1.0f);
         float maxDis = sqrt(pow(halfSize, 2.0) + pow(halfSize, 2.0));
-        float curDis = sqrt(pow(buttonPattern->GetLocalLocation().GetX() - halfSize, 2.0)
-            + pow(buttonPattern->GetLocalLocation().GetY() - halfSize, 2.0));
+        float curDis = sqrt(pow(buttonPattern->GetLocalLocation().GetX() - halfSize, 2.0) +
+                            pow(buttonPattern->GetLocalLocation().GetY() - halfSize, 2.0));
         float currentScale = 1 + 0.1 * icurve->Move((maxDis - curDis) / (maxDis));
         baseScale = currentScale > baseScale ? currentScale : baseScale;
         float imageTranslate = 2 * icurve->Move((maxDis - curDis) / (maxDis));
@@ -376,12 +330,11 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         translate.x = isHover ? translateX : 0.0f;
         translate.y = isHover ? translateY : 0.0f;
         if (isHover) {
-            AnimationUtils::Animate(option,
-                [buttonNodeRenderContext, imageIconRenderContext, imageScale, translate]() {
-                    buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
-                    imageIconRenderContext->UpdateTransformScale(VectorF(1 / imageScale, 1 / imageScale));
-                    imageIconRenderContext->UpdateTransformTranslate(translate);
-                });
+            AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale, translate]() {
+                buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
+                imageIconRenderContext->UpdateTransformScale(VectorF(1 / imageScale, 1 / imageScale));
+                imageIconRenderContext->UpdateTransformTranslate(translate);
+            });
         } else {
             baseScale = 1.0f;
             imageMaxTranslate = 0.0f;
@@ -417,8 +370,8 @@ void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
         auto icurve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.2f, 1.0f);
         float maxDis = sqrt(pow(halfSize, 2.0) + pow(halfSize, 2.0));
-        float curDis = sqrt(pow(info.GetLocalLocation().GetX() - halfSize, 2.0)
-            + pow(info.GetLocalLocation().GetY() - halfSize, 2.0));
+        float curDis = sqrt(
+            pow(info.GetLocalLocation().GetX() - halfSize, 2.0) + pow(info.GetLocalLocation().GetY() - halfSize, 2.0));
         float currentScale = 1 + 0.1 * icurve->Move((maxDis - curDis) / (maxDis));
         baseScale = currentScale > baseScale ? currentScale : baseScale;
         float imageScale = baseScale;

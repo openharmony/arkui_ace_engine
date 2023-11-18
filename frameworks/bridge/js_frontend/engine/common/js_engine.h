@@ -147,6 +147,11 @@ public:
         return false;
     }
 
+    virtual bool ExecuteJs(const uint8_t* content, int32_t size)
+    {
+        return false;
+    }
+
     // Update running page
     virtual void UpdateRunningPage(const RefPtr<JsAcePage>& page) = 0;
 
