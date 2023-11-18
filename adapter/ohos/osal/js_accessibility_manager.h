@@ -209,7 +209,7 @@ private:
     bool ExecuteActionNG(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         Accessibility::ActionType action, const RefPtr<PipelineBase>& context, int32_t uiExtensionOffset);
     bool ConvertActionTypeToBoolen(Accessibility::ActionType action, RefPtr<NG::FrameNode>& frameNode,
-        int32_t elementId, RefPtr<NG::PipelineContext>& context, bool result);
+        int32_t elementId, RefPtr<NG::PipelineContext>& context);
     void SetSearchElementInfoByAccessibilityIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,
         const std::list<Accessibility::AccessibilityElementInfo>& infos, const int32_t requestId);
 

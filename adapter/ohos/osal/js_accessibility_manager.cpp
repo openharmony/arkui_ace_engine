@@ -2794,7 +2794,18 @@ bool JsAccessibilityManager::ExecuteExtensionActionNG(int32_t elementId,
     const std::map<std::string, std::string>& actionArguments, int32_t action, const RefPtr<PipelineBase>& context,
     int32_t uiExtensionOffset)
 {
-    return ExecuteActionNG(elementId, actionArguments, static_cast<ActionType>(action), context, uiExtensionOffset);
+    bool isExecuted = false;
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_RETURN(pipeline, isExecuted);
+    pipeline->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), elementId, actionArguments, action, context, uiExtensionOffset, &isExecuted]() {
+            auto jsAccessibilityManager = weak.Upgrade();
+            CHECK_NULL_VOID(jsAccessibilityManager);
+            isExecuted = jsAccessibilityManager->ExecuteActionNG(
+                elementId, actionArguments, static_cast<ActionType>(action), context, uiExtensionOffset);
+        },
+        TaskExecutor::TaskType::UI);
+    return isExecuted;
 }
 
 bool JsAccessibilityManager::ExecuteActionNG(int32_t elementId,
@@ -2826,7 +2837,7 @@ bool JsAccessibilityManager::ExecuteActionNG(int32_t elementId,
     if (!enabled) {
         return result;
     }
-    result = ConvertActionTypeToBoolen(action, frameNode, elementId, ngPipeline, result);
+    result = ConvertActionTypeToBoolen(action, frameNode, elementId, ngPipeline);
     if (!result) {
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_RETURN(accessibilityProperty, false);
@@ -2836,8 +2847,9 @@ bool JsAccessibilityManager::ExecuteActionNG(int32_t elementId,
 }
 
 bool JsAccessibilityManager::ConvertActionTypeToBoolen(ActionType action, RefPtr<NG::FrameNode>& frameNode,
-    int32_t elementId, RefPtr<NG::PipelineContext>& context, bool result)
+    int32_t elementId, RefPtr<NG::PipelineContext>& context)
 {
+    bool result = false;
     switch (action) {
         case ActionType::ACCESSIBILITY_ACTION_FOCUS: {
             result = RequestFocus(frameNode);
