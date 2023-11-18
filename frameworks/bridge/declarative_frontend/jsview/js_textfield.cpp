@@ -379,6 +379,11 @@ void JSTextField::SetSelectedBackgroundColor(const JSCallbackInfo& info)
         CHECK_NULL_VOID(theme);
         selectedColor = theme->GetSelectedColor();
     }
+    // Alpha = 255 means opaque
+    if (selectedColor.GetAlpha() == 255) {
+        // Default setting of 20% opacity
+        selectedColor = selectedColor.ChangeOpacity(0.2);
+    }
     TextFieldModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
 }
 
