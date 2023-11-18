@@ -201,8 +201,7 @@ private:
     bool transferringCaller_ = false;
     bool isVisible_ = true;
 
-    int32_t uiExtensionId_ = -1;
-    static thread_local int32_t currentUiExtensionId_;
+    int32_t uiExtensionId_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H
