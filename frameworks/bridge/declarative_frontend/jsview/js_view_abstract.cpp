@@ -2064,7 +2064,14 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     if (!ParseJsColor(jsOption->GetProperty("color"), color)) {
         color.SetValue(Color::TRANSPARENT.GetValue());
     }
-    effectOption = { radius, saturation, brightness, color };
+    auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+    auto adaptiveColor = AdaptiveColor::DEFAULT;
+    ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColorValue);
+    if (adaptiveColorValue >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+        adaptiveColorValue <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+        adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorValue);
+    }
+    effectOption = { radius, saturation, brightness, color, adaptiveColor };
 }
 
 void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
