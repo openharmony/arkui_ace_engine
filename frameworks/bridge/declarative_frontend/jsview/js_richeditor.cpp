@@ -676,12 +676,16 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
     } else {
         imageStyle.objectFit = ImageFit::COVER;
     }
-    auto marginAttr = imageAttribute->GetProperty("margin");
-    imageStyle.marginProp = ParseMarginAttr(marginAttr);
-    updateSpanStyle_.marginProp = imageStyle.marginProp;
-    auto borderRadiusAttr = imageAttribute->GetProperty("borderRadius");
-    imageStyle.borderRadius = ParseBorderRadiusAttr(borderRadiusAttr);
-    updateSpanStyle_.borderRadius = imageStyle.borderRadius;
+    auto layoutStyleObj = imageAttribute->GetProperty("layoutStyle");
+    auto layoutStyleObject = JSRef<JSObject>::Cast(layoutStyleObj);
+    if (!layoutStyleObject->IsUndefined()) {
+        auto marginAttr = layoutStyleObject->GetProperty("margin");
+        imageStyle.marginProp = ParseMarginAttr(marginAttr);
+        updateSpanStyle_.marginProp = imageStyle.marginProp;
+        auto borderRadiusAttr = layoutStyleObject->GetProperty("borderRadius");
+        imageStyle.borderRadius = ParseBorderRadiusAttr(borderRadiusAttr);
+        updateSpanStyle_.borderRadius = imageStyle.borderRadius;
+    }
     return imageStyle;
 }
 
