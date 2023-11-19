@@ -138,10 +138,10 @@ public:
     static void SetBackgroundAlign(const Alignment& align);
 
     // decoration
-    static void SetBackdropBlur(const Dimension& radius);
+    static void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption);
     static void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara);
     static void SetDynamicLightUp(float rate, float lightUpDegree);
-    static void SetFrontBlur(const Dimension& radius);
+    static void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption);
     static void SetBackShadow(const Shadow& shadow);
     static void SetBlendMode(BlendMode blendMode);
 

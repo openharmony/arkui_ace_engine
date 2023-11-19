@@ -692,6 +692,10 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
     SetBackBlurFilter();
+    if (bgBlurStyle->blurOption.grayscale.size() > 1) {
+        rsNode_->SetGreyCoef1(bgBlurStyle->blurOption.grayscale[0]);
+        rsNode_->SetGreyCoef2(bgBlurStyle->blurOption.grayscale[1]);
+    }
 }
 
 void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption)
@@ -717,6 +721,10 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
             static_cast<float>(effectOption->brightness), effectOption->color.GetValue(),
             static_cast<Rosen::BLUR_COLOR_MODE>(effectOption->adaptiveColor));
     rsNode_->SetBackgroundFilter(backFilter);
+    if (effectOption->blurOption.grayscale.size() > 1) {
+        rsNode_->SetGreyCoef1(effectOption->blurOption.grayscale[0]);
+        rsNode_->SetGreyCoef2(effectOption->blurOption.grayscale[1]);
+    }
 }
 
 void RosenRenderContext::UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle)
@@ -732,6 +740,10 @@ void RosenRenderContext::UpdateFrontBlurStyle(const std::optional<BlurStyleOptio
         groupProperty->propBlurStyleOption = fgBlurStyle;
     }
     SetFrontBlurFilter();
+    if (fgBlurStyle->blurOption.grayscale.size() > 1) {
+        rsNode_->SetGreyCoef1(fgBlurStyle->blurOption.grayscale[0]);
+        rsNode_->SetGreyCoef2(fgBlurStyle->blurOption.grayscale[1]);
+    }
 }
 
 void RosenRenderContext::ResetBackBlurStyle()
@@ -2668,6 +2680,21 @@ void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
     SetBackBlurFilter();
 }
 
+void RosenRenderContext::UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption)
+{
+    const auto& groupProperty = GetOrCreateBackground();
+    if (groupProperty->CheckBlurRadius(radius)) {
+        // Same with previous value
+        return;
+    }
+    groupProperty->propBlurRadius = radius;
+    SetBackBlurFilter();
+    if (blurOption.grayscale.size() > 1) {
+        rsNode_->SetGreyCoef1(blurOption.grayscale[0]);
+        rsNode_->SetGreyCoef2(blurOption.grayscale[1]);
+    }
+}
+
 void RosenRenderContext::UpdateFrontBlurRadius(const Dimension& radius)
 {
     const auto& groupProperty = GetOrCreateForeground();
@@ -2677,6 +2704,21 @@ void RosenRenderContext::UpdateFrontBlurRadius(const Dimension& radius)
     }
     groupProperty->propBlurRadius = radius;
     SetFrontBlurFilter();
+}
+
+void RosenRenderContext::UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption)
+{
+    const auto& groupProperty = GetOrCreateForeground();
+    if (groupProperty->CheckBlurRadius(radius)) {
+        // Same with previous value
+        return;
+    }
+    groupProperty->propBlurRadius = radius;
+    SetFrontBlurFilter();
+    if (blurOption.grayscale.size() > 1) {
+        rsNode_->SetGreyCoef1(blurOption.grayscale[0]);
+        rsNode_->SetGreyCoef2(blurOption.grayscale[1]);
+    }
 }
 
 void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)

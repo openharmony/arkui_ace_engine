@@ -567,9 +567,9 @@ public:
         ViewAbstract::SetProgressMask(progress);
     }
 
-    void SetBackdropBlur(const Dimension& radius) override
+    void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) override
     {
-        ViewAbstract::SetBackdropBlur(radius);
+        ViewAbstract::SetBackdropBlur(radius, blurOption);
     }
 
     void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override
@@ -582,9 +582,9 @@ public:
         ViewAbstract::SetDynamicLightUp(rate, lightUpDegree);
     }
 
-    void SetFrontBlur(const Dimension& radius) override
+    void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override
     {
-        ViewAbstract::SetFrontBlur(radius);
+        ViewAbstract::SetFrontBlur(radius, blurOption);
     }
 
     void SetBackShadow(const std::vector<Shadow>& shadows) override
