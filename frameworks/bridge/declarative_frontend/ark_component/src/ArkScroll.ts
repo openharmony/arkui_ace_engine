@@ -1,4 +1,5 @@
-//@ts-nocheck
+
+/// <reference path="./import.ts" />
 class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
     scrollable(value: ScrollDirection): ScrollAttribute {
         throw new Error("Method not implemented.");
@@ -46,10 +47,10 @@ class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
         throw new Error("Method not implemented.");
     }
 }
-
+// @ts-ignore
 globalThis.Scroll.attributeModifier = function(modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
     var component = this.createOrGetNode(elmtId, () =>
     {
         return new ArkScrollComponent(nativeNode);
