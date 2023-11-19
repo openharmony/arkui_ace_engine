@@ -2099,7 +2099,7 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
             item.label, ""
         });
     }
-    auto menu = MenuView::Create(selectParam, id);
+    auto menu = MenuView::Create(selectParam, id, host->GetTag());
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto eventHub = host->GetEventHub<WebEventHub>();
