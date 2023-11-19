@@ -205,12 +205,11 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     EXPECT_NE(textLayoutProperty, nullptr);
 
     /**
-     * @tc.steps: step3. call OnModifyDone and UpdateTimeTextCallBack function when default properties.
+     * @tc.steps: step3. call OnModifyDone function when default properties.
      * @tc.expected: check whether the content is correct.
      */
     pattern->InitTextClockController();
     pattern->OnModifyDone();
-    pattern->UpdateTimeTextCallBack();
     EXPECT_EQ(textLayoutProperty->GetContent(), FORMAT_DATA);
 
     /**
@@ -235,7 +234,6 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     pattern->UpdateTimeText();
     pattern->textClockController_ = nullptr;
     pattern->InitUpdateTimeTextCallBack();
-    pattern->UpdateTimeTextCallBack();
     EXPECT_EQ(pattern->textClockController_, nullptr);
     EXPECT_EQ(textLayoutProperty->GetContent(), FORMAT_DATA);
 }
@@ -736,11 +734,12 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
      * @tc.steps: step4. VisibleArea be changed, call the event entry function.
      * @tc.expected: check whether the value is correct.
      */
+    pattern->isStart_ = true;
     pattern->OnVisibleAreaChange(false);
-    pattern->UpdateTimeTextCallBack();
+    pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_1);
     pattern->OnVisibleAreaChange(true);
-    pattern->UpdateTimeTextCallBack();
+    pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_2);
 
     /**
@@ -749,14 +748,14 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
      */
     utc = UTC_1;
     pattern->OnVisibleChange(false);
-    pattern->UpdateTimeTextCallBack();
+    pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_1);
     pattern->OnVisibleChange(true);
-    pattern->UpdateTimeTextCallBack();
+    pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_1);
     pattern->prevTime_ = "";
     pattern->OnVisibleChange(true);
-    pattern->UpdateTimeTextCallBack();
+    pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_2);
 
     /**
@@ -765,14 +764,14 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
      */
     utc = UTC_1;
     pattern->OnFormVisibleChange(false);
-    pattern->UpdateTimeTextCallBack();
+    pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_1);
     pattern->OnFormVisibleChange(true);
-    pattern->UpdateTimeTextCallBack();
+    pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_1);
     pattern->prevTime_ = "";
     pattern->OnFormVisibleChange(true);
-    pattern->UpdateTimeTextCallBack();
+    pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_2);
     MockPipelineBase::TearDown();
 }
