@@ -70,7 +70,7 @@ HWTEST_F(ImeTest, CastToTextInputTypeTest001, TestSize.Level1)
      * @tc.steps: step3. Value is greater than END.
      * @tc.expected: step3. The return value is set to TEXT.
      */
-    EXPECT_EQ(CastToTextInputType(10), TextInputType::TEXT);
+    EXPECT_EQ(CastToTextInputType(static_cast<int32_t>(TextInputType::END) + 1), TextInputType::TEXT);
     /**
      * @tc.steps: step4. Value is set to zero.
      * @tc.expected: step4. The return value is set to TEXT.
