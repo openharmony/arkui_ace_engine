@@ -333,8 +333,10 @@ ArkUINativeModuleValue CommonBridge::SetPosition(ArkUIRuntimeCallInfo* runtimeCa
 
     CalcDimension x;
     CalcDimension y;
-    // param is x and y,parse CalcDimension by utility
-    if (!ParseJsDimensionVpNG(vm, sizeX, x, false) && !ParseJsDimensionVpNG(vm, sizeY, y, false)) {
+
+    bool hasX = ParseJsDimensionVpNG(vm, sizeX, x, false);
+    bool hasY = ParseJsDimensionVpNG(vm, sizeY, y, false);
+    if (!hasX && !hasY) {
         GetArkUIInternalNodeAPI()->GetCommonModifier().ResetPosition(nativeNode);
     }
 
@@ -402,11 +404,23 @@ ArkUINativeModuleValue CommonBridge::SetBorderColor(ArkUIRuntimeCallInfo* runtim
     if (leftArg->IsUndefined() && rifghtArg->IsUndefined() && topArg->IsUndefined() && bottomArg->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBorderColor(nativeNode);
     }
+    uint32_t leftColor = COLOR_ALPHA_VALUE;
+    uint32_t rightColor = COLOR_ALPHA_VALUE;
+    uint32_t topColor = COLOR_ALPHA_VALUE;
+    uint32_t bottomColor = COLOR_ALPHA_VALUE;
 
-    uint32_t leftColor = leftArg->Uint32Value(vm);
-    uint32_t rightColor = rifghtArg->Uint32Value(vm);
-    uint32_t topColor = topArg->Uint32Value(vm);
-    uint32_t bottomColor = bottomArg->Uint32Value(vm);
+    if (!leftArg->IsUndefined()) {
+        leftColor = leftArg->Uint32Value(vm);
+    }
+    if (!rifghtArg->IsUndefined()) {
+        rightColor = rifghtArg->Uint32Value(vm);
+    }
+    if (!topArg->IsUndefined()) {
+        topColor = topArg->Uint32Value(vm);
+    }
+    if (!topArg->IsUndefined()) {
+        bottomColor = bottomArg->Uint32Value(vm);
+    }
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetBorderColor(
         nativeNode, leftColor, rightColor, topColor, bottomColor);
     return panda::JSValueRef::Undefined(vm);

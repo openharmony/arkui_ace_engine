@@ -1,4 +1,6 @@
-//@ts-nocheck
+
+/// <reference path="./import.ts" />
+
 class ArkButtonComponent extends ArkComponent implements  ButtonAttribute {
   type (value: ButtonType): ButtonAttribute {
     throw new Error("Method not implemented.");
@@ -25,9 +27,11 @@ class ArkButtonComponent extends ArkComponent implements  ButtonAttribute {
     throw new Error("Method not implemented.");
   }
 }
+
+// @ts-ignore
 globalThis.Button.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
     var component = this.createOrGetNode(elmtId, ()=> {
       return new ArkButtonComponent(nativeNode);
     });
