@@ -73,6 +73,7 @@ private:
     void InitOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
     void SetAccessibilityAction();
+    void UpdateSelectStatus(bool isSelected);
 
     RefPtr<ClickEvent> clickListener_;
     std::optional<bool> isOn_;

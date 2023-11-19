@@ -165,6 +165,7 @@ private:
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
     void SetAccessibilityAction();
+    void UpdateSelectStatus(bool isSelected);
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;

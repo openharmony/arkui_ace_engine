@@ -175,6 +175,7 @@ private:
     void RemoveLastHotZoneRect() const;
     void InitializeModifierParam(CheckBoxGroupModifier::Parameters& paintParameters);
     void SetAccessibilityAction();
+    void UpdateSelectStatus(bool isSelected);
 
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;

@@ -203,6 +203,7 @@ private:
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
     void SetAccessibilityAction();
+    void UpdateSelectStatus(bool isSelected);
 
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;

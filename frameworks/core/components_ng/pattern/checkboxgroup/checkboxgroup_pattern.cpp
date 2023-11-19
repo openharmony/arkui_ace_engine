@@ -87,29 +87,29 @@ void CheckBoxGroupPattern::SetAccessibilityAction()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto checkBoxGroupAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(checkBoxGroupAccessibilityProperty);
-    checkBoxGroupAccessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetRenderContext();
-        CHECK_NULL_VOID(context);
-        pattern->MarkIsSelected(true);
-        context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+        pattern->UpdateSelectStatus(false);
     });
 
-    checkBoxGroupAccessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
+    accessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetRenderContext();
-        CHECK_NULL_VOID(context);
-        pattern->MarkIsSelected(false);
-        context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+        pattern->UpdateSelectStatus(false);
     });
+}
+
+void CheckBoxGroupPattern::UpdateSelectStatus(bool isSelected)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    MarkIsSelected(isSelected);
+    context->OnMouseSelectUpdate(isSelected, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
 }
 
 void CheckBoxGroupPattern::MarkIsSelected(bool isSelected)
