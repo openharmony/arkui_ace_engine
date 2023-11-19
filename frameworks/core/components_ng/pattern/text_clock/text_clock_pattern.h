@@ -80,10 +80,9 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void InitTextClockController();
-    void UpdateTimeTextCallBack();
 
     void InitUpdateTimeTextCallBack();
-    bool UpdateTimeText();
+    void UpdateTimeText();
     void RequestUpdateForNextSecond();
     void FireChangeEvent() const;
     std::string GetCurrentFormatDateTime();

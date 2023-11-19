@@ -159,27 +159,27 @@ void TextClockPattern::InitTextClockController()
 
 void TextClockPattern::OnVisibleChange(bool isVisible)
 {
-    if (isVisible && !isSetVisible_ && isStart_) {
+    if (isVisible && !isSetVisible_) {
         isSetVisible_ = isVisible;
-        UpdateTimeTextCallBack();
+        UpdateTimeText();
     }
     isSetVisible_ = isVisible;
 }
 
 void TextClockPattern::OnVisibleAreaChange(bool visible)
 {
-    if (visible && !isInVisibleArea_ && isStart_) {
+    if (visible && !isInVisibleArea_) {
         isInVisibleArea_ = visible;
-        UpdateTimeTextCallBack();
+        UpdateTimeText();
     }
     isInVisibleArea_ = visible;
 }
 
 void TextClockPattern::OnFormVisibleChange(bool visible)
 {
-    if (visible && !isFormVisible_ && isStart_) {
+    if (visible && !isFormVisible_) {
         isFormVisible_ = visible;
-        UpdateTimeTextCallBack();
+        UpdateTimeText();
     }
     isFormVisible_ = visible;
 }
@@ -219,34 +219,33 @@ void TextClockPattern::InitUpdateTimeTextCallBack()
     RegistVisibleAreaChangeCallback();
 }
 
-bool TextClockPattern::UpdateTimeText()
+void TextClockPattern::UpdateTimeText()
 {
-    bool isTextChange = false;
+    if (!isStart_ || !isSetVisible_ || !isInVisibleArea_ || !isFormVisible_) {
+        return;
+    }
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, isTextChange);
+    CHECK_NULL_VOID(host);
     auto textNode = GetTextNode();
-    CHECK_NULL_RETURN(textNode, isTextChange);
+    CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, isTextChange);
+    CHECK_NULL_VOID(textLayoutProperty);
 
     std::string currentTime = GetCurrentFormatDateTime();
     if (currentTime.empty() || currentTime == prevTime_) {
-        return isTextChange;
+        return;
     }
     prevTime_ = currentTime;
-    isTextChange = true;
 
     textLayoutProperty->UpdateContent(currentTime); // update time text.
     auto textContext = textNode->GetRenderContext();
-    CHECK_NULL_RETURN(textContext, isTextChange);
+    CHECK_NULL_VOID(textContext);
     textContext->SetClipToFrame(false);
     textContext->UpdateClipEdge(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     textNode->MarkModifyDone();
-    if (isStart_ && isTextChange) {
-        RequestUpdateForNextSecond();
-    }
-    return isTextChange;
+    RequestUpdateForNextSecond();
+    FireChangeEvent();
 }
 
 void TextClockPattern::RequestUpdateForNextSecond()
@@ -274,6 +273,7 @@ void TextClockPattern::RequestUpdateForNextSecond()
 
     auto context = UINode::GetContext();
     CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(context->GetTaskExecutor());
     context->GetTaskExecutor()->PostDelayedTask(
         [wp = WeakClaim(this)] {
             auto textClock = wp.Upgrade();
@@ -281,19 +281,9 @@ void TextClockPattern::RequestUpdateForNextSecond()
             if (!textClock->isStart_) {
                 return;
             }
-            textClock->UpdateTimeTextCallBack();
+            textClock->UpdateTimeText();
         },
         TaskExecutor::TaskType::UI, delayTime);
-}
-
-void TextClockPattern::UpdateTimeTextCallBack()
-{
-    if (!isSetVisible_ || !isInVisibleArea_ || !isFormVisible_) {
-        return;
-    }
-    if (UpdateTimeText()) {
-        FireChangeEvent();
-    }
 }
 
 std::string TextClockPattern::GetCurrentFormatDateTime()
