@@ -121,9 +121,14 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
 
 void MenuItemModelNG::SetSelected(bool isSelected)
 {
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<MenuItemPattern>();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(isSelected);
+    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
 }
 
 void MenuItemModelNG::SetSelectIcon(bool isShow)
