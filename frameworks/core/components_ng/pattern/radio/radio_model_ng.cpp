@@ -104,4 +104,14 @@ void RadioModelNG::SetResponseRegion(const std::vector<DimensionRect>& responseR
     CHECK_NULL_VOID(pattern);
     pattern->SetIsUserSetResponseRegion(true);
 }
+
+void RadioModelNG::SetHoverEffect(HoverEffectType hoverEffect)
+{
+    NG::ViewAbstract::SetHoverEffect(hoverEffect);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetShowHoverEffect(hoverEffect != HoverEffectType::NONE);
+}
 } // namespace OHOS::Ace::NG

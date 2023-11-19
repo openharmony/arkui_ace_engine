@@ -68,6 +68,7 @@ public:
         paintMethod->SetIsOnAnimationFlag(isOnAnimationFlag_);
         paintMethod->SetTouchHoverAnimationType(touchHoverType_);
         paintMethod->SetIsFirstCreated(isFirstCreated_);
+        paintMethod->SetShowHoverEffect(showHoverEffect_);
         isFirstCreated_ = false;
         return paintMethod;
     }
@@ -117,6 +118,11 @@ public:
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
     {
         isUserSetResponseRegion_ = isUserSetResponseRegion;
+    }
+
+    void SetShowHoverEffect(bool showHoverEffect)
+    {
+        showHoverEffect_ = showHoverEffect;
     }
 
     FocusPattern GetFocusPattern() const override;
@@ -183,6 +189,7 @@ private:
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     bool isOnAnimationFlag_ = false;
     bool isUserSetResponseRegion_ = false;
+    bool showHoverEffect_ = true;
 
     RefPtr<RadioModifier> radioModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
