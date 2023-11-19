@@ -536,10 +536,10 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
     CHECK_NULL_VOID(builderFunc);
 
     // responseType
-    ResponseType responseType = ResponseType::LONG_PRESS;
+    RichEditorResponseType responseType = RichEditorResponseType::LONG_PRESS;
     if (info.Length() >= 3 && info[2]->IsNumber()) {
         auto response = info[2]->ToNumber<int32_t>();
-        responseType = static_cast<ResponseType>(response);
+        responseType = static_cast<RichEditorResponseType>(response);
     }
     std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -1045,6 +1045,23 @@ void JSRichEditorController::CloseSelectionMenu()
     controller->CloseSelectionMenu();
 }
 
+void JSRichEditorController::SetSelection(int32_t selectionStart, int32_t selectionEnd)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->SetSelection(selectionStart, selectionEnd);
+    }
+}
+
+void JSRichEditorController::GetSelection(const JSCallbackInfo& args)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        RichEditorSelection value = controller->GetSelectionSpansInfo();
+        args.SetReturnValue(JSRichEditor::CreateJSSelection(value));
+    }
+}
+
 void JSRichEditorController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditorController>::Declare("RichEditorController");
@@ -1060,6 +1077,8 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("getSpans", &JSRichEditorController::GetSpansInfo);
     JSClass<JSRichEditorController>::CustomMethod("getParagraphs", &JSRichEditorController::GetParagraphsInfo);
     JSClass<JSRichEditorController>::CustomMethod("deleteSpans", &JSRichEditorController::DeleteSpans);
+    JSClass<JSRichEditorController>::Method("setSelection", &JSRichEditorController::SetSelection);
+    JSClass<JSRichEditorController>::CustomMethod("getSelection", &JSRichEditorController::GetSelection);
     JSClass<JSRichEditorController>::Method("closeSelectionMenu", &JSRichEditorController::CloseSelectionMenu);
     JSClass<JSRichEditorController>::Bind(
         globalObj, JSRichEditorController::Constructor, JSRichEditorController::Destructor);
@@ -1264,8 +1283,7 @@ JSRef<JSObject> JSRichEditorController::CreateTypingStyleResult(const struct Upd
         decorationObj->SetProperty<int32_t>("type", static_cast<int32_t>(typingStyle.updateTextDecoration.value()));
     }
     if (typingStyle.updateTextDecorationColor.has_value()) {
-        decorationObj->SetProperty<std::string>(
-            "color", typingStyle.updateTextDecorationColor.value().ColorToString());
+        decorationObj->SetProperty<std::string>("color", typingStyle.updateTextDecorationColor.value().ColorToString());
     }
     if (typingStyle.updateTextDecoration.has_value() || typingStyle.updateTextDecorationColor.has_value()) {
         tyingStyleObj->SetPropertyObject("decoration", decorationObj);

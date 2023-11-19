@@ -52,16 +52,16 @@ namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
 
-
 struct SelectionMenuParams {
     RichEditorType type;
     std::function<void()> buildFunc;
     std::function<void(int32_t, int32_t)> onAppear;
     std::function<void()> onDisappear;
-    ResponseType responseType;
+    RichEditorResponseType responseType;
 
     SelectionMenuParams(RichEditorType _type, std::function<void()> _buildFunc,
-        std::function<void(int32_t, int32_t)> _onAppear, std::function<void()> _onDisappear, ResponseType _responseType)
+        std::function<void(int32_t, int32_t)> _onAppear, std::function<void()> _onDisappear,
+        RichEditorResponseType _responseType)
         : type(_type), buildFunc(_buildFunc), onAppear(_onAppear), onDisappear(_onDisappear),
           responseType(_responseType)
     {}
@@ -167,11 +167,13 @@ public:
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
     RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
+    void SetSelection(int32_t start, int32_t end);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
-    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false);
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false,
+        RichEditorResponseType responseType = RichEditorResponseType::LONG_PRESS);
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
@@ -190,9 +192,9 @@ public:
         isMousePressed_ = false;
     }
 
-    OffsetF GetRightClickOffset() const
+    OffsetF GetSelectionMenuOffset() const
     {
-        return rightClickOffset_;
+        return selectionMenuOffsetByMouse_;
     }
 
     OffsetF GetLastClickOffset() const
@@ -223,7 +225,7 @@ public:
     RectF GetCaretRect() const override;
     void CloseSelectOverlay() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
-    void CopySelectionMenuParams(SelectOverlayInfo& selectInfo);
+    void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, RichEditorResponseType responseType);
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::function<void(Offset)> GetThumbnailCallback() override;
 #endif
@@ -252,8 +254,9 @@ public:
         }
         customKeyboardBuilder_ = keyboardBuilder;
     }
-    void BindSelectionMenu(ResponseType type, RichEditorType richEditorType, std::function<void()>& menuBuilder,
-        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear);
+    void BindSelectionMenu(RichEditorResponseType type, RichEditorType richEditorType,
+        std::function<void()>& menuBuilder, std::function<void(int32_t, int32_t)>& onAppear,
+        std::function<void()>& onDisappear);
     void ClearSelectionMenu()
     {
         selectionMenuMap_.clear();
@@ -280,7 +283,7 @@ private:
         selectMenuInfo_ = selectInfo.menuInfo;
     }
     void UpdateSelectionType(RichEditorSelection& selection);
-    std::shared_ptr<SelectionMenuParams> GetMenuParams(bool usingMouse, RichEditorType type);
+    std::shared_ptr<SelectionMenuParams> GetMenuParams(RichEditorResponseType responseType, RichEditorType type);
     void HandleOnPaste();
     void HandleOnCut();
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
@@ -368,6 +371,7 @@ private:
     RefPtr<SpanNode> InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::string& insertValue);
     void SetCaretSpanIndex(int32_t index);
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
+    bool IsSelectedBindSelectionMenu();
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else
@@ -396,7 +400,7 @@ private:
     int32_t caretSpanIndex_ = -1;
     long long timestamp_ = 0;
     OffsetF parentGlobalOffset_;
-    OffsetF rightClickOffset_;
+    OffsetF selectionMenuOffsetByMouse_;
     OffsetF lastClickOffset_;
     std::string pasteStr_;
 
@@ -414,9 +418,9 @@ private:
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::list<ResultObject> dragResultObjects_;
 #endif // ENABLE_DRAG_FRAMEWORK
-    std::map<std::pair<RichEditorType, ResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
+    std::map<std::pair<RichEditorType, RichEditorResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
     std::optional<RichEditorType> selectedType_;
-    
+
     std::function<void()> customKeyboardBuilder_;
     Offset selectionMenuOffset_;
 

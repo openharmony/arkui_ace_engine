@@ -98,6 +98,8 @@ public:
     void GetTypingStyle(const JSCallbackInfo& info);
     void SetTypingStyle(const JSCallbackInfo& info);
     void CloseSelectionMenu();
+    void SetSelection(int32_t selectionStart, int32_t selectionEnd);
+    void GetSelection(const JSCallbackInfo& args);
 
 private:
     bool ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
