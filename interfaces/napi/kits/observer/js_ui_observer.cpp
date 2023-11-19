@@ -18,7 +18,6 @@
 #include "js_native_api_types.h"
 
 #include "core/components_ng/base/observer.h"
-#include "core/components_ng/common_napi_utils/common_napi_utils.h"
 
 namespace OHOS::Ace::Napi {
 #define GET_PARAMS(env, info, max) \
@@ -28,13 +27,6 @@ namespace OHOS::Ace::Napi {
     void* data;                    \
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data)
 
-struct EventCallback {
-    EventCallback() : env(nullptr), thisVar(nullptr), callbackRef(nullptr) {}
-    napi_env env = nullptr;
-    napi_ref thisVar = nullptr;
-    napi_ref callbackRef = nullptr;
-};
-
 bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType)
 {
     napi_valuetype valueType = napi_undefined;
@@ -42,32 +34,38 @@ bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType)
     return valueType == targetType;
 }
 
+static void ParseNavigation(napi_env env, napi_value navigation, std::string& navigationStr)
+{
+    if (navigation != nullptr) {
+        size_t navLen = 0;
+        napi_get_value_string_utf8(env, navigation, nullptr, 0, &navLen);
+        std::unique_ptr<char[]> nav = std::make_unique<char[]>(navLen + 1);
+        napi_get_value_string_utf8(env, navigation, nav.get(), navLen + 1, &navLen);
+        navigationStr = nav.get();
+    }
+}
+
 napi_value ObserverOn(napi_env env, napi_callback_info info)
 {
     GET_PARAMS(env, info, 3);
     NAPI_ASSERT(env, (argc >= 2 && thisVar != nullptr), "Invalid arguments");
 
-
     if (argc == 2 && MatchValueType(env, argv[0], napi_string) && MatchValueType(env, argv[1], napi_function)) {
         auto listener = std::make_shared<NG::UIObserverListener>(env, argv[1]);
-        LOGE("testtest ObserverOn");
         NG::UIObserver::RegisterNavigationCallback(listener);
     }
 
-    // if (argc == 3 && MatchValueType(env, argv[0], napi_string) && MatchValueType(env, argv[1], napi_object) &&
-    //     MatchValueType(env, argv[2], napi_function)) {
-    //     napi_value navigationId = nullptr;
-    //     napi_get_named_property(env, argv[1], "navigationId", &navigationId);
-    //     if (MatchValueType(env, navigationId, napi_string)) {
-    //         auto id = CommonNapiUtils::GetStringFromValueUtf8(env, navigationId);
-    //         EventCallback cb;
-    //         cb.env = env;
-    //         napi_create_reference(env, thisVar, 1, &cb.thisVar);
-    //         napi_create_reference(env, argv[2], 1, &cb.callbackRef);
-
-    //         NG::UIObserver::RegisterNavigationCallback(id, argv[2]);
-    //     }
-    // }
+    if (argc == 3 && MatchValueType(env, argv[0], napi_string) && MatchValueType(env, argv[1], napi_object) &&
+        MatchValueType(env, argv[2], napi_function)) {
+        napi_value navigationId = nullptr;
+        napi_get_named_property(env, argv[1], "navigationId", &navigationId);
+        if (MatchValueType(env, navigationId, napi_string)) {
+            std::string id;
+            ParseNavigation(env, navigationId, id);
+            auto listener = std::make_shared<NG::UIObserverListener>(env, argv[2]);
+            NG::UIObserver::RegisterNavigationCallback(id, listener);
+        }
+    }
 
     napi_value result = nullptr;
     return result;
@@ -75,6 +73,26 @@ napi_value ObserverOn(napi_env env, napi_callback_info info)
 
 napi_value ObserverOff(napi_env env, napi_callback_info info)
 {
+    GET_PARAMS(env, info, 3);
+    NAPI_ASSERT(env, (argc >= 2 && thisVar != nullptr), "Invalid arguments");
+
+    if (argc == 2 && MatchValueType(env, argv[0], napi_string) && MatchValueType(env, argv[1], napi_function)) {
+        auto listener = std::make_shared<NG::UIObserverListener>(env, argv[1]);
+        NG::UIObserver::UnRegisterNavigationCallback(listener);
+    }
+
+    if (argc == 3 && MatchValueType(env, argv[0], napi_string) && MatchValueType(env, argv[1], napi_object) &&
+        MatchValueType(env, argv[2], napi_function)) {
+        napi_value navigationId = nullptr;
+        napi_get_named_property(env, argv[1], "navigationId", &navigationId);
+        if (MatchValueType(env, navigationId, napi_string)) {
+            std::string id;
+            ParseNavigation(env, navigationId, id);
+            auto listener = std::make_shared<NG::UIObserverListener>(env, argv[2]);
+            NG::UIObserver::UnRegisterNavigationCallback(id, listener);
+        }
+    }
+
     napi_value result = nullptr;
     return result;
 }

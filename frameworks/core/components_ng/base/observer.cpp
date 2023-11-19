@@ -31,7 +31,6 @@ std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
 void UIObserverHandler::NotifyNavigationStateChange(
     const RefPtr<NavDestinationPattern>& pattern, NavDestinationState state)
 {
-    LOGE("testtest UIObserverHandler NotifyNavigationStateChange");
     std::string navigationId;
     std::string navDestinationName = pattern->GetName();
     for (const auto& listener : UIObserver::unspecifiedNavigationListeners_) {
@@ -73,9 +72,7 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
 void UIObserverListener::OnNavigationStateChange(
     std::string navigationId, std::string navDestinationName, NG::NavDestinationState navState)
 {
-    LOGE("testtest call OnNavigationStateChange %p", &env_);
     if (!env_ || !callback_) {
-        LOGE("testtest no env");
         return;
     }
     napi_value callback = nullptr;
@@ -92,10 +89,11 @@ void UIObserverListener::OnNavigationStateChange(
     napi_set_named_property(env_, objValue, "name", name);
     napi_set_named_property(env_, objValue, "state", state);
     napi_value argv[] = { objValue };
-    LOGE("testtest call napi_call_function");
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
 }
 
+// UIObserver.on(type: "navDestinationUpdate", callback)
+// register a global listener without options
 void UIObserver::RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener)
 {
     if (std::find(unspecifiedNavigationListeners_.begin(), unspecifiedNavigationListeners_.end(), listener) !=
@@ -105,6 +103,8 @@ void UIObserver::RegisterNavigationCallback(const std::shared_ptr<UIObserverList
     unspecifiedNavigationListeners_.emplace_back(listener);
 }
 
+// UIObserver.on(type: "navDestinationUpdate", options, callback)
+// register a listener on a specified Navigation
 void UIObserver::RegisterNavigationCallback(
     std::string navigationId, const std::shared_ptr<UIObserverListener>& listener)
 {
@@ -119,6 +119,7 @@ void UIObserver::RegisterNavigationCallback(
     holder.emplace_back(listener);
 }
 
+// UIObserver.off(type: "navDestinationUpdate", callback)
 void UIObserver::UnRegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener)
 {
     if (listener == nullptr) {
@@ -133,6 +134,7 @@ void UIObserver::UnRegisterNavigationCallback(const std::shared_ptr<UIObserverLi
         unspecifiedNavigationListeners_.end());
 }
 
+// UIObserver.off(type: "navDestinationUpdate", options, callback)
 void UIObserver::UnRegisterNavigationCallback(
     std::string navigationId, const std::shared_ptr<UIObserverListener>& listener)
 {

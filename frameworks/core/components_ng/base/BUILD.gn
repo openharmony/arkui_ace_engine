@@ -31,7 +31,5 @@ build_component_ng("base_ng") {
     "view_stack_processor.cpp",
   ]
 
-  # deps = [ "$ace_napi:ace_napi" ]
-
   external_deps = [ "napi:ace_napi" ]
 }

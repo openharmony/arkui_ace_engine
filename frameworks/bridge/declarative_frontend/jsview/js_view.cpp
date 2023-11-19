@@ -23,11 +23,13 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
+#include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/base/observer_trigger.h"
@@ -922,6 +924,17 @@ void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
     }
 }
 
+void JSViewPartialUpdate::JSGetUIContext(const JSCallbackInfo& info)
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto frontEnd = container->GetFrontend();
+    CHECK_NULL_VOID(frontEnd);
+    auto context = frontEnd->GetContextValue();
+    auto jsVal = JsConverter::ConvertNapiValueToJsVal(context);
+    info.SetReturnValue(jsVal);
+}
+
 void JSViewPartialUpdate::JSBind(BindingTarget object)
 {
     LOGD("JSViewPartialUpdate::Bind");
@@ -948,6 +961,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::Method("invalidateLayout", &JSViewPartialUpdate::JsInvalidateLayout);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "queryNavDestinationInfo", &JSViewPartialUpdate::JSGetNavDestinationInfo);
+    JSClass<JSViewPartialUpdate>::CustomMethod("getUIContext", &JSViewPartialUpdate::JSGetUIContext);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 
