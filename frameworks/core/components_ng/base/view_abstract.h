@@ -289,6 +289,9 @@ public:
     // useEffect
     static void SetUseEffect(bool useEffect);
 
+    // useShadowBatching
+    static void SetUseShadowBatching(bool useShadowBatching);
+
     // foregroundColor
     static void SetForegroundColor(const Color& color);
     static void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy);

@@ -1588,6 +1588,14 @@ void ViewAbstract::SetUseEffect(bool useEffect)
     ACE_UPDATE_RENDER_CONTEXT(UseEffect, useEffect);
 }
 
+void ViewAbstract::SetUseShadowBatching(bool useShadowBatching)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(UseShadowBatching, useShadowBatching);
+}
+
 void ViewAbstract::SetForegroundColor(const Color& color)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
