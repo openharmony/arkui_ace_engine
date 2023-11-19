@@ -871,6 +871,26 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleScrollVelocity006
+ * @tc.desc: Test HandleScrollVelocity without scrollableEvent, shouldn't crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleScrollVelocity006, TestSize.Level1)
+{
+    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
+    mockScroll_->pattern_ = mockPn;
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    EXPECT_TRUE(scrollPn);
+    scrollPn->parent_ = mockPn;
+
+    EXPECT_CALL(*mockPn, HandleScrollVelocity).Times(0);
+    EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
+
+    bool res = scrollPn->HandleScrollVelocity(5);
+    EXPECT_TRUE(res);
+}
+
+/**
  * @tc.name: OnScrollStart001
  * @tc.desc: Test nested HandleScroll onScrollStart
  * @tc.type: FUNC
