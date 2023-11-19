@@ -771,7 +771,11 @@ void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace:
     bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
     bitmap.SetPixels(data);
     auto contentOffset = GetContentOffset(paintWrapper);
+    RSBrush brush;
+    brush.SetBlendMode(RSBlendMode::SRC_OVER);
+    rsCanvas_->AttachBrush(brush);
     rsCanvas_->DrawBitmap(bitmap, imageData.x + contentOffset.GetX(), imageData.y + contentOffset.GetY());
+    rsCanvas_->DetachBrush();
 #endif
     delete[] data;
 }
