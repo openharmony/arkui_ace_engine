@@ -17,8 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_FIELD_TEXT_FIELD_OVERLAY_MODIFIER_H
 
 #include <cstdint>
+
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
@@ -71,9 +73,11 @@ private:
     void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
     void PaintScrollBar(DrawingContext& context);
     void PaintMagnifier(DrawingContext& context);
-    bool GetMagnifierRect(float& startX, float& startY, float& endX, float& endY, float& localOffsetX);
+    bool GetMagnifierRect(
+        float& startX, float& startY, float& endX, float& endY, float& localOffsetX, float& cursorOffsetY);
     std::vector<TextPoint> GetTextPoints(float startX, float startY, float endX, float endY, bool haveOffset = false);
     std::shared_ptr<RSPath> GetPathByPoints(std::vector<TextPoint> points);
+    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
 
     bool needPaintSelect_ = false;
     WeakPtr<Pattern> pattern_;
