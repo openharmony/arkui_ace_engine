@@ -116,13 +116,26 @@ private:
     WeakPtr<UIExtensionPattern> uiExtensionPattern_;
 };
 
-thread_local int32_t UIExtensionPattern::currentUiExtensionId_ = 1;
-
-UIExtensionPattern::UIExtensionPattern() : uiExtensionId_(currentUiExtensionId_++)
-{}
+UIExtensionPattern::UIExtensionPattern()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_VOID(ngPipeline);
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionId_ = uiExtensionManager->ApplyExtensionId();
+}
 
 UIExtensionPattern::~UIExtensionPattern()
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_VOID(ngPipeline);
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionManager->RecycleExtensionId(uiExtensionId_);
     DestorySession();
 }
 

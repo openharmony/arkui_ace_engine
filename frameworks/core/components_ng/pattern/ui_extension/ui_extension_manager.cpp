@@ -18,9 +18,27 @@
 #include "adapter/ohos/entrance/ace_container.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr int32_t UI_EXTENSION_OFFSET_MIN = 1000000;
-};
+std::bitset<UI_EXTENSION_ID_FIRST_MAX> UIExtensionManager::UIExtensionIdUtility::idPool_;
+std::mutex UIExtensionManager::UIExtensionIdUtility::poolMutex_;
+int32_t UIExtensionManager::UIExtensionIdUtility::ApplyExtensionId()
+{
+    std::lock_guard<std::mutex> poolMutex(UIExtensionManager::UIExtensionIdUtility::poolMutex_);
+    for (int32_t index = 0; index < UI_EXTENSION_ID_FIRST_MAX; index++) {
+        if (!UIExtensionManager::UIExtensionIdUtility::idPool_.test(index)) {
+            UIExtensionManager::UIExtensionIdUtility::idPool_.set(index, 1);
+            return index + 1;
+        }
+    }
+    return UI_EXTENSION_UNKNOW_ID;
+}
+
+void UIExtensionManager::UIExtensionIdUtility::RecycleExtensionId(int32_t id)
+{
+    std::lock_guard<std::mutex> poolMutex(UIExtensionManager::UIExtensionIdUtility::poolMutex_);
+    if ((id > UI_EXTENSION_UNKNOW_ID) && (id <= UI_EXTENSION_ID_FIRST_MAX)) {
+        UIExtensionManager::UIExtensionIdUtility::idPool_.set(id - 1, 0);
+    }
+}
 
 void UIExtensionManager::RegisterUIExtensionInFocus(const WeakPtr<UIExtensionPattern>& uiExtensionFocused)
 {
@@ -73,5 +91,17 @@ const RefPtr<FrameNode> UIExtensionManager::GetFocusUiExtensionNode()
     auto uiExtensionFocused = uiExtensionFocused_.Upgrade();
     CHECK_NULL_RETURN(uiExtensionFocused, nullptr);
     return uiExtensionFocused->GetUiExtensionNode();
+}
+
+int32_t UIExtensionManager::ApplyExtensionId()
+{
+    CHECK_NULL_RETURN(extensionIdUtility_, UI_EXTENSION_UNKNOW_ID);
+    return extensionIdUtility_->ApplyExtensionId();
+}
+
+void UIExtensionManager::RecycleExtensionId(int32_t id)
+{
+    CHECK_NULL_VOID(extensionIdUtility_);
+    extensionIdUtility_->RecycleExtensionId(id);
 }
 } // namespace OHOS::Ace::NG

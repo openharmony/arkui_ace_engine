@@ -252,8 +252,8 @@ private:
     void ProcessParameters(Accessibility::ActionType op, const std::vector<std::string>& params,
         std::map<std::string, std::string>& paramsMap);
 
-    void SearchExtensionElementInfoNG(int32_t elementId, int32_t mode, const RefPtr<NG::FrameNode>& node,
-        std::list<Accessibility::AccessibilityElementInfo>& infos, int32_t uiExtensionOffset);
+    void SearchExtensionElementInfoNG(const SearchParameter& searchParam, const RefPtr<NG::FrameNode>& node,
+        std::list<Accessibility::AccessibilityElementInfo>& infos, Accessibility::AccessibilityElementInfo& parentInfo);
 
     void DumpTreeNodeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
         NodeId nodeID, const CommonProperty& commonProperty);

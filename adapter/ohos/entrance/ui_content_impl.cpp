@@ -2053,7 +2053,7 @@ void UIContentImpl::FocusMoveSearch(
     int32_t elementId, int32_t direction,
     int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
-    Platform::AceContainer::FindFocusedElementInfoNG(instanceId_, elementId, direction, baseParent, output);
+    Platform::AceContainer::FocusMoveSearchNG(instanceId_, elementId, direction, baseParent, output);
 }
 
 bool UIContentImpl::NotifyExecuteAction(
