@@ -239,9 +239,7 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
 {
     if (PipelineBase::GetCurrentContext() &&
         // for normal app add version protection, enable keyboard as default start from API 10 or higher
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9 &&
-        // UIExtension Ability focus windowId setted by component user window, can not enable keyboard as default
-        !PipelineBase::GetCurrentContext()->IsFocusWindowIdSetted()) {
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
         needToRequestKeyboardOnFocus_ = true;
     }
     contentController_ = MakeRefPtr<ContentController>(WeakClaim(this));
