@@ -45,6 +45,12 @@ SubContainer::~SubContainer()
 
 void SubContainer::Initialize()
 {
+    auto formPattern = formPattern_.Upgrade();
+    if (formPattern && !formPattern->IsJsCard()) {
+        LOGI("ETS card do not require the creation of a separate TaskExecutor");
+        return;
+    }
+
     if (!outSidePipelineContext_.Upgrade()) {
         LOGE("no pipeline context for create form component container.");
         return;
