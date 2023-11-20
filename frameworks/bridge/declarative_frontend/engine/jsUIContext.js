@@ -88,26 +88,14 @@ class UIObserver {
         this.instanceId_ = instanceId;
         this.ohos_observer = globalThis.requireNapi('arkui.observer');
     }
-    on(type, options, callback) {
+    on(...args) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        if (typeof options === undefined) {
-            this.ohos_observer.on(type, callback);
-        }
-        else {
-            this.ohos_observer.on(type, options, callback);
-        }
+        this.ohos_observer.on(...args);
         __JSScopeUtil__.restoreInstanceId();
     }
-    off(type, options, callback) {
+    off(...args) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        if (typeof options === undefined && callback === undefined) {
-            this.ohos_observer.off(type);
-        }
-        else if (typeof options === undefined){
-            this.ohos_observer.off(type, callback);
-        } else {
-            this.ohos_observer.off(type, options, callback);
-        }
+        this.ohos_observer.off(...args);
         __JSScopeUtil__.restoreInstanceId();
     }
 }

@@ -28,10 +28,26 @@ std::list<std::shared_ptr<UIObserverListener>> UIObserver::unspecifiedNavigation
 std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedCNavigationListeners_;
 
-void UIObserverHandler::NotifyNavigationStateChange(
-    const RefPtr<NavDestinationPattern>& pattern, NavDestinationState state)
+namespace {
+std::string GetNavigationId(const RefPtr<NavDestinationPattern> pattern)
 {
+    CHECK_NULL_RETURN(pattern, "");
+    auto navigationNode = pattern->GetNavigationNode();
     std::string navigationId;
+    if (navigationNode) {
+        navigationId = navigationNode->GetInspectorId().value_or("");
+    }
+    return navigationId;
+}
+} // namespace
+
+void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state)
+{
+    auto ref = weakPattern.Upgrade();
+    CHECK_NULL_VOID(ref);
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(ref);
+    CHECK_NULL_VOID(pattern);
+    std::string navigationId = GetNavigationId(pattern);
     std::string navDestinationName = pattern->GetName();
     for (const auto& listener : UIObserver::unspecifiedNavigationListeners_) {
         listener->OnNavigationStateChange(navigationId, navDestinationName, state);
@@ -66,7 +82,9 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
     auto pattern = nav->GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     return std::make_shared<NavDestinationInfo>(
-        "", pattern->GetName(), pattern->GetIsOnShow() ? NavDestinationState::ON_SHOW : NavDestinationState::ON_HIDDEN);
+        GetNavigationId(pattern),
+        pattern->GetName(),
+        pattern->GetIsOnShow() ? NavDestinationState::ON_SHOW : NavDestinationState::ON_HIDDEN);
 }
 
 void UIObserverListener::OnNavigationStateChange(
@@ -90,6 +108,20 @@ void UIObserverListener::OnNavigationStateChange(
     napi_set_named_property(env_, objValue, "state", state);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+}
+
+napi_value UIObserverListener::GetNapiCallback()
+{
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    return callback;
+}
+
+bool UIObserverListener::NapiEqual(napi_value cb)
+{
+    bool isEquals = false;
+    napi_strict_equals(env_, cb, GetNapiCallback(), &isEquals);
+    return isEquals;
 }
 
 // UIObserver.on(type: "navDestinationUpdate", callback)
@@ -120,36 +152,45 @@ void UIObserver::RegisterNavigationCallback(
 }
 
 // UIObserver.off(type: "navDestinationUpdate", callback)
-void UIObserver::UnRegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener)
+void UIObserver::UnRegisterNavigationCallback(napi_value cb)
 {
-    if (listener == nullptr) {
+    if (cb == nullptr) {
         unspecifiedNavigationListeners_.clear();
         return;
     }
+
     unspecifiedNavigationListeners_.erase(
-        std::remove_if(unspecifiedNavigationListeners_.begin(), unspecifiedNavigationListeners_.end(),
-            [listener](const std::shared_ptr<UIObserverListener>& registeredListener) {
-                return registeredListener == listener;
-            }),
-        unspecifiedNavigationListeners_.end());
+        std::remove_if(
+            unspecifiedNavigationListeners_.begin(),
+            unspecifiedNavigationListeners_.end(),
+            [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(cb);
+            }
+        ),
+        unspecifiedNavigationListeners_.end()
+    );
 }
 
 // UIObserver.off(type: "navDestinationUpdate", options, callback)
-void UIObserver::UnRegisterNavigationCallback(
-    std::string navigationId, const std::shared_ptr<UIObserverListener>& listener)
+void UIObserver::UnRegisterNavigationCallback(std::string navigationId, napi_value cb)
 {
     if (specifiedCNavigationListeners_.find(navigationId) == specifiedCNavigationListeners_.end()) {
         return;
     }
     auto holder = specifiedCNavigationListeners_[navigationId];
-    if (listener == nullptr) {
+    if (cb == nullptr) {
         holder.clear();
         return;
     }
-    holder.erase(std::remove_if(holder.begin(), holder.end(),
-                     [listener](const std::shared_ptr<UIObserverListener>& registeredListener) {
-                         return registeredListener == listener;
-                     }),
-        holder.end());
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(cb);
+            }
+        ),
+        holder.end()
+    );
 }
 } // namespace OHOS::Ace::NG

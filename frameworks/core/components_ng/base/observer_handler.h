@@ -8,7 +8,6 @@
 #include "base/memory/referenced.h"
 
 namespace OHOS::Ace::NG {
-class NavDestinationPattern;
 enum class NavDestinationState {
     ON_SHOW = 0,
     ON_HIDDEN = 1,
@@ -26,7 +25,7 @@ struct NavDestinationInfo {
 
 class UIObserverHandler {
 public:
-    static void NotifyNavigationStateChange(const RefPtr<NavDestinationPattern>& pattern, NavDestinationState state);
+    static void NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
     static std::shared_ptr<NavDestinationInfo> GetNavigationState(const RefPtr<AceType>& node);
 };
 } // namespace OHOS::Ace::NG

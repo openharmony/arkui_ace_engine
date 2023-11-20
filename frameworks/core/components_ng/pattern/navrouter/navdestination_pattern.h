@@ -56,7 +56,9 @@ public:
 
     RefPtr<EventHub> CreateEventHub() override
     {
-        return MakeRefPtr<NavDestinationEventHub>();
+        auto eventHub = MakeRefPtr<NavDestinationEventHub>();
+        eventHub->SetNavDestinationPattern(WeakClaim(this));
+        return eventHub;
     }
 
     void OnActive() override;
@@ -105,10 +107,18 @@ public:
 
     bool GetBackButtonState();
 
+    RefPtr<UINode> GetNavigationNode()
+    {
+        return navigationNode_.Upgrade();
+    }
+
+    void OnAttachToMainTree() override;
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
     WeakPtr<UINode> navDestinationNode_;
+    WeakPtr<UINode> navigationNode_;
     bool isOnShow_ = false;
     void OnAttachToFrameNode() override;
 };

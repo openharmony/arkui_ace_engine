@@ -18,13 +18,12 @@
 
 #include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
-#include "core/components_ng/base/observer_trigger.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 
 namespace OHOS::Ace::NG {
-class NavDestinationPattern;
 using OnStateChangeEvent = std::function<void(bool)>;
 using namespace Framework;
 class NavDestinationEventHub : public EventHub {
@@ -57,17 +56,7 @@ public:
 
     void FireOnShownEvent() const
     {
-        do {
-            auto host = GetFrameNode();
-            if (!host) {
-                break;
-            }
-            auto pattern = host->GetPattern<NavDestinationPattern>();
-            if (!pattern) {
-                break;
-            }
-            UIObserverHandler::NotifyNavigationStateChange(pattern, NavDestinationState::ON_SHOW);
-        } while (false);
+        UIObserverHandler::NotifyNavigationStateChange(navDestinationPattern_, NavDestinationState::ON_SHOW);
         if (onShownEvent_) {
             auto onShownEvent = onShownEvent_;
             onShownEvent();
@@ -81,17 +70,7 @@ public:
 
     void FireOnHiddenEvent() const
     {
-        do {
-            auto host = GetFrameNode();
-            if (!host) {
-                break;
-            }
-            auto pattern = host->GetPattern<NavDestinationPattern>();
-            if (!pattern) {
-                break;
-            }
-            UIObserverHandler::NotifyNavigationStateChange(pattern, NavDestinationState::ON_HIDDEN);
-        } while (false);
+        UIObserverHandler::NotifyNavigationStateChange(navDestinationPattern_, NavDestinationState::ON_HIDDEN);
         if (onHiddenEvent_) {
             onHiddenEvent_();
         }
@@ -115,11 +94,17 @@ public:
         return false;
     }
 
+    void SetNavDestinationPattern(const WeakPtr<AceType>& pattern)
+    {
+        navDestinationPattern_ = pattern;
+    }
+
 private:
     OnStateChangeEvent onStateChangeEvent_;
     std::function<void()> onShownEvent_;
     std::function<void()> onHiddenEvent_;
     std::function<bool()> onBackPressedEvent_;
+    WeakPtr<AceType> navDestinationPattern_; 
 
     bool isActivated_ = false;
 };

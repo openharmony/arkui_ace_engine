@@ -32,7 +32,7 @@
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
-#include "core/components_ng/base/observer_trigger.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_full_update_model.h"
 #include "core/components_ng/base/view_full_update_model_ng.h"

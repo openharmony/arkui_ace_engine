@@ -22,7 +22,7 @@
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-#include "observer_trigger.h"
+#include "observer_handler.h"
 
 #include "base/memory/ace_type.h"
 
@@ -46,8 +46,10 @@ public:
     }
     void OnNavigationStateChange(
         std::string navigationId, std::string navDestinationName, NG::NavDestinationState state) override;
+    bool NapiEqual(napi_value cb);
 
 private:
+    napi_value GetNapiCallback();
     napi_env env_ = nullptr;
     napi_ref callback_ = nullptr;
 };
@@ -57,9 +59,8 @@ public:
     static void RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener);
     static void RegisterNavigationCallback(
         std::string navigationId, const std::shared_ptr<UIObserverListener>& listener);
-    static void UnRegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener = nullptr);
-    static void UnRegisterNavigationCallback(
-        std::string navigationId, const std::shared_ptr<UIObserverListener>& listener = nullptr);
+    static void UnRegisterNavigationCallback(napi_value cb);
+    static void UnRegisterNavigationCallback(std::string navigationId, napi_value cb);
 
 private:
     static std::list<std::shared_ptr<UIObserverListener>> unspecifiedNavigationListeners_;
