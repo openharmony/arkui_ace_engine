@@ -484,5 +484,10 @@ RefPtr<NG::FrameNode> NG::PipelineContext::FindNavigationNodeToHandleBack(const 
     return nullptr;
 }
 
+bool NG::PipelineContext::SetIsFocusActive(bool isFocusActive)
+{
+    return false;
+}
+
 void HandleSubwindow(bool isShow) {}
 } // namespace OHOS::Ace
