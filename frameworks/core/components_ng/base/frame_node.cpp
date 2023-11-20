@@ -34,6 +34,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -45,6 +46,7 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
+#include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -1578,6 +1580,16 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
+    auto targetComponent = MakeRefPtr<TargetComponent>();
+    targetComponent->SetNode(WeakClaim(this));
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    if (gestureHub) {
+        auto callback = gestureHub->GetOnGestureJudgeBeginCallback();
+        if (callback) {
+            targetComponent->SetOnGestureJudgeBegin(std::move(callback));
+        }
+    }
+
     if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("%{public}s is inActive, need't do touch test", GetTag().c_str());
@@ -1695,8 +1707,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             if (gestureHub) {
                 TouchTestResult finalResult;
                 const auto coordinateOffset = globalPoint - localPoint - localTransformOffset;
-                preventBubbling = gestureHub->ProcessTouchTestHit(
-                    coordinateOffset, touchRestrict, newComingTargets, finalResult, touchId, localPoint);
+                preventBubbling = gestureHub->ProcessTouchTestHit(coordinateOffset, touchRestrict, newComingTargets,
+                    finalResult, touchId, localPoint, targetComponent);
                 newComingTargets.swap(finalResult);
             }
         } else if (touchRestrict.hitTestType == SourceType::MOUSE) {
@@ -2423,8 +2435,9 @@ void FrameNode::GetPercentSensitive()
 
 void FrameNode::UpdatePercentSensitive()
 {
-    auto res = layoutProperty_->UpdatePercentSensitive(
-        layoutAlgorithm_->GetPercentHeight(), layoutAlgorithm_->GetPercentWidth());
+    bool percentHeight = layoutAlgorithm_ ? layoutAlgorithm_->GetPercentHeight() : true;
+    bool percentWidth = layoutAlgorithm_ ? layoutAlgorithm_->GetPercentWidth() : true;
+    auto res = layoutProperty_->UpdatePercentSensitive(percentHeight, percentWidth);
     if (res.first) {
         auto parent = GetAncestorNodeOfFrame();
         if (parent && parent->layoutAlgorithm_) {
@@ -2607,6 +2620,28 @@ void FrameNode::SyncGeometryNode()
         contentOffsetChange = geometryNode_->GetContentOffset() != oldGeometryNode_->GetContentOffset();
         oldGeometryNode_.Reset();
     }
+    
+    // update border.
+    if (layoutProperty_->GetBorderWidthProperty()) {
+        if (!renderContext_->HasBorderColor()) {
+            BorderColorProperty borderColorProperty;
+            borderColorProperty.SetColor(Color::BLACK);
+            renderContext_->UpdateBorderColor(borderColorProperty);
+        }
+        if (!renderContext_->HasBorderStyle()) {
+            BorderStyleProperty borderStyleProperty;
+            borderStyleProperty.SetBorderStyle(BorderStyle::SOLID);
+            renderContext_->UpdateBorderStyle(borderStyleProperty);
+        }
+        if (layoutProperty_->GetLayoutConstraint().has_value()) {
+            renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
+                ScaleProperty::CreateScaleProperty(),
+                layoutProperty_->GetLayoutConstraint()->percentReference.Width()));
+        } else {
+            renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
+                ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
+        }
+    }
 
     // clean layout flag.
     layoutProperty_->CleanDirty();
@@ -2639,28 +2674,6 @@ void FrameNode::SyncGeometryNode()
         needRerender || pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config.skipMeasure, config.skipLayout);
     if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
-    }
-
-    // update border.
-    if (layoutProperty_->GetBorderWidthProperty()) {
-        if (!renderContext_->HasBorderColor()) {
-            BorderColorProperty borderColorProperty;
-            borderColorProperty.SetColor(Color::BLACK);
-            renderContext_->UpdateBorderColor(borderColorProperty);
-        }
-        if (!renderContext_->HasBorderStyle()) {
-            BorderStyleProperty borderStyleProperty;
-            borderStyleProperty.SetBorderStyle(BorderStyle::SOLID);
-            renderContext_->UpdateBorderStyle(borderStyleProperty);
-        }
-        if (layoutProperty_->GetLayoutConstraint().has_value()) {
-            renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
-                ScaleProperty::CreateScaleProperty(),
-                layoutProperty_->GetLayoutConstraint()->percentReference.Width()));
-        } else {
-            renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
-                ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
-        }
     }
 
     // update background
@@ -2914,12 +2927,4 @@ bool FrameNode::TransferExecuteAction(int32_t elementId, const std::map<std::str
     return isExecuted;
 }
 
-bool FrameNode::SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-    std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline)
-{
-    if (pattern_) {
-        return pattern_->SendAccessibilityEventInfo(eventInfo, uiExtensionIdLevelList, pipeline);
-    }
-    return false;
-}
 } // namespace OHOS::Ace::NG

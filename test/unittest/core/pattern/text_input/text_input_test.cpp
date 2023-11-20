@@ -758,6 +758,80 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition008, TestSize.Le
 }
 
 /**
+ * @tc.name: OnHandleMove001
+ * @tc.desc: Test the clip board interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, OnHandleMove001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Initialize text input and Move the handles and then do handle selection.
+     */
+    int32_t start = 5;
+    int32_t end = 10;
+    std::vector<std::int32_t> select = { 2014, 2015, 2012, 2013 };
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
+
+    /**
+     * @tc.steps: Move the handles and selection left.
+     *            Verify the selection data.
+     */
+    pattern_->HandleSetSelection(start, end);
+    pattern_->HandleSelect(select[0], 0);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end - 1);
+
+    /**
+     * @tc.steps: Move the handles and selection right.
+     *            Verify the selection data.
+     */
+    pattern_->HandleSetSelection(start, end);
+    pattern_->HandleSelect(select[1], 0);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end + 1);
+}
+
+/**
+ * @tc.name: OnHandleMove002
+ * @tc.desc: Test the clip board interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, OnHandleMove002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Initialize text input and Move the handles and then do handle selection.
+     */
+    int32_t start = 5;
+    int32_t end = 10;
+    std::vector<std::int32_t> select = { 2014, 2015, 2012, 2013 };
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
+
+    /**
+     * @tc.steps: Move the handles and selection up.
+     *            Verify the selection data.
+     */
+    EXPECT_FALSE(pattern_->IsTextArea());
+    pattern_->HandleSetSelection(start, end);
+    pattern_->HandleSelect(select[2], 0);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end);
+
+    /**
+     * @tc.steps: Move the handles and selection down.
+     *            Verify the selection data.
+     */
+    EXPECT_FALSE(pattern_->IsTextArea());
+    pattern_->HandleSetSelection(start, end);
+    pattern_->HandleSelect(select[3], 0);
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end);
+}
+
+/**
  * @tc.name: CursonMoveLeftTest001
  * @tc.desc: Test the curson move left
  * @tc.type: FUNC

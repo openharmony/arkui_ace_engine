@@ -63,7 +63,8 @@ connect_server_support = true
 hdc_register_support = true
 pa_engine_path = "adapter/ohos/entrance/pa_engine"
 enable_rosen_backend = true
-if (defined(global_parts_info.distributeddatamgr_udmf)) {
+if (defined(global_parts_info.distributeddatamgr_udmf) &&
+    defined(global_parts_info.msdp_device_status)) {
   enable_drag_framework = true
 } else {
   enable_drag_framework = false

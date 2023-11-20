@@ -20,8 +20,10 @@
 #include "core/common/container.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
@@ -80,9 +82,12 @@ DragEventActuator::DragEventActuator(
     }
 
     panRecognizer_ = MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_);
+    panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
     longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, false);
+    longPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
     previewLongPressRecognizer_ =
         AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_RECONGNIZER, fingers_, false, false);
+    previewLongPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
     isNotInPreviewState_ = false;
 }
 
@@ -117,6 +122,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
     CHECK_NULL_VOID(userCallback_);
+    isDragUserReject_ = false;
     auto gestureHub = gestureEventHub_.Upgrade();
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
@@ -307,6 +313,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     panRecognizer_->SetIsForDrag(true);
     panRecognizer_->SetMouseDistance(DRAG_PAN_DISTANCE_MOUSE.ConvertToPx());
     actionCancel_ = actionCancel;
+    panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     panRecognizer_->SetOnActionCancel(actionCancel);
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (touchRestrict.sourceType == SourceType::MOUSE) {
@@ -414,6 +421,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     std::vector<RefPtr<NGGestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
     SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
     SequencedRecognizer_->RemainChildOnResetStatus();
+    previewLongPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     result.emplace_back(SequencedRecognizer_);
@@ -434,6 +443,13 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
     CHECK_NULL_VOID(parent);
     while (parent && parent->GetDepth() != 1) {
         parent = parent->GetParent();
+    }
+    if (!parent) {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "DragFrameNode is %{public}s, depth %{public}d, can not find filter root",
+                frameNode->GetTag().c_str(), frameNode->GetDepth());
+        }
+        return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);

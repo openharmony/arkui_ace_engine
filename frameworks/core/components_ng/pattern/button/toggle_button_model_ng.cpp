@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,15 @@ void ToggleButtonModelNG::SetSelectedColor(const Color& selectedColor)
 
 void ToggleButtonModelNG::SetIsOn(bool isOn)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelected(isOn);
+    auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
+
     ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, IsOn, isOn);
 }
 

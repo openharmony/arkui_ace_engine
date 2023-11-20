@@ -765,7 +765,7 @@ void DatePickerColumnPattern::HandleDragEnd()
     auto toss = GetToss();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    if (toss->Play()) {
+    if (!NotLoopOptions() && toss->Play()) {
         frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         return;
     }

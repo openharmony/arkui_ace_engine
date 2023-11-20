@@ -15,8 +15,11 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 
+#include <cerrno>
+#include <dirent.h>
 #include <fstream>
 #include <functional>
+#include <regex>
 
 #include "ability_context.h"
 #include "ability_info.h"
@@ -1426,6 +1429,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
             themeManager->LoadCustomTheme(assetManager);
             themeManager->LoadResourceThemes();
         }
+        auto themeManager = pipelineContext->GetThemeManager();
+        if (themeManager) {
+            pipelineContext->SetAppBgColor(themeManager->GetBackgroundColor());
+        }
     };
 
     auto setupRootElementTask = [context = pipelineContext_, callback, isSubContainer = isSubContainer_]() {
@@ -1512,6 +1519,22 @@ void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetFontScale(fontScale);
+}
+
+bool AceContainer::ParseThemeConfig(const std::string& themeConfig)
+{
+    std::regex pattern("\"font\":(\\d+)");
+    std::smatch match;
+    if (std::regex_search(themeConfig, match, pattern)) {
+        std::string fontValue = match[1].str();
+        if (fontValue.length() > 1) {
+            LOGE("ParseThemeConfig error value");
+            return false;
+        }
+        int font = std::stoi(fontValue);
+        return font == 1;
+    }
+    return false;
 }
 
 void AceContainer::SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme)
@@ -1636,6 +1659,89 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
     return isFormRender_ ? nullptr : context->CreateModuleContext(bundle, module);
 }
 
+void AceContainer::CheckAndSetFontFamily()
+{
+    std::string familyName = "";
+    std::string path = "/data/themes/a/app";
+    if (!IsFontFileExistInPath(path)) {
+        path = "/data/themes/b/app";
+        if (!IsFontFileExistInPath(path)) {
+            return;
+        }
+    }
+    path = path.append("/font/");
+    familyName = GetFontFamilyName(path);
+    if (familyName.empty()) {
+        return;
+    }
+    path = path.append(familyName);
+    auto fontManager = pipelineContext_->GetFontManager();
+    fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+}
+
+bool AceContainer::IsFontFileExistInPath(std::string path)
+{
+    DIR* dir;
+    struct dirent* ent;
+    bool isFlagFileExist = false;
+    bool isFontDirExist = false;
+    if ((dir = opendir(path.c_str())) == nullptr) {
+        if (errno == ENOENT) {
+            LOGE("ERROR ENOENT");
+        } else if (errno == EACCES) {
+            LOGE("ERROR EACCES");
+        } else {
+            LOGE("ERROR Other");
+        }
+        return false;
+    }
+    while ((ent = readdir(dir)) != nullptr) {
+        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+            continue;
+        }
+        if (strcmp(ent->d_name, "flag") == 0) {
+            isFlagFileExist = true;
+        } else if (strcmp(ent->d_name, "font") == 0) {
+            isFontDirExist = true;
+        }
+    }
+    closedir(dir);
+    if (isFlagFileExist && isFontDirExist) {
+        LOGI("font path exist");
+        return true;
+    }
+    return false;
+}
+
+std::string AceContainer::GetFontFamilyName(std::string path)
+{
+    std::string fontFamilyName = "";
+    DIR* dir;
+    struct dirent* ent;
+    if ((dir = opendir(path.c_str())) == nullptr) {
+        return fontFamilyName;
+    }
+    while ((ent = readdir(dir)) != nullptr) {
+        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+            continue;
+        }
+        if (endsWith(ent->d_name, ".ttf")) {
+            fontFamilyName = ent->d_name;
+            break;
+        }
+    }
+    closedir(dir);
+    return fontFamilyName;
+}
+
+bool AceContainer::endsWith(std::string str, std::string suffix)
+{
+    if (str.length() < suffix.length()) {
+        return false;
+    }
+    return str.substr(str.length() - suffix.length()) == suffix;
+}
+
 void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)
 {
     if (!parsedConfig.IsValid()) {
@@ -1686,6 +1792,13 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
             resConfig.SetOrientation(resDirection);
         }
     }
+    if (!parsedConfig.themeTag.empty()) {
+        if (ParseThemeConfig(parsedConfig.themeTag)) {
+            CheckAndSetFontFamily();
+        } else {
+            LOGE("AceContainer::ParseThemeConfig false");
+        }
+    }
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     if (SystemProperties::GetResourceDecoupling()) {
@@ -1695,6 +1808,9 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     auto front = GetFrontend();
     CHECK_NULL_VOID(front);
     front->OnConfigurationUpdated(configuration);
+    if (!IsTransparentForm()) {
+        pipelineContext_->SetAppBgColor(themeManager->GetBackgroundColor());
+    }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
 #endif

@@ -441,19 +441,16 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
         currentBitmap.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kStrict_SrcRectConstraint);
     pixels = tempCache.pixmap().addr8();
 #else
-    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
-    RSBitmap tempCache;
-    tempCache.Build(width, height, format);
-
     RSBitmap currentBitmap;
-    CHECK_NULL_RETURN(rsRecordingCanvas_, nullptr);
-    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
-    bool res = renderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
-    if (!res || !currentBitmap.IsValid()) {
+    if (!DrawBitmap(renderContext, currentBitmap)) {
         return nullptr;
     }
 
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    RSBitmap tempCache;
+    tempCache.Build(dirtyWidth, dirtyHeight, format);
     int32_t size = dirtyWidth * dirtyHeight;
+
     RSCanvas tempCanvas;
     tempCanvas.Bind(tempCache);
     auto srcRect =
@@ -528,26 +525,27 @@ void CanvasPaintMethod::GetImageData(
         drawCmdList->Playback(canvas, &rect);
     }
 #else
-    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
-    RSBitmap tempCache;
-    tempCache.Build(dirtyWidth * viewScale, dirtyHeight * viewScale, format);
-
-    RSBitmap currentBitmap;
     CHECK_NULL_VOID(rsRecordingCanvas_);
     auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
-    bool res = rosenRenderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
-    if (!res || !currentBitmap.IsValid()) {
-        return;
+    auto rect = RSRect(scaledLeft, scaledTop,
+        dirtyWidth * viewScale + scaledLeft, dirtyHeight * viewScale + scaledTop);
+    auto pixelMap = imageData->pixelMap;
+    CHECK_NULL_VOID(pixelMap);
+    auto sharedPixelMap = pixelMap->GetPixelMapSharedPtr();
+    auto ret = rosenRenderContext->GetPixelMap(sharedPixelMap, drawCmdList, &rect);
+    if (!ret) {
+        if (!drawCmdList || drawCmdList->IsEmpty()) {
+            return;
+        }
+        RSBitmap bitmap;
+        RSImageInfo info = RSImageInfo(rect.GetWidth(), rect.GetHeight(),
+            RSColorType::COLORTYPE_BRGBA_8888, RSAlphaType::ALPHATYPE_PREMUL);
+        bitmap.InstallPixels(info, pixelMap->GetWritablePixels(), pixelMap->GetRowBytes());
+        RSCanvas canvas;
+        canvas.Bind(bitmap);
+        canvas.Translate(-rect.GetLeft(), -rect.GetTop());
+        drawCmdList->Playback(canvas, &rect);
     }
-
-    RSCanvas tempCanvas;
-    tempCanvas.Bind(tempCache);
-    auto srcRect =
-        RSRect(scaledLeft, scaledTop, dirtyWidth * viewScale + scaledLeft, dirtyHeight * viewScale + scaledTop);
-    auto dstRect = RSRect(0.0, 0.0, dirtyWidth, dirtyHeight);
-    RSImage rsImage;
-    rsImage.BuildFromBitmap(currentBitmap);
-    tempCanvas.DrawImageRect(rsImage, srcRect, dstRect, RSSamplingOptions());
 #endif
 }
 
@@ -1121,12 +1119,12 @@ std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContex
     double width = lastLayoutSize_.Width();
     double height = lastLayoutSize_.Height();
 
+#ifndef USE_ROSEN_DRAWING
     auto imageInfo = SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType);
     SkBitmap tempCache;
     tempCache.allocPixels(imageInfo);
 
-#ifndef USE_ROSEN_DRAWING
     SkBitmap currentBitmap;
     if (!DrawBitmap(renderContext, currentBitmap)) {
         return UNSUPPORTED;
@@ -1199,6 +1197,30 @@ bool CanvasPaintMethod::DrawBitmap(RefPtr<RosenRenderContext> renderContext, SkB
     // tryAllocPixels is more safe than allocPixels
     currentBitmap.allocPixels(imageInfo);
     SkCanvas currentCanvas(currentBitmap);
+    drawCmdList->Playback(currentCanvas);
+    return true;
+}
+#else
+bool CanvasPaintMethod::DrawBitmap(RefPtr<RosenRenderContext> renderContext, RSBitmap& currentBitmap)
+{
+    CHECK_NULL_RETURN(rsRecordingCanvas_, false);
+    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
+    bool res = renderContext->GetBitmap(currentBitmap, drawCmdList);
+    if (res) {
+        return true;
+    }
+    if (!drawCmdList) {
+        return false;
+    }
+    if (drawCmdList->IsEmpty()) {
+        return false;
+    }
+    currentBitmap.Free();
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    currentBitmap.Build(lastLayoutSize_.Width(), lastLayoutSize_.Height(), format);
+
+    RSCanvas currentCanvas;
+    currentCanvas.Bind(currentBitmap);
     drawCmdList->Playback(currentCanvas);
     return true;
 }

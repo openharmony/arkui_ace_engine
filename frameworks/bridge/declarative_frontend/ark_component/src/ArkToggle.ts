@@ -1,4 +1,5 @@
-//@ts-nocheck
+
+/// <reference path="./import.ts" />
 class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     onChange(callback: (isOn: boolean) => void): ToggleAttribute {
         throw new Error("Method not implemented.");
@@ -10,10 +11,10 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
         throw new Error("Method not implemented.");
     }
 }
-
+// @ts-ignore
 globalThis.Toggle.attributeModifier = function(modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
     var component = this.createOrGetNode(elmtId, () =>
     {
         return new ArkToggleComponent(nativeNode);

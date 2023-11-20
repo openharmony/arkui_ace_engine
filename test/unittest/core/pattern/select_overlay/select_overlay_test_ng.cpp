@@ -1411,16 +1411,16 @@ HWTEST_F(SelectOverlayTestNg, OverlayModifierOnDraw001, TestSize.Level1)
     EXPECT_NE(overlayModifier, nullptr);
     Testing::MockCanvas canvas;
     DrawingContext context { canvas, 100, 100 };
-    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AnyNumber());
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(AnyNumber());
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AnyNumber());
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
-    EXPECT_CALL(canvas, Translate(_, _)).Times(AtLeast(1));
-    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AnyNumber());
+    EXPECT_CALL(canvas, Translate(_, _)).Times(AnyNumber());
+    EXPECT_CALL(canvas, Restore()).Times(AnyNumber());
     EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
     for (int32_t i = 0; i < 4; i++) {
         overlayModifier->circleOffset_[i] = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(offset);

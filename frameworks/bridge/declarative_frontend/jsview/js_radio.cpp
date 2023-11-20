@@ -87,6 +87,7 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("padding", &JSRadio::JsPadding);
     JSClass<JSRadio>::StaticMethod("radioStyle", &JSRadio::JsRadioStyle);
     JSClass<JSRadio>::StaticMethod("responseRegion", &JSRadio::JsResponseRegion);
+    JSClass<JSRadio>::StaticMethod("hoverEffect", &JSRadio::JsHoverEffect);
     JSClass<JSRadio>::StaticMethod("onChange", &JSRadio::OnChange);
     JSClass<JSRadio>::StaticMethod("onClick", &JSRadio::JsOnClick);
     JSClass<JSRadio>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -386,4 +387,10 @@ void JSRadio::JsOnClick(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
+void JSRadio::JsHoverEffect(const JSCallbackInfo& info)
+{
+    if (info[0]->IsNumber()) {
+        RadioModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
+    }
+}
 } // namespace OHOS::Ace::Framework

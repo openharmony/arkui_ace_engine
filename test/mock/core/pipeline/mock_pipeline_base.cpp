@@ -107,6 +107,8 @@ void PipelineContext::ContainerModalUnFocus() {}
 
 void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpdate) {}
 
+void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height) {}
+
 void PipelineContext::SetContainerWindow(bool isShow) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
@@ -482,6 +484,11 @@ void NG::PipelineContext::SetJSViewActive(bool active, WeakPtr<NG::CustomNode> c
 RefPtr<NG::FrameNode> NG::PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<NG::UINode>& node)
 {
     return nullptr;
+}
+
+bool NG::PipelineContext::SetIsFocusActive(bool isFocusActive)
+{
+    return false;
 }
 
 void HandleSubwindow(bool isShow) {}

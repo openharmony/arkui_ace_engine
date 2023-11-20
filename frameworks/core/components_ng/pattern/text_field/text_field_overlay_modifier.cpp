@@ -27,12 +27,11 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float MAGNIFIER_GAIN = 1.25f;
 constexpr Dimension MAGNIFIER_WIDTH = 140.0_vp;
-constexpr Dimension MAGNIFIER_HEIGHT = 50.0_vp;
-constexpr Dimension MAGNIFIER_OFFSET_Y = 10.0_vp;
-constexpr Dimension PIXEL_MAP_IMAGE_OFFSET = 5.0_vp;
+constexpr Dimension MAGNIFIER_HEIGHT = 48.0_vp;
+constexpr Dimension MAGNIFIER_OFFSET_Y = 4.0_vp;
+constexpr Dimension PIXEL_MAP_IMAGE_OFFSET = 4.0_vp;
 constexpr Dimension CLOSE_MAGNIFIER_MAX_OFFSET_X = 70.0_vp;
 constexpr Dimension MAGNIFIER_BOUNDRY_WIDTH = 1.0_vp;
-constexpr uint32_t MAGNIFIER_COLOR_BG = 0xffffffff;
 } // namespace
 
 TextFieldOverlayModifier::TextFieldOverlayModifier(
@@ -251,19 +250,20 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
     float endX = 0.0f;
     float endY = 0.0f;
     float localOffsetX = 0.0f;
-    if (!GetMagnifierRect(startX, startY, endX, endY, localOffsetX)) {
+    auto cursorOffsetY = cursorOffset_->Get().GetY();
+    if (!GetMagnifierRect(startX, startY, endX, endY, localOffsetX, cursorOffsetY)) {
         return;
     }
 
-    Color color(MAGNIFIER_COLOR_BG);
     RSBrush brush;
-    brush.SetColor(ToRSColor(color));
+    brush.SetColor(RSColor::COLOR_WHITE);
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
 
-    std::vector<TextPoint> drawPathPoints = GetTextPoints(startX, startY, endX, endY, true);
+    std::vector<TextPoint> drawPathPoints = GetTextPoints(startX, startY, endX, endY, false);
     auto drawPath = GetPathByPoints(drawPathPoints);
     canvas.DrawPath(*drawPath);
+    PaintShadow(*drawPath, ShadowConfig::DefaultShadowM, canvas);
     std::vector<TextPoint> clipPathPoints = GetTextPoints(startX, startY, endX, endY, false);
     auto clipPath = GetPathByPoints(clipPathPoints);
     canvas.ClipPath(*clipPath, RSClipOp::INTERSECT, true);
@@ -280,8 +280,8 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
 
     RectF dstRect;
     dstRect.SetRect(localOffsetX - localOffsetX * magnifierGain,
-        startY - cursorOffset_->Get().GetY() * magnifierGain + pixelMapImageOffset,
-        pixelMap->GetWidth() * magnifierGain, pixelMap->GetHeight() * magnifierGain);
+        startY - cursorOffsetY * magnifierGain + pixelMapImageOffset, pixelMap->GetWidth() * magnifierGain,
+        pixelMap->GetHeight() * magnifierGain);
     pixelMapImage.DrawRect(canvas, ToRSRect(dstRect));
 
     canvas.DetachBrush();
@@ -289,7 +289,7 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
 }
 
 bool TextFieldOverlayModifier::GetMagnifierRect(
-    float& startX, float& startY, float& endX, float& endY, float& localOffsetX)
+    float& startX, float& startY, float& endX, float& endY, float& localOffsetX, float& cursorOffsetY)
 {
     auto pattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_RETURN(pattern, false);
@@ -299,6 +299,7 @@ bool TextFieldOverlayModifier::GetMagnifierRect(
     auto magnifierOffsetY = MAGNIFIER_OFFSET_Y.ConvertToPx();
     auto closeMagnifierMaxOffsetX = CLOSE_MAGNIFIER_MAX_OFFSET_X.ConvertToPx();
     localOffsetX = pattern->GetLocalOffset().GetX();
+    auto localOffsetY = pattern->GetLocalOffset().GetY();
     localOffsetX = std::max(localOffsetX, contentOffset_->Get().GetX());
     localOffsetX = std::min(localOffsetX, contentSize_->Get().Width() + contentOffset_->Get().GetX());
     auto textBoxesLeft = 0.0f;
@@ -314,9 +315,20 @@ bool TextFieldOverlayModifier::GetMagnifierRect(
         startX = cursorOffsetX - magnifierWidth / 2.0f;
         localOffsetX = cursorOffsetX;
     }
-    startY = cursorOffset_->Get().GetY() - magnifierHeight - magnifierOffsetY;
+    auto firstHandleOffsetY = pattern->GetTextSelectController()->GetFirstHandleOffset().GetY();
+    auto secondHandleOffsetY = pattern->GetTextSelectController()->GetSecondHandleOffset().GetY();
+    if (pattern->IsSelected() && firstHandleOffsetY != secondHandleOffsetY &&
+        localOffsetY < firstHandleOffsetY + pattern->GetLineHeight() &&
+        localOffsetY < secondHandleOffsetY + pattern->GetLineHeight()) {
+        if (firstHandleOffsetY < secondHandleOffsetY) {
+            cursorOffsetY = firstHandleOffsetY;
+        } else if (secondHandleOffsetY < firstHandleOffsetY) {
+            cursorOffsetY = secondHandleOffsetY;
+        }
+    }
+    startY = cursorOffsetY - magnifierHeight - magnifierOffsetY;
     if (startY < 0 && (pattern->GetParentGlobalOffset().GetY() + startY) < 0) {
-        startY = cursorOffset_->Get().GetY() + pattern->GetLineHeight() + magnifierHeight + magnifierOffsetY;
+        startY = cursorOffsetY + pattern->GetLineHeight() + magnifierHeight + magnifierOffsetY;
     }
     startX = std::max(startX, 0.0f);
     endX = startX + magnifierWidth;
@@ -381,6 +393,33 @@ std::shared_ptr<RSPath> TextFieldOverlayModifier::GetPathByPoints(std::vector<Te
     }
     return path;
 }
+void TextFieldOverlayModifier::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas)
+{
+    canvas.Save();
+#ifndef USE_ROSEN_DRAWING
+    RSPath rsPath = path;
+#else
+    RSRecordingPath rsPath;
+    rsPath.AddPath(path);
+#endif
+    rsPath.Offset(shadow.GetOffset().GetX(), shadow.GetOffset().GetY());
+    RSColor spotColor = ToRSColor(shadow.GetColor());
+    RSPoint3 planeParams = { 0.0f, 0.0f, shadow.GetElevation() };
+#ifndef USE_ROSEN_DRAWING
+    RSPoint3 lightPos = { rsPath.GetBounds().GetLeft() / 2 + rsPath.GetBounds().GetRight(),
+        rsPath.GetBounds().GetTop() / 2.0 + rsPath.GetBounds().GetBottom() / 2.0, shadow.GetLightHeight() };
+#else
+    auto tmpPath = rsPath.GetCmdList()->Playback();
+    auto bounds = tmpPath->GetBounds();
+    RSPoint3 lightPos = { bounds.GetLeft() / 2.0 + bounds.GetRight() / 2.0,
+        bounds.GetTop() / 2.0 + bounds.GetBottom() / 2.0, shadow.GetLightHeight() };
+#endif
+    RSColor ambientColor = RSColor(0, 0, 0, 0);
+    canvas.DrawShadow(rsPath, planeParams, lightPos, shadow.GetLightRadius(), ambientColor, spotColor,
+        RSShadowFlags::TRANSPARENT_OCCLUDER);
+    canvas.Restore();
+}
+
 void TextFieldOverlayModifier::SetCursorColor(Color& value)
 {
     cursorColor_->Set(LinearColor(value));

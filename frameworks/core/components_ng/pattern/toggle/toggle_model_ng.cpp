@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,6 +78,7 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
             auto index = RemoveNode(childFrameNode, nodeId);
             childFrameNode->SetUndefinedNodeId();
             CreateSwitch(nodeId);
+            SetSwitchSelected(childFrameNode, isOn);
             ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
             AddNewChild(parentFrame, nodeId, index);
             return;
@@ -93,6 +94,7 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
     }
     if (AceType::InstanceOf<SwitchPattern>(pattern)) {
         if (toggleType == ToggleType::SWITCH) {
+            SetSwitchSelected(childFrameNode, isOn);
             stack->Push(childFrameNode);
             ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
             return;
@@ -139,9 +141,20 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
         auto index = RemoveNode(childFrameNode, nodeId);
         childFrameNode->SetUndefinedNodeId();
         CreateSwitch(nodeId);
+        SetSwitchSelected(childFrameNode, isOn);
         ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
         AddNewChild(parentFrame, nodeId, index);
     }
+}
+
+void ToggleModelNG::SetSwitchSelected(const RefPtr<FrameNode>& childFrameNode, bool isOn)
+{
+    auto childPattern = childFrameNode->GetPattern<SwitchPattern>();
+    CHECK_NULL_VOID(childPattern);
+    childPattern->SetSelect(isOn);
+    auto eventHub = childFrameNode->GetEventHub<SwitchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
 }
 
 void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)

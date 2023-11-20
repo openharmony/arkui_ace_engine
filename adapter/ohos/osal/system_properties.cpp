@@ -73,8 +73,7 @@ bool IsDownloadByNetworkDisabled()
 
 bool IsTraceEnabled()
 {
-    return (system::GetParameter("persist.ace.trace.enabled", "0") == "1" ||
-            system::GetParameter("debug.ace.trace.enabled", "0") == "1");
+    return (system::GetParameter("persist.ace.trace.enabled", "1") == "1");
 }
 
 bool IsSvgTraceEnabled()
@@ -205,6 +204,11 @@ bool IsExtSurfaceEnabled()
     return false;
 #endif
 }
+
+bool IsTitleStyleEnabled()
+{
+    return system::GetBoolParameter("persist.ace.title.style.enabled", false);
+}
 } // namespace
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
@@ -245,6 +249,7 @@ int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 bool SystemProperties::resourceDecoupling_ = GetResourceDecoupling();
+bool SystemProperties::changeTitleStyleEnabled_ = IsTitleStyleEnabled();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {

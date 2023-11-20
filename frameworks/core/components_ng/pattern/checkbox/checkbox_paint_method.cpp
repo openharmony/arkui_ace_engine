@@ -97,8 +97,8 @@ void CheckBoxModifier::InitializeParam()
     clickEffectColor_ = checkBoxTheme->GetClickEffectColor();
     hoverColor_ = checkBoxTheme->GetHoverColor();
     hoverRadius_ = checkBoxTheme->GetHoverRadius();
-    hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
-    hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
+    hotZoneHorizontalPadding_ = checkBoxTheme->GetCheckboxHotZonePadding();
+    hotZoneVerticalPadding_ = hotZoneHorizontalPadding_;
     shadowWidth_ = checkBoxTheme->GetShadowWidth();
     userActiveColor_ = activeColor_;
     hoverDuration_ = checkBoxTheme->GetHoverDuration();

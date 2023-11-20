@@ -123,6 +123,15 @@ public:
         }
     }
 
+    void SetChildrenTargetComponent(const RefPtr<TargetComponent>& targetComponent)
+    {
+        for (const auto& child : recognizers_) {
+            if (child) {
+                child->SetTargetComponent(targetComponent);
+            }
+        }
+    }
+
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override;
     void OnFinishGestureReferee(int32_t touchId, bool isBlocked = false) override;

@@ -36,7 +36,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 const Dimension MARGIN_TEXT_LEFT = 24.0_vp;
-const Dimension MARGIN_TEXT_RIGHT = 0.1_pct;
+const Dimension MARGIN_TEXT_RIGHT = 84.0_vp;
 const Dimension MARGIN_BUTTON = 12.0_vp;
 const Dimension MARGIN_BACK_BUTTON_RIGHT = -20.0_vp;
 
@@ -212,10 +212,6 @@ RefPtr<FrameNode> AppBarView::BuildIconButton(
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    if (!isBackButton) {
-        Dimension PositionY = (appBarTheme->GetAppBarHeight() / 2.0f) - appBarTheme->GetIconSize();
-        renderContext->UpdatePosition(OffsetT(0.9_pct, PositionY));
-    }
 
     auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
     CHECK_NULL_RETURN(buttonPattern, nullptr);
@@ -375,6 +371,22 @@ void AppBarView::SetIconColor(const std::optional<Color>& color)
     auto faIcon = AceType::DynamicCast<FrameNode>(uiFaIcon);
     SetEachIconColor(backIcon, color, InternalResource::ResourceId::APP_BAR_BACK_SVG);
     SetEachIconColor(faIcon, color, InternalResource::ResourceId::APP_BAR_FA_SVG);
+}
+
+void AppBarView::SetRowWidth(const Dimension& width)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
+    Dimension offset = appBarTheme->GetIconSize() * 3;
+    Dimension positionX = width - offset;
+    Dimension positionY = (appBarTheme->GetAppBarHeight() / 2.0f) - appBarTheme->GetIconSize();
+    auto uiFaButton = atom_->GetLastChild();
+    CHECK_NULL_VOID(uiFaButton);
+    auto faButton = AceType::DynamicCast<FrameNode>(uiFaButton);
+    auto renderContext = faButton->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdatePosition(OffsetT(positionX, positionY));
 }
 
 void AppBarView::SetEachIconColor(

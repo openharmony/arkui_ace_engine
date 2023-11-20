@@ -500,9 +500,10 @@ void MenuView::UpdateMenuPaintProperty(
     paintProperty->UpdateArrowOffset(menuParam.arrowOffset.value_or(Dimension(0)));
 }
 
-RefPtr<FrameNode> MenuView::Create(const std::vector<SelectParam>& params, int32_t targetId)
+RefPtr<FrameNode> MenuView::Create(
+    const std::vector<SelectParam>& params, int32_t targetId, const std::string& targetTag)
 {
-    auto [wrapperNode, menuNode] = CreateMenu(targetId);
+    auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag);
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto menuPattern = menuNode->GetPattern<MenuPattern>();

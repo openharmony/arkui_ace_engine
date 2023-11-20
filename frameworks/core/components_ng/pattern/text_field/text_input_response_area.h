@@ -94,12 +94,13 @@ public:
 
     const RefPtr<FrameNode> GetFrameNode() override;
 
+    void OnPasswordIconClicked();
+
 private:
     void LoadImageSourceInfo();
     ImageSourceInfo GetDefaultSourceInfo(bool isObscured);
     void UpdateImageSource();
     bool IsShowPasswordIcon();
-    void OnPasswordIconClicked();
     float GetIconRightOffset();
     float GetIconSize();
     RefPtr<FrameNode> CreateNode();
@@ -167,6 +168,10 @@ public:
 
     void UpdateCleanNode(bool isShow);
 
+    bool IsShow() const
+    {
+        return isShow_;
+    }
 private:
     void InitClickEvent(const RefPtr<FrameNode>& frameNode);
     void OnCleanNodeClicked();
@@ -175,6 +180,7 @@ private:
     CalcDimension iconSize_ = 0.0_px;
     std::string iconSrc_;
     Color iconColor_;
+    bool isShow_ = false;
 };
 } // namespace OHOS::Ace::NG
 

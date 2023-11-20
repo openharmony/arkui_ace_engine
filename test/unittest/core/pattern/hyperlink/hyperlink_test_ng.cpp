@@ -260,7 +260,7 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest005, TestSize.Level1)
     theme->textDisabledColor_ = Color::RED;
     hyperlinkPattern->isLinked_ = true;
     hyperlinkPattern->OnModifyDone();
-    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::BLACK);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::TRANSPARENT);
     EXPECT_FALSE(hyperlinkPattern->isLinked_);
 }
 

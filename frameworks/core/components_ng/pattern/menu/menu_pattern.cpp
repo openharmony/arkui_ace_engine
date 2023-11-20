@@ -156,6 +156,19 @@ void MenuPattern::OnAttachToFrameNode()
     RegisterOnKeyEvent(focusHub);
     DisableTabInMenu();
     InitTheme(host);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    pipelineContext->AddOnAreaChangeNode(targetNode->GetId());
+    OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
+                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
+                                              const OffsetF& /* origin */) {
+        auto menuNode = menuNodeWk.Upgrade();
+        CHECK_NULL_VOID(menuNode);
+        menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    targetNode->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
 }
 
 void MenuPattern::OnModifyDone()
@@ -171,6 +184,9 @@ void MenuPattern::OnModifyDone()
     } else if (innerMenuCount > 1) {
         // multiple inner menus, reset outer container's shadow for desktop UX
         ResetTheme(host, true);
+    }
+    if (IsSelectOverlayCustomMenu()) {
+        ResetScrollTheme(host);
     }
     auto menuFirstNode = GetFirstInnerMenu();
     if (menuFirstNode) {
@@ -582,6 +598,15 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
     scrollProp->UpdatePadding(PaddingProperty());
 }
 
+void MenuPattern::ResetScrollTheme(const RefPtr<FrameNode>& host)
+{
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(scroll);
+    scroll->GetRenderContext()->UpdateClipEdge(false);
+}
+
 void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
 {
     auto renderContext = host->GetRenderContext();
@@ -743,7 +768,7 @@ void MenuPattern::ShowPreviewMenuAnimation()
                 renderContext->UpdatePosition(
                     OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
             }
-            
+
             if (previewRenderContext) {
                 previewRenderContext->UpdatePosition(
                     OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));

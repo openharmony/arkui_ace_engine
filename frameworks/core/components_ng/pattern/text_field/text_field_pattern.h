@@ -75,6 +75,9 @@ struct TextConfig;
 #endif
 
 namespace OHOS::Ace::NG {
+
+enum class FocuseIndex { TEXT = 0, CANCEL, UNIT };
+
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
 enum class DragStatus { DRAGGING, ON_DROP, NONE };
@@ -945,6 +948,12 @@ public:
         return showSelect_;
     }
 
+    bool UpdateFocusForward();
+
+    bool UpdateFocusBackward();
+
+    bool HandleSpaceEvent();
+
     RefPtr<PixelMap> GetPixelMap();
 
     void UpdateShowMagnifier(bool isShowMagnifier = false)
@@ -1016,6 +1025,7 @@ private:
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
+    void ChangeMouseState(const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId);
     void HandleMouseEvent(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);
     void HandleRightMouseEvent(MouseInfo& info);
@@ -1103,6 +1113,20 @@ private:
     void UpdateHandlesOffsetOnScroll(float offset);
     void CloseHandleAndSelect() override;
     bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex);
+    void PaintTextRect();
+    void PaintResponseAreaRect();
+    void PaintCancelRect();
+    void PaintUnitRect();
+    void PaintPasswordRect();
+    bool CancelNodeIsShow()
+    {
+        auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+        CHECK_NULL_RETURN(cleanNodeArea, false);
+        return cleanNodeArea->IsShow();
+    }
+    void CleanNodeResponseKeyEvent();
+    void PasswordResponseKeyEvent();
+    void UnitResponseKeyEvent();
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif
@@ -1264,6 +1288,7 @@ private:
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
     CleanNodeStyle cleanNodeStyle_ = CleanNodeStyle::INVISIBLE;
+    FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
     bool isTouchCaret_ = false;

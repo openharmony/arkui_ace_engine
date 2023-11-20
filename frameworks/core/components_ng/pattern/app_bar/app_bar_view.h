@@ -54,6 +54,7 @@ public:
     void SetFontStyle(Ace::FontStyle fontStyle);
     void SetIconColor(const std::optional<Color>& color);
     void iniBehavior();
+    void SetRowWidth(const Dimension& positionX);
 
 private:
     static RefPtr<FrameNode> BuildBarTitle();

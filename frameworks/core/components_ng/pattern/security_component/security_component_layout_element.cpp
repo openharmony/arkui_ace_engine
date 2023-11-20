@@ -27,7 +27,6 @@
 #endif
 
 namespace OHOS::Ace::NG {
-static constexpr double MAX_FONT_SIZE = 100.0;
 void IconLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
     RefPtr<LayoutWrapper>& iconWrap)
 {
@@ -118,7 +117,8 @@ void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
     if (property->GetFontSize().has_value()) {
         isSetSize_ = true;
     } else {
-        textProp->UpdateFontSize(theme->GetFontSize());
+        defaultFontSize_ = theme->GetFontSize();
+        textProp->UpdateFontSize(defaultFontSize_);
     }
 
     auto textConstraint = property->CreateChildConstraint();
@@ -130,25 +130,50 @@ void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
     height_ = textSizeF.Height();
 }
 
+void TextLayoutElement::ChooseExactFontSize(RefPtr<TextLayoutProperty>& property, bool isWidth)
+{
+    if (!minTextSize_.has_value()) {
+        property->UpdateFontSize(minFontSize_);
+        return;
+    }
+    constexpr Dimension ADAPT_UNIT = 1.0_fp;
+    Dimension step = ADAPT_UNIT;
+    Dimension fontSize = (property->GetFontSize().has_value()) ? property->GetFontSize().value() : defaultFontSize_;
+    while (fontSize > minFontSize_) {
+        auto tempSize = GetMeasureTextSize(property->GetContent().value_or(""),
+            fontSize,
+            property->GetFontWeight().value_or(FontWeight::NORMAL));
+        if (!tempSize.has_value()) {
+            fontSize = minFontSize_;
+            break;
+        }
+        if (isWidth) {
+            if (GreatOrEqual(width_, tempSize.value().Width())) {
+                break;
+            }
+        } else {
+            if (GreatOrEqual(height_, tempSize.value().Height())) {
+                break;
+            }
+        }
+        fontSize -= step;
+    }
+    property->UpdateFontSize(fontSize);
+}
+
 void TextLayoutElement::UpdateSize(bool isWidth)
 {
     auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
     CHECK_NULL_VOID(textProp);
-    textProp->ResetFontSize();
-    textProp->UpdateAdaptMinFontSize(minFontSize_);
-    textProp->UpdateAdaptMaxFontSize(Dimension(MAX_FONT_SIZE));
-
+    ChooseExactFontSize(textProp, isWidth);
     auto textConstraint = textProp->GetContentLayoutConstraint();
     CHECK_NULL_VOID(textConstraint);
-    std::optional<float> width = std::nullopt;
-    std::optional<float> height = std::nullopt;
     if (isWidth) {
-        width = width_;
+        textConstraint->selfIdealSize.SetWidth(width_);
     } else {
-        height = height_;
+        textConstraint->selfIdealSize.SetHeight(height_);
     }
 
-    textConstraint->UpdateSelfMarginSizeWithCheck(OptionalSize<float>(width, height));
     textWrap_->Measure(textConstraint);
     auto textSizeF = textWrap_->GetGeometryNode()->GetFrameSize();
     width_ = textSizeF.Width();
@@ -176,7 +201,7 @@ void TextLayoutElement::MeasureMinTextSize()
     auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
     CHECK_NULL_VOID(textProp);
     minTextSize_ = GetMeasureTextSize(textProp->GetContent().value_or(""),
-        textProp->GetFontSize().value_or(Dimension(0.0)),
+        minFontSize_,
         textProp->GetFontWeight().value_or(FontWeight::NORMAL));
 }
 

@@ -17,9 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ROSEN_ROSEN_CONVERT_HELPER_H
 
 #include "core/common/rosen/rosen_enums.h"
+#include "core/components/common/properties/blur_parameter.h"
 #include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace {
 MATERIAL_BLUR_STYLE GetRosenBlurStyleValue(const BlurStyleOption& option);
+std::optional<BlurParameter> GetBlurParameter(BlurStyle style, ThemeColorMode colorMode);
 } // namespace OHOS::Ace
 #endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ROSEN_ROSEN_CONVERT_HELPER_H

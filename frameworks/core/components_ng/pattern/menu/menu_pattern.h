@@ -282,6 +282,7 @@ private:
     // If CustomBuilder is declared with <Menu> and <MenuItem>,
     // reset outer menu container and only apply theme on the inner <Menu> node.
     void ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu);
+    void ResetScrollTheme(const RefPtr<FrameNode>& host);
     void CopyMenuAttr(const RefPtr<FrameNode>& menuNode) const;
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);

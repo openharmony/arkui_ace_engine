@@ -214,6 +214,8 @@ public:
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
     virtual void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) {}
+    virtual void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) {}
+    virtual void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) {}
     virtual void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void ResetBackBlurStyle() {}
@@ -414,7 +416,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontContrast, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontSaturate, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontSepia, Dimension);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, InvertVariant);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, LinearGradientBlur, NG::LinearGradientBlurPara);
@@ -471,6 +473,9 @@ public:
 
     // useEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
+
+    // useShadowBatching
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseShadowBatching, bool);
 
     // freeze
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Freeze, bool);
@@ -544,7 +549,7 @@ protected:
     virtual void OnFrontContrastUpdate(const Dimension& value) {}
     virtual void OnFrontSaturateUpdate(const Dimension& value) {}
     virtual void OnFrontSepiaUpdate(const Dimension& value) {}
-    virtual void OnFrontInvertUpdate(const Dimension& value) {}
+    virtual void OnFrontInvertUpdate(const InvertVariant& value) {}
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
     virtual void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) {}
@@ -556,6 +561,7 @@ protected:
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
     virtual void OnUseEffectUpdate(bool useEffect) {}
+    virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
 

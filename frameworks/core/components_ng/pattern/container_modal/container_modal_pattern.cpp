@@ -118,6 +118,10 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
 
 void ContainerModalPattern::InitContainerEvent()
 {
+    bool isChangeTitleStyle = SystemProperties::GetTitleStyleEnabled();
+    if (isChangeTitleStyle) {
+        return;
+    }
     auto containerNode = GetHost();
     CHECK_NULL_VOID(containerNode);
     auto touchEventHub = containerNode->GetOrCreateGestureEventHub();

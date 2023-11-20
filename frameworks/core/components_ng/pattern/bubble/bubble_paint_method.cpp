@@ -112,8 +112,8 @@ void BubblePaintMethod::PaintBorder(RSCanvas& canvas, PaintWrapper* paintWrapper
         const float intervals[] = { borderWidth, borderWidth };
         paint.SetPathEffect(RSPathEffect::CreateDashPathEffect(intervals, 2, 0.0));
 #else
-        const std::vector<RSScalar> intervals = { borderWidth, borderWidth };
-        paint.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, 0.0));
+        const RSScalar intervals[] = { borderWidth, borderWidth };
+        paint.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, 2, 0.0));
 #endif
         canvas.AttachPen(paint);
         canvas.DrawPath(path_);

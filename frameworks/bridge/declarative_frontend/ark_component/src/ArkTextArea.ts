@@ -1,5 +1,9 @@
-//@ts-nocheck
+
+/// <reference path="./import.ts" />
 class ArkTextAreaComponent extends ArkComponent implements TextAreaAttribute {
+    type(value: TextAreaType): TextAreaAttribute{
+        throw new Error("Method not implemented.");
+    }
     placeholderColor(value: ResourceColor): TextAreaAttribute {
         throw new Error("Method not implemented.");
     }
@@ -79,10 +83,10 @@ class ArkTextAreaComponent extends ArkComponent implements TextAreaAttribute {
         throw new Error("Method not implemented.");
     }
 }
-
+// @ts-ignore
 globalThis.TextArea.attributeModifier = function(modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
     var component = this.createOrGetNode(elmtId, () =>
     {
         return new ArkTextAreaComponent(nativeNode);

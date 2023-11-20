@@ -232,12 +232,12 @@ void SvgGraphic::UpdateLineDash()
         SkScalar phase = SkDoubleToScalar(strokeState.GetLineDash().dashOffset);
         strokePaint_.setPathEffect(SkDashPathEffect::Make(intervals.data(), lineDashState.size(), phase));
 #else
-        std::vector<RSScalar> intervals(lineDashState.size());
+        RSScalar intervals[lineDashState.size()];
         for (size_t i = 0; i < lineDashState.size(); ++i) {
             intervals[i] = static_cast<RSScalar>(lineDashState[i]);
         }
         RSScalar phase = static_cast<RSScalar>(strokeState.GetLineDash().dashOffset);
-        strokePen_.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, phase));
+        strokePen_.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, lineDashState.size(), phase));
 #endif
     }
 }

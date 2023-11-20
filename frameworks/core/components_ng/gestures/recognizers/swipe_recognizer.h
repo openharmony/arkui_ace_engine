@@ -68,6 +68,7 @@ private:
     void OnResetStatus() override;
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    GestureJudgeResult TriggerGestureJudgeCallback();
 
     bool CheckAngle(double angle);
 

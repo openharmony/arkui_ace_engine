@@ -33,6 +33,7 @@ public:
     void SetIndicatorColor(const Color& color) override;
     void SetOnChangeEvent(ChangeEvent&& onChangeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
+    void SetHoverEffect(HoverEffectType hoverEffect) override;
 };
 } // namespace OHOS::Ace::NG
 

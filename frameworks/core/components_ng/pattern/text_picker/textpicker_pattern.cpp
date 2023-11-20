@@ -221,9 +221,9 @@ void TextPickerPattern::OnColumnsBuildingCascade()
         CHECK_NULL_VOID(frameNodes[index]);
         auto textPickerColumnPattern = frameNodes[index]->GetPattern<TextPickerColumnPattern>();
         CHECK_NULL_VOID(textPickerColumnPattern);
-        if (cascadeOptions_.size() > 0) {
-            selectedIndex_ = cascadeOptions_[index].rangeResult.empty() ? 0 :
-                selecteds_[index] % cascadeOptions_[index].rangeResult.size();
+        if (cascadeOptions_.size() > index) {
+            selectedIndex_ = selecteds_.size() <= index || cascadeOptions_[index].rangeResult.empty()
+                                 ? 0 : selecteds_[index] % cascadeOptions_[index].rangeResult.size();
             textPickerColumnPattern->SetCurrentIndex(selectedIndex_);
             std::vector<NG::RangeContent> rangeContents;
             for (uint32_t i = 0; i < cascadeOptions_[index].rangeResult.size(); i++) {
@@ -246,9 +246,9 @@ void TextPickerPattern::OnColumnsBuildingUnCascade()
         CHECK_NULL_VOID(it.second);
         auto textPickerColumnPattern = it.second->GetPattern<TextPickerColumnPattern>();
         CHECK_NULL_VOID(textPickerColumnPattern);
-        if (cascadeOptions_.size() > 0) {
-            selectedIndex_ = cascadeOptions_[it.first].rangeResult.empty() ? 0 :
-                selecteds_[it.first] % cascadeOptions_[it.first].rangeResult.size();
+        if (cascadeOptions_.size() > it.first) {
+            selectedIndex_ = selecteds_.size() <= it.first || cascadeOptions_[it.first].rangeResult.empty()
+                                 ? 0 : selecteds_[it.first] % cascadeOptions_[it.first].rangeResult.size();
             textPickerColumnPattern->SetCurrentIndex(selectedIndex_);
             std::vector<NG::RangeContent> rangeContents;
             for (uint32_t i = 0; i < cascadeOptions_[it.first].rangeResult.size(); i++) {
