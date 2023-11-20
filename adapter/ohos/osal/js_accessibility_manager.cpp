@@ -15,6 +15,8 @@
 
 #include "js_accessibility_manager.h"
 
+#include <algorithm>
+
 #include "accessibility_constants.h"
 #include "accessibility_event_info.h"
 #include "accessibility_system_ability_client.h"
@@ -450,12 +452,23 @@ void ConvertExtensionAccessibilityId(AccessibilityElementInfo& info, const RefPt
         info.AddChild(extensionNode->WrapExtensionAbilityId(uiExtensionOffset, child));
     }
     if (V2::ROOT_ETS_TAG == info.GetComponentType()) {
-        info.SetParent(extensionNode->GetAccessibilityId());
-        auto subOffset = uiExtensionOffset / NG::UI_EXTENSION_ID_FACTOR;
-        if ((info.GetAccessibilityId() / subOffset) ==
-            (extensionNode->GetUiExtensionId() * NG::UI_EXTENSION_ID_FACTOR)) {
-                parentInfo.AddChild(info.GetAccessibilityId());
+        for (auto& child : info.GetChildIds()) {
+            parentInfo.AddChild(child);
         }
+    }
+    auto subOffset = uiExtensionOffset / NG::UI_EXTENSION_ID_FACTOR;
+    if ((info.GetAccessibilityId() / subOffset) >
+        (extensionNode->GetUiExtensionId() * NG::UI_EXTENSION_ID_FACTOR)) {
+        Accessibility::Rect bounds {
+            info.GetRectInScreen().GetLeftTopXScreenPostion() +
+                parentInfo.GetRectInScreen().GetLeftTopXScreenPostion(),
+            info.GetRectInScreen().GetLeftTopYScreenPostion() +
+                parentInfo.GetRectInScreen().GetLeftTopYScreenPostion(),
+            info.GetRectInScreen().GetRightBottomXScreenPostion() +
+                parentInfo.GetRectInScreen().GetLeftTopXScreenPostion(),
+            info.GetRectInScreen().GetRightBottomYScreenPostion() +
+                parentInfo.GetRectInScreen().GetLeftTopYScreenPostion()};
+        info.SetRectInScreen(bounds);
     }
 }
 
@@ -466,6 +479,12 @@ void ConvertExtensionAccessibilityNodeId(std::list<AccessibilityElementInfo>& in
     CHECK_NULL_VOID(extensionNode);
     for (auto& accessibilityElementInfo : infos) {
         ConvertExtensionAccessibilityId(accessibilityElementInfo, extensionNode, uiExtensionOffset, parentInfo);
+    }
+    for (auto& accessibilityElementInfo : infos) {
+        if (std::find(parentInfo.GetChildIds().begin(), parentInfo.GetChildIds().end(),
+            accessibilityElementInfo.GetAccessibilityId()) != parentInfo.GetChildIds().end()) {
+            accessibilityElementInfo.SetParent(extensionNode->GetAccessibilityId());
+        }
     }
 }
 
@@ -949,8 +968,8 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
 }
 
 void UpdateAccessibilityElementInfo(
-    const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty, AccessibilityElementInfo& nodeInfo,
-    const RefPtr<NG::PipelineContext>& ngPipeline, const int32_t uiExtensionOffset = 0)
+    const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
+    AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline)
 {
     CHECK_NULL_VOID(node);
     nodeInfo.SetParent(GetParentId(node));
@@ -1040,8 +1059,8 @@ void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<
         }
         std::list<AccessibilityElementInfo> extensionElementInfos = SearchExtensionElementInfoByAccessibilityIdNG(
             -1, umode, parent, searchParam.uiExtensionOffset);
+        UpdateAccessibilityElementInfo(parent, commonProperty, nodeInfo, ngPipeline);
         ConvertExtensionAccessibilityNodeId(extensionElementInfos, parent, searchParam.uiExtensionOffset, nodeInfo);
-        UpdateAccessibilityElementInfo(parent, commonProperty, nodeInfo, ngPipeline, searchParam.uiExtensionOffset);
         for (auto& info : extensionElementInfos) {
             infos.push_back(info);
         }
@@ -1944,7 +1963,7 @@ void JsAccessibilityManager::DumpProperty(const std::vector<std::string>& params
 }
 
 static void DumpAccessibilityElementInfosTreeNG(
-    std::list<AccessibilityElementInfo>& infos, int32_t depth, int32_t accessibilityId)
+    std::list<AccessibilityElementInfo>& infos, int32_t depth, int32_t accessibilityId, bool isRoot)
 {
     AccessibilityElementInfo accessibilityInfo;
     for (auto& info : infos) {
@@ -1953,30 +1972,33 @@ static void DumpAccessibilityElementInfosTreeNG(
             break;
         }
     }
-    DumpLog::GetInstance().AddDesc("ID: " + std::to_string(accessibilityInfo.GetAccessibilityId()));
-    DumpLog::GetInstance().AddDesc("compid: " + accessibilityInfo.GetInspectorKey());
-    DumpLog::GetInstance().AddDesc("text: " + accessibilityInfo.GetContent());
-    DumpLog::GetInstance().AddDesc("accessibilityText: " + accessibilityInfo.GetContent());
-    DumpLog::GetInstance().AddDesc("accessibilityGroup: ");
-    DumpLog::GetInstance().AddDesc("accessibilityLevel: ");
-    DumpLog::GetInstance().AddDesc("top: " +
-        std::to_string(accessibilityInfo.GetRectInScreen().GetLeftTopYScreenPostion()));
-    DumpLog::GetInstance().AddDesc("left: " +
-        std::to_string(accessibilityInfo.GetRectInScreen().GetLeftTopXScreenPostion()));
-    DumpLog::GetInstance().AddDesc("width: " + std::to_string(
-        accessibilityInfo.GetRectInScreen().GetRightBottomXScreenPostion() -
-        accessibilityInfo.GetRectInScreen().GetLeftTopXScreenPostion()));
-    DumpLog::GetInstance().AddDesc("height: " + std::to_string(
-        accessibilityInfo.GetRectInScreen().GetRightBottomYScreenPostion() -
-        accessibilityInfo.GetRectInScreen().GetLeftTopYScreenPostion()));
-    DumpLog::GetInstance().AddDesc("visible: " + std::to_string(accessibilityInfo.IsVisible()));
-    DumpLog::GetInstance().AddDesc("checkable: " + std::to_string(accessibilityInfo.IsCheckable()));
-    DumpLog::GetInstance().AddDesc("scrollable: " + std::to_string(accessibilityInfo.IsScrollable()));
-    DumpLog::GetInstance().AddDesc("checked: " + std::to_string(accessibilityInfo.IsCheckable()));
-    DumpLog::GetInstance().AddDesc("hint: " + accessibilityInfo.GetHint());
-    DumpLog::GetInstance().Print(depth, accessibilityInfo.GetComponentType(), accessibilityInfo.GetChildCount());
+    if (!isRoot) {
+        DumpLog::GetInstance().AddDesc("ID: " + std::to_string(accessibilityInfo.GetAccessibilityId()));
+        DumpLog::GetInstance().AddDesc("compid: " + accessibilityInfo.GetInspectorKey());
+        DumpLog::GetInstance().AddDesc("text: " + accessibilityInfo.GetContent());
+        DumpLog::GetInstance().AddDesc("accessibilityText: " + accessibilityInfo.GetContent());
+        DumpLog::GetInstance().AddDesc("accessibilityGroup: ");
+        DumpLog::GetInstance().AddDesc("accessibilityLevel: ");
+        DumpLog::GetInstance().AddDesc("top: " +
+            std::to_string(accessibilityInfo.GetRectInScreen().GetLeftTopYScreenPostion()));
+        DumpLog::GetInstance().AddDesc("left: " +
+            std::to_string(accessibilityInfo.GetRectInScreen().GetLeftTopXScreenPostion()));
+        DumpLog::GetInstance().AddDesc("width: " + std::to_string(
+            accessibilityInfo.GetRectInScreen().GetRightBottomXScreenPostion() -
+            accessibilityInfo.GetRectInScreen().GetLeftTopXScreenPostion()));
+        DumpLog::GetInstance().AddDesc("height: " + std::to_string(
+            accessibilityInfo.GetRectInScreen().GetRightBottomYScreenPostion() -
+            accessibilityInfo.GetRectInScreen().GetLeftTopYScreenPostion()));
+        DumpLog::GetInstance().AddDesc("visible: " + std::to_string(accessibilityInfo.IsVisible()));
+        DumpLog::GetInstance().AddDesc("checkable: " + std::to_string(accessibilityInfo.IsCheckable()));
+        DumpLog::GetInstance().AddDesc("scrollable: " + std::to_string(accessibilityInfo.IsScrollable()));
+        DumpLog::GetInstance().AddDesc("checked: " + std::to_string(accessibilityInfo.IsCheckable()));
+        DumpLog::GetInstance().AddDesc("hint: " + accessibilityInfo.GetHint());
+        DumpLog::GetInstance().Print(depth, accessibilityInfo.GetComponentType(), accessibilityInfo.GetChildCount());
+        depth ++;
+    }
     for (auto child : accessibilityInfo.GetChildIds()) {
-        DumpAccessibilityElementInfosTreeNG(infos, depth + 1, child);
+        DumpAccessibilityElementInfosTreeNG(infos, depth, child, false);
     }
 }
 
@@ -2040,16 +2062,8 @@ void JsAccessibilityManager::DumpTreeNodeNG(const RefPtr<NG::FrameNode>& parent,
         SearchElementInfoByAccessibilityIdNG(
             node->GetAccessibilityId(), PREFETCH_RECURSIVE_CHILDREN, extensionElementInfos,
             pipeline, NG::UI_EXTENSION_OFFSET_MAX);
-        int32_t rootId = -1;
-        for (auto& info : extensionElementInfos) {
-            if ((V2::ROOT_ETS_TAG == info.GetComponentType()) &&
-                ((info.GetAccessibilityId() / NG::UI_EXTENSION_OFFSET_MAX) == (node->GetUiExtensionId()))) {
-                rootId = info.GetAccessibilityId();
-                break;
-            }
-        }
         if (!extensionElementInfos.empty()) {
-            DumpAccessibilityElementInfosTreeNG(extensionElementInfos, depth + 1, rootId);
+            DumpAccessibilityElementInfosTreeNG(extensionElementInfos, depth + 1, node->GetAccessibilityId(), true);
         }
     }
     for (auto childId : children) {
@@ -2330,6 +2344,9 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(const SearchParameter& s
     if (extensionElementInfos.empty()) {
         return;
     }
+    CommonProperty commonProperty;
+    GenerateCommonProperty(ngPipeline, commonProperty);
+    UpdateAccessibilityElementInfo(uiExtensionNode, commonProperty, nodeInfo, ngPipeline);
     ConvertExtensionAccessibilityNodeId(extensionElementInfos, uiExtensionNode,
         searchParam.uiExtensionOffset, nodeInfo);
     for (auto& info : extensionElementInfos) {
@@ -2386,27 +2403,24 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int32_t elementId, const
     std::list<RefPtr<NG::FrameNode>> frameNodesWithText;
     std::list<RefPtr<NG::FrameNode>> uiExtensionsNodes;
     FindText(node, text, frameNodesWithText, uiExtensionsNodes);
-    int32_t pageId = 0;
-    std::string pagePath;
-    if (context->GetWindowId() == mainContext->GetWindowId()) {
-        auto stageManager = ngPipeline->GetStageManager();
-        CHECK_NULL_VOID(stageManager);
-        auto page = stageManager->GetLastPage();
-        CHECK_NULL_VOID(page);
-        pageId = page->GetPageId();
-        pagePath = GetPagePath();
-    }
-    CommonProperty commonProperty { ngPipeline->GetFocusWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
-        GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
     for (const auto& node : uiExtensionsNodes) {
         auto infosByIPC = SearchElementInfosByTextNG(0, text, node, uiExtensionOffset / NG::UI_EXTENSION_ID_FACTOR);
         if (!infosByIPC.empty()) {
             AccessibilityElementInfo nodeInfo;
+            CommonProperty commonProperty;
+            GenerateCommonProperty(ngPipeline, commonProperty);
+            UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
             ConvertExtensionAccessibilityNodeId(infosByIPC, node, uiExtensionOffset, nodeInfo);
             for (auto& info : infosByIPC) {
                 infos.emplace_back(info);
             }
         }
+    }
+    CommonProperty commonProperty;
+    GenerateCommonProperty(ngPipeline, commonProperty);
+    if (context->GetWindowId() != mainContext->GetWindowId()) {
+        commonProperty.pageId = 0;
+        commonProperty.pagePath = "";
     }
     for (const auto& node : frameNodesWithText) {
         AccessibilityElementInfo nodeInfo;
