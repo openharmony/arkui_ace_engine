@@ -969,11 +969,6 @@ public:
         return localOffset_;
     }
 
-    int32_t GetCaretPosition()
-    {
-        return operationRecords_.back().caretPosition;
-    }
-
     int32_t GetContentWideTextLength()
     {
         return static_cast<int32_t>(contentController_->GetWideText().length());

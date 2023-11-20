@@ -2205,7 +2205,6 @@ void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
         auto proxy = GetSelectOverlayProxy();
         CHECK_NULL_VOID(proxy);
         auto position = UpdateCaretPositionOnHandleMove(localOffset);
-        operationRecords_.back().caretPosition = position;
         if (isFirstHandle) {
             selectController_->MoveFirstHandleToContentRect(position);
             SelectHandleInfo handleInfo = GetSelectHandleInfo(selectController_->GetSecondHandleOffset());
