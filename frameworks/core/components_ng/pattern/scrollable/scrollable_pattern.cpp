@@ -1426,8 +1426,9 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity)
         // trigger scroll animation if edge not reached
         if (scrollableEvent_ && scrollableEvent_->GetScrollable()) {
             scrollableEvent_->GetScrollable()->StartScrollAnimation(0.0f, velocity);
+            return true;
         }
-        return true;
+        return false;
     }
     return HandleOverScroll(velocity);
 }
