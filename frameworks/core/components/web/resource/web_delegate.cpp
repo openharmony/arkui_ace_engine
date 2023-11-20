@@ -96,7 +96,7 @@ const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1;
 
 #define VISIBLERATIO_LENGTH 4
-#define FLOATRATIO_TO_INT 100
+#define VISIBLERATIO_FLOAT_TO_INT 100
 
 static bool IsDeviceTabletOr2in1()
 {
@@ -2512,8 +2512,7 @@ void WebDelegate::SurfaceOcclusionCallback(float visibleRatio)
 
 void WebDelegate::ratioStrToFloat(const std::string& str)
 {
-    // LowerFrameRateConfig参数的格式限定为x.xx, 长度为4，
-    // 小数点在第二位，其余三位为数字，范围为0.00-1.00
+    // LowerFrameRateConfig format x.xx, len is 4, [0.00, 1.00]
     if (str.size() != VISIBLERATIO_LENGTH) {
         TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio lenth is over 4.");
         return;
@@ -2537,8 +2536,8 @@ void WebDelegate::ratioStrToFloat(const std::string& str)
         return;
     }
     float f = std::stof(str);
-    int i = f * FLOATRATIO_TO_INT;
-    if (i >= 0 && i <= 100) {
+    int i = f * VISIBLERATIO_FLOAT_TO_INT;
+    if (i >= 0 && i <= VISIBLERATIO_FLOAT_TO_INT) {
         TAG_LOGI(AceLogTag::ACE_WEB, "visibleRatio check success.");
         lowerFrameRateVisibleRatio_ = f;
     }
@@ -2559,7 +2558,7 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
     ratioStrToFloat(visibleAreaRatio);
     std::vector<float> partitionPoints;
     TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to lower frame rate:%{public}f", lowerFrameRateVisibleRatio_);
-    if ((int)(lowerFrameRateVisibleRatio_ * FLOATRATIO_TO_INT) == 0) {
+    if ((int)(lowerFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
         partitionPoints = {0};
     } else {
         partitionPoints = {0, lowerFrameRateVisibleRatio_};
