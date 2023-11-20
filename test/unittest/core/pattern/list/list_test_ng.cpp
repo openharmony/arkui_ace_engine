@@ -109,8 +109,8 @@ protected:
     void Create(const std::function<void(ListModelNG)>& callback = nullptr);
     void CreateWithItem(const std::function<void(ListModelNG)>& callback = nullptr);
     void CreateWithSwipe(bool isStartNode, V2::SwipeEdgeEffect swipeEdgeEffect, int32_t itemNumber = TOTAL_LINE_NUMBER);
-    void CreateWithSwipeAction(SwipeActionItem& item, bool useDefaultDeleteAnimation, bool isStartArea,
-        OnOffsetChangeFunc onOffsetChange, V2::SwipeEdgeEffect effect);
+    void CreateWithSwipeAction(
+        SwipeActionItem& item, bool isStartArea, OnOffsetChangeFunc onOffsetChange, V2::SwipeEdgeEffect effect);
 
     static void CreateItem(
         int32_t itemNumber, Axis axis = Axis::VERTICAL, V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
@@ -251,8 +251,8 @@ void ListTestNg::CreateWithSwipe(bool isStartNode, V2::SwipeEdgeEffect swipeEdge
     });
 }
 
-void ListTestNg::CreateWithSwipeAction(SwipeActionItem& item, bool useDefaultDeleteAnimation, bool isStartArea,
-    OnOffsetChangeFunc onOffsetChange, V2::SwipeEdgeEffect effect)
+void ListTestNg::CreateWithSwipeAction(
+    SwipeActionItem& item, bool isStartArea, OnOffsetChangeFunc onOffsetChange, V2::SwipeEdgeEffect effect)
 {
     ListModelNG model;
     model.Create();
@@ -261,9 +261,8 @@ void ListTestNg::CreateWithSwipeAction(SwipeActionItem& item, bool useDefaultDel
     SetHeight(Dimension(ITEM_HEIGHT));
     SetWidth(FILL_LENGTH);
     itemModel.SetSwiperAction(nullptr, nullptr, std::move(onOffsetChange), effect);
-    itemModel.SetDeleteArea(std::move(item.builderAction), useDefaultDeleteAnimation, std::move(item.onDelete),
-        std::move(item.onEnterDeleteArea), std::move(item.onExitDeleteArea), std::move(item.onStateChange),
-        item.actionAreaDistance, isStartArea);
+    itemModel.SetDeleteArea(std::move(item.builderAction), std::move(item.onDelete), std::move(item.onEnterDeleteArea),
+        std::move(item.onExitDeleteArea), std::move(item.onStateChange), item.actionAreaDistance, isStartArea);
     {
         RowModelNG rowModel;
         rowModel.Create(std::nullopt, nullptr, "");
@@ -331,6 +330,14 @@ void ListTestNg::CreateItemWithSwipe(
     SetWidth(FILL_LENGTH);
     SetHeight(Dimension(ITEM_HEIGHT));
     itemModel.SetSwiperAction(std::move(startAction), std::move(endAction), nullptr, effect);
+    if (startAction) {
+        itemModel.SetDeleteArea(
+            std::move(startAction), nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), true);
+    }
+    if (endAction) {
+        itemModel.SetDeleteArea(
+            std::move(endAction), nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), false);
+    }
     {
         RowModelNG rowModel;
         rowModel.Create(std::nullopt, nullptr, "");
@@ -1993,7 +2000,7 @@ HWTEST_F(ListTestNg, SwiperItem007, TestSize.Level1)
         .onStateChange = nullptr
 
     };
-    CreateWithSwipeAction(item, true, true, nullptr, V2::SwipeEdgeEffect::None);
+    CreateWithSwipeAction(item, true, nullptr, V2::SwipeEdgeEffect::None);
     const int32_t listItemIndex = 0;
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
     EXPECT_NE(listItemPattern, nullptr);
@@ -2044,7 +2051,7 @@ HWTEST_F(ListTestNg, SwiperItem008, TestSize.Level1)
         .onStateChange = nullptr
 
     };
-    CreateWithSwipeAction(item, true, false, nullptr, V2::SwipeEdgeEffect::None);
+    CreateWithSwipeAction(item, false, nullptr, V2::SwipeEdgeEffect::None);
     const int32_t listItemIndex = 0;
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
     const float maxDistance = END_NODE_LEN + DELETE_AREA_DISTANCE;
@@ -2095,7 +2102,7 @@ HWTEST_F(ListTestNg, SwiperItem009, TestSize.Level1)
         .onEnterDeleteArea = nullptr,
         .onExitDeleteArea = nullptr,
         .onStateChange = std::move(onStateChangeFunc) };
-    CreateWithSwipeAction(item, true, true, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
+    CreateWithSwipeAction(item, true, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
     const int32_t listItemIndex = 0;
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
     const float maxDistance = START_NODE_LEN + DELETE_AREA_DISTANCE;
@@ -2149,7 +2156,7 @@ HWTEST_F(ListTestNg, SwiperItem010, TestSize.Level1)
         .onEnterDeleteArea = nullptr,
         .onExitDeleteArea = nullptr,
         .onStateChange = std::move(onStateChangeFunc) };
-    CreateWithSwipeAction(item, true, false, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
+    CreateWithSwipeAction(item, false, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
     const int32_t listItemIndex = 0;
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
     const float maxDistance = END_NODE_LEN + DELETE_AREA_DISTANCE;
@@ -2205,7 +2212,7 @@ HWTEST_F(ListTestNg, SwiperItem011, TestSize.Level1)
         .onEnterDeleteArea = std::move(enterEvent),
         .onExitDeleteArea = std::move(exitEvent),
         .onStateChange = nullptr };
-    CreateWithSwipeAction(item, true, true, nullptr, V2::SwipeEdgeEffect::Spring);
+    CreateWithSwipeAction(item, true, nullptr, V2::SwipeEdgeEffect::Spring);
     const int32_t listItemIndex = 0;
 
     /**
@@ -2275,7 +2282,7 @@ HWTEST_F(ListTestNg, SwiperItem012, TestSize.Level1)
         .onEnterDeleteArea = std::move(enterEvent),
         .onExitDeleteArea = std::move(exitEvent),
         .onStateChange = nullptr };
-    CreateWithSwipeAction(item, true, false, nullptr, V2::SwipeEdgeEffect::Spring);
+    CreateWithSwipeAction(item, false, nullptr, V2::SwipeEdgeEffect::Spring);
     const int32_t listItemIndex = 0;
     const float exceedArea = DELETE_AREA_DISTANCE + 1;
 
@@ -2344,7 +2351,7 @@ HWTEST_F(ListTestNg, SwiperItem013, TestSize.Level1)
         .onEnterDeleteArea = std::move(enterEvent),
         .onExitDeleteArea = std::move(exitEvent),
         .onStateChange = nullptr };
-    CreateWithSwipeAction(item, true, true, nullptr, V2::SwipeEdgeEffect::None);
+    CreateWithSwipeAction(item, true, nullptr, V2::SwipeEdgeEffect::None);
     const int32_t listItemIndex = 0;
 
     /**
@@ -2405,7 +2412,7 @@ HWTEST_F(ListTestNg, SwiperItem014, TestSize.Level1)
         .onEnterDeleteArea = std::move(enterEvent),
         .onExitDeleteArea = std::move(exitEvent),
         .onStateChange = nullptr };
-    CreateWithSwipeAction(item, true, false, nullptr, V2::SwipeEdgeEffect::None);
+    CreateWithSwipeAction(item, false, nullptr, V2::SwipeEdgeEffect::None);
     const int32_t listItemIndex = 0;
     const float exceedArea = DELETE_AREA_DISTANCE + 1;
 
@@ -2529,7 +2536,7 @@ HWTEST_F(ListTestNg, SwiperItem018, TestSize.Level1)
         .onEnterDeleteArea = nullptr,
         .onExitDeleteArea = nullptr,
         .onStateChange = [&curState](SwipeActionState state) { curState = state; } };
-    CreateWithSwipeAction(item, true, true, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
+    CreateWithSwipeAction(item, true, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
     const int32_t listItemIndex = 0;
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
 
@@ -2591,7 +2598,7 @@ HWTEST_F(ListTestNg, SwiperItem019, TestSize.Level1)
         .onEnterDeleteArea = nullptr,
         .onExitDeleteArea = nullptr,
         .onStateChange = [&curState](SwipeActionState state) { curState = state; } };
-    CreateWithSwipeAction(item, true, false, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
+    CreateWithSwipeAction(item, false, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
     const int32_t listItemIndex = 0;
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
 
@@ -2653,7 +2660,7 @@ HWTEST_F(ListTestNg, SwiperItem020, TestSize.Level1)
         .onEnterDeleteArea = nullptr,
         .onExitDeleteArea = nullptr,
         .onStateChange = std::move(onStateChangeFunc) };
-    CreateWithSwipeAction(item, true, false, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
+    CreateWithSwipeAction(item, false, std::move(onOffsetChange), V2::SwipeEdgeEffect::Spring);
     const int32_t listItemIndex = 0;
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
     const float maxDistance = END_NODE_LEN + DELETE_AREA_DISTANCE;
