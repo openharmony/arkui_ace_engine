@@ -34,6 +34,7 @@ public:
     ~RosenFontLoader() override = default;
 
     void AddFont(const RefPtr<PipelineBase>& context) override;
+    void SetDefaultFontFamily(const char* fontFamily, const char* familySrc) override;
 
 private:
     void LoadFromNetwork(const RefPtr<PipelineBase>& context);

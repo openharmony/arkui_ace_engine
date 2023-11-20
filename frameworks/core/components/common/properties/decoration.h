@@ -34,6 +34,7 @@
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/invert.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/components/theme/theme_utils.h"
 
@@ -95,6 +96,11 @@ enum class BlurStyle {
     BACKGROUND_REGULAR,
     BACKGROUND_THICK,
     BACKGROUND_ULTRA_THICK,
+    COMPONENT_ULTRA_THIN,
+    COMPONENT_THIN,
+    COMPONENT_REGULAR,
+    COMPONENT_THICK,
+    COMPONENT_ULTRA_THICK,
 };
 
 enum class ThemeColorMode {
@@ -108,11 +114,16 @@ enum class AdaptiveColor {
     AVERAGE,
 };
 
+struct BlurOption {
+    std::vector<float> grayscale;
+};
+
 struct BlurStyleOption {
     BlurStyle blurStyle = BlurStyle::NO_MATERIAL;
     ThemeColorMode colorMode = ThemeColorMode::SYSTEM;
     AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
     double scale = 1.0;
+    BlurOption blurOption;
     bool operator == (const BlurStyleOption& other) const
     {
         return blurStyle == other.blurStyle && colorMode == other.colorMode && adaptiveColor == other.adaptiveColor &&
@@ -122,7 +133,8 @@ struct BlurStyleOption {
     {
         static const char* STYLE[] = { "BlurStyle.NONE", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
             "BlurStyle.BACKGROUND_THIN", "BlurStyle.BACKGROUND_REGULAR", "BlurStyle.BACKGROUND_THICK",
-            "BlurStyle.BACKGROUND_ULTRA_THICK" };
+            "BlurStyle.BACKGROUND_ULTRA_THICK", "BlurStyle.COMPONENT_ULTRA_THIN", "BlurStyle.COMPONENT_THIN",
+            "BlurStyle.COMPONENT_REGULAR", "BlurStyle.COMPONENT_THICK", "BlurStyle.COMPONENT_ULTRA_THICK" };
         static const char* COLOR_MODE[] = { "ThemeColorMode.System", "ThemeColorMode.Light", "ThemeColorMode.Dark" };
         static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
         auto jsonBlurStyle = JsonUtil::Create(true);
@@ -141,10 +153,12 @@ struct EffectOption {
     double saturation { 1.0f };
     double brightness { 1.0f };
     Color color { Color::TRANSPARENT };
+    AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
+    BlurOption blurOption;
     bool operator == (const EffectOption& other) const
     {
         return radius == other.radius && NearEqual(saturation, other.saturation) &&
-            NearEqual(brightness, other.brightness) && color == other.color;
+            NearEqual(brightness, other.brightness) && color == other.color && adaptiveColor == other.adaptiveColor;
     }
 };
 

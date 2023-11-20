@@ -21,6 +21,7 @@
 #include <memory>
 #include <refbase.h>
 #include <list>
+#include <vector>
 
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
@@ -108,8 +109,6 @@ public:
         int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
     virtual bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset) override;
-    virtual bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-        std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline) override;
 
     int32_t GetSessionId();
 
@@ -122,7 +121,7 @@ public:
     }
 
     void OnAccessibilityEvent(
-        const Accessibility::AccessibilityEventInfo& info, std::vector<int32_t> uiExtensionIdLevelList);
+        const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList);
 
 private:
     enum ReleaseCode {
@@ -202,8 +201,7 @@ private:
     bool transferringCaller_ = false;
     bool isVisible_ = true;
 
-    int32_t uiExtensionId_ = -1;
-    static thread_local int32_t currentUiExtensionId_;
+    int32_t uiExtensionId_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H

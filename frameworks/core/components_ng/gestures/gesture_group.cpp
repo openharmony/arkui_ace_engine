@@ -51,6 +51,7 @@ RefPtr<NGGestureRecognizer> GestureGroup::CreateRecognizer()
     DynamicCast<RecognizerGroup>(groupRecognizer)->RemainChildOnResetStatus();
     groupRecognizer->SetPriority(priority_);
     groupRecognizer->SetPriorityMask(gestureMask_);
+    groupRecognizer->SetGestureInfo(gestureInfo_);
     return groupRecognizer;
 }
 

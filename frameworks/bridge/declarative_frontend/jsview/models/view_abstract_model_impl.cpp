@@ -936,14 +936,14 @@ void ViewAbstractModelImpl::SetMask(const RefPtr<BasicShape>& shape)
     box->SetMask(maskPath);
 }
 
-void ViewAbstractModelImpl::SetBackdropBlur(const Dimension& radius)
+void ViewAbstractModelImpl::SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption)
 {
     auto decoration = GetBackDecoration();
     decoration->SetBlurRadius(ToAnimatableDimension(radius));
     decoration->SetBlurStyle(BlurStyleOption());
 }
 
-void ViewAbstractModelImpl::SetFrontBlur(const Dimension& radius)
+void ViewAbstractModelImpl::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption)
 {
     auto decoration = GetFrontDecoration();
     decoration->SetBlurRadius(ToAnimatableDimension(radius));
@@ -1004,10 +1004,13 @@ void ViewAbstractModelImpl::SetSepia(const Dimension& value)
     frontDecoration->SetSepia(value);
 }
 
-void ViewAbstractModelImpl::SetInvert(const Dimension& value)
+void ViewAbstractModelImpl::SetInvert(const InvertVariant& value)
 {
     auto frontDecoration = GetFrontDecoration();
-    frontDecoration->SetInvert(value);
+    if (value.index() == 0) {
+        float invert = std::get<float>(value);
+        frontDecoration->SetInvert(Dimension(invert, DimensionUnit::VP));
+    }
 }
 
 void ViewAbstractModelImpl::SetHueRotate(float value)

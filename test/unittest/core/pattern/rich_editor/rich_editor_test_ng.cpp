@@ -1753,22 +1753,22 @@ HWTEST_F(RichEditorTestNg, CopySelectionMenuParams001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     SelectOverlayInfo selectInfo;
     richEditorPattern->selectedType_ = RichEditorType::TEXT;
-    richEditorPattern->CopySelectionMenuParams(selectInfo);
+    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::LONG_PRESS);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
 
     richEditorPattern->selectedType_ = RichEditorType::IMAGE;
-    richEditorPattern->CopySelectionMenuParams(selectInfo);
+    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::LONG_PRESS);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
 
     richEditorPattern->selectedType_ = RichEditorType::MIXED;
-    richEditorPattern->CopySelectionMenuParams(selectInfo);
+    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::LONG_PRESS);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
 
     richEditorPattern->selectedType_ = RichEditorType(-1);
-    richEditorPattern->CopySelectionMenuParams(selectInfo);
+    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::LONG_PRESS);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
 
-    auto key = std::make_pair(RichEditorType::MIXED, ResponseType::RIGHT_CLICK);
+    auto key = std::make_pair(RichEditorType::MIXED, RichEditorResponseType::RIGHT_CLICK);
     callBack1 = 0;
     callBack2 = 0;
     callBack3 = 0;
@@ -1785,20 +1785,20 @@ HWTEST_F(RichEditorTestNg, CopySelectionMenuParams001, TestSize.Level1)
         return;
     };
     std::shared_ptr<SelectionMenuParams> params1 = std::make_shared<SelectionMenuParams>(
-        RichEditorType::MIXED, buildFunc, onAppear, onDisappear, ResponseType::RIGHT_CLICK);
+        RichEditorType::MIXED, buildFunc, onAppear, onDisappear, RichEditorResponseType::RIGHT_CLICK);
     richEditorPattern->selectionMenuMap_[key] = params1;
     selectInfo.isUsingMouse = true;
     richEditorPattern->selectedType_ = RichEditorType::MIXED;
-    richEditorPattern->CopySelectionMenuParams(selectInfo);
+    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::RIGHT_CLICK);
     EXPECT_NE(selectInfo.menuCallback.onDisappear, nullptr);
 
-    key = std::make_pair(RichEditorType::MIXED, ResponseType::LONG_PRESS);
+    key = std::make_pair(RichEditorType::MIXED, RichEditorResponseType::LONG_PRESS);
     std::shared_ptr<SelectionMenuParams> params2 = std::make_shared<SelectionMenuParams>(
-        RichEditorType::MIXED, buildFunc, nullptr, nullptr, ResponseType::RIGHT_CLICK);
+        RichEditorType::MIXED, buildFunc, nullptr, nullptr, RichEditorResponseType::RIGHT_CLICK);
     richEditorPattern->selectionMenuMap_[key] = params2;
     selectInfo.isUsingMouse = false;
     richEditorPattern->selectedType_ = RichEditorType::MIXED;
-    richEditorPattern->CopySelectionMenuParams(selectInfo);
+    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::RIGHT_CLICK);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
 }
 
@@ -1891,24 +1891,24 @@ HWTEST_F(RichEditorTestNg, BindSelectionMenu001, TestSize.Level1)
         return;
     };
 
-    auto key = std::make_pair(RichEditorType::MIXED, ResponseType::RIGHT_CLICK);
+    auto key = std::make_pair(RichEditorType::MIXED, RichEditorResponseType::RIGHT_CLICK);
     std::shared_ptr<SelectionMenuParams> params1 = std::make_shared<SelectionMenuParams>(
-        RichEditorType::MIXED, buildFunc, onAppear, onDisappear, ResponseType::RIGHT_CLICK);
+        RichEditorType::MIXED, buildFunc, onAppear, onDisappear, RichEditorResponseType::RIGHT_CLICK);
     richEditorPattern->selectionMenuMap_[key] = params1;
 
     std::function<void()> nullFunc = nullptr;
 
     richEditorPattern->BindSelectionMenu(
-        ResponseType::RIGHT_CLICK, RichEditorType::MIXED, nullFunc, onAppear, onDisappear);
+        RichEditorResponseType::RIGHT_CLICK, RichEditorType::MIXED, nullFunc, onAppear, onDisappear);
     EXPECT_TRUE(richEditorPattern->selectionMenuMap_.empty());
 
     richEditorPattern->selectionMenuMap_[key] = params1;
     richEditorPattern->BindSelectionMenu(
-        ResponseType::RIGHT_CLICK, RichEditorType::MIXED, buildFunc, onAppear, onDisappear);
+        RichEditorResponseType::RIGHT_CLICK, RichEditorType::MIXED, buildFunc, onAppear, onDisappear);
     EXPECT_FALSE(richEditorPattern->selectionMenuMap_.empty());
 
     richEditorPattern->BindSelectionMenu(
-        ResponseType::RIGHT_CLICK, RichEditorType::IMAGE, buildFunc, onAppear, onDisappear);
+        RichEditorResponseType::RIGHT_CLICK, RichEditorType::IMAGE, buildFunc, onAppear, onDisappear);
     EXPECT_FALSE(richEditorPattern->selectionMenuMap_.empty());
 }
 

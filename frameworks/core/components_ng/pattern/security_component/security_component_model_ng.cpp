@@ -304,7 +304,7 @@ void SecurityComponentModelNG::SetBackgroundBorderRadius(const Dimension& value)
         return;
     }
 
-    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderWidth, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, value);
 }
 
 void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimension>& left,

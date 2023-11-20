@@ -73,7 +73,7 @@ public:
     {
         return color_ == rhs.color_ && NearEqual(blurRadius_, rhs.blurRadius_) && offset_ == rhs.offset_ &&
                NearEqual(spreadRadius_, rhs.spreadRadius_) && NearEqual(elevation_, rhs.elevation_) &&
-               isFilled_ == rhs.isFilled_;
+               isFilled_ == rhs.isFilled_ && colorStrategy_ == rhs.colorStrategy_;
     }
 
     bool operator!=(const Shadow& rhs) const

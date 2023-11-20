@@ -21,6 +21,7 @@
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
+#include "core/components_ng/event/target_component.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
 
@@ -639,6 +640,16 @@ public:
         return info;
     }
 
+    void SetTargetComponent(const RefPtr<NG::TargetComponent>& targetComponent)
+    {
+        targetComponent_ = targetComponent;
+    }
+
+    RefPtr<NG::TargetComponent> GetTargetComponent()
+    {
+        return targetComponent_;
+    }
+
 protected:
     Offset coordinateOffset_;
     GetEventTargetImpl getEventTargetImpl_;
@@ -649,6 +660,7 @@ protected:
     int32_t nodeId_ = -1;
     WeakPtr<NG::FrameNode> node_ = nullptr;
     Axis direction_ = Axis::NONE;
+    RefPtr<NG::TargetComponent> targetComponent_;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;

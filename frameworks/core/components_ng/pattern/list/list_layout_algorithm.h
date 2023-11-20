@@ -96,6 +96,11 @@ public:
         targetIndex_ = index;
     }
 
+    std::optional<int32_t> GetTargetIndex() const
+    {
+        return targetIndexStaged_;
+    }
+
     void SetPredictSnapOffset(float predictSnapOffset)
     {
         predictSnapOffset_ = predictSnapOffset;
@@ -356,6 +361,7 @@ private:
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> targetIndexStaged_;
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;

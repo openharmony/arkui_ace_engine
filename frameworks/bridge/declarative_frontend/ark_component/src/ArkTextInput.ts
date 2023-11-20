@@ -1,5 +1,9 @@
-//@ts-nocheck
+
+/// <reference path="./import.ts" />
 class ArkTextInputComponent extends ArkComponent implements TextInputAttribute {
+    showCounter(value: boolean): TextInputAttribute {
+        throw new Error("Method not implemented.");
+    }
     type(value: InputType): TextInputAttribute {
         throw new Error("Method not implemented.");
     }
@@ -112,10 +116,10 @@ class ArkTextInputComponent extends ArkComponent implements TextInputAttribute {
         throw new Error("Method not implemented.");
     }
 }
-
+// @ts-ignore
 globalThis.TextInput.attributeModifier = function(modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
     var component = this.createOrGetNode(elmtId, () =>
     {
         return new ArkTextInputComponent(nativeNode);

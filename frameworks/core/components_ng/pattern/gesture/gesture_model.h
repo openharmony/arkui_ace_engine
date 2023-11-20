@@ -17,9 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GESTURE_GESTURE_MODEL_H
 
 #include <mutex>
+#include <string>
 
-#include "core/gestures/gesture_processor.h"
 #include "core/gestures/gesture_info.h"
+#include "core/gestures/gesture_processor.h"
 #include "frameworks/base/memory/referenced.h"
 
 namespace OHOS::Ace {
@@ -34,6 +35,7 @@ public:
     virtual void Pop() = 0;
     virtual void SetOnGestureEvent(const GestureEventNoParameter& gestureEventNoParameter) = 0;
     virtual void SetOnActionFunc(const GestureEventFunc& gestureEventFunc, const Ace::GestureEventAction& action) = 0;
+    virtual void SetTag(const std::string& tag) = 0;
 
 private:
     static std::unique_ptr<GestureModel> instance_;

@@ -632,6 +632,13 @@ void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
     gestureHub->SetUserOnClick(std::move(clickEventFunc));
 }
 
+void ViewAbstract::SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
+}
+
 void ViewAbstract::SetOnTouch(TouchEventFunc&& touchEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
@@ -1207,7 +1214,7 @@ void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool is
     overlayManager->ShowMenu(targetId, offset, nullptr);
 }
 
-void ViewAbstract::SetBackdropBlur(const Dimension& radius)
+void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -1219,7 +1226,7 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
         if (target->GetBackgroundEffect().has_value()) {
             target->UpdateBackgroundEffect(std::nullopt);
         }
-        target->UpdateBackBlurRadius(radius);
+        target->UpdateBackBlur(radius, blurOption);
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
@@ -1243,7 +1250,7 @@ void ViewAbstract::SetDynamicLightUp(float rate, float lightUpDegree)
     ACE_UPDATE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree);
 }
 
-void ViewAbstract::SetFrontBlur(const Dimension& radius)
+void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -1252,7 +1259,7 @@ void ViewAbstract::SetFrontBlur(const Dimension& radius)
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
-        target->UpdateFrontBlurRadius(radius);
+        target->UpdateFrontBlur(radius, blurOption);
         if (target->GetFrontBlurStyle().has_value()) {
             target->UpdateFrontBlurStyle(std::nullopt);
         }
@@ -1464,7 +1471,7 @@ void ViewAbstract::SetSepia(const Dimension& sepia)
     ACE_UPDATE_RENDER_CONTEXT(FrontSepia, sepia);
 }
 
-void ViewAbstract::SetInvert(const Dimension& invert)
+void ViewAbstract::SetInvert(const InvertVariant& invert)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -1579,6 +1586,14 @@ void ViewAbstract::SetUseEffect(bool useEffect)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(UseEffect, useEffect);
+}
+
+void ViewAbstract::SetUseShadowBatching(bool useShadowBatching)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(UseShadowBatching, useShadowBatching);
 }
 
 void ViewAbstract::SetForegroundColor(const Color& color)
