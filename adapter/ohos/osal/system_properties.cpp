@@ -73,8 +73,7 @@ bool IsDownloadByNetworkDisabled()
 
 bool IsTraceEnabled()
 {
-    return (system::GetParameter("persist.ace.trace.enabled", "0") == "1" ||
-            system::GetParameter("debug.ace.trace.enabled", "0") == "1");
+    return (system::GetParameter("persist.ace.trace.enabled", "1") == "1");
 }
 
 bool IsSvgTraceEnabled()

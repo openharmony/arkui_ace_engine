@@ -38,7 +38,7 @@ AceAsyncScopedTrace::~AceAsyncScopedTrace()
 
 bool AceTraceEnabled()
 {
-    return true;
+    return false;
 }
 void AceTraceEnd()
 {}
