@@ -26,6 +26,19 @@ Rect ListPositionController::GetItemRectInGroup(int32_t index, int32_t indexInGr
     return listPattern->GetItemRectInGroup(index, indexInGroup);
 }
 
+void ListPositionController::JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth,
+    ScrollAlign align, int32_t source)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
+    CHECK_NULL_VOID(listPattern);
+    if (align == ScrollAlign::NONE) {
+        align = ScrollAlign::START;
+    }
+    listPattern->ScrollToItemInGroup(index, indexInGroup, smooth, align);
+}
+
 void ListPositionController::CloseAllSwipeActions(OnFinishFunc&& onFinishCallback)
 {
     auto pattern = scroll_.Upgrade();
