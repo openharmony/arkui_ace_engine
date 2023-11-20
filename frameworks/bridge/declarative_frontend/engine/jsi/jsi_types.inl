@@ -161,6 +161,27 @@ void JsiObject::SetProperty(const char* prop, T value) const
 }
 
 template<typename T>
+T JsiObject::GetPropertyValue(const char* prop, T defaultValue) const
+{
+    static_assert(!std::is_const_v<T> && !std::is_reference_v<T>,
+        "Cannot convert value to reference or cv-qualified types!");
+
+    const EcmaVM* vm = GetEcmaVM();
+    Local<StringRef> stringRef = panda::StringRef::NewFromUtf8(vm, prop);
+    Local<JSValueRef> valueRef = GetHandle()->Get(vm, stringRef);
+    if constexpr (std::is_same<T, bool>::value) {
+        return valueRef->IsBoolean() ? valueRef->BooleaValue() : defaultValue;
+    } else if constexpr (std::is_arithmetic<T>::value) {
+        return valueRef->IsNumber() ? JsiValueConvertor::fromJsiValue<T>(vm, valueRef) : defaultValue;
+    } else if constexpr (std::is_same_v<T, std::string>) {
+        return valueRef->IsString() ? valueRef->ToString(vm)->ToString() : defaultValue;
+    } else {
+        LOGW("Get property value failed.");
+    }
+    return defaultValue;
+}
+
+template<typename T>
 void JsiCallbackInfo::SetReturnValue(T* instance) const
 {
     retVal_ = instance;
