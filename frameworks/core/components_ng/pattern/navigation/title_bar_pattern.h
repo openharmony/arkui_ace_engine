@@ -152,7 +152,7 @@ public:
             return true;
         }
         GetMaxTitleBarHeight();
-        return LessNotEqual(tempTitleBarHeight_, maxTitleBarHeight_);
+        return LessOrEqual(tempTitleBarHeight_, maxTitleBarHeight_);
     }
 
     bool GetCurrentNavBarStatus() const
@@ -182,7 +182,7 @@ public:
     }
 
     void ResetAssociatedScroll();
-    bool UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node);
+    bool UpdateAssociatedScrollOffset(float offset);
 
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
@@ -262,7 +262,6 @@ private:
     bool dragScrolling_ = false;
     bool associatedScrollOverSize_ = false;
     float associatedScrollOffsetMax_ = 0.0f;
-    RefPtr<FrameNode> associatedScrollNode_;
 };
 
 } // namespace OHOS::Ace::NG
