@@ -54,7 +54,7 @@ void SelectModelNG::Create(const std::vector<SelectParam>& params)
     pattern->BuildChild();
     // create menu node
     if (!pattern->GetMenuNode()) {
-        auto menuWrapper = MenuView::Create(params, nodeId);
+        auto menuWrapper = MenuView::Create(params, nodeId, V2::SELECT_ETS_TAG);
         pattern->SetMenuNode(menuWrapper);
         pattern->InitSelected();
     } else {
