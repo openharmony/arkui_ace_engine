@@ -53,6 +53,7 @@ public:
     void SetContent(const std::string& content);
     void SetFontStyle(Ace::FontStyle fontStyle);
     void SetIconColor(const std::optional<Color>& color);
+    void SetRowWidth(const Dimension& positionX);
 
 private:
     static RefPtr<FrameNode> BuildBarTitle();
