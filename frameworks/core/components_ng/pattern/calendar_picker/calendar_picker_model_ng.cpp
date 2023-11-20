@@ -254,7 +254,7 @@ void CalendarPickerModelNG::SetTextStyle(const PickerTextStyle& textStyle)
         ACE_UPDATE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, FontSize, calendarTheme->GetEntryFontSize());
     }
     ACE_UPDATE_LAYOUT_PROPERTY(
-        CalendarPickerLayoutProperty, Color,textStyle.textColor.value_or(calendarTheme->GetEntryFontColor()));
+        CalendarPickerLayoutProperty, Color, textStyle.textColor.value_or(calendarTheme->GetEntryFontColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, Weight, textStyle.fontWeight.value_or(FontWeight::NORMAL));
 }
 
@@ -290,5 +290,30 @@ void CalendarPickerModelNG::SetPadding(const PaddingProperty& padding)
     auto linearLayoutProperty = contentNode->GetLayoutProperty();
     CHECK_NULL_VOID(linearLayoutProperty);
     linearLayoutProperty->UpdatePadding(padding);
+}
+
+void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyle)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(calendarTheme);
+    if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, FontSize, textStyle.fontSize.value(), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            CalendarPickerLayoutProperty, FontSize, calendarTheme->GetEntryFontSize(), frameNode);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, Color,
+        textStyle.textColor.value_or(calendarTheme->GetEntryFontColor()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        CalendarPickerLayoutProperty, Weight, textStyle.fontWeight.value_or(FontWeight::NORMAL), frameNode);
+}
+
+void CalendarPickerModelNG::SetEdgeAlign(
+    FrameNode* frameNode, const CalendarEdgeAlign& alignType, const DimensionOffset& offset)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogAlignType, alignType, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offset, frameNode);
 }
 } // namespace OHOS::Ace::NG
