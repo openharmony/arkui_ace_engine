@@ -118,7 +118,7 @@ bool ScrollablePattern::ProcessNavBarReactOnUpdate(float offset)
     auto dragOffsetY = firstGeometryNode->GetFrameOffset().GetY();
     navBarPattern_->OnCoordScrollUpdate(offset, dragOffsetY);
     DraggedDownScrollEndProcess();
-    if (minTitle) {
+    if (minTitle &&  Negative(offset)) {
         return scrollEffect_ && scrollEffect_->IsNoneEffect();
     }
     return scrollEffect_ && scrollEffect_->IsSpringEffect();
@@ -1181,8 +1181,7 @@ bool ScrollablePattern::ProcessAssociatedScroll(double offset, int32_t source)
         } else if ((source == SCROLL_FROM_UPDATE) || (source == SCROLL_FROM_ANIMATION) ||
                    (source == SCROLL_FROM_ANIMATION_SPRING)) {
             if (IsAtTop()) {
-                auto host = GetHost();
-                return navBarPattern_->UpdateAssociatedScrollOffset(offset, host);
+                return navBarPattern_->UpdateAssociatedScrollOffset(offset);
             }
         }
     }

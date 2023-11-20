@@ -2984,33 +2984,31 @@ HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest001, T
     /**
      * @tc.steps: step1. create navigation.
      */
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
     RefPtr<TitleBarPattern> titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
     titleBarPattern->enableAssociatedScroll_ = true;
-    titleBarPattern->UpdateAssociatedScrollOffset(DEFAULT_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(DEFAULT_TITLE_BAR_OFFSET);
     EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
 
     titleBarPattern->enableAssociatedScroll_ = false;
-    titleBarPattern->UpdateAssociatedScrollOffset(DEFAULT_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(DEFAULT_TITLE_BAR_OFFSET);
     EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
 
     titleBarPattern->enableAssociatedScroll_ = true;
-    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_LARGE_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_LARGE_TITLE_BAR_OFFSET);
     EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
 
     titleBarPattern->enableAssociatedScroll_ = true;
     titleBarPattern->dragScrolling_ = true;
     titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
     titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
-    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET);
     EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
 
     titleBarPattern->enableAssociatedScroll_ = true;
     titleBarPattern->dragScrolling_ = true;
     titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
     titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
-    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET);
     EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
 }
 
@@ -3024,8 +3022,6 @@ HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest002, T
     /**
      * @tc.steps: step1. create navigation.
      */
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
     RefPtr<TitleBarPattern> titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
 
     titleBarPattern->enableAssociatedScroll_ = true;
@@ -3034,7 +3030,7 @@ HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest002, T
     titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
     titleBarPattern->defaultTitleBarHeight_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
     titleBarPattern->maxTitleBarHeight_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
-    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET);
     EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
 
     titleBarPattern->enableAssociatedScroll_ = true;
@@ -3042,7 +3038,7 @@ HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest002, T
     titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
     titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
     titleBarPattern->maxTitleBarHeight_ = MAX_TITLE_BAR_HEIGHT;
-    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET);
     EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
 }
 
@@ -3056,8 +3052,6 @@ HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest003, T
     /**
      * @tc.steps: step1. create navigation.
      */
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
     RefPtr<TitleBarPattern> titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
 
     titleBarPattern->enableAssociatedScroll_ = true;
@@ -3066,7 +3060,7 @@ HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest003, T
     titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
     titleBarPattern->defaultTitleBarHeight_ = DEFAULT_TITLE_BAR_HEIGHT;
     titleBarPattern->maxTitleBarHeight_ = NEGATIVE_MAX_TITLE_BAR_HEIGHT;
-    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET);
     EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
 
     titleBarPattern->enableAssociatedScroll_ = true;
@@ -3075,7 +3069,7 @@ HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest003, T
     titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
     titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
     titleBarPattern->maxTitleBarHeight_ = NEGATIVE_MAX_TITLE_BAR_HEIGHT;
-    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET);
     EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
 }
 
