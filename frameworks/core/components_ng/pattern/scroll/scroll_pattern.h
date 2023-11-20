@@ -109,8 +109,7 @@ public:
 
     float GetTotalOffset() const override
     {
-        return GetScrollSource() == SCROLL_FROM_JUMP || GetScrollSource() == SCROLL_FROM_BAR
-                                    ? -std::clamp(currentOffset_, -scrollableDistance_, 0.0f) : -currentOffset_;
+        return -currentOffset_;
     }
 
     void ResetPosition();
