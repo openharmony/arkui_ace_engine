@@ -3198,6 +3198,16 @@ void RichEditorPattern::ResetAfterPaste()
 
 void RichEditorPattern::HandleOnPaste()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    TextCommonEvent event;
+    eventHub->FireOnPaste(event);
+    if (event.IsPreventDefault()) {
+        return;
+    }
+    CHECK_NULL_VOID(clipboard_);
     auto pasteCallback = [weak = WeakClaim(this)](const std::string& data) {
         if (data.empty()) {
             return;
@@ -3207,7 +3217,6 @@ void RichEditorPattern::HandleOnPaste()
         richEditor->AddPasteStr(data);
         richEditor->ResetAfterPaste();
     };
-    CHECK_NULL_VOID(clipboard_);
     clipboard_->GetData(pasteCallback);
 }
 
