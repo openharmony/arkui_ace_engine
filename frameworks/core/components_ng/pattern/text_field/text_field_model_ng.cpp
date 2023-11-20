@@ -579,6 +579,7 @@ void TextFieldModelNG::SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCleanNodeStyle(cleanNodeStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CleanNodeStyle, cleanNodeStyle);
 }
 
 void TextFieldModelNG::SetCancelIconSize(const CalcDimension& iconSize)
