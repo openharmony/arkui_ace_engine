@@ -761,8 +761,8 @@ bool RichEditorPattern::SetCaretOffset(int32_t caretPosition)
     if (focusHub->IsCurrentFocus()) {
         StartTwinkling();
     }
-    textSelector_.Update(-1);
     CloseSelectOverlay();
+    ResetSelection();
     return success;
 }
 
@@ -978,8 +978,8 @@ void RichEditorPattern::UpdateSpanStyle(
 
     // Custom menus do not actively close.
     if (!(SelectOverlayIsOn() && selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.menuBuilder != nullptr)) {
-        textSelector_.Update(-1);
         CloseSelectOverlay();
+        ResetSelection();
     }
 }
 
@@ -2282,8 +2282,8 @@ void RichEditorPattern::SetInputMethodStatus(bool keyboardShown)
 
 bool RichEditorPattern::CursorMoveLeft()
 {
-    textSelector_.Update(-1);
     CloseSelectOverlay();
+    ResetSelection();
     auto caretPosition = std::clamp((caretPosition_ - 1), 0, static_cast<int32_t>(GetTextContentLength()));
     if (caretPosition_ == caretPosition) {
         return false;
@@ -2297,8 +2297,8 @@ bool RichEditorPattern::CursorMoveLeft()
 
 bool RichEditorPattern::CursorMoveRight()
 {
-    textSelector_.Update(-1);
     CloseSelectOverlay();
+    ResetSelection();
     auto caretPosition = std::clamp((caretPosition_ + 1), 0, static_cast<int32_t>(GetTextContentLength()));
     if (caretPosition_ == caretPosition) {
         return false;
@@ -2312,8 +2312,8 @@ bool RichEditorPattern::CursorMoveRight()
 
 bool RichEditorPattern::CursorMoveUp()
 {
-    textSelector_.Update(-1);
     CloseSelectOverlay();
+    ResetSelection();
     if (static_cast<int32_t>(GetTextContentLength()) > 1) {
         float caretHeight = 0.0f;
         OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
@@ -2334,8 +2334,8 @@ bool RichEditorPattern::CursorMoveUp()
 
 bool RichEditorPattern::CursorMoveDown()
 {
-    textSelector_.Update(-1);
     CloseSelectOverlay();
+    ResetSelection();
     if (static_cast<int32_t>(GetTextContentLength()) > 1) {
         float caretHeight = 0.0f;
         OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
