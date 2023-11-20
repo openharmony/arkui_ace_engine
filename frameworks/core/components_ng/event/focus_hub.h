@@ -522,7 +522,7 @@ public:
     int32_t GetFrameId() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
-    bool RequestFocusImmediately();
+    bool RequestFocusImmediately(bool isJudgeRootTree = false);
     void RequestFocus() const;
     void RequestFocusWithDefaultFocusFirstly();
     void UpdateAccessibilityFocusInfo();
@@ -556,6 +556,7 @@ public:
     bool IsFocusableScopeByTab();
 
     bool IsFocusableWholePath();
+    bool IsOnRootTree();
 
     bool IsFocusable();
     bool IsFocusableNode();

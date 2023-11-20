@@ -117,7 +117,7 @@ public:
     }
 
     void ResetAssociatedScroll();
-    bool UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node);
+    bool UpdateAssociatedScrollOffset(float offset);
     bool IsTitleModeFree();
     void OnAttachToFrameNode() override;
     void OnWindowFocused() override

@@ -936,6 +936,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest007, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context { canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT };
     checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
 }
@@ -1066,6 +1068,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest011, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context { canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT };
     checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
 }
@@ -1096,6 +1100,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest012, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context { canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT };
     checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
 }
@@ -1253,6 +1259,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupModifierTest001, TestSize.Level1)
     checkBoxGroupModifier->SetCheckStroke(CHECKBOX_GROUP_LENGTH_ZERO);
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     checkBoxGroupModifier->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
     checkBoxGroupModifier->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
     checkBoxGroupModifier->SetUiStatus(UIStatus::OFF_TO_ON);

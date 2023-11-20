@@ -30,6 +30,8 @@
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
@@ -153,5 +155,62 @@ void NavDestinationPattern::OnModifyDone()
         }
     }
     MountTitleBar(hostNode);
+}
+
+bool NavDestinationPattern::GetBackButtonState()
+{
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    CHECK_NULL_RETURN(navDestinationLayoutProperty, false);
+    if (navDestinationLayoutProperty->GetHideTitleBarValue(false)) {
+        return false;
+    }
+    // get navigation node
+    auto parent = AceType::DynamicCast<FrameNode>(hostNode->GetParent());
+    RefPtr<NavigationGroupNode> navigationNode;
+    while (parent && !parent->IsRootNode()) {
+        navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
+        if (navigationNode) {
+            break;
+        }
+        parent = AceType::DynamicCast<FrameNode>(parent->GetParent());
+    }
+    if (!navigationNode) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "can't find navigation node");
+        return false;
+    }
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_RETURN(navigationLayoutProperty, false);
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    auto stack = pattern->GetNavigationStack();
+    auto index = stack->FindIndex(name_, navDestinationNode_.Upgrade(), true);
+    bool showBackButton = true;
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    auto layoutWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(navigationNode->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutWrapper, showBackButton);
+    auto layout = AceType::DynamicCast<NavigationLayoutAlgorithm>(layoutWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layout, false);
+    if (index == 0 && (layout->GetNavigationMode() == NavigationMode::SPLIT ||
+        navigationLayoutProperty->GetHideNavBarValue(false))) {
+        showBackButton = false;
+    }
+    auto isCustomTitle = hostNode->GetPrevTitleIsCustomValue(false);
+    if (isCustomTitle) {
+        return showBackButton;
+    }
+    auto titleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+    CHECK_NULL_RETURN(titleNode, showBackButton);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_RETURN(theme, showBackButton);
+    auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    auto currentFontSize = textLayoutProperty->GetAdaptMaxFontSizeValue(Dimension(0.0, DimensionUnit::FP));
+    auto targetFontSize = showBackButton ? theme->GetTitleFontSizeMin() : theme->GetTitleFontSize();
+    if (targetFontSize == currentFontSize) {
+        return showBackButton;
+    }
+    textLayoutProperty->UpdateFontSize(targetFontSize);
+    textLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    return showBackButton;
 }
 } // namespace OHOS::Ace::NG

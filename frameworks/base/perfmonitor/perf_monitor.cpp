@@ -32,7 +32,6 @@ constexpr int64_t SCENE_TIMEOUT = 10000000000;
 constexpr int64_t RESPONSE_TIMEOUT = 1000000000;
 constexpr float SINGLE_FRAME_TIME = 16600000;
 const int32_t JANK_SKIPPED_THRESHOLD = SystemProperties::GetJankFrameThreshold();
-const std::string NO_USER = "NO_USER";
 
 static int64_t GetCurrentRealTimeNs()
 {
@@ -121,7 +120,7 @@ void ReportPerfEventToRS(DataBase& data)
         case EVENT_COMPLETE:
             {
                 ACE_SCOPED_TRACE("EVENT_REPORT_COMPLETE_RS");
-                if (data.needReportToRS) {
+                if (data.isDisplayAnimator) {
                     Rosen::RSInterfaces::GetInstance().ReportEventComplete(dataRs);
                 }
                 break;
@@ -141,7 +140,7 @@ void ReportPerfEventToUI(DataBase data)
 {
     switch (data.eventType) {
         case EVENT_COMPLETE:
-            if (!data.needReportToRS) {
+            if (!data.isDisplayAnimator) {
                 EventReport::ReportEventComplete(data);
             }
             break;
@@ -209,6 +208,7 @@ void SceneRecord::Report(const std::string& sceneId, int64_t vsyncTime, bool isR
     } else {
         endVsyncTime = vsyncTime;
     }
+    isDisplayAnimator = !isRsRender;
 }
 
 bool SceneRecord::IsFirstFrame()
@@ -265,7 +265,7 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
     if (record != nullptr) {
         RecordBaseInfo(record);
         record->Report(sceneId, mVsyncTime, isRsRender);
-        ReportAnimateEnd(sceneId, record, !isRsRender);
+        ReportAnimateEnd(sceneId, record);
         RemoveRecord(sceneId);
         AceAsyncTraceEnd(0, sceneId.c_str());
     }
@@ -391,7 +391,7 @@ int64_t PerfMonitor::GetInputTime(const std::string& sceneId, PerfActionType typ
         default:
             break;
     }
-    if (inputTime <= 0 || note == NO_USER || IsExceptResponseTime(inputTime, sceneId)) {
+    if (inputTime <= 0 || IsExceptResponseTime(inputTime, sceneId)) {
         ACE_SCOPED_TRACE("GetInputTime: now time");
         inputTime = GetCurrentRealTimeNs();
     }
@@ -404,22 +404,22 @@ void PerfMonitor::ReportAnimateStart(const std::string& sceneId, SceneRecord* re
         return;
     }
     DataBase data;
-    FlushDataBase(record, data, true);
+    FlushDataBase(record, data);
     ReportPerfEvent(EVENT_RESPONSE, data);
 }
 
-void PerfMonitor::ReportAnimateEnd(const std::string& sceneId, SceneRecord* record, bool needReportToRS)
+void PerfMonitor::ReportAnimateEnd(const std::string& sceneId, SceneRecord* record)
 {
     if (record == nullptr) {
         return;
     }
     DataBase data;
-    FlushDataBase(record, data, needReportToRS);
+    FlushDataBase(record, data);
     ReportPerfEvent(EVENT_JANK_FRAME, data);
     ReportPerfEvent(EVENT_COMPLETE, data);
 }
 
-void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data, bool needReportToRS)
+void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data)
 {
     if (record == nullptr) {
         return;
@@ -438,7 +438,7 @@ void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data, bool needRe
     data.maxSuccessiveFrames = record->maxSuccessiveFrames;
     data.totalMissed = record->totalMissed;
     data.totalFrames = record->totalFrames;
-    data.needReportToRS = needReportToRS;
+    data.isDisplayAnimator = record->isDisplayAnimator;
     data.sourceType = record->sourceType;
     data.actionType = record->actionType;
     data.baseInfo = baseInfo;
@@ -465,8 +465,9 @@ void PerfMonitor::ReportPerfEvent(PerfEventType type, DataBase& data)
 
 bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
 {
-    if (sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH
-        && GetCurrentRealTimeNs() - time > RESPONSE_TIMEOUT) {
+    if ((sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH
+        && GetCurrentRealTimeNs() - time > RESPONSE_TIMEOUT)
+        || sceneId == PerfConstants::VOLUME_BAR_SHOW) {
         return true;
     }
     return false;

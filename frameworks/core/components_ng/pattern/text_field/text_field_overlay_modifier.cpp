@@ -272,6 +272,7 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
     auto pixelMapImageOffset = PIXEL_MAP_IMAGE_OFFSET.ConvertToPx();
 
     auto pixelMap = pattern->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
     PixelMapImage pixelMapImage(pixelMap);
     auto magnifierPaintConfig = pixelMapImage.GetPaintConfig();
     magnifierPaintConfig.scaleX_ = magnifierGain;
@@ -311,7 +312,7 @@ bool TextFieldOverlayModifier::GetMagnifierRect(
         return false;
     }
     startX = localOffsetX - magnifierWidth / 2.0f;
-    if (pattern->GetCaretPosition() == pattern->GetContentWideTextLength() && localOffsetX >= cursorOffsetX) {
+    if (pattern->GetCaretIndex() == pattern->GetContentWideTextLength() && localOffsetX >= cursorOffsetX) {
         startX = cursorOffsetX - magnifierWidth / 2.0f;
         localOffsetX = cursorOffsetX;
     }

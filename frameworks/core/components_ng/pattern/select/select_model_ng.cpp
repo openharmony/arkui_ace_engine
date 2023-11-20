@@ -39,9 +39,9 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
     layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), std::nullopt));
 }
 
-static constexpr float SELECT_MARGIN_VP = 4.0;
-static constexpr float SELECT_MIN_SPACE = 8.0;
-static constexpr float SELECT_HORIZONTAL_GAP = 24.0;
+static constexpr Dimension SELECT_MARGIN_VP = 4.0_vp;
+static constexpr Dimension SELECT_MIN_SPACE = 8.0_vp;
+static constexpr Dimension SELECT_HORIZONTAL_GAP = 24.0_vp;
 } // namespace
 
 void SelectModelNG::Create(const std::vector<SelectParam>& params)
@@ -64,8 +64,8 @@ void SelectModelNG::Create(const std::vector<SelectParam>& params)
     NG::PaddingProperty paddings;
     paddings.top = std::nullopt;
     paddings.bottom = std::nullopt;
-    paddings.left = NG::CalcLength(SELECT_MARGIN_VP, DimensionUnit::VP);
-    paddings.right = NG::CalcLength(SELECT_MARGIN_VP, DimensionUnit::VP);
+    paddings.left = NG::CalcLength(SELECT_MARGIN_VP);
+    paddings.right = NG::CalcLength(SELECT_MARGIN_VP);
     ViewAbstract::SetPadding(paddings);
     
     pattern->BuildChild();
@@ -255,11 +255,10 @@ void SelectModelNG::SetWidth(Dimension& value)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     
-    double minWidth = 2 * pattern->GetFontSize().ConvertToVp() + SELECT_HORIZONTAL_GAP +
-        theme->GetSpinnerWidth().ConvertToVp() + SELECT_MIN_SPACE;
-    Dimension spaceRet = Dimension(SELECT_MIN_SPACE, DimensionUnit::VP);
+    double minWidth = 2 * pattern->GetFontSize().ConvertToVp() + SELECT_HORIZONTAL_GAP.ConvertToVp() +
+        theme->GetSpinnerWidth().ConvertToVp() + SELECT_MIN_SPACE.ConvertToVp();
     if (value.ConvertToVp() < minWidth) {
-        pattern->SetSpace(spaceRet);
+        pattern->SetSpace(SELECT_MIN_SPACE);
     } else {
         ViewAbstract::SetWidth(NG::CalcLength(value));
     }

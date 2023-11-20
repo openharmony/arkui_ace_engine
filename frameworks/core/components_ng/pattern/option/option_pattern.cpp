@@ -24,6 +24,10 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_view.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
+#include "core/components_ng/pattern/security_component/security_component_pattern.h"
+#include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/touch_event.h"
@@ -32,8 +36,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr MIN_OPTION_WIDTH = 56.0f;
-    constexpr OPTION_MARGIN = 8.0f;
+    constexpr Dimension MIN_OPTION_WIDTH = 56.0_vp;
+    constexpr Dimension OPTION_MARGIN = 8.0_vp;
+    constexpr int32_t COLUMN_NUM = 2;
 } // namespace
 
 void OptionPattern::OnAttachToFrameNode()
@@ -59,11 +64,23 @@ void OptionPattern::OnModifyDone()
     auto eventHub = host->GetEventHub<OptionEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->IsEnabled()) {
+        UpdatePasteFontColor(selectTheme_->GetDisabledMenuFontColor());
         CHECK_NULL_VOID(text_);
         text_->GetRenderContext()->UpdateForegroundColor(selectTheme_->GetDisabledMenuFontColor());
         text_->MarkModifyDone();
+    } else {
+        UpdatePasteFontColor(selectTheme_->GetMenuFontColor());
     }
     SetAccessibilityAction();
+}
+
+void OptionPattern::UpdatePasteFontColor(const Color& fontColor)
+{
+    CHECK_NULL_VOID(pasteButton_);
+    auto property = pasteButton_->GetPaintProperty<SecurityComponentPaintProperty>();
+    CHECK_NULL_VOID(property);
+    property->UpdateFontColor(fontColor);
+    pasteButton_->MarkModifyDone();
 }
 
 void OptionPattern::OnSelectProcess()
@@ -470,28 +487,28 @@ void OptionPattern::SetAccessibilityAction()
 
 float OptionPattern::GetSelectOptionWidth()
 {
-    auto minWidth = Dimension(MIN_OPTION_WIDTH, DimensionUnit::VP);
-    auto margin = Dimension(OPTION_MARGIN, DimensionUnit::VP);
     RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
     auto parent = columnInfo->GetParent();
-    CHECK_NULL_RETURN(parent, minWidth.ConvertToPx());
+    CHECK_NULL_RETURN(parent, MIN_OPTION_WIDTH.ConvertToPx());
     parent->BuildColumnWidth();
-    auto defaultWidth = static_cast<float>(columnInfo->GetWidth(2)) - margin.ConvertToPx();
+    auto defaultWidth = static_cast<float>(columnInfo->GetWidth(COLUMN_NUM)) - OPTION_MARGIN.ConvertToPx();
     auto optionNode = GetHost();
-    CHECK_NULL_RETURN(optionNode, minWidth.ConvertToPx());
-    float finalWidth;
+    CHECK_NULL_RETURN(optionNode, MIN_OPTION_WIDTH.ConvertToPx());
+    float finalWidth = MIN_OPTION_WIDTH.ConvertToPx();
     
     if (IsWidthModifiedBySelect()) {
         auto optionPatintProperty = optionNode->GetPaintProperty<OptionPaintProperty>();
-        CHECK_NULL_RETURN(optionPatintProperty, minWidth.ConvertToPx());
+        CHECK_NULL_RETURN(optionPatintProperty, MIN_OPTION_WIDTH.ConvertToPx());
         auto selectmodifiedwidth = optionPatintProperty->GetSelectModifiedWidth();
         finalWidth = selectmodifiedwidth.value();
     } else {
         finalWidth = defaultWidth;
     }
     
-    if (finalWidth < minWidth.ConvertToPx()) {
+    if (finalWidth < MIN_OPTION_WIDTH.ConvertToPx()) {
         finalWidth = defaultWidth;
     }
+
+    return finalWidth;
 }
 } // namespace OHOS::Ace::NG

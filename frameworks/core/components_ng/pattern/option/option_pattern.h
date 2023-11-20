@@ -79,6 +79,11 @@ public:
         icon_ = icon;
     }
 
+    void SetPasteButton(const RefPtr<FrameNode>& pasteButton)
+    {
+        pasteButton_ = pasteButton;
+    }
+
     void SetBgColor(const Color& color);
     // set font props
     void SetFontSize(const Dimension& value);
@@ -207,6 +212,7 @@ private:
 
     void OnSelectProcess();
     void SetAccessibilityAction();
+    void UpdatePasteFontColor(const Color& fontColor);
 
     std::optional<Color> bgColor_;
 
@@ -215,6 +221,7 @@ private:
     WeakPtr<FrameNode> menuWeak_;
     RefPtr<FrameNode> text_;
     RefPtr<FrameNode> icon_;
+    RefPtr<FrameNode> pasteButton_;
     RefPtr<TextTheme> textTheme_;
     RefPtr<SelectTheme> selectTheme_;
     // this option node's index in the menu

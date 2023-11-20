@@ -745,6 +745,9 @@ void FrameNode::OnVisibleChange(bool isVisible)
 
 void FrameNode::OnDetachFromMainTree(bool recursive)
 {
+    if (auto focusHub = GetFocusHub()) {
+        focusHub->RemoveSelf();
+    }
     eventHub_->FireOnDisappear();
     renderContext_->OnNodeDisappear(recursive);
 }
@@ -2171,10 +2174,7 @@ bool FrameNode::OnRemoveFromParent(bool allowTransition)
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, false);
     if (!allowTransition || RemoveImmediately()) {
-        // directly remove, reset focusHub, parent and depth
-        if (auto focusHub = GetFocusHub()) {
-            focusHub->RemoveSelf();
-        }
+        // directly remove, reset parent and depth
         ResetParent();
         return true;
     }

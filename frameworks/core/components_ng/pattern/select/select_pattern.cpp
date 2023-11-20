@@ -55,9 +55,8 @@ namespace {
 
 constexpr uint32_t SELECT_ITSELF_TEXT_LINES = 1;
 
-constexpr float OPTION_MARGIN = 8.0f;
+constexpr Dimension OPTION_MARGIN = 8.0_vp;
 
-constexpr float FONT_SIZE_GET_ERROR = 0.0f;
 } // namespace
 
 void SelectPattern::OnAttachToFrameNode()
@@ -124,8 +123,7 @@ void SelectPattern::ShowSelectMenu()
             auto optionGeoNode = options_[i]->GetGeometryNode();
             CHECK_NULL_VOID(optionGeoNode);
     
-            Dimension horizonPadding = Dimension(OPTION_MARGIN, DimensionUnit::VP);
-            auto optionWidth = selectWidth - horizonPadding.ConvertToPx();
+            auto optionWidth = selectWidth - OPTION_MARGIN.ConvertToPx();
         
             auto optionPattern = options_[i]->GetPattern<OptionPattern>();
             CHECK_NULL_VOID(optionPattern);
@@ -1024,7 +1022,7 @@ void SelectPattern::OnLanguageConfigurationUpdate()
 
 Dimension SelectPattern::GetFontSize()
 {
-    Dimension defaultRet = Dimension(FONT_SIZE_GET_ERROR);
+    Dimension defaultRet = Dimension();
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(props, defaultRet);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -1065,8 +1063,7 @@ void SelectPattern::SetOptionWidth(const Dimension& value)
     menuPattern->SetIsWidthModifiedBySelect(true);
     auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuLayoutProps);
-    Dimension horizonPadding = Dimension(OPTION_MARGIN, DimensionUnit::VP);
-    menuLayoutProps->UpdateSelectMenuModifiedWidth(value.ConvertToPx() + horizonPadding.ConvertToPx());
+    menuLayoutProps->UpdateSelectMenuModifiedWidth(value.ConvertToPx() + OPTION_MARGIN.ConvertToPx());
     
     auto scroll = DynamicCast<FrameNode>(menu->GetFirstChild());
     CHECK_NULL_VOID(scroll);
@@ -1075,7 +1072,7 @@ void SelectPattern::SetOptionWidth(const Dimension& value)
     scrollPattern->SetIsWidthModifiedBySelect(true);
     auto scrollLayoutProps = scroll->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(scrollLayoutProps);
-    scrollLayoutProps->UpdateScrollWidth(value.ConvertToPx() + horizonPadding.ConvertToPx());
+    scrollLayoutProps->UpdateScrollWidth(value.ConvertToPx() + OPTION_MARGIN.ConvertToPx());
     
     for (size_t i = 0; i < options_.size(); ++i) {
         auto optionWidth = value.ConvertToPx();

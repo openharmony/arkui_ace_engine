@@ -247,27 +247,6 @@ void NavigationGroupNode::AddBackButtonIconToNavDestination(const RefPtr<UINode>
     }
 }
 
-void NavigationGroupNode::SetBackButtonVisible(const RefPtr<UINode>& navDestinationNode, bool isVisible)
-{
-    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationNode);
-    CHECK_NULL_VOID(navDestination);
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
-    CHECK_NULL_VOID(titleBarNode);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
-    CHECK_NULL_VOID(backButtonNode);
-    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(backButtonLayoutProperty);
-    if (isVisible) {
-        backButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    } else {
-        backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
-    }
-    backButtonNode->MarkModifyDone();
-    navDestination->UpdateTitleFontSize(isVisible);
-}
-
 void NavigationGroupNode::SetBackButtonEvent(
     const RefPtr<NavDestinationGroupNode>& navDestination, const RefPtr<NavRouterPattern>& navRouterPattern)
 {

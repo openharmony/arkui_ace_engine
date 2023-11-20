@@ -260,9 +260,10 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    if (currentFingers_ < fingers_) {
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
     }
+
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
     PointF windowPoint(event.GetOffset().GetX(), event.GetOffset().GetY());
@@ -282,9 +283,6 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     touchPointsDistance_[event.id] += delta_;
     time_ = event.time;
 
-    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
-        return;
-    }
     if (refereeState_ == RefereeState::DETECTING) {
         auto result = IsPanGestureAccept();
         if (result == GestureAcceptResult::ACCEPT) {
@@ -429,15 +427,12 @@ void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& /*event*/)
 
 bool PanRecognizer::CalculateTruthFingers(bool isDirectionUp) const
 {
-    int32_t totalFingers = 0;
     float totalDistance = 0.0f;
     for (auto& element : touchPointsDistance_) {
         auto each_point_move = element.second.GetY();
         if (GreatNotEqual(each_point_move, 0.0) && isDirectionUp) {
-            totalFingers++;
             totalDistance += each_point_move;
         } else if (LessNotEqual(each_point_move, 0.0) && !isDirectionUp) {
-            totalFingers++;
             totalDistance -= each_point_move;
         }
     }
@@ -445,7 +440,7 @@ bool PanRecognizer::CalculateTruthFingers(bool isDirectionUp) const
     if (deviceType_ == SourceType::MOUSE) {
         judgeDistance = mouseDistance_;
     }
-    return GreatNotEqual(totalDistance, judgeDistance) && totalFingers >= fingers_;
+    return GreatNotEqual(totalDistance, judgeDistance) && static_cast<int32_t>(touchPointsDistance_.size()) >= fingers_;
 }
 
 PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const

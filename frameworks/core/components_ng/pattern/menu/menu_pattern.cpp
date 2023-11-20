@@ -46,7 +46,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
-constexpr float MIN_SELECT_MENU_WIDTH = 64.0f;
+constexpr Dimension MIN_SELECT_MENU_WIDTH = 64.0_vp;
+constexpr int32_t COLUMN_NUM = 2;
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
@@ -973,14 +974,13 @@ void MenuPattern::DumpInfo()
 
 float MenuPattern::GetSelectMenuWidth()
 {
-    auto minWidth = Dimension(MIN_SELECT_MENU_WIDTH, DimensionUnit::VP);
     RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-    CHECK_NULL_RETURN(columnInfo, minWidth.ConvertToPx());
+    CHECK_NULL_RETURN(columnInfo, MIN_SELECT_MENU_WIDTH.ConvertToPx());
     auto parent = columnInfo->GetParent();
-    CHECK_NULL_RETURN(parent, minWidth.ConvertToPx());
+    CHECK_NULL_RETURN(parent, MIN_SELECT_MENU_WIDTH.ConvertToPx());
     parent->BuildColumnWidth();
-    auto defaultWidth = static_cast<float>(columnInfo->GetWidth(2));
-    float finalWidth;
+    auto defaultWidth = static_cast<float>(columnInfo->GetWidth(COLUMN_NUM));
+    float finalWidth = MIN_SELECT_MENU_WIDTH.ConvertToPx();
     
     if (IsWidthModifiedBySelect()) {
         auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
@@ -990,7 +990,7 @@ float MenuPattern::GetSelectMenuWidth()
         finalWidth = defaultWidth;
     }
     
-    if (finalWidth < minWidth.ConvertToPx()) {
+    if (finalWidth < MIN_SELECT_MENU_WIDTH.ConvertToPx()) {
         finalWidth = defaultWidth;
     }
     

@@ -712,9 +712,6 @@ void SliderPattern::HandleHoverEvent(bool isHover)
     hotFlag_ = isHover;
     mouseHoverFlag_ = mouseHoverFlag_ && isHover;
     if (!mouseHoverFlag_) {
-        if (!isFocusActive_) {
-            bubbleFlag_ = false;
-        }
         axisFlag_ = false;
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -732,7 +729,7 @@ void SliderPattern::HandleMouseEvent(const MouseInfo& info)
         }
     }
     // when mouse hovers over slider, distinguish between hover block and Wheel operation.
-    if (!mouseHoverFlag_ && !axisFlag_ && !isFocusActive_) {
+    if (!mouseHoverFlag_ && !axisFlag_ && !isFocusActive_ && !mousePressedFlag_) {
         bubbleFlag_ = false;
     }
 

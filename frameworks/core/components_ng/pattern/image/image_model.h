@@ -35,7 +35,7 @@ public:
     static ImageModel* GetInstance();
     virtual ~ImageModel() = default;
 
-    virtual void SetAlt(const std::string& src) = 0;
+    virtual void SetAlt(const ImageSourceInfo& src) = 0;
     virtual void SetBlur(double blur) = 0;
     virtual void SetBorder(const Border& border) = 0;
     virtual void SetBackBorder() = 0;
