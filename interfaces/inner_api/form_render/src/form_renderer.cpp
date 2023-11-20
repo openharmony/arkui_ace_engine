@@ -29,6 +29,7 @@ namespace {
 constexpr char FORM_RENDERER_ALLOW_UPDATE[] = "allowUpdate";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
 constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
+constexpr char TRANSPARENT_COLOR[] = "#00FFFFFF";
 } // namespace
 
 using EventHandler = OHOS::AppExecFwk::EventHandler;
@@ -92,6 +93,10 @@ void FormRenderer::InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppE
         return;
     }
     rsSurfaceNode->SetBounds(0.0f, 0.0f, width_, height_);
+    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) {
+        HILOG_INFO("InitUIContent SetFormBackgroundColor #00FFFFFF");
+        uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
+    }
     uiContent_->Foreground();
 }
 
@@ -101,6 +106,8 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
     width_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f);
     height_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 0.0f);
     proxy_ = want.GetRemoteObject(FORM_RENDERER_PROCESS_ON_ADD_SURFACE);
+    renderingMode_ = (AppExecFwk::Constants::RenderingMode)want.GetIntParam(
+        OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, 0);
 }
 
 void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -361,6 +368,11 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
         backgroundColor_ = backgroundColor;
         uiContent_->SetFormBackgroundColor(backgroundColor_);
     }
+    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) {
+        HILOG_INFO("AttachUIContent SetFormBackgroundColor #00FFFFFF");
+        uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
+    }
+
     uiContent_->Foreground();
 }
 } // namespace Ace

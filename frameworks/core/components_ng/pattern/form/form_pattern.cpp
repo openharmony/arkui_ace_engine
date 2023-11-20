@@ -399,7 +399,7 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
-        info.dimension != cardInfo_.dimension) {
+        info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
         // When cardInfo has changed, it will call AddForm in Fwk
         // If the width or height equal to zero, it will not
         if (NonPositive(size.Width()) || NonPositive(size.Height())) {
