@@ -1220,7 +1220,7 @@ void WebDelegate::RequestFocus()
                 auto focusHub = eventHub->GetOrCreateFocusHub();
                 CHECK_NULL_VOID(focusHub);
 
-                focusHub->RequestFocusImmediately();
+                focusHub->RequestFocusImmediately(true);
             }
 
             auto webCom = delegate->webComponent_.Upgrade();
