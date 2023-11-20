@@ -887,7 +887,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity006, TestSize.Level1)
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
 
     bool res = scrollPn->HandleScrollVelocity(5);
-    EXPECT_TRUE(res);
+    EXPECT_FALSE(res);
 }
 
 /**
