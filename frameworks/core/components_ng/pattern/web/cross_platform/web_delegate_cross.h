@@ -187,6 +187,7 @@ public:
     bool LoadDataWithRichText() override;
 
     void SetBoundsOrResize(const Size& drawSize, const Offset& offset) override;
+    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height) override;
 private:
     void ReleasePlatformResource();
     void CreatePluginResource(const Size& size, const Offset& position, const WeakPtr<NG::PipelineContext>& context);
