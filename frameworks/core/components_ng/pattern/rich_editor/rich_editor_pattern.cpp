@@ -2706,6 +2706,7 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
     } else if (info.GetAction() == MouseAction::RELEASE) {
         blockPress_ = false;
         leftMousePress_ = false;
+        auto oldMouseStatus = mouseStatus_;
         mouseStatus_ = MouseStatus::RELEASED;
         isMouseSelect_ = false;
         isMousePressed_ = false;
@@ -2713,7 +2714,8 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
         auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
         auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
         FireOnSelect(selectStart, selectEnd);
-        if (textSelector_.IsValid() && !textSelector_.StartEqualToDest() && IsSelectedBindSelectionMenu()) {
+        if (textSelector_.IsValid() && !textSelector_.StartEqualToDest() && IsSelectedBindSelectionMenu() &&
+            oldMouseStatus == MouseStatus::MOVE) {
             selectionMenuOffsetByMouse_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
                 static_cast<float>(info.GetGlobalLocation().GetY()));
             ShowSelectOverlay(RectF(), RectF(), false, RichEditorResponseType::SELECTED_BY_MOUSE);
@@ -3077,8 +3079,8 @@ void RichEditorPattern::ShowSelectOverlay(
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle, isCopyAll, &responseType](
-                               bool hasData) {
+    auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle, isCopyAll, responseType](
+                               bool hasData) mutable {
         auto pattern = weak.Upgrade();
         SelectOverlayInfo selectInfo;
         bool usingMouse = pattern->IsUsingMouse();
