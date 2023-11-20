@@ -71,7 +71,7 @@ class ACE_EXPORT Frontend : public AceType {
 
 public:
     Frontend() = default;
-    ~Frontend() override = default;
+    ~Frontend() override;
 
     enum class State { ON_CREATE, ON_DESTROY, ON_SHOW, ON_HIDE, ON_ACTIVE, ON_INACTIVE, UNDEFINE };
 
@@ -301,6 +301,7 @@ protected:
     FrontendDialogCallback dialogCallback_ = nullptr;
     State state_ = State::UNDEFINE;
     mutable std::recursive_mutex mutex_;
+    mutable std::mutex destructMutex_;
 };
 
 } // namespace OHOS::Ace

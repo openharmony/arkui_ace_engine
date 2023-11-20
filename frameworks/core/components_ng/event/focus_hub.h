@@ -37,7 +37,6 @@ constexpr int32_t DEEPTH_OF_MENU_WRAPPER = 3;
 constexpr int32_t DEEPTH_OF_MENU = 2;
 constexpr int32_t DEEPTH_OF_DIALOG = 2;
 constexpr int32_t DEEPTH_OF_PAGE = 1;
-constexpr int32_t DEEPTH_OF_POPUP = 2;
 
 enum class FocusType : int32_t {
     DISABLE = 0,
@@ -523,7 +522,7 @@ public:
     int32_t GetFrameId() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
-    bool RequestFocusImmediately();
+    bool RequestFocusImmediately(bool isJudgeRootTree = false);
     void RequestFocus() const;
     void RequestFocusWithDefaultFocusFirstly();
     void UpdateAccessibilityFocusInfo();
@@ -557,6 +556,7 @@ public:
     bool IsFocusableScopeByTab();
 
     bool IsFocusableWholePath();
+    bool IsOnRootTree();
 
     bool IsFocusable();
     bool IsFocusableNode();

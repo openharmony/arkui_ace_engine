@@ -75,6 +75,8 @@ public:
     std::string ToDataURL(RefPtr<RosenRenderContext> renderContext, const std::string& args);
 #ifndef USE_ROSEN_DRAWING
     bool DrawBitmap(RefPtr<RosenRenderContext> renderContext, SkBitmap& currentBitmap);
+#else
+    bool DrawBitmap(RefPtr<RosenRenderContext> renderContext, RSBitmap& currentBitmap);
 #endif
     std::string GetJsonData(const std::string& path);
 

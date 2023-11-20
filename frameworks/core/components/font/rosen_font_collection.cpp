@@ -119,6 +119,99 @@ void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t lengt
     }
 }
 
+void RosenFontCollection::InitializeFontCollection()
+{
+    std::call_once(fontFlag_, [this]() {
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto rosenCollection = RSFontCollection::GetInstance(false);
+    auto collectionTxtBase = rosenCollection->GetFontCollection();
+    auto collectionTxt = std::static_pointer_cast<rosen::FontCollectionTxt>(collectionTxtBase);
+    if (collectionTxt) {
+        fontCollection_ = collectionTxt->GetFontCollection();
+        dynamicFontManager_ = collectionTxt->GetDynamicFontManager();
+    }
+#else
+    auto fontCollection = AceType::DynamicCast<NG::TxtFontCollection>(NG::FontCollection::Current());
+    fontCollection_ = fontCollection->GetRawFontCollection();
+#endif
+    });
+}
+
+void RosenFontCollection::LoadThemeFont(const char* fontFamily, std::unique_ptr<char[]> buffer, size_t size)
+{
+    const std::string familyName = fontFamily;
+    const uint8_t* data = reinterpret_cast<uint8_t*>(buffer.get());
+    if (fontCollection_) {
+#ifndef USE_GRAPHIC_TEXT_GINE
+#ifndef USE_ROSEN_DRAWING
+        std::unique_ptr<SkStreamAsset> font_stream = std::make_unique<SkMemoryStream>(data, size, true);
+        sk_sp<SkTypeface> typeface = SkTypeface::MakeFromStream(std::move(font_stream));
+        txt::TypefaceFontAssetProvider& font_provider = dynamicFontManager_->font_provider();
+        if (familyName.empty()) {
+            font_provider.RegisterTypeface(typeface);
+        } else {
+            font_provider.RegisterTypeface(typeface, familyName);
+        }
+        fontCollection_->ClearFontFamilyCache();
+#else
+        LOGE("Drawing is not supported");
+#endif
+#else
+        fontCollection_->LoadThemeFont(familyName, data, size);
+#endif
+    }
+}
+
+void RosenFontCollection::LoadFontFamily(const char* fontFamily, const char* familySrc)
+{
+    InitializeFontCollection();
+    const std::string path = familySrc;
+    auto ret = StdFilesystemExists(path);
+    if (!ret) {
+        LOGE("font is not exist");
+        return;
+    }
+
+    std::ifstream ifs(path, std::ios_base::in);
+    if (!ifs.is_open()) {
+        LOGE("path file open fail");
+        return;
+    }
+    ifs.seekg(0, ifs.end);
+    if (!ifs.good()) {
+        ifs.close();
+        LOGE("font file is bad");
+        return;
+    }
+    auto size = ifs.tellg();
+    if (ifs.fail()) {
+        ifs.close();
+        LOGE("get size failed");
+        return;
+    }
+    ifs.seekg(ifs.beg);
+    if (!ifs.good()) {
+        ifs.close();
+        LOGE("file seek failed");
+        return;
+    }
+    std::unique_ptr<char[]> buffer = std::make_unique<char[]>(size);
+    ifs.read(buffer.get(), size);
+    if (!ifs.good()) {
+        ifs.close();
+        LOGE("read file failed");
+        return;
+    }
+    ifs.close();
+    LoadThemeFont(fontFamily, std::move(buffer), size);
+}
+
+bool RosenFontCollection::StdFilesystemExists(const std::string &path)
+{
+    std::ifstream f(path.c_str());
+    return f.good();
+}
+
 RosenFontCollection& RosenFontCollection::GetInstance()
 {
     return instance;

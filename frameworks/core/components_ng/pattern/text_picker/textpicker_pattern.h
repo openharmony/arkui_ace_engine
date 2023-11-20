@@ -276,6 +276,11 @@ public:
         return isShowInDialog_;
     }
 
+    double GetDefaultPickerItemHeight() const
+    {
+        return defaultPickerItemHeight_;
+    }
+
     void SetSelecteds(const std::vector<uint32_t>& values);
 
     void HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify);

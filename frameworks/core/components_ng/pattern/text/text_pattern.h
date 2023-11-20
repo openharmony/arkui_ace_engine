@@ -426,6 +426,7 @@ private:
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
     RefPtr<RenderContext> GetRenderContext();
+    void ProcessBoundRectByTextShadow(RectF& rect);
     // to check if drag is in progress
 
     bool isMeasureBoundary_ = false;

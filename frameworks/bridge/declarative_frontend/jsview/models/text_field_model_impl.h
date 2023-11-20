@@ -19,8 +19,8 @@
 #include <optional>
 #include <string>
 
-#include "frameworks/core/components/text_field/textfield_theme.h"
 #include "frameworks/core/components/text_field/text_field_component.h"
+#include "frameworks/core/components/text_field/textfield_theme.h"
 #include "frameworks/core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::Framework {
@@ -76,11 +76,14 @@ public:
     void SetOnClick(std::function<void(const ClickInfo&)>&& func) override;
     void SetFocusableAndFocusNode() override;
     void SetSelectionMenuHidden(bool contextMenuHidden) override {};
-    void SetCustomKeyboard(const std::function<void ()> &&buildFunc) override {};
+    void SetCustomKeyboard(const std::function<void()>&& buildFunc) override {};
+    void SetPasswordRules(const std::string& passwordRules) override {};
+    void SetEnableAutoFill(bool enableAutoFill) override {};
     void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) override {};
     void SetCancelIconSize(const CalcDimension& iconSize) override {};
     void SetCanacelIconSrc(const std::string& iconSrc) override {};
     void SetCancelIconColor(const Color& iconColor) override {};
+    void SetSelectAllValue(bool isSetSelectAllValue) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

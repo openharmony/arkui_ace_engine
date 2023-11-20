@@ -273,7 +273,7 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) { return; };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
     PanDirection panDirection;
-    panDirection.type = PanDirection::VERTICAL;
+    panDirection.type = PanDirection::ALL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
@@ -2104,7 +2104,7 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
             item.label, ""
         });
     }
-    auto menu = MenuView::Create(selectParam, id);
+    auto menu = MenuView::Create(selectParam, id, host->GetTag());
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto eventHub = host->GetEventHub<WebEventHub>();

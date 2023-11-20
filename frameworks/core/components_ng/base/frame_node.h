@@ -391,6 +391,7 @@ public:
     {
         draggable_ = draggable;
         userSet_ = true;
+        customerSet_ = false;
     }
 
     void SetCustomerDraggable(bool draggable) {
@@ -595,6 +596,10 @@ public:
         return localMat_;
     }
 
+    RefPtr<FrameNode> GetPageNode();
+    void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
+    void NotifyFillRequestFailed(int32_t errCode);
+
     int32_t GetUiExtensionId();
     int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId);
     void SearchExtensionElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
@@ -607,8 +612,6 @@ public:
         int32_t offset, Accessibility::AccessibilityElementInfo& output);
     bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset);
-    bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-        std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline);
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -643,6 +646,8 @@ private:
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpAdvanceInfo() override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    bool CheckAutoSave() override;
     void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
@@ -664,6 +669,8 @@ private:
 
     void UpdateParentAbsoluteOffset();
     void AddFrameNodeSnapshot(bool isHit, int32_t parentId);
+
+    int32_t GetNodeExpectedRate();
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -726,6 +733,8 @@ private:
     bool checkboxFlag_ = false;
 
     RefPtr<FrameNode> overlayNode_;
+
+    std::unordered_map<std::string, int32_t> sceneRateMap_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

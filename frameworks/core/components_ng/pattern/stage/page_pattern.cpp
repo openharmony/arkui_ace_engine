@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 #include "base/log/jank_frame_report.h"
+#include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/utils.h"
 #include "core/animation/animator.h"
@@ -72,6 +73,9 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
+    if (type == PageTransitionType::EXIT_POP || type == PageTransitionType::EXIT_PUSH) {
+        ProcessAutoSave();
+    }
     if (pageTransitionFunc_) {
         pageTransitionFunc_();
     }
@@ -105,6 +109,19 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
         return renderContext->TriggerPageTransition(type, nullptr);
     }
     return renderContext->TriggerPageTransition(type, wrappedOnFinish);
+}
+
+void PagePattern::ProcessAutoSave()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->NeedRequestAutoSave()) {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "No need to auto save");
+        return;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    container->RequestAutoSave(host);
 }
 
 void PagePattern::ProcessHideState()

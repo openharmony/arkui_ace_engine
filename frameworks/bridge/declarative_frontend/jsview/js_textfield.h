@@ -36,7 +36,7 @@ public:
     static void SetEnterKeyType(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
     static void SetCaretColor(const JSCallbackInfo& info);
-    static void SetCaretStyle(const JSCallbackInfo &info);
+    static void SetCaretStyle(const JSCallbackInfo& info);
     static void SetCaretPosition(const JSCallbackInfo& info);
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetMaxLength(const JSCallbackInfo& info);
@@ -87,10 +87,13 @@ public:
     static void SetShowUnderline(const JSCallbackInfo& info);
     static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
     static void SetSelectionMenuHidden(const JSCallbackInfo& info);
-    static bool ParseJsCustomKeyboardBuilder(const JSCallbackInfo& info,
-        int32_t index, std::function<void()>& buildFunc);
+    static bool ParseJsCustomKeyboardBuilder(
+        const JSCallbackInfo& info, int32_t index, std::function<void()>& buildFunc);
     static void SetCustomKeyboard(const JSCallbackInfo& info);
+    static void SetPasswordRules(const JSCallbackInfo& info);
+    static void SetEnableAutoFill(const JSCallbackInfo& info);
     static void SetCancelButton(const JSCallbackInfo& info);
+    static void SetSelectAllValue(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

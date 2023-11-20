@@ -43,11 +43,11 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/base/utils/base_id.cpp",
 
     # properties
-    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
 
     # theme
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
@@ -76,13 +76,13 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/core/common/window.cpp",
 
     # event
-    "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
+    "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
 
     # mock
-    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_skia_image_data.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_skia_image.cpp",
     "$ace_root/test/mock/adapter/mock_file_uri_helper_ohos.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_skia_image_data.cpp",
+    "$ace_root/test/mock/core/render/mock_skia_image.cpp",
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
 
     #fuzz
@@ -99,7 +99,6 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
 
     #"$ace_root/frameworks/base/resource/internal_resource.cpp",
     "$ace_root/frameworks/base/log/ace_tracker.cpp",
-    "$ace_root/frameworks/base/test/mock/mock_download_manager.cpp",
     "$ace_root/frameworks/core/common/event_manager.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/gesture_referee.cpp",
@@ -111,6 +110,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/core/image/image_provider.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
+    "$ace_root/test/mock/base/mock_download_manager.cpp",
     "imageloader_fuzzer.cpp",
   ]
 

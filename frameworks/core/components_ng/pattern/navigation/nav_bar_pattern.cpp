@@ -777,7 +777,7 @@ void NavBarPattern::ResetAssociatedScroll()
     titlePattern->ResetAssociatedScroll();
 }
 
-bool NavBarPattern::UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node)
+bool NavBarPattern::UpdateAssociatedScrollOffset(float offset)
 {
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, true);
@@ -785,7 +785,7 @@ bool NavBarPattern::UpdateAssociatedScrollOffset(float offset, const RefPtr<Fram
     CHECK_NULL_RETURN(titleNode, true);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, true);
-    return titlePattern->UpdateAssociatedScrollOffset(offset, node);
+    return titlePattern->UpdateAssociatedScrollOffset(offset);
 }
 
 bool NavBarPattern::IsTitleModeFree()

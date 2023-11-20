@@ -581,7 +581,7 @@ var FormDimension;
   FormDimension["Dimension_2_4"] = 3;
   FormDimension["Dimension_4_4"] = 4;
   FormDimension["Dimension_2_1"] = 5;
-  FormDimension["Dimension_1_1"] = 6;
+  FormDimension["DIMENSION_1_1"] = 6;
 })(FormDimension || (FormDimension = {}));
 
 var TransitionType;
@@ -793,6 +793,8 @@ var InputType;
   InputType[InputType["Password"] = 7] = "Password";
   InputType[InputType["NUMBER_PASSWORD"] = 8] = "NUMBER_PASSWORD";
   InputType[InputType["SCREEN_LOCK_PASSWORD"] = 9] = "SCREEN_LOCK_PASSWORD";
+  InputType[InputType["USER_NAME"] = 10] = "USER_NAME";
+  InputType[InputType["NEW_PASSWORD"] = 11] = "NEW_PASSWORD";
 })(InputType || (InputType = {}));
 
 var SearchType;
@@ -866,6 +868,13 @@ var ResponseType;
   ResponseType[ResponseType["RightClick"] = 0] = "RightClick";
   ResponseType[ResponseType["LongPress"] = 1] = "LongPress";
 })(ResponseType || (ResponseType = {}));
+
+var RichEditorResponseType;
+(function (RichEditorResponseType) {
+  RichEditorResponseType[RichEditorResponseType["RIGHT_CLICK"] = 0] = "RIGHT_CLICK";
+  RichEditorResponseType[RichEditorResponseType["LONG_PRESS"] = 1] = "LONG_PRESS";
+  RichEditorResponseType[RichEditorResponseType["SELECT"] = 2] = "SELECT";
+})(RichEditorResponseType || (RichEditorResponseType = {}));
 
 var MenuPreviewMode;
 (function (MenuPreviewMode) {
@@ -1093,6 +1102,11 @@ var BlurStyle;
   BlurStyle[BlurStyle["BACKGROUND_REGULAR"] = 5] = "BACKGROUND_REGULAR";
   BlurStyle[BlurStyle["BACKGROUND_THICK"] = 6] = "BACKGROUND_THICK";
   BlurStyle[BlurStyle["BACKGROUND_ULTRA_THICK"] = 7] = "BACKGROUND_ULTRA_THICK";
+  BlurStyle[BlurStyle["COMPONENT_ULTRA_THIN"] = 8] = "COMPONENT_ULTRA_THIN";
+  BlurStyle[BlurStyle["COMPONENT_THIN"] = 9] = "COMPONENT_THIN";
+  BlurStyle[BlurStyle["COMPONENT_REGULAR"] = 10] = "COMPONENT_REGULAR";
+  BlurStyle[BlurStyle["COMPONENT_THICK"] = 11] = "COMPONENT_THICK";
+  BlurStyle[BlurStyle["COMPONENT_ULTRA_THICK"] = 12] = "COMPONENT_ULTRA_THICK";
   BlurStyle[BlurStyle["NONE"] = 0] = "NONE";
 })(BlurStyle || (BlurStyle = {}));
 
@@ -1250,6 +1264,27 @@ var FunctionKey;
   FunctionKey[FunctionKey["F11"] = 11] = "F11";
   FunctionKey[FunctionKey["F12"] = 12] = "F12";
 })(FunctionKey || (FunctionKey = {}));
+
+var GestureJudgeResult;
+(function (GestureJudgeResult) {
+  GestureJudgeResult[GestureJudgeResult["CONTINUE"] = 0] = "CONTINUE";
+  GestureJudgeResult[GestureJudgeResult["REJECT"] = 1] = "REJECT";
+})(GestureJudgeResult || (GestureJudgeResult = {}));
+
+var GestureControl;
+(function (GestureControl) {
+    let GestureType;
+    (function (GestureType) {
+        GestureType[GestureType["TAP_GESTURE"] = 0] = "TAP_GESTURE";
+        GestureType[GestureType["LONG_PRESS_GESTURE"] = 1] = "LONG_PRESS_GESTURE";
+        GestureType[GestureType["PAN_GESTURE"] = 2] = "PAN_GESTURE";
+        GestureType[GestureType["PINCH_GESTURE"] = 3] = "PINCH_GESTURE";
+        GestureType[GestureType["SWIPE_GESTURE"] = 4] = "SWIPE_GESTURE";
+        GestureType[GestureType["ROTATION_GESTURE"] = 5] = "ROTATION_GESTURE";
+        GestureType[GestureType["DRAG"] = 6] = "DRAG";
+        GestureType[GestureType["CLICK"] = 7] = "CLICK";
+    })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
+})(GestureControl || (GestureControl = {}));
 
 class SubTabBarStyle {
   constructor(content) {

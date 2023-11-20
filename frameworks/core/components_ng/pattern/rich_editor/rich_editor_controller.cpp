@@ -101,6 +101,26 @@ RichEditorSelection RichEditorController::GetSpansInfo(int32_t start, int32_t en
     return value;
 }
 
+RichEditorSelection RichEditorController::GetSelectionSpansInfo()
+{
+    RichEditorSelection value;
+    auto richEditorPattern = pattern_.Upgrade();
+    if (richEditorPattern) {
+        auto start = std::max(richEditorPattern->GetTextSelector().GetTextStart(), 0);
+        auto end = std::max(richEditorPattern->GetTextSelector().GetTextEnd(), 0);
+        value = richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::ONSELECT);
+    }
+    return value;
+}
+
+void RichEditorController::SetSelection(int32_t selectionStart, int32_t selectionEnd)
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    if (richEditorPattern) {
+        richEditorPattern->SetSelection(selectionStart, selectionEnd);
+    }
+}
+
 void RichEditorController::DeleteSpans(const RangeOptions& options)
 {
     auto richEditorPattern = pattern_.Upgrade();

@@ -269,7 +269,10 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     auto offsetY = GetFloatImageOffset(target).GetY();
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
+    renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     auto targetSize = CalcSize(NG::CalcLength(width), NG::CalcLength(height));
     props->UpdateUserDefinedIdealSize(targetSize);
@@ -497,9 +500,10 @@ void MenuView::UpdateMenuPaintProperty(
     paintProperty->UpdateArrowOffset(menuParam.arrowOffset.value_or(Dimension(0)));
 }
 
-RefPtr<FrameNode> MenuView::Create(const std::vector<SelectParam>& params, int32_t targetId)
+RefPtr<FrameNode> MenuView::Create(
+    const std::vector<SelectParam>& params, int32_t targetId, const std::string& targetTag)
 {
-    auto [wrapperNode, menuNode] = CreateMenu(targetId);
+    auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag);
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto menuPattern = menuNode->GetPattern<MenuPattern>();

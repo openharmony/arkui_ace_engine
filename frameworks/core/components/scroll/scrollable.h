@@ -22,6 +22,7 @@
 #include "core/animation/animator.h"
 #include "core/animation/friction_motion.h"
 #include "core/animation/scroll_motion.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/event/axis_event.h"
@@ -63,6 +64,7 @@ using ContinuousSlidingCallback = std::function<double()>;
 using CalePredictSnapOffsetCallback = std::function<std::optional<float>(float delta)>;
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
+using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 
 class Scrollable : public TouchEventTarget, public RelatedChild {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
@@ -455,6 +457,16 @@ public:
         actionEnd_ = std::move(actionEnd);
     }
 
+    bool GetIsDragging() const
+    {
+        return isDragging_;
+    }
+
+    void SetDragFRCSceneCallback(DragFRCSceneCallback&& dragFRCSceneCallback)
+    {
+        dragFRCSceneCallback_ = std::move(dragFRCSceneCallback);
+    }
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
@@ -547,6 +559,8 @@ private:
     CalePredictSnapOffsetCallback calePredictSnapOffsetCallback_;
     NeedScrollSnapToSideCallback needScrollSnapToSideCallback_;
     GestureEventFunc actionEnd_;
+
+    DragFRCSceneCallback dragFRCSceneCallback_;
 };
 
 } // namespace OHOS::Ace

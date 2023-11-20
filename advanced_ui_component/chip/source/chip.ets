@@ -14,9 +14,18 @@
  */
 
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
+import measure from '@ohos.measure';
+import mediaquery from '@ohos.mediaquery';
+
 export enum ChipSize {
   NORMAL = "NORMAL",
   SMALL = "SMALL"
+}
+
+enum BreakPointsType {
+  SM = "SM",
+  MD = "MD",
+  LG = "LG"
 }
 
 export interface IconCommonOptions {
@@ -64,11 +73,18 @@ interface LabelTheme {
   smallMargin: Margin;
 }
 
-interface chipNodeOpacity {
+interface ChipNodeOpacity {
   normal: number;
   hover: number;
   pressed: number;
   disabled: number;
+}
+
+interface ChipNodeConstraintWidth {
+  breakPointMinWidth: number,
+  breakPointSmMaxWidth: number,
+  breakPointMdMaxWidth: number,
+  breakPointLgMaxWidth: number,
 }
 
 interface ChipNodeTheme {
@@ -84,7 +100,8 @@ interface ChipNodeTheme {
   smallPadding: Padding;
   hoverBlendColor: ResourceColor;
   pressedBlendColor: ResourceColor;
-  opacity: chipNodeOpacity;
+  opacity: ChipNodeOpacity;
+  breakPointConstraintWidth: ChipNodeConstraintWidth;
 }
 
 interface ChipTheme {
@@ -125,7 +142,13 @@ export const defaultTheme: ChipTheme = {
     smallPadding: { left: 12, right: 12, top: 0, bottom: 0 },
     hoverBlendColor: $r('sys.color.ohos_id_color_hover'),
     pressedBlendColor: $r('sys.color.ohos_id_color_click_effect'),
-    opacity: { normal: 1, hover: 0.95, pressed: 0.9, disabled: 0.4 }
+    opacity: { normal: 1, hover: 0.95, pressed: 0.9, disabled: 0.4 },
+    breakPointConstraintWidth: {
+      breakPointMinWidth: 128,
+      breakPointSmMaxWidth: 156,
+      breakPointMdMaxWidth: 280,
+      breakPointLgMaxWidth: 400
+    }
   }
 };
 
@@ -176,12 +199,17 @@ export struct ChipComponent {
   @State chipOpacity: number = 1
   @State chipBlendColor: ResourceColor = Color.Transparent
   @State deleteChip: boolean = false
+  @State chipNodeOnFocus: boolean = false
+  @State useDefaultSuffixIcon: boolean = false
   private chipNodeSize: SizeOptions = {}
   private onClose: () => void = noop
-  private useDefaultSuffixIcon: boolean = false
+  @State chipBreakPoints: BreakPointsType = BreakPointsType.SM
+  private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("0vp<width<600vp")
+  private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("600vp<=width<840vp")
+  private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("840vp<=width")
 
   private isChipSizeEnum(): boolean {
-    return typeof (this.chipSize) === 'number'
+    return typeof (this.chipSize) === 'string'
   }
 
   private getLabelFontSize(): Dimension {
@@ -198,9 +226,9 @@ export struct ChipComponent {
 
   private getLabelMargin(): Margin {
     return {
-      left: this.label?.labelMargin?.left ??
+      left: (this.label?.labelMargin?.left as number) ??
         ((this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) ? this.theme.label.smallMargin.left : this.theme.label.normalMargin.left),
-      right: this.label?.labelMargin?.right ??
+      right: (this.label?.labelMargin?.right as number) ??
         ((this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) ? this.theme.label.smallMargin.right : this.theme.label.normalMargin.right)
     }
   }
@@ -214,8 +242,8 @@ export struct ChipComponent {
 
   private getPrefixIconSize(): SizeOptions {
     return {
-      width: this.prefixIcon?.size?.width ?? (this.prefixIcon?.src ? this.theme.prefixIcon.size.width : 0),
-      height: this.prefixIcon?.size?.height ?? (this.prefixIcon?.src ? this.theme.prefixIcon.size.height : 0)
+      width: (this.prefixIcon?.size?.width as number) ?? (this.prefixIcon?.src ? this.theme.prefixIcon.size.width : 0),
+      height: (this.prefixIcon?.size?.height as number) ?? (this.prefixIcon?.src ? this.theme.prefixIcon.size.height : 0)
     }
   }
 
@@ -232,7 +260,7 @@ export struct ChipComponent {
   }
 
   private getChipNodePadding(): Padding {
-    return (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) ? this.theme.chipNode.smallPadding : this.theme.chipNode.normalPadding
+    return (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ? this.theme.chipNode.smallPadding : this.theme.chipNode.normalPadding
   }
 
   private getChipNodeRadius(): Dimension {
@@ -246,11 +274,34 @@ export struct ChipComponent {
 
   private getChipNodeHeight(): Length {
     if (this.isChipSizeEnum()) {
-      return this.chipSize == ChipSize.SMALL ? this.theme.chipNode.smallHeight : this.theme.chipNode.normalHeight
+      return this.chipSize === ChipSize.SMALL ? this.theme.chipNode.smallHeight : this.theme.chipNode.normalHeight
     } else {
       this.chipNodeSize = this.chipSize as SizeOptions
       return this.chipNodeSize?.height ?? this.theme.chipNode.normalHeight
     }
+  }
+
+  private getLabelWidth(): number {
+      return px2vp(measure.measureText({
+        textContent: this.label.text,
+        fontSize: this.label?.fontSize ?? '12.0_fp',
+        fontFamily: this.label?.fontFamily ?? this.theme.label.fontFamily,
+        maxLines: 1,
+        overflow: TextOverflow.Ellipsis,
+        textAlign: TextAlign.Center
+      }))
+  }
+
+  private getCalculateChipNodeWidth(): number {
+    let calWidth: number = 0
+    calWidth += this.getChipNodePadding().left as number
+    calWidth += this.getPrefixIconSize().width as number
+    calWidth += this.getLabelMargin().left as number
+    calWidth += this.getLabelWidth()
+    calWidth += this.getLabelMargin().right as number
+    calWidth += this.getSuffixIconSize().width as number
+    calWidth += this.getChipNodePadding().right as number
+    return calWidth
   }
 
   private getChipNodeOpacity(): number {
@@ -328,12 +379,67 @@ export struct ChipComponent {
     return this.suffixIcon.src
   }
 
-  private getChipNodeWidth(): Length | undefined {
+  private getChipNodeWidth(): Length {
     if (!this.isChipSizeEnum()) {
       this.chipNodeSize = this.chipSize as SizeOptions
-      return this.chipNodeSize?.width
+      if (this.chipNodeSize?.width) {
+        return this.chipNodeSize?.width
+      }
     }
-    return void (0)
+    let constraintWidth: ConstraintSizeOptions = this.getChipConstraintWidth()
+    return Math.min(Math.max(this.getCalculateChipNodeWidth(), constraintWidth.minWidth as number), constraintWidth.maxWidth as number);
+  }
+
+  private getFocusOverlaySize(): SizeOptions {
+    return { width: this.getChipNodeWidth() as number + 8, height: this.getChipNodeHeight() as number + 8 }
+  }
+
+  private getChipConstraintWidth(): ConstraintSizeOptions {
+
+    if (!this.isChipSizeEnum()) {
+      this.chipNodeSize = this.chipSize as SizeOptions
+      if (this.chipNodeSize?.width) {
+        return { minWidth: 0, maxWidth: this.chipNodeSize.width as number }
+      }
+    }
+
+    let constraintWidth: number = this.getCalculateChipNodeWidth()
+
+    switch (this.chipBreakPoints) {
+      case BreakPointsType.SM:
+        return {
+          minWidth: 0,
+          maxWidth: Math.min(constraintWidth , this.theme.chipNode.breakPointConstraintWidth.breakPointSmMaxWidth)
+        }
+      case BreakPointsType.MD:
+        return {
+          minWidth: Math.max(constraintWidth , this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
+          maxWidth: Math.min(constraintWidth , this.theme.chipNode.breakPointConstraintWidth.breakPointMdMaxWidth)
+        }
+
+      case BreakPointsType.LG:
+        return {
+          minWidth: Math.max(constraintWidth , this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
+          maxWidth: Math.min(constraintWidth , this.theme.chipNode.breakPointConstraintWidth.breakPointLgMaxWidth)
+        }
+      default:
+        return { minWidth: 0, maxWidth: constraintWidth }
+    }
+  }
+
+  @Builder
+  focusOverlay() {
+    Stack() {
+      if (this.chipNodeOnFocus) {
+        Stack()
+          .borderRadius(this.getChipNodeRadius())
+          .size(this.getFocusOverlaySize())
+          .borderColor(this.theme.chipNode.focusOutlineColor)
+          .borderWidth(this.theme.chipNode.borderWidth)
+      }
+    }
+    .size({ width: 1, height: 1 })
+    .align(Alignment.Center)
   }
 
   @Styles
@@ -346,6 +452,30 @@ export struct ChipComponent {
   suffixIconNormalStyles() {
     .borderColor(Color.Transparent)
     .borderWidth(0)
+  }
+
+  aboutToAppear() {
+    this.smListener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
+      if (mediaQueryResult.matches) {
+        this.chipBreakPoints = BreakPointsType.SM
+      }
+    })
+    this.mdListener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
+      if (mediaQueryResult.matches) {
+        this.chipBreakPoints = BreakPointsType.MD
+      }
+    })
+    this.lgListener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
+      if (mediaQueryResult.matches) {
+        this.chipBreakPoints = BreakPointsType.LG
+      }
+    })
+  }
+
+  aboutToDisappear() {
+    this.smListener.off("change")
+    this.mdListener.off("change")
+    this.lgListener.off("change")
   }
 
   @Builder
@@ -373,6 +503,7 @@ export struct ChipComponent {
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .flexShrink(1)
         .focusable(true)
+        .textAlign(TextAlign.Center)
 
       Image(this.getSuffixIconSrc())
         .opacity(this.getChipNodeOpacity())
@@ -402,10 +533,11 @@ export struct ChipComponent {
         })
     }
     .justifyContent(FlexAlign.Center)
-    .clip(true)
+    .clip(false)
     .padding(this.getChipNodePadding())
     .height(this.getChipNodeHeight())
     .width(this.getChipNodeWidth())
+    .constraintSize(this.getChipConstraintWidth())
     .backgroundColor(this.getChipNodeBackGroundColor())
     .borderRadius(this.getChipNodeRadius())
     .enabled(this.chipEnabled)
@@ -413,6 +545,13 @@ export struct ChipComponent {
     .focusable(true)
     .colorBlend(this.chipBlendColor)
     .opacity(this.getChipNodeOpacity())
+    .overlay(this.focusOverlay, { align: Alignment.Center })
+    .onFocus(() => {
+      this.chipNodeOnFocus = true
+    })
+    .onBlur(() => {
+      this.chipNodeOnFocus = false
+    })
     .onTouch((event) => {
       this.handleTouch(event)
     })

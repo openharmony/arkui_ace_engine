@@ -443,6 +443,27 @@ void UINode::OnAttachToMainTree(bool)
     }
 }
 
+void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap)
+{
+    DumpViewDataPageNode(viewDataWrap);
+    for (const auto& item : GetChildren()) {
+        item->DumpViewDataPageNodes(viewDataWrap);
+    }
+}
+
+bool UINode::NeedRequestAutoSave()
+{
+    if (CheckAutoSave()) {
+        return true;
+    }
+    for (const auto& item : GetChildren()) {
+        if (item->NeedRequestAutoSave()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void UINode::DumpTree(int32_t depth)
 {
     if (DumpLog::GetInstance().GetDumpFile()) {

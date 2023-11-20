@@ -233,8 +233,10 @@ public:
 
     ~PandaFunctionData() = default;
 
-    NO_COPY_SEMANTIC(PandaFunctionData);
-    NO_MOVE_SEMANTIC(PandaFunctionData);
+    PandaFunctionData(const PandaFunctionData&) = delete;
+    void operator=(const PandaFunctionData&) = delete;
+    PandaFunctionData(PandaFunctionData&&) = delete;
+    PandaFunctionData& operator=(PandaFunctionData&&) = delete;
 
 private:
     Local<JSValueRef> Callback(panda::JsiRuntimeCallInfo* info) const;

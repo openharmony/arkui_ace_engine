@@ -60,6 +60,7 @@ struct SelectMenuInfo {
     bool showCut = true;
     bool showCameraInput = false;
     std::optional<OffsetF> menuOffset;
+    std::optional<int32_t> responseType;
     std::function<void()> menuBuilder;
 
     bool IsIconChanged(const SelectMenuInfo& info) const

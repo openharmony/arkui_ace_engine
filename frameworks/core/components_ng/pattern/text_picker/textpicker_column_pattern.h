@@ -321,6 +321,11 @@ public:
         return touchBreak_;
     }
 
+    void NeedResetOptionPropertyHeight(bool needOptionPropertyHeightReset)
+    {
+        needOptionPropertyHeightReset_ = needOptionPropertyHeightReset;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -388,6 +393,8 @@ private:
     RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<EventParam> param);
     void SetAccessibilityAction();
 
+    void ResetOptionPropertyHeight();
+
     float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;
@@ -440,6 +447,7 @@ private:
     bool clickBreak_ = false;
     bool touchBreak_ = false;
     bool animationBreak_ = false;
+    bool needOptionPropertyHeightReset_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

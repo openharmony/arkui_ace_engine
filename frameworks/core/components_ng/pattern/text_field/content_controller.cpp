@@ -108,7 +108,8 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::string& res
             textChanged |= FilterWithEvent(URL_WHITE_LIST, result);
             break;
         }
-        case TextInputType::VISIBLE_PASSWORD: {
+        case TextInputType::VISIBLE_PASSWORD:
+        case TextInputType::NEW_PASSWORD: {
             textChanged |= FilterWithAscii(result);
             break;
         }

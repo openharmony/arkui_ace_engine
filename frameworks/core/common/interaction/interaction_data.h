@@ -53,6 +53,7 @@ struct DragDataCore {
     int32_t displayY = -1;
     int32_t displayId = -1;
     bool hasCanceledAnimation = false;
+    std::map<std::string, int64_t> summary;
 };
 
 struct DragNotifyMsg {

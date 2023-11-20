@@ -148,7 +148,7 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
     }
 }
 
-bool FocusHub::RequestFocusImmediately()
+bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
 {
     auto context = NG::PipelineContext::GetCurrentContext();
     if (context && context->GetIsFocusingByTab()) {
@@ -162,6 +162,10 @@ bool FocusHub::RequestFocusImmediately()
     }
 
     if (!IsFocusableWholePath()) {
+        return false;
+    }
+
+    if (isJudgeRootTree && !IsOnRootTree()) {
         return false;
     }
 
@@ -205,8 +209,7 @@ RefPtr<FocusHub> FocusHub::GetChildMainView()
         }
         auto frameName = child->GetFrameName();
         if (frameName == V2::PAGE_ETS_TAG || frameName == V2::MENU_WRAPPER_ETS_TAG || frameName == V2::DIALOG_ETS_TAG ||
-            frameName == V2::MODAL_PAGE_TAG || frameName == V2::MENU_ETS_TAG || frameName == V2::SHEET_PAGE_TAG ||
-            frameName == V2::POPUP_ETS_TAG) {
+            frameName == V2::MODAL_PAGE_TAG || frameName == V2::MENU_ETS_TAG || frameName == V2::SHEET_PAGE_TAG) {
             if (!curFocusMainView && child->IsCurrentFocus()) {
                 curFocusMainView = child;
             }
@@ -254,8 +257,6 @@ RefPtr<FocusHub> FocusHub::GetMainViewRootScope()
         rootScopeDeepth = DEEPTH_OF_MENU;
     } else if (frameName == V2::DIALOG_ETS_TAG) {
         rootScopeDeepth = DEEPTH_OF_DIALOG;
-    } else if (frameName == V2::POPUP_ETS_TAG) {
-        rootScopeDeepth = DEEPTH_OF_POPUP;
     } else {
         rootScopeDeepth = DEEPTH_OF_PAGE;
     }
@@ -263,9 +264,6 @@ RefPtr<FocusHub> FocusHub::GetMainViewRootScope()
     for (int32_t i = 0; i < rootScopeDeepth; ++i) {
         CHECK_NULL_RETURN(rootScope, nullptr);
         rootScope = rootScope->GetChildren().front();
-    }
-    if (rootScope->GetFocusType() != FocusType::SCOPE) {
-        return rootScope->GetParentFocusHub();
     }
     return rootScope;
 }
@@ -1501,6 +1499,19 @@ bool FocusHub::IsFocusableWholePath()
     return IsFocusable();
 }
 
+bool FocusHub::IsOnRootTree()
+{
+    auto parent = GetParentFocusHub();
+    while (parent) {
+        auto parentName = parent->GetFrameName();
+        if (parentName == V2::ROOT_ETS_TAG) {
+            return true;
+        }
+        parent = parent->GetParentFocusHub();
+    }
+    return false;
+}
+
 void FocusHub::CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes)
 {
     if (GetTabIndex() > 0 && IsFocusable()) {
@@ -1652,7 +1663,7 @@ int32_t FocusHub::GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes) const
         }
         ++i;
     }
-    return NONE_TAB_FOCUSED_INDEX;
+    return DEFAULT_TAB_FOCUSED_INDEX;
 }
 
 bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event)

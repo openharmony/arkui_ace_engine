@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "base/view_data/view_data_wrap.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -293,6 +294,14 @@ public:
 
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
+    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
+    virtual void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
+    virtual void NotifyFillRequestFailed(int32_t errCode) {}
+    virtual bool CheckAutoSave()
+    {
+        return false;
+    }
+
     template<typename T>
     RefPtr<T> GetLayoutProperty() const
     {
@@ -422,11 +431,6 @@ public:
         int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
     virtual bool TransferExecuteAction(
         int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
-    {
-        return false;
-    }
-    virtual bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-        std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline)
     {
         return false;
     }

@@ -55,6 +55,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -63,6 +64,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
@@ -415,6 +417,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (hasAnimation) {
         RequestFrame();
     }
+    FlushFrameRate();
     FlushMessages();
     if (dragCleanTask_) {
         dragCleanTask_();
@@ -578,6 +581,16 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     FlushAnimationClosure();
     FlushMessages();
     FlushFocus();
+}
+
+void PipelineContext::FlushFrameRate()
+{
+    if (frameRateManager_->IsRateChanged()) {
+        auto rate = frameRateManager_->GetExpectedRate();
+        ACE_SCOPED_TRACE("FlushFrameRate Expected frameRate = %d", rate);
+        window_->FlushFrameRate(rate);
+        frameRateManager_->SetIsRateChanged(false);
+    }
 }
 
 void PipelineContext::FlushBuild()
@@ -1433,6 +1446,58 @@ void PipelineContext::RegisterDumpInfoListener(const std::function<void(const st
     dumpListeners_.push_back(callback);
 }
 
+bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap)
+{
+    CHECK_NULL_RETURN(viewDataWrap, false);
+    RefPtr<FrameNode> pageNode = nullptr;
+    if (node == nullptr) {
+        if (stageManager_) {
+            pageNode = stageManager_->GetLastPage();
+        }
+    } else {
+        pageNode = node->GetPageNode();
+    }
+    CHECK_NULL_RETURN(pageNode, false);
+    pageNode->DumpViewDataPageNodes(viewDataWrap);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, false);
+    auto pageInfo = pagePattern->GetPageInfo();
+    CHECK_NULL_RETURN(pageInfo, false);
+    viewDataWrap->SetPageUrl(pageInfo->GetPageUrl());
+    return true;
+}
+
+bool PipelineContext::CheckNeedAutoSave()
+{
+    CHECK_NULL_RETURN(stageManager_, false);
+    auto pageNode = stageManager_->GetLastPage();
+    CHECK_NULL_RETURN(pageNode, false);
+    return pageNode->NeedRequestAutoSave();
+}
+
+void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap)
+{
+    CHECK_NULL_VOID(viewDataWrap);
+    auto pageNodeInfoWraps = viewDataWrap->GetPageNodeInfoWraps();
+    for (const auto& item: pageNodeInfoWraps) {
+        if (item == nullptr) {
+            continue;
+        }
+        auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(item->GetId()));
+        if (frameNode == nullptr) {
+            TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "frameNode is not found, id=%{public}d", item->GetId());
+            continue;
+        }
+        frameNode->NotifyFillRequestSuccess(item, autoFillType);
+    }
+}
+
+void PipelineContext::NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode)
+{
+    CHECK_NULL_VOID(node);
+    node->NotifyFillRequestFailed(errCode);
+}
+
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 {
     ACE_DCHECK(!params.empty());
@@ -2018,6 +2083,19 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     }
 }
 
+void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->UpdateTitleInTargetPos(isShow, height);
+}
+
 void PipelineContext::SetContainerWindow(bool isShow)
 {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2236,19 +2314,16 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_START) {
         manager->RequireSummary();
-        manager->GetExtraInfoFromClipboard(extraInfo);
-        manager->SetExtraInfo(extraInfo);
     }
+    extraInfo = manager->GetExtraInfo();
 #else
     manager->GetExtraInfoFromClipboard(extraInfo);
 #endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
-#ifdef ENABLE_DRAG_FRAMEWORK
-        manager->GetExtraInfoFromClipboard(extraInfo);
-        manager->SetExtraInfo(extraInfo);
-#endif // ENABLE_DRAG_FRAMEWORK
         manager->OnDragEnd(Point(x, y, x, y), extraInfo);
+#ifndef ENABLE_DRAG_FRAMEWORK
         manager->RestoreClipboardData();
+#endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
     manager->OnDragMove(Point(x, y, x, y), extraInfo);

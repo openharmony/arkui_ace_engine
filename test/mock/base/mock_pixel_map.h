@@ -21,7 +21,6 @@
 namespace OHOS::Ace {
 class MockPixelMap : public PixelMap {
 public:
-    MOCK_METHOD(RefPtr<PixelMap>, CreatePixelMap, (void* sptrAddr));
     MOCK_METHOD(int32_t, GetWidth, (), (const override));
     MOCK_METHOD(int32_t, GetHeight, (), (const override));
     MOCK_METHOD(const uint8_t*, GetPixels, (), (const override));

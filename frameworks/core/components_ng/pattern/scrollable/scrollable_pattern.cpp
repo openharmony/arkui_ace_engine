@@ -32,6 +32,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
+const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 } // namespace
 
 void ScrollablePattern::SetAxis(Axis axis)
@@ -117,7 +118,7 @@ bool ScrollablePattern::ProcessNavBarReactOnUpdate(float offset)
     auto dragOffsetY = firstGeometryNode->GetFrameOffset().GetY();
     navBarPattern_->OnCoordScrollUpdate(offset, dragOffsetY);
     DraggedDownScrollEndProcess();
-    if (minTitle) {
+    if (minTitle &&  Negative(offset)) {
         return scrollEffect_ && scrollEffect_->IsNoneEffect();
     }
     return scrollEffect_ && scrollEffect_->IsSpringEffect();
@@ -343,6 +344,13 @@ void ScrollablePattern::AddScrollEvent()
         return pattern->NeedScrollSnapToSide(delta);
     };
     scrollable->SetNeedScrollSnapToSideCallback(std::move(needScrollSnapToSideCallback));
+
+    auto dragFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        return pattern->NotifyFRCSceneInfo(velocity, sceneStatus);
+    };
+    scrollable->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
 
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
     scrollableEvent_->SetScrollable(scrollable);
@@ -908,7 +916,7 @@ void ScrollablePattern::HandleInvisibleItemsSelectedStatus(const RectF& selected
 
 void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
 {
-    if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+    if (info.GetButton() != MouseButton::LEFT_BUTTON || (scrollBar_ && scrollBar_->IsHover())) {
         return;
     }
 
@@ -1137,10 +1145,9 @@ void ScrollablePattern::LimitMouseEndOffset()
 {
     float limitedMainOffset = -1.0f;
     float limitedCrossOffset = -1.0f;
-    auto host = GetHost();
-    auto hostSize = host->GetGeometryNode()->GetFrameSize();
-    auto mainSize = hostSize.MainSize(axis_);
-    auto crossSize = hostSize.CrossSize(axis_);
+    auto hostSize = GetHostFrameSize();
+    auto mainSize = hostSize->MainSize(axis_);
+    auto crossSize = hostSize->CrossSize(axis_);
     auto mainOffset = mouseEndOffset_.GetMainOffset(axis_);
     auto crossOffset = mouseEndOffset_.GetCrossOffset(axis_);
     if (LessNotEqual(mainOffset, 0.0f)) {
@@ -1173,8 +1180,7 @@ bool ScrollablePattern::ProcessAssociatedScroll(double offset, int32_t source)
         } else if ((source == SCROLL_FROM_UPDATE) || (source == SCROLL_FROM_ANIMATION) ||
                    (source == SCROLL_FROM_ANIMATION_SPRING)) {
             if (IsAtTop()) {
-                auto host = GetHost();
-                return navBarPattern_->UpdateAssociatedScrollOffset(offset, host);
+                return navBarPattern_->UpdateAssociatedScrollOffset(offset);
             }
         }
     }
@@ -1416,8 +1422,11 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity)
 {
     if ((velocity > 0 && !IsAtTop()) || (velocity < 0 && !IsAtBottom())) {
         // trigger scroll animation if edge not reached
-        scrollableEvent_->GetScrollable()->StartScrollAnimation(0.0f, velocity);
-        return true;
+        if (scrollableEvent_ && scrollableEvent_->GetScrollable()) {
+            scrollableEvent_->GetScrollable()->StartScrollAnimation(0.0f, velocity);
+            return true;
+        }
+        return false;
     }
     return HandleOverScroll(velocity);
 }
@@ -1529,5 +1538,12 @@ void ScrollablePattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
         // use LAST_ITEM for children count changed after scrollEdge(Edge.Bottom) and before layout
         ScrollToIndex(LAST_ITEM, smooth, ScrollAlign::END);
     }
+}
+
+void ScrollablePattern::NotifyFRCSceneInfo(double velocity, SceneStatus sceneStatus)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->AddFRCSceneInfo(SCROLLABLE_DRAG_SCENE, velocity, sceneStatus);
 }
 } // namespace OHOS::Ace::NG

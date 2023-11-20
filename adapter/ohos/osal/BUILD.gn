@@ -70,6 +70,7 @@ template("ace_osal_ohos_source_set") {
       "socperf_client_impl.cpp",
       "system_properties.cpp",
       "trace_id_impl.cpp",
+      "view_data_wrap_ohos.cpp",
       "want_wrap_ohos.cpp",
     ]
 
@@ -97,6 +98,7 @@ template("ace_osal_ohos_source_set") {
       }
 
       external_deps += [
+        "ability_base:view_data",
         "ability_base:want",
         "ability_runtime:abilitykit_native",
         "image_framework:image",

@@ -67,6 +67,10 @@ namespace Media {
 class PixelMap;
 } // namespace Media
 
+namespace AbilityBase {
+struct ViewData;
+} // namespace AbilityBase
+
 class RefBase;
 class Parcelable;
 class IRemoteObject;
@@ -77,7 +81,6 @@ class NativeEngine;
 typedef struct napi_value__* napi_value;
 
 namespace OHOS::Ace {
-
 class ACE_FORCE_EXPORT UIContent {
 public:
     static std::unique_ptr<UIContent> Create(
@@ -85,6 +88,7 @@ public:
     static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime);
     static std::unique_ptr<UIContent> Create(OHOS::AppExecFwk::Ability* ability);
     static void ShowDumpHelp(std::vector<std::string>& info);
+    static UIContent* GetUIContent(int32_t instanceId);
 
     virtual ~UIContent() = default;
 
@@ -122,6 +126,9 @@ public:
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
     virtual void ProcessFormVisibleChange(bool isVisible) {};
+
+    // only vaild in ContainerModalPatternEnhance
+    virtual void UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;
 
     // Window color
     virtual uint32_t GetBackgroundColor() = 0;
@@ -212,6 +219,17 @@ public:
      * @return return parent ability token.
      */
     virtual sptr<IRemoteObject> GetParentToken();
+
+    virtual bool DumpViewData(AbilityBase::ViewData& viewData)
+    {
+        return false;
+    }
+
+    virtual bool CheckNeedAutoSave()
+    {
+        return false;
+    }
+
 #ifndef PREVIEW
     virtual void SearchElementInfoByAccessibilityId(
         int32_t elementId, int32_t mode,

@@ -27,6 +27,7 @@
 #include "wm/window.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
+#include "base/view_data/view_data_wrap.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Accessibility {
@@ -34,7 +35,6 @@ class AccessibilityElementInfo;
 }
 
 namespace OHOS::Ace {
-
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
@@ -77,6 +77,7 @@ public:
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
     void ProcessFormVisibleChange(bool isVisible) override;
+    void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
 
     // Window color
     uint32_t GetBackgroundColor() override;
@@ -180,6 +181,9 @@ public:
 
     void SetParentToken(sptr<IRemoteObject> token) override;
     sptr<IRemoteObject> GetParentToken() override;
+    bool DumpViewData(AbilityBase::ViewData& viewData) override;
+    bool CheckNeedAutoSave() override;
+    bool DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap);
 
     void SearchElementInfoByAccessibilityId(
         int32_t elementId, int32_t mode,

@@ -24,8 +24,8 @@
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "base/window/drag_window.h"
-#include "core/common/font_manager.h"
 #include "core/common/ai/data_detector_mgr.h"
+#include "core/common/font_manager.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
@@ -424,7 +424,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
 
 void TextPattern::HandleOnSelectAll()
 {
-    auto textSize = GetWideText().length() + imageCount_;
+    auto textSize = static_cast<int32_t>(GetWideText().length()) + imageCount_;
     textSelector_.Update(0, textSize);
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
@@ -529,7 +529,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
             }
             std::vector<RectF> selectedRects;
             paragraph_->GetRectsForRange(start, item->position, selectedRects);
-            start =  item->position;
+            start = item->position;
             for (auto&& rect : selectedRects) {
                 if (rect.IsInRegion(textOffset)) {
                     if (!item->onClick) {
@@ -992,8 +992,8 @@ void TextPattern::InitTextDetect()
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto uiTaskExecutor = SingleTaskExecutor::Make(
-            host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([result, weak, instanceID] {
             ContainerScope scope(instanceID);
             auto pattern = weak.Upgrade();
@@ -1008,7 +1008,7 @@ void TextPattern::InitTextDetect()
 void TextPattern::ActSetSelection(int32_t start, int32_t end)
 {
     int32_t min = 0;
-    int32_t textSize = GetWideText().length() + imageCount_;
+    int32_t textSize = static_cast<int32_t>(GetWideText().length()) + imageCount_;
     start = start < min ? min : start;
     end = end < min ? min : end;
     start = start > textSize ? textSize : start;
@@ -1433,6 +1433,40 @@ OffsetF TextPattern::GetDragUpperLeftCoordinates()
     return GetParentGlobalOffset() + offset;
 }
 
+void TextPattern::ProcessBoundRectByTextShadow(RectF& rect)
+{
+    auto property = GetHost()->GetLayoutProperty<TextLayoutProperty>();
+    auto shadows = property->GetTextShadow();
+    if (!shadows.has_value()) {
+        return;
+    }
+    float leftOffsetX = 0.0f;
+    float rightOffsetX = 0.0f;
+    float upOffsetY = 0.0f;
+    float downOffsetY = 0.0f;
+    for (const auto& shadow : shadows.value()) {
+        if (LessNotEqual(shadow.GetOffset().GetX(), 0.0f) && LessNotEqual(shadow.GetOffset().GetX(), leftOffsetX)) {
+            leftOffsetX = shadow.GetOffset().GetX();
+        }
+
+        if (GreatNotEqual(shadow.GetOffset().GetX(), 0.0f) &&
+            GreatNotEqual(shadow.GetOffset().GetX() + shadow.GetBlurRadius(), rightOffsetX)) {
+            rightOffsetX = shadow.GetOffset().GetX() + shadow.GetBlurRadius();
+        }
+
+        if (LessNotEqual(shadow.GetOffset().GetY(), 0.0f) && LessNotEqual(shadow.GetOffset().GetY(), upOffsetY)) {
+            upOffsetY = shadow.GetOffset().GetY();
+        }
+
+        if (GreatNotEqual(shadow.GetOffset().GetY(), 0.0f) &&
+            GreatNotEqual(shadow.GetOffset().GetY() + shadow.GetBlurRadius(), downOffsetY)) {
+            downOffsetY = shadow.GetOffset().GetY() + shadow.GetBlurRadius();
+        }
+    }
+    rect.SetRect(rect.GetX() + leftOffsetX, rect.GetY() + upOffsetY, rect.Width() + rightOffsetX - leftOffsetX,
+        rect.Height() + downOffsetY - upOffsetY);
+}
+
 RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
 {
     if (!contentMod_) {
@@ -1444,8 +1478,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
     if (isCustomFont_) {
         contentMod_->SetIsCustomFont(true);
     }
-    auto paintMethod =
-        MakeRefPtr<TextPaintMethod>(WeakClaim(this), baselineOffset_, contentMod_, overlayMod_);
+    auto paintMethod = MakeRefPtr<TextPaintMethod>(WeakClaim(this), baselineOffset_, contentMod_, overlayMod_);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, paintMethod);
     auto context = host->GetRenderContext();
@@ -1458,6 +1491,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
         auto height = static_cast<float>(paragraph_->GetHeight() + std::fabs(baselineOffset_));
         if (!context->GetClipEdge().value() && LessNotEqual(frameSize.Height(), height)) {
             RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(), height);
+            ProcessBoundRectByTextShadow(boundsRect);
             overlayMod_->SetBoundsRect(boundsRect);
         }
     }

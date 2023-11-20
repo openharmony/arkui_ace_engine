@@ -16,6 +16,12 @@
 #include "core/common/frontend.h"
 
 namespace OHOS::Ace {
+Frontend::~Frontend()
+{
+    std::lock_guard lock(destructMutex_);
+    LOG_DESTROY();
+}
+
 bool Frontend::MaybeRelease()
 {
     CHECK_NULL_RETURN(taskExecutor_, true);
@@ -23,6 +29,7 @@ bool Frontend::MaybeRelease()
         LOGI("Destroy Frontend on JS thread.");
         return true;
     } else {
+        std::lock_guard lock(destructMutex_);
         LOGI("Post Destroy Frontend Task to JS thread.");
         return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::JS);
     }

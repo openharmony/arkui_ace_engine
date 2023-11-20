@@ -207,6 +207,7 @@ void NavigationPattern::CheckTopNavPathChange(
     RefPtr<NavDestinationGroupNode> preTopNavDestination;
     if (preTopNavPath.has_value()) {
         // pre page is not in the current stack
+        isPopPage |= navigationStack_->FindIndex(preTopNavPath->first, preTopNavPath->second, true) == -1;
         preTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(preTopNavPath->second));
         if (preTopNavDestination) {
@@ -554,16 +555,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     // considering backButton visibility
                     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
                         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
-                    if (navigationStack->Size() == 1 &&
-                        (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
-                            navigationLayoutProperty->GetHideNavBar().value_or(false))) {
-                        // cases that backButton of navDestination is gone when there's only one child and
-                        // 1. In SPLIT mode, it's the first level page
-                        // 2. In STACK mode, the navBar is hidden
-                        navigationGroupNode->SetBackButtonVisible(curTopNavDestination, false);
-                    } else {
-                        navigationGroupNode->SetBackButtonVisible(curTopNavDestination, true);
-                    }
                     pattern->UpdateContextRect(curTopNavDestination, navigationGroupNode);
                 }
                 // considering navBar visibility
@@ -600,10 +591,6 @@ void NavigationPattern::UpdateContextRect(
     CHECK_NULL_VOID(navBarNode);
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     CHECK_NULL_VOID(navigationPattern);
-    auto size = curDestination->GetGeometryNode()->GetFrameSize();
-    curDestination->GetRenderContext()->ClipWithRRect(
-        RectF(0.0f, 0.0f, size.Width(), size.Height()), RadiusF(EdgeF(0.0f, 0.0f)));
-    curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
 
     if (navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
         curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);

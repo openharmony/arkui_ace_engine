@@ -67,10 +67,13 @@ public:
         ResetDisplayMode();
         ResetMaxViewLines();
         ResetSelectionMenuHidden();
+        ResetPasswordRules();
+        ResetEnableAutoFill();
         ResetCleanNodeStyle();
         ResetIconSize();
         ResetIconSrc();
         ResetIconColor();
+        ResetSelectAllValue();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -81,6 +84,15 @@ public:
         json->Put("showErrorText", propShowErrorText_.value_or(false));
         json->Put("showCounter", propShowCounter_.value_or(false));
         json->Put("showUnderline", propShowUnderline_.value_or(false));
+        auto jsonCancelButton = JsonUtil::Create(true);
+        jsonCancelButton->Put("style", static_cast<int32_t>(propCleanNodeStyle_.value_or(CleanNodeStyle::INPUT)));
+        auto jsonIconOptions = JsonUtil::Create(true);
+        jsonIconOptions->Put("size", propIconSize_.value_or(Dimension()).ToString().c_str());
+        jsonIconOptions->Put("src", propIconSrc_.value_or("").c_str());
+        jsonIconOptions->Put("color", propIconColor_.value_or(Color()).ColorToString().c_str());
+        jsonCancelButton->Put("icon", jsonIconOptions->ToString().c_str());
+        json->Put("cancelButton", jsonCancelButton->ToString().c_str());
+        json->Put("selectAll", propSelectAllValue_.value_or(false));
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
@@ -143,11 +155,15 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HidePasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectionMenuHidden, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PasswordRules, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableAutoFill, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectAllValue, bool, PROPERTY_UPDATE_NORMAL);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CleanNodeStyle, CleanNodeStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSize, CalcDimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSrc, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconColor, Color, PROPERTY_UPDATE_MEASURE);
+
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
     {
@@ -177,13 +193,14 @@ protected:
         value->propMaxViewLines_ = CloneMaxViewLines();
         value->propIsEnabled_ = CloneIsEnabled();
         value->propSelectionMenuHidden_ = CloneSelectionMenuHidden();
+        value->propPasswordRules_ = ClonePasswordRules();
+        value->propEnableAutoFill_ = CloneEnableAutoFill();
         value->propCleanNodeStyle_ = CloneCleanNodeStyle();
         value->propIconSize_ = CloneIconSize();
-        value->propIconSrc_ = CloneIconSrc();
         value->propIconColor_ = CloneIconColor();
+        value->propSelectAllValue_ = CloneSelectAllValue();
     }
 
-private:
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutProperty);
 };
 } // namespace OHOS::Ace::NG

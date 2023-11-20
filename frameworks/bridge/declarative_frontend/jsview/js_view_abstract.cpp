@@ -43,6 +43,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_focus_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_gesture_judge_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
@@ -56,14 +57,17 @@
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/invert.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -2012,13 +2016,29 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackgroundImageRepeat(repeat);
 }
 
+void JSViewAbstract::ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOption& blurOption)
+{
+    if (jsBlurOption->GetProperty("grayscale")->IsArray()) {
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(jsBlurOption->GetProperty("grayscale"));
+        auto grey1 = params->GetValueAt(0)->ToNumber<uint32_t>();
+        auto grey2 = params->GetValueAt(1)->ToNumber<uint32_t>();
+        std::vector<float> greyVec(2);  // 2 number
+        greyVec[0] = grey1;
+        greyVec[1] = grey2;
+        blurOption.grayscale = greyVec;
+    }
+}
+
 void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
 {
+    if (info.Length() == 0) {
+        return;
+    }
     BlurStyleOption styleOption;
     if (info[0]->IsNumber()) {
         auto blurStyle = info[0]->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
     }
@@ -2039,6 +2059,13 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
         if (jsOption->GetProperty("scale")->IsNumber()) {
             double scale = jsOption->GetProperty("scale")->ToNumber<double>();
             styleOption.scale = std::clamp(scale, 0.0, 1.0);
+        }
+
+        if (jsOption->GetProperty("blurOption")->IsObject()) {
+            JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOption"));
+            BlurOption blurOption;
+            ParseBlurOption(jsBlurOption, blurOption);
+            styleOption.blurOption = blurOption;
         }
     }
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
@@ -2064,11 +2091,27 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     if (!ParseJsColor(jsOption->GetProperty("color"), color)) {
         color.SetValue(Color::TRANSPARENT.GetValue());
     }
-    effectOption = { radius, saturation, brightness, color };
+    auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+    auto adaptiveColor = AdaptiveColor::DEFAULT;
+    ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColorValue);
+    if (adaptiveColorValue >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+        adaptiveColorValue <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+        adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorValue);
+    }
+
+    BlurOption blurOption;
+    if (jsOption->GetProperty("blurOption")->IsObject()) {
+        JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOption"));
+        ParseBlurOption(jsBlurOption, blurOption);
+    }
+    effectOption = { radius, saturation, brightness, color, adaptiveColor, blurOption };
 }
 
 void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
 {
+    if (info.Length() == 0) {
+        return;
+    }
     if (!info[0]->IsObject()) {
         return;
     }
@@ -2080,11 +2123,14 @@ void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsForegroundBlurStyle(const JSCallbackInfo& info)
 {
+    if (info.Length() == 0) {
+        return;
+    }
     BlurStyleOption styleOption;
     if (info[0]->IsNumber()) {
         auto blurStyle = info[0]->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
     }
@@ -2105,6 +2151,13 @@ void JSViewAbstract::JsForegroundBlurStyle(const JSCallbackInfo& info)
         if (jsOption->GetProperty("scale")->IsNumber()) {
             double scale = jsOption->GetProperty("scale")->ToNumber<double>();
             styleOption.scale = std::clamp(scale, 0.0, 1.0);
+        }
+ 
+        if (jsOption->GetProperty("blurOption")->IsObject()) {
+            JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOption"));
+            BlurOption blurOption;
+            ParseBlurOption(jsBlurOption, blurOption);
+            styleOption.blurOption = blurOption;
         }
     }
     ViewAbstractModel::GetInstance()->SetForegroundBlurStyle(styleOption);
@@ -3063,18 +3116,21 @@ void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
 
 void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
 {
-    double blur = 0.0;
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::STRING,
-        JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("Blur", info, checkList)) {
-        SetBlur(blur);
-        info.SetReturnValue(info.This());
+    if (info.Length() == 0) {
         return;
     }
+    double blur = 0.0;
     if (!ParseJsDouble(info[0], blur)) {
         return;
     }
-    SetBlur(blur);
+
+    BlurOption blurOption;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(info[1]);
+        ParseBlurOption(jsBlurOption, blurOption);
+    }
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+    ViewAbstractModel::GetInstance()->SetFrontBlur(dimensionRadius, blurOption);
     info.SetReturnValue(info.This());
 }
 
@@ -3100,20 +3156,30 @@ void JSViewAbstract::JsUseEffect(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsUseShadowBatching(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetUseShadowBatching(info[0]->ToBoolean());
+    }
+}
+
 void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
 {
-    double blur = 0.0;
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::STRING,
-        JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("BackdropBlur", info, checkList)) {
-        SetBackdropBlur(blur);
-        info.SetReturnValue(info.This());
+    if (info.Length() == 0) {
         return;
     }
+    double blur = 0.0;
     if (!ParseJsDouble(info[0], blur)) {
         return;
     }
-    SetBackdropBlur(blur);
+    BlurOption blurOption;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(info[1]);
+        ParseBlurOption(jsBlurOption, blurOption);
+    }
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+    ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius, blurOption);
+    
     info.SetReturnValue(info.This());
 }
 
@@ -3189,7 +3255,7 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
     SetLinearGradientBlur(blurPara);
 }
 
-void JSViewAbstract::JsDynamicLightUp(const JSCallbackInfo& info)
+void JSViewAbstract::JsBackgroundBrightness(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
         return;
@@ -4697,19 +4763,50 @@ void JSViewAbstract::JsSepia(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetSepia(value);
 }
 
+bool JSViewAbstract::ParseInvertProps(const JSRef<JSVal>& jsValue, InvertVariant& invert)
+{
+    double invertValue = 0.0;
+    if (ParseJsDouble(jsValue, invertValue)) {
+        invert = static_cast<float>(invertValue);
+        return true;
+    }
+    auto argsPtrItem = JsonUtil::ParseJsonString(jsValue->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        return false;
+    }
+    InvertOption option;
+    double low = 0.0;
+    if (ParseJsonDouble(argsPtrItem->GetValue("low"), low)) {
+        option.low_ = std::clamp(low, 0.0, 1.0);
+    }
+    double high = 0.0;
+    if (ParseJsonDouble(argsPtrItem->GetValue("high"), high)) {
+        option.high_ = std::clamp(high, 0.0, 1.0);
+    }
+    double threshold = 0.0;
+    if (ParseJsonDouble(argsPtrItem->GetValue("threshold"), threshold)) {
+        option.threshold_ = std::clamp(threshold, 0.0, 1.0);
+    }
+    double thresholdRange = 0.0;
+    if (ParseJsonDouble(argsPtrItem->GetValue("thresholdRange"), thresholdRange)) {
+        option.thresholdRange_ = std::clamp(thresholdRange, 0.0, 1.0);
+    }
+    invert = option;
+    return true;
+}
+
 void JSViewAbstract::JsInvert(const JSCallbackInfo& info)
 {
-    CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        value.SetValue(0.0);
-        ViewAbstractModel::GetInstance()->SetInvert(value);
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::NUMBER };
+    InvertVariant invert = 0.0f;
+    if (!CheckJSCallbackInfo("JsInvert", info, checkList)) {
+        ViewAbstractModel::GetInstance()->SetInvert(invert);
         return;
     }
-    if (LessNotEqual(value.Value(), 0.0)) {
-        value.SetValue(0.0);
+    if (ParseInvertProps(info[0], invert)) {
+        ViewAbstractModel::GetInstance()->SetInvert(invert);
     }
-
-    ViewAbstractModel::GetInstance()->SetInvert(value);
+    ViewAbstractModel::GetInstance()->SetInvert(invert);
 }
 
 void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
@@ -5433,10 +5530,11 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("blur", &JSViewAbstract::JsBlur);
     JSClass<JSViewAbstract>::StaticMethod("useEffect", &JSViewAbstract::JsUseEffect);
+    JSClass<JSViewAbstract>::StaticMethod("useShadowBatching", &JSViewAbstract::JsUseShadowBatching);
     JSClass<JSViewAbstract>::StaticMethod("colorBlend", &JSViewAbstract::JsColorBlend);
     JSClass<JSViewAbstract>::StaticMethod("backdropBlur", &JSViewAbstract::JsBackdropBlur);
     JSClass<JSViewAbstract>::StaticMethod("linearGradientBlur", &JSViewAbstract::JsLinearGradientBlur);
-    JSClass<JSViewAbstract>::StaticMethod("dynamicLightUp", &JSViewAbstract::JsDynamicLightUp);
+    JSClass<JSViewAbstract>::StaticMethod("backgroundBrightness", &JSViewAbstract::JsBackgroundBrightness);
     JSClass<JSViewAbstract>::StaticMethod("windowBlur", &JSViewAbstract::JsWindowBlur);
     JSClass<JSViewAbstract>::StaticMethod("visibility", &JSViewAbstract::SetVisibility);
     JSClass<JSViewAbstract>::StaticMethod("flexBasis", &JSViewAbstract::JsFlexBasis);
@@ -5499,6 +5597,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
+    JSClass<JSViewAbstract>::StaticMethod("onGestureJudgeBegin", &JSViewAbstract::JsOnGestureJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
@@ -5647,21 +5746,9 @@ void JSViewAbstract::SetPaddingRight(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetPaddings(std::nullopt, std::nullopt, std::nullopt, value);
 }
 
-void JSViewAbstract::SetBlur(float radius)
-{
-    CalcDimension dimensionRadius(radius, DimensionUnit::PX);
-    ViewAbstractModel::GetInstance()->SetFrontBlur(dimensionRadius);
-}
-
 void JSViewAbstract::SetColorBlend(Color color)
 {
     ViewAbstractModel::GetInstance()->SetColorBlend(color);
-}
-
-void JSViewAbstract::SetBackdropBlur(float radius)
-{
-    CalcDimension dimensionRadius(radius, DimensionUnit::PX);
-    ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius);
 }
 
 void JSViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
@@ -5844,9 +5931,8 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     if (ParseJsShadowColorStrategy(jsObj->GetProperty("color"), shadowColorStrategy)) {
         shadow.SetShadowColorStrategy(shadowColorStrategy);
     } else if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
-        shadow.SetShadowColorStrategy(ShadowColorStrategy::NONE);
+        shadow.SetColor(color);
     }
-    shadow.SetColor(color);
     auto type = argsPtrItem->GetInt("type", static_cast<int32_t>(ShadowType::COLOR));
     type = std::clamp(type, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
     shadow.SetShadowType(static_cast<ShadowType>(type));
@@ -6146,6 +6232,24 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         func->Execute(*info);
     };
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick));
+}
+
+void JSViewAbstract::JsOnGestureJudgeBegin(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->SetOnGestureJudgeBegin(nullptr);
+        return;
+    }
+
+    auto jsOnGestureJudgeFunc = AceType::MakeRefPtr<JsGestureJudgeFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onGestureJudgefunc = [execCtx = info.GetExecutionContext(), func = jsOnGestureJudgeFunc](
+                                  const RefPtr<NG::GestureInfo>& gestureInfo,
+                                  const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, GestureJudgeResult::CONTINUE);
+        ACE_SCORING_EVENT("onGestureJudgeBegin");
+        return func->Execute(gestureInfo, info);
+    };
+    ViewAbstractModel::GetInstance()->SetOnGestureJudgeBegin(std::move(onGestureJudgefunc));
 }
 
 void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)

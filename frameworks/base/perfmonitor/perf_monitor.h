@@ -70,7 +70,7 @@ struct DataBase {
     int64_t beginVsyncTime {0};
     int64_t endVsyncTime {0};
     int64_t maxFrameTime {0};
-    bool needReportToRS {false};
+    bool isDisplayAnimator {false};
     PerfSourceType sourceType {UNKNOWN_SOURCE};
     PerfActionType actionType {UNKNOWN_ACTION};
     PerfEventType eventType {UNKNOWN_EVENT};
@@ -105,6 +105,7 @@ public:
     int32_t seqMissFrames {0};
     bool isSuccessive {false};
     bool isFirstFrame {false};
+    bool isDisplayAnimator {false};
     std::string sceneId {""};
     PerfActionType actionType {UNKNOWN_ACTION};
     PerfSourceType sourceType {UNKNOWN_SOURCE};
@@ -128,8 +129,8 @@ private:
     SceneRecord* GetRecord(const std::string& sceneId);
     void RemoveRecord(const std::string& sceneId);
     void ReportAnimateStart(const std::string& sceneId, SceneRecord* record);
-    void ReportAnimateEnd(const std::string& sceneId, SceneRecord* record, bool needReportToRS);
-    void FlushDataBase(SceneRecord* record, DataBase& data, bool needReportToRS);
+    void ReportAnimateEnd(const std::string& sceneId, SceneRecord* record);
+    void FlushDataBase(SceneRecord* record, DataBase& data);
     void ReportPerfEvent(PerfEventType type, DataBase& data);
     void RecordBaseInfo(SceneRecord* record);
     bool IsExceptResponseTime(int64_t time, const std::string& sceneId);

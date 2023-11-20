@@ -97,7 +97,10 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("enableKeyboardOnFocus", &JSTextField::SetEnableKeyboardOnFocus);
     JSClass<JSTextInput>::StaticMethod("selectionMenuHidden", &JSTextField::SetSelectionMenuHidden);
     JSClass<JSTextInput>::StaticMethod("customKeyboard", &JSTextField::SetCustomKeyboard);
+    JSClass<JSTextInput>::StaticMethod("passwordRules", &JSTextField::SetPasswordRules);
+    JSClass<JSTextInput>::StaticMethod("enableAutoFill", &JSTextField::SetEnableAutoFill);
     JSClass<JSTextInput>::StaticMethod("cancelButton", &JSTextField::SetCancelButton);
+    JSClass<JSTextInput>::StaticMethod("selectAll", &JSTextField::SetSelectAllValue);
 
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -114,8 +117,8 @@ void JSTextInputController::JSBind(BindingTarget globalObj)
     JSClass<JSTextInputController>::CustomMethod("getCaretOffset", &JSTextInputController::GetCaretOffset);
     JSClass<JSTextInputController>::Method("setTextSelection", &JSTextInputController::SetTextSelection);
     JSClass<JSTextInputController>::CustomMethod("getTextContentRect", &JSTextInputController::GetTextContentRect);
-    JSClass<JSTextInputController>::CustomMethod("getTextContentLineCount",
-        &JSTextInputController::GetTextContentLinesNum);
+    JSClass<JSTextInputController>::CustomMethod(
+        "getTextContentLineCount", &JSTextInputController::GetTextContentLinesNum);
     JSClass<JSTextInputController>::Method("stopEditing", &JSTextInputController::StopEditing);
     JSClass<JSTextInputController>::Bind(
         globalObj, JSTextInputController::Constructor, JSTextInputController::Destructor);

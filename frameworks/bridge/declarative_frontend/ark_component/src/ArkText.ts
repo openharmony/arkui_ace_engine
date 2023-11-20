@@ -1,4 +1,5 @@
-//@ts-nocheck
+
+/// <reference path="./import.ts" />
 class ArkTextComponent extends ArkComponent implements TextAttribute {
     font(value: Font): TextAttribute {
         throw new Error("Method not implemented.");
@@ -73,10 +74,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
         throw new Error("Method not implemented.");
     }
 }
-
+// @ts-ignore
 globalThis.Text.attributeModifier = function(modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
     var component = this.createOrGetNode(elmtId, () =>
     {
         return new ArkTextComponent(nativeNode);

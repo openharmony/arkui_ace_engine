@@ -100,6 +100,7 @@ private:
     Offset ComputeFocusPoint();
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    GestureJudgeResult TriggerGestureJudgeCallback();
     bool ExceedSlop();
     void InitGlobalValue(SourceType deviceId);
 

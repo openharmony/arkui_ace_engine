@@ -94,7 +94,7 @@ const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 
-constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1;
+constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
 #define VISIBLERATIO_LENGTH 4
 #define FLOATRATIO_TO_INT 100
@@ -1221,7 +1221,7 @@ void WebDelegate::RequestFocus()
                 auto focusHub = eventHub->GetOrCreateFocusHub();
                 CHECK_NULL_VOID(focusHub);
 
-                focusHub->RequestFocusImmediately();
+                focusHub->RequestFocusImmediately(true);
             }
 
             auto webCom = delegate->webComponent_.Upgrade();
@@ -2484,11 +2484,12 @@ std::string WebDelegate::GetCustomScheme()
 
 void WebDelegate::SurfaceOcclusionCallback(float visibleRatio)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "SurfaceOcclusion changed, occlusionPoints:%{public}f, surfacenode id: %{public}"
+    TAG_LOGI(AceLogTag::ACE_WEB, "SurfaceOcclusion changed, occlusionPoints:%{public}f, surfacenode id: %{public}"
         PRIu64 "", visibleRatio, surfaceNodeId_);
     if (fabs(visibleRatio_ - visibleRatio) <= FLT_EPSILON
         || (fabs(visibleRatio) > FLT_EPSILON && visibleRatio < 0.0)
         || (fabs(visibleRatio - 1.0) > FLT_EPSILON && visibleRatio > 1.0)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio is ilegal or not changed.");
         return;
     }
     visibleRatio_ = visibleRatio;
@@ -2511,7 +2512,7 @@ void WebDelegate::SurfaceOcclusionCallback(float visibleRatio)
                 auto delegate = weak.Upgrade();
                 CHECK_NULL_VOID(delegate);
                 if (fabs(delegate->visibleRatio_) <= FLT_EPSILON) {
-                    TAG_LOGD(AceLogTag::ACE_WEB, "the web is still all occluded");
+                    TAG_LOGI(AceLogTag::ACE_WEB, "the web is still all occluded");
                     CHECK_NULL_VOID(delegate->nweb_);
                     delegate->nweb_->OnOccluded();
                 }
@@ -2525,14 +2526,17 @@ void WebDelegate::ratioStrToFloat(const std::string& str)
     // LowerFrameRateConfig参数的格式限定为x.xx, 长度为4，
     // 小数点在第二位，其余三位为数字，范围为0.00-1.00
     if (str.size() != VISIBLERATIO_LENGTH) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio lenth is over 4.");
         return;
     }
     auto dotCount = std::count(str.begin(), str.end(), '.');
     if (dotCount != 1) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio does not have dot.");
         return;
     }
     auto pos = str.find('.', 0);
     if (pos != 1) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio dot position is wrong.");
         return;
     }
     auto notDigitCount = std::count_if(str.begin(), str.end(),
@@ -2540,11 +2544,13 @@ void WebDelegate::ratioStrToFloat(const std::string& str)
             return !isdigit(c) && c != '.';
         });
     if (notDigitCount > 0) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio dot count is over 1.");
         return;
     }
     float f = std::stof(str);
     int i = f * FLOATRATIO_TO_INT;
-    if (i >= 0 && i <= 1) {
+    if (i >= 0 && i <= 100) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "visibleRatio check success.");
         lowerFrameRateVisibleRatio_ = f;
     }
 }
@@ -2552,16 +2558,18 @@ void WebDelegate::ratioStrToFloat(const std::string& str)
 void WebDelegate::RegisterSurfaceOcclusionChangeFun()
 {
     if (!GetWebOptimizationValue()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "web optimization is close.");
         return;
     }
     if (!IsDeviceTabletOr2in1()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "device type does not satisfy.");
         return;
     }
     std::string visibleAreaRatio = OHOS::NWeb::NWebAdapterHelper::Instance().ParsePerfConfig("LowerFrameRateConfig",
         "visibleAreaRatio");
     ratioStrToFloat(visibleAreaRatio);
     std::vector<float> partitionPoints;
-    TAG_LOGD(AceLogTag::ACE_WEB, "max visible rate to lower frame rate:%{public}f", lowerFrameRateVisibleRatio_);
+    TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to lower frame rate:%{public}f", lowerFrameRateVisibleRatio_);
     if ((int)(lowerFrameRateVisibleRatio_ * FLOATRATIO_TO_INT) == 0) {
         partitionPoints = {0};
     } else {
@@ -2582,7 +2590,7 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
         },
         partitionPoints);
     if (ret != Rosen::StatusCode::SUCCESS) {
-        TAG_LOGD(AceLogTag::ACE_WEB, "RegisterSurfaceOcclusionChangeCallback failed, surfacenode id:%{public}" PRIu64 ""
+        TAG_LOGI(AceLogTag::ACE_WEB, "RegisterSurfaceOcclusionChangeCallback failed, surfacenode id:%{public}" PRIu64 ""
              ", ret: %{public}" PRIu32 "", surfaceNodeId_, ret);
     }
 }
@@ -3225,6 +3233,7 @@ void WebDelegate::UpdateAllowWindowOpenMethod(bool isAllowWindowOpenMethod)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
                 setting->PutIsCreateWindowsByJavaScriptAllowed(isAllowWindowOpenMethod);
             }
         },

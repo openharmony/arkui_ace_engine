@@ -37,6 +37,7 @@ const Dimension FONT_SIZE = Dimension(2.0);
 const Dimension FOCUS_SIZE = Dimension(1.0);
 const float MOVE_DISTANCE = 5.0f;
 constexpr float FONTWEIGHT = 0.5f;
+constexpr float FONT_SIZE_PERCENT = 0.9f;
 constexpr int32_t HOVER_ANIMATION_DURATION = 40;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
 constexpr size_t MIXTURE_CHILD_COUNT = 2;
@@ -327,9 +328,44 @@ uint32_t TextPickerColumnPattern::GetShowOptionCount() const
     return showCount;
 }
 
+void TextPickerColumnPattern::ResetOptionPropertyHeight()
+{
+    if (needOptionPropertyHeightReset_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto stackNode = DynamicCast<FrameNode>(host->GetParent());
+        CHECK_NULL_VOID(stackNode);
+        auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+        CHECK_NULL_VOID(parentNode);
+        auto textPickerLayoutProperty = parentNode->GetLayoutProperty<TextPickerLayoutProperty>();
+        CHECK_NULL_VOID(textPickerLayoutProperty);
+        bool isDefaultPickerItemHeight_ = false;
+        if (textPickerLayoutProperty->HasDefaultPickerItemHeight()) {
+            auto defaultPickerItemHeightValue = textPickerLayoutProperty->GetDefaultPickerItemHeightValue();
+            isDefaultPickerItemHeight_ = LessOrEqual(defaultPickerItemHeightValue.Value(), 0.0) ? false : true;
+        }
+        if (isDefaultPickerItemHeight_) {
+            auto pickerItemHeight = 0.0;
+            auto pattern = parentNode->GetPattern<TextPickerPattern>();
+            CHECK_NULL_VOID(pattern);
+            pickerItemHeight = pattern->GetResizeFlag() ? pattern->GetResizePickerItemHeight()
+                                                        : pattern->GetDefaultPickerItemHeight();
+            int32_t itemCounts = GetShowOptionCount();
+            for (int32_t i = 0; i < itemCounts; i++) {
+                TextPickerOptionProperty& prop = optionProperties_[i];
+                prop.height = pickerItemHeight;
+            }
+            SetOptionShiftDistance();
+        }
+        needOptionPropertyHeightReset_ = false;
+    }
+}
+
 void TextPickerColumnPattern::FlushCurrentOptions(
     bool isDown, bool isUpateTextContentOnly, bool isDirectlyClear, bool isUpdateAnimationProperties)
 {
+    ResetOptionPropertyHeight();
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto stackNode = DynamicCast<FrameNode>(host->GetParent());
@@ -675,6 +711,17 @@ void TextPickerColumnPattern::AddAnimationTextProperties(
 {
     TextProperties properties;
     if (textLayoutProperty->HasFontSize()) {
+        MeasureContext measureContext;
+        measureContext.textContent = MEASURE_STRING;
+        measureContext.fontSize = textLayoutProperty->GetFontSize().value();
+        auto size = MeasureUtil::MeasureTextSize(measureContext);
+        if (!optionProperties_.empty()) {
+            optionProperties_[currentIndex].fontheight = size.Height();
+            if (optionProperties_[currentIndex].fontheight > optionProperties_[currentIndex].height) {
+                optionProperties_[currentIndex].fontheight = optionProperties_[currentIndex].height;
+            }
+        }
+        SetOptionShiftDistance();
         properties.fontSize = Dimension(textLayoutProperty->GetFontSize().value().ConvertToPx());
     }
     if (textLayoutProperty->HasTextColor()) {
@@ -816,7 +863,11 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
 Dimension TextPickerColumnPattern::LinearFontSize(
     const Dimension& startFontSize, const Dimension& endFontSize, double percent)
 {
-    return startFontSize + (endFontSize - startFontSize) * percent;
+    if (percent > FONT_SIZE_PERCENT) {
+        return startFontSize + (endFontSize - startFontSize);
+    } else {
+        return startFontSize + (endFontSize - startFontSize) * percent;
+    }
 }
 
 void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -910,7 +961,7 @@ void TextPickerColumnPattern::HandleDragEnd()
     auto toss = GetToss();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    if (toss->Play()) {
+    if (!NotLoopOptions() && toss->Play()) {
         frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         return;
     }
@@ -1019,7 +1070,7 @@ void TextPickerColumnPattern::CalcAlgorithmOffset(ScrollDirection dir, double di
     for (uint32_t i = 0; i < counts; i++) {
         double distance =
             (dir == ScrollDirection::UP) ? optionProperties_[i].prevDistance : optionProperties_[i].nextDistance;
-        algorithmOffset_.emplace_back(distance * distancePercent);
+        algorithmOffset_.emplace_back(static_cast<int32_t>(distance * distancePercent));
     }
 }
 

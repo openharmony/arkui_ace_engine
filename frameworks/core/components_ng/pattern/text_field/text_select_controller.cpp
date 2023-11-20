@@ -69,6 +69,14 @@ RectF TextSelectController::CalculateEmptyValueCaretRect() const
     }
 }
 
+void TextSelectController::FitCaretMetricsToContentRect(CaretMetricsF& caretMetrics)
+{
+    if (caretMetrics.height > contentRect_.Height()) {
+        caretMetrics.offset.SetY(caretMetrics.offset.GetY() + caretMetrics.height - contentRect_.Height());
+        caretMetrics.height = contentRect_.Height();
+    }
+}
+
 void TextSelectController::CalcCaretMetricsByPosition(
     int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
 {
@@ -81,6 +89,7 @@ void TextSelectController::CalcCaretMetricsByPosition(
     auto textRect = textFiled->GetTextRect();
     caretCaretMetric.offset.AddX(textRect.GetX());
     caretCaretMetric.offset.AddY(textRect.GetY());
+    FitCaretMetricsToContentRect(caretCaretMetric);
 }
 
 void TextSelectController::CalcCaretMetricsByPositionNearTouchOffset(
@@ -95,6 +104,7 @@ void TextSelectController::CalcCaretMetricsByPositionNearTouchOffset(
     paragraph_->CalcCaretMetricsByPosition(extent, caretMetrics, touchOffset - textRect.GetOffset());
     caretMetrics.offset.AddX(textRect.GetX());
     caretMetrics.offset.AddY(textRect.GetY());
+    FitCaretMetricsToContentRect(caretMetrics);
 }
 
 void TextSelectController::UpdateCaretRectByPositionNearTouchOffset(int32_t position, const Offset& touchOffset)

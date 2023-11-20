@@ -398,6 +398,7 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
     contentProp->UpdateTextAlign(TextAlign::START);
     contentProp->UpdateContent(props.content);
     auto contentStyle = dialogTheme_->GetContentTextStyle();
+    contentProp->UpdateFontWeight(FontWeight::MEDIUM);
     contentProp->UpdateFontSize(contentStyle.GetFontSize());
     contentProp->UpdateTextColor(contentStyle.GetTextColor());
     // update padding

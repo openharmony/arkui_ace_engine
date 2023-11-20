@@ -637,7 +637,7 @@ private:
     bool isFirstFlingScrollVelocity_ = true;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool scrollState_ = false;
-    NestedScrollMode nestedScrollMode_ = NestedScrollMode::SELF_ONLY;
+    NestedScrollMode nestedScrollMode_ = NestedScrollMode::SELF_FIRST;
     Axis axis_ = Axis::FREE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;

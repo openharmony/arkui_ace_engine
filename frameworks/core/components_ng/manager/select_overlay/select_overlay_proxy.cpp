@@ -160,4 +160,13 @@ bool SelectOverlayProxy::IsSingleHandle()
     CHECK_NULL_RETURN(pattern, false);
     return pattern->IsSingleHandle();
 }
+
+SelectOverlayInfo SelectOverlayProxy::GetSelectOverlayMangerInfo()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, SelectOverlayInfo());
+    auto manager = pipeline->GetSelectOverlayManager();
+    CHECK_NULL_RETURN(manager, SelectOverlayInfo());
+    return manager->GetSelectOverlayInfo();
+}
 } // namespace OHOS::Ace::NG

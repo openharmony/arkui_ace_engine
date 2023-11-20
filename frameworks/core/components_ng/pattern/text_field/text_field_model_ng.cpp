@@ -123,6 +123,13 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
+    auto focusHub = pattern->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
+    focusHub->SetFocusType(FocusType::NODE);
+    focusHub->SetFocusStyleType(FocusStyleType::CUSTOM_REGION);
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    pipeline->SetIsFocusActive(true);
     return pattern->GetTextFieldController();
 };
 
@@ -555,6 +562,16 @@ void TextFieldModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc
     }
 }
 
+void TextFieldModelNG::SetPasswordRules(const std::string& passwordRules)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PasswordRules, passwordRules);
+}
+
+void TextFieldModelNG::SetEnableAutoFill(bool enableAutoFill)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoFill, enableAutoFill);
+}
+
 void TextFieldModelNG::SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -562,6 +579,7 @@ void TextFieldModelNG::SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCleanNodeStyle(cleanNodeStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CleanNodeStyle, cleanNodeStyle);
 }
 
 void TextFieldModelNG::SetCancelIconSize(const CalcDimension& iconSize)
@@ -577,5 +595,10 @@ void TextFieldModelNG::SetCanacelIconSrc(const std::string& iconSrc)
 void TextFieldModelNG::SetCancelIconColor(const Color& iconColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, iconColor);
+}
+
+void TextFieldModelNG::SetSelectAllValue(bool isSelectAllValue)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue);
 }
 } // namespace OHOS::Ace::NG
