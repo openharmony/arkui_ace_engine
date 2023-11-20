@@ -88,7 +88,6 @@ void NavDestinationModelNG::CreateImageButton(const RefPtr<NavDestinationGroupNo
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
     backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     backButtonNode->MarkModifyDone();
 
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
@@ -112,7 +111,6 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     titleBarNode->SetBackButton(backButtonNode);
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
-    backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     backButtonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
     backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
