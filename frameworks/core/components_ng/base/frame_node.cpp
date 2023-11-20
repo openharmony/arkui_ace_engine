@@ -2435,8 +2435,9 @@ void FrameNode::GetPercentSensitive()
 
 void FrameNode::UpdatePercentSensitive()
 {
-    auto res = layoutProperty_->UpdatePercentSensitive(
-        layoutAlgorithm_->GetPercentHeight(), layoutAlgorithm_->GetPercentWidth());
+    bool percentHeight = layoutAlgorithm_ ? layoutAlgorithm_->GetPercentHeight() : true;
+    bool percentWidth = layoutAlgorithm_ ? layoutAlgorithm_->GetPercentWidth() : true;
+    auto res = layoutProperty_->UpdatePercentSensitive(percentHeight, percentWidth);
     if (res.first) {
         auto parent = GetAncestorNodeOfFrame();
         if (parent && parent->layoutAlgorithm_) {
