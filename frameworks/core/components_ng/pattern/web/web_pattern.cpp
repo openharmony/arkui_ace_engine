@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1487,6 +1487,8 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
         delegate_->SetPopup(isPopup_);
         delegate_->SetParentNWebId(parentNWebId_);
+        accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
+        delegate_->UpdateAccessibilityState(accessibilityState_);
         delegate_->SetBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         if (isEnhanceSurface_) {
@@ -1557,6 +1559,9 @@ void WebPattern::OnModifyDone()
         }
         isAllowWindowOpenMethod_ = SystemProperties::GetAllowWindowOpenMethodEnabled();
         delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
+        if (!webAccessibilityNode_) {
+            webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(host);
+        }
     }
 
     // Initialize events such as keyboard, focus, etc.
@@ -2788,6 +2793,67 @@ void WebPattern::UpdateJavaScriptOnDocumentStart()
     if (delegate_ && scriptItems_.has_value()) {
         delegate_->SetJavaScriptItems(scriptItems_.value());
         scriptItems_ = std::nullopt;
+    }
+}
+
+RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeById(int32_t accessibilityId)
+{
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
+    auto& info = webAccessibilityNode_->GetAccessibilityNodeInfo();
+    if (!delegate_->GetAccessibilityNodeInfoById(accessibilityId, info)) {
+        return nullptr;
+    }
+    SetSelfAsParentOfWebCoreNode(info);
+    return webAccessibilityNode_;
+}
+
+RefPtr<WebAccessibilityNode> WebPattern::GetFocusedAccessibilityNode(int32_t accessibilityId, bool isAccessibilityFocus)
+{
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
+    auto& info = webAccessibilityNode_->GetAccessibilityNodeInfo();
+    if (!delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus, info)) {
+        return nullptr;
+    }
+    SetSelfAsParentOfWebCoreNode(info);
+    return webAccessibilityNode_;
+}
+
+RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeByFocusMove(int32_t accessibilityId, int32_t direction)
+{
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
+    auto& info = webAccessibilityNode_->GetAccessibilityNodeInfo();
+    if (!delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction, info)) {
+        return nullptr;
+    }
+    SetSelfAsParentOfWebCoreNode(info);
+    return webAccessibilityNode_;
+}
+
+
+void WebPattern::ExecuteAction(int32_t nodeId, AceAction action) const
+{
+    CHECK_NULL_VOID(delegate_);
+    delegate_->ExecuteAction(nodeId, action);
+}
+
+void WebPattern::SetAccessibilityState(bool state)
+{
+    CHECK_NULL_VOID(delegate_);
+    if (accessibilityState_ != state) {
+        accessibilityState_ = state;
+        delegate_->SetAccessibilityState(state);
+    }
+}
+
+void WebPattern::SetSelfAsParentOfWebCoreNode(NWeb::NWebAccessibilityNodeInfo& info) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (info.parentId == -1) { // root node of web core
+        info.parentId = host->GetAccessibilityId();
     }
 }
 } // namespace OHOS::Ace::NG

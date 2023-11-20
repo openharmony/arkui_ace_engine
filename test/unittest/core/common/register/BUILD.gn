@@ -21,6 +21,7 @@ ohos_unittest("register_test") {
   sources = [
     "$ace_root/frameworks/core/common/register/hdc_connect.cpp",
     "$ace_root/frameworks/core/common/register/hdc_jdwp.cpp",
+    "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "register_test.cpp",
   ]

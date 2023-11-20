@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,7 @@
 #include "core/common/ace_application_info.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
+#include "core/components_ng/base/ui_node.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
@@ -2375,6 +2376,15 @@ void WebDelegate::InitWebViewWithWindow()
                 delegate->nweb_->Load(src.value());
             }
             delegate->window_->Show();
+            if (delegate->accessibilityState_) {
+                delegate->nweb_->SetAccessibilityState(true);
+                auto accessibilityEventListenerImpl =
+                    std::make_shared<AccessibilityEventListenerImpl>(Container::CurrentId());
+                CHECK_NULL_VOID(accessibilityEventListenerImpl);
+                accessibilityEventListenerImpl->SetWebDelegate(delegate);
+                delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
+                delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
+            }
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -2649,6 +2659,15 @@ void WebDelegate::InitWebViewWithSurface()
             downloadListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->SetNWebHandler(nweb_handler);
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
+            if (delegate->accessibilityState_) {
+                delegate->nweb_->SetAccessibilityState(true);
+                auto accessibilityEventListenerImpl =
+                    std::make_shared<AccessibilityEventListenerImpl>(Container::CurrentId());
+                CHECK_NULL_VOID(accessibilityEventListenerImpl);
+                accessibilityEventListenerImpl->SetWebDelegate(delegate);
+                delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
+                delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
+            }
 #ifdef OHOS_STANDARD_SYSTEM
             delegate->nweb_->RegisterScreenLockFunction(delegate->GetRosenWindowId(), [context](bool key) {
                 TAG_LOGD(AceLogTag::ACE_WEB, "SetKeepScreenOn %{public}d", key);
@@ -4304,6 +4323,16 @@ void WebDelegate::OnDownloadStart(const std::string& url, const std::string& use
         TaskExecutor::TaskType::JS);
 }
 
+void WebDelegate::OnAccessibilityEvent(int32_t accessibilityId, AccessibilityEventType eventType)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    AccessibilityEvent event;
+    event.nodeId = accessibilityId;
+    event.type = eventType;
+    context->SendEventToAccessibility(event);
+}
+
 void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error)
 {
@@ -5547,5 +5576,69 @@ void WebDelegate::JavaScriptOnDocumentStart()
         nweb_->JavaScriptOnDocumentStart(scriptItems_.value());
         scriptItems_ = std::nullopt;
     }
+}
+
+void WebDelegate::ExecuteAction(int32_t nodeId, AceAction action)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    uint32_t nwebAction = static_cast<uint32_t>(action);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), nodeId, nwebAction]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->ExecuteAction(nodeId, nwebAction);
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateAccessibilityState(bool state)
+{
+    accessibilityState_ = state;
+}
+
+void WebDelegate::SetAccessibilityState(bool state)
+{
+    accessibilityState_ = state;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), state]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->SetAccessibilityState(state);
+            if (state) {
+                auto accessibilityEventListenerImpl =
+                    std::make_shared<AccessibilityEventListenerImpl>(Container::CurrentId());
+                CHECK_NULL_VOID(accessibilityEventListenerImpl);
+                accessibilityEventListenerImpl->SetWebDelegate(delegate);
+                delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
+                delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+bool WebDelegate::GetFocusedAccessibilityNodeInfo(
+    int32_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
+{
+    CHECK_NULL_RETURN(nweb_, false);
+    return nweb_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus, nodeInfo);
+}
+
+bool WebDelegate::GetAccessibilityNodeInfoById(
+    int32_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
+{
+    CHECK_NULL_RETURN(nweb_, false);
+    return nweb_->GetAccessibilityNodeInfoById(accessibilityId, nodeInfo);
+}
+
+bool WebDelegate::GetAccessibilityNodeInfoByFocusMove(
+    int32_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
+{
+    CHECK_NULL_RETURN(nweb_, false);
+    return nweb_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction, nodeInfo);
 }
 } // namespace OHOS::Ace

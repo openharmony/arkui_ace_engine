@@ -35,6 +35,7 @@
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/web/web_accessibility_node.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/web_layout_algorithm.h"
@@ -411,6 +412,11 @@ public:
         return rootLayerHeight_;
     }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
+    RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int32_t accessibilityId, bool isAccessibilityFocus);
+    RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int32_t accessibilityId);
+    RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int32_t accessibilityId, int32_t direction);
+    void ExecuteAction(int32_t nodeId, AceAction action) const;
+    void SetAccessibilityState(bool state);
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -551,6 +557,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
     OffsetF GetSelectPopupPostion(const OHOS::NWeb::SelectMenuBound& bounds);
+    void SetSelfAsParentOfWebCoreNode(NWeb::NWebAccessibilityNodeInfo& info) const;
 
     struct TouchInfo {
         float x = -1.0f;
@@ -640,6 +647,8 @@ private:
     std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
     std::optional<ScriptItems> scriptItems_;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
+    bool accessibilityState_ = false;
+    RefPtr<WebAccessibilityNode> webAccessibilityNode_;
 };
 } // namespace OHOS::Ace::NG
 

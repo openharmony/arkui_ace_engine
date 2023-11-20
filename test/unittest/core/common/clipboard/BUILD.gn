@@ -19,6 +19,7 @@ ohos_unittest("clip_board_test") {
 
   sources = [
     "$ace_root/frameworks/core/common/clipboard/clipboard_proxy.cpp",
+    "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "clipboard_test.cpp",
   ]
