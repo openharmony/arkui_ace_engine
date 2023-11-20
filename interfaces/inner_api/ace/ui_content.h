@@ -127,6 +127,9 @@ public:
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
     virtual void ProcessFormVisibleChange(bool isVisible) {};
 
+    // only vaild in ContainerModalPatternEnhance
+    virtual void UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;
+
     // Window color
     virtual uint32_t GetBackgroundColor() = 0;
     virtual void SetBackgroundColor(uint32_t color) = 0;

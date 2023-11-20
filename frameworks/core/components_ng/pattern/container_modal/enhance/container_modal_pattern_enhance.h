@@ -27,6 +27,7 @@ public:
     void OnWindowFocused() override;
     void OnWindowUnfocused() override;
     void OnWindowForceUnfocused() override;
+    void UpdateTitleInTargetPos(bool isShow, int32_t height);
     virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
 protected:

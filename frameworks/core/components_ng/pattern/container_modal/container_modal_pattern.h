@@ -98,6 +98,8 @@ protected:
         return true;
     }
 
+    bool CanShowFloatingTitle();
+
     WindowMode windowMode_;
 
 private:
@@ -105,8 +107,6 @@ private:
 
     void SetTitleButtonHide(
         const RefPtr<FrameNode>& titleNode, bool hideSplit, bool hideMaximize, bool hideMinimize);
-
-    bool CanShowFloatingTitle();
 
     float moveX_ = 0.0f;
     float moveY_ = 0.0f;
