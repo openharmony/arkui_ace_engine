@@ -1803,7 +1803,7 @@ void UIContentImpl::SetFormBackgroundColor(const std::string& color)
     if (!Color::ParseColorString(color, bgColor)) {
         return;
     }
-    auto container = AceEngine::Get().GetContainer(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
     auto taskExecutor = container->GetTaskExecutor();
@@ -1813,6 +1813,7 @@ void UIContentImpl::SetFormBackgroundColor(const std::string& color)
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetAppBgColor(bgColor);
+            container->SetIsTransparentForm(bgColor == Color::TRANSPARENT);
         },
         TaskExecutor::TaskType::UI);
 }
