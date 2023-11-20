@@ -43,6 +43,7 @@ void ListItemGroupPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas
     DividerPainter dividerPainter(constrainStrokeWidth, laneLen, vertical_, divider_.color, LineCap::SQUARE);
     int32_t laneIdx = 0;
     bool isFirstItem = (itemPosition_.begin()->first == 0);
+    std::list<int32_t> lastLineIndex;
     for (const auto& child : itemPosition_) {
         if (!isFirstItem) {
             float mainPos = child.second.first - halfSpaceWidth;
@@ -50,8 +51,25 @@ void ListItemGroupPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas
             OffsetF offset = vertical_ ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
             dividerPainter.DrawLine(canvas, offset + paddingOffset);
         }
+        if (laneIdx == 0) {
+            lastLineIndex.clear();
+        }
+        lastLineIndex.emplace_back(child.first);
         laneIdx = (laneIdx + 1) >= lanes ? 0 : laneIdx + 1;
         isFirstItem = isFirstItem ? laneIdx > 0 : false;
+    }
+    if (!lastLineIndex.empty() && *lastLineIndex.rbegin() < totalItemCount_ - 1) {
+        int32_t laneIdx = 0;
+        for (auto index : lastLineIndex) {
+            if (index + lanes >= totalItemCount_) {
+                break;
+            }
+            float mainPos = itemPosition_.at(index).second + spaceWidth_ - halfSpaceWidth;
+            float crossPos = startMargin + laneIdx * ((crossSize - fSpacingTotal) / lanes + laneGutter_);
+            OffsetF offset = vertical_ ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
+            dividerPainter.DrawLine(canvas, offset);
+            laneIdx++;
+        }
     }
 }
 
