@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 
 namespace OHOS::Ace::NG {
 void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -60,6 +61,17 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         idealSize.SetWidth(idealWidth.value());
     }
     idealSize.SetHeight(std::max(minOptionHeight, idealSize.Height()));
+    auto rowChild = child->GetOrCreateChildByIndex(0);
+    if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG)) {
+        float dividerWidth = static_cast<float>(theme->GetDefaultDividerWidth().ConvertToPx());
+        SizeF idealSizePaste(idealSize.Width() - dividerWidth, idealSize.Height() - dividerWidth);
+        childConstraint.selfIdealSize.SetSize(idealSizePaste);
+        auto securityLayoutProperty = DynamicCast<SecurityComponentLayoutProperty>(rowChild->GetLayoutProperty());
+        CHECK_NULL_VOID(securityLayoutProperty);
+        securityLayoutProperty->UpdateBackgroundLeftPadding(Dimension(horInterval_));
+        rowChild->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        rowChild->Measure(childConstraint);
+    }
     LOGD("option frame size set to %{public}s", idealSize.ToString().c_str());
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
 }
@@ -72,6 +84,14 @@ void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     child->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+
+    auto rowChild = child->GetOrCreateChildByIndex(0);
+    if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG)) {
+        child->GetGeometryNode()->SetMarginFrameOffset(
+            OffsetF(0.0, (optionHeight - child->GetGeometryNode()->GetFrameSize().Height()) / 2.0f));
+        child->Layout();
+        return;
+    }
     child->GetGeometryNode()->SetMarginFrameOffset(
         OffsetF(horInterval_, (optionHeight - child->GetGeometryNode()->GetFrameSize().Height()) / 2.0f));
     child->Layout();

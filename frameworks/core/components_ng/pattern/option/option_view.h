@@ -32,6 +32,8 @@ public:
 
     static RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& parent);
     static RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent);
+    static void CreatePasteButton(const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
+        std::function<void()>&& onClickFunc);
 };
 
 } // namespace OHOS::Ace::NG

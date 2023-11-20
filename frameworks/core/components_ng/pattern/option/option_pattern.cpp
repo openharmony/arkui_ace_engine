@@ -23,6 +23,10 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_view.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
+#include "core/components_ng/pattern/security_component/security_component_pattern.h"
+#include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/touch_event.h"
@@ -53,11 +57,23 @@ void OptionPattern::OnModifyDone()
     auto eventHub = host->GetEventHub<OptionEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->IsEnabled()) {
+        UpdatePasteFontColor(selectTheme_->GetDisabledMenuFontColor());
         CHECK_NULL_VOID(text_);
         text_->GetRenderContext()->UpdateForegroundColor(selectTheme_->GetDisabledMenuFontColor());
         text_->MarkModifyDone();
+    } else {
+        UpdatePasteFontColor(selectTheme_->GetMenuFontColor());
     }
     SetAccessibilityAction();
+}
+
+void OptionPattern::UpdatePasteFontColor(const Color& fontColor)
+{
+    CHECK_NULL_VOID(pasteButton_);
+    auto property = pasteButton_->GetPaintProperty<SecurityComponentPaintProperty>();
+    CHECK_NULL_VOID(property);
+    property->UpdateFontColor(fontColor);
+    pasteButton_->MarkModifyDone();
 }
 
 void OptionPattern::OnSelectProcess()
