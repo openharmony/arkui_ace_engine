@@ -197,6 +197,7 @@ public:
     int32_t ConvertTouchOffsetToPosition(const Offset& localOffset);
 
 private:
+    void FitCaretMetricsToContentRect(CaretMetricsF& caretMetrics);
     void CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity);
     void CalcCaretMetricsByPositionNearTouchOffset(
         int32_t extent, CaretMetricsF& caretMetrics, const OffsetF& touchOffset);

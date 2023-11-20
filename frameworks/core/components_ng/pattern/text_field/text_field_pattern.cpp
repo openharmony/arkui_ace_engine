@@ -2047,7 +2047,11 @@ void TextFieldPattern::StartRequestSelectOverlay(const ShowSelectOverlayParams& 
     }
     if (params.secondHandle.has_value()) {
         auto handle = params.secondHandle.value();
+        auto contentRect = GetContentRect();
         handle.SetOffset(handle.GetOffset() + GetTextPaintOffset());
+        if (handle.Height() > contentRect.Height()) {
+            handle.SetHeight(contentRect.Height());
+        }
         SelectHandleInfo secondHandleInfo;
         secondHandleInfo.paintRect = handle;
         overlayInfo.secondHandleInfo = secondHandleInfo;
