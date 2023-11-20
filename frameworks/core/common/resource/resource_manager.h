@@ -44,7 +44,7 @@ public:
         const std::string& bundleName, const std::string& moduleName, RefPtr<ResourceAdapter>& resourceAdapter)
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
-        resourceAdapters_.emplace(std::make_pair(bundleName, moduleName), resourceAdapter);
+        resourceAdapters_[std::make_pair(bundleName, moduleName)] = resourceAdapter;
     }
 
     bool IsResourceAdapterRecord(const std::string& bundleName, const std::string& moduleName)
