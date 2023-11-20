@@ -73,9 +73,9 @@ void ImageModelNG::Create(
     }
 }
 
-void ImageModelNG::SetAlt(const std::string& src)
+void ImageModelNG::SetAlt(const ImageSourceInfo& src)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, ImageSourceInfo(src));
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, src);
 }
 
 void ImageModelNG::SetBorder(const Border& border) {}

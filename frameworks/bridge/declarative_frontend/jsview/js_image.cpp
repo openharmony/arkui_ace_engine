@@ -91,13 +91,18 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     }
 
     std::string src;
-    if (!ParseJsMedia(args[0], src)) {
+    if (args[0]->IsString()) {
+        src = args[0]->ToString();
+    } else if (!ParseJsMedia(args[0], src)) {
         return;
     }
     if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
         return;
     }
-    ImageModel::GetInstance()->SetAlt(src);
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(args[0], bundleName, moduleName);
+    ImageModel::GetInstance()->SetAlt(ImageSourceInfo { src, bundleName, moduleName });
 }
 
 void JSImage::SetObjectFit(int32_t value)
