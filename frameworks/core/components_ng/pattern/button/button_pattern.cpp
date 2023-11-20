@@ -41,6 +41,11 @@ void ButtonPattern::OnAttachToFrameNode()
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     clickedColor_ = buttonTheme->GetClickedColor();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetAlphaOffscreen(true);
 }
 
 void ButtonPattern::UpdateTextLayoutProperty(
