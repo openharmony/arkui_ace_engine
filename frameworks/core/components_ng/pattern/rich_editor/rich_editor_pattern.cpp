@@ -1919,7 +1919,6 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    ScrollToSafeArea();
     RefPtr<SpanNode> spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex()));
     if (spanNode == nullptr && info.GetSpanIndex() == 0) {
         CreateTextSpanNode(spanNode, info, insertValueTemp);
@@ -2212,7 +2211,6 @@ void RichEditorPattern::DeleteBackward(int32_t length)
     if (!caretVisible_) {
         StartTwinkling();
     }
-    ScrollToSafeArea();
 }
 
 void RichEditorPattern::DeleteForward(int32_t length)
@@ -3540,6 +3538,19 @@ void RichEditorPattern::UpdateTextFieldManager(const Offset& offset, float heigh
                                     ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx()
                                     : GetCaretRect().Height());
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
+
+    if (!isTextChange_) {
+        return;
+    }
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ScrollToSafeArea();
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 bool RichEditorPattern::IsDisabled() const
