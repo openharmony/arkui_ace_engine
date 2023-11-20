@@ -1990,12 +1990,8 @@ void TabBarPattern::DumpAdvanceInfo()
                    : DumpLog::GetInstance().AddDesc("changeByClick:false");
     needSetCentered_ ? DumpLog::GetInstance().AddDesc("needSetCentered:true")
                      : DumpLog::GetInstance().AddDesc("needSetCentered:false");
-    DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(currentOffset_));
     DumpLog::GetInstance().AddDesc("childrenMainSize:" + std::to_string(childrenMainSize_));
     DumpLog::GetInstance().AddDesc("indicator:" + std::to_string(indicator_));
-    DumpLog::GetInstance().AddDesc("focusIndicator:" + std::to_string(focusIndicator_));
-    DumpLog::GetInstance().AddDesc("currentIndicatorOffset:" + std::to_string(currentIndicatorOffset_));
-    DumpLog::GetInstance().AddDesc("turnPageRate:" + std::to_string(turnPageRate_));
     DumpLog::GetInstance().AddDesc("swiperStartIndex:" + std::to_string(swiperStartIndex_));
     DumpLog::GetInstance().AddDesc("scrollMargin:" + std::to_string(scrollMargin_));
     std::string regionString = std::string("region:");
