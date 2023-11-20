@@ -2535,4 +2535,22 @@ void PipelineContext::SetJSViewActive(bool active, WeakPtr<CustomNode> custom)
 {
     taskScheduler_->SetJSViewActive(active, custom);
 }
+
+void PipelineContext::SetCursor(int32_t cursorValue)
+{
+    if (cursorValue >= 0 && cursorValue <= static_cast<int32_t>(MouseFormat::RUNNING)) {
+        cursor_ = static_cast<MouseFormat>(cursorValue);
+        auto mouseStyle = MouseStyle::CreateMouseStyle();
+        CHECK_NULL_VOID(mouseStyle);
+        mouseStyle->ChangePointerStyle(GetWindowId(), cursor_);
+    }
+}
+
+void PipelineContext::RestoreDefault()
+{
+    cursor_ = MouseFormat::DEFAULT;
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    CHECK_NULL_VOID(mouseStyle);
+    mouseStyle->ChangePointerStyle(GetWindowId(), MouseFormat::DEFAULT);
+}
 } // namespace OHOS::Ace::NG

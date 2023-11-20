@@ -449,6 +449,10 @@ public:
 
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
 
+    void SetCursor(int32_t cursorValue) override;
+
+    void RestoreDefault() override;
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);

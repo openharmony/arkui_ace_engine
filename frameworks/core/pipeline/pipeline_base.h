@@ -976,6 +976,21 @@ public:
 
     virtual void UpdateTitleInTargetPos(bool isShow = true, int32_t height = 0) {}
 
+    virtual void SetCursor(int32_t cursorValue)
+    {
+        cursor_ = static_cast<MouseFormat>(cursorValue);
+    }
+
+    virtual void RestoreDefault()
+    {
+        cursor_ = MouseFormat::DEFAULT;
+    }
+
+    MouseFormat GetCursor() const
+    {
+        return cursor_;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1092,6 +1107,7 @@ protected:
     std::atomic<bool> onFocus_ = true;
     uint64_t lastTouchTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
+    MouseFormat cursor_ = MouseFormat::DEFAULT;
 
 private:
     void DumpFrontend() const;
