@@ -60,10 +60,7 @@ public:
     bool ResetSlidingPanelParentHeight();
 
     bool UpdatePanelForVirtualKeyboard(double offsetY, double fullHeight);
-    void SetHeight(float height)
-    {
-        height_ = height * 3;
-    }
+    void SetHeight(float height);
 
     float GetHeight() const
     {
