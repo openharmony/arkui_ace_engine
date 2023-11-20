@@ -572,6 +572,7 @@ private:
         const std::vector<NWeb::DateTimeSuggestion>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task) const;
+    void OfflineMode();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -639,6 +640,7 @@ private:
     RefPtr<WebDelegateObserver> observer_;
     std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
     std::optional<ScriptItems> scriptItems_;
+    bool isOfflineMode_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG
