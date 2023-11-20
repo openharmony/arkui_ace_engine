@@ -277,6 +277,7 @@ bool ArkJSRuntime::HasPendingException()
 void ArkJSRuntime::HandleUncaughtException(panda::TryCatch& trycatch,
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
+    LOGE("HandleUncaughtException called.");
     if (errorCallback != nullptr) {
         Local<ObjectRef> exception = trycatch.GetAndClearException();
         if (!exception.IsEmpty() && !exception->IsHole()) {
