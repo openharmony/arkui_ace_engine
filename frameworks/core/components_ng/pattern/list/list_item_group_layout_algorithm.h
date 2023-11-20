@@ -159,6 +159,10 @@ private:
     {
         return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_);
     }
+    inline void RecycleListItem(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index) const
+    {
+        layoutWrapper->RemoveChildInRenderTree(index + itemStartIndex_);
+    }
     void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis);
 
