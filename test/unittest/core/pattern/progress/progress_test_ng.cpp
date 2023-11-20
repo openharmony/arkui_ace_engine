@@ -2901,6 +2901,9 @@ HWTEST_F(ProgressTestNg, ProgressModifier006, TestSize.Level1)
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawRect(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawArc(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
 
@@ -2916,6 +2919,18 @@ HWTEST_F(ProgressTestNg, ProgressModifier006, TestSize.Level1)
             EXPECT_EQ(modifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_CAPSULE));
         }
         EXPECT_EQ(modifier->contentSize_->Get(), i);
+    }
+
+    std::vector<ProgressType> typeVector = { PROGRESS_TYPE_LINEAR, PROGRESS_TYPE_RING };
+    for (auto it : typeVector) {
+        modifier->SetProgressType(it);
+        modifier->SetMaxValue(0.f);
+        modifier->onDraw(context);
+        EXPECT_FLOAT_EQ(modifier->maxValue_->Get(), 0.f);
+        modifier->SetValue(0.f);
+        modifier->onDraw(context);
+        EXPECT_FLOAT_EQ(modifier->value_->Get(), 0.f);
+        EXPECT_EQ(modifier->progressType_->Get(), static_cast<int32_t>(it));
     }
 }
 
@@ -2944,19 +2959,130 @@ HWTEST_F(ProgressTestNg, ProgressModifier007, TestSize.Level1)
     modifier->SetSweepEffect(true);
     modifier->dateUpdated_ = true;
     modifier->SetValue(10.f);
-    EXPECT_EQ(modifier->value_->Get(), 10.f);
+    EXPECT_FLOAT_EQ(modifier->value_->Get(), 10.f);
     EXPECT_EQ(modifier->sweepEffect_->Get(), true);
     EXPECT_EQ(modifier->isSweeping_, true);
     EXPECT_EQ(modifier->dateUpdated_, false);
 
     modifier->SetVisible(false);
     modifier->SetSweepEffect(true);
+    modifier->SetProgressStatus(ProgressStatus::LOADING);
     modifier->StartCapsuleSweepingAnimationImpl(1.f, 1.f);
+    modifier->StartContinuousSweepingAnimation(0.f, 1.f, 1.f);
     EXPECT_EQ(modifier->isVisible_, false);
     EXPECT_EQ(modifier->isSweeping_, false);
-    EXPECT_EQ(modifier->sweepingDate_->Get(), 0.f);
+    EXPECT_FLOAT_EQ(modifier->sweepingDate_->Get(), 0.f);
     EXPECT_EQ(modifier->sweepEffect_->Get(), true);
+    EXPECT_EQ(modifier->progressStatus_->Get(), static_cast<int32_t>(ProgressStatus::LOADING));
+
     modifier->SetVisible(true);
+    modifier->SetProgressType(PROGRESS_TYPE_SCALE);
+    modifier->StartContinuousSweepingAnimation(0.f, 1.f, 1.f);
     EXPECT_EQ(modifier->isVisible_, true);
+    EXPECT_EQ(modifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_SCALE));
+}
+
+/**
+ * @tc.name: ProgressModifier008
+ * @tc.desc: Test PROGRESS_TYPE_RING ProgressModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModifier008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    modifier->SetProgressType(PROGRESS_TYPE_RING);
+    auto contentSize = SizeF(100.0f, 100.0f);
+    modifier->SetContentSize(contentSize);
+    EXPECT_EQ(modifier->contentSize_->Get(), contentSize);
+    EXPECT_EQ(modifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
+
+    /**
+     * @tc.steps: step2. Set different properties, call function onDraw.
+     * @tc.expected: step2. Set the properties success.
+     */
+    modifier->SetRingSweepEffect(true);
+    modifier->dateUpdated_ = true;
+    modifier->SetValue(10.f);
+    EXPECT_FLOAT_EQ(modifier->value_->Get(), 10.f);
+    EXPECT_EQ(modifier->ringSweepEffect_->Get(), true);
+    EXPECT_EQ(modifier->isSweeping_, true);
+    EXPECT_EQ(modifier->dateUpdated_, false);
+
+    modifier->StartRingLoadingAnimation();
+    EXPECT_EQ(modifier->isLoading_, false);
+    EXPECT_FLOAT_EQ(modifier->trailingHeadDate_->Get(), 0.f);
+    EXPECT_FLOAT_EQ(modifier->trailingTailDate_->Get(), 0.f);
+
+    modifier->SetValue(-10.f);
+    modifier->StartRingLoadingAnimation();
+    EXPECT_EQ(modifier->isLoading_, false);
+    EXPECT_FLOAT_EQ(modifier->trailingHeadDate_->Get(), 0.f);
+    EXPECT_FLOAT_EQ(modifier->trailingTailDate_->Get(), 0.f);
+
+    modifier->SetValue(100.f);
+    modifier->StartRingSweepingAnimation(100.f);
+    modifier->StartContinuousSweepingAnimation(0.f, 1.f, 1.f);
+    EXPECT_FLOAT_EQ(modifier->value_->Get(), 100.f);
+
+    modifier->SetVisible(false);
+    modifier->StartRingLoadingAnimation();
+    modifier->StartRingSweepingAnimation(100.f);
+    EXPECT_EQ(modifier->isVisible_, false);
+
+    modifier->isLoading_ = true;
+    modifier->StartRingLoadingAnimation();
+    EXPECT_EQ(modifier->isLoading_, true);
+}
+
+/**
+ * @tc.name: ProgressModifier009
+ * @tc.desc: Test PROGRESS_TYPE_LINEAR ProgressModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModifier009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    modifier->SetProgressType(PROGRESS_TYPE_LINEAR);
+    auto contentSize = SizeF(100.0f, 100.0f);
+    modifier->SetContentSize(contentSize);
+    EXPECT_EQ(modifier->contentSize_->Get(), contentSize);
+    EXPECT_EQ(modifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_LINEAR));
+
+    /**
+     * @tc.steps: step2. Set different properties, call function onDraw.
+     * @tc.expected: step2. Set the properties success.
+     */
+    modifier->SetLinearSweepEffect(true);
+    modifier->dateUpdated_ = true;
+    modifier->SetValue(10.f);
+    EXPECT_FLOAT_EQ(modifier->value_->Get(), 10.f);
+    EXPECT_EQ(modifier->linearSweepEffect_->Get(), true);
+    EXPECT_EQ(modifier->isSweeping_, true);
+    EXPECT_EQ(modifier->dateUpdated_, false);
+
+    modifier->SetValue(0.f);
+    modifier->StartLinearSweepingAnimation(0.f);
+    modifier->dateUpdated_ = true;
+    modifier->StartContinuousSweepingAnimation(0.f, 1.f, 1.f);
+    EXPECT_FLOAT_EQ(modifier->value_->Get(), 0.f);
+    EXPECT_EQ(modifier->isSweeping_, true);
+    EXPECT_EQ(modifier->dateUpdated_, false);
+
+    modifier->SetValue(100.f);
+    modifier->StartLinearSweepingAnimation(100.f);
+    modifier->StartContinuousSweepingAnimation(0.f, 1.f, 1.f);
+    EXPECT_FLOAT_EQ(modifier->value_->Get(), 100.f);
+
+    modifier->SetVisible(false);
+    modifier->StartLinearSweepingAnimation(100.f);
+    EXPECT_EQ(modifier->isVisible_, false);
 }
 } // namespace OHOS::Ace::NG
