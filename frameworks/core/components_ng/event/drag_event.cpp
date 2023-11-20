@@ -444,6 +444,13 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
     while (parent && parent->GetDepth() != 1) {
         parent = parent->GetParent();
     }
+    if (!parent) {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "DragFrameNode is %{public}s, depth %{public}d, can not find filter root",
+                frameNode->GetTag().c_str(), frameNode->GetDepth());
+        }
+        return;
+    }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
