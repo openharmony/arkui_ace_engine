@@ -38,7 +38,7 @@ public:
         const std::string& title) = 0;
     virtual void SetTitle(const std::string& title, bool hasSubTitle = false) = 0;
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
-    virtual void SetTitleHeight(const Dimension& height) = 0;
+    virtual void SetTitleHeight(const Dimension& height, bool isValid = true) = 0;
     virtual void SetTitleMode(NG::NavigationTitleMode mode) = 0;
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetHideTitleBar(bool hideTitleBar) = 0;

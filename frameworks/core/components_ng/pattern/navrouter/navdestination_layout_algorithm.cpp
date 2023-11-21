@@ -42,8 +42,6 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationG
     auto index = hostNode->GetChildIndexById(titleBarNode->GetId());
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(titleBarNode)->GetTitle();
-    CHECK_NULL_RETURN(titleNode, 0.0f);
     auto constraint = navDestinationLayoutProperty->CreateChildConstraint();
     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
