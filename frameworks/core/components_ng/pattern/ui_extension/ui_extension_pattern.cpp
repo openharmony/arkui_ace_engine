@@ -667,9 +667,10 @@ void UIExtensionPattern::SetOnRemoteReadyCallback(const std::function<void(const
         };
 }
 
-void UIExtensionPattern::SetOnSyncOnCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
+void UIExtensionPattern::SetOnSyncOnCallbackList(
+    const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList)
 {
-    onSyncOnCallback_ = std::move(callback);
+    onSyncOnCallbackList_ = std::move(callbackList);
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -682,16 +683,22 @@ void UIExtensionPattern::SetOnSyncOnCallback(const std::function<void(const RefP
             taskExecutor->PostTask([weak, instanceId]() {
                 ContainerScope scope(instanceId);
                 auto pattern = weak.Upgrade();
-                if (pattern && pattern->onSyncOnCallback_) {
-                    pattern->onSyncOnCallback_(MakeRefPtr<UIExtensionProxy>(pattern->session_, pattern));
+                if (!pattern) {
+                    return;
+                }
+                for (const auto& callback : pattern->onSyncOnCallbackList_) {
+                    if (callback) {
+                        callback(MakeRefPtr<UIExtensionProxy>(pattern->session_, pattern));
+                    }
                 }
             }, TaskExecutor::TaskType::UI);
         };
 }
 
-void UIExtensionPattern::SetOnAsyncOnCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
+void UIExtensionPattern::SetOnAsyncOnCallbackList(
+    const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList)
 {
-    onAsyncOnCallback_ = std::move(callback);
+    onAsyncOnCallbackList_ = std::move(callbackList);
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -704,37 +711,28 @@ void UIExtensionPattern::SetOnAsyncOnCallback(const std::function<void(const Ref
             taskExecutor->PostTask([weak, instanceId]() {
                 ContainerScope scope(instanceId);
                 auto pattern = weak.Upgrade();
-                if (pattern && pattern->onAsyncOnCallback_) {
-                    pattern->onAsyncOnCallback_(MakeRefPtr<UIExtensionProxy>(pattern->session_, pattern));
+                if (!pattern) {
+                    return;
+                }
+                for (const auto& callback : pattern->onAsyncOnCallbackList_) {
+                    if (callback) {
+                        callback(MakeRefPtr<UIExtensionProxy>(pattern->session_, pattern));
+                    }
                 }
             }, TaskExecutor::TaskType::UI);
         };
 }
 
-void UIExtensionPattern::SetOnSyncOffCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
+void UIExtensionPattern::SetOnSyncOffCallbackList(
+    const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList)
 {
-    onSyncOnCallback_ = std::move(callback);
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
-    extSessionEventCallback->notifySyncOnFunc_ = nullptr;
+    onSyncOnCallbackList_ = std::move(callbackList);
 }
 
-void UIExtensionPattern::SetOnAsyncOffCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
+void UIExtensionPattern::SetOnAsyncOffCallbackList(
+    const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList)
 {
-    onAsyncOnCallback_ = std::move(callback);
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
-    extSessionEventCallback->notifyAsyncOnFunc_ = nullptr;
+    onAsyncOnCallbackList_ = std::move(callbackList);
 }
 
 void UIExtensionPattern::SetModalOnRemoteReadyCallback(
