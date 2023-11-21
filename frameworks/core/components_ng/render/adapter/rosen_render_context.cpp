@@ -2303,17 +2303,19 @@ void RosenRenderContext::PaintFocusState(
     CHECK_NULL_VOID(rsNode_);
     auto borderWidthPx = static_cast<float>(paintWidth.ConvertToPx());
     auto frameNode = GetHost();
-    auto paintTask = [paintColor, borderWidthPx, frameNode](const RSRoundRect& rrect, RSCanvas& rsCanvas) mutable {
+    auto paintTask = [paintColor, borderWidthPx, weak = WeakClaim(AceType::RawPtr(frameNode))]
+    (const RSRoundRect& rrect, RSCanvas& rsCanvas) mutable {
         RSPen pen;
         pen.SetAntiAlias(true);
         pen.SetColor(ToRSColor(paintColor));
         pen.SetWidth(borderWidthPx);
         rsCanvas.AttachPen(pen);
-        CHECK_NULL_VOID(frameNode);
-        if (!frameNode->GetCheckboxFlag()) {
+        auto delegatePtr = weak.Upgrade();
+        CHECK_NULL_VOID(delegatePtr);
+        if (!delegatePtr->GetCheckboxFlag()) {
             rsCanvas.DrawRoundRect(rrect);
         } else {
-            auto paintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+            auto paintProperty = delegatePtr->GetPaintProperty<CheckBoxPaintProperty>();
             CHECK_NULL_VOID(paintProperty);
             CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
             if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
