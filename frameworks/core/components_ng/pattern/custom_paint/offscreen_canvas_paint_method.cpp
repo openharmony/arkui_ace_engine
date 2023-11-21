@@ -1006,10 +1006,11 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
     CHECK_NULL_RETURN(context, UNSUPPORTED);
     std::string mimeType = GetMimeType(type);
     double qua = GetQuality(type, quality);
+    auto imageInfo = SkImageInfo::Make(width_, height_, SkColorType::kBGRA_8888_SkColorType,
+        (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType);
 #ifndef USE_ROSEN_DRAWING
     SkBitmap tempCache;
-    tempCache.allocPixels(SkImageInfo::Make(width_, height_, SkColorType::kBGRA_8888_SkColorType,
-        (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
+    tempCache.allocPixels(imageInfo);
     SkCanvas tempCanvas(tempCache);
     double viewScale = context->GetViewScale();
     tempCanvas.clear(SK_ColorTRANSPARENT);
@@ -1029,10 +1030,9 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
     tempCanvas.Clear(RSColor::COLOR_TRANSPARENT);
     tempCanvas.Scale(1.0 / viewScale, 1.0 / viewScale);
     tempCanvas.DrawBitmap(bitmap_, 0.0f, 0.0f);
-
-    auto& skBitmap = tempCache.GetImpl<Rosen::Drawing::SkiaBitmap>()->ExportSkiaBitmap();
-    SkPixmap src;
-    bool success = skBitmap.peekPixels(&src);
+    RSPixmap rsSrc;
+    bool success = tempCache.PeekPixels(rsSrc);
+    SkPixmap src { imageInfo, rsSrc.GetAddr(), rsSrc.GetRowBytes() };
 #endif
     CHECK_NULL_RETURN(success, UNSUPPORTED);
     SkDynamicMemoryWStream dst;

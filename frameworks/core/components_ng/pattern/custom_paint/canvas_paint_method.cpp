@@ -1118,37 +1118,34 @@ std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContex
     double quality = GetQuality(args);
     double width = lastLayoutSize_.Width();
     double height = lastLayoutSize_.Height();
-
-#ifndef USE_ROSEN_DRAWING
     auto imageInfo = SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType);
+#ifndef USE_ROSEN_DRAWING
     SkBitmap tempCache;
     tempCache.allocPixels(imageInfo);
-
     SkBitmap currentBitmap;
     if (!DrawBitmap(renderContext, currentBitmap)) {
         return UNSUPPORTED;
     }
-
-    bool success = false;
-
-    success = currentBitmap.pixmap().scalePixels(
+    bool success = currentBitmap.pixmap().scalePixels(
         tempCache.pixmap(), SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f }));
-#else
-    RSBitmap currentBitmap;
-    CHECK_NULL_RETURN(rsRecordingCanvas_, UNSUPPORTED);
-    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
-    bool res = renderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
-    if (!res || !currentBitmap.IsValid()) {
-        return UNSUPPORTED;
-    }
-    bool success = false;
-    auto& skBitmap = currentBitmap.GetImpl<Rosen::Drawing::SkiaBitmap>()->ExportSkiaBitmap();
-    success =
-        skBitmap.pixmap().scalePixels(tempCache.pixmap(), SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f }));
-#endif
     CHECK_NULL_RETURN(success, UNSUPPORTED);
     SkPixmap src = tempCache.pixmap();
+#else
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888,
+        (mimeType == IMAGE_JPEG) ? RSAlphaType::ALPHATYPE_OPAQUE : RSAlphaType::ALPHATYPE_UNPREMUL };
+    RSBitmap tempCache;
+    tempCache.Build(width, height, format);
+    RSBitmap currentBitmap;
+    if (!DrawBitmap(renderContext, currentBitmap)) {
+        return UNSUPPORTED;
+    }
+    bool success = currentBitmap.GetPixelMap().ScalePixels(
+        tempCache.GetPixelMap(), RSSamplingOptions(RSCubicResampler { 1 / 3.0f, 1 / 3.0f }));
+    CHECK_NULL_RETURN(success, UNSUPPORTED);
+    RSPixmap rsSrc = tempCache.GetPixelMap();
+    SkPixmap src { imageInfo, rsSrc.GetAddr(), rsSrc.GetRowBytes() };
+#endif
     SkDynamicMemoryWStream dst;
     if (mimeType == IMAGE_JPEG) {
         SkJpegEncoder::Options options;
@@ -1172,7 +1169,6 @@ std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContex
     }
     SkString info(len);
     SkBase64::Encode(result->data(), result->size(), info.writable_str());
-
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
 }
 
