@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/form/form_pattern.h"
 
+#include "form_info_base.h"
 #include "pointer_event.h"
 #include "transaction/rs_interfaces.h"
 
@@ -22,6 +23,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/common/form_manager.h"
+#include "core/common/frontend.h"
 #include "core/components/form/resource/form_manager_delegate.h"
 #include "core/components/form/sub_container.h"
 #include "core/components_ng/pattern/form/form_event_hub.h"
@@ -35,6 +37,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 #include "form_constants.h"
+
+#if OHOS_STANDARD_SYSTEM
+#include "form_info.h"
+#endif
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/udmf_client.h"
@@ -442,12 +448,26 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         UpdateConfiguration();
         return false;
     }
+
+    isJsCard_ = true;
+#if OHOS_STANDARD_SYSTEM
+    AppExecFwk::FormInfo formInfo;
+    if (FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo) &&
+        formInfo.uiSyntax == AppExecFwk::FormType::ETS) {
+        isJsCard_ = false;
+    }
+#endif
+
     CreateCardContainer();
     if (host->IsDraggable()) {
         EnableDrag();
     }
     if (formManagerBridge_) {
+#if OHOS_STANDARD_SYSTEM
+        formManagerBridge_->AddForm(host->GetContext(), info, formInfo);
+#else
         formManagerBridge_->AddForm(host->GetContext(), info);
+#endif
     }
     return false;
 }
@@ -701,8 +721,8 @@ void FormPattern::CreateCardContainer()
         subContainer_ = AceType::MakeRefPtr<SubContainer>(context, context->GetInstanceId());
     }
     CHECK_NULL_VOID(subContainer_);
-    subContainer_->Initialize();
     subContainer_->SetFormPattern(WeakClaim(this));
+    subContainer_->Initialize();
     subContainer_->SetNodeId(host->GetId());
 
     subContainer_->AddFormAcquireCallback([weak = WeakClaim(this)](size_t id) {
