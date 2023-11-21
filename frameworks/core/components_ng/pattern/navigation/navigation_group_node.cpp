@@ -632,7 +632,7 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
     CHECK_NULL_VOID(titleNode);
 
     option.SetOnFinishEvent([weakNode = WeakPtr<FrameNode>(node), weakNavigation = WeakClaim(this),
-                                id = Container::CurrentId(), isNavBar, nodeWidth, nodeHeight, mode] {
+                                id = Container::CurrentId()] {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
