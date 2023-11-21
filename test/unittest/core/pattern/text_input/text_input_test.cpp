@@ -1828,4 +1828,232 @@ HWTEST_F(TextFieldUXTest, RepeatClickCaret, TestSize.Level1)
      */
     EXPECT_TRUE(pattern_->RepeatClickCaret(clickOffset, lastIndex));
 }
+
+/**
+ * @tc.name: UpdateFocusForward001
+ * @tc.desc: Test UpdateFocusForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, UpdateFocusForward001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Text input request focus.
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. Test update focus forward when focus index = UNIT.
+     */
+    pattern_->focusIndex_ = FocuseIndex::UNIT;
+    EXPECT_FALSE(pattern_->UpdateFocusForward());
+}
+
+/**
+ * @tc.name: UpdateFocusForward002
+ * @tc.desc: Test UpdateFocusForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, UpdateFocusForward002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Text input request focus.
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. show cancel image.
+     */
+    pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
+    RunMeasureAndLayout();
+    
+    /**
+     * @tc.steps: step4. Test update focus forward when focus index = CANCEL.
+     */
+    pattern_->focusIndex_ = FocuseIndex::CANCEL;
+    EXPECT_FALSE(pattern_->UpdateFocusForward());
+}
+
+/**
+ * @tc.name: UpdateFocusForward003
+ * @tc.desc: Test UpdateFocusForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, UpdateFocusForward003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show password icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowPasswordIcon(true);
+    });
+
+    /**
+     * @tc.steps: step2. Text input request focus.
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. show cancel image.
+     */
+    pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step4. Test update focus forward, focus index = CANCEL.
+     */
+    pattern_->focusIndex_ = FocuseIndex::CANCEL;
+    EXPECT_TRUE(pattern_->UpdateFocusForward());
+}
+
+/**
+ * @tc.name: UpdateFocusForward004
+ * @tc.desc: Test UpdateFocusForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, UpdateFocusForward004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show password icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowPasswordIcon(true);
+    });
+
+    /**
+     * @tc.steps: step2. Text input request focus.
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. Test update focus forward when focus index = TEXT.
+     */
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->UpdateFocusForward());
+}
+
+/**
+ * @tc.name: UpdateFocusBackward001
+ * @tc.desc: Test UpdateFocusBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, UpdateFocusBackward001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Text input request focus.
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. Test update focus backward when focus index = TEXT.
+     */
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_FALSE(pattern_->UpdateFocusBackward());
+}
+
+/**
+ * @tc.name: UpdateFocusBackward002
+ * @tc.desc: Test UpdateFocusBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, UpdateFocusBackward002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Text input request focus.
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. show cancel image.
+     */
+    pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step4. Test update focus backward when focus index = CANCEL.
+     */
+    pattern_->focusIndex_ = FocuseIndex::CANCEL;
+    EXPECT_TRUE(pattern_->UpdateFocusBackward());
+}
+
+/**
+ * @tc.name: UpdateFocusBackward003
+ * @tc.desc: Test UpdateFocusBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, UpdateFocusBackward003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show password icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowPasswordIcon(true);
+    });
+
+    /**
+     * @tc.steps: step2. Text input request focus
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. Test update focus backward when focus index = UNIT.
+     */
+    pattern_->focusIndex_ = FocuseIndex::UNIT;
+    EXPECT_TRUE(pattern_->UpdateFocusBackward());
+}
+
+/**
+ * @tc.name: UpdateFocusBackward004
+ * @tc.desc: Test UpdateFocusBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, UpdateFocusBackward004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show password icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowPasswordIcon(true);
+    });
+
+    /**
+     * @tc.steps: step2. Text input request focus.
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. show cancel image.
+     */
+    pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
+    RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step4. Test update focus backward when focus index = UNIT.
+     */
+    pattern_->focusIndex_ = FocuseIndex::UNIT;
+    EXPECT_TRUE(pattern_->UpdateFocusBackward());
+}
 } // namespace OHOS::Ace::NG
