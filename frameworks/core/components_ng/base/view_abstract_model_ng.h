@@ -950,6 +950,27 @@ public:
         ViewAbstract::DisableOnBlur();
     }
 
+    void SetLightPosition(
+        const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override
+    {
+        ViewAbstract::SetLightPosition(positionX, positionY, positionZ);
+    }
+
+    void SetLightIntensity(const float value) override
+    {
+        ViewAbstract::SetLightIntensity(value);
+    }
+
+    void SetLightIlluminated(const uint32_t value) override
+    {
+        ViewAbstract::SetLightIlluminated(value);
+    }
+
+    void SetBloom(const float value) override
+    {
+        ViewAbstract::SetBloom(value);
+    }
+
 private:
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);

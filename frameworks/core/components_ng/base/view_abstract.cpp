@@ -1821,4 +1821,37 @@ void ViewAbstract::SetZIndex(FrameNode* frameNode, int32_t value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(ZIndex, value, frameNode);
 }
+
+void ViewAbstract::SetLightPosition(
+    const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(LightPosition, TranslateOptions(positionX, positionY, positionZ));
+}
+
+void ViewAbstract::SetLightIntensity(const float value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(LightIntensity, value);
+}
+
+void ViewAbstract::SetLightIlluminated(const uint32_t value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(LightIlluminated, value);
+}
+void ViewAbstract::SetBloom(const float value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(Bloom, value);
+}
+
 } // namespace OHOS::Ace::NG

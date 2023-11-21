@@ -329,6 +329,12 @@ public:
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
+    // global light
+    static void SetLightPosition(
+        const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
+    static void SetLightIntensity(const float value);
+    static void SetLightIlluminated(const uint32_t value);
+    static void SetBloom(const float value);
 
 private:
     static void AddDragFrameNodeToManager();

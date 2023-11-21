@@ -1901,6 +1901,16 @@ var NestedScrollMode;
   NestedScrollMode[NestedScrollMode["PARALLEL"] = 3] = "PARALLEL";
 })(NestedScrollMode || (NestedScrollMode = {}));
 
+var IlluminatedType;
+(function (IlluminatedType) {
+  IlluminatedType[IlluminatedType["NONE"] = 0] = "NONE";
+  IlluminatedType[IlluminatedType["BORDER"] = 1] = "BORDER";
+  IlluminatedType[IlluminatedType["CONTENT"] = 2] = "CONTENT";
+  IlluminatedType[IlluminatedType["BORDER_CONTENT"] = 3] = "BORDER_CONTENT";
+  IlluminatedType[IlluminatedType["BLOOM_BORDER"] = 4] = "BLOOM_BORDER";
+  IlluminatedType[IlluminatedType["BLOOM_BORDER_CONTENT"] = 5] = "BLOOM_BORDER_CONTENT";
+})(IlluminatedType || (IlluminatedType = {}));
+
 var ScrollAlign;
 (function (ScrollAlign) {
   ScrollAlign[ScrollAlign["START"] = 0] = "START";

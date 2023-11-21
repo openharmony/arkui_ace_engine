@@ -292,4 +292,21 @@ void BorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
     json->Put("border", jsonBorder->ToString().c_str());
 }
+
+void PointLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto jsonLightIntensity = JsonUtil::Create(true);
+    jsonLightIntensity->Put("lightIntensity", propLightIntensity.has_value() ? propLightIntensity.value() : 0.0);
+    json->Put("pointLight", jsonLightIntensity);
+
+    if (propLightPosition.has_value()) {
+        auto jsonLightPosition = JsonUtil::Create(true);
+        jsonLightPosition->Put("x", propLightPosition->x.ToString().c_str());
+        jsonLightPosition->Put("y", propLightPosition->y.ToString().c_str());
+        jsonLightPosition->Put("z", propLightPosition->z.ToString().c_str());
+        json->Put("LightPosition", jsonLightPosition);
+    } else {
+        json->Put("LightPosition", JsonUtil::Create(true));
+    }
+}
 } // namespace OHOS::Ace::NG

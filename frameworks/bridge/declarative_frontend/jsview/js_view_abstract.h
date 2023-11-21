@@ -356,6 +356,7 @@ public:
     static void GetBorderRadius(const char* key, JSRef<JSObject>& object, CalcDimension& radius);
     static void ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
         CalcDimension& bottomLeft, CalcDimension& bottomRight);
+    static void JsPointLight(const JSCallbackInfo& info);
 
     template<typename T>
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, T& result)
