@@ -282,6 +282,10 @@ class SelectionMenuComponent extends ViewPU {
     popDataFromPasteboard(e) {
         let t = e.selection[0];
         let o = e.selection[1];
+        if (t === o && this.controller) {
+            t = this.controller.getCaretOffset();
+            o = this.controller.getCaretOffset()
+        }
         let n = 0;
         pasteboard.getSystemPasteboard().getData(((e, i) => {
             if (e) return;

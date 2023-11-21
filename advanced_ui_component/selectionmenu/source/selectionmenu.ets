@@ -175,6 +175,10 @@ struct SelectionMenuComponent {
   popDataFromPasteboard(richEditorSelection: RichEditorSelection) {
     let start = richEditorSelection.selection[0]
     let end = richEditorSelection.selection[1]
+    if (start === end && this.controller) {
+      start = this.controller.getCaretOffset()
+      end = this.controller.getCaretOffset()
+    }
     let moveOffset = 0
     let sysBoard = pasteboard.getSystemPasteboard()
     sysBoard.getData((err, data) => {
