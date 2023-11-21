@@ -271,16 +271,22 @@ void NavigationPattern::CheckTopNavPathChange(
         focusHub->RequestFocus();
     }
     // animation need to run after layout task
-    context->AddAfterLayoutTask([preTopNavDestination, newTopNavDestination, isPopPage,
-                                    weakNavigationPattern = WeakClaim(this), this]() {
-        auto navigationPattern = weakNavigationPattern.Upgrade();
-        CHECK_NULL_VOID(navigationPattern);
-        if (navigationMode_ == NavigationMode::STACK) {
+    if (navigationMode_ == NavigationMode::STACK) {
+        context->AddAfterLayoutTask([preTopNavDestination, newTopNavDestination, isPopPage,
+                                    weakNavigationPattern = WeakClaim(this)]() {
+            auto navigationPattern = weakNavigationPattern.Upgrade();
+            CHECK_NULL_VOID(navigationPattern);
             navigationPattern->DoStackModeTransitionAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
-        } else {
+        });
+    }
+    if (navigationMode_ == NavigationMode::SPLIT) {
+        context->AddAfterLayoutTask([preTopNavDestination, newTopNavDestination, isPopPage,
+                                        weakNavigationPattern = WeakClaim(this)]() {
+            auto navigationPattern = weakNavigationPattern.Upgrade();
+            CHECK_NULL_VOID(navigationPattern);
             navigationPattern->DoSplitModeTransitionAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
-        }
-    });
+        });
+    }
     hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
 }
 
