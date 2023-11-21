@@ -61,7 +61,13 @@ const std::vector<V2::ScrollSnapAlign> SCROLL_SNAP_ALIGN = { V2::ScrollSnapAlign
     V2::ScrollSnapAlign::CENTER, V2::ScrollSnapAlign::END };
 
 namespace {
-    const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
+const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
+constexpr ScrollAlign ALIGN_TABLE[] = {
+    ScrollAlign::START,
+    ScrollAlign::CENTER,
+    ScrollAlign::END,
+    ScrollAlign::AUTO,
+};
 }
 
 void JSList::SetDirection(int32_t direction)
@@ -733,6 +739,7 @@ void JSListScroller::JSBind(BindingTarget globalObj)
 {
     JSClass<JSListScroller>::Declare("ListScroller");
     JSClass<JSListScroller>::CustomMethod("getItemRectInGroup", &JSListScroller::GetItemRectInGroup);
+    JSClass<JSListScroller>::CustomMethod("scrollToItemInGroup", &JSListScroller::ScrollToItemInGroup);
     JSClass<JSListScroller>::CustomMethod("closeAllSwipeActions", &JSListScroller::CloseAllSwipeActions);
     JSClass<JSListScroller>::InheritAndBind<JSScroller>(globalObj, JSListScroller::Constructor,
         JSListScroller::Destructor);
@@ -769,6 +776,54 @@ void JSListScroller::GetItemRectInGroup(const JSCallbackInfo& args)
     } else {
         JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
     }
+}
+
+void JSListScroller::ScrollToItemInGroup(const JSCallbackInfo& args)
+{
+    int32_t index = 0;
+    int32_t indexInGroup = 0;
+    bool smooth = false;
+    ScrollAlign align = ScrollAlign::NONE;
+
+    if (args.Length() < 1) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
+
+    auto scrollController = GetController().Upgrade();
+    if (!scrollController) {
+        JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
+        return;
+    }
+
+    if (!ConvertFromJSValue(args[0], index) || index < 0) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
+
+    if (args.Length() >= 2) { // 2 is param count
+        if (!ConvertFromJSValue(args[1], indexInGroup) || indexInGroup < 0) {
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+            return;
+        }
+    }
+
+    if (args.Length() >= 3) { // 3 is param count
+        if (!args[2]->IsBoolean()) { // 2 is the param index of smooth
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+            return;
+        }
+        smooth = args[2]->ToBoolean(); // 2 is the param index of smooth
+    }
+
+    if (args.Length() == 4) { // 4 is param count
+        if (!ConvertFromJSValue(args[3], ALIGN_TABLE, align)) { // 3 is param count of align
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+            return;
+        }
+    }
+
+    scrollController->JumpToItemInGroup(index, indexInGroup, smooth, align, SCROLL_FROM_JUMP);
 }
 
 void JSListScroller::CloseAllSwipeActions(const JSCallbackInfo& args)

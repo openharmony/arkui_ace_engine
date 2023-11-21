@@ -71,6 +71,8 @@ public:
         itemPosition_ = itemPosition;
     }
 
+    void ClearAllItemPosition(LayoutWrapper* layoutWrapper);
+
     void SetOverScrollFeature()
     {
         overScrollFeature_ = true;
@@ -262,6 +264,12 @@ public:
     void HandleJumpAuto(LayoutWrapper* layoutWrapper,
         int32_t& startIndex, int32_t& endIndex, float& startPos, float& endPos);
 
+    void HandleJumpCenter(LayoutWrapper* layoutWrapper);
+
+    void HandleJumpStart(LayoutWrapper* layoutWrapper);
+
+    void HandleJumpEnd(LayoutWrapper* layoutWrapper);
+
     bool NoNeedJump(LayoutWrapper* layoutWrapper, float startPos, float endPos,
         int32_t startIndex, int32_t endIndex);
 
@@ -317,7 +325,7 @@ protected:
     static void SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
     void CheckListItemGroupRecycle(
         LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
-    void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index);
+    void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index, bool forwardLayout);
     void SetItemInfo(int32_t index, ListItemInfo&& info)
     {
         itemPosition_[index] = info;
@@ -325,6 +333,7 @@ protected:
     void LayoutItem(RefPtr<LayoutWrapper>& layoutWrapper, int32_t index, const ListItemInfo& pos,
         int32_t& startIndex, float crossSize);
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
+    ListItemInfo GetListItemGroupPosition(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;

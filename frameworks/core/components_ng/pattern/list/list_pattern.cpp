@@ -114,42 +114,16 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         relativeOffset += absoluteOffset - currentOffset_;
         isJump = true;
     }
-    targetIndex_ = listLayoutAlgorithm->GetTargetIndex();
-    if (targetIndex_) {
-        auto iter = itemPosition_.find(targetIndex_.value());
-        if (iter != itemPosition_.end()) {
-            float targetPos = 0.0f;
-            switch (scrollAlign_) {
-                case ScrollAlign::START:
-                case ScrollAlign::NONE:
-                    targetPos = iter->second.startPos;
-                    break;
-                case ScrollAlign::CENTER:
-                    targetPos = (iter->second.endPos + iter->second.startPos) / 2.0f - contentMainSize_ / 2.0f;
-                    break;
-                case ScrollAlign::END:
-                    targetPos = iter->second.endPos - contentMainSize_;
-                    break;
-                case ScrollAlign::AUTO:
-                    ScrollAutoType scrollAutoType = listLayoutAlgorithm->GetScrollAutoType();
-                    targetPos = CalculateTargetPos(iter->second.startPos, iter->second.endPos, scrollAutoType);
-                    break;
-            }
-            // correct the currentOffset when the startIndex is 0.
-            if (listLayoutAlgorithm->GetStartIndex() == 0) {
-                currentOffset_ = -itemPosition_.begin()->second.startPos;
-            } else {
-                currentOffset_ = currentOffset_ + relativeOffset;
-            }
-            AnimateTo(targetPos + currentOffset_, -1, nullptr, true);
-        }
-        targetIndex_.reset();
+    // correct the currentOffset when the startIndex is 0.
+    if (listLayoutAlgorithm->GetStartIndex() == 0) {
+        currentOffset_ = -itemPosition_.begin()->second.startPos;
     } else {
-        if (listLayoutAlgorithm->GetStartIndex() == 0) {
-            currentOffset_ = -itemPosition_.begin()->second.startPos;
-        } else {
-            currentOffset_ = currentOffset_ + relativeOffset;
-        }
+        currentOffset_ = currentOffset_ + relativeOffset;
+    }
+    if (targetIndex_) {
+        AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
+        targetIndex_.reset();
+        targetIndexInGroup_.reset();
     }
     if (predictSnapOffset.has_value()) {
         if (scrollableTouchEvent_) {
@@ -257,21 +231,24 @@ ScrollAlign ListPattern::GetScrollAlignByScrollSnapAlign() const
     return scrollAlign;
 }
 
-float ListPattern::CalculateTargetPos(float startPos, float endPos, ScrollAutoType scrollAutoType)
+float ListPattern::CalculateTargetPos(float startPos, float endPos)
 {
-    float targetPos = 0.0f;
-    switch (scrollAutoType) {
-        case ScrollAutoType::NOT_CHANGE:
-            TAG_LOGI(AceLogTag::ACE_LIST, "item is fully visible, no need to scroll.");
-            break;
-        case ScrollAutoType::START:
-            targetPos = startPos;
-            break;
-        case ScrollAutoType::END:
-            targetPos = endPos - contentMainSize_;
-            break;
+    float downOffset = 0.0f;
+    float upOffset = 0.0f;
+    if (Negative(startPos)) {
+        downOffset = -startPos;
     }
-    return targetPos;
+    if (GreatNotEqual(endPos, contentMainSize_)) {
+        upOffset = endPos - contentMainSize_;
+    }
+
+    if (LessNotEqual(downOffset, upOffset)) {
+        return -downOffset;
+    }
+    if (LessNotEqual(upOffset, downOffset)) {
+        return upOffset;
+    }
+    return 0.0f;
 }
 
 RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
@@ -1250,30 +1227,186 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
         currentDelta_ = 0.0f;
         smooth_ = smooth;
         if (smooth_) {
-            targetIndex_ = index;
+            if (!AnimateToTarget(index, std::nullopt, align)) {
+                targetIndex_ = index;
+                scrollAlign_ = align;
+            }
         } else {
             jumpIndex_ = index;
+            scrollAlign_ = align;
         }
-        scrollAlign_ = align;
         MarkDirtyNodeSelf();
     }
     isScrollEnd_ = true;
     FireAndCleanScrollingListener();
 }
 
-void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align)
+void ListPattern::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
-        currentDelta_ = 0;
-        jumpIndex_ = index;
-        jumpIndexInGroup_ = indexInGroup;
-        scrollAlign_ = align;
+        currentDelta_ = 0.0f;
+        smooth_ = smooth;
+        if (smooth_) {
+            if (!AnimateToTarget(index, indexInGroup, align)) {
+                targetIndex_ = index;
+                currentDelta_ = 0;
+                targetIndexInGroup_ = indexInGroup;
+                scrollAlign_ = align;
+            }
+        } else {
+            jumpIndex_ = index;
+            jumpIndexInGroup_ = indexInGroup;
+            scrollAlign_ = align;
+        }
         MarkDirtyNodeSelf();
     }
     isScrollEnd_ = true;
     FireAndCleanScrollingListener();
+}
+
+bool ListPattern::GetListItemAnimatePos(float startPos, float endPos, ScrollAlign align, float& targetPos)
+{
+    switch (align) {
+        case ScrollAlign::START:
+        case ScrollAlign::NONE:
+            targetPos = startPos;
+            break;
+        case ScrollAlign::CENTER:
+            targetPos = (endPos + startPos) / 2.0f - contentMainSize_ / 2.0f;
+            break;
+        case ScrollAlign::END:
+            targetPos = endPos - contentMainSize_;
+            break;
+        case ScrollAlign::AUTO:
+            targetPos = CalculateTargetPos(startPos, endPos);
+            break;
+    }
+    return true;
+}
+
+bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, float startPos, float endPos,
+    ScrollAlign align, float& targetPos)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto groupWrapper = host->GetChildByIndex(index);
+    CHECK_NULL_RETURN(groupWrapper, false);
+    auto groupNode = groupWrapper->GetHostNode();
+    CHECK_NULL_RETURN(groupNode, false);
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(groupPattern, false);
+
+    switch (align) {
+        case ScrollAlign::START:
+        case ScrollAlign::NONE:
+            if (!groupPattern->IsDisplayStart()) {
+                return false;
+            }
+            targetPos = startPos;
+            break;
+        case ScrollAlign::CENTER:
+            if (!groupPattern->IsDisplayStart() || !groupPattern->IsDisplayEnd()) {
+                return false;
+            }
+            targetPos = (endPos + startPos) / 2.0f - contentMainSize_ / 2.0f;
+            break;
+        case ScrollAlign::END:
+            if (!groupPattern->IsDisplayEnd()) {
+                return false;
+            }
+            targetPos = endPos - contentMainSize_;
+            break;
+        case ScrollAlign::AUTO:
+            if (targetIndex_.has_value()) {
+                targetPos = CalculateTargetPos(startPos, endPos);
+                return true;
+            }
+            return false;
+    }
+
+    return true;
+}
+
+bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int32_t indexInGroup, float startPos,
+    ScrollAlign align, float& targetPos)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto groupWrapper = host->GetChildByIndex(index);
+    CHECK_NULL_RETURN(groupWrapper, false);
+    auto groupNode = groupWrapper->GetHostNode();
+    CHECK_NULL_RETURN(groupNode, false);
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(groupPattern, false);
+
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listLayoutProperty, false);
+    auto stickyStyle = listLayoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
+
+    auto itemsPosInGroup = groupPattern->GetItemPosition();
+    auto it = itemsPosInGroup.find(indexInGroup);
+    if (it == itemsPosInGroup.end()) {
+        return false;
+    }
+    std::optional<std::pair<float, float>> itemPosInGroup = it->second;
+    auto padding = groupWrapper->GetGeometryNode()->GetPadding()->top;
+    float paddingBeforeContent = 0.0f;
+    if (padding) {
+        paddingBeforeContent = padding.value();
+    }
+    switch (align) {
+        case ScrollAlign::START:
+        case ScrollAlign::NONE:
+            targetPos = paddingBeforeContent + startPos + itemPosInGroup.value().first;
+            if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
+                targetPos -= groupPattern->GetHeaderMainSize();
+            }
+            break;
+        case ScrollAlign::CENTER:
+            targetPos = paddingBeforeContent + startPos +
+                (itemPosInGroup.value().first + itemPosInGroup.value().second) / 2.0f -
+                contentMainSize_ / 2.0f;
+            break;
+        case ScrollAlign::END:
+            targetPos = paddingBeforeContent + startPos + itemPosInGroup.value().second - contentMainSize_;
+            if (stickyStyle == V2::StickyStyle::FOOTER || stickyStyle == V2::StickyStyle::BOTH) {
+                targetPos += groupPattern->GetFooterMainSize();
+            }
+            break;
+        case ScrollAlign::AUTO:
+            break;
+    }
+    return true;
+}
+
+bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align)
+{
+    auto iter = itemPosition_.find(index);
+    if (iter == itemPosition_.end()) {
+        return false;
+    }
+    float targetPos = 0.0f;
+    if (iter->second.isGroup) {
+        if (indexInGroup.has_value()) {
+            if (!GetListItemGroupAnimatePosWithIndexInGroup(index, indexInGroup.value(), iter->second.startPos,
+                align, targetPos)) {
+                return false;
+            }
+        } else {
+            if (!GetListItemGroupAnimatePosWithoutIndexInGroup(index, iter->second.startPos, iter->second.endPos,
+                align, targetPos)) {
+                return false;
+            }
+        }
+    } else {
+        GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
+    }
+    if (!NearZero(targetPos)) {
+        AnimateTo(targetPos + currentOffset_, -1, nullptr, true);
+    }
+    return true;
 }
 
 bool ListPattern::ScrollPage(bool reverse)
