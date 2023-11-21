@@ -552,7 +552,7 @@ private:
 
     void SetLazyLoadFeature(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
-    int32_t ComputeNextIndexByVelocity(float velocity) const;
+    int32_t ComputeNextIndexByVelocity(float velocity, bool onlyDistance = false) const;
     void UpdateCurrentIndex(int32_t index);
     void OnSpringAnimationStart(float velocity);
     void OnSpringAndFadeAnimationFinish();
