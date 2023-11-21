@@ -51,7 +51,6 @@ foreach(device, ace_devices) {
       "$ace_root/frameworks",
       "$flutter_root/glfw/include",
       "//foundation/window/window_manager",
-      "//ide/tools/previewer",
     ]
     deps += [ ":copy_preview_shared_library" ]
     sources = [
@@ -61,7 +60,6 @@ foreach(device, ace_devices) {
 
     external_deps = [
       "graphic_2d:librender_service_client",
-      "previewer:ide_extension",
       "window_manager:previewer_window",
     ]
 

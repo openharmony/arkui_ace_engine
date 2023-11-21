@@ -71,7 +71,6 @@
                 "soc_perf",
                 "security_component_manager",
                 "camera_framework",
-                "previewer",
                 "media_library",
                 "app_file_service"
             ],
