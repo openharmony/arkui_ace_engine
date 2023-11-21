@@ -27,176 +27,78 @@ Flow A:
 2. Some time later on next re-render of a ViewPU:
 3. ViewPU.purgeDeletedElmtIds calls C+++ UINodeRegisterProxy.obtainElementIds(),
 4. UINodeRegisterProxy.obtainElementIds() calls C++  ElementRegister::MoveRemovedItems to move elmtIds of deleted UINodes UINodeRegisterProxy
-   (those added by RemoveItems(elmtId) in step 1), see documentation of the UINodeRegisterProxy.obtainElementIds() for details.
-5. continue if UINodeRegisterProxy.elmtIdsNeedUnregister:
-6. forEach elmtId managed by this ViewPU call UINodeRegisterProxy.consume(elmtId)
-7. if the consume(elmtId) returns true it means this elmtId has been deleted and needs to be unregistered from the ViewPU and its state vars.
-   consume(elmtId) also deleted the elmtId from Set UINodeRegisterProxy.elmtIdsToUnregister_
-
+   (those added by RemoveItems(elmtId) in step 1).
+5. UINodeRegisterProxy.unregisterElmtIdsFromViewPUs: unregister the removedElementIds from the all the viewpus:
+  1) purge the update function in viewpu
+  2) purge the dependent element if from statevariable
 
 Flow B:
 1. CustomNode destructor calls deleteFunction calls ViewPU.aboutToBeDeleted
    note that CustomNode destructor may get called before child UINodes' destructor.
-2. aboutToBeDeleted calls UINodeRegisterProxy.accountElmtIdsAsUnregistered(elmtIds) for all elmtIds of child UINodes of this ViewPU
-   see accountElmtIdsAsUnregistered(elmtIds array) method for details.
+  1) unregister its own element ids
+  2) call UINodeRegisterProxy.obtainElementIds() to get the removed elementIds from cpp and unregister from all the viewpus.
+     it may make the first viewpu aboutToBeDeleted execution time longer than before, but for rest viewpu may be faster.
+     It's function equals with purgeDeletedElmtIdsRecursively, so it is not necessary to execute purgeDeletedElmtIds for all its child recursively.
 
-3. some time later: child UINodes destructor call ElementRegister::removeItem(elmtId), ElementRegister memorises the elmtId until  
-   next ViewPU.purgeDeletedElmtIds - processing ends
-
-4. some time later: a ViewPU rerenders and calls ViewPU.purgeDeletedElmtIds, calls UINodeRegisterProxy.obtainElementIds()
-   obtainElementIds() realizes that the elmtIds added in step 3 have already been marked as unregistered in step 2.
-   see obtainElementIds() for details.
+2. some time later or when idle: PipelineContext::OnIdle will CallJSCleanUpIdleTaskFunc to do the clean up for the removed elements which have not unregisted
+   from the stateMgmt side.
 */
 
 type RemovedElementInfo = { elmtId : number, tag : string };
-
-// Define a global function
-function globalRegisterCleanUpFunction(): void {
-    stateMgmtConsole.debug('globalRegisterCleanUpFunction - called from C++ on CleanUp');
+// defined a globle function to clean up the removeItems when idle
+function uiNodeCleanUpIdleTask(): void {
+    stateMgmtConsole.debug(`UINodeRegisterProxy. static uiNodeCleanUpIdleTask:`);
     UINodeRegisterProxy.obtainDeletedElmtIds();
+    UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
 }
 
 class UINodeRegisterProxy {
-    public static uiNodeRegisterCleanUpFunction() : void {
-        stateMgmtConsole.debug('UINodeRegisterProxy. static uiNodeRegisterCleanUpFunction:');
-        UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
-    }
-    
     public static obtainDeletedElmtIds(): void {
         stateMgmtConsole.debug(`UINodeRegisterProxy. static obtainDeletedElmtIds:`);
         UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
     }
 
-    public static accountElmtIdsAsUnregistered(elmtIds: number[]): void {
-        stateMgmtConsole.debug('UINodeRegisterProxy.accountElmtIdsAsUnregistered elmtIds', elmtIds);
-        UINodeRegisterProxy.instance_.accountElmtIdsAsUnregistered(elmtIds);
+    public static unregisterElmtIdsFromViewPUs(): void {
+        stateMgmtConsole.debug('UINodeRegisterProxy.unregisterElmtIdsFromViewPUs elmtIds');
+        UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
     }
 
-    public static consume(elmtId: number): boolean {
-        return UINodeRegisterProxy.instance_.consume(elmtId);
-    }
-
-    /*
-    a function to enable an optimization, returns true if UINodeRegisterProxy
-    has any elmtIds that need to be unregistered
-    */
-    public static hasElmtIdsPendingUnregister(): boolean {
-        return UINodeRegisterProxy.instance_.elmtIdsToUnregister_.size > 0;
-    }
-
-    public static dump(): void {
-        UINodeRegisterProxy.instance_.dump();
-    }
-
-    /*
-    A function to expose debug info of the UINodeRegisterProxy
-    The function is intended to be used with debug or DFX log only
-    */
-    public static debugInfoElements(): string {
-        return UINodeRegisterProxy.instance_.debugInfoElementsInternal();
-    }
-
-    // private properties & functions:
-
-    /* move elmtIds from C++ ElementRegister, elmtIds of UINodes that have been deleted 
-     two processing steps for each moved elmtId:
-     1. check if elmtId has been unregistered ahead of time (when a ViewPU gets deleted)
-     2. if not, memorize elmtId to still need un-registration
+    /* just get the remove items from the native side
     */
     private obtainDeletedElmtIds(): void {
-
         stateMgmtConsole.debug('UINodeRegisterProxy.obtainDeletedElmtIds: ');
-
         let removedElementsInfo = new Array<RemovedElementInfo>();
         ViewStackProcessor.moveDeletedElmtIds(removedElementsInfo);
         stateMgmtConsole.debug(`   ... ${removedElementsInfo.length} elmtIds newly obtained from ElementRegister: ${JSON.stringify(removedElementsInfo)} .`);
+        this.removeElementsInfo_ = removedElementsInfo;
+    }
 
-        removedElementsInfo.forEach(rmElmtInfo => {
-            if (this.elmtIdsUnregisteredAheadOfTime_.has(rmElmtInfo.elmtId)) {
-                stateMgmtConsole.debug(`   ... elmtId ${rmElmtInfo.elmtId}[${rmElmtInfo.tag}] listed as unregistered ahead of time. Done with it. `);
-                this.elmtIdsUnregisteredAheadOfTime_.delete(rmElmtInfo.elmtId);
+    public unregisterElmtIdsFromViewPUs(): void {
+        stateMgmtConsole.debug(`${this.removeElementsInfo_.length} elmtIds newly obtained from ElementRegister: ${JSON.stringify(this.removeElementsInfo_)} .`);
+        
+        if (this.removeElementsInfo_.length == 0) {
+            stateMgmtConsole.debug(`${this.removeElementsInfo_.length} elmtIds needs to purgeDelete. } .`);
+            return;
+        }
+        let owningView : ViewPU | undefined;
+        this.removeElementsInfo_.forEach((rmElmtInfo  : RemovedElementInfo) => {
+            const owningViewPUWeak : WeakRef<ViewPU> = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(rmElmtInfo.elmtId );
+            if (owningViewPUWeak != undefined) {
+                owningView = owningViewPUWeak.deref();
+                if (owningView) {
+                    owningView.purgeDeleteElmtId(rmElmtInfo.elmtId);
+                } else {
+                    stateMgmtConsole.warn(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} has not been removed because of failure of updating the weakptr of viewpu. Internal error!.`);
+                }
             } else {
-                stateMgmtConsole.debug(`   ... elmtId ${rmElmtInfo.elmtId}[${rmElmtInfo.tag}] need to be unregistered later.`);
-                this.elmtIdsToUnregister_.add(rmElmtInfo.elmtId);
-                this.tagByElmtId_.set(rmElmtInfo.elmtId, rmElmtInfo.tag);
+                stateMgmtConsole.warn(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} cannot find its owning viewpu, maybe this viewpu has already been abouttobedeleted. Internal error!`)
             }
-        });
-        this.dump();
+        })
+
+        this.removeElementsInfo_.length = 0;
     }
 
-    /* 
-        called from ViewPU with all its child elmtIds
-        memorize these elmtIds until obtainDeletedElmtIds finds them in ElementRegister later (see its step 1)
-    */
-    private accountElmtIdsAsUnregistered(elmtIds: Array<number>): void {
-        stateMgmtConsole.debug(`UINodeRegisterProxy.accountElmtIdsAsUnregistered: ${elmtIds.length} elmtIds: [ ${JSON.stringify(elmtIds)} ] - start`);
-        // get info about latest deleted elmtIds from C++ to UINodeRegisterProxy
-        this.obtainDeletedElmtIds();
-        elmtIds.filter((elmtId: number) => {
-            return /* can not unregister elmtId */ !this.consume(elmtId)
-        }).forEach((elmtIdUnregisteredAheadOfTime) => {
-            // add to Set of elmtIds that have been unregistered already
-            // when the elmtId arrives with later ObtainDeletedElementIds, we know it is unregistered already
-            this.elmtIdsUnregisteredAheadOfTime_.add(elmtIdUnregisteredAheadOfTime)
-        });
-        this.dump();
-    }
-
-
-    /* called view View to query if given elmtId needs to be unregistered 
-      (these are the elmtIds added in step 2 of obtainDeletedElmtIds)
-      if true, forget about the elmtId because called ViewPU will unregistered it next, tell it
-      to do so by returning true.
-    */
-    private consume(elmtId: number): boolean {
-        if (this.elmtIdsToUnregister_.delete(elmtId)) {
-            stateMgmtConsole.debug(`UINodeRegisterProxy.consume ${elmtId}[${this.tagByElmtId_.get(elmtId)}] has been removed from UINodeRegisterProxy.`);
-            this.tagByElmtId_.delete(elmtId);
-            return true;
-        }
-        return false;
-    }
-
-    /* dump the state  of UINodeRegisterProxy to log
-    does nothing in release build
-    */
-    private dump() {
-        stateMgmtConsole.debug(this.debugInfoElementsInternal());
-    }
-
-    /* Generates debug info got UINodeRegisterProxy
-    This function is intended for use with debug or DFX log
-    */
-    private debugInfoElementsInternal(): string {
-        const formatElementInfo = () : string => {
-            let result = '[ ';
-            let sepa = "";
-            Array.from(this.elmtIdsToUnregister_).forEach((elmtId) => {
-                result+= `${sepa}${elmtId}[${this.tagByElmtId_.get(elmtId)}]`;
-                sepa=", ";
-            });
-            result += ' ]';
-            return result;
-        };
-
-        let retVal: string = "UINodeRegisterProxy debug info: ";
-        if(this.elmtIdsToUnregister_.size < 50) {
-            retVal += `\n- ${this.elmtIdsToUnregister_.size} elmtIds need unregister: ${formatElementInfo()}.`
-        }
-        else {
-            retVal += `\n- WARNING: ${this.elmtIdsToUnregister_.size} elmtIds need unregister (exceptionally high number, possible framework error): ${formatElementInfo()}.`
-        }
-        retVal += `\n- ${this.elmtIdsUnregisteredAheadOfTime_.size} elmtIds marked as unregistered already: ${JSON.stringify(Array.from(this.elmtIdsUnregisteredAheadOfTime_))} .`;
-
-        return retVal;
-    }
-
-
-    private static instance_: UINodeRegisterProxy = new UINodeRegisterProxy();
-    private elmtIdsToUnregister_: Set<number> = new Set<number>();
-    private tagByElmtId_ : Map<number, string> = new Map<number, string>();
-    private elmtIdsUnregisteredAheadOfTime_: Set<number> = new Set<number>();
-
+    public static instance_: UINodeRegisterProxy = new UINodeRegisterProxy();
+    public removeElementsInfo_: Array<RemovedElementInfo> = new Array<RemovedElementInfo>();
+    public static ElementIdToOwningViewPU_: Map<number, WeakRef<ViewPU>> = new Map<number, WeakRef<ViewPU>>();
 }
-
-const uiNodeRegisterCleanUpFunction = UINodeRegisterProxy.uiNodeRegisterCleanUpFunction;
