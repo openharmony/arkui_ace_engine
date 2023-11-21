@@ -45,10 +45,11 @@ public:
         isFirstShow_ = true;
     }
 
+    RefPtr<FrameNode> GetMenuWrapper() const;
+
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    RefPtr<FrameNode> GetMenuWrapper() const;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
     bool isFirstShow_ = false;
