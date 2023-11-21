@@ -42,6 +42,7 @@ ohos_source_set("preview_entrance_source") {
       "ace_ability.cpp",
       "ace_application_info.cpp",
       "ace_container.cpp",
+      "ace_preview_helper.cpp",
       "ace_resource_register.cpp",
       "ace_view_preview.cpp",
       "clipboard/clipboard_impl.cpp",
@@ -65,7 +66,6 @@ ohos_source_set("preview_entrance_source") {
       "$flutter_root/engine",
       "//foundation/window/window_manager",
       "//foundation/ability/ability_runtime",
-      "//ide/tools/previewer",
       "//arkcompiler/ets_runtime",
       "//arkcompiler/runtime_core",
     ]
@@ -73,8 +73,6 @@ ohos_source_set("preview_entrance_source") {
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       external_deps += [
         "graphic_2d:librender_service_client",
-        "previewer:ide_extension",
-        "previewer:ide_util",
         "window_manager:previewer_window",
       ]
       if (ace_use_rosen_drawing) {
