@@ -1135,8 +1135,8 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             pattern->FireAndCleanScrollingListener();
             pattern->HandleDragStart(info);
             // notify scrollStart upwards
-            pattern->OnScrollStartRecursive(pattern->direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
-                                                                                    : info.GetGlobalLocation().GetY());
+            pattern->NotifyParentScrollStart(pattern->direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
+                                                                                     : info.GetGlobalLocation().GetY());
         }
     };
 
@@ -1497,18 +1497,9 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
 {
     TAG_LOGD(AceLogTag::ACE_SWIPER, "Swiper drag start.");
     UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::START);
-    if (usePropertyAnimation_) {
-        StopPropertyTranslateAnimation();
-    }
-    if (indicatorController_) {
-        indicatorController_->Stop();
-    }
-    StopTranslateAnimation();
-    if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
-        StopSpringAnimationAndFlushImmediately();
-    } else {
-        StopSpringAnimation();
-    }
+
+    StopAnimationOnScrollStart(
+        info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD);
     StopAutoPlay();
 
     const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
@@ -1530,6 +1521,22 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     mainDeltaSum_ = 0.0f;
     // in drag process, close lazy feature.
     SetLazyLoadFeature(false);
+}
+
+void SwiperPattern::StopAnimationOnScrollStart(bool flushImmediately)
+{
+    if (usePropertyAnimation_) {
+        StopPropertyTranslateAnimation();
+    }
+    if (indicatorController_) {
+        indicatorController_->Stop();
+    }
+    StopTranslateAnimation();
+    if (flushImmediately) {
+        StopSpringAnimationAndFlushImmediately();
+    } else {
+        StopSpringAnimation();
+    }
 }
 
 void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
@@ -3305,9 +3312,13 @@ void SwiperPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus)
 
 void SwiperPattern::OnScrollStartRecursive(float position)
 {
-    if (!isDragging_) {
-        childScrolling_ = true;
-    }
+    childScrolling_ = true;
+    StopAnimationOnScrollStart(false);
+    NotifyParentScrollStart(position);
+}
+
+void SwiperPattern::NotifyParentScrollStart(float position)
+{
     auto parent = enableNestedScroll_ ? SearchParent() : nullptr;
     if (parent) {
         parent->OnScrollStartRecursive(position);
