@@ -85,7 +85,7 @@ void BlankPattern::BeforeCreateLayoutWrapper()
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return;
     }
-    auto& calcConstraint = layoutProp->GetCalcLayoutConstraint();
+    const auto& calcConstraint = layoutProp->GetCalcLayoutConstraint();
     auto isParentRow = GetFlexDirection(parent) == FlexDirection::ROW;
     layoutProp->ResetAlignSelf();
     layoutProp->ResetFlexGrow();
@@ -108,7 +108,7 @@ void BlankPattern::BeforeCreateLayoutWrapper()
         layoutProp->UpdateFlexShrink(1.0f);
     }
     CHECK_NULL_VOID(layoutProp->GetMinSize().has_value());
-    auto blankMin = layoutProp->GetMinSize().value_or(Dimension());
+    auto blankMin = layoutProp->GetMinSize().value_or(Dimension(0.0, DimensionUnit::VP));
     if (isParentRow) {
         if (!(calcConstraint && calcConstraint->minSize.has_value() &&
                 calcConstraint->minSize.value().Width().has_value())) {

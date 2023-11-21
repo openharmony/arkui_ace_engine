@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 
+#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
@@ -55,7 +56,7 @@ void BlankModelNG::SetBlankMin(const Dimension& blankMin)
     CHECK_NULL_VOID(layoutProperty);
     auto result = blankMin;
     if (blankMin.IsNegative()) {
-        result = Dimension();
+        result = Dimension(0.0, DimensionUnit::VP);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, MinSize, result);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {

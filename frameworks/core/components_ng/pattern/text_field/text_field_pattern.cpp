@@ -47,10 +47,10 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
@@ -1877,8 +1877,8 @@ void TextFieldPattern::FilterInitializeText()
     if (!contentController_->IsEmpty()) {
         contentController_->FilterValue();
     }
-    if (GetWideText().length() < GetCaretIndex()) {
-        selectController_->UpdateCaretIndex(GetWideText().length());
+    if (static_cast<int32_t>(GetWideText().length()) < GetCaretIndex()) {
+        selectController_->UpdateCaretIndex(static_cast<int32_t>(GetWideText().length()));
     }
 }
 
