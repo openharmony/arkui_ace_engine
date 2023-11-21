@@ -1428,6 +1428,10 @@ bool FocusHub::AcceptFocusByRectOfLastFocusFlex(const RectF& rect)
             continue;
         }
 
+        if (!childRect.IsValid() || NearZero(childRect.Width()) || NearZero(childRect.Height())) {
+            continue;
+        }
+
         OffsetF vec = childRect.Center() - rect.Center();
         double val = (vec.GetX() * vec.GetX()) + (vec.GetY() * vec.GetY());
         if (minVal > val) {
