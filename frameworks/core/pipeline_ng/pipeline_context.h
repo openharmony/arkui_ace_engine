@@ -115,7 +115,7 @@ public:
         return false;
     }
 
-    void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override;
+    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) override;
 
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;

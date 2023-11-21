@@ -127,6 +127,8 @@ public:
     void OnAccessibilityEvent(
         const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList);
 
+    void HandleDragEvent(const PointerEvent& info) override;
+
 private:
     enum ReleaseCode {
         DESTROY_NORMAL = 0,

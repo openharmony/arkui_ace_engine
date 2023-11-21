@@ -62,12 +62,12 @@ void DragDropManager::CancelItemDrag() {}
 
 void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode) {}
 
-void DragDropManager::OnDragMove(const Point& point, const std::string& extraInfo)
+void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo)
 {
     currentId_ = static_cast<int32_t>(point.GetX());
 }
 
-void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo) {}
+void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo) {}
 
 void DragDropManager::OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo) {}
 

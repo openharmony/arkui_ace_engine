@@ -74,8 +74,8 @@ public:
 
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
-    void OnDragMove(const Point& point, const std::string& extraInfo);
-    void OnDragEnd(const Point& point, const std::string& extraInfo);
+    void OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo);
+    void OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);

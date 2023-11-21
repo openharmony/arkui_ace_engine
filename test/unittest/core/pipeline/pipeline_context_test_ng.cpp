@@ -891,7 +891,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
      */
     manager->isDragged_ = true;
     manager->currentId_ = DEFAULT_INT1;
-    context_->OnDragEvent(DEFAULT_INT1, DEFAULT_INT1, DragEventAction::DRAG_EVENT_END);
+    context_->OnDragEvent({ DEFAULT_INT1, DEFAULT_INT1 }, DragEventAction::DRAG_EVENT_END);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
 
     /**
@@ -900,7 +900,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
      */
     manager->isDragged_ = true;
     manager->currentId_ = DEFAULT_INT1;
-    context_->OnDragEvent(DEFAULT_INT1, DEFAULT_INT1, DragEventAction::DRAG_EVENT_MOVE);
+    context_->OnDragEvent({ DEFAULT_INT1, DEFAULT_INT1 }, DragEventAction::DRAG_EVENT_MOVE);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
 
     /**
@@ -909,7 +909,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
      */
     manager->isDragged_ = false;
     manager->currentId_ = DEFAULT_INT1;
-    context_->OnDragEvent(DEFAULT_INT10, DEFAULT_INT10, DragEventAction::DRAG_EVENT_END);
+    context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_END);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
 
     /**
@@ -918,7 +918,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
      */
     manager->isDragged_ = false;
     manager->currentId_ = DEFAULT_INT1;
-    context_->OnDragEvent(DEFAULT_INT10, DEFAULT_INT10, DragEventAction::DRAG_EVENT_MOVE);
+    context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_MOVE);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT10);
 }
 
