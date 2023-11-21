@@ -568,6 +568,9 @@ void JSTextField::JsWidth(const JSCallbackInfo& info)
         LOGW("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
+    if (info[0]->IsString() && info[0]->ToString().empty()) {
+        return;
+    }
     if (info[0]->IsString() && info[0]->ToString() == "auto") {
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         TextFieldModel::GetInstance()->SetWidthAuto(true);
