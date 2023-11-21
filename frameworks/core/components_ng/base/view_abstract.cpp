@@ -1238,6 +1238,21 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& bl
     }
 }
 
+void ViewAbstract::SetBackdropBlur(FrameNode* frameNode, const Dimension& radius)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
+        target->UpdateBackBlurRadius(radius);
+        if (target->GetBackBlurStyle().has_value()) {
+            target->UpdateBackBlurStyle(std::nullopt);
+        }
+    }
+}
+
 void ViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1265,6 +1280,18 @@ void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurO
     auto target = frameNode->GetRenderContext();
     if (target) {
         target->UpdateFrontBlur(radius, blurOption);
+        if (target->GetFrontBlurStyle().has_value()) {
+            target->UpdateFrontBlurStyle(std::nullopt);
+        }
+    }
+}
+
+void ViewAbstract::SetFrontBlur(FrameNode* frameNode, const Dimension& radius)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateFrontBlurRadius(radius);
         if (target->GetFrontBlurStyle().has_value()) {
             target->UpdateFrontBlurStyle(std::nullopt);
         }
@@ -1444,12 +1471,22 @@ void ViewAbstract::SetBrightness(const Dimension& brightness)
     ACE_UPDATE_RENDER_CONTEXT(FrontBrightness, brightness);
 }
 
+void ViewAbstract::SetBrightness(FrameNode* frameNode, const Dimension& brightness)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontBrightness, brightness, frameNode);
+}
+
 void ViewAbstract::SetGrayScale(const Dimension& grayScale)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontGrayScale, grayScale);
+}
+
+void ViewAbstract::SetGrayScale(FrameNode* frameNode, const Dimension& grayScale)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontGrayScale, grayScale, frameNode);
 }
 
 void ViewAbstract::SetContrast(const Dimension& contrast)
@@ -1460,12 +1497,22 @@ void ViewAbstract::SetContrast(const Dimension& contrast)
     ACE_UPDATE_RENDER_CONTEXT(FrontContrast, contrast);
 }
 
+void ViewAbstract::SetContrast(FrameNode* frameNode, const Dimension& contrast)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontContrast, contrast, frameNode);
+}
+
 void ViewAbstract::SetSaturate(const Dimension& saturate)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontSaturate, saturate);
+}
+
+void ViewAbstract::SetSaturate(FrameNode* frameNode, const Dimension& saturate)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontSaturate, saturate, frameNode);
 }
 
 void ViewAbstract::SetSepia(const Dimension& sepia)
@@ -1476,12 +1523,22 @@ void ViewAbstract::SetSepia(const Dimension& sepia)
     ACE_UPDATE_RENDER_CONTEXT(FrontSepia, sepia);
 }
 
+void ViewAbstract::SetSepia(FrameNode* frameNode, const Dimension& sepia)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontSepia, sepia, frameNode);
+}
+
 void ViewAbstract::SetInvert(const InvertVariant& invert)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontInvert, invert);
+}
+
+void ViewAbstract::SetInvert(FrameNode* frameNode, const InvertVariant& invert)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontInvert, invert, frameNode);
 }
 
 void ViewAbstract::SetHueRotate(float hueRotate)
@@ -1492,12 +1549,22 @@ void ViewAbstract::SetHueRotate(float hueRotate)
     ACE_UPDATE_RENDER_CONTEXT(FrontHueRotate, hueRotate);
 }
 
+void ViewAbstract::SetHueRotate(FrameNode* frameNode, float hueRotate)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontHueRotate, hueRotate, frameNode);
+}
+
 void ViewAbstract::SetColorBlend(const Color& colorBlend)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontColorBlend, colorBlend);
+}
+
+void ViewAbstract::SetColorBlend(FrameNode* frameNode, const Color& colorBlend)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontColorBlend, colorBlend, frameNode);
 }
 
 void ViewAbstract::SetBorderImage(const RefPtr<BorderImage>& borderImage)

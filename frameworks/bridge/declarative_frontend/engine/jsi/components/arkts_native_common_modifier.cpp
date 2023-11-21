@@ -39,6 +39,7 @@ constexpr int NUM_13 = 13;
 constexpr int NUM_14 = 14;
 constexpr int NUM_15 = 15;
 constexpr int DEFAULT_LENGTH = 4;
+constexpr double ROUND_UNIT = 360.0;
 
 
 BorderStyle ConvertBorderStyle(int32_t value)
@@ -386,13 +387,209 @@ void ResetAlign(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetAlign(frameNode, Alignment::CENTER);
 }
+
+void SetBackdropBlur(NodeHandle node, double value)
+{
+    float blur = 0.0f;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (value > 0) {
+        blur = value;
+    }
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius);
+}
+
+void ResetBackdropBlur(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    double blur = 0.0;
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius);
+}
+
+void SetHueRotate(NodeHandle node, float deg)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    deg = std::fmod(deg, ROUND_UNIT);
+    if (deg < 0.0f) {
+        deg += ROUND_UNIT;
+    }
+    ViewAbstract::SetHueRotate(frameNode, deg);
+}
+
+void ResetHueRotate(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    float deg = 0.0f;
+    ViewAbstract::SetHueRotate(frameNode, deg);
+}
+
+void SetInvert(NodeHandle node, double invert)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    InvertVariant invertVariant = static_cast<float>(invert);
+    ViewAbstract::SetInvert(frameNode, invertVariant);
+}
+
+void ResetInvert(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    InvertVariant invert = 0.0f;
+    ViewAbstract::SetInvert(frameNode, invert);
+}
+
+void SetSepia(NodeHandle node, double sepia)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value = CalcDimension(sepia, DimensionUnit::VP);
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    if (GreatNotEqual(value.Value(), 1.0)) {
+        value.SetValue(1.0);
+    }
+    ViewAbstract::SetSepia(frameNode, value);
+}
+
+void ResetSepia(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value(0.0, DimensionUnit::VP);
+    ViewAbstract::SetSepia(frameNode, value);
+}
+
+void SetSaturate(NodeHandle node, double saturate)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value = CalcDimension(saturate, DimensionUnit::VP);
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    ViewAbstract::SetSaturate(frameNode, value);
+}
+
+void ResetSaturate(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value(1.0, DimensionUnit::VP);
+    ViewAbstract::SetSaturate(frameNode, value);
+}
+
+void SetColorBlend(NodeHandle node, uint32_t color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetColorBlend(frameNode, Color(color));
+}
+
+void ResetColorBlend(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color colorBlend = Color::TRANSPARENT;
+    ViewAbstract::SetColorBlend(frameNode, colorBlend);
+}
+
+void SetGrayscale(NodeHandle node, double grayScale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value = CalcDimension(grayScale, DimensionUnit::VP);
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    if (GreatNotEqual(value.Value(), 1.0)) {
+        value.SetValue(1.0);
+    }
+    ViewAbstract::SetGrayScale(frameNode, value);
+}
+
+void ResetGrayscale(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value(0.0, DimensionUnit::VP);
+    ViewAbstract::SetGrayScale(frameNode, value);
+}
+
+void SetContrast(NodeHandle node, double contrast)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value = CalcDimension(contrast, DimensionUnit::VP);
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    ViewAbstract::SetContrast(frameNode, value);
+}
+
+void ResetContrast(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value(1.0, DimensionUnit::VP);
+    ViewAbstract::SetContrast(frameNode, value);
+}
+
+void SetBrightness(NodeHandle node, double brightness)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value = CalcDimension(brightness, DimensionUnit::VP);
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    ViewAbstract::SetBrightness(frameNode, value);
+}
+
+void ResetBrightness(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value(1.0, DimensionUnit::VP);
+    ViewAbstract::SetBrightness(frameNode, value);
+}
+
+void SetBlur(NodeHandle node, double value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    float blur = 0.0f;
+    if (value > 0) {
+        blur = value;
+    }
+    CalcDimension dimensionBlur(blur, DimensionUnit::PX);
+    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur);
+}
+
+void ResetBlur(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    double blur = 0.0;
+    CalcDimension dimensionBlur(blur, DimensionUnit::PX);
+    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur);
+}
+
 ArkUICommonModifierAPI GetCommonModifier()
 {
     static const ArkUICommonModifierAPI modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
         SetHeight, ResetHeight, SetBorderRadius, ResetBorderRadius, SetBorderWidth, ResetBorderWidth, SetTransform,
         ResetTransform, SetBorderColor, ResetBorderColor, SetPosition, ResetPosition, SetBorderStyle, ResetBorderStyle,
         SetBackShadow, ResetBackShadow, SetHitTestBehavior, ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity,
-        ResetOpacity, SetAlign, ResetAlign };
+        ResetOpacity, SetAlign, ResetAlign, SetBackdropBlur, ResetBackdropBlur, SetHueRotate, ResetHueRotate, SetInvert,
+        ResetInvert, SetSepia, ResetSepia, SetSaturate, ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale,
+        ResetGrayscale, SetContrast, ResetContrast, SetBrightness, ResetBrightness, SetBlur, ResetBlur };
 
     return modifier;
 }

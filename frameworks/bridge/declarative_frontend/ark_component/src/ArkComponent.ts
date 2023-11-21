@@ -218,15 +218,136 @@ class AlignModifier extends Modifier<number> {
     }
 }
 
+class BackdropBlurModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("backdropBlur");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+           GetUINativeModule().common.resetBackdropBlur(node);
+        }
+        else {
+           GetUINativeModule().common.setBackdropBlur(node, this.value);
+        }
+    }
+}
+
+class HueRotateModifier extends Modifier<number | string> {
+    static identity: Symbol = Symbol("hueRotate");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+           GetUINativeModule().common.resetHueRotate(node);
+        }
+        else {
+           GetUINativeModule().common.setHueRotate(node, this.value);
+        }
+    }
+}
+
+class InvertModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("invert");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+           GetUINativeModule().common.resetInvert(node);
+        }
+        else {
+           GetUINativeModule().common.setInvert(node, this.value);
+        }
+    }
+}
+
+class SepiaModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("sepia");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+           GetUINativeModule().common.resetSepia(node);
+        }
+        else {
+           GetUINativeModule().common.setSepia(node, this.value);
+        }
+    }
+}
+
+class SaturateModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("saturate");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+           GetUINativeModule().common.resetSaturate(node);
+        }
+        else {
+           GetUINativeModule().common.setSaturate(node, this.value);
+        }
+    }
+}
+
+class ColorBlendModifier extends Modifier<number | string> {
+    static identity: Symbol = Symbol("colorBlend");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+           GetUINativeModule().common.resetColorBlend(node);
+        }
+        else {
+           GetUINativeModule().common.setColorBlend(node, this.value);
+        }
+    }
+}
+
+class GrayscaleModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("grayscale");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+           GetUINativeModule().common.resetGrayscale(node);
+        }
+        else {
+           GetUINativeModule().common.setGrayscale(node, this.value);
+        }
+    }
+}
+
+class ContrastModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("contrast");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+           GetUINativeModule().common.resetContrast(node);
+        }
+        else {
+           GetUINativeModule().common.setContrast(node, this.value);
+        }
+    }
+}
+
+class BrightnessModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("brightness");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+           GetUINativeModule().common.resetBrightness(node);
+        }
+        else {
+           GetUINativeModule().common.setBrightness(node, this.value);
+        }
+    }
+}
+
+class BlurModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("blur");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+           GetUINativeModule().common.resetBlur(node);
+        }
+        else {
+           GetUINativeModule().common.setBlur(node, this.value);
+        }
+    }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
-const isString = (val: any) => typeof val === 'string'
-const isNumber = (val: any) => typeof val === 'number'
-const isBigint = (val: any) => typeof val === 'bigint'
-const isBoolean = (val: any) => typeof val === 'boolean'
-const isSymbol = (val: any) => typeof val === 'symbol'
-const isUndefined = (val: any) => typeof val === 'undefined'
-const isObject = (val: any) => typeof val === 'object'
-const isFunction = (val: any) => typeof val === 'function'
+type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
+const isString = (val: basicType) => typeof val === 'string'
+const isNumber = (val: basicType) => typeof val === 'number'
+const isBigint = (val: basicType) => typeof val === 'bigint'
+const isBoolean = (val: basicType) => typeof val === 'boolean'
+const isSymbol = (val: basicType) => typeof val === 'symbol'
+const isUndefined = (val: basicType) => typeof val === 'undefined'
+const isObject = (val: basicType) => typeof val === 'object'
+const isFunction = (val: basicType) => typeof val === 'function'
 
 function CheckJSCallbackInfo(value: any, checklist: any[]) {
     var typeVerified = false;
@@ -602,7 +723,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     blur(value: number): this {
-        throw new Error("Method not implemented.");
+        if (!isNumber(value)) {
+            modifier(this._modifiers, BlurModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, BlurModifier, value);
+        }
+        return this;
     }
 
     linearGradientBlur(value: number, options: LinearGradientBlurOptions): this {
@@ -610,35 +737,83 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     brightness(value: number): this {
-        throw new Error("Method not implemented.");
+        if (!isNumber(value)) {
+            modifier(this._modifiers, BrightnessModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, BrightnessModifier, value);
+        }
+        return this;
     }
 
     contrast(value: number): this {
-        throw new Error("Method not implemented.");
+        if (!isNumber(value)) {
+            modifier(this._modifiers, ContrastModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, ContrastModifier, value);
+        }
+        return this;
     }
 
     grayscale(value: number): this {
-        throw new Error("Method not implemented.");
+        if (!isNumber(value)) {
+            modifier(this._modifiers, GrayscaleModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, GrayscaleModifier, value);
+        }
+        return this;
     }
 
     colorBlend(value: Color | string | Resource): this {
-        throw new Error("Method not implemented.");
+        var arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, ColorBlendModifier, arkColor.color);
+        } else {
+            modifier(this._modifiers, ColorBlendModifier, undefined);
+        }
+        return this;
     }
 
     saturate(value: number): this {
-        throw new Error("Method not implemented.");
+        if (!isNumber(value)) {
+            modifier(this._modifiers, SaturateModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, SaturateModifier, value);
+        }
+        return this;
     }
 
     sepia(value: number): this {
-        throw new Error("Method not implemented.");
+        if (!isNumber(value)) {
+            modifier(this._modifiers, SepiaModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, SepiaModifier, value);
+        }
+        return this;
     }
 
     invert(value: number): this {
-        throw new Error("Method not implemented.");
+        if (!isNumber(value)) {
+            modifier(this._modifiers, InvertModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, InvertModifier, value);
+        }
+        return this;
     }
 
     hueRotate(value: number | string): this {
-        throw new Error("Method not implemented.");
+        if (!isNumber(value) && !isString(value)) {
+            modifier(this._modifiers, HueRotateModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, HueRotateModifier, value);
+        }
+        return this;
     }
 
     useEffect(value: boolean): this {
@@ -646,7 +821,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     backdropBlur(value: number): this {
-        throw new Error("Method not implemented.");
+        if (!isNumber(value)) {
+            modifier(this._modifiers, BackdropBlurModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, BackdropBlurModifier, value);
+        }
+        return this;
     }
 
     renderGroup(value: boolean): this {

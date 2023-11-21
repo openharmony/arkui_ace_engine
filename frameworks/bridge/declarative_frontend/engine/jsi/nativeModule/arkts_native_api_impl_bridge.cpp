@@ -93,6 +93,46 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAlign));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlign"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAlign));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackdropBlur"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBackdropBlur));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackdropBlur"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBackdropBlur));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHueRotate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetHueRotate));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHueRotate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetHueRotate));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setInvert"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetInvert));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetInvert"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetInvert));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSepia"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetSepia));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSepia"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetSepia));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSaturate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetSaturate));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSaturate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetSaturate));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColorBlend"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetColorBlend));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColorBlend"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetColorBlend));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGrayscale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetGrayscale));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGrayscale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetGrayscale));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContrast"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetContrast));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContrast"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetContrast));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBrightness"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBrightness));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBrightness"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBrightness));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlur"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBlur));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlur"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBlur));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto text = panda::ObjectRef::New(vm);
