@@ -175,6 +175,17 @@ class OpacityModifier extends Modifier {
     }
 }
 OpacityModifier.identity = Symbol("opacity");
+class AlignModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetAlign(node);
+        }
+        else {
+            GetUINativeModule().common.setAlign(node, this.value);
+        }
+    }
+}
+AlignModifier.identity = Symbol("align");
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 const isString = (val) => typeof val === 'string';
 const isNumber = (val) => typeof val === 'number';
@@ -604,7 +615,13 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     align(value) {
-        throw new Error("Method not implemented.");
+        if (isNumber(value)) {
+            modifier(this._modifiers, AlignModifier, value);
+        }
+        else {
+            modifier(this._modifiers, AlignModifier, undefined);
+        }
+        return this;
     }
     position(value) {
         if (isResource(value) || isUndefined(value)) {
@@ -982,15 +999,83 @@ globalThis.Image.attributeModifier = function (modifier) {
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class FontColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetFontColor(node);
+        }
+        else {
+            GetUINativeModule().text.setFontColor(node, this.value);
+        }
+    }
+}
+FontColorModifier.identity = Symbol("fontColor");
+class FontSizeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetFontSize(node);
+        }
+        else {
+            GetUINativeModule().text.setFontSize(node, this.value);
+        }
+    }
+}
+FontSizeModifier.identity = Symbol("fontSize");
+class FontWeightModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetFontWeight(node);
+        }
+        else {
+            GetUINativeModule().text.setFontWeight(node, this.value);
+        }
+    }
+}
+FontWeightModifier.identity = Symbol("fontWeight");
+class FontStyleModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetFontStyle(node);
+        }
+        else {
+            GetUINativeModule().text.setFontStyle(node, this.value);
+        }
+    }
+}
+FontStyleModifier.identity = Symbol("fontStyle");
+class TextAlignModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetTextAlign(node);
+        }
+        else {
+            GetUINativeModule().text.setTextAlign(node, this.value);
+        }
+    }
+}
+TextAlignModifier.identity = Symbol("textAlign");
 class ArkTextComponent extends ArkComponent {
     font(value) {
         throw new Error("Method not implemented.");
     }
     fontColor(value) {
-        throw new Error("Method not implemented.");
+        var arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, FontColorModifier, arkColor.color);
+        }
+        else {
+            modifier(this._modifiers, FontColorModifier, undefined);
+        }
+        return this;
     }
     fontSize(value) {
-        throw new Error("Method not implemented.");
+        if (!isNumber(value) && !isString(value)) {
+            modifier(this._modifiers, FontSizeModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, FontSizeModifier, value);
+        }
+        return this;
     }
     minFontSize(value) {
         throw new Error("Method not implemented.");
@@ -999,13 +1084,49 @@ class ArkTextComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
     fontStyle(value) {
-        throw new Error("Method not implemented.");
+        if (isNumber(value)) {
+            modifier(this._modifiers, FontStyleModifier, value);
+        }
+        return this;
     }
     fontWeight(value) {
-        throw new Error("Method not implemented.");
+        let fontWeightStr = "400";
+        if (isNumber(value)) {
+            if (value === 0) {
+                fontWeightStr = "Lighter";
+            }
+            else if (value === 1) {
+                fontWeightStr = "Normal";
+            }
+            else if (value === 2) {
+                fontWeightStr = "Regular";
+            }
+            else if (value === 3) {
+                fontWeightStr = "Medium";
+            }
+            else if (value === 4) {
+                fontWeightStr = "Bold";
+            }
+            else if (value === 5) {
+                fontWeightStr = "Bolder";
+            }
+            else {
+                fontWeightStr = value.toString();
+            }
+        }
+        else if (isString(value)) {
+            fontWeightStr = value;
+        }
+        modifier(this._modifiers, FontWeightModifier, fontWeightStr);
+        return this;
     }
     textAlign(value) {
-        throw new Error("Method not implemented.");
+        let textAlignNum = 0;
+        if (isNumber(value)) {
+            textAlignNum = value;
+        }
+        modifier(this._modifiers, TextAlignModifier, textAlignNum);
+        return this;
     }
     lineHeight(value) {
         throw new Error("Method not implemented.");

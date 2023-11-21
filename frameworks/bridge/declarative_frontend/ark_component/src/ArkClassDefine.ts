@@ -1,8 +1,6 @@
-
 /// <reference path="./import.ts" />
 
-
-class ArkBorderStyle {
+class ArkBorderStyle implements Equable {
     type: boolean | undefined;
     style: number | undefined;
     top: number | undefined;
@@ -109,7 +107,7 @@ class ArkBorderColor {
     }
 }
 
-class ArkPosition {
+class ArkPosition implements Equable {
     x: number | string | undefined | Resource;
     y: number | string | undefined | Resource;
 
@@ -124,7 +122,7 @@ class ArkPosition {
 }
 
 
-class ArkBorderWidth {
+class ArkBorderWidth implements Equable {
     left: number | string | undefined | Resource;
     right: number | string | undefined| Resource;
     top: number | string | undefined| Resource;
@@ -142,7 +140,7 @@ class ArkBorderWidth {
     }
 }
 
-class ArkBorderRadius {
+class ArkBorderRadius implements Equable {
     topLeft: number | string | undefined | Resource;
     topRight: number | string | undefined | Resource;
     bottomLeft: number | string | undefined | Resource;
@@ -160,7 +158,7 @@ class ArkBorderRadius {
     }
 }
 
-class ArkTransformMatrix {
+class ArkTransformMatrix implements Equable  {
     matrix: [];
     length: number;
 

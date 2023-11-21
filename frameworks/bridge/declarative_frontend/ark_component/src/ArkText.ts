@@ -1,14 +1,85 @@
-
 /// <reference path="./import.ts" />
+
+class FontColorModifier extends Modifier< number | undefined> {
+    static identity: Symbol = Symbol("fontColor");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().text.resetFontColor(node);
+        } else {
+            GetUINativeModule().text.setFontColor(node, this.value);
+        }
+    }
+}
+
+class FontSizeModifier extends Modifier<number | string> {
+    static identity: Symbol = Symbol("fontSize");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().text.resetFontSize(node);
+        }
+        else {
+            GetUINativeModule().text.setFontSize(node, this.value);
+        }
+    }
+}
+
+class FontWeightModifier extends Modifier<string> {
+    static identity: Symbol = Symbol("fontWeight");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().text.resetFontWeight(node);
+        }
+        else {
+            GetUINativeModule().text.setFontWeight(node, this.value);
+        }
+    }
+}
+
+class FontStyleModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("fontStyle");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().text.resetFontStyle(node);
+        }
+        else {
+            GetUINativeModule().text.setFontStyle(node, this.value);
+        }
+    }
+}
+
+class TextAlignModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("textAlign");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().text.resetTextAlign(node);
+        }
+        else {
+            GetUINativeModule().text.setTextAlign(node, this.value);
+        }
+    }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
     font(value: Font): TextAttribute {
         throw new Error("Method not implemented.");
     }
     fontColor(value: ResourceColor): TextAttribute {
-        throw new Error("Method not implemented.");
+        var arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, FontColorModifier, arkColor.color);
+        } else {
+            modifier(this._modifiers, FontColorModifier, undefined);
+        }
+        return this;
     }
     fontSize(value: any): TextAttribute {
-        throw new Error("Method not implemented.");
+        if (!isNumber(value) && !isString(value)) {
+            modifier(this._modifiers, FontSizeModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, FontSizeModifier, value);
+        }
+        return this;
     }
     minFontSize(value: any): TextAttribute {
         throw new Error("Method not implemented.");
@@ -16,14 +87,50 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     maxFontSize(value: any): TextAttribute {
         throw new Error("Method not implemented.");
     }
-    fontStyle(value: FontStyle): TextAttribute {
-        throw new Error("Method not implemented.");
+    fontStyle(value: FontStyle): TextAttribute {      
+        if(isNumber(value)){
+            modifier(this._modifiers, FontStyleModifier, value);
+        }
+        return this;
     }
     fontWeight(value: any): TextAttribute {
-        throw new Error("Method not implemented.");
+        let fontWeightStr: string = "400";
+        if(isNumber(value)){
+            if(value === 0){
+                fontWeightStr = "Lighter"
+            }
+            else if(value === 1){
+                fontWeightStr = "Normal"
+            }
+            else if(value === 2){
+                fontWeightStr = "Regular"
+            }
+            else if(value === 3){
+                fontWeightStr = "Medium"
+            }
+            else if(value === 4){
+                fontWeightStr = "Bold"
+            }
+            else if(value === 5){
+                fontWeightStr = "Bolder"
+            }
+            else{
+                fontWeightStr = value.toString()            
+            }
+        }       
+        else if (isString(value)) {
+            fontWeightStr = value
+        }
+        modifier(this._modifiers, FontWeightModifier, fontWeightStr);
+        return this;
     }
     textAlign(value: TextAlign): TextAttribute {
-        throw new Error("Method not implemented.");
+        let textAlignNum = 0
+        if(isNumber(value)){
+            textAlignNum = value
+        }
+        modifier(this._modifiers, TextAlignModifier, textAlignNum);
+        return this 
     }
     lineHeight(value: any): TextAttribute {
         throw new Error("Method not implemented.");

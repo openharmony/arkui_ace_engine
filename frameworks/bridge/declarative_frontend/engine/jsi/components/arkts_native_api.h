@@ -48,11 +48,27 @@ struct ArkUICommonModifierAPI {
     void (*ResetZIndex)(NodeHandle node);
     void (*SetOpacity)(NodeHandle node, double opacity);
     void (*ResetOpacity)(NodeHandle node);
+    void (*SetAlign)(NodeHandle node, int32_t align);
+    void (*ResetAlign)(NodeHandle node);
+};
+
+struct ArkUITextModifierAPI {
+    void (*SetFontWeight)(NodeHandle node, const char* weight);
+    void (*ResetFontWeight)(NodeHandle node);
+    void (*SetFontStyle)(NodeHandle node, uint32_t fontStyle);
+    void (*ResetFontStyle)(NodeHandle node);
+    void (*SetTextAlign)(NodeHandle node, uint32_t testAlign);
+    void (*ResetTextAlign)(NodeHandle node);
+    void (*SetFontColor)(NodeHandle node, uint32_t color);
+    void (*ResetFontColor)(NodeHandle node);
+    void (*SetFontSize)(NodeHandle node, double value, int unit);
+    void (*ResetFontSize)(NodeHandle node);
 };
 
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
+    ArkUITextModifierAPI (*GetTextModifier)();
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI();

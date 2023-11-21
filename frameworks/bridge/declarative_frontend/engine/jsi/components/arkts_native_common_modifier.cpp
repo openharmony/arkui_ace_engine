@@ -49,6 +49,42 @@ BorderStyle ConvertBorderStyle(int32_t value)
     }
     return style;
 }
+Alignment ParseAlignment(int32_t align)
+{
+    Alignment alignment = Alignment::CENTER;
+    switch (align) {
+        case NUM_0:
+            alignment = Alignment::TOP_LEFT;
+            break;
+        case NUM_1:
+            alignment = Alignment::TOP_CENTER;
+            break;
+        case NUM_2:
+            alignment = Alignment::TOP_RIGHT;
+            break;
+        case NUM_3:
+            alignment = Alignment::CENTER_LEFT;
+            break;
+        case NUM_4:
+            alignment = Alignment::CENTER;
+            break;
+        case NUM_5:
+            alignment = Alignment::CENTER_RIGHT;
+            break;
+        case NUM_6:
+            alignment = Alignment::BOTTOM_LEFT;
+            break;
+        case NUM_7:
+            alignment = Alignment::BOTTOM_CENTER;
+            break;
+        case NUM_8:
+            alignment = Alignment::BOTTOM_RIGHT;
+            break;
+        default:
+            break;
+    }
+    return alignment;
+}
 } // namespace
 
 void SetBackgroundColor(NodeHandle node, uint32_t color)
@@ -336,14 +372,27 @@ void ResetOpacity(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetOpacity(frameNode, 1.0f);
 }
+void SetAlign(NodeHandle node, int32_t align)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Alignment alignment = ParseAlignment(align);
+    ViewAbstract::SetAlign(frameNode, alignment);
+}
 
+void ResetAlign(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetAlign(frameNode, Alignment::CENTER);
+}
 ArkUICommonModifierAPI GetCommonModifier()
 {
     static const ArkUICommonModifierAPI modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
         SetHeight, ResetHeight, SetBorderRadius, ResetBorderRadius, SetBorderWidth, ResetBorderWidth, SetTransform,
         ResetTransform, SetBorderColor, ResetBorderColor, SetPosition, ResetPosition, SetBorderStyle, ResetBorderStyle,
         SetBackShadow, ResetBackShadow, SetHitTestBehavior, ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity,
-        ResetOpacity };
+        ResetOpacity, SetAlign, ResetAlign };
 
     return modifier;
 }
