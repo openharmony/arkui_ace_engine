@@ -4298,136 +4298,60 @@ class SynchedPropertyNesedObjectPU extends SynchedPropertyNestedObjectPU {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Define a global function
-function globalRegisterCleanUpFunction() {
+// defined a globle function to clean up the removeItems when idle
+function uiNodeCleanUpIdleTask() {
     
     UINodeRegisterProxy.obtainDeletedElmtIds();
+    UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
 }
 class UINodeRegisterProxy {
     constructor() {
-        this.elmtIdsToUnregister_ = new Set();
-        this.tagByElmtId_ = new Map();
-        this.elmtIdsUnregisteredAheadOfTime_ = new Set();
-    }
-    static uiNodeRegisterCleanUpFunction() {
-        
-        UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
+        this.removeElementsInfo_ = new Array();
     }
     static obtainDeletedElmtIds() {
         
         UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
     }
-    static accountElmtIdsAsUnregistered(elmtIds) {
+    static unregisterElmtIdsFromViewPUs() {
         
-        UINodeRegisterProxy.instance_.accountElmtIdsAsUnregistered(elmtIds);
+        UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
     }
-    static consume(elmtId) {
-        return UINodeRegisterProxy.instance_.consume(elmtId);
-    }
-    /*
-    a function to enable an optimization, returns true if UINodeRegisterProxy
-    has any elmtIds that need to be unregistered
-    */
-    static hasElmtIdsPendingUnregister() {
-        return UINodeRegisterProxy.instance_.elmtIdsToUnregister_.size > 0;
-    }
-    static dump() {
-        UINodeRegisterProxy.instance_.dump();
-    }
-    /*
-    A function to expose debug info of the UINodeRegisterProxy
-    The function is intended to be used with debug or DFX log only
-    */
-    static debugInfoElements() {
-        return UINodeRegisterProxy.instance_.debugInfoElementsInternal();
-    }
-    // private properties & functions:
-    /* move elmtIds from C++ ElementRegister, elmtIds of UINodes that have been deleted
-     two processing steps for each moved elmtId:
-     1. check if elmtId has been unregistered ahead of time (when a ViewPU gets deleted)
-     2. if not, memorize elmtId to still need un-registration
+    /* just get the remove items from the native side
     */
     obtainDeletedElmtIds() {
         
         let removedElementsInfo = new Array();
         ViewStackProcessor.moveDeletedElmtIds(removedElementsInfo);
         
-        removedElementsInfo.forEach(rmElmtInfo => {
-            if (this.elmtIdsUnregisteredAheadOfTime_.has(rmElmtInfo.elmtId)) {
-                
-                this.elmtIdsUnregisteredAheadOfTime_.delete(rmElmtInfo.elmtId);
+        this.removeElementsInfo_ = removedElementsInfo;
+    }
+    unregisterElmtIdsFromViewPUs() {
+        
+        if (this.removeElementsInfo_.length == 0) {
+            
+            return;
+        }
+        let owningView;
+        this.removeElementsInfo_.forEach((rmElmtInfo) => {
+            const owningViewPUWeak = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(rmElmtInfo.elmtId);
+            if (owningViewPUWeak != undefined) {
+                owningView = owningViewPUWeak.deref();
+                if (owningView) {
+                    owningView.purgeDeleteElmtId(rmElmtInfo.elmtId);
+                }
+                else {
+                    stateMgmtConsole.warn(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} has not been removed because of failure of updating the weakptr of viewpu. Internal error!.`);
+                }
             }
             else {
-                
-                this.elmtIdsToUnregister_.add(rmElmtInfo.elmtId);
-                this.tagByElmtId_.set(rmElmtInfo.elmtId, rmElmtInfo.tag);
+                stateMgmtConsole.warn(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} cannot find its owning viewpu, maybe this viewpu has already been abouttobedeleted. Internal error!`);
             }
         });
-        this.dump();
-    }
-    /*
-        called from ViewPU with all its child elmtIds
-        memorize these elmtIds until obtainDeletedElmtIds finds them in ElementRegister later (see its step 1)
-    */
-    accountElmtIdsAsUnregistered(elmtIds) {
-        
-        // get info about latest deleted elmtIds from C++ to UINodeRegisterProxy
-        this.obtainDeletedElmtIds();
-        elmtIds.filter((elmtId) => {
-            return /* can not unregister elmtId */ !this.consume(elmtId);
-        }).forEach((elmtIdUnregisteredAheadOfTime) => {
-            // add to Set of elmtIds that have been unregistered already
-            // when the elmtId arrives with later ObtainDeletedElementIds, we know it is unregistered already
-            this.elmtIdsUnregisteredAheadOfTime_.add(elmtIdUnregisteredAheadOfTime);
-        });
-        this.dump();
-    }
-    /* called view View to query if given elmtId needs to be unregistered
-      (these are the elmtIds added in step 2 of obtainDeletedElmtIds)
-      if true, forget about the elmtId because called ViewPU will unregistered it next, tell it
-      to do so by returning true.
-    */
-    consume(elmtId) {
-        if (this.elmtIdsToUnregister_.delete(elmtId)) {
-            
-            this.tagByElmtId_.delete(elmtId);
-            return true;
-        }
-        return false;
-    }
-    /* dump the state  of UINodeRegisterProxy to log
-    does nothing in release build
-    */
-    dump() {
-        
-    }
-    /* Generates debug info got UINodeRegisterProxy
-    This function is intended for use with debug or DFX log
-    */
-    debugInfoElementsInternal() {
-        const formatElementInfo = () => {
-            let result = '[ ';
-            let sepa = "";
-            Array.from(this.elmtIdsToUnregister_).forEach((elmtId) => {
-                result += `${sepa}${elmtId}[${this.tagByElmtId_.get(elmtId)}]`;
-                sepa = ", ";
-            });
-            result += ' ]';
-            return result;
-        };
-        let retVal = "UINodeRegisterProxy debug info: ";
-        if (this.elmtIdsToUnregister_.size < 50) {
-            retVal += `\n- ${this.elmtIdsToUnregister_.size} elmtIds need unregister: ${formatElementInfo()}.`;
-        }
-        else {
-            retVal += `\n- WARNING: ${this.elmtIdsToUnregister_.size} elmtIds need unregister (exceptionally high number, possible framework error): ${formatElementInfo()}.`;
-        }
-        retVal += `\n- ${this.elmtIdsUnregisteredAheadOfTime_.size} elmtIds marked as unregistered already: ${JSON.stringify(Array.from(this.elmtIdsUnregisteredAheadOfTime_))} .`;
-        return retVal;
+        this.removeElementsInfo_.length = 0;
     }
 }
 UINodeRegisterProxy.instance_ = new UINodeRegisterProxy();
-const uiNodeRegisterCleanUpFunction = UINodeRegisterProxy.uiNodeRegisterCleanUpFunction;
+UINodeRegisterProxy.ElementIdToOwningViewPU_ = new Map();
 /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -4452,6 +4376,27 @@ const UndefinedElmtId = -1;
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 class ViewPU extends NativeViewPartialUpdate {
+    get ownObservedPropertiesStore_() {
+        if (!this.ownObservedPropertiesStore__) {
+            // lazy init
+            this.ownObservedPropertiesStore__ = new Set();
+            this.obtainOwnObservedProperties();
+        }
+        return this.ownObservedPropertiesStore__;
+    }
+    obtainOwnObservedProperties() {
+        Object.getOwnPropertyNames(this)
+            .filter((propName) => {
+            return propName.startsWith("__");
+        })
+            .forEach((propName) => {
+            const stateVar = Reflect.get(this, propName);
+            if ("notifyPropertyHasChangedPU" in stateVar) {
+                
+                this.ownObservedPropertiesStore_.add(stateVar);
+            }
+        });
+    }
     get localStorage_() {
         if (!this.localStoragebackStore_ && this.parent_) {
             
@@ -4550,18 +4495,17 @@ class ViewPU extends NativeViewPartialUpdate {
         // tell UINodeRegisterProxy that all elmtIds under
         // this ViewPU should be treated as already unregistered
         
-        UINodeRegisterProxy.accountElmtIdsAsUnregistered(Array.from(this.updateFuncByElmtId.keys()));
+        // purge the elementids owning by this viewpu from the updateFuncByElmtId and also the state variable dependent elementids
+        Array.from(this.updateFuncByElmtId.keys()).forEach((elemId) => {
+            this.purgeDeleteElmtId(elemId);
+        });
         if (this.hasRecycleManager()) {
             this.getRecycleManager().purgeAllCachedRecycleNode();
         }
-        // unregister the elmtId of this ViewPU / its CustomNode object
-        UINodeRegisterProxy.consume(this.id__());
         // unregistration of ElementIDs
         
-        // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
-        UINodeRegisterProxy.obtainDeletedElmtIds();
-        this.purgeDeletedElmtIdsRecursively();
-        UINodeRegisterProxy.dump();
+        // it will unregister removed elementids from all the viewpu, equals purgeDeletedElmtIdsRecursively
+        this.purgeDeletedElmtIds();
         
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
@@ -4572,6 +4516,16 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         this.localStoragebackStore_ = undefined;
         this.isDeleting_ = true;
+    }
+    purgeDeleteElmtId(rmElmtId) {
+        
+        const result = this.updateFuncByElmtId.delete(rmElmtId);
+        if (result) {
+            this.purgeVariableDependenciesOnElmtIdOwnFunc(rmElmtId);
+            // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+        }
+        return result;
     }
     debugInfo() {
         return `@Component '${this.constructor.name}'[${this.id__()}]`;
@@ -4742,7 +4696,7 @@ class ViewPU extends NativeViewPartialUpdate {
         const updateFunc = ((typeof updateFunc1 == "object") ? (updateFunc1.updateFunc) : updateFunc1);
         const componentName = (typeof updateFunc1 == "object") ? updateFunc1.componentName : "unknown component type";
         if (typeof updateFunc !== "function") {
-            stateMgmtConsole.debug(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
+            
         }
         else {
             
@@ -4974,72 +4928,20 @@ class ViewPU extends NativeViewPartialUpdate {
         this.dumpStateVars();
         
     }
-    //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
+    // request list of all (global) elmtIds of deleted UINodes and unregister from the all viewpus
+    // this function equals purgeDeletedElmtIdsRecursively because it does unregistration for all viewpus
     purgeDeletedElmtIds() {
         
         // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
         UINodeRegisterProxy.obtainDeletedElmtIds();
-        UINodeRegisterProxy.dump();
-        if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
-            
-            return;
-        }
-        this.purgeDeletedElmtIdsInternal();
-        UINodeRegisterProxy.dump();
-    }
-    // function called from elementRegister to the root ViewPU of the page
-    purgeDeletedElmtIdsRecursively() {
-        
-        // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
-        UINodeRegisterProxy.obtainDeletedElmtIds();
-        this.purgeDeletedElmtIdsRecursivelyInternal();
-        UINodeRegisterProxy.dump();
-        
-        this.dumpStateVars();
-    }
-    purgeDeletedElmtIdsRecursivelyInternal() {
-        if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
-            
-            return;
-        }
-        this.purgeDeletedElmtIdsInternal();
-        this.childrenWeakrefMap_.forEach((weakRefChild) => {
-            const child = weakRefChild.deref();
-            if (child) {
-                if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
-                    
-                    return;
-                }
-                child.purgeDeletedElmtIdsRecursively();
-            }
-        });
-    }
-    purgeDeletedElmtIdsInternal() {
-        
-        const elmtIdsOfThisView = this.updateFuncByElmtId.keys();
-        for (const rmElmtId of elmtIdsOfThisView) {
-            if (UINodeRegisterProxy.consume(rmElmtId)) {
-                
-                // remove entry from Map elmtId -> update function
-                this.updateFuncByElmtId.delete(rmElmtId);
-                // for each state var, remove dependent elmtId (if present)
-                // purgeVariableDependenciesOnElmtId needs to be generated by the compiler
-                this.purgeVariableDependenciesOnElmtIdOwnFunc(rmElmtId);
-                if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
-                    
-                    return;
-                }
-            } // for all elmtIds that need to unregister
-        }
-        
+        // unregister the removed elementids requested from the cpp side for all viewpus, it will make the first viewpu slower
+        // than before, but the rest viewpu will be faster
+        UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
         
     }
     purgeVariableDependenciesOnElmtIdOwnFunc(elmtId) {
-        Object.getOwnPropertyNames(this).filter((varName => varName.startsWith("__"))).forEach((stateVarName) => {
-            let variable = Reflect.get(this, stateVarName);
-            if ("purgeDependencyOnElmtId" in variable) {
-                variable.purgeDependencyOnElmtId(elmtId);
-            }
+        this.ownObservedPropertiesStore_.forEach((stateVar) => {
+            stateVar.purgeDependencyOnElmtId(elmtId);
         });
     }
     // executed on first render only
@@ -5055,6 +4957,8 @@ class ViewPU extends NativeViewPartialUpdate {
         // in observeComponentCreation function we do not get info about the component name, in 
         // observeComponentCreation2 we do.
         this.updateFuncByElmtId.set(elmtId, { updateFunc: compilerAssignedUpdateFunc, componentName: "unknown" });
+        // add element id -> owningviewpu
+        UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId, new WeakRef(this));
         
     }
     // executed on first render only
@@ -5085,15 +4989,19 @@ class ViewPU extends NativeViewPartialUpdate {
         // needs to move set before updateFunc.
         // make sure the key and object value exist since it will add node in attributeModifier during updateFunc.
         this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, componentName: _componentName });
+        // add element id -> owningviewpu
+        UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId, new WeakRef(this));
         try {
             updateFunc(elmtId, /* is first render */ true);
         }
         catch (error) {
             // avoid the incompatible change that move set function before updateFunc.
             this.updateFuncByElmtId.delete(elmtId);
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(elmtId);
             stateMgmtConsole.applicationError(`${this.debugInfo()} has error in update func: ${error.message}`);
             throw error;
         }
+        
     }
     getOrCreateRecycleManager() {
         if (!this.recycleManager) {
@@ -5383,10 +5291,6 @@ class ViewPU extends NativeViewPartialUpdate {
                     view.printDFXHeader("ViewPU Dirty Registered Element IDs", command);
                     DumpLog.print(0, view.debugInfoDirtDescendantElementIds(command.isRecursive));
                     break;
-                case "-uiNodeRegister":
-                    view.printDFXHeader("UINodeRegisterProxy Elements Info", command);
-                    DumpLog.print(0, view.debugInfoUINodeRegister());
-                    break;
                 case "-profiler":
                     view.printDFXHeader("Profiler Info", command);
                     view.dumpReport();
@@ -5515,9 +5419,6 @@ class ViewPU extends NativeViewPartialUpdate {
             retVaL += `\nTotal: ${counter.total}`;
         }
         return retVaL;
-    }
-    debugInfoUINodeRegister() {
-        return UINodeRegisterProxy.debugInfoElements();
     }
 }
 // Array.sort() converts array items to string to compare them!
