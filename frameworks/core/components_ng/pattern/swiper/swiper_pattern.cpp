@@ -3336,7 +3336,7 @@ void SwiperPattern::NotifyParentScrollEnd()
 inline bool SwiperPattern::AnimationRunning() const
 {
     return (controller_ && controller_->IsRunning()) || (springController_ && springController_->IsRunning()) ||
-           (fadeController_ && fadeController_->IsRunning()) || usePropertyAnimation_;
+           (fadeController_ && fadeController_->IsRunning()) || targetIndex_ || usePropertyAnimation_;
 }
 
 bool SwiperPattern::HandleScrollVelocity(float velocity)
@@ -3361,6 +3361,10 @@ bool SwiperPattern::HandleScrollVelocity(float velocity)
 
 ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedState state)
 {
+    if (source == SCROLL_FROM_ANIMATION && AnimationRunning()) {
+        // deny conflicting animation from child
+        return { offset, false };
+    }
     auto parent = parent_.Upgrade();
     if (!parent || !enableNestedScroll_) {
         if (IsOutOfBoundary(offset) && ChildFirst(state)) {
