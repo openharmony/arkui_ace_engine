@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -123,6 +123,8 @@ public:
         const RefPtr<PipelineBase>& context, const int32_t uiExtensionOffset = 0) override;
     bool ExecuteExtensionActionNG(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, const RefPtr<PipelineBase>& context, int32_t uiExtensionOffset) override;
+    void SetWebAccessibilityState(bool state);
+
     std::string GetPagePath();
 
 protected:

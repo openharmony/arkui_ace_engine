@@ -20,6 +20,7 @@ ohos_unittest("share_data_test") {
 
   sources = [
     "$ace_root/frameworks/core/common/sharedata/share_data.cpp",
+    "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "sharedata_test.cpp",
   ]

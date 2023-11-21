@@ -504,6 +504,7 @@ ACE_EXPORT extern const char TIME_PICKER_DIALOG_ETS_TAG[];
 // web
 ACE_EXPORT extern const char WEB_COMPONENT_TAG[];
 ACE_EXPORT extern const char WEB_ETS_TAG[];
+ACE_EXPORT extern const char WEB_CORE_TAG[];
 
 // richText
 ACE_EXPORT extern const char RICH_TEXT_COMPONENT_TAG[];

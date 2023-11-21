@@ -897,4 +897,8 @@ void UINode::OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConst
     }
 }
 
+int32_t UINode::GenerateAccessibilityId()
+{
+    return currentAccessibilityId_++;
+}
 } // namespace OHOS::Ace::NG
