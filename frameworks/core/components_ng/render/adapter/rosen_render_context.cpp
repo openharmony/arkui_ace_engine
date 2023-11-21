@@ -1210,6 +1210,12 @@ void RosenRenderContext::OnOpacityUpdate(double opacity)
     RequestNextFrame();
 }
 
+void RosenRenderContext::SetAlphaOffscreen(bool isOffScreen)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetAlphaOffscreen(isOffScreen);
+}
+
 class DrawDragThumbnailCallback : public SurfaceCaptureCallback {
 public:
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
