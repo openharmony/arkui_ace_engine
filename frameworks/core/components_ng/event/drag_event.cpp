@@ -162,7 +162,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     SetTextPixelMap(gestureHub);
                 }
             } else if (!isNotInPreviewState_) {
-                if (gestureHub->GetIsTextDraggable()) {
+                if (gestureHub->GetTextDraggable()) {
                     HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 } else {
                     HideEventColumn();
@@ -183,12 +183,15 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             auto pattern = frameNode->GetPattern<TextBase>();
             if (gestureHub->GetTextDraggable() && pattern) {
                 if (!pattern->IsSelected() || pattern->GetMouseStatus() == MouseStatus::MOVE) {
-                    frameNode->SetDraggable(false);
+                    dragDropManager->ResetDragging();
+                    gestureHub->SetIsTextDraggable(false);
                     return;
                 }
                 if (pattern->BetweenSelectedPosition(info.GetGlobalLocation())) {
-                    frameNode->SetDraggable(true);
-                    textDragCallback_(info.GetGlobalLocation());
+                    gestureHub->SetIsTextDraggable(true);
+                    if (textDragCallback_) {
+                        textDragCallback_(info.GetGlobalLocation());
+                    }
                 }
             }
         }
@@ -332,12 +335,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->SetIsNotInPreviewState(true);
-
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto dragDropManager = pipeline->GetDragDropManager();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->ResetDragging();
     };
     longPressRecognizer_->SetOnActionUpdate(longPressUpdateValue);
     auto longPressUpdate = [weak = WeakClaim(this)](GestureEvent& info) {

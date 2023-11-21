@@ -419,6 +419,7 @@ public:
             dragEventActuator_->SetThumbnailCallback(std::move(callback));
         }
     }
+#endif // ENABLE_DRAG_FRAMEWORK
 
     bool GetTextDraggable() const
     {
@@ -449,7 +450,6 @@ public:
     {
         return previewMode_;
     }
-#endif // ENABLE_DRAG_FRAMEWORK
 
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
     {
@@ -546,11 +546,9 @@ private:
 
     GestureJudgeFunc gestureJudgeFunc_;
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
-#endif
 };
 
 } // namespace OHOS::Ace::NG

@@ -1482,7 +1482,6 @@ void RichEditorPattern::InitDragDropEvent()
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->InitDragDropEvent();
-    gestureHub->SetTextDraggable(true);
     gestureHub->SetThumbnailCallback(GetThumbnailCallback());
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);

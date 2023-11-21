@@ -1325,13 +1325,14 @@ void TextFieldPattern::InitDragDropEvent()
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->InitDragDropEvent();
-    gestureHub->SetTextDraggable(true);
     auto callback = GetThumbnailCallback();
     gestureHub->SetThumbnailCallback(std::move(callback));
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->HasOnDragStart()) {
         eventHub->SetOnDragStart(OnDragStart());
+    } else if (gestureHub->GetTextDraggable()) {
+        gestureHub->SetTextDraggable(false);
     }
 
     auto onDragEnter = [weakPtr = WeakClaim(this)](
@@ -1399,7 +1400,7 @@ void TextFieldPattern::ClearDragDropEvent()
     CHECK_NULL_VOID(host);
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetTextDraggable(false);
+    gestureHub->SetIsTextDraggable(false);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDragStart(nullptr);
