@@ -155,11 +155,6 @@ public:
         return touchDuration_;
     }
 
-    const Dimension& GetCheckboxHotZonePadding() const
-    {
-        return checkboxHotZonePadding_;
-    }
-
 protected:
     CheckableTheme() = default;
 
@@ -182,7 +177,6 @@ protected:
     Dimension hoverRadius_;
     Dimension focusRadius_;
     Dimension focusPaintPadding_;
-    Dimension checkboxHotZonePadding_;
     double hoverDuration_ = 0.0f;
     double hoverToTouchDuration_ = 0.0f;
     double touchDuration_ = 0.0f;
@@ -226,11 +220,9 @@ public:
             }
             theme->width_ = checkboxPattern->GetAttr<Dimension>("checkbox_size", 0.0_vp);
             theme->height_ = theme->width_;
-            std::string defaultPadding = checkboxPattern->GetAttr<std::string>("default_padding", "2.0vp");
-            theme->hotZoneHorizontalPadding_ = StringUtils::StringToDimension(defaultPadding, true);
+            theme->hotZoneHorizontalPadding_ = checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding", 0.0_vp);
             theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
-            std::string defaultWidth = checkboxPattern->GetAttr<std::string>("default_width", "24.0vp");
-            theme->defaultWidth_ = StringUtils::StringToDimension(defaultWidth, true);
+            theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size", 0.0_vp);
             theme->defaultHeight_ = theme->defaultWidth_;
             theme->needFocus_ = static_cast<bool>(checkboxPattern->GetAttr<double>("checkbox_need_focus", 0.0));
             theme->backgroundSolid_ =
@@ -254,7 +246,6 @@ public:
             theme->hoverToTouchDuration_ = checkboxPattern->GetAttr<double>("hover_to_press_animation_duration", 0.0);
             theme->touchDuration_ = checkboxPattern->GetAttr<double>("touch_animation_duration", 0.0);
             theme->colorAnimationDuration_ = checkboxPattern->GetAttr<double>("color_animation_duration", 0.0);
-            theme->checkboxHotZonePadding_ = checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding", 14.0_vp);
 
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
