@@ -19,6 +19,7 @@
  * all definitions in this file are framework internal
  */
 
+
 abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T> 
 implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber, IMultiPropertiesReadSubscriber
 // these interfaces implementations are all empty functions, overwrite FU base class implementations.
@@ -162,6 +163,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     }
     super.unlinkSuscriber(id);
   }
+
 
   /**
    * put the property to delayed notification mode
@@ -347,6 +349,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     // keep it here until transpiler is updated.
   }
 
+  // FIXME check, is this used from AppStorage.
   // unified Appstorage, what classes to use, and the API
   public createLink(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstractPU<T> {

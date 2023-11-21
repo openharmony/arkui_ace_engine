@@ -276,15 +276,9 @@ class LocalStorage extends NativeLocalStorage {
      * Not a public / sdk method.
      */
     addNewPropertyInternal(propName, value) {
-        let newProp;
-        if (ViewStackProcessor.UsesNewPipeline()) {
-            newProp = new ObservedPropertyPU(value, undefined, propName);
-        }
-        else {
-            newProp = (typeof value === "object") ?
-                new ObservedPropertyObject(value, undefined, propName)
-                : new ObservedPropertySimple(value, undefined, propName);
-        }
+        const newProp = (typeof value === "object") ?
+            new ObservedPropertyObject(value, undefined, propName)
+            : new ObservedPropertySimple(value, undefined, propName);
         this.storage_.set(propName, newProp);
         return newProp;
     }
@@ -312,7 +306,9 @@ class LocalStorage extends NativeLocalStorage {
         }
         let linkResult;
         if (ViewStackProcessor.UsesNewPipeline()) {
-            linkResult = new SynchedPropertyTwoWayPU(p, linkUser, propName);
+            linkResult = (p instanceof ObservedPropertySimple)
+                ? new SynchedPropertySimpleTwoWayPU(p, linkUser, propName)
+                : new SynchedPropertyObjectTwoWayPU(p, linkUser, propName);
         }
         else {
             linkResult = p.createLink(linkUser, propName);
@@ -367,7 +363,9 @@ class LocalStorage extends NativeLocalStorage {
         }
         let propResult;
         if (ViewStackProcessor.UsesNewPipeline()) {
-            propResult = new SynchedPropertyOneWayPU(p, propUser, propName);
+            propResult = (p instanceof ObservedPropertySimple)
+                ? new SynchedPropertySimpleOneWayPU(p, propUser, propName)
+                : new SynchedPropertyObjectOneWayPU(p, propUser, propName);
         }
         else {
             propResult = p.createProp(propUser, propName);
@@ -505,6 +503,19 @@ class LocalStorage extends NativeLocalStorage {
             return true;
         }
         return false;
+    }
+    /**
+     * return number of subscribers to named property
+     *  useful for debug purposes
+     *
+     * Not a public / sdk function
+    */
+    numberOfSubscrbersTo(propName) {
+        var p = this.storage_.get(propName);
+        if (p) {
+            return p.numberOfSubscrbers();
+        }
+        return undefined;
     }
     __createSync(storagePropName, defaultValue, factoryFunc) {
         let p = this.storage_.get(storagePropName);
@@ -874,6 +885,15 @@ class AppStorage extends LocalStorage {
     */
     static aboutToBeDeleted() {
         AppStorage.getOrCreate().aboutToBeDeleted();
+    }
+    /**
+     * return number of subscribers to named property
+     * useful for debug purposes
+     *
+     * not a public / sdk function
+    */
+    static numberOfSubscribersTo(propName) {
+        return AppStorage.getOrCreate().numberOfSubscrbersTo(propName);
     }
     /**
     * Subscribe to value change notifications of named property
@@ -1286,22 +1306,21 @@ class SubscribableAbstract {
         
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = SubscriberManager.Find(subscribedId);
-            if (!owningProperty) {
+            if (owningProperty) {
+                if ('objectPropertyHasChangedPU' in owningProperty) {
+                    // PU code path
+                    owningProperty.objectPropertyHasChangedPU(this, propName);
+                }
+                // FU code path
+                if ('hasChanged' in owningProperty) {
+                    owningProperty.hasChanged(newValue);
+                }
+                if ('propertyHasChanged' in owningProperty) {
+                    owningProperty.propertyHasChanged(propName);
+                }
+            }
+            else {
                 stateMgmtConsole.error(`SubscribableAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
-                return;
-            }
-            // PU Code path
-            if ('objectPropertyHasChangedPU' in owningProperty) {
-                // PU code path
-                owningProperty.objectPropertyHasChangedPU(this, propName);
-                return;
-            }
-            // FU code path
-            if ('hasChanged' in owningProperty) {
-                owningProperty.hasChanged(newValue);
-            }
-            if ('propertyHasChanged' in owningProperty) {
-                owningProperty.propertyHasChanged(propName);
             }
         });
     }
@@ -1602,12 +1621,10 @@ class PersistentStorage {
             PersistentStorage.storage_.set(propName, link.get());
         });
     }
-    // FU code path method
     propertyHasChanged(info) {
         
         this.write();
     }
-    // PU code path method
     syncPeerHasChanged(eventSource) {
         
         this.write();
@@ -1997,21 +2014,21 @@ class SubscribableHandler {
         
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = SubscriberManager.Find(subscribedId);
-            if (!owningProperty) {
+            if (owningProperty) {
+                if ('objectPropertyHasChangedPU' in owningProperty) {
+                    // PU code path
+                    owningProperty.objectPropertyHasChangedPU(this, propName);
+                }
+                // FU code path
+                if ('hasChanged' in owningProperty) {
+                    owningProperty.hasChanged(newValue);
+                }
+                if ('propertyHasChanged' in owningProperty) {
+                    owningProperty.propertyHasChanged(propName);
+                }
+            }
+            else {
                 stateMgmtConsole.warn(`SubscribableHandler: notifyObjectPropertyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
-                return;
-            }
-            // PU code path
-            if ('objectPropertyHasChangedPU' in owningProperty) {
-                owningProperty.objectPropertyHasChangedPU(this, propName);
-                return;
-            }
-            // FU code path
-            if ('hasChanged' in owningProperty) {
-                owningProperty.hasChanged(newValue);
-            }
-            if ('propertyHasChanged' in owningProperty) {
-                owningProperty.propertyHasChanged(propName);
             }
         });
     }
@@ -2381,7 +2398,6 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
             this.unlinkSuscriber(subscriber.id__());
         }
     }
-    // FU code path callback
     notifyHasChanged(newValue) {
         
         
@@ -2394,6 +2410,11 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
                 }
                 if ('propertyHasChanged' in subscriber) {
                     subscriber.propertyHasChanged(this.info_);
+                }
+                // PU code path, only used for ObservedPropertySimple/Object stored inside App/LocalStorage
+                // ObservedPropertySimplePU/ObjectPU  used in all other PU cases, has its own notifyPropertyHasChangedPU()
+                if ('syncPeerHasChanged' in subscriber) {
+                    subscriber.syncPeerHasChanged(this);
                 }
             }
             else {
@@ -2688,7 +2709,9 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
    * changes.
    */
     createLink(subscribeOwner, linkPropName) {
-        return new SynchedPropertySimpleTwoWay(this, subscribeOwner, linkPropName);
+        return ((subscribeOwner !== undefined) && ("rerender" in subscribeOwner)) ?
+            new SynchedPropertySimpleTwoWayPU(this, subscribeOwner, linkPropName) :
+            new SynchedPropertySimpleTwoWay(this, subscribeOwner, linkPropName);
     }
     createProp(subscribeOwner, linkPropName) {
         return new SynchedPropertySimpleOneWaySubscribing(this, subscribeOwner, linkPropName);
@@ -3409,7 +3432,6 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     }
     notifyPropertyHasBeenReadPU() {
         
-        
         this.recordDependentUpdate();
         
     }
@@ -3526,6 +3548,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         // function to be removed
         // keep it here until transpiler is updated.
     }
+    // FIXME check, is this used from AppStorage.
     // unified Appstorage, what classes to use, and the API
     createLink(subscribeOwner, linkPropName) {
         throw new Error(`${this.debugInfo()}: createLink: Can not create a AppStorage 'Link' from this property.`);
@@ -4930,8 +4953,9 @@ class ViewPU extends NativeViewPartialUpdate {
           Fail to resolve @Consume(${providedPropName}).`);
         }
         const factory = (source) => {
-            const result = new SynchedPropertyTwoWayPU(source, this, consumeVarName);
-            
+            const result = ((source instanceof ObservedPropertySimple) || (source instanceof ObservedPropertySimplePU))
+                ? new SynchedPropertyObjectTwoWayPU(source, this, consumeVarName)
+                : new SynchedPropertyObjectTwoWayPU(source, this, consumeVarName);
             return result;
         };
         return providedVarStore.createSync(factory);
@@ -5302,28 +5326,36 @@ class ViewPU extends NativeViewPartialUpdate {
     createStorageLink(storagePropName, defaultValue, viewVariableName) {
         const appStorageLink = AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
-            : new SynchedPropertyTwoWayPU(source, this, viewVariableName));
+            : (source instanceof ObservedPropertySimple)
+                ? new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName)
+                : new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName));
         this.ownStorageLinksProps_.add(appStorageLink);
         return appStorageLink;
     }
     createStorageProp(storagePropName, defaultValue, viewVariableName) {
         const appStorageProp = AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
-            : new SynchedPropertyOneWayPU(source, this, viewVariableName));
+            : (source instanceof ObservedPropertySimple)
+                ? new SynchedPropertyObjectOneWayPU(source, this, viewVariableName)
+                : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
         this.ownStorageLinksProps_.add(appStorageProp);
         return appStorageProp;
     }
     createLocalStorageLink(storagePropName, defaultValue, viewVariableName) {
         const localStorageLink = this.localStorage_.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
-            : new SynchedPropertyTwoWayPU(source, this, viewVariableName));
+            : (source instanceof ObservedPropertySimple)
+                ? new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName)
+                : new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName));
         this.ownStorageLinksProps_.add(localStorageLink);
         return localStorageLink;
     }
     createLocalStorageProp(storagePropName, defaultValue, viewVariableName) {
         const localStorageProp = this.localStorage_.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
-            : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
+            : (source instanceof ObservedPropertySimple)
+                ? new SynchedPropertyObjectOneWayPU(source, this, viewVariableName)
+                : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
         this.ownStorageLinksProps_.add(localStorageProp);
         return localStorageProp;
     }
