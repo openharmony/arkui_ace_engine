@@ -202,6 +202,21 @@ void FrontendDelegateDeclarativeNG::RunPage(
         TaskExecutor::TaskType::JS);
 }
 
+void FrontendDelegateDeclarativeNG::RunPage(
+    const std::shared_ptr<std::vector<uint8_t>>& content,  const std::string& params, const std::string& profile)
+{
+    ACE_SCOPED_TRACE("FrontendDelegateDeclarativeNG::RunPage %zu", content->size());
+    taskExecutor_->PostTask(
+        [delegate = Claim(this), weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), content,
+            params]() {
+            auto pageRouterManager = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageRouterManager->RunPage(content, params);
+            auto pipeline = delegate->GetPipelineContext();
+        },
+        TaskExecutor::TaskType::JS);
+}
+
 void FrontendDelegateDeclarativeNG::OnConfigurationUpdated(const std::string& data)
 {
     // only support mediaQueryUpdate

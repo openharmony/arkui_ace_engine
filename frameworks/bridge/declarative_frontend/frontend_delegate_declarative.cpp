@@ -210,6 +210,20 @@ void FrontendDelegateDeclarative::RunPage(
     LoadPage(GenerateNextPageId(), PageTarget(mainPagePath_), true, params);
 }
 
+void FrontendDelegateDeclarative::RunPage(
+    const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params, const std::string& profile)
+{
+    ACE_SCOPED_TRACE("FrontendDelegateDeclarativeNG::RunPage by buffer size:%zu", content->size());
+    taskExecutor_->PostTask(
+        [delegate = Claim(this), weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), content, params]() {
+            auto pageRouterManager = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageRouterManager->RunPage(content, params);
+            auto pipeline = delegate->GetPipelineContext();
+        },
+        TaskExecutor::TaskType::JS);
+}
+
 void FrontendDelegateDeclarative::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
 {
     LOGD("JSFrontend ChangeLocale");
@@ -797,11 +811,13 @@ void FrontendDelegateDeclarative::GetStageSourceMap(
 }
 
 void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback,
+    NG::LoadPageByBufferCallback&& loadPageByBufferCallback,
     NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
     NG::UpdateRootComponentCallback&& updateRootComponentCallback)
 {
     pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
     pageRouterManager_->SetLoadJsCallback(std::move(loadPageCallback));
+    pageRouterManager_->SetLoadJsByBufferCallback(std::move(loadPageByBufferCallback));
     pageRouterManager_->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
     pageRouterManager_->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
 }

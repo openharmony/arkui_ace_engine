@@ -935,6 +935,19 @@ bool AceContainer::RunPage(
     return true;
 }
 
+bool AceContainer::RunPage(
+    int32_t instanceId, const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, false);
+    ContainerScope scope(instanceId);
+    auto front = container->GetFrontend();
+    CHECK_NULL_RETURN(front, false);
+    LOGD("RunPage by buffer size:%{public}d", size);
+    front->RunPage(content, params);
+    return true;
+}
+
 bool AceContainer::PushPage(int32_t instanceId, const std::string& content, const std::string& params)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);

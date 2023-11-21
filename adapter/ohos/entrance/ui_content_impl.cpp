@@ -367,6 +367,22 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     InitializeInner(window, url, storage, false);
 }
 
+void UIContentImpl::Initialize(
+    OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage)
+{
+    CommonInitialize(window, "", storage);
+    if (content) {
+        LOGI("Initialize by buffer, size:%{public}zu", content->size());
+        // run page.
+        Platform::AceContainer::RunPage(instanceId_, content, "");
+    } else {
+        LOGE("Initialize failed, buffer is null");
+    }
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+}
+
 void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
 {
     InitializeInner(window, name, storage, true);
@@ -1863,7 +1879,7 @@ void UIContentImpl::SetResourcePaths(const std::vector<std::string>& resourcesPa
             CHECK_NULL_VOID(themeManager);
 
             if (resourcesPaths.empty() && assetRootPath.empty()) {
-                 return;
+                return;
             }
 
             if (!assetRootPath.empty()) {
@@ -2091,4 +2107,3 @@ bool UIContentImpl::NotifyExecuteAction(
     return Platform::AceContainer::NotifyExecuteAction(instanceId_, elementId, actionArguments, action, offset);
 }
 } // namespace OHOS::Ace
-
