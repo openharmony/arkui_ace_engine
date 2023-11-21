@@ -22,6 +22,8 @@
 #include "core/components_ng/pattern/gauge/gauge_layout_property.h"
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -44,6 +46,7 @@ void GaugeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto idealSize = geometryNode->GetContentSize();
         MeasureLimitValueText(layoutWrapper, idealSize, true);
         MeasureLimitValueText(layoutWrapper, idealSize, false);
+        MeasureFontSize(layoutWrapper);
         MeasureDescription(layoutWrapper, idealSize);
         MeasureTitleChild(layoutWrapper, idealSize);
     }
@@ -127,13 +130,14 @@ void GaugeLayoutAlgorithm::MeasureLimitValueTextWidth(LayoutWrapper* layoutWrapp
     auto endDegree = endAngle * M_PI / HALF_CIRCLE;
     startAngleOffsetX_ = center.GetX() + (radius - strokeWidthValue) * std::cos(startDegree);
     endAngleOffsetX_ = center.GetX() + (radius - strokeWidthValue) * std::cos(endDegree);
-    auto textSafeDistance =
-        LIMIT_VALUE_MIN_SAFE_DISTANCE + LIMIT_VALUE_MAX_SAFE_DISTANCE + LIMIT_VALUE_SPACE_SAFE_DISTANCE;
-    limitValueTextWidth_ = (endAngleOffsetX_ - startAngleOffsetX_ - textSafeDistance.ConvertToPx()) * 0.5f;
+    auto diameter = radius * 2.0f;
+    auto textSafeDistance = LIMIT_VALUE_MIN_SAFE_DISTANCE_RATIO * diameter +
+                            LIMIT_VALUE_MAX_SAFE_DISTANCE_RATIO * diameter +
+                            LIMIT_VALUE_SPACE_SAFE_DISTANCE_RATIO * diameter;
+    limitValueTextWidth_ = (endAngleOffsetX_ - startAngleOffsetX_ - textSafeDistance) * 0.5f;
 }
 
-void GaugeLayoutAlgorithm::MeasureLimitValueText(
-    LayoutWrapper* layoutWrapper, const SizeF& parentSize, const bool isMin)
+void GaugeLayoutAlgorithm::MeasureLimitValueText(LayoutWrapper* layoutWrapper, const SizeF& parentSize, bool isMin)
 {
     auto hostNode = AceType::DynamicCast<FrameNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(hostNode);
@@ -254,12 +258,12 @@ void GaugeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
         } else if (nodeId == gaugePattern->GetMinValueTextId()) {
             childOffset =
-                circularOffset + OffsetF(startAngleOffsetX_ + LIMIT_VALUE_MIN_SAFE_DISTANCE.ConvertToPx() - left,
+                circularOffset + OffsetF(startAngleOffsetX_ + LIMIT_VALUE_MIN_SAFE_DISTANCE_RATIO * diameter - left,
                                          LIMIT_VALUE_Y * diameter);
         } else if (nodeId == gaugePattern->GetMaxValueTextId()) {
-            childOffset =
-                circularOffset + OffsetF(endAngleOffsetX_ - limitValueTextWidth_ -
-                                         LIMIT_VALUE_MAX_SAFE_DISTANCE.ConvertToPx() - left, LIMIT_VALUE_Y * diameter);
+            childOffset = circularOffset + OffsetF(endAngleOffsetX_ - limitValueTextWidth_ -
+                                                   LIMIT_VALUE_MAX_SAFE_DISTANCE_RATIO * diameter - left,
+                                                   LIMIT_VALUE_Y * diameter);
         } else if (nodeId == gaugePattern->GetTitleChildId()) {
             childOffset = circularOffset;
         }
@@ -282,5 +286,67 @@ bool GaugeLayoutAlgorithm::CheckDescriptionIsImageNode(const RefPtr<LayoutWrappe
     auto childLayoutWrapper = layoutWrapper->GetChildByIndex(0);
     CHECK_NULL_RETURN(childLayoutWrapper, false);
     return childLayoutWrapper->GetHostTag() == V2::IMAGE_ETS_TAG;
+}
+
+void GaugeLayoutAlgorithm::MeasureFontSize(LayoutWrapper* layoutWrapper)
+{
+    Dimension minFontSize;
+    auto hasMinFontSize = GetLimitFontSize(layoutWrapper, true, minFontSize);
+    Dimension maxFontSize;
+    auto hasMaxFontSize = GetLimitFontSize(layoutWrapper, false, maxFontSize);
+
+    if (hasMinFontSize && hasMaxFontSize) {
+        auto fontSize = minFontSize < maxFontSize ? minFontSize : maxFontSize;
+        SetLimitFontSize(layoutWrapper, true, fontSize);
+        SetLimitFontSize(layoutWrapper, false, fontSize);
+    }
+}
+
+bool GaugeLayoutAlgorithm::GetLimitFontSize(LayoutWrapper* layoutWrapper, bool isMin, Dimension& fontSize)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto hostNode = AceType::DynamicCast<FrameNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_RETURN(hostNode, false);
+    auto pattern = hostNode->GetPattern<GaugePattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto hasLimitValueNode = isMin ? pattern->HasMinValueTextNode() : pattern->HasMaxValueTextNode();
+    CHECK_NULL_RETURN(hasLimitValueNode, false);
+    auto hasLimitValueNodeId = isMin ? pattern->GetMinValueTextId() : pattern->GetMaxValueTextId();
+    auto index = hostNode->GetChildIndexById(hasLimitValueNodeId);
+    auto limitValueTextWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_RETURN(limitValueTextWrapper, false);
+    auto textLayoutTextWrapper = limitValueTextWrapper->GetLayoutAlgorithm();
+    CHECK_NULL_RETURN(textLayoutTextWrapper, false);
+    auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(textLayoutTextWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(textLayoutAlgorithm, false);
+    auto limitTextStyle = textLayoutAlgorithm->GetTextStyle();
+    if (!limitTextStyle.has_value()) {
+        return false;
+    }
+    fontSize = limitTextStyle->GetFontSize();
+    return true;
+}
+
+void GaugeLayoutAlgorithm::SetLimitFontSize(LayoutWrapper* layoutWrapper, bool isMin, const Dimension& fontSize)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto hostNode = AceType::DynamicCast<FrameNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(hostNode);
+    auto pattern = hostNode->GetPattern<GaugePattern>();
+    CHECK_NULL_VOID(pattern);
+    auto hasLimitValueNode = isMin ? pattern->HasMinValueTextNode() : pattern->HasMaxValueTextNode();
+    CHECK_NULL_VOID(hasLimitValueNode);
+    auto hasLimitValueNodeId = isMin ? pattern->GetMinValueTextId() : pattern->GetMaxValueTextId();
+    auto index = hostNode->GetChildIndexById(hasLimitValueNodeId);
+    auto limitValueTextWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(limitValueTextWrapper);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(limitValueTextWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
+    textLayoutProperty->ResetAdaptMaxFontSize();
+    textLayoutProperty->ResetAdaptMinFontSize();
+    textLayoutProperty->UpdateFontSize(fontSize);
+    limitValueTextWrapper->Measure(layoutConstraint);
 }
 } // namespace OHOS::Ace::NG

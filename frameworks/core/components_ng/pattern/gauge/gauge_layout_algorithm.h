@@ -39,12 +39,14 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
 private:
-    void MeasureLimitValueText(LayoutWrapper* layoutWrapper, const SizeF& parentSize, const bool isMin);
+    void MeasureLimitValueText(LayoutWrapper* layoutWrapper, const SizeF& parentSize, bool isMin);
     void MeasureDescription(LayoutWrapper* layoutWrapper, const SizeF& parentSize);
     void MeasureTitleChild(LayoutWrapper* layoutWrapper, const SizeF& parentSize);
     bool CheckDescriptionIsImageNode(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     void MeasureLimitValueTextWidth(LayoutWrapper* layoutWrapper);
-
+    bool GetLimitFontSize(LayoutWrapper* layoutWrapper, bool isMin, Dimension& fontSize);
+    void SetLimitFontSize(LayoutWrapper* layoutWrapper, bool isMin, const Dimension& fontSize);
+    void MeasureFontSize(LayoutWrapper* layoutWrapper);
     RefPtr<ImageLoadingContext> indicatorIconLoadingCtx_;
     double limitValueTextWidth_ = 0.0;
     double startAngleOffsetX_ = 0.0;
