@@ -25,7 +25,6 @@ template("napi_observer_static") {
     }
 
     include_dirs = [
-      "//foundation/arkui",
       "$ace_root",
       "$ace_root/frameworks",
       "$root_out_dir/arkui/framework",
@@ -36,7 +35,7 @@ template("napi_observer_static") {
     deps = []
     external_deps = []
     if (platform != "" && is_arkui_x) {
-      deps += [ "//plugins/libs/napi:napi_$platform" ]
+      deps += [ "${crossplatform_plugin_root}/libs/napi:napi_$platform" ]
     } else {
       external_deps += [ "napi:ace_napi" ]
     }

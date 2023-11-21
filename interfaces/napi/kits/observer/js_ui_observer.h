@@ -25,7 +25,6 @@
 
 namespace OHOS::Ace::Napi {
 const std::string NAVDESTINATION_UPDATE = "navDestinationUpdate";
-// using Func = std::function<napi_value(napi_env, napi_callback_info)>;
 
 class ObserverProcess {
 public:
