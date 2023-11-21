@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_blank.h"
 
+#include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/blank_model_impl.h"
@@ -47,7 +48,7 @@ BlankModel* BlankModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSBlank::Create(const JSCallbackInfo& info)
 {
-    CalcDimension blankMin;
+    CalcDimension blankMin(0.0, DimensionUnit::VP);
     BlankModel::GetInstance()->Create();
     if (info[0]->IsUndefined()) {
         BlankModel::GetInstance()->SetBlankMin(blankMin);
