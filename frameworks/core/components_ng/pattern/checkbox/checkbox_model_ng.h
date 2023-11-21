@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_NG_H
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
 
 namespace OHOS::Ace::NG {
@@ -36,6 +37,7 @@ public:
     void SetChangeEvent(ChangeEvent&& changeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetCheckboxStyle(CheckBoxStyle checkboxStyle) override;
+    static void SetSelectedColor(FrameNode* frameNode, const Color& color);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_NG_H

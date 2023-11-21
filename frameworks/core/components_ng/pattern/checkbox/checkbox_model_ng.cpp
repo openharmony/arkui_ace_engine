@@ -128,4 +128,9 @@ void CheckBoxModelNG::SetResponseRegion(const std::vector<DimensionRect>& respon
     CHECK_NULL_VOID(pattern);
     pattern->SetIsUserSetResponseRegion(true);
 }
+
+void CheckBoxModelNG::SetSelectedColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColor, color, frameNode);
+}
 } // namespace OHOS::Ace::NG

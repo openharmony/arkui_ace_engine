@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeById(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -115,6 +117,62 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetFontWeight));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
+
+    RegisterButtonAttributes(object, vm);
+    RegisterToggleAttributes(object, vm);
+
     return object;
+}
+
+void ArkUINativeModule::RegisterButtonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto button = panda::ObjectRef::New(vm);
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetType));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetType));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStateEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetStateEffect));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStateEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetStateEffect));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetFontColor));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetFontColor));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetFontSize));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetFontSize));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetFontWeight));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetFontWeight));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetFontStyle));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetFontStyle));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetFontFamily));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetFontFamily));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLabelStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetLabelStyle));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLabelStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetLabelStyle));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "button"), button);
+}
+
+void ArkUINativeModule::RegisterToggleAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto toggle = panda::ObjectRef::New(vm);
+    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ToggleBridge::SetSelectedColor));
+    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ToggleBridge::ResetSelectedColor));
+    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwitchPointColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ToggleBridge::SetSwitchPointColor));
+    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwitchPointColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ToggleBridge::ResetSwitchPointColor));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "toggle"), toggle);
 }
 } // namespace OHOS::Ace::NG

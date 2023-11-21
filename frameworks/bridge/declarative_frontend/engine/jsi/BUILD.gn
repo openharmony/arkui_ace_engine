@@ -145,8 +145,10 @@ template("declarative_js_engine_ark") {
 
     sources = [
       "components/arkts_native_api_impl.cpp",
+      "components/arkts_native_button_modifier.cpp",
       "components/arkts_native_common_modifier.cpp",
       "components/arkts_native_text_modifier.cpp",
+      "components/arkts_native_toggle_modifier.cpp",
       "js_converter.cpp",
       "jsi_declarative_engine.cpp",
       "jsi_declarative_group_js_bridge.cpp",
@@ -162,8 +164,10 @@ template("declarative_js_engine_ark") {
       "modules/jsi_syscap_module.cpp",
       "modules/jsi_timer_module.cpp",
       "nativeModule/arkts_native_api_impl_bridge.cpp",
+      "nativeModule/arkts_native_button_bridge.cpp",
       "nativeModule/arkts_native_common_bridge.cpp",
       "nativeModule/arkts_native_text_bridge.cpp",
+      "nativeModule/arkts_native_toggle_bridge.cpp",
     ]
 
     include_dirs = []
