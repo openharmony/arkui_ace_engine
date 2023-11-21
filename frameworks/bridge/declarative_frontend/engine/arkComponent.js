@@ -1,4 +1,3 @@
-const HashMap = globalThis.requireNapi('util.HashMap');
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function GetUINativeModule() {
     if (arkUINativeModule) {
