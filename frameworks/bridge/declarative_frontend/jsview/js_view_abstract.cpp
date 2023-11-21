@@ -2061,8 +2061,8 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
             styleOption.scale = std::clamp(scale, 0.0, 1.0);
         }
 
-        if (jsOption->GetProperty("blurOption")->IsObject()) {
-            JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOption"));
+        if (jsOption->GetProperty("blurOptions")->IsObject()) {
+            JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
             BlurOption blurOption;
             ParseBlurOption(jsBlurOption, blurOption);
             styleOption.blurOption = blurOption;
@@ -2100,8 +2100,8 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     }
 
     BlurOption blurOption;
-    if (jsOption->GetProperty("blurOption")->IsObject()) {
-        JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOption"));
+    if (jsOption->GetProperty("blurOptions")->IsObject()) {
+        JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
         ParseBlurOption(jsBlurOption, blurOption);
     }
     effectOption = { radius, saturation, brightness, color, adaptiveColor, blurOption };
@@ -2153,8 +2153,8 @@ void JSViewAbstract::JsForegroundBlurStyle(const JSCallbackInfo& info)
             styleOption.scale = std::clamp(scale, 0.0, 1.0);
         }
  
-        if (jsOption->GetProperty("blurOption")->IsObject()) {
-            JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOption"));
+        if (jsOption->GetProperty("blurOptions")->IsObject()) {
+            JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
             BlurOption blurOption;
             ParseBlurOption(jsBlurOption, blurOption);
             styleOption.blurOption = blurOption;
