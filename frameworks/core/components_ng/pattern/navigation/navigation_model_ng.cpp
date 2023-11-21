@@ -865,7 +865,7 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
         backButtonLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
         backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
-        backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS));
+        backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
         backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         auto renderContext = backButtonNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);

@@ -49,12 +49,11 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
     }
 
     size_t index = 0;
-    auto contentOffset = pattern->GetContentOffset();
     auto imageChildren = pattern->GetImageChildren();
     auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
     for (const auto& child : imageChildren) {
         auto rect = rectsForPlaceholders.at(index);
-        auto offset = OffsetF(rect.Left(), rect.Top()) - contentOffset;
+        auto offset = OffsetF(rect.Left(), rect.Top()) + pattern->GetTextRect().GetOffset();
         auto imageChild = DynamicCast<ImagePattern>(child->GetPattern());
         if (imageChild) {
             RectF imageRect(offset.GetX(), offset.GetY(), rect.Width(), rect.Height());

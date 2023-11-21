@@ -26,6 +26,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -43,8 +44,8 @@
 
 namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public Pattern, public TextDragBase, public TextBase {
-    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase);
+class TextPattern : public ScrollablePattern, public TextDragBase, public TextBase {
+    DECLARE_ACE_TYPE(TextPattern, ScrollablePattern, TextDragBase, TextBase);
 
 public:
     TextPattern() = default;
@@ -361,6 +362,22 @@ public:
 
     void OnAreaChangedInner() override;
     void RemoveAreaChangeInner();
+    bool IsAtBottom() const override
+    {
+        return true;
+    }
+
+    bool IsAtTop() const override
+    {
+        return true;
+    }
+
+    bool UpdateCurrentOffset(float offset, int32_t source) override
+    {
+        return true;
+    }
+
+    virtual void UpdateScrollBarOffset() override {}
 
 protected:
     virtual void HandleOnCopy();

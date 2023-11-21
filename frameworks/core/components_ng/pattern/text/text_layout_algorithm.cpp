@@ -293,10 +293,15 @@ OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper) cons
     return contentOffset;
 }
 
+OffsetF TextLayoutAlgorithm::GetTextRectOffset(LayoutWrapper* layoutWrapper) const
+{
+    return GetContentOffset(layoutWrapper);
+}
+
 void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto contentOffset = GetContentOffset(layoutWrapper);
+    auto textOffset = GetTextRectOffset(layoutWrapper);
     std::vector<int32_t> placeHolderIndex;
     for (const auto& child : spanItemChildren_) {
         if (!child) {
@@ -330,7 +335,7 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             ++index;
             continue;
         }
-        geometryNode->SetMarginFrameOffset(contentOffset + OffsetF(rect.Left(), rect.Top()));
+        geometryNode->SetMarginFrameOffset(textOffset + OffsetF(rect.Left(), rect.Top()));
         child->Layout();
         ++index;
     }
@@ -342,6 +347,7 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
+    auto contentOffset = GetContentOffset(layoutWrapper);
     pattern->InitSpanImageLayout(placeHolderIndex, rectsForPlaceholders, contentOffset);
 #endif
 }
