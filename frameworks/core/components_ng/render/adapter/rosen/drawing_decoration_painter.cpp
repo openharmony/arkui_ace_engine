@@ -613,7 +613,8 @@ public:
         if (isRepeat_) {
             tileMode = RSTileMode::REPEAT;
         }
-        return RSRecordingShaderEffect::CreateSweepGradient(center_, colors, pos, tileMode, startAngle_, endAngle_);
+        return RSRecordingShaderEffect::CreateSweepGradient(
+            center_, colors, pos, tileMode, startAngle_, endAngle_, &matrix);
     }
 
     static std::unique_ptr<GradientShader> CreateSweepGradient(const NG::Gradient& gradient, const RSSize& size)

@@ -213,7 +213,7 @@ std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(RSBrus
         std::vector<RSScalar> pos(gradientColors.size(), 0);
         double angle = gradient.GetConicGradient().startAngle->Value() / M_PI * 180.0;
         RSScalar startAngle = static_cast<RSScalar>(angle);
-        matrix.Rotate(startAngle, centerX, centerY);
+        matrix.PreRotate(startAngle, centerX, centerY);
         for (uint32_t i = 0; i < colorsSize; ++i) {
             const auto& gradientColor = gradientColors[i];
             colors.at(i) = gradientColor.GetColor().GetValue();
@@ -221,7 +221,7 @@ std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(RSBrus
         }
         auto mode = RSTileMode::CLAMP;
         shaderEffect = RSShaderEffect::CreateSweepGradient(RSPoint(centerX, centerY), colors, pos, mode,
-            static_cast<RSScalar>(CONIC_START_ANGLE), static_cast<RSScalar>(CONIC_END_ANGLE));
+            static_cast<RSScalar>(CONIC_START_ANGLE), static_cast<RSScalar>(CONIC_END_ANGLE), &matrix);
     }
     return shaderEffect;
 }

@@ -190,10 +190,10 @@ void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, ArcData arcData
 
 #ifndef USE_ROSEN_DRAWING
     gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle));
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle, nullptr));
 #else
     gradientPaint.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle));
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle, nullptr));
 #endif
     RSRect edgeRect(center.GetX() - thickness * PERCENT_HALF, center.GetY() - radius,
         center.GetX() + thickness * PERCENT_HALF, center.GetY() - radius + thickness);
@@ -544,10 +544,10 @@ void DataPanelModifier::PaintProgress(RSCanvas& canvas, ArcData arcData) const
 
 #ifndef USE_ROSEN_DRAWING
     gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle, nullptr));
 #else
     gradientPaint.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle, nullptr));
 #endif
 
     canvas.Save();
