@@ -398,7 +398,6 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
     contentProp->UpdateTextAlign(TextAlign::START);
     contentProp->UpdateContent(props.content);
     auto contentStyle = dialogTheme_->GetContentTextStyle();
-    contentProp->UpdateFontWeight(FontWeight::MEDIUM);
     contentProp->UpdateFontSize(contentStyle.GetFontSize());
     contentProp->UpdateTextColor(contentStyle.GetTextColor());
     // update padding
@@ -668,6 +667,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, nullptr);
     textProps->UpdateContent(text);
+    textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateMaxLines(1);
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     Dimension buttonTextSize =
