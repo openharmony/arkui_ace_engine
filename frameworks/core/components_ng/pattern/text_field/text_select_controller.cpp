@@ -161,14 +161,6 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
             pos + GetGraphemeClusterLength(contentController_->GetWideText(), pos, true));
     }
     UpdateHandleIndex(start, end);
-    if (CaretAtLast() && GreatNotEqual(localOffset.GetX(), caretInfo_.rect.GetOffset().GetX())) {
-        UpdateHandleIndex(GetCaretIndex());
-    }
-    if (IsSelected()) {
-        MoveSecondHandleToContentRect(GetSecondHandleIndex());
-    } else {
-        MoveCaretToContentRect(GetCaretIndex());
-    }
 }
 
 int32_t TextSelectController::GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev)
@@ -446,5 +438,28 @@ void TextSelectController::ResetHandles()
     secondHandleInfo_.index = caretInfo_.index;
     UpdateFirstHandleOffset();
     UpdateSecondHandleOffset();
+}
+
+void TextSelectController::UpdateSelectByDoubleClick(const Offset& localOffset)
+{
+    UpdateSelectByOffset(localOffset);
+    if (IsSelected()) {
+        MoveSecondHandleToContentRect(GetSecondHandleIndex());
+    } else {
+        MoveCaretToContentRect(GetCaretIndex());
+    }
+}
+
+void TextSelectController::UpdateSelectByLongPress(const Offset& localOffset)
+{
+    UpdateSelectByOffset(localOffset);
+    if (CaretAtLast() && GreatNotEqual(localOffset.GetX(), caretInfo_.rect.GetOffset().GetX())) {
+        UpdateHandleIndex(GetCaretIndex());
+    }
+    if (IsSelected()) {
+        MoveSecondHandleToContentRect(GetSecondHandleIndex());
+    } else {
+        MoveCaretToContentRect(GetCaretIndex());
+    }
 }
 } // namespace OHOS::Ace::NG
