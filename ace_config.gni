@@ -35,6 +35,15 @@ declare_args() {
   # Enable metal in iOS or MacOS
   shell_enable_metal = false
 
+  # Enable pgo for building.
+  ace_engine_feature_enable_pgo = false
+
+  # Set pgo profdata path
+  ace_engine_feature_pgo_path = ""
+
+  # Enable atomic for building.
+  ace_engine_feature_enable_atomic = false
+
   # Enable test coverage
   ace_engine_feature_enable_coverage = false
 
