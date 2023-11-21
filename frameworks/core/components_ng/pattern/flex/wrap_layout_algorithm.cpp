@@ -93,7 +93,7 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             continue;
         }
         // can place current child at current row
-        if (mainLengthLimit_ >= currentMainLength + GetItemMainAxisLength(item->GetGeometryNode())) {
+        if (GreatOrEqual(mainLengthLimit_, currentMainLength + GetItemMainAxisLength(item->GetGeometryNode()))) {
             currentMainLength += GetItemMainAxisLength(item->GetGeometryNode());
             currentMainLength += spacing;
             currentCrossLength = std::max(currentCrossLength, GetItemCrossAxisLength(item->GetGeometryNode()));
