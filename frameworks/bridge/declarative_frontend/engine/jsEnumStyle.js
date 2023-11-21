@@ -32,7 +32,8 @@ var Color;
 
 var ColoringStrategy;
 (function (ColoringStrategy) {
-  ColoringStrategy["INVERT"] = "Invert";
+  ColoringStrategy["INVERT"] = "invert";
+  ColoringStrategy["AVERAGE"] = "average";
 })(ColoringStrategy || (ColoringStrategy = {}));
 
 var TextInputStyle;
@@ -55,6 +56,14 @@ var TextAlign;
   TextAlign[TextAlign["Justify"] = 3] = "Justify";
   TextAlign[TextAlign["JUSTIFY"] = 3] = "JUSTIFY";
 })(TextAlign || (TextAlign = {}));
+
+var TextDataDetectType;
+(function (TextDataDetectType) {
+  TextDataDetectType[TextDataDetectType["PHONE_NUMBER"] = 0] = "PHONE_NUMBER";
+  TextDataDetectType[TextDataDetectType["URL"] = 1] = "URL";
+  TextDataDetectType[TextDataDetectType["EMAIL"] = 2] = "EMAIL";
+  TextDataDetectType[TextDataDetectType["ADDRESS"] = 3] = "ADDRESS";
+})(TextDataDetectType || (TextDataDetectType = {}));
 
 var DataPanelType;
 (function (DataPanelType) {
@@ -572,6 +581,7 @@ var FormDimension;
   FormDimension["Dimension_2_4"] = 3;
   FormDimension["Dimension_4_4"] = 4;
   FormDimension["Dimension_2_1"] = 5;
+  FormDimension["DIMENSION_1_1"] = 6;
 })(FormDimension || (FormDimension = {}));
 
 var TransitionType;
@@ -781,6 +791,10 @@ var InputType;
   InputType[InputType["PhoneNumber"] = 3] = "PhoneNumber";
   InputType[InputType["Email"] = 5] = "Email";
   InputType[InputType["Password"] = 7] = "Password";
+  InputType[InputType["NUMBER_PASSWORD"] = 8] = "NUMBER_PASSWORD";
+  InputType[InputType["SCREEN_LOCK_PASSWORD"] = 9] = "SCREEN_LOCK_PASSWORD";
+  InputType[InputType["USER_NAME"] = 10] = "USER_NAME";
+  InputType[InputType["NEW_PASSWORD"] = 11] = "NEW_PASSWORD";
 })(InputType || (InputType = {}));
 
 var SearchType;
@@ -854,6 +868,13 @@ var ResponseType;
   ResponseType[ResponseType["RightClick"] = 0] = "RightClick";
   ResponseType[ResponseType["LongPress"] = 1] = "LongPress";
 })(ResponseType || (ResponseType = {}));
+
+var RichEditorResponseType;
+(function (RichEditorResponseType) {
+  RichEditorResponseType[RichEditorResponseType["RIGHT_CLICK"] = 0] = "RIGHT_CLICK";
+  RichEditorResponseType[RichEditorResponseType["LONG_PRESS"] = 1] = "LONG_PRESS";
+  RichEditorResponseType[RichEditorResponseType["SELECT"] = 2] = "SELECT";
+})(RichEditorResponseType || (RichEditorResponseType = {}));
 
 var MenuPreviewMode;
 (function (MenuPreviewMode) {
@@ -1081,6 +1102,11 @@ var BlurStyle;
   BlurStyle[BlurStyle["BACKGROUND_REGULAR"] = 5] = "BACKGROUND_REGULAR";
   BlurStyle[BlurStyle["BACKGROUND_THICK"] = 6] = "BACKGROUND_THICK";
   BlurStyle[BlurStyle["BACKGROUND_ULTRA_THICK"] = 7] = "BACKGROUND_ULTRA_THICK";
+  BlurStyle[BlurStyle["COMPONENT_ULTRA_THIN"] = 8] = "COMPONENT_ULTRA_THIN";
+  BlurStyle[BlurStyle["COMPONENT_THIN"] = 9] = "COMPONENT_THIN";
+  BlurStyle[BlurStyle["COMPONENT_REGULAR"] = 10] = "COMPONENT_REGULAR";
+  BlurStyle[BlurStyle["COMPONENT_THICK"] = 11] = "COMPONENT_THICK";
+  BlurStyle[BlurStyle["COMPONENT_ULTRA_THICK"] = 12] = "COMPONENT_ULTRA_THICK";
   BlurStyle[BlurStyle["NONE"] = 0] = "NONE";
 })(BlurStyle || (BlurStyle = {}));
 
@@ -1238,6 +1264,27 @@ var FunctionKey;
   FunctionKey[FunctionKey["F11"] = 11] = "F11";
   FunctionKey[FunctionKey["F12"] = 12] = "F12";
 })(FunctionKey || (FunctionKey = {}));
+
+var GestureJudgeResult;
+(function (GestureJudgeResult) {
+  GestureJudgeResult[GestureJudgeResult["CONTINUE"] = 0] = "CONTINUE";
+  GestureJudgeResult[GestureJudgeResult["REJECT"] = 1] = "REJECT";
+})(GestureJudgeResult || (GestureJudgeResult = {}));
+
+var GestureControl;
+(function (GestureControl) {
+    let GestureType;
+    (function (GestureType) {
+        GestureType[GestureType["TAP_GESTURE"] = 0] = "TAP_GESTURE";
+        GestureType[GestureType["LONG_PRESS_GESTURE"] = 1] = "LONG_PRESS_GESTURE";
+        GestureType[GestureType["PAN_GESTURE"] = 2] = "PAN_GESTURE";
+        GestureType[GestureType["PINCH_GESTURE"] = 3] = "PINCH_GESTURE";
+        GestureType[GestureType["SWIPE_GESTURE"] = 4] = "SWIPE_GESTURE";
+        GestureType[GestureType["ROTATION_GESTURE"] = 5] = "ROTATION_GESTURE";
+        GestureType[GestureType["DRAG"] = 6] = "DRAG";
+        GestureType[GestureType["CLICK"] = 7] = "CLICK";
+    })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
+})(GestureControl || (GestureControl = {}));
 
 class SubTabBarStyle {
   constructor(content) {
@@ -1539,23 +1586,47 @@ class NavPathStack {
     this.pathArray = [];
     // indicate class has changed.
     this.changeFlag = 0;
+    this.isReplace = false;
     this.type = this.constructor.name;
   }
   pushName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
   }
   push(info) {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
   }
   pushPathByName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
   }
   pushPath(info) {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
+  }
+  replacePath(info) {
+    if (this.pathArray.length !== 0) {
+      this.pathArray.pop();
+    }
+    this.pathArray.push(info);
+    this.isReplace = true;
+    this.changeFlag = this.changeFlag + 1;
+  }
+  replacePathByName(name, param) {
+    if (this.pathArray.length !== 0) {
+      this.pathArray.pop();
+    }
+    this.isReplace = true;
+    this.pathArray.push(new NavPathInfo(name, param));
+    this.changeFlag = this.changeFlag + 1;
+  }
+  setIsReplace(value) {
+    this.isReplace = value;
   }
   pop() {
     if (this.pathArray.length === 0) {
@@ -1563,6 +1634,7 @@ class NavPathStack {
     }
     let pathInfo = this.pathArray.pop();
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
     return pathInfo;
   }
   popTo(name) {
@@ -1571,6 +1643,7 @@ class NavPathStack {
       return -1;
     }
     this.pathArray.splice(index + 1);
+    this.isReplace = false;
     this.changeFlag = this.changeFlag + 1;
     return index;
   }
@@ -1581,6 +1654,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
     return index;
   }
   popToIndex(index) {
@@ -1589,6 +1663,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
   }
   moveToTop(name) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -1598,6 +1673,7 @@ class NavPathStack {
     let info = this.pathArray.splice(index, 1);
     this.pathArray.push(info[0]);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
     return index;
   }
   moveIndexToTop(index) {
@@ -1607,10 +1683,12 @@ class NavPathStack {
     let info = this.pathArray.splice(index, 1);
     this.pathArray.push(info[0]);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
   }
   clear() {
     this.pathArray.splice(0);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
   }
   removeName(name) {
     var removed = false;
@@ -1622,6 +1700,7 @@ class NavPathStack {
     }
     if (removed) {
       this.changeFlag = this.changeFlag + 1;
+      this.isReplace = false;
     }
   }
   removeIndex(index) {
@@ -1630,6 +1709,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index, 1);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = false;
   }
   getAllPathName() {
     let array = this.pathArray.flatMap(element => element.name);
@@ -1931,14 +2011,59 @@ var SwiperNestedScrollMode;
   SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_FIRST"] = 1] = "SELF_FIRST";
 })(SwiperNestedScrollMode || (SwiperNestedScrollMode = {}));
 
+var CheckBoxStyle;
+(function (CheckBoxStyle) {
+  CheckBoxStyle["CIRCULAR_STYLE"] = 0;
+  CheckBoxStyle["SQUARE_STYLE"] = 1;
+})(CheckBoxStyle || (CheckBoxStyle = {}));
+
+var ModelType;
+(function (ModelType) {
+  ModelType[ModelType["TEXTURE"] = 0] = "TEXTURE";
+  ModelType[ModelType["SURFACE"] = 1] = "SURFACE";
+})(ModelType || (ModelType = {}));
+
+var ModelLightType;
+(function (ModelLightType) {
+  ModelLightType[ModelLightType["INVALID"] = 0] = "INVALID";
+  ModelLightType[ModelLightType["DIRECTIONAL"] = 1] = "DIRECTIONAL";
+  ModelLightType[ModelLightType["POINT"] = 2] = "POINT";
+  ModelLightType[ModelLightType["SPOT"] = 3] = "SPOT";
+})(ModelLightType || (ModelLightType = {}));
+
+var ModelAnimationStates;
+(function (ModelAnimationStates) {
+  ModelAnimationStates[ModelAnimationStates["PLAY"] = 0] = "PLAY";
+  ModelAnimationStates[ModelAnimationStates["PAUSE"] = 1] = "PAUSE";
+  ModelAnimationStates[ModelAnimationStates["STOP"] = 2] = "STOP";
+})(ModelAnimationStates || (ModelAnimationStates = {}));
+
+var SwipeActionState;
+(function (SwipeActionState) {
+  SwipeActionState[SwipeActionState["COLLAPSED"] = 0] = "COLLAPSED";
+  SwipeActionState[SwipeActionState["EXPANDED"] = 1] = "EXPANDED";
+  SwipeActionState[SwipeActionState["ACTIONING"] = 2] = "ACTIONING";
+})(SwipeActionState || (SwipeActionState = {}));
+
 var CheckBoxShape;
 (function (CheckBoxShape) {
   CheckBoxShape["CIRCLE"] = 0;
   CheckBoxShape["ROUNDED_SQUARE"] = 1;
 })(CheckBoxShape || (CheckBoxShape = {}));
 
+var FinishCallbackType;
+(function (FinishCallbackType) {
+  FinishCallbackType["REMOVED"] = 0;
+  FinishCallbackType["LOGICALLY"] = 1;
+})(FinishCallbackType || (FinishCallbackType = {}));
 var WebLayoutMode;
 (function (WebLayoutMode) {
   WebLayoutMode[WebLayoutMode["NONE"] = 0] = "NONE";
   WebLayoutMode[WebLayoutMode["FIT_CONTENT"] = 1] = "FIT_CONTENT";
 })(WebLayoutMode || (WebLayoutMode = {}));
+
+var OptionWidthMode;
+(function (OptionWidthMode) {
+  OptionWidthMode["FIT_CONTENT"] = "fit_content";
+  OptionWidthMode["FIT_TRIGGER"] = "fit_trigger";
+})(OptionWidthMode || (OptionWidthMode = {}));

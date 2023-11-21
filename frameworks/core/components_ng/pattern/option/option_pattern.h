@@ -79,6 +79,11 @@ public:
         icon_ = icon;
     }
 
+    void SetPasteButton(const RefPtr<FrameNode>& pasteButton)
+    {
+        pasteButton_ = pasteButton;
+    }
+
     void SetBgColor(const Color& color);
     // set font props
     void SetFontSize(const Dimension& value);
@@ -99,6 +104,8 @@ public:
 
     // XTS inspector functions
     std::string InspectorGetFont();
+
+    float GetSelectOptionWidth();
 
     void SetIcon(const std::string& src)
     {
@@ -151,6 +158,36 @@ public:
     {
         return menuWeak_;
     }
+    
+    void SetIsWidthModifiedBySelect(bool isModified)
+    {
+        isWidthModifiedBySelect_ = isModified;
+    }
+    
+    bool IsWidthModifiedBySelect() const
+    {
+        return isWidthModifiedBySelect_;
+    }
+    
+    void SetIsHeightModifiedBySelect(bool isModified)
+    {
+        isHeightModifiedBySelect_ = isModified;
+    }
+    
+    bool IsHeightModifiedBySelect() const
+    {
+        return isHeightModifiedBySelect_;
+    }
+    
+    void SetIsSelectOption(bool isSelect)
+    {
+        isSelectOption_ = isSelect;
+    }
+    
+    bool IsSelectOption() const
+    {
+        return isSelectOption_;
+    }
 
 private:
     void OnAttachToFrameNode() override;
@@ -175,6 +212,7 @@ private:
 
     void OnSelectProcess();
     void SetAccessibilityAction();
+    void UpdatePasteFontColor(const Color& fontColor);
 
     std::optional<Color> bgColor_;
 
@@ -183,6 +221,7 @@ private:
     WeakPtr<FrameNode> menuWeak_;
     RefPtr<FrameNode> text_;
     RefPtr<FrameNode> icon_;
+    RefPtr<FrameNode> pasteButton_;
     RefPtr<TextTheme> textTheme_;
     RefPtr<SelectTheme> selectTheme_;
     // this option node's index in the menu
@@ -190,6 +229,9 @@ private:
 
     Color bgBlendColor_ = Color::TRANSPARENT;
     bool isHover_ = false;
+    bool isWidthModifiedBySelect_ = false;
+    bool isHeightModifiedBySelect_ = false;
+    bool isSelectOption_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPattern);
 };

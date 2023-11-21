@@ -86,6 +86,11 @@ struct NestedScrollOptions {
     {
         return forward != NestedScrollMode::SELF_ONLY || backward != NestedScrollMode::SELF_ONLY;
     }
+
+    bool NeedParent(bool forward) const
+    {
+        return forward ? this->forward != NestedScrollMode::SELF_ONLY : backward != NestedScrollMode::SELF_ONLY;
+    }
 };
 
 constexpr int32_t SCROLL_FROM_NONE = 0;

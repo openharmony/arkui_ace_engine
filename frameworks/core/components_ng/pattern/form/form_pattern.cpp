@@ -34,6 +34,8 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include "form_constants.h"
+
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/udmf_client.h"
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -42,6 +44,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT = 10000;
+constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -113,6 +116,8 @@ void FormPattern::OnAttachToFrameNode()
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gestureEventHub->AddClickEvent(clickEvent);
     scopeId_ = Container::CurrentId();
+
+    RegistVisibleAreaChangeCallback();
 }
 
 void FormPattern::HandleUnTrustForm()
@@ -395,6 +400,12 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             return false;
         }
         cardInfo_ = info;
+        if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)) {
+            BorderRadiusProperty borderRadius;
+            Dimension diameter = std::min(info.width, info.height);
+            borderRadius.SetRadius(diameter / ARC_RADIUS_TO_DIAMETER);
+            host->GetRenderContext()->UpdateBorderRadius(borderRadius);
+        }
     } else {
         // for update form component
         if (cardInfo_.allowUpdate != info.allowUpdate) {
@@ -412,6 +423,12 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         if (cardInfo_.width != info.width || cardInfo_.height != info.height) {
             cardInfo_.width = info.width;
             cardInfo_.height = info.height;
+            if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)) {
+                BorderRadiusProperty borderRadius;
+                Dimension diameter = std::min(info.width, info.height);
+                borderRadius.SetRadius(diameter / ARC_RADIUS_TO_DIAMETER);
+                host->GetRenderContext()->UpdateBorderRadius(borderRadius);
+            }
             if (subContainer_) {
                 subContainer_->SetFormPattern(WeakClaim(this));
                 subContainer_->UpdateRootElementSize();
@@ -954,6 +971,29 @@ void FormPattern::UpdateConfiguration()
     if (localeTag != localeTag_ && subContainer_) {
         localeTag_ = localeTag;
         subContainer_->UpdateConfiguration();
+    }
+}
+
+void FormPattern::OnVisibleAreaChange(bool visible)
+{
+    CHECK_NULL_VOID(formManagerBridge_);
+    formManagerBridge_->SetVisibleChange(visible);
+}
+
+void FormPattern::RegistVisibleAreaChangeCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!isRegistedAreaCallback_) {
+        isRegistedAreaCallback_ = true;
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+            auto formPattern = weak.Upgrade();
+            CHECK_NULL_VOID(formPattern);
+            formPattern->OnVisibleAreaChange(visible);
+        };
+        pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
     }
 }
 } // namespace OHOS::Ace::NG

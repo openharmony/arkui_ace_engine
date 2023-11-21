@@ -64,6 +64,7 @@ constexpr char EVENT_KEY_MAX_FRAMETIME[] = "MAX_FRAMETIME";
 constexpr char EVENT_KEY_MAX_SEQ_MISSED_FRAMES[] = "MAX_SEQ_MISSED_FRAMES";
 constexpr char EVENT_KEY_SOURCE_TYPE[] = "SOURCE_TYPE";
 constexpr char EVENT_KEY_NOTE[] = "NOTE";
+constexpr char EVENT_KEY_DISPLAY_ANIMATOR[] = "DISPLAY_ANIMATOR";
 constexpr char EVENT_KEY_SKIPPED_FRAME_TIME[] = "SKIPPED_FRAME_TIME";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
@@ -337,7 +338,7 @@ void EventReport::ReportEventComplete(DataBase& data)
         EVENT_KEY_ANIMATION_END_LATENCY, static_cast<uint64_t>(animationEndLantency),
         EVENT_KEY_E2E_LATENCY, static_cast<uint64_t>(e2eLatency),
         EVENT_KEY_NOTE, note);
-    ACE_SCOPED_TRACE("INTERACTION_COMPLETED_LATENCY: inputTime(ms)=%lld, e2eLatency(ms)=%lld",
+    ACE_SCOPED_TRACE("INTERACTION_COMPLETED_LATENCY: inputTime=%lld(ms), e2eLatency=%lld(ms)",
         static_cast<long long>(inputTime), static_cast<long long>(e2eLatency));
 }
 
@@ -360,6 +361,7 @@ void EventReport::ReportEventJankFrame(DataBase& data)
     const auto& maxFrameTime = data.maxFrameTime / NS_TO_MS;
     const auto& maxSeqMissedFrames = data.maxSuccessiveFrames;
     const auto& note = data.baseInfo.note;
+    const auto& isDisplayAnimator = data.isDisplayAnimator;
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_UNIQUE_ID, static_cast<int32_t>(uniqueId),
@@ -376,8 +378,9 @@ void EventReport::ReportEventJankFrame(DataBase& data)
         EVENT_KEY_TOTAL_MISSED_FRAMES, totalMissedFrames,
         EVENT_KEY_MAX_FRAMETIME, static_cast<uint64_t>(maxFrameTime),
         EVENT_KEY_MAX_SEQ_MISSED_FRAMES, maxSeqMissedFrames,
-        EVENT_KEY_NOTE, note);
-    ACE_SCOPED_TRACE("INTERACTION_APP_JANK: inputTime(ms)=%lld, maxFrameTime(ms)=%lld",
+        EVENT_KEY_NOTE, note,
+        EVENT_KEY_DISPLAY_ANIMATOR, isDisplayAnimator);
+    ACE_SCOPED_TRACE("INTERACTION_APP_JANK: inputTime=%lld(ms), maxFrameTime=%lld(ms)",
         static_cast<long long>(startTime), static_cast<long long>(maxFrameTime));
 }
 
@@ -400,6 +403,6 @@ void EventReport::ReportJankFrameApp(JankInfo& info)
         EVENT_KEY_VERSION_CODE, versionCode,
         EVENT_KEY_VERSION_NAME, versionName,
         EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
-    ACE_SCOPED_TRACE("JANK_FRAME_APP: skipppedFrameTime(ms)=%lld", static_cast<long long>(skippedFrameTime / NS_TO_MS));
+    ACE_SCOPED_TRACE("JANK_FRAME_APP: skipppedFrameTime=%lld(ms)", static_cast<long long>(skippedFrameTime / NS_TO_MS));
 }
 } // namespace OHOS::Ace

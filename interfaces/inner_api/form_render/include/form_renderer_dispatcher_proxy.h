@@ -39,6 +39,7 @@ public:
 
     void DispatchSurfaceChangeEvent(float width, float height) override;
 
+    void SetVisibleChange(bool isVisible) override;
 private:
     template<typename T>
     int32_t GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);

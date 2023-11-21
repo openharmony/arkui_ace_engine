@@ -35,6 +35,7 @@ void TextFieldModelNG::CreateNode(
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", isTextArea ? V2::TEXTAREA_ETS_TAG : V2::TEXTINPUT_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(isTextArea ? V2::TEXTAREA_ETS_TAG : V2::TEXTINPUT_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     stack->Push(frameNode);
@@ -81,9 +82,14 @@ void TextFieldModelNG::CreateNode(
     AddDragFrameNodeToManager();
     PaddingProperty paddings;
     ProcessDefaultPadding(paddings);
-    auto draggable = pipeline->GetDraggable<TextFieldTheme>();
-    SetDraggable(draggable);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, paddings);
+    if (frameNode->IsFirstBuilding()) {
+        auto draggable = pipeline->GetDraggable<TextFieldTheme>();
+        SetDraggable(draggable);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetTextDraggable(true);
+    }
 }
 
 void TextFieldModelNG::SetDraggable(bool draggable)
@@ -122,6 +128,13 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
+    auto focusHub = pattern->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
+    focusHub->SetFocusType(FocusType::NODE);
+    focusHub->SetFocusStyleType(FocusStyleType::CUSTOM_REGION);
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    pipeline->SetIsFocusActive(true);
     return pattern->GetTextFieldController();
 };
 
@@ -552,5 +565,45 @@ void TextFieldModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc
     if (pattern) {
         pattern->SetCustomKeyboard(std::move(buildFunc));
     }
+}
+
+void TextFieldModelNG::SetPasswordRules(const std::string& passwordRules)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PasswordRules, passwordRules);
+}
+
+void TextFieldModelNG::SetEnableAutoFill(bool enableAutoFill)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoFill, enableAutoFill);
+}
+
+void TextFieldModelNG::SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCleanNodeStyle(cleanNodeStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CleanNodeStyle, cleanNodeStyle);
+}
+
+void TextFieldModelNG::SetCancelIconSize(const CalcDimension& iconSize)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, iconSize);
+}
+
+void TextFieldModelNG::SetCanacelIconSrc(const std::string& iconSrc)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, iconSrc);
+}
+
+void TextFieldModelNG::SetCancelIconColor(const Color& iconColor)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, iconColor);
+}
+
+void TextFieldModelNG::SetSelectAllValue(bool isSelectAllValue)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue);
 }
 } // namespace OHOS::Ace::NG

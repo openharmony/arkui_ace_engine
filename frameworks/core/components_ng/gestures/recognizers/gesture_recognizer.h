@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/event/gesture_info.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"
@@ -27,7 +28,23 @@
 
 namespace OHOS::Ace::NG {
 
+struct DelayedTask {
+    WeakPtr<NGGestureRecognizer> recognizer;
+    int64_t timeStamp = 0;
+    int32_t time = 0;
+    std::function<void()> task;
+};
+
 enum class RefereeState { READY, DETECTING, PENDING, PENDING_BLOCKED, SUCCEED_BLOCKED, SUCCEED, FAIL };
+
+inline std::string TransRefereeState(RefereeState state)
+{
+    const char *str[] = { "READY", "DETECTING", "PENDING", "PENDING_BLOCKED", "SUCCEED_BLOCKED", "SUCCEED", "FAIL" };
+    if (state >= RefereeState::READY && state <= RefereeState::FAIL) {
+        return str[static_cast<int32_t>(state)];
+    }
+    return std::string("State:").append(std::to_string(static_cast<int32_t>(state)));
+}
 
 class FrameNode;
 
@@ -189,6 +206,7 @@ public:
             OnSucceedCancel();
         }
         refereeState_ = RefereeState::READY;
+        disposal_ = GestureDisposal::NONE;
         OnResetStatus();
     }
 
@@ -214,6 +232,33 @@ public:
     }
 
     void SetTransInfo(int id);
+
+    virtual RefPtr<GestureSnapshot> Dump() const override;
+
+    // for recognizer
+    void AddGestureProcedure(const std::string& procedure) const;
+    // for recognizer group
+    void AddGestureProcedure(const TouchEvent& point, const RefPtr<NGGestureRecognizer>& recognizer) const;
+
+    void SetGestureInfo(const RefPtr<GestureInfo>& gestureInfo)
+    {
+        gestureInfo_ = gestureInfo;
+    }
+
+    RefPtr<GestureInfo> GetGestureInfo()
+    {
+        return gestureInfo_;
+    }
+
+    void SetIsSystemGesture(bool isSystemGesture)
+    {
+        if (gestureInfo_) {
+            gestureInfo_->SetIsSystemGesture(isSystemGesture);
+        } else {
+            gestureInfo_ = MakeRefPtr<GestureInfo>(isSystemGesture);
+        }
+    }
+
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -261,6 +306,8 @@ protected:
     int32_t transId_ = 0;
 
     int32_t currentFingers_ = 0;
+    RefPtr<GestureInfo> gestureInfo_;
+
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
 };

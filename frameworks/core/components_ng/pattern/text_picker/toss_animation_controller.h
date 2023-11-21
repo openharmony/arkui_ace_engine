@@ -47,18 +47,36 @@ public:
 
     bool Play();
 
+    RefPtr<NodeAnimatablePropertyFloat> GetTossNodeAnimation() const
+    {
+        return property_;
+    }
+
+    void StartSpringMotion();
+
+    RefPtr<Curve> UpdatePlayAnimationValue();
+
+    void StopTossAnimation();
+
+    double GetTossEndPosition() const
+    {
+        return end_;
+    }
+
 private:
     double GetCurrentTime() const;
+    void CreatePropertyCallback();
 
     double yStart_ = 0.0;
     double yEnd_ = 0.0;
     double timeStart_ = 0.0;
     double timeEnd_ = 0.0;
     double speed_ = 0.0;
-
-    RefPtr<PickerAnimation> toss_;
+    int32_t showCount_ = 0;
+    double end_ = 0.0;
     WeakPtr<TextPickerColumnPattern> column_;
     WeakPtr<PipelineContext> pipeline_;
+    RefPtr<NodeAnimatablePropertyFloat> property_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerTossAnimationController);
 };

@@ -31,7 +31,6 @@
 #include "base/utils/type_definition.h"
 #include "core/event/ace_events.h"
 #include "core/gestures/velocity.h"
-#include "core/gestures/velocity_tracker.h"
 
 namespace OHOS::Ace {
 
@@ -246,9 +245,6 @@ struct FingerInfo {
     SourceType sourceType_ = SourceType::NONE;
     SourceTool sourceTool_ = SourceTool::UNKNOWN;
 };
-
-
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_GESTURE_INFO_H

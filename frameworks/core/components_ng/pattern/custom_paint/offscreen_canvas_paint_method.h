@@ -58,6 +58,10 @@ public:
     {
         return isSucceed_;
     }
+    size_t GetBitmapSize()
+    {
+        return bitmapSize_;
+    }
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
@@ -99,6 +103,7 @@ private:
     int32_t width_;
     int32_t height_;
     bool isSucceed_ = true;
+    size_t bitmapSize_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

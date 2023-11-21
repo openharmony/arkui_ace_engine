@@ -28,6 +28,8 @@ bool Frontend::MaybeRelease()
     return AceType::MaybeRelease();
 }
 
+Frontend::~Frontend() = default;
+
 int32_t Container::CurrentId()
 {
     return g_id;

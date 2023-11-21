@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/ui_node.h"
@@ -45,6 +46,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
+constexpr Dimension MIN_SELECT_MENU_WIDTH = 64.0_vp;
+constexpr int32_t COLUMN_NUM = 2;
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
@@ -156,6 +159,19 @@ void MenuPattern::OnAttachToFrameNode()
     RegisterOnKeyEvent(focusHub);
     DisableTabInMenu();
     InitTheme(host);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    pipelineContext->AddOnAreaChangeNode(targetNode->GetId());
+    OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
+                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
+                                              const OffsetF& /* origin */) {
+        auto menuNode = menuNodeWk.Upgrade();
+        CHECK_NULL_VOID(menuNode);
+        menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    targetNode->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
 }
 
 void MenuPattern::OnModifyDone()
@@ -171,6 +187,9 @@ void MenuPattern::OnModifyDone()
     } else if (innerMenuCount > 1) {
         // multiple inner menus, reset outer container's shadow for desktop UX
         ResetTheme(host, true);
+    }
+    if (IsSelectOverlayCustomMenu()) {
+        ResetScrollTheme(host);
     }
     auto menuFirstNode = GetFirstInnerMenu();
     if (menuFirstNode) {
@@ -582,6 +601,15 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
     scrollProp->UpdatePadding(PaddingProperty());
 }
 
+void MenuPattern::ResetScrollTheme(const RefPtr<FrameNode>& host)
+{
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(scroll);
+    scroll->GetRenderContext()->UpdateClipEdge(false);
+}
+
 void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
 {
     auto renderContext = host->GetRenderContext();
@@ -743,7 +771,7 @@ void MenuPattern::ShowPreviewMenuAnimation()
                 renderContext->UpdatePosition(
                     OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
             }
-            
+
             if (previewRenderContext) {
                 previewRenderContext->UpdatePosition(
                     OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
@@ -942,5 +970,30 @@ void MenuPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(
         std::string("MenuType: ").append(std::to_string(static_cast<int32_t>(GetMenuType()))));
+}
+
+float MenuPattern::GetSelectMenuWidth()
+{
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    CHECK_NULL_RETURN(columnInfo, MIN_SELECT_MENU_WIDTH.ConvertToPx());
+    auto parent = columnInfo->GetParent();
+    CHECK_NULL_RETURN(parent, MIN_SELECT_MENU_WIDTH.ConvertToPx());
+    parent->BuildColumnWidth();
+    auto defaultWidth = static_cast<float>(columnInfo->GetWidth(COLUMN_NUM));
+    float finalWidth = MIN_SELECT_MENU_WIDTH.ConvertToPx();
+    
+    if (IsWidthModifiedBySelect()) {
+        auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
+        auto selectmodifiedwidth = menuLayoutProperty->GetSelectMenuModifiedWidth();
+        finalWidth = selectmodifiedwidth.value();
+    } else {
+        finalWidth = defaultWidth;
+    }
+    
+    if (finalWidth < MIN_SELECT_MENU_WIDTH.ConvertToPx()) {
+        finalWidth = defaultWidth;
+    }
+    
+    return finalWidth;
 }
 } // namespace OHOS::Ace::NG

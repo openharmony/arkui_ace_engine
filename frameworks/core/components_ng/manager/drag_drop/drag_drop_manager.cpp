@@ -182,14 +182,15 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     if (parentFrameNode && (!parentFrameNode->IsActive() || !parentFrameNode->IsVisible())) {
         return nullptr;
     }
-    auto children = parentNode->GetChildren();
+    auto children = parentFrameNode->GetFrameChildren();
 
     for (auto iter = children.rbegin(); iter != children.rend(); iter++) {
-        auto child = *iter;
+        auto child = iter->Upgrade();
         if (child == nullptr) {
             continue;
         }
-        auto childFindResult = FindTargetInChildNodes(child, hitFrameNodes, findDrop);
+        auto childNode = AceType::DynamicCast<UINode>(child);
+        auto childFindResult = FindTargetInChildNodes(childNode, hitFrameNodes, findDrop);
         if (childFindResult) {
             return childFindResult;
         }
@@ -569,14 +570,18 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
 #ifdef ENABLE_DRAG_FRAMEWORK
 void DragDropManager::RequireSummary()
 {
-    std::string udKey;
-    InteractionInterface::GetInstance()->GetUdKey(udKey);
     std::map<std::string, int64_t> summary;
-    int32_t ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
+    int32_t ret = InteractionInterface::GetInstance()->GetDragSummary(summary);
     if (ret != 0) {
-        LOGW("OnDragStart: UDMF GetSummary failed: %{public}d", ret);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "RequireSummary: Interaction GetSummary failed: %{public}d", ret);
+    }
+    std::string extraInfo;
+    ret = InteractionInterface::GetInstance()->GetDragExtraInfo(extraInfo);
+    if (ret != 0) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "GetExtraInfo: Interaction GetExtraInfo failed: %{public}d", ret);
     }
     previewRect_ = Rect(-1, -1, -1, -1);
+    extraInfo_ = extraInfo;
     summaryMap_ = summary;
 }
 
@@ -914,9 +919,6 @@ void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
     if (clipboard_) {
         clipboard_->GetData(addDataCallback_, true);
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
-    extraInfo_ = extraInfo;
-#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void DragDropManager::GetExtraInfoFromClipboard(std::string& extraInfo)
@@ -961,14 +963,7 @@ void DragDropManager::RestoreClipboardData()
             CHECK_NULL_VOID(dragDropManager);
             auto json = JsonUtil::ParseJsonString(data);
             if (json->Contains("preData")) {
-                auto preData = json->GetString("preData");
-#ifdef ENABLE_DRAG_FRAMEWORK
-                if (!preData.empty()) {
-                    dragDropManager->clipboard_->SetData(preData);
-                }
-#else
                 dragDropManager->clipboard_->SetData(json->GetString("preData"));
-#endif // ENABLE_DRAG_FRAMEWORK
             }
         };
         deleteDataCallback_ = callback;
@@ -1106,6 +1101,13 @@ void DragDropManager::SetExtraInfo(const std::string& extraInfo)
 void DragDropManager::ClearExtraInfo()
 {
     extraInfo_.clear();
+}
+
+bool DragDropManager::IsMsdpDragging() const
+{
+    DragState dragState;
+    InteractionInterface::GetInstance()->GetDragState(dragState);
+    return dragState == DragState::START;
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 

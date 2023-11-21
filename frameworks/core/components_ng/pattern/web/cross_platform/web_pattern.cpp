@@ -1464,10 +1464,10 @@ bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     auto viewScale = context->GetViewScale();
-    if (info.GetTouches().empty()) {
+    if (info.GetChangedTouches().empty()) {
         return false;
     }
-    for (const auto& point : info.GetTouches()) {
+    for (const auto& point : info.GetChangedTouches()) {
         TouchInfo touchInfo;
         touchInfo.id = point.GetFingerId();
         const Offset& location = point.GetLocalLocation();
@@ -1609,5 +1609,25 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
+}
+
+void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::UpdateJavaScriptOnDocumentStart()
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnOverScrollModeUpdate(int mode)
+{
+   // cross platform is not support now;
 }
 } // namespace OHOS::Ace::NG

@@ -31,7 +31,6 @@ class ACE_EXPORT CustomNode : public UINode, public CustomNodeBase {
 
 public:
     static RefPtr<CustomNode> CreateCustomNode(int32_t nodeId, const std::string& viewKey);
-    static void FlushDelayJsActive();
 
     CustomNode(int32_t nodeId, const std::string& viewKey);
     ~CustomNode() override = default;
@@ -81,11 +80,22 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
     void SetJSViewActive(bool active) override;
 
+    bool GetJsActive()
+    {
+        return prevJsActive_;
+    }
+
+    void SetJsActive(bool active)
+    {
+        prevJsActive_ = active;
+    }
+
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;
     RenderFunction completeReloadFunc_;
     bool needMarkParent_ = true;
+    bool prevJsActive_ = true;
 };
 } // namespace OHOS::Ace::NG
 

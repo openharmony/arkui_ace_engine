@@ -35,7 +35,13 @@ public:
         int32_t fingers, bool repeat, int32_t duration, bool isForDrag = false, bool isDisableMouseLeft = false)
         : Gesture(fingers), repeat_(repeat), duration_(duration), isForDrag_(isForDrag),
           isDisableMouseLeft_(isDisableMouseLeft)
-    {}
+    {
+        if (gestureInfo_) {
+            gestureInfo_->SetType(GestureTypeName::LONG_PRESS_GESTURE);
+        } else {
+            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::LONG_PRESS_GESTURE);
+        }
+    }
     ~LongPressGesture() override = default;
 
 protected:

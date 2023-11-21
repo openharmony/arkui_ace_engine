@@ -1,0 +1,147 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_modifier.h"
+
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/pipeline/base/element_register.h"
+#include "frameworks/core/components/common/properties/text_style.h"
+#include "frameworks/core/components_ng/pattern/text/text_model_ng.h"
+#include "frameworks/core/components/common/layout/constants.h"
+namespace OHOS::Ace::NG {
+namespace {
+constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
+constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
+const std::vector<OHOS::Ace::TextAlign> TEXT_ALIGNS = { OHOS::Ace::TextAlign::START, OHOS::Ace::TextAlign::CENTER,
+    OHOS::Ace::TextAlign::END, OHOS::Ace::TextAlign::JUSTIFY, OHOS::Ace::TextAlign::LEFT, OHOS::Ace::TextAlign::RIGHT };
+
+FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
+{
+    std::string weightStr(weight);
+    return StringUtils::StringToFontWeight(weightStr, defaultFontWeight);
+}
+
+uint32_t ColorAlphaAdapt(uint32_t origin)
+{
+    uint32_t result = origin;
+    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
+        result = origin | COLOR_ALPHA_VALUE;
+    }
+    return result;
+}
+} // namespace
+void SetFontWeight(NodeHandle node, const char* weight)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetFontWeight(frameNode, ConvertStrToFontWeight(weight));
+}
+
+void ResetFontWeight(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetFontWeight(frameNode, Ace::FontWeight::NORMAL);
+}
+
+void SetFontStyle(NodeHandle node, uint32_t fontStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (fontStyle < 0 || fontStyle >= FONT_STYLES.size()) {
+        return;
+    }
+    TextModelNG::SetItalicFontStyle(frameNode, FONT_STYLES[fontStyle]);
+}
+
+void ResetFontStyle(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+}
+
+void SetTextAlign(NodeHandle node, uint32_t testAlign)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (testAlign < 0 || testAlign >= TEXT_ALIGNS.size()) {
+        return;
+    }
+    TextModelNG::SetTextAlign(frameNode, TEXT_ALIGNS[testAlign]);
+}
+
+void ResetTextAlign(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+}
+void SetFontColor(NodeHandle node, uint32_t color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextColor(frameNode, Color(ColorAlphaAdapt(color)));
+}
+void ResetFontColor(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color textColor;
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    textColor = theme->GetTextStyle().GetTextColor();
+    TextModelNG::SetTextColor(frameNode, textColor);
+}
+void SetFontSize(NodeHandle node,  double fontSize, int unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+
+    if (fontSize < 0 || unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC ||
+        unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+        TextModelNG::SetFontSize(frameNode, fontSize);
+    } else {
+        TextModelNG::SetFontSize(frameNode, Dimension(fontSize, static_cast<OHOS::Ace::DimensionUnit>(unit)));
+    }
+}
+void ResetFontSize(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    TextModelNG::SetFontSize(frameNode, fontSize);
+}
+
+ArkUITextModifierAPI GetTextModifier()
+{
+    static const ArkUITextModifierAPI modifier = { SetFontWeight, ResetFontWeight, SetFontStyle, ResetFontStyle,
+        SetTextAlign, ResetTextAlign, SetFontColor, ResetFontColor, SetFontSize, ResetFontSize };
+
+    return modifier;
+}
+} // namespace OHOS::Ace::NG

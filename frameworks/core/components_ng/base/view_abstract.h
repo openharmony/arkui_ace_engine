@@ -138,10 +138,10 @@ public:
     static void SetBackgroundAlign(const Alignment& align);
 
     // decoration
-    static void SetBackdropBlur(const Dimension& radius);
+    static void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption);
     static void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara);
     static void SetDynamicLightUp(float rate, float lightUpDegree);
-    static void SetFrontBlur(const Dimension& radius);
+    static void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption);
     static void SetBackShadow(const Shadow& shadow);
     static void SetBlendMode(BlendMode blendMode);
 
@@ -151,7 +151,7 @@ public:
     static void SetContrast(const Dimension& value);
     static void SetSaturate(const Dimension& value);
     static void SetSepia(const Dimension& value);
-    static void SetInvert(const Dimension& value);
+    static void SetInvert(const InvertVariant& value);
     static void SetHueRotate(float value);
     static void SetColorBlend(const Color& value);
 
@@ -189,6 +189,7 @@ public:
 
     // event
     static void SetOnClick(GestureEventFunc&& clickEventFunc);
+    static void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
     static void SetOnTouch(TouchEventFunc&& touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
     static void SetOnHover(OnHoverFunc&& onHoverEventFunc);
@@ -288,6 +289,9 @@ public:
     // useEffect
     static void SetUseEffect(bool useEffect);
 
+    // useShadowBatching
+    static void SetUseShadowBatching(bool useShadowBatching);
+
     // foregroundColor
     static void SetForegroundColor(const Color& color);
     static void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy);
@@ -324,7 +328,7 @@ public:
     static void SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode);
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
-
+    static void SetAlign(FrameNode* frameNode, Alignment alignment);
     // global light
     static void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);

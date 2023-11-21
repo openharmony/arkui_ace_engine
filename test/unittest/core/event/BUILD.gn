@@ -1,0 +1,113 @@
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+
+ace_unittest("event_manager_test_ng") {
+  type = "new"
+  flutter_skia = true
+  render = true
+  sources = [
+    "$ace_root/frameworks/core/common/event_manager.cpp",
+    "$ace_root/frameworks/core/event/key_event.cpp",
+    "$ace_root/frameworks/core/event/mouse_event.cpp",
+    "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
+    "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
+    "$ace_root/test/mock/core/common/mock_window.cpp",
+    "event_manager_test_ng.cpp",
+  ]
+}
+
+ace_unittest("click_event_test_ng") {
+  module_output = "events"
+  type = "new"
+  sources = [ "click_event_test_ng.cpp" ]
+}
+
+ace_unittest("drag_event_test_ng") {
+  type = "new"
+  module_output = "events"
+  sources = [ "drag_event_test_ng.cpp" ]
+}
+
+ace_unittest("event_hub_test_ng") {
+  type = "new"
+  module_output = "events"
+  sources = [ "event_hub_test_ng.cpp" ]
+}
+
+ace_unittest("focus_hub_test_ng") {
+  type = "new"
+  module_output = "events"
+  sources = [ "focus_hub_test_ng.cpp" ]
+}
+
+ace_unittest("gesture_event_hub_test_ng") {
+  type = "new"
+  module_output = "events"
+  sources = [ "gesture_event_hub_test_ng.cpp" ]
+}
+
+ace_unittest("input_event_hub_test_ng") {
+  type = "new"
+  module_output = "events"
+  sources = [ "input_event_hub_test_ng.cpp" ]
+}
+
+ace_unittest("long_press_event_test_ng") {
+  module_output = "events"
+  type = "new"
+  sources = [ "long_press_event_test_ng.cpp" ]
+}
+
+ace_unittest("pan_event_test_ng") {
+  type = "new"
+  module_output = "events"
+  sources = [ "pan_event_test_ng.cpp" ]
+}
+
+ace_unittest("scrollable_event_test_ng") {
+  type = "new"
+  module_output = "events"
+  sources = [ "scrollable_event_test_ng.cpp" ]
+}
+
+ace_unittest("state_style_test_ng") {
+  type = "new"
+  module_output = "events"
+  sources = [ "state_style_manager_test_ng.cpp" ]
+}
+
+ace_unittest("touch_event_test_ng") {
+  type = "new"
+  module_output = "events"
+  sources = [ "touch_event_test_ng.cpp" ]
+}
+
+group("core_event_unittest") {
+  testonly = true
+  deps = [
+    ":click_event_test_ng",
+    ":drag_event_test_ng",
+    ":event_hub_test_ng",
+    ":event_manager_test_ng",
+    ":focus_hub_test_ng",
+    ":gesture_event_hub_test_ng",
+    ":input_event_hub_test_ng",
+    ":long_press_event_test_ng",
+    ":pan_event_test_ng",
+    ":scrollable_event_test_ng",
+    ":state_style_test_ng",
+    ":touch_event_test_ng",
+  ]
+}

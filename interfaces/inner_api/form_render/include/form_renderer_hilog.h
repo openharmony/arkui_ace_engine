@@ -41,7 +41,7 @@
 #endif
 
 #ifndef FR_LOG_DOMAIN
-#define FR_LOG_DOMAIN 0xD003900
+#define FR_LOG_DOMAIN 0xD0039FF
 #endif
 
 #ifndef FR_LOG_TAG

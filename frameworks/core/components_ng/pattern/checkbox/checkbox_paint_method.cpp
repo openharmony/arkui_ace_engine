@@ -65,6 +65,7 @@ CheckBoxModifier::CheckBoxModifier(
     offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
     size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
     enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
+    checkBoxShape_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(CheckBoxStyle::CIRCULAR_STYLE));
 
     AttachProperty(animatableBoardColor_);
     AttachProperty(animatableCheckColor_);
@@ -77,6 +78,7 @@ CheckBoxModifier::CheckBoxModifier(
     AttachProperty(offset_);
     AttachProperty(size_);
     AttachProperty(enabled_);
+    AttachProperty(checkBoxShape_);
 }
 
 void CheckBoxModifier::InitializeParam()
@@ -95,8 +97,8 @@ void CheckBoxModifier::InitializeParam()
     clickEffectColor_ = checkBoxTheme->GetClickEffectColor();
     hoverColor_ = checkBoxTheme->GetHoverColor();
     hoverRadius_ = checkBoxTheme->GetHoverRadius();
-    hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
-    hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
+    hotZoneHorizontalPadding_ = checkBoxTheme->GetCheckboxHotZonePadding();
+    hotZoneVerticalPadding_ = hotZoneHorizontalPadding_;
     shadowWidth_ = checkBoxTheme->GetShadowWidth();
     userActiveColor_ = activeColor_;
     hoverDuration_ = checkBoxTheme->GetHoverDuration();
@@ -144,7 +146,8 @@ void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& siz
     float endY = size.Height() + originY + CHECKBOX_DOUBLE_RATIO * hotZoneVerticalPadding_.ConvertToPx();
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
-    if (HoverEffectType::NONE != hoverEffectType_ || TouchHoverAnimationType::PRESS == touchHoverType_) {
+    if (HoverEffectType::NONE != hoverEffectType_ || TouchHoverAnimationType::PRESS == touchHoverType_ || 
+        (TouchHoverAnimationType::HOVER != touchHoverType_ && TouchHoverAnimationType::NONE != touchHoverType_)) {
         if (CheckBoxStyle::SQUARE_STYLE == checkBoxStyle_) {
             canvas.DrawRoundRect(rrect);
         } else {

@@ -22,7 +22,7 @@
 #include "bridge/card_frontend/card_frontend_declarative.h"
 #undef private
 #undef protected
-#include "base/test/mock/mock_task_executor.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "bridge/common/utils/utils.h"
 
 using namespace testing;

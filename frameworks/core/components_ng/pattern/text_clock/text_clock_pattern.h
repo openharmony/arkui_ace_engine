@@ -73,17 +73,22 @@ public:
         return textId_.value();
     }
 
+    void OnVisibleChange(bool isVisible) override;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void InitTextClockController();
-    void UpdateTimeTextCallBack();
 
     void InitUpdateTimeTextCallBack();
     void UpdateTimeText();
     void RequestUpdateForNextSecond();
     void FireChangeEvent() const;
     std::string GetCurrentFormatDateTime();
+    void RegistVisibleAreaChangeCallback();
+    void OnVisibleAreaChange(bool visible);
+    void OnFormVisibleChange(bool visible);
     static void UpdateTextLayoutProperty(
         RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     std::vector<std::string> ParseInputFormat(
@@ -103,11 +108,14 @@ private:
     RefPtr<FrameNode> GetTextNode();
 
     RefPtr<TextClockController> textClockController_;
-    TimeCallback timeCallback_;
     bool isStart_ = true;
     int32_t hourWest_ = 0;
     std::optional<int32_t> textId_;
+    bool isSetVisible_ = true;
+    bool isInVisibleArea_ = true;
+    bool isFormVisible_ = true;
     bool isForm_ = false;
+    std::string prevTime_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextClockPattern);
 };

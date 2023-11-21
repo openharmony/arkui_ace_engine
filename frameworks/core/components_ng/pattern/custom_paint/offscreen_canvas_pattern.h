@@ -114,6 +114,7 @@ public:
 
     bool IsSucceed();
 
+    size_t GetBitmapSize();
 private:
     RefPtr<OffscreenCanvasPaintMethod> offscreenPaintMethod_;
     ACE_DISALLOW_COPY_AND_MOVE(OffscreenCanvasPattern);

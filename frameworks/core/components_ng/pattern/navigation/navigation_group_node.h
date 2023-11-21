@@ -110,7 +110,6 @@ public:
     void SetBackButtonEvent(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<NavRouterPattern>& navRouterPattern = nullptr);
     void AddBackButtonIconToNavDestination(const RefPtr<UINode>& navDestinationNode);
-    void SetBackButtonVisible(const RefPtr<UINode>& navDestinationNode, bool isVisible = true);
 
     void ExitTransitionWithPop(const RefPtr<FrameNode>& node);
     void ExitTransitionWithPush(const RefPtr<FrameNode>& node, bool isNavBar = false);
@@ -119,6 +118,8 @@ public:
     void BackButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
     void MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
     void TitleOpacityAnimationOut(const RefPtr<RenderContext>& transitionOutNodeContext);
+    void TransitionWithReplace(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar);
+    void DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBar);
 
 private:
     RefPtr<UINode> navBarNode_;

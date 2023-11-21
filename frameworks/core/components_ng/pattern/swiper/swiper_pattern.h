@@ -25,6 +25,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -511,7 +512,7 @@ private:
     void HandleDragEnd(double dragVelocity);
 
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchDown(const TouchEventInfo& info);
+    void HandleTouchDown(const TouchLocationInfo& locationInfo);
     void HandleTouchUp();
 
     void HandleMouseEvent(const MouseInfo& info);
@@ -521,7 +522,8 @@ private:
     void PlayFadeAnimation();
 
     // use property animation feature
-    void PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity = 0.0f);
+    void PlayPropertyTranslateAnimation(
+        float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
     void StopPropertyTranslateAnimation(bool isBeforeCreateLayoutWrapper = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -534,6 +536,7 @@ private:
     void StopFadeAnimation();
 
     bool IsOutOfBoundary(float mainOffset = 0.0f) const;
+    bool AutoLinearIsOutOfBoundary(float mainOffset) const;
     float GetDistanceToEdge() const;
     float MainSize() const;
     float GetMainContentSize() const;
@@ -591,7 +594,7 @@ private:
     void SetLazyLoadFeature(bool useLazyLoad) const;
     void SetLazyForEachLongPredict(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
-    int32_t ComputeNextIndexByVelocity(float velocity) const;
+    int32_t ComputeNextIndexByVelocity(float velocity, bool onlyDistance = false) const;
     void UpdateCurrentIndex(int32_t index);
     void OnSpringAnimationStart(float velocity);
     void OnSpringAndFadeAnimationFinish();
@@ -604,6 +607,10 @@ private:
     void MarkDirtyNodeSelf();
     void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
     int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
+    bool IsAutoLinear() const;
+    bool AutoLinearAnimationNeedReset(float translate) const;
+    void OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPlay);
+    void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
 
     /**
      * @brief Checks if the animation is currently running.

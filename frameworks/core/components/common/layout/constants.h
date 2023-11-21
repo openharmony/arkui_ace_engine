@@ -188,6 +188,13 @@ enum class TextAlign {
     END = 2,
 };
 
+enum class TextDataDetectType {
+    PHONE_NUMBER = 0,
+    URL,
+    EMAIL,
+    ADDRESS,
+};
+
 enum class WhiteSpace {
     NORMAL,
     PRE,
@@ -613,6 +620,22 @@ enum class TabBarStyle {
     BOTTOMTABBATSTYLE,
 };
 
+enum class GestureJudgeResult {
+    CONTINUE = 0,
+    REJECT = 1,
+};
+
+enum class GestureTypeName {
+    TAP_GESTURE = 0,
+    LONG_PRESS_GESTURE = 1,
+    PAN_GESTURE = 2,
+    PINCH_GESTURE = 3,
+    SWIPE_GESTURE = 4,
+    ROTATION_GESTURE = 5,
+    DRAG = 6,
+    CLICK = 7,
+};
+
 enum class ModifierKey {
     CTRL = 0,
     SHIFT = 1,
@@ -667,6 +690,12 @@ enum class RenderFit : int32_t {
 enum class KeyBoardAvoidMode : int32_t {
     OFFSET = 0,
     RESIZE,
+};
+
+enum class SwipeActionState : uint32_t {
+    COLLAPSED = 0,
+    EXPANDED,
+    ACTIONING,
 };
 
 } // namespace OHOS::Ace

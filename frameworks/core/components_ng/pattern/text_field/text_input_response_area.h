@@ -34,33 +34,24 @@ public:
 
     virtual void InitResponseArea() = 0;
 
-    virtual SizeF Measure(LayoutWrapper* layoutWrapper) = 0;
+    virtual SizeF Measure(LayoutWrapper* layoutWrapper, int32_t index) = 0;
 
-    virtual void Layout(LayoutWrapper* layoutWrapper) = 0;
+    virtual void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) = 0;
 
     virtual void Refresh() {}
 
-    virtual void ClearArea()
-    {
-        auto hostPattern = hostPattern_.Upgrade();
-        CHECK_NULL_VOID(hostPattern);
-        auto host = hostPattern->GetHost();
-        CHECK_NULL_VOID(host);
-        if (!host->GetChildren().empty()) {
-            host->GetChildren();
-            host->Clean();
-        }
-    }
+    virtual void ClearArea() {}
 
-    virtual OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize) = 0;
+    virtual OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) = 0;
 
     RectF GetAreaRect()
     {
         return areaRect_;
     }
 
+    virtual const RefPtr<FrameNode> GetFrameNode() = 0;
 protected:
-    void LayoutChild(LayoutWrapper* layoutWrapper);
+    void LayoutChild(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth);
     WeakPtr<Pattern> hostPattern_;
     RectF areaRect_;
 };
@@ -75,11 +66,11 @@ public:
 
     void InitResponseArea() override;
 
-    SizeF Measure(LayoutWrapper* layoutWrapper) override;
+    SizeF Measure(LayoutWrapper* layoutWrapper, int32_t index) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) override;
 
-    OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize) override;
+    OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) override;
 
     void AddEvent(const RefPtr<FrameNode>& node);
 
@@ -92,16 +83,24 @@ public:
 
     void ClearArea() override
     {
-        TextInputResponseArea::ClearArea();
+        auto hostPattern = hostPattern_.Upgrade();
+        CHECK_NULL_VOID(hostPattern);
+        auto host = hostPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        CHECK_NULL_VOID(stackNode_);
+        host->RemoveChildAndReturnIndex(stackNode_);
         passwordNode_.Reset();
     }
+
+    const RefPtr<FrameNode> GetFrameNode() override;
+
+    void OnPasswordIconClicked();
 
 private:
     void LoadImageSourceInfo();
     ImageSourceInfo GetDefaultSourceInfo(bool isObscured);
     void UpdateImageSource();
     bool IsShowPasswordIcon();
-    void OnPasswordIconClicked();
     float GetIconRightOffset();
     float GetIconSize();
     RefPtr<FrameNode> CreateNode();
@@ -112,6 +111,7 @@ private:
     bool isObscured_ = true;
     std::optional<ImageSourceInfo> showIcon_;
     std::optional<ImageSourceInfo> hideIcon_;
+    RefPtr<FrameNode> stackNode_;
     WeakPtr<FrameNode> passwordNode_;
 };
 
@@ -125,15 +125,61 @@ public:
 
     void InitResponseArea() override;
 
-    SizeF Measure(LayoutWrapper* layoutWrapper) override;
+    SizeF Measure(LayoutWrapper* layoutWrapper, int32_t index) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) override;
 
-    OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize) override;
+    OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) override;
+
+    const RefPtr<FrameNode> GetFrameNode() override;
+
+    void ClearArea() override
+    {
+        auto hostPattern = hostPattern_.Upgrade();
+        CHECK_NULL_VOID(hostPattern);
+        auto host = hostPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        CHECK_NULL_VOID(unitNode_);
+        host->RemoveChildAndReturnIndex(unitNode_);
+    }
 
 private:
     bool IsShowUnit();
     RefPtr<NG::UINode> unitNode_;
+};
+
+class CleanNodeResponseArea : public TextInputResponseArea {
+    DECLARE_ACE_TYPE(CleanNodeResponseArea, TextInputResponseArea);
+
+public:
+    CleanNodeResponseArea(const WeakPtr<Pattern>& hostPattern) : TextInputResponseArea(hostPattern) {}
+    ~CleanNodeResponseArea() = default;
+
+    void InitResponseArea() override;
+
+    SizeF Measure(LayoutWrapper* layoutWrapper, int32_t index) override;
+
+    void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) override;
+
+    OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) override;
+
+    const RefPtr<FrameNode> GetFrameNode() override;
+
+    void UpdateCleanNode(bool isShow);
+
+    bool IsShow() const
+    {
+        return isShow_;
+    }
+private:
+    void InitClickEvent(const RefPtr<FrameNode>& frameNode);
+    void OnCleanNodeClicked();
+    RefPtr<FrameNode> CreateNode();
+    RefPtr<FrameNode> cleanNode_;
+    CalcDimension iconSize_ = 0.0_px;
+    std::string iconSrc_;
+    Color iconColor_;
+    bool isShow_ = false;
 };
 } // namespace OHOS::Ace::NG
 

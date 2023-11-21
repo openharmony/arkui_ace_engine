@@ -1,6 +1,6 @@
+/// <reference path="./import.ts" />
 
-
-class ArkBorderStyle {
+class ArkBorderStyle implements Equable {
     type: boolean | undefined;
     style: number | undefined;
     top: number | undefined;
@@ -90,10 +90,10 @@ class ArkShadow {
 }
 
 class ArkBorderColor {
-    leftColor: number | undefined;
-    rightColor: number | undefined;
-    topColor: number | undefined;
-    bottomColor: number | undefined;
+    leftColor: number | undefined | Resource;
+    rightColor: number | undefined | Resource;
+    topColor: number | undefined | Resource;
+    bottomColor: number | undefined | Resource;
 
     constructor() {
         this.leftColor = undefined;
@@ -107,9 +107,9 @@ class ArkBorderColor {
     }
 }
 
-class ArkPosition {
-    x: number | undefined;
-    y: number | undefined;
+class ArkPosition implements Equable {
+    x: number | string | undefined | Resource;
+    y: number | string | undefined | Resource;
 
     constructor() {
         this.x = undefined;
@@ -122,11 +122,11 @@ class ArkPosition {
 }
 
 
-class ArkBorderWidth {
-    left: number | undefined;
-    right: number | undefined;
-    top: number | undefined;
-    bottom: number | undefined;
+class ArkBorderWidth implements Equable {
+    left: number | string | undefined | Resource;
+    right: number | string | undefined| Resource;
+    top: number | string | undefined| Resource;
+    bottom: number | string | undefined| Resource;
 
     constructor() {
         this.left = undefined;
@@ -140,11 +140,11 @@ class ArkBorderWidth {
     }
 }
 
-class ArkBorderRadius {
-    topLeft: number | undefined;
-    topRight: number | undefined;
-    bottomLeft: number | undefined;
-    bottomRight: number | undefined;
+class ArkBorderRadius implements Equable {
+    topLeft: number | string | undefined | Resource;
+    topRight: number | string | undefined | Resource;
+    bottomLeft: number | string | undefined | Resource;
+    bottomRight: number | string | undefined | Resource;
 
     constructor() {
         this.topLeft = undefined;
@@ -158,7 +158,7 @@ class ArkBorderRadius {
     }
 }
 
-class ArkTransformMatrix {
+class ArkTransformMatrix implements Equable  {
     matrix: [];
     length: number;
 
@@ -174,7 +174,7 @@ class ArkTransformMatrix {
             && arr1.every((value, index) => value === arr2[index]);
     }
 
-    isEqual(another: ArkTransformMatrix): void {
-        this.compareArrays(this.matrix, another.matrix)
+    isEqual(another: ArkTransformMatrix): boolean {
+        return this.compareArrays(this.matrix, another.matrix)
     }
 }

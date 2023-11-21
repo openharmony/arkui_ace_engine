@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/option/option_view.h"
 
 #include "base/geometry/dimension.h"
+#include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -26,6 +27,9 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/option/option_event_hub.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
+#include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/image/image_source_info.h"
@@ -33,10 +37,12 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+constexpr char BUTTON_PASTE[] = "textoverlay.paste";
 
 RefPtr<FrameNode> Create(int32_t index)
 {
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::OPTION_ETS_TAG, Id);
     auto node = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<OptionPattern>(index));
 
     // set border radius
@@ -120,6 +126,45 @@ RefPtr<FrameNode> OptionView::CreateIcon(const std::string& icon, const RefPtr<F
     return iconNode;
 }
 
+void OptionView::CreatePasteButton(const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
+    std::function<void()>&& onClickFunc)
+{
+    auto pasteNode =
+        PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
+            static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL));
+    CHECK_NULL_VOID(pasteNode);
+    auto pattern = option->GetPattern<OptionPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    auto pasteLayoutProperty = pasteNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(pasteLayoutProperty);
+    auto pastePaintProperty = pasteNode->GetPaintProperty<SecurityComponentPaintProperty>();
+    CHECK_NULL_VOID(pastePaintProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+
+    pasteLayoutProperty->UpdateFontSize(theme->GetMenuFontSize());
+    pasteLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
+    pastePaintProperty->UpdateFontColor(theme->GetMenuFontColor());
+    pastePaintProperty->UpdateBackgroundColor(theme->GetBackgroundColor());
+    pasteLayoutProperty->UpdateBackgroundBorderRadius(theme->GetInnerBorderRadius());
+    pasteNode->MountToParent(row);
+    pasteNode->MarkModifyDone();
+
+    row->MountToParent(option);
+    row->MarkModifyDone();
+    auto eventHub = option->GetEventHub<OptionEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    pasteNode->GetOrCreateGestureEventHub()->SetUserOnClick([onClickFunc](GestureEvent& /* info */) {
+        if (onClickFunc) {
+            onClickFunc();
+        }
+    });
+    pattern->SetPasteButton(pasteNode);
+}
+
 RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const std::string& value,
     std::function<void()>&& onClickFunc, int32_t index, const std::string& icon)
 {
@@ -130,19 +175,23 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const std::s
     auto pattern = option->GetPattern<OptionPattern>();
     CHECK_NULL_RETURN(pattern, option);
 
-    if (optionsHasIcon) {
-        auto iconNode = CreateIcon(icon, row);
-        pattern->SetIconNode(iconNode);
-        pattern->SetIcon(icon);
-    }
-    auto textNode = CreateText(value, row);
-    row->MountToParent(option);
-    row->MarkModifyDone();
-    pattern->SetTextNode(textNode);
+    if (value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+        CreatePasteButton(option, row, std::move(onClickFunc));
+    } else {
+        if (optionsHasIcon) {
+            auto iconNode = CreateIcon(icon, row);
+            pattern->SetIconNode(iconNode);
+            pattern->SetIcon(icon);
+        }
+        auto textNode = CreateText(value, row);
+        row->MountToParent(option);
+        row->MarkModifyDone();
+        pattern->SetTextNode(textNode);
 
-    auto eventHub = option->GetEventHub<OptionEventHub>();
-    CHECK_NULL_RETURN(eventHub, nullptr);
-    eventHub->SetMenuOnClick(std::move(onClickFunc));
+        auto eventHub = option->GetEventHub<OptionEventHub>();
+        CHECK_NULL_RETURN(eventHub, nullptr);
+        eventHub->SetMenuOnClick(std::move(onClickFunc));
+    }
     return option;
 }
 

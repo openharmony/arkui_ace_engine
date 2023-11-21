@@ -46,11 +46,6 @@ public:
 
     bool Play();
 
-    RefPtr<Animator> GetTossAnimation()
-    {
-        return springController_;
-    }
-
     RefPtr<NodeAnimatablePropertyFloat> GetTossNodeAnimation()
     {
         return property_;
@@ -78,14 +73,10 @@ private:
     double speed_ = 0.0;
     int32_t showCount_ = 0;
     double end_ = 0.0;
-    RefPtr<PickerAnimation> toss_;
     WeakPtr<DatePickerColumnPattern> column_;
     WeakPtr<PipelineContext> pipeline_;
 
     RefPtr<NodeAnimatablePropertyFloat> property_;
-    RefPtr<SpringMotion> springMotion_;
-    RefPtr<SpringProperty> spring_;
-    RefPtr<Animator> springController_;
 };
 } // namespace OHOS::Ace::NG
 

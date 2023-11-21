@@ -404,12 +404,12 @@ void RosenSvgPainter::UpdateLineDash(RSPen& pen, const StrokeState& strokeState)
 {
     if (!strokeState.GetLineDash().lineDash.empty()) {
         auto lineDashState = strokeState.GetLineDash().lineDash;
-        std::vector<RSScalar> intervals(lineDashState.size());
+        RSScalar intervals[lineDashState.size()];
         for (size_t i = 0; i < lineDashState.size(); ++i) {
             intervals[i] = static_cast<RSScalar>(lineDashState[i]);
         }
         RSScalar phase = static_cast<RSScalar>(strokeState.GetLineDash().dashOffset);
-        pen.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, phase));
+        pen.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, lineDashState.size(), phase));
     }
 }
 #endif

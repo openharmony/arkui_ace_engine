@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -268,7 +269,10 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     auto offsetY = GetFloatImageOffset(target).GetY();
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
+    renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     auto targetSize = CalcSize(NG::CalcLength(width), NG::CalcLength(height));
     props->UpdateUserDefinedIdealSize(targetSize);
@@ -441,7 +445,14 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
             renderContext->UpdateBorderRadius(borderRadius);
         }
     }
-    
+    if (type == MenuType::SELECT_OVERLAY_CUSTOM_MENU) {
+        BorderRadiusProperty borderRadiusProperty;
+        borderRadiusProperty.SetRadius(0.0_vp);
+        scroll->GetRenderContext()->UpdateBorderRadius(borderRadiusProperty);
+        scroll->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+        menuNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+        menuNode->GetRenderContext()->UpdateBackShadow(ShadowConfig::NoneShadow);
+    }
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
     if (menuParam.backgroundEffectOption.has_value()) {
@@ -489,15 +500,19 @@ void MenuView::UpdateMenuPaintProperty(
     paintProperty->UpdateArrowOffset(menuParam.arrowOffset.value_or(Dimension(0)));
 }
 
-RefPtr<FrameNode> MenuView::Create(const std::vector<SelectParam>& params, int32_t targetId)
+RefPtr<FrameNode> MenuView::Create(
+    const std::vector<SelectParam>& params, int32_t targetId, const std::string& targetTag)
 {
-    auto [wrapperNode, menuNode] = CreateMenu(targetId);
+    auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag);
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
     for (size_t i = 0; i < params.size(); ++i) {
         auto optionNode = OptionView::CreateSelectOption(params[i].first, params[i].second, i);
+        auto optionPattern = optionNode->GetPattern<OptionPattern>();
+        CHECK_NULL_RETURN(optionPattern, nullptr);
+        optionPattern->SetIsSelectOption(true);
         menuPattern->AddOptionNode(optionNode);
         auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
         OptionKeepMenu(optionNode, menuWeak);
@@ -511,6 +526,9 @@ RefPtr<FrameNode> MenuView::Create(const std::vector<SelectParam>& params, int32
     }
     auto scroll = CreateMenuScroll(column);
     CHECK_NULL_RETURN(scroll, nullptr);
+    auto scrollPattern = scroll->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(scrollPattern, nullptr);
+    scrollPattern->SetIsSelectScroll(true);
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
     menuNode->MarkModifyDone();

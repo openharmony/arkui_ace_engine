@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_PAN_RECOGNIZER_H
 
 #include <map>
+#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
@@ -45,6 +46,20 @@ public:
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
 
+    Axis GetAxisDirection() override
+    {
+        if (direction_.type == PanDirection::ALL) {
+            return Axis::FREE;
+        }
+        if ((direction_.type & PanDirection::VERTICAL) == 0) {
+            return Axis::HORIZONTAL;
+        }
+        if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
+            return Axis::VERTICAL;
+        }
+        return Axis::NONE;
+    }
+
     void SetDirection(const PanDirection& direction);
 
     void SetIsForDrag(bool isForDrag)
@@ -61,6 +76,8 @@ public:
     {
         isAllowMouse_ = isAllowMouse;
     }
+
+    virtual RefPtr<GestureSnapshot> Dump() const override;
 
 private:
     enum class GestureAcceptResult {
@@ -83,10 +100,13 @@ private:
     void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    GestureJudgeResult TriggerGestureJudgeCallback();
     void ChangeFingers(int32_t fingers);
     void ChangeDirection(const PanDirection& direction);
     void ChangeDistance(double distance);
     double GetMainAxisDelta();
+    RefPtr<DragEventActuator> GetDragEventActuator();
+    bool HandlePanAccept();
 
     void OnResetStatus() override;
     void OnSucceedCancel() override;

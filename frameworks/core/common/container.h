@@ -59,12 +59,14 @@ enum ContainerType {
     PA_DATA_CONTAINER,
     PA_FORM_CONTAINER,
     FA_SUBWINDOW_CONTAINER,
-    COMPONENT_SUBWINDOW_CONTAINER,
+    COMPONENT_SUBWINDOW_CONTAINER = 10,
     PLUGIN_SUBCONTAINER = 20,
 };
 
 constexpr int32_t CONTAINER_ID_DIVIDE_SIZE = 100000;
 constexpr int32_t MIN_PLUGIN_SUBCONTAINER_ID = PLUGIN_SUBCONTAINER * CONTAINER_ID_DIVIDE_SIZE;
+constexpr int32_t MIN_SUBCONTAINER_ID = COMPONENT_SUBWINDOW_CONTAINER * CONTAINER_ID_DIVIDE_SIZE;
+constexpr int32_t MIN_PA_SERVICE_ID = PA_SERVICE_CONTAINER * CONTAINER_ID_DIVIDE_SIZE;
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
@@ -365,6 +367,16 @@ public:
 
     virtual bool GetCurPointerEventInfo(
         int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType, StopDragCallback&& stopDragCallback)
+    {
+        return false;
+    }
+
+    virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType)
+    {
+        return false;
+    }
+
+    virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node)
     {
         return false;
     }

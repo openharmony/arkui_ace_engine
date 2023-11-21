@@ -48,11 +48,6 @@ public:
         defaultPickerItemHeight_ = defaultPickerItemHeight;
     }
 
-    void SetBackgroundColor(const Color& color)
-    {
-        backgroundColor_ = color;
-    }
-
     void PaintDisable(RSCanvas& canvas, double X, double Y);
 
     void SetEnabled(bool enabled)
@@ -66,7 +61,6 @@ public:
 private:
     double defaultPickerItemHeight_ = 0.0;
     bool enabled_ = true;
-    Color backgroundColor_ = Color::WHITE;
 
     WeakPtr<Pattern> pattern_;
 };

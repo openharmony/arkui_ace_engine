@@ -596,6 +596,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (isTouchingSwiper_ && layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
         ApplyTurnPageRateToIndicator(turnPageRate_);
     }
+    PaintFocusState();
     return false;
 }
 
@@ -1974,14 +1975,8 @@ void TabBarPattern::DumpAdvanceInfo()
 {
     isRTL_ ? DumpLog::GetInstance().AddDesc("isRTL:true") : DumpLog::GetInstance().AddDesc("isRTL:false");
     touching_ ? DumpLog::GetInstance().AddDesc("touching:true") : DumpLog::GetInstance().AddDesc("touching:false");
-    isHover_ ? DumpLog::GetInstance().AddDesc("isHover:true") : DumpLog::GetInstance().AddDesc("isHover:false");
     isMaskAnimationByCreate_ ? DumpLog::GetInstance().AddDesc("isMaskAnimationByCreate:true")
                              : DumpLog::GetInstance().AddDesc("isMaskAnimationByCreate:false");
-    touchingIndex_.has_value()
-        ? DumpLog::GetInstance().AddDesc("touchingIndex:" + std::to_string(touchingIndex_.value()))
-        : DumpLog::GetInstance().AddDesc("touchingIndex:null");
-    hoverIndex_.has_value() ? DumpLog::GetInstance().AddDesc("hoverIndex:" + std::to_string(hoverIndex_.value()))
-                            : DumpLog::GetInstance().AddDesc("hoverIndex:null");
     animationDuration_.has_value()
         ? DumpLog::GetInstance().AddDesc("animationDuration:" + std::to_string(animationDuration_.value()))
         : DumpLog::GetInstance().AddDesc("animationDuration:null");
@@ -1995,12 +1990,8 @@ void TabBarPattern::DumpAdvanceInfo()
                    : DumpLog::GetInstance().AddDesc("changeByClick:false");
     needSetCentered_ ? DumpLog::GetInstance().AddDesc("needSetCentered:true")
                      : DumpLog::GetInstance().AddDesc("needSetCentered:false");
-    DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(currentOffset_));
     DumpLog::GetInstance().AddDesc("childrenMainSize:" + std::to_string(childrenMainSize_));
     DumpLog::GetInstance().AddDesc("indicator:" + std::to_string(indicator_));
-    DumpLog::GetInstance().AddDesc("focusIndicator:" + std::to_string(focusIndicator_));
-    DumpLog::GetInstance().AddDesc("currentIndicatorOffset:" + std::to_string(currentIndicatorOffset_));
-    DumpLog::GetInstance().AddDesc("turnPageRate:" + std::to_string(turnPageRate_));
     DumpLog::GetInstance().AddDesc("swiperStartIndex:" + std::to_string(swiperStartIndex_));
     DumpLog::GetInstance().AddDesc("scrollMargin:" + std::to_string(scrollMargin_));
     std::string regionString = std::string("region:");

@@ -126,6 +126,7 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
             for (auto& item : touchPoints_) {
                 item.second.type = TouchType::DOWN;
                 curRecognizer->HandleEvent(item.second);
+                AddGestureProcedure(item.second, curRecognizer);
             }
         }
     }
@@ -139,6 +140,7 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
         case TouchType::UP:
         case TouchType::CANCEL:
             curRecognizer->HandleEvent(point);
+            AddGestureProcedure(point, curRecognizer);
             break;
         default:
             break;

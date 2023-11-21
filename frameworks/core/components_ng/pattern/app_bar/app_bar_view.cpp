@@ -36,10 +36,18 @@ namespace OHOS::Ace::NG {
 namespace {
 
 const Dimension MARGIN_TEXT_LEFT = 24.0_vp;
-const Dimension MARGIN_TEXT_RIGHT = 72.0_vp;
+const Dimension MARGIN_TEXT_RIGHT = 84.0_vp;
 const Dimension MARGIN_BUTTON = 12.0_vp;
 const Dimension MARGIN_BACK_BUTTON_RIGHT = -20.0_vp;
 
+bool HasNavigation(const RefPtr<UINode>& node)
+{
+    if (node->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+        return true;
+    }
+    const auto& children = node->GetChildren();
+    return std::any_of(children.begin(), children.end(), [](const auto& node) { return HasNavigation(node); });
+}
 } // namespace
 
 RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
@@ -57,20 +65,33 @@ RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
     content->GetLayoutProperty()->UpdateLayoutWeight(1.0f);
     content->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto stagePattern = content->GetPattern<StagePattern>();
-    if (stagePattern) {
-        stagePattern->SetOnRebuildFrameCallback([titleBar, content]() {
-            CHECK_NULL_VOID(titleBar);
-            CHECK_NULL_VOID(content);
-            auto backButton = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
-            CHECK_NULL_VOID(backButton);
-            if (content->GetChildren().size() > 1) {
-                backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-                return;
-            }
-            backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-        });
-    }
     return atom;
+}
+
+void AppBarView::iniBehavior()
+{
+    CHECK_NULL_VOID(atom_);
+    auto titleBar = AceType::DynamicCast<FrameNode>(atom_->GetFirstChild());
+    CHECK_NULL_VOID(titleBar);
+    auto content = AceType::DynamicCast<FrameNode>(atom_->GetChildAtIndex(1));
+    CHECK_NULL_VOID(content);
+    auto stagePattern = content->GetPattern<StagePattern>();
+    CHECK_NULL_VOID(stagePattern);
+    stagePattern->SetOnRebuildFrameCallback([titleBar, content, this]() {
+        auto backButton = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
+        CHECK_NULL_VOID(backButton);
+        if (content->GetChildren().size() > 1) {
+            backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+            if (!hasBeSetted) {
+                titleBar->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+            }
+            return;
+        }
+        backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        if (HasNavigation(content)) {
+            titleBar->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        }
+    });
 }
 
 RefPtr<FrameNode> AppBarView::BuildBarTitle()
@@ -191,10 +212,6 @@ RefPtr<FrameNode> AppBarView::BuildIconButton(
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    if (!isBackButton) {
-        Dimension PositionY = (appBarTheme->GetAppBarHeight() / 2.0f) - appBarTheme->GetIconSize();
-        renderContext->UpdatePosition(OffsetT(0.9_pct, PositionY));
-    }
 
     auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
     CHECK_NULL_RETURN(buttonPattern, nullptr);
@@ -283,6 +300,7 @@ void AppBarView::BindContentCover(int32_t targetId)
 
 void AppBarView::SetVisible(bool visible)
 {
+    hasBeSetted = true;
     CHECK_NULL_VOID(atom_);
     auto uiRow = atom_->GetFirstChild();
     CHECK_NULL_VOID(uiRow);
@@ -353,6 +371,22 @@ void AppBarView::SetIconColor(const std::optional<Color>& color)
     auto faIcon = AceType::DynamicCast<FrameNode>(uiFaIcon);
     SetEachIconColor(backIcon, color, InternalResource::ResourceId::APP_BAR_BACK_SVG);
     SetEachIconColor(faIcon, color, InternalResource::ResourceId::APP_BAR_FA_SVG);
+}
+
+void AppBarView::SetRowWidth(const Dimension& width)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
+    Dimension offset = appBarTheme->GetIconSize() * 3;
+    Dimension positionX = width - offset;
+    Dimension positionY = (appBarTheme->GetAppBarHeight() / 2.0f) - appBarTheme->GetIconSize();
+    auto uiFaButton = atom_->GetLastChild();
+    CHECK_NULL_VOID(uiFaButton);
+    auto faButton = AceType::DynamicCast<FrameNode>(uiFaButton);
+    auto renderContext = faButton->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdatePosition(OffsetT(positionX, positionY));
 }
 
 void AppBarView::SetEachIconColor(

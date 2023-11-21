@@ -20,6 +20,7 @@
 #include "base/log/event_report.h"
 #include "base/log/jank_frame_report.h"
 #include "base/log/log.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
@@ -28,9 +29,9 @@ namespace OHOS::Ace {
 using namespace std;
 PerfMonitor* PerfMonitor::pMonitor = nullptr;
 constexpr int64_t SCENE_TIMEOUT = 10000000000;
+constexpr int64_t RESPONSE_TIMEOUT = 1000000000;
 constexpr float SINGLE_FRAME_TIME = 16600000;
 const int32_t JANK_SKIPPED_THRESHOLD = SystemProperties::GetJankFrameThreshold();
-const std::string NO_USER = "NO_USER";
 
 static int64_t GetCurrentRealTimeNs()
 {
@@ -119,7 +120,7 @@ void ReportPerfEventToRS(DataBase& data)
         case EVENT_COMPLETE:
             {
                 ACE_SCOPED_TRACE("EVENT_REPORT_COMPLETE_RS");
-                if (data.needReportToRS) {
+                if (data.isDisplayAnimator) {
                     Rosen::RSInterfaces::GetInstance().ReportEventComplete(dataRs);
                 }
                 break;
@@ -139,7 +140,7 @@ void ReportPerfEventToUI(DataBase data)
 {
     switch (data.eventType) {
         case EVENT_COMPLETE:
-            if (!data.needReportToRS) {
+            if (!data.isDisplayAnimator) {
                 EventReport::ReportEventComplete(data);
             }
             break;
@@ -207,6 +208,7 @@ void SceneRecord::Report(const std::string& sceneId, int64_t vsyncTime, bool isR
     } else {
         endVsyncTime = vsyncTime;
     }
+    isDisplayAnimator = !isRsRender;
 }
 
 bool SceneRecord::IsFirstFrame()
@@ -243,7 +245,7 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
 {
     AceAsyncTraceBegin(0, sceneId.c_str());
     std::lock_guard<std::mutex> Lock(mMutex);
-    int64_t inputTime = GetInputTime(type, note);
+    int64_t inputTime = GetInputTime(sceneId, type, note);
     SceneRecord* record = GetRecord(sceneId);
     if (record != nullptr) {
         record->Reset();
@@ -263,7 +265,7 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
     if (record != nullptr) {
         RecordBaseInfo(record);
         record->Report(sceneId, mVsyncTime, isRsRender);
-        ReportAnimateEnd(sceneId, record, !isRsRender);
+        ReportAnimateEnd(sceneId, record);
         RemoveRecord(sceneId);
         AceAsyncTraceEnd(0, sceneId.c_str());
     }
@@ -278,19 +280,19 @@ void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceTyp
     switch (type) {
         case LAST_DOWN:
             {
-                ACE_SCOPED_TRACE("RecordInputEvent: last_down(ns)=%lld", static_cast<long long>(time));
+                ACE_SCOPED_TRACE("RecordInputEvent: last_down=%lld(ns)", static_cast<long long>(time));
                 mInputTime[LAST_DOWN] = time;
                 break;
             }
         case LAST_UP:
             {
-                ACE_SCOPED_TRACE("RecordInputEvent: last_up(ns)=%lld", static_cast<long long>(time));
+                ACE_SCOPED_TRACE("RecordInputEvent: last_up=%lld(ns)", static_cast<long long>(time));
                 mInputTime[LAST_UP] = time;
                 break;
             }
         case FIRST_MOVE:
             {
-                ACE_SCOPED_TRACE("RecordInputEvent: first_move(ns)=%lld", static_cast<long long>(time));
+                ACE_SCOPED_TRACE("RecordInputEvent: first_move=%lld(ns)", static_cast<long long>(time));
                 mInputTime[FIRST_MOVE] = time;
                 break;
             }
@@ -373,7 +375,7 @@ void PerfMonitor::RemoveRecord(const std::string& sceneId)
     }
 }
 
-int64_t PerfMonitor::GetInputTime(PerfActionType type, const std::string& note)
+int64_t PerfMonitor::GetInputTime(const std::string& sceneId, PerfActionType type, const std::string& note)
 {
     int64_t inputTime = 0;
     switch (type) {
@@ -389,7 +391,7 @@ int64_t PerfMonitor::GetInputTime(PerfActionType type, const std::string& note)
         default:
             break;
     }
-    if (inputTime <= 0 || note == NO_USER) {
+    if (inputTime <= 0 || IsExceptResponseTime(inputTime, sceneId)) {
         ACE_SCOPED_TRACE("GetInputTime: now time");
         inputTime = GetCurrentRealTimeNs();
     }
@@ -402,22 +404,22 @@ void PerfMonitor::ReportAnimateStart(const std::string& sceneId, SceneRecord* re
         return;
     }
     DataBase data;
-    FlushDataBase(record, data, true);
+    FlushDataBase(record, data);
     ReportPerfEvent(EVENT_RESPONSE, data);
 }
 
-void PerfMonitor::ReportAnimateEnd(const std::string& sceneId, SceneRecord* record, bool needReportToRS)
+void PerfMonitor::ReportAnimateEnd(const std::string& sceneId, SceneRecord* record)
 {
     if (record == nullptr) {
         return;
     }
     DataBase data;
-    FlushDataBase(record, data, needReportToRS);
+    FlushDataBase(record, data);
     ReportPerfEvent(EVENT_JANK_FRAME, data);
     ReportPerfEvent(EVENT_COMPLETE, data);
 }
 
-void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data, bool needReportToRS)
+void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data)
 {
     if (record == nullptr) {
         return;
@@ -436,7 +438,7 @@ void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data, bool needRe
     data.maxSuccessiveFrames = record->maxSuccessiveFrames;
     data.totalMissed = record->totalMissed;
     data.totalFrames = record->totalFrames;
-    data.needReportToRS = needReportToRS;
+    data.isDisplayAnimator = record->isDisplayAnimator;
     data.sourceType = record->sourceType;
     data.actionType = record->actionType;
     data.baseInfo = baseInfo;
@@ -459,5 +461,15 @@ void PerfMonitor::ReportPerfEvent(PerfEventType type, DataBase& data)
     }
     ReportPerfEventToRS(data);
     ReportPerfEventToUI(data);
+}
+
+bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
+{
+    if ((sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH
+        && GetCurrentRealTimeNs() - time > RESPONSE_TIMEOUT)
+        || sceneId == PerfConstants::VOLUME_BAR_SHOW) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace

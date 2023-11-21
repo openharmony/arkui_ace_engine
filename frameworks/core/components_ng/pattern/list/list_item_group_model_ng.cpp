@@ -30,6 +30,7 @@ void ListItemGroupModelNG::Create(V2::ListItemGroupStyle listItemGroupStyle)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::LIST_ITEM_GROUP_ETS_TAG, nodeId);
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, nodeId, [itemGroupStyle = listItemGroupStyle]() {
             return AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, itemGroupStyle);

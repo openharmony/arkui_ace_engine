@@ -42,6 +42,8 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
                 pattern->PerformAction(pattern->GetTextInputActionValue(TextInputAction::DONE), false);
                 return true;
             }
+        } else if (keyEvent.code == KeyCode::KEY_TAB) {
+            return HandleTabEvent(keyEvent);
         } else if (HandleShiftPressedEvent(keyEvent)) {
             return true;
         } else if (keyEvent.IsDirectionalKey() || keyEvent.code == KeyCode::KEY_MOVE_HOME ||
@@ -245,6 +247,9 @@ bool KeyEventHandler::HandleShiftPressedEvent(const KeyEvent& event)
             keyChar = static_cast<wchar_t>(event.code) - static_cast<wchar_t>(KeyCode::KEY_A) + UPPER_CASE_A;
         } else if (KeyCode::KEY_0 <= event.code && event.code <= KeyCode::KEY_9) {
             keyChar = NUM_SYMBOLS[static_cast<int32_t>(event.code) - static_cast<int32_t>(KeyCode::KEY_0)];
+        } else if (KeyCode::KEY_F10 == event.code) {
+            pattern->ShowMenu();
+            return true;
         } else {
             return false;
         }
@@ -256,4 +261,15 @@ bool KeyEventHandler::HandleShiftPressedEvent(const KeyEvent& event)
     return true;
 }
 
+bool KeyEventHandler::HandleTabEvent(const KeyEvent& keyEvent)
+{
+    auto pattern = DynamicCast<TextFieldPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_RETURN(pattern, false);
+    if (keyEvent.IsShiftWith(KeyCode::KEY_TAB)) {
+        return pattern->UpdateFocusBackward();
+    } else if (keyEvent.code == KeyCode::KEY_TAB) {
+        return pattern->UpdateFocusForward();
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

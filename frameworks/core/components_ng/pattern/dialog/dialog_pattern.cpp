@@ -398,6 +398,7 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
     contentProp->UpdateTextAlign(TextAlign::START);
     contentProp->UpdateContent(props.content);
     auto contentStyle = dialogTheme_->GetContentTextStyle();
+    contentProp->UpdateFontWeight(FontWeight::MEDIUM);
     contentProp->UpdateFontSize(contentStyle.GetFontSize());
     contentProp->UpdateTextColor(contentStyle.GetTextColor());
     // update padding
@@ -520,7 +521,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     // add scale animation
     auto inputHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_RETURN(inputHub, nullptr);
-    inputHub->SetHoverEffect(HoverEffectType::NONE);
+    inputHub->SetHoverEffect(HoverEffectType::AUTO);
 
     // update background color
     auto renderContext = buttonNode->GetRenderContext();

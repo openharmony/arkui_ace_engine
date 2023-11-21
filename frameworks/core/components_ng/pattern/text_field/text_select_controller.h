@@ -194,14 +194,15 @@ public:
     std::vector<RectF> GetSelectedRects() const;
     RectF CalculateEmptyValueCaretRect() const;
     std::string ToString() const;
+    int32_t ConvertTouchOffsetToPosition(const Offset& localOffset);
 
 private:
+    void FitCaretMetricsToContentRect(CaretMetricsF& caretMetrics);
     void CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity);
     void CalcCaretMetricsByPositionNearTouchOffset(
         int32_t extent, CaretMetricsF& caretMetrics, const OffsetF& touchOffset);
     // The cursor needs to fit the line where the touch is located.
     void UpdateCaretRectByPositionNearTouchOffset(int32_t position, const Offset& touchOffset);
-    int32_t ConvertTouchOffsetToPosition(const Offset& localOffset);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FirstIndex, int32_t, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SecondIndex, int32_t, PROPERTY_UPDATE_RENDER);
 

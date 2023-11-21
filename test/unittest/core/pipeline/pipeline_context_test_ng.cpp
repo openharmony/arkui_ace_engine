@@ -36,7 +36,7 @@
 #include "base/log/frame_report.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "base/test/mock/mock_mouse_style.h"
+#include "test/mock/base/mock_mouse_style.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
@@ -60,9 +60,9 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_ng/render/drawing_forward.h"
-#include "core/components_ng/test/mock/pattern/mock_pattern.h"
-#include "core/components_ng/test/mock/render/mock_render_context.h"
-#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "test/mock/core/pattern/mock_pattern.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/event/mouse_event.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -2231,6 +2231,39 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg005, TestSize.Level1)
     taskScheduler.FinishRecordFrameInfo();
     taskScheduler.FlushRenderTask(true);
     EXPECT_EQ(frameInfo.renderInfos_.size(), 1);
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg002
+ * @tc.desc: Test FlushAfterLayoutTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg006, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Call FlushAfterLayoutTask.
+     */
+    taskScheduler.FlushAfterLayoutTask();
+
+    /**
+     * @tc.steps3: Call AddAfterLayoutTask.
+     * @tc.expected: afterLayoutTasks_ in the taskScheduler size is 2.
+     */
+    taskScheduler.AddPersistAfterLayoutTask([]() {});
+    taskScheduler.AddPersistAfterLayoutTask(nullptr);
+    EXPECT_EQ(taskScheduler.persistAfterLayoutTasks_.size(), 2);
+
+    /**
+     * @tc.steps4: Call FlushTask.
+     * @tc.expected: afterLayoutTasks_ in the taskScheduler size is 0.
+     */
+    taskScheduler.FlushTask();
+    EXPECT_EQ(taskScheduler.afterLayoutTasks_.size(), 2);
 }
 
 /**

@@ -23,7 +23,7 @@
 #include "bridge/card_frontend/js_card_parser.h"
 #undef private
 #undef protected
-#include "base/test/mock/mock_task_executor.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "bridge/common/utils/utils.h"
 
 using namespace testing;

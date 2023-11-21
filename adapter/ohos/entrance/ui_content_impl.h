@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 
+#include <list>
+
 #include "ability_info.h"
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
@@ -25,10 +27,14 @@
 #include "wm/window.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
+#include "base/view_data/view_data_wrap.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 
-namespace OHOS::Ace {
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+}
 
+namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
@@ -70,6 +76,8 @@ public:
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
+    void ProcessFormVisibleChange(bool isVisible) override;
+    void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
 
     // Window color
     uint32_t GetBackgroundColor() override;
@@ -79,6 +87,9 @@ public:
 
     // Set UIContent callback for custom window animation
     void SetNextFrameLayoutCallback(std::function<void()>&& callback) override;
+
+    // Set UIContent callback after layout finish
+    void SetFrameLayoutFinishCallback(std::function<void()>&& callback) override;
 
     // Receive memory level notification
     void NotifyMemoryLevel(int32_t level) override;
@@ -173,7 +184,29 @@ public:
 
     void SetParentToken(sptr<IRemoteObject> token) override;
     sptr<IRemoteObject> GetParentToken() override;
+    bool DumpViewData(AbilityBase::ViewData& viewData) override;
+    bool CheckNeedAutoSave() override;
+    bool DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap);
 
+    void SearchElementInfoByAccessibilityId(
+        int32_t elementId, int32_t mode,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) override;
+
+    void SearchElementInfosByText(
+        int32_t elementId, const std::string& text, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output) override;
+
+    void FindFocusedElementInfo(
+        int32_t elementId, int32_t focusType,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
+
+    void FocusMoveSearch(
+        int32_t elementId, int32_t direction,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
+
+    bool NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t offset) override;
+    
 private:
     void InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);

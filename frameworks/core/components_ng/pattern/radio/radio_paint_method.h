@@ -75,6 +75,7 @@ public:
                 radioModifier_->UpdateIsOnAnimatableProperty(checked);
             }
         }
+        radioModifier_->SetShowHoverEffect(showHoverEffect_);
         radioModifier_->SetIsCheck(checked);
         radioModifier_->SetTouchHoverAnimationType(touchHoverType_);
         radioModifier_->UpdateAnimatableProperty();
@@ -138,6 +139,11 @@ public:
         touchHoverType_ = touchHoverType;
     }
 
+    void SetShowHoverEffect(bool showHoverEffect)
+    {
+        showHoverEffect_ = showHoverEffect;
+    }
+
 private:
     Color pointColor_;
     Color activeColor_;
@@ -145,6 +151,7 @@ private:
     bool enabled_ = true;
     bool isOnAnimationFlag_ = false;
     bool isFirstCreated_ = true;
+    bool showHoverEffect_ = true;
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;
     float ringPointScale_ = 0.0f;

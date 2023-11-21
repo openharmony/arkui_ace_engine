@@ -42,6 +42,13 @@ public:
         value->propTextIconSpace_ = CloneTextIconSpace();
         value->propSecurityComponentDescription_ = CloneSecurityComponentDescription();
         value->propIconStyle_ = CloneIconStyle();
+        value->propIconSize_ = CloneIconSize();
+        value->propFontSize_ = CloneFontSize();
+        value->propFontStyle_ = CloneFontStyle();
+        value->propFontWeight_ = CloneFontWeight();
+        value->propFontFamily_ = CloneFontFamily();
+        value->propBackgroundBorderWidth_ = CloneBackgroundBorderWidth();
+        value->propBackgroundBorderRadius_ = CloneBackgroundBorderRadius();
         value->propBackgroundType_ = CloneBackgroundType();
         value->propTextIconLayoutDirection_ = CloneTextIconLayoutDirection();
         return value;
@@ -57,6 +64,13 @@ public:
         ResetTextIconSpace();
         ResetSecurityComponentDescription();
         ResetIconStyle();
+        ResetIconSize();
+        ResetFontSize();
+        ResetFontStyle();
+        ResetFontWeight();
+        ResetFontFamily();
+        ResetBackgroundBorderWidth();
+        ResetBackgroundBorderRadius();
         ResetBackgroundType();
         ResetTextIconLayoutDirection();
     }
@@ -68,6 +82,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextIconSpace, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SecurityComponentDescription, int32_t, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconStyle, int32_t, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundBorderWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundBorderRadius, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundType, int32_t, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextIconLayoutDirection,
         SecurityComponentLayoutDirection, PROPERTY_UPDATE_MEASURE);

@@ -59,7 +59,7 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
         Msdp::DeviceStatus::ShadowInfo { dragData.shadowInfo.pixelMap, dragData.shadowInfo.x, dragData.shadowInfo.y },
         dragData.buffer, dragData.udKey, dragData.filterInfo, dragData.extraInfo,
         dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX, dragData.displayY,
-        dragData.displayId, dragData.hasCanceledAnimation };
+        dragData.displayId, dragData.hasCanceledAnimation, dragData.summary };
     return InteractionManager::GetInstance()->StartDrag(msdpDragData, callbackCore);
 }
 
@@ -87,6 +87,16 @@ int32_t InteractionImpl::GetShadowOffset(ShadowOffsetData& shadowOffsetData)
 {
     return InteractionManager::GetInstance()->GetShadowOffset(
         shadowOffsetData.offsetX, shadowOffsetData.offsetY, shadowOffsetData.width, shadowOffsetData.height);
+}
+
+int32_t InteractionImpl::GetDragSummary(std::map<std::string, int64_t>& summary)
+{
+    return InteractionManager::GetInstance()->GetDragSummary(summary);
+}
+
+int32_t InteractionImpl::GetDragExtraInfo(std::string& extraInfo)
+{
+    return InteractionManager::GetInstance()->GetExtraInfo(extraInfo);
 }
 
 Msdp::DeviceStatus::DragCursorStyle TranslateDragCursorStyle(OHOS::Ace::DragCursorStyleCore style)
@@ -131,6 +141,34 @@ DragRet TranslateDragResult(Msdp::DeviceStatus::DragResult dragResult)
         default:
             return DragRet::DRAG_SUCCESS;
     }
+}
+
+int32_t InteractionImpl::GetDragState(DragState& dragState) const
+{
+    Msdp::DeviceStatus::DragState state;
+    int32_t ret = InteractionManager::GetInstance()->GetDragState(state);
+    switch (state) {
+        case Msdp::DeviceStatus::DragState::ERROR:
+            dragState = DragState::ERROR;
+            break;
+        case Msdp::DeviceStatus::DragState::START:
+            dragState = DragState::START;
+            break;
+        case Msdp::DeviceStatus::DragState::STOP:
+            dragState = DragState::STOP;
+            break;
+        case Msdp::DeviceStatus::DragState::CANCEL:
+            dragState = DragState::CANCEL;
+            break;
+        case Msdp::DeviceStatus::DragState::MOTION_DRAGGING:
+            dragState = DragState::MOTION_DRAGGING;
+            break;
+        default:
+            dragState = DragState::ERROR;
+            LOGW("unknow msdp drag state: %d", state);
+            break;
+    }
+    return ret;
 }
 } // namespace OHOS::Ace
 #endif // ENABLE_DRAG_FRAMEWORK

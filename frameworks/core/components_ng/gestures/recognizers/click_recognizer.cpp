@@ -19,6 +19,8 @@
 #include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
@@ -134,6 +136,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
     ++currentTouchPointsNum_;
     touchPoints_[event.id] = event;
+    UpdateFingerListInfo();
     if (fingers_ > currentTouchPointsNum_) {
         // waiting for multi-finger press
         DeadlineTimer(fingerDeadlineTimer_, MULTI_FINGER_TIMEOUT);
@@ -165,6 +168,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
     InitGlobalValue(event.sourceType);
     touchPoints_[event.id] = event;
+    UpdateFingerListInfo();
     --currentTouchPointsNum_;
     // Check whether multi-finger taps are completed in count_ times
     if (equalsToFingers_ && (currentTouchPointsNum_ == 0)) {
@@ -176,11 +180,16 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         if (tappedCount_ == count_) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "This gesture is click, try to accept it");
             time_ = event.time;
-            if (useCatchMode_) {
-                Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
-            } else {
+            if (!useCatchMode_) {
                 OnAccepted();
+                return;
             }
+            auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
+            if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+                Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+                return;
+            }
+            Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
             return;
         }
         equalsToFingers_ = false;
@@ -211,6 +220,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         TAG_LOGI(AceLogTag::ACE_GESTURE, "This gesture is out of offset, try to reject it");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
+    UpdateFingerListInfo();
 }
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
@@ -307,6 +317,35 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
     }
 }
 
+GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
+{
+    auto targetComponent = GetTargetComponent();
+    CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
+    auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
+    CHECK_NULL_RETURN(callback, GestureJudgeResult::CONTINUE);
+    auto info = std::make_shared<TapGestureEvent>();
+    info->SetTimeStamp(time_);
+    info->SetFingerList(fingerList_);
+    TouchEvent touchPoint = {};
+    if (!touchPoints_.empty()) {
+        touchPoint = touchPoints_.begin()->second;
+    }
+    info->SetSourceDevice(deviceType_);
+    info->SetTarget(GetEventTarget().value_or(EventTarget()));
+    if (recognizerTarget_.has_value()) {
+        info->SetTarget(recognizerTarget_.value());
+    }
+    info->SetForce(touchPoint.force);
+    if (touchPoint.tiltX.has_value()) {
+        info->SetTiltX(touchPoint.tiltX.value());
+    }
+    if (touchPoint.tiltY.has_value()) {
+        info->SetTiltY(touchPoint.tiltY.value());
+    }
+    info->SetSourceTool(touchPoint.sourceTool);
+    return callback(gestureInfo_, info);
+}
+
 bool ClickRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     RefPtr<ClickRecognizer> curr = AceType::DynamicCast<ClickRecognizer>(recognizer);
@@ -322,6 +361,16 @@ bool ClickRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
 
     onAction_ = std::move(curr->onAction_);
     return true;
+}
+
+RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
+{
+    RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
+    std::stringstream oss;
+    oss << "count: " << count_ << ", "
+        << "fingers: " << fingers_;
+    info->customInfo = oss.str();
+    return info;
 }
 
 } // namespace OHOS::Ace::NG

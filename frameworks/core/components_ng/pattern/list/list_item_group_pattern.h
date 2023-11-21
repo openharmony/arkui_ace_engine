@@ -74,6 +74,7 @@ public:
             itemStartIndex_++;
         } else {
             host->ReplaceChild(host->GetChildAtIndex(headerIndex_), header);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
         auto frameNode = AceType::DynamicCast<FrameNode>(header->GetFrameChildByIndex(0, false));
         CHECK_NULL_VOID(frameNode);
@@ -92,6 +93,7 @@ public:
             itemStartIndex_++;
         } else {
             host->ReplaceChild(host->GetChildAtIndex(footerIndex_), footer);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
         auto frameNode = AceType::DynamicCast<FrameNode>(footer->GetFrameChildByIndex(0, false));
         CHECK_NULL_VOID(frameNode);
@@ -123,6 +125,11 @@ public:
     int32_t GetDisplayStartIndexInGroup() const
     {
         return itemDisplayStartIndex_;
+    }
+
+    int32_t GetItemStartIndex() const
+    {
+        return itemStartIndex_;
     }
 
     int32_t GetEndIndexInGroup() const

@@ -42,6 +42,12 @@ public:
     virtual int32_t GetUdKey(std::string& udKey) = 0;
 
     virtual int32_t GetShadowOffset(ShadowOffsetData& shadowOffsetData) = 0;
+
+    virtual int32_t GetDragState(DragState& dragState) const = 0;
+
+    virtual int32_t GetDragSummary(std::map<std::string, int64_t>& summary) = 0;
+
+    virtual int32_t GetDragExtraInfo(std::string& extraInfo) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INTERACTION_INTERFACE_H

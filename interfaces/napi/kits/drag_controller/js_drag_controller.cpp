@@ -270,7 +270,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
 
             Msdp::DeviceStatus::DragData dragData {
                 { asyncCtx->pixmap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE }, {}, udKey, "", "",
-                asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true
+                asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, {}
             };
 
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
@@ -461,11 +461,15 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
     napi_open_escapable_handle_scope(env, &scope);
 
     auto* asyncCtx = new DragControllerAsyncCtx();
+    if (asyncCtx == nullptr) {
+        LOGE("DragControllerAsyncContext is null");
+        return nullptr;
+    }
     InitializeDragControllerCtx(env, info, asyncCtx);
 
     std::string errMsg;
     if (!CheckAndParseParams(asyncCtx, errMsg)) {
-        NapiThrow(asyncCtx->env, errMsg, Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(asyncCtx->env, errMsg, Framework::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
 

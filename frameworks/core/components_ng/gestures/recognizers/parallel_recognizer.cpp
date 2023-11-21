@@ -86,7 +86,9 @@ bool ParallelRecognizer::HandleEvent(const TouchEvent& point)
     auto size = recognizers_.size();
     for (const auto& recognizer : recognizers_) {
         if (recognizer && recognizer->CheckTouchId(point.id)) {
+            auto saveRecognizer = recognizer;
             recognizer->HandleEvent(point);
+            AddGestureProcedure(point, saveRecognizer);
             if (recognizers_.size() < size) {
                 break;
             }

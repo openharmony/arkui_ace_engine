@@ -68,6 +68,8 @@ public:
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsDraggable(const JSCallbackInfo& info);
     static void JsMenuOptionsExtension(const JSCallbackInfo& info);
+    static void JsEnableDataDetector(const JSCallbackInfo& info);
+    static void JsDataDetectorConfig(const JSCallbackInfo& info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

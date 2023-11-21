@@ -117,13 +117,24 @@ public:
     }
 
     void ResetAssociatedScroll();
-    bool UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node);
+    bool UpdateAssociatedScrollOffset(float offset);
     bool IsTitleModeFree();
+    void OnAttachToFrameNode() override;
+    void OnWindowFocused() override
+    {
+        WindowFocus(true);
+    }
+
+    void OnWindowUnfocused() override
+    {
+        WindowFocus(false);
+    }
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
 private:
+    void WindowFocus(bool isFocus);
     void RegistOritationListener();
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnModifyDone() override;

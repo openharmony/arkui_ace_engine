@@ -24,6 +24,12 @@
 #include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::NG {
+struct SecurityComponentElementStyle {
+    int32_t text;
+    int32_t icon;
+    int32_t backgroundType;
+};
+
 class ACE_EXPORT SecurityComponentModelNG {
 public:
     virtual ~SecurityComponentModelNG() = default;
@@ -31,6 +37,9 @@ public:
         int32_t backgroundType) = 0;
     void CreateCommon(const std::string& tag, int32_t text, int32_t icon,
         int32_t backgroundType,
+        const std::function<RefPtr<Pattern>(void)>& patternCreator);
+    RefPtr<FrameNode> CreateNode(const std::string& tag, int32_t nodeId,
+        SecurityComponentElementStyle& style,
         const std::function<RefPtr<Pattern>(void)>& patternCreator);
     static void SetIconSize(const Dimension& value);
     static void SetIconColor(const Color& value);

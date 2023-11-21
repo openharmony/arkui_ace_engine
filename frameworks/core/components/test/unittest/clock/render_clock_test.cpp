@@ -18,7 +18,7 @@
 #define protected public
 #include "base/i18n/localization.h"
 #include "base/test/mock/mock_asset_manager.h"
-#include "base/test/mock/mock_task_executor.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "base/utils/system_properties.h"
 #include "core/common/test/mock/mock_resource_register.h"
 #include "frameworks/core/components/clock/clock_component.h"

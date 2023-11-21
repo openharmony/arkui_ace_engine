@@ -21,6 +21,11 @@
 #include "core/accessibility/accessibility_utils.h"
 #include "core/pipeline/base/base_composed_component.h"
 
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+class AccessibilityEventInfo;
+} // namespace OHOS::Accessibility
+
 namespace OHOS::Ace {
 
 struct AccessibilityEvent {
@@ -79,7 +84,26 @@ public:
     virtual bool IsVisibleChangeNodeExists(NodeId nodeId) = 0;
     virtual void UpdateEventTarget(NodeId id, BaseEventInfo& info) = 0;
     virtual void SetWindowPos(int32_t left, int32_t top, int32_t windowId) = 0;
-
+#ifdef WINDOW_SCENE_SUPPORTED
+    virtual void SearchElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
+        std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
+        int32_t uiExtensionOffset) = 0;
+    virtual void SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
+        std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
+        const int32_t uiExtensionOffset = 0) = 0;
+    virtual void FindFocusedElementInfoNG(int32_t elementId, int32_t focusType,
+        Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
+        const int32_t uiExtensionOffset = 0) = 0;
+    virtual void FocusMoveSearchNG(int32_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info,
+        const RefPtr<PipelineBase>& context, const int32_t uiExtensionOffset = 0) = 0;
+    virtual bool ExecuteExtensionActionNG(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, const RefPtr<PipelineBase>& context, int32_t uiExtensionOffset) = 0;
+    virtual bool SendAccessibilitySyncEvent(
+        const Accessibility::AccessibilityEventInfo& eventInfo, std::vector<int32_t>& uiExtensionIdLevelList)
+    {
+        return false;
+    }
+#endif
     void SetVersion(AccessibilityVersion version)
     {
         version_ = version;

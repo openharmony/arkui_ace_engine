@@ -36,6 +36,7 @@ build_component_ng("window_scene") {
     "scene/window_scene.cpp",
     "scene/window_scene_model.cpp",
     "screen/screen_model.cpp",
+    "screen/screen_node.cpp",
     "screen/screen_pattern.cpp",
   ]
 
@@ -52,7 +53,7 @@ build_component_ng("window_scene") {
       "window_manager:scene_session",
       "window_manager:scene_session_manager",
       "window_manager:screen_session",
-      "window_manager:screen_session_manager",
+      "window_manager:screen_session_manager_client",
     ]
   }
 }

@@ -478,7 +478,7 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
                 break;
             }
             TAG_LOGD(AceLogTag::ACE_LIST, "recycle item:%{public}d", pos->first);
-            layoutWrapper->RemoveChildInRenderTree(pos->first);
+            RecycleListItem(layoutWrapper, pos->first);
             itemPosition_.erase(pos++);
         }
         return;
@@ -488,7 +488,7 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
         if (LessOrEqual(pos->second.first, endPos - (referencePos - totalMainSize_))) {
             break;
         }
-        layoutWrapper->RemoveChildInRenderTree(pos->first);
+        RecycleListItem(layoutWrapper, pos->first);
         removeIndexes.emplace_back(pos->first);
     }
     for (const auto& index : removeIndexes) {

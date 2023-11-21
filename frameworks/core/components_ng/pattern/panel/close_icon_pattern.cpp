@@ -23,7 +23,10 @@ namespace OHOS::Ace::NG {
 void CloseIconPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    InitCloseIcon();
+    if (isFirstLayout_) {
+        InitCloseIcon();
+        isFirstLayout_ = false;
+    }
     InitButtonEvent();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -43,6 +46,9 @@ void CloseIconPattern::InitCloseIcon()
         CalcSize(CalcLength(closeIconLayoutProperty->GetCloseIconWidthValue()),
             CalcLength(closeIconLayoutProperty->GetCloseIconHeightValue())));
     buttonNode->MarkModifyDone();
+    auto pattern = buttonNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSkipColorConfigurationUpdate();
     auto imageNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();

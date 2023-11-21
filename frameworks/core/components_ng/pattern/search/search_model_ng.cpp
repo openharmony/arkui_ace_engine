@@ -45,6 +45,7 @@ RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::s
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::SEARCH_ETS_TAG, nodeId);
     auto frameNode =
         GetOrCreateSearchNode(V2::SEARCH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SearchPattern>(); });
 
@@ -607,6 +608,8 @@ void SearchModelNG::SetType(TextInputType value)
         layoutProperty->UpdateTypeChanged(true);
     }
     layoutProperty->UpdateTextInputType(value);
+    textFieldHost->MarkModifyDone();
+    textFieldHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const std::optional<std::string>& placeholder,
@@ -875,6 +878,7 @@ void SearchModelNG::SetMaxLength(uint32_t value)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateMaxLength(value);
+    textFieldChild->MarkModifyDone();
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 

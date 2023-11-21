@@ -148,7 +148,7 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
     }
 }
 
-bool FocusHub::RequestFocusImmediately()
+bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
 {
     auto context = NG::PipelineContext::GetCurrentContext();
     if (context && context->GetIsFocusingByTab()) {
@@ -162,6 +162,10 @@ bool FocusHub::RequestFocusImmediately()
     }
 
     if (!IsFocusableWholePath()) {
+        return false;
+    }
+
+    if (isJudgeRootTree && !IsOnRootTree()) {
         return false;
     }
 
@@ -1495,6 +1499,19 @@ bool FocusHub::IsFocusableWholePath()
     return IsFocusable();
 }
 
+bool FocusHub::IsOnRootTree()
+{
+    auto parent = GetParentFocusHub();
+    while (parent) {
+        auto parentName = parent->GetFrameName();
+        if (parentName == V2::ROOT_ETS_TAG) {
+            return true;
+        }
+        parent = parent->GetParentFocusHub();
+    }
+    return false;
+}
+
 void FocusHub::CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes)
 {
     if (GetTabIndex() > 0 && IsFocusable()) {
@@ -1646,7 +1663,7 @@ int32_t FocusHub::GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes) const
         }
         ++i;
     }
-    return NONE_TAB_FOCUSED_INDEX;
+    return DEFAULT_TAB_FOCUSED_INDEX;
 }
 
 bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event)

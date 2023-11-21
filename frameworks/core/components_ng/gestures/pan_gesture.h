@@ -36,10 +36,20 @@ public:
         fingers_ = fingers;
         direction_ = direction;
         distance_ = distance;
+        if (gestureInfo_) {
+            gestureInfo_->SetType(GestureTypeName::PAN_GESTURE);
+        } else {
+            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::PAN_GESTURE);
+        }
     };
     explicit PanGesture(RefPtr<PanGestureOption> panGestureOption)
     {
         panGestureOption_ = panGestureOption;
+        if (gestureInfo_) {
+            gestureInfo_->SetType(GestureTypeName::PAN_GESTURE);
+        } else {
+            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::PAN_GESTURE);
+        }
     };
     ~PanGesture() override = default;
 

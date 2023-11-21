@@ -166,6 +166,10 @@ void JSLocationButton::JSBind(BindingTarget globalObj)
     JSClass<JSLocationButton>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);
     JSClass<JSLocationButton>::StaticMethod("offset", &JSViewAbstract::JsOffset);
     JSClass<JSLocationButton>::StaticMethod("pop", &JSViewAbstract::Pop, opt);
+    JSClass<JSLocationButton>::StaticMethod("width", &JSViewAbstract::JsWidth);
+    JSClass<JSLocationButton>::StaticMethod("height", &JSViewAbstract::JsHeight);
+    JSClass<JSLocationButton>::StaticMethod("size", &JSViewAbstract::JsSize);
+    JSClass<JSLocationButton>::StaticMethod("constraintSize", &JSViewAbstract::JsConstraintSize);
     JSClass<JSLocationButton>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
     JSClass<JSLocationButton>::Bind<>(globalObj);
 }

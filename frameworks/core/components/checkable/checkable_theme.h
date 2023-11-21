@@ -155,6 +155,11 @@ public:
         return touchDuration_;
     }
 
+    const Dimension& GetCheckboxHotZonePadding() const
+    {
+        return checkboxHotZonePadding_;
+    }
+
 protected:
     CheckableTheme() = default;
 
@@ -177,6 +182,7 @@ protected:
     Dimension hoverRadius_;
     Dimension focusRadius_;
     Dimension focusPaintPadding_;
+    Dimension checkboxHotZonePadding_;
     double hoverDuration_ = 0.0f;
     double hoverToTouchDuration_ = 0.0f;
     double touchDuration_ = 0.0f;
@@ -203,26 +209,6 @@ public:
                 LOGI("Build AppTheme error, themeConstants is null!");
                 return theme;
             }
-            theme->width_ = themeConstants->GetDimension(THEME_CHECKBOX_SIZE);
-            theme->height_ = theme->width_;
-            theme->hotZoneHorizontalPadding_ = themeConstants->GetDimension(THEME_CHECKBOX_HOTZONE_PADDING);
-            theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
-            theme->pointColor_ = themeConstants->GetColor(THEME_CHECKBOX_POINT_COLOR);
-            theme->activeColor_ = themeConstants->GetColor(THEME_CHECKBOX_ACTIVE_COLOR);
-            theme->inactiveColor_ = themeConstants->GetColor(THEME_CHECKBOX_INACTIVE_COLOR);
-            theme->focusColor_ = themeConstants->GetColor(THEME_CHECKBOX_FOCUS_COLOR);
-            theme->defaultWidth_ = themeConstants->GetDimension(THEME_CHECKBOX_DEFAULT_SIZE);
-            theme->defaultHeight_ = theme->defaultWidth_;
-            theme->needFocus_ = themeConstants->GetInt(THEME_CHECKBOX_NEED_FOCUS);
-            theme->backgroundSolid_ = themeConstants->GetInt(THEME_CHECKBOX_INACTIVE_BACKGROUND_SOLID);
-            theme->borderWidth_ = themeConstants->GetDimension(THEME_CHECKBOX_BORDER_WIDTH);
-            theme->borderRadius_ = themeConstants->GetDimension(THEME_CHECKBOX_BORDER_RADIUS);
-            theme->checkStroke_ = themeConstants->GetDimension(THEME_CHECKBOX_STROKE_WIDTH);
-            theme->hoverColor_ = themeConstants->GetColor(THEME_CHECKBOX_HOVER_COLOR);
-            theme->inactivePointColor_ = themeConstants->GetColor(THEME_CHECKBOX_INACTIVE_POINT_COLOR);
-            theme->hoverRadius_ = themeConstants->GetDimension(THEME_CHECKBOX_HOVER_RADIUS);
-            theme->shadowColor_ = themeConstants->GetColor(THEME_CHECKBOX_SHADOW_COLOR);
-            theme->shadowWidth_ = themeConstants->GetDimension(THEME_CHECKBOX_SHADOW_WIDTH);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -238,6 +224,21 @@ public:
                 LOGE("Pattern of checkbox is null, please check!");
                 return;
             }
+            theme->width_ = checkboxPattern->GetAttr<Dimension>("checkbox_size", 0.0_vp);
+            theme->height_ = theme->width_;
+            std::string defaultPadding = checkboxPattern->GetAttr<std::string>("default_padding", "2.0vp");
+            theme->hotZoneHorizontalPadding_ = StringUtils::StringToDimension(defaultPadding, true);
+            theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
+            std::string defaultWidth = checkboxPattern->GetAttr<std::string>("default_width", "24.0vp");
+            theme->defaultWidth_ = StringUtils::StringToDimension(defaultWidth, true);
+            theme->defaultHeight_ = theme->defaultWidth_;
+            theme->needFocus_ = static_cast<bool>(checkboxPattern->GetAttr<double>("checkbox_need_focus", 0.0));
+            theme->backgroundSolid_ =
+                static_cast<bool>(checkboxPattern->GetAttr<double>("checkbox_inactive_background_solid", 0.0));
+            theme->borderWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_border_width", 0.0_vp);
+            theme->checkStroke_ = checkboxPattern->GetAttr<Dimension>("checkbox_stroke_width", 0.0_vp);
+            theme->shadowColor_ = checkboxPattern->GetAttr<Color>("checkbox_shadow_color", Color());
+            theme->shadowWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_shadow_width", 0.0_vp);
             theme->pointColor_ = checkboxPattern->GetAttr<Color>("fg_color_checked", Color::RED);
             theme->activeColor_ = checkboxPattern->GetAttr<Color>("bg_color_checked", Color::RED);
             theme->inactiveColor_ = checkboxPattern->GetAttr<Color>("bg_border_color_unchecked", Color::RED);
@@ -253,6 +254,7 @@ public:
             theme->hoverToTouchDuration_ = checkboxPattern->GetAttr<double>("hover_to_press_animation_duration", 0.0);
             theme->touchDuration_ = checkboxPattern->GetAttr<double>("touch_animation_duration", 0.0);
             theme->colorAnimationDuration_ = checkboxPattern->GetAttr<double>("color_animation_duration", 0.0);
+            theme->checkboxHotZonePadding_ = checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding", 14.0_vp);
 
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
@@ -304,25 +306,6 @@ public:
                 LOGE("Build AppTheme error, themeConstants is null!");
                 return theme;
             }
-            theme->width_ = themeConstants->GetDimension(THEME_SWITCH_WIDTH);
-            theme->height_ = themeConstants->GetDimension(THEME_SWITCH_HEIGHT);
-            theme->hotZoneHorizontalPadding_ = themeConstants->GetDimension(THEME_SWITCH_HOTZONE_HORIZONTAL_PADDING);
-            theme->hotZoneVerticalPadding_ = themeConstants->GetDimension(THEME_SWITCH_HOTZONE_VERTICAL_PADDING);
-            theme->aspectRatio_ = themeConstants->GetDouble(THEME_SWITCH_ASPECT_RATIO);
-            theme->backgroundSolid_ = themeConstants->GetInt(THEME_SWITCH_INACTIVE_BACKGROUND_SOLID);
-            theme->pointColor_ = themeConstants->GetColor(THEME_SWITCH_POINT_COLOR);
-            theme->activeColor_ = themeConstants->GetColor(THEME_SWITCH_ACTIVE_COLOR);
-            theme->inactiveColor_ = themeConstants->GetColor(THEME_SWITCH_INACTIVE_COLOR);
-            theme->focusColor_ = themeConstants->GetColor(THEME_SWITCH_FOCUS_COLOR);
-            theme->defaultWidth_ = themeConstants->GetDimension(THEME_SWITCH_DEFAULT_WIDTH);
-            theme->defaultHeight_ = themeConstants->GetDimension(THEME_SWITCH_DEFAULT_HEIGHT);
-            theme->needFocus_ = themeConstants->GetInt(THEME_SWITCH_NEED_FOCUS);
-            theme->borderWidth_ = themeConstants->GetDimension(THEME_SWITCH_BORDER_WIDTH);
-            theme->hoverColor_ = themeConstants->GetColor(THEME_SWITCH_HOVER_COLOR);
-            theme->hoverRadius_ = themeConstants->GetDimension(THEME_SWITCH_HOVER_RADIUS);
-            theme->inactivePointColor_ = themeConstants->GetColor(THEME_SWITCH_INACTIVE_POINT_COLOR);
-            theme->shadowColor_ = themeConstants->GetColor(THEME_SWITCH_SHADOW_COLOR);
-            theme->shadowWidth_ = themeConstants->GetDimension(THEME_SWITCH_SHADOW_WIDTH);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -338,6 +321,21 @@ public:
                 LOGE("Pattern of switch is null, please check!");
                 return;
             }
+            theme->width_ = switchPattern->GetAttr<Dimension>("switch_pattern_width", 0.0_vp);
+            theme->height_ = switchPattern->GetAttr<Dimension>("switch_pattern_height", 0.0_vp);
+            theme->hotZoneHorizontalPadding_ =
+                switchPattern->GetAttr<Dimension>("switch_hotzone_horizontal_padding", 0.0_vp);
+            theme->hotZoneVerticalPadding_ =
+                switchPattern->GetAttr<Dimension>("switch_hotzone_vertical_padding", 0.0_vp);
+            theme->aspectRatio_ = switchPattern->GetAttr<double>("switch_aspect_ratio", 0.0);
+            theme->backgroundSolid_ =
+                static_cast<bool>(switchPattern->GetAttr<double>("switch_inactive_background_solid", 0.0));
+            theme->defaultWidth_ = switchPattern->GetAttr<Dimension>("switch_default_width", 0.0_vp);
+            theme->defaultHeight_ = switchPattern->GetAttr<Dimension>("switch_default_height", 0.0_vp);
+            theme->needFocus_ = static_cast<bool>(switchPattern->GetAttr<double>("switch_need_focus", 0.0));
+            theme->borderWidth_ = switchPattern->GetAttr<Dimension>("switch_border_width", 0.0_vp);
+            theme->shadowColor_ = switchPattern->GetAttr<Color>("switch_shadow_color", Color());
+            theme->shadowWidth_ = switchPattern->GetAttr<Dimension>("switch_pattern_shadow_width", 0.0_vp);
             theme->pointColor_ = switchPattern->GetAttr<Color>("fg_color_checked", Color::RED);
             theme->activeColor_ = switchPattern->GetAttr<Color>("bg_color_checked", Color::RED);
             theme->inactiveColor_ = switchPattern->GetAttr<Color>("bg_color_unchecked", Color::RED);
@@ -399,24 +397,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->width_ = themeConstants->GetDimension(THEME_RADIO_SIZE);
-            theme->height_ = theme->width_;
-            theme->hotZoneHorizontalPadding_ = themeConstants->GetDimension(THEME_RADIO_HOTZONE_PADDING);
-            theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
-            theme->pointColor_ = themeConstants->GetColor(THEME_RADIO_POINT_COLOR);
-            theme->activeColor_ = themeConstants->GetColor(THEME_RADIO_ACTIVE_COLOR);
-            theme->inactiveColor_ = themeConstants->GetColor(THEME_RADIO_INACTIVE_COLOR);
-            theme->focusColor_ = themeConstants->GetColor(THEME_RADIO_FOCUS_COLOR);
-            theme->defaultWidth_ = themeConstants->GetDimension(THEME_RADIO_DEFAULT_SIZE);
-            theme->defaultHeight_ = theme->defaultWidth_;
-            theme->radioInnerSizeRatio_ = themeConstants->GetDouble(THEME_RADIO_INNER_SIZE_RATIO);
-            theme->needFocus_ = themeConstants->GetInt(THEME_RADIO_NEED_FOCUS);
-            theme->backgroundSolid_ = themeConstants->GetInt(THEME_RADIO_INACTIVE_BACKGROUND_SOLID);
-            theme->borderWidth_ = themeConstants->GetDimension(THEME_RADIO_BORDER_WIDTH);
-            theme->hoverColor_ = themeConstants->GetColor(THEME_RADIO_HOVER_COLOR);
-            theme->inactivePointColor_ = themeConstants->GetColor(THEME_RADIO_INACTIVE_POINT_COLOR);
-            theme->shadowColor_ = themeConstants->GetColor(THEME_RADIO_SHADOW_COLOR);
-            theme->shadowWidth_ = themeConstants->GetDimension(THEME_RADIO_SHADOW_WIDTH);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -432,6 +412,19 @@ public:
                 LOGW("find pattern of radio fail");
                 return;
             }
+            theme->width_ = radioPattern->GetAttr<Dimension>("radio_size", 0.0_vp);
+            theme->height_ = theme->width_;
+            theme->hotZoneHorizontalPadding_ = radioPattern->GetAttr<Dimension>("radio_hotzone_padding", 0.0_vp);
+            theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
+            theme->defaultWidth_ = radioPattern->GetAttr<Dimension>("radio_default_size", 0.0_vp);
+            theme->defaultHeight_ = theme->defaultWidth_;
+            theme->radioInnerSizeRatio_ = radioPattern->GetAttr<double>("radio_inner_size_ratio", 0.0);
+            theme->needFocus_ = static_cast<bool>(radioPattern->GetAttr<double>("radio_need_focus", 0.0));
+            theme->backgroundSolid_ =
+                static_cast<bool>(radioPattern->GetAttr<double>("radio_inactive_background_solid", 0.0));
+            theme->borderWidth_ = radioPattern->GetAttr<Dimension>("radio_border_width", 0.0_vp);
+            theme->shadowColor_ = radioPattern->GetAttr<Color>("radio_shadow_color", Color());
+            theme->shadowWidth_ = radioPattern->GetAttr<Dimension>("radio_shadow_width", 0.0_vp);
             theme->pointColor_ = radioPattern->GetAttr<Color>("fg_color_checked", Color::RED);
             theme->activeColor_ = radioPattern->GetAttr<Color>("bg_color_checked", Color::RED);
             theme->inactiveColor_ = radioPattern->GetAttr<Color>("bg_color_unchecked", Color::RED);

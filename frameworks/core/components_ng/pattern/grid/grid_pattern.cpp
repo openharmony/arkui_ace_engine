@@ -249,6 +249,14 @@ void GridPattern::FireOnScrollStart()
     if (GetScrollAbort()) {
         return;
     }
+    if (scrollStop_) {
+        // onScrollStart triggers immediately on gesture dragStart, but onScrollStop marks scrollStop_ to true on
+        // gesture dragEnd, and consumes it/fires onScrollStop after layout. When the user quickly swipes twice, the
+        // second onScrollStart can trigger before the first onScrollEnd. In this case, we let the two events annihilate
+        // each other and fire neither.
+        scrollStop_ = false;
+        return;
+    }
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
         scrollBar->PlayScrollBarAppearAnimation();
@@ -327,6 +335,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return false;
     }
     SetScrollSource(source);
+    FireAndCleanScrollingListener();
 
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
@@ -344,7 +353,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             gridLayoutInfo_.currentOffset_ += offset;
             overScroll += offset;
         }
-        HandleScrollBarOutBoundary(overScroll);
+        if (IsOutOfBoundary()) {
+            HandleScrollBarOutBoundary(overScroll);
+        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (GreatNotEqual(gridLayoutInfo_.currentOffset_, GetMainContentSize() - itemsHeight)) {
@@ -364,7 +375,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             gridLayoutInfo_.currentOffset_ += offset;
         }
         overScroll = gridLayoutInfo_.currentOffset_;
-        HandleScrollBarOutBoundary(overScroll);
+        if (IsOutOfBoundary()) {
+            HandleScrollBarOutBoundary(overScroll);
+        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (LessNotEqual(gridLayoutInfo_.currentOffset_, 0.0)) {
@@ -409,6 +422,9 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
                         (gridLayoutInfo.endIndex_ != gridLayoutInfo_.endIndex_);
     bool offsetEnd = gridLayoutInfo_.offsetEnd_;
     gridLayoutInfo_ = gridLayoutInfo;
+    if (gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_)) {
+        gridLayoutInfo_.reachStart_ = true;
+    }
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
     currentHeight_ = EstimateHeight();
     if (!offsetEnd && gridLayoutInfo_.offsetEnd_) {
@@ -1370,31 +1386,7 @@ float GridPattern::EstimateHeight() const
         return info.GetContentOffset(mainGap);
     }
 
-    float heightSum = 0;
-    int32_t itemCount = 0;
-    float height = 0;
-    for (const auto& item : info.lineHeightMap_) {
-        auto line = info.gridMatrix_.find(item.first);
-        if (line == info.gridMatrix_.end()) {
-            continue;
-        }
-        if (line->second.empty()) {
-            continue;
-        }
-        auto lineStart = line->second.begin()->second;
-        auto lineEnd = line->second.rbegin()->second;
-        itemCount += (lineEnd - lineStart + 1);
-        heightSum += item.second + mainGap;
-    }
-    if (itemCount == 0) {
-        return 0;
-    }
-    auto averageHeight = heightSum / itemCount;
-    height = info.startIndex_ * averageHeight - info.currentOffset_;
-    if (itemCount >= (info.childrenCount_ - 1)) {
-        height = info.GetStartLineOffset(mainGap);
-    }
-    return height;
+    return info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
 }
 
 float GridPattern::GetAverageHeight() const
@@ -1467,26 +1459,8 @@ void GridPattern::UpdateScrollBarOffset()
             offset = gridLayoutInfo_.GetContentOffset(mainGap);
             estimatedHeight = gridLayoutInfo_.GetContentHeight(mainGap);
         } else {
-            float heightSum = 0;
-            int32_t itemCount = 0;
-            for (const auto& item : info.lineHeightMap_) {
-                auto line = info.gridMatrix_.find(item.first);
-                if (line == info.gridMatrix_.end() || line->second.empty()) {
-                    continue;
-                }
-                auto lineStart = line->second.begin()->second;
-                auto lineEnd = line->second.rbegin()->second;
-                itemCount += (lineEnd - lineStart + 1);
-                heightSum += item.second + mainGap;
-            }
-            auto averageHeight = itemCount == 0 ? 0.0 : heightSum / itemCount;
-            offset = info.startIndex_ * averageHeight - info.currentOffset_;
-            if (itemCount >= (info.childrenCount_ - 1)) {
-                estimatedHeight = heightSum - mainGap;
-                offset = info.GetStartLineOffset(mainGap);
-            } else {
-                estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight;
-            }
+            offset = info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
+            estimatedHeight = info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), mainGap);
         }
     }
     if (info.startMainLineIndex_ != 0 && info.startIndex_ == 0) {
@@ -1641,6 +1615,10 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
     }
     if (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) {
         auto endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
+        if (GreatNotEqual(GetMainContentSize(),
+            gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_)) {
+            endPos = gridLayoutInfo_.currentOffset_ + GetMainContentSize();
+        }
         auto newEndPos = endPos + delta;
         if (endPos < gridLayoutInfo_.lastMainSize_ && newEndPos < gridLayoutInfo_.lastMainSize_) {
             offset.end = delta;
@@ -1833,5 +1811,6 @@ void GridPattern::ScrollToIndex(int32_t index, bool /* smooth */, ScrollAlign al
     }
     StopAnimate();
     UpdateStartIndex(index, align);
+    FireAndCleanScrollingListener();
 }
 } // namespace OHOS::Ace::NG

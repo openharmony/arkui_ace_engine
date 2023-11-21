@@ -46,7 +46,7 @@ class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
     ~ViewAbstractModelNG() override = default;
 
-    static void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
+    static void CreateCustomMenu(const std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
         const NG::OffsetF& offset, std::function<void()>& previewBuildFunc, MenuParam menuParam);
 
     void SetWidth(const CalcDimension& width) override
@@ -567,9 +567,9 @@ public:
         ViewAbstract::SetProgressMask(progress);
     }
 
-    void SetBackdropBlur(const Dimension& radius) override
+    void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) override
     {
-        ViewAbstract::SetBackdropBlur(radius);
+        ViewAbstract::SetBackdropBlur(radius, blurOption);
     }
 
     void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override
@@ -582,9 +582,9 @@ public:
         ViewAbstract::SetDynamicLightUp(rate, lightUpDegree);
     }
 
-    void SetFrontBlur(const Dimension& radius) override
+    void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override
     {
-        ViewAbstract::SetFrontBlur(radius);
+        ViewAbstract::SetFrontBlur(radius, blurOption);
     }
 
     void SetBackShadow(const std::vector<Shadow>& shadows) override
@@ -631,7 +631,7 @@ public:
         ViewAbstract::SetSepia(value);
     }
 
-    void SetInvert(const Dimension& value) override
+    void SetInvert(const InvertVariant& value) override
     {
         ViewAbstract::SetInvert(value);
     }
@@ -646,6 +646,11 @@ public:
         ViewAbstract::SetUseEffect(useEffect);
     }
 
+    void SetUseShadowBatching(bool useShadowBatching) override
+    {
+        ViewAbstract::SetUseShadowBatching(useShadowBatching);
+    }
+
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override
     {
         ViewAbstract::SetClickEffectLevel(level, scaleValue);
@@ -654,6 +659,11 @@ public:
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override
     {
         ViewAbstract::SetOnClick(std::move(tapEventFunc));
+    }
+
+    void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override
+    {
+        ViewAbstract::SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
     }
 
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override

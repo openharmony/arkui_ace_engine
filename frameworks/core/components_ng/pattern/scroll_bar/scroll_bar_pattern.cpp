@@ -139,6 +139,10 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
             }
             return true;
         }
+        if (!Positive(controlDistance_)) {
+            SetOpacity(0);
+            return true;
+        }
     }
     return false;
 }
@@ -318,6 +322,10 @@ void ScrollBarPattern::HandleDragUpdate(const GestureEvent& info)
 {
     if (scrollPositionCallback_) {
         auto offset = info.GetMainDelta();
+        // The offset of the mouse wheel and gesture is opposite.
+        if (info.GetInputEventType() == InputEventType::AXIS && !NearZero(controlDistance_)) {
+            offset = - offset * scrollableDistance_ / controlDistance_;
+        }
         scrollPositionCallback_(offset, SCROLL_FROM_BAR);
     }
 }
@@ -325,7 +333,7 @@ void ScrollBarPattern::HandleDragUpdate(const GestureEvent& info)
 void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
 {
     auto velocity = info.GetMainVelocity();
-    if (NearZero(velocity)) {
+    if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
         if (scrollEndCallback_) {
             if (scrollBarProxy_) {
                 scrollBarProxy_->NotifyScrollStop();

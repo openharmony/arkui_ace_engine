@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "base/geometry/axis.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#include "core/common/udmf/unified_data.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/web/web_property.h"
@@ -508,6 +509,8 @@ private:
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDragDropFile(RefPtr<UnifiedData> aceData);
+    void HandleOnDragDropLink(RefPtr<UnifiedData> aceData);
     void HandleOnDragLeave(int32_t x, int32_t y);
     void HandleOnDragEnd(int32_t x, int32_t y);
     int32_t dropX_ = 0;
@@ -627,7 +630,7 @@ private:
     bool isFirstFlingScrollVelocity_ = true;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool scrollState_ = false;
-    NestedScrollMode nestedScrollMode_ = NestedScrollMode::SELF_ONLY;
+    NestedScrollMode nestedScrollMode_ = NestedScrollMode::SELF_FIRST;
     Axis axis_ = Axis::FREE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;

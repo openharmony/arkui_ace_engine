@@ -22,12 +22,18 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "base/view_data/view_data_wrap.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
+
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+class AccessibilityEventInfo;
+}
 
 namespace OHOS::Ace::NG {
 struct DirtySwapConfig {
@@ -288,6 +294,14 @@ public:
 
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
+    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
+    virtual void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
+    virtual void NotifyFillRequestFailed(int32_t errCode) {}
+    virtual bool CheckAutoSave()
+    {
+        return false;
+    }
+
     template<typename T>
     RefPtr<T> GetLayoutProperty() const
     {
@@ -401,6 +415,30 @@ public:
 
     virtual void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) {}
     virtual void FireAndCleanScrollingListener() {}
+
+    virtual int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
+    {
+        return -1;
+    }
+    
+    virtual void SearchExtensionElementInfoByAccessibilityId(int32_t elementId, int32_t mode,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {}
+    virtual void SearchElementInfosByText(int32_t elementId, const std::string& text,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {}
+    virtual void FindFocusedElementInfo(int32_t elementId, int32_t focusType,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
+    virtual void FocusMoveSearch(int32_t elementId, int32_t direction,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
+    virtual bool TransferExecuteAction(
+        int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
+    {
+        return false;
+    }
+
+    virtual int32_t GetUiExtensionId()
+    {
+        return -1;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}

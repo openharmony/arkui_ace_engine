@@ -38,6 +38,22 @@ public:
     void OnAccepted() override;
     void OnRejected() override;
 
+    Axis GetAxisDirection() override
+    {
+        switch (direction_.type) {
+            case SwipeDirection::HORIZONTAL:
+                return Axis::HORIZONTAL;
+            case SwipeDirection::VERTICAL:
+                return Axis::VERTICAL;
+            case SwipeDirection::ALL:
+                return Axis::FREE;
+            default:
+                return Axis::NONE;
+        }
+    }
+
+    virtual RefPtr<GestureSnapshot> Dump() const override;
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -52,6 +68,7 @@ private:
     void OnResetStatus() override;
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    GestureJudgeResult TriggerGestureJudgeCallback();
 
     bool CheckAngle(double angle);
 
@@ -61,8 +78,7 @@ private:
     std::map<int32_t, TouchEvent> downEvents_;
 
     AxisEvent axisEventStart_;
-    double axisVerticalTotal_ = 0.0;
-    double axisHorizontalTotal_ = 0.0;
+    Offset axisOffset_;
 
     TimeStamp time_;
     TimeStamp touchDownTime_;

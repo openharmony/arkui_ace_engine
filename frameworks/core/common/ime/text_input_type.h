@@ -33,7 +33,11 @@ enum class TextInputType {
     EMAIL_ADDRESS = 5,
     URL = 6,
     VISIBLE_PASSWORD = 7,
-    END = VISIBLE_PASSWORD,
+    NUMBER_PASSWORD = 8,
+    SCREEN_LOCK_PASSWORD = 9,
+    USER_NAME = 10,
+    NEW_PASSWORD = 11,
+    END = NEW_PASSWORD,
 };
 
 TextInputType CastToTextInputType(int32_t value);

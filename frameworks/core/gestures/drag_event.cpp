@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- #include "drag_event.h"
+#include "drag_event.h"
 
 namespace OHOS::Ace {
 #ifdef ENABLE_DRAG_FRAMEWORK

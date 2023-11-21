@@ -22,7 +22,7 @@ BackgroundTaskExecutor& BackgroundTaskExecutor::GetInstance()
     return instance;
 }
 
-BackgroundTaskExecutor::BackgroundTaskExecutor() {}
+BackgroundTaskExecutor::BackgroundTaskExecutor() = default;
 
 BackgroundTaskExecutor::~BackgroundTaskExecutor() {}
 

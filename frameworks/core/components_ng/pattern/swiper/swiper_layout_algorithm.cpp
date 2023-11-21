@@ -248,6 +248,7 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
     float startPos = 0.0f;
     float endPos = 0.0f;
     int32_t startIndexInVisibleWindow = 0;
+    prevItemPosition_ = itemPosition_;
     if (!itemPosition_.empty()) {
         startPos = itemPosition_.begin()->second.startPos;
         endPos = itemPosition_.rbegin()->second.endPos;
@@ -294,6 +295,14 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
             int32_t stepsFromCurrentToTarget = endIndex - targetIndex_.value();
             endIndex -= (stepsFromCurrentToTarget > (totalItemCount_ - 1))
                 ? (stepsFromCurrentToTarget - totalItemCount_ + 1) : 0;
+
+            auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
+            auto iter = prevItemPosition_.find(endIndex);
+            if (swiperLayoutProperty && !SwiperUtils::IsStretch(swiperLayoutProperty) &&
+                iter != prevItemPosition_.end()) {
+                endPos = iter->second.endPos;
+            }
+
             LayoutBackward(layoutWrapper, layoutConstraint, axis, endIndex, endPos);
             if (LessNotEqual(GetEndPosition(), endMainPos_)) {
                 LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());

@@ -23,8 +23,8 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
-#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace {
 
@@ -33,7 +33,7 @@ constexpr double SELECT_OPTION_TOP_LENGTH = 15.0;
 constexpr double SELECT_OPTION_RIGHT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_BOTTOM_LENGTH = 15.0;
 constexpr Dimension VERTICAL_INTERVAL = 14.4_vp;
-constexpr Dimension MENU_END_ICON_WIDTH = 12.0_vp;
+constexpr Dimension MENU_END_ICON_WIDTH = 24.0_vp;
 constexpr Dimension MENU_END_ICON_HEIGHT = 24.0_vp;
 constexpr Dimension DEFAULT_MENU_WIDTH = 0.0_vp;
 constexpr Dimension MIN_MENU_WIDTH = 64.0_vp;
@@ -196,6 +196,10 @@ public:
             theme->endIconWidth_ = MENU_END_ICON_WIDTH;
             theme->endIconHeight_ = MENU_END_ICON_HEIGHT;
             theme->contentMargin_ = pattern->GetAttr<Dimension>("content_margin", theme->contentMargin_);
+            theme->selectDefaultBgColor_ =
+                pattern->GetAttr<Color>("select_default_bg_color", theme->selectDefaultBgColor_);
+            theme->selectDefaultBorderRadius_ =
+                pattern->GetAttr<Dimension>("select_default_border_radius", theme->selectDefaultBorderRadius_);
         }
     };
 
@@ -286,6 +290,8 @@ public:
         theme->endIconWidth_ = endIconWidth_;
         theme->endIconHeight_ = endIconHeight_;
         theme->contentMargin_ = contentMargin_;
+        theme->selectDefaultBgColor_ = selectDefaultBgColor_;
+        theme->selectDefaultBorderRadius_ = selectDefaultBorderRadius_;
         return theme;
     }
 
@@ -812,6 +818,16 @@ public:
     {
         return contentMargin_;
     }
+    
+    const Color& GetSelectDefaultBgColor() const
+    {
+        return selectDefaultBgColor_;
+    }
+
+    const Dimension& GetSelectDefaultBorderRadius() const
+    {
+        return selectDefaultBorderRadius_;
+    }
 
 private:
     Color disabledColor_;
@@ -908,6 +924,9 @@ private:
     int32_t pressAnimationDuration_ = 0;
 
     Edge optionPadding_;
+    
+    Color selectDefaultBgColor_;
+    Dimension selectDefaultBorderRadius_;
 };
 
 } // namespace OHOS::Ace

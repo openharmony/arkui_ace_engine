@@ -36,10 +36,10 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
 {
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    auto backButtonNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
-    CHECK_NULL_VOID(backButtonNode);
+    auto navigatorNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
+    CHECK_NULL_VOID(navigatorNode);
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) == TitleBarParentType::NAVBAR) {
-        auto buttonNode = backButtonNode->GetChildren().front();
+        auto buttonNode = navigatorNode->GetChildren().front();
         CHECK_NULL_VOID(buttonNode);
         auto backButtonImageNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
         CHECK_NULL_VOID(backButtonImageNode);
@@ -53,19 +53,21 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
         auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
         CHECK_NULL_VOID(navBarLayoutProperty);
         auto hideBackButton = navBarLayoutProperty->GetHideBackButtonValue(false);
-        backButtonImageLayoutProperty->UpdateVisibility(hideBackButton ? VisibleType::GONE : VisibleType::VISIBLE);
+        auto backButtonLayoutProperty = AceType::DynamicCast<FrameNode>(buttonNode)->GetLayoutProperty();
+        CHECK_NULL_VOID(backButtonLayoutProperty);
+        backButtonLayoutProperty->UpdateVisibility(hideBackButton ? VisibleType::GONE : VisibleType::VISIBLE);
         backButtonImageNode->MarkModifyDone();
         return;
     }
     if (!titleBarLayoutProperty->HasNoPixMap()) {
-        backButtonNode->MarkModifyDone();
+        navigatorNode->MarkModifyDone();
         return;
     }
     RefPtr<ImageLayoutProperty> backButtonImageLayoutProperty;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        backButtonImageLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+        backButtonImageLayoutProperty = navigatorNode->GetLayoutProperty<ImageLayoutProperty>();
     } else {
-        auto buttonNode = backButtonNode->GetChildren().front();
+        auto buttonNode = navigatorNode->GetChildren().front();
         CHECK_NULL_VOID(buttonNode);
         auto backButtonImageNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
         CHECK_NULL_VOID(backButtonImageNode);
@@ -74,13 +76,13 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
     if (titleBarLayoutProperty->HasImageSource()) {
         backButtonImageLayoutProperty->UpdateImageSourceInfo(titleBarLayoutProperty->GetImageSourceValue());
-        backButtonNode->MarkModifyDone();
+        navigatorNode->MarkModifyDone();
         return;
     }
 
     if (titleBarLayoutProperty->HasPixelMap()) {
         // TODO: use pixelMap
-        backButtonNode->MarkModifyDone();
+        navigatorNode->MarkModifyDone();
         return;
     }
 }
@@ -424,11 +426,6 @@ void TitleBarPattern::ProcessTitleDragEnd()
         } else if (GreatNotEqual(tempTitleBarHeight_, titleMiddleValue)) {
             AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_);
             enableAssociatedScroll_ = false;
-            CHECK_NULL_VOID(associatedScrollNode_);
-            auto scrollablePattern = associatedScrollNode_->GetPattern<ScrollablePattern>();
-            CHECK_NULL_VOID(scrollablePattern);
-            scrollablePattern->StopAnimate();
-            scrollablePattern->AnimateTo(0, DEFAULT_ANIMATION_DURATION, Curves::FAST_OUT_SLOW_IN, false);
             return;
         }
     }
@@ -789,9 +786,8 @@ void TitleBarPattern::ResetAssociatedScroll()
     SetMaxTitleBarHeight();
 }
 
-bool TitleBarPattern::UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node)
+bool TitleBarPattern::UpdateAssociatedScrollOffset(float offset)
 {
-    associatedScrollNode_ = node;
     if (!enableAssociatedScroll_) {
         return true;
     }

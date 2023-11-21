@@ -114,6 +114,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         relativeOffset += absoluteOffset - currentOffset_;
         isJump = true;
     }
+    targetIndex_ = listLayoutAlgorithm->GetTargetIndex();
     if (targetIndex_) {
         auto iter = itemPosition_.find(targetIndex_.value());
         if (iter != itemPosition_.end()) {
@@ -660,6 +661,9 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
     }
     if (endIndex_ == maxListItemIndex_ && groupAtEnd) {
         auto endPos = endMainPos_ + GetChainDelta(endIndex_);
+        if (GreatNotEqual(contentMainSize_, endMainPos_ - startMainPos_)) {
+            endPos = startMainPos_ + contentMainSize_;
+        }
         auto newEndPos = endPos + delta;
         if (endPos < contentMainSize_ && newEndPos < contentMainSize_) {
             offset.end = delta;
@@ -695,6 +699,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         return false;
     }
     SetScrollSource(source);
+    FireAndCleanScrollingListener();
     currentDelta_ = currentDelta_ - offset;
     MarkDirtyNodeSelf();
     if (!IsOutOfBoundary() || !scrollable_) {
@@ -742,6 +747,7 @@ void ListPattern::MarkDirtyNodeSelf()
 
 void ListPattern::OnScrollEndCallback()
 {
+    SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
 }
@@ -1240,20 +1246,11 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto totalItemCount = host->TotalChildCount();
     if ((index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM)) {
         currentDelta_ = 0.0f;
         smooth_ = smooth;
         if (smooth_) {
             targetIndex_ = index;
-            if (index == ListLayoutAlgorithm::LAST_ITEM) {
-                targetIndex_ = totalItemCount - 1;
-            } else if ((LessNotEqual(targetIndex_.value(), 0)) ||
-                       (GreatOrEqual(targetIndex_.value(), totalItemCount))) {
-                targetIndex_.reset();
-            }
         } else {
             jumpIndex_ = index;
         }
@@ -1261,6 +1258,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
         MarkDirtyNodeSelf();
     }
     isScrollEnd_ = true;
+    FireAndCleanScrollingListener();
 }
 
 void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align)
@@ -1275,6 +1273,7 @@ void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign
         MarkDirtyNodeSelf();
     }
     isScrollEnd_ = true;
+    FireAndCleanScrollingListener();
 }
 
 bool ListPattern::ScrollPage(bool reverse)
@@ -1368,7 +1367,7 @@ Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
         indexInGroup > groupPattern->GetDisplayEndIndexInGroup()) {
         return Rect();
     }
-    auto groupItem = itemGroup->GetChildByIndex(indexInGroup);
+    auto groupItem = itemGroup->GetChildByIndex(indexInGroup + groupPattern->GetItemStartIndex());
     CHECK_NULL_RETURN(groupItem, Rect());
     auto groupItemGeometry = groupItem->GetGeometryNode();
     CHECK_NULL_RETURN(groupItemGeometry, Rect());
@@ -1891,6 +1890,14 @@ void ListPattern::RefreshLanesItemRange()
 std::string ListPattern::ProvideRestoreInfo()
 {
     return std::to_string(startIndex_);
+}
+
+void ListPattern::CloseAllSwipeActions(OnFinishFunc&& onFinishCallback)
+{
+    auto item = swiperItem_.Upgrade();
+    if (item) {
+        return item->CloseSwipeAction(std::move(onFinishCallback));
+    }
 }
 
 void ListPattern::OnRestoreInfo(const std::string& restoreInfo)

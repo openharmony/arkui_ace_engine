@@ -26,7 +26,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ModelViewNG : public ModelView {
 public:
     ModelViewNG();
-    void Create(const std::string& src, Render3D::SurfaceType surfaceType) override;
+    void Create(const std::string& src, const std::string& bundleName,
+        const std::string& moduleName, Render3D::SurfaceType surfaceType) override;
     void SetBackground(const std::string& value) override;
     void SetHandleCameraMove(bool value) override;
     void SetTransparent(bool value) override;
@@ -42,6 +43,9 @@ public:
     void AddCustomRender(const std::shared_ptr<Render3D::CustomRenderDescriptor>& customRender) override;
     void SetWidth(Dimension& width) override;
     void SetHeight(Dimension& height) override;
+    void SetRenderWidth(Dimension& width) override;
+    void SetRenderHeight(Dimension& height) override;
+    void SetRenderFrameRate(float rate) override;
     void SetShader(const std::string& path) override;
     void AddShaderImageTexture(const std::string& path) override;
     void AddShaderInputBuffer(const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer) override;
@@ -55,8 +59,6 @@ private:
     WeakPtr<FrameNode> frameNode_;
     ModelPosition cameraPosition_;
     std::vector<RefPtr<ModelLight>> lights_;
-    bool isFirstLightsUpdate_ = true;
-    int lightsIdx_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <memory>
 #include <mutex>
+#include <list>
 
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
@@ -28,11 +29,21 @@
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
+#include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
+#include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/pipeline/pipeline_context.h"
 #include "base/memory/ace_type.h"
+
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+}
+
+namespace OHOS::Ace {
+class FontManager;
+}
 
 namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
@@ -44,10 +55,11 @@ struct ParsedConfig {
     std::string languageTag;
     std::string direction;
     std::string densitydpi;
+    std::string themeTag;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
-                 densitydpi.empty());
+                 densitydpi.empty() && themeTag.empty());
     }
 };
 
@@ -62,7 +74,7 @@ public:
         std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool isSubContainer = false, bool useNewPipeline = false);
-    ~AceContainer() override = default;
+    ~AceContainer() override;
 
     void Initialize() override;
 
@@ -245,6 +257,10 @@ public:
 
     void SetLocalStorage(NativeReference* storage, NativeReference* context);
 
+    bool ParseThemeConfig(const std::string& themeConfig);
+
+    void CheckAndSetFontFamily();
+
     void OnFinish()
     {
         if (platformEventCallback_) {
@@ -309,6 +325,16 @@ public:
         if (pipelineContext_) {
             pipelineContext_->SetFocusWindowId(focusWindowId);
         }
+    }
+
+    void SetIsTransparentForm(bool isTransparentForm)
+    {
+        isTransparentForm_ = isTransparentForm;
+    }
+
+    bool IsTransparentForm() const
+    {
+        return isTransparentForm_;
     }
 
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
@@ -445,13 +471,39 @@ public:
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         StopDragCallback&& stopDragCallback) override;
+    
+    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType) override;
+    bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
 
+    static void SearchElementInfoByAccessibilityIdNG(
+        int32_t instanceId, int32_t elementId, int32_t mode,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output);
+
+    static void SearchElementInfosByTextNG(
+        int32_t instanceId, int32_t elementId, const std::string& text,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output);
+    
+    static void FindFocusedElementInfoNG(
+        int32_t instanceId, int32_t elementId, int32_t focusType,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output);
+
+    static void FocusMoveSearchNG(
+        int32_t instanceId, int32_t elementId, int32_t direction,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output);
+    
+    static bool NotifyExecuteAction(
+        int32_t instanceId, int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t offset);
+    
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
     void InitializeCallback();
     void InitializeTask();
     void InitWindowCallback();
+    bool IsFontFileExistInPath(std::string path);
+    std::string GetFontFamilyName(std::string path);
+    bool endsWith(std::string str, std::string suffix);
 
     void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
         uint32_t windowId, UIEnvCallback callback = nullptr);
@@ -493,9 +545,11 @@ private:
     bool isFormRender_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
+    bool isTransparentForm_ = false;
 
     mutable std::mutex frontendMutex_;
     mutable std::mutex pipelineMutex_;
+    mutable std::mutex destructMutex_;
 
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;

@@ -31,4 +31,9 @@ std::shared_ptr<AbilityRuntime::Context> AceContainer::GetAbilityContextByModule
 {
     return nullptr;
 }
+
+sptr<OHOS::Rosen::Window> AceContainer::GetUIWindow(int32_t instanceId)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::Platform

@@ -17,6 +17,7 @@
 
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
+#include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
@@ -107,6 +108,11 @@ void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         double diffAngle = fabs((currentAngle_ - initialAngle_));
         if (GreatOrEqual(diffAngle, angle_)) {
             resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
+            auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
+            if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+                Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+                return;
+            }
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         }
     } else if (refereeState_ == RefereeState::SUCCEED) {
@@ -197,6 +203,37 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         auto callbackFunction = *callback;
         callbackFunction(info);
     }
+}
+
+GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
+{
+    auto targetComponent = GetTargetComponent();
+    CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
+    auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
+    CHECK_NULL_RETURN(callback, GestureJudgeResult::CONTINUE);
+    auto info = std::make_shared<RotationGestureEvent>();
+    info->SetTimeStamp(time_);
+    UpdateFingerListInfo();
+    info->SetFingerList(fingerList_);
+    info->SetAngle(resultAngle_);
+    info->SetSourceDevice(deviceType_);
+    info->SetTarget(GetEventTarget().value_or(EventTarget()));
+    if (recognizerTarget_.has_value()) {
+        info->SetTarget(recognizerTarget_.value());
+    }
+    TouchEvent touchPoint = {};
+    if (!touchPoints_.empty()) {
+        touchPoint = touchPoints_.begin()->second;
+    }
+    info->SetForce(touchPoint.force);
+    if (touchPoint.tiltX.has_value()) {
+        info->SetTiltX(touchPoint.tiltX.value());
+    }
+    if (touchPoint.tiltY.has_value()) {
+        info->SetTiltY(touchPoint.tiltY.value());
+    }
+    info->SetSourceTool(touchPoint.sourceTool);
+    return callback(gestureInfo_, info);
 }
 
 bool RotationRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)

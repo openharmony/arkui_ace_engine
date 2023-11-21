@@ -221,6 +221,18 @@ public:
     {
         return showedSubMenu_;
     }
+    
+    void SetIsWidthModifiedBySelect(bool isModified)
+    {
+        isWidthModifiedBySelect_ = isModified;
+    }
+    
+    bool IsWidthModifiedBySelect() const
+    {
+        return isWidthModifiedBySelect_;
+    }
+    
+    float GetSelectMenuWidth();
     void HideSubMenu();
     void OnModifyDone() override;
 
@@ -282,6 +294,7 @@ private:
     // If CustomBuilder is declared with <Menu> and <MenuItem>,
     // reset outer menu container and only apply theme on the inner <Menu> node.
     void ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu);
+    void ResetScrollTheme(const RefPtr<FrameNode>& host);
     void CopyMenuAttr(const RefPtr<FrameNode>& menuNode) const;
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -313,6 +326,8 @@ private:
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF previewOriginOffset_;
+	
+    bool isWidthModifiedBySelect_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

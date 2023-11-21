@@ -62,6 +62,12 @@ enum class InputStyle {
     INLINE,
 };
 
+enum class CleanNodeStyle {
+    CONSTANT,
+    INVISIBLE,
+    INPUT,
+};
+
 class ACE_EXPORT TextFieldControllerBase : public AceType {
     DECLARE_ACE_TYPE(TextFieldControllerBase, AceType);
 
@@ -73,11 +79,23 @@ public:
     virtual void Insert(const std::string& args) {}
 
     virtual void CaretPosition(int32_t caretPosition) {}
-    virtual int32_t GetCaretIndex() { return {}; }
-    virtual NG::OffsetF GetCaretPosition() { return {}; }
+    virtual int32_t GetCaretIndex()
+    {
+        return {};
+    }
+    virtual NG::OffsetF GetCaretPosition()
+    {
+        return {};
+    }
     virtual void SetTextSelection(int32_t selectionStart, int32_t selectionEnd) {}
-    virtual Rect GetTextContentRect() { return {}; }
-    virtual int32_t GetTextContentLinesNum() { return {}; }
+    virtual Rect GetTextContentRect()
+    {
+        return {};
+    }
+    virtual int32_t GetTextContentLinesNum()
+    {
+        return {};
+    }
     virtual void StopEditing() {}
 
     void SetGetCaretIndex(std::function<int32_t()>&& setGetCaretIndex)
@@ -210,6 +228,14 @@ public:
     virtual void SetFocusableAndFocusNode() {};
     virtual void SetSelectionMenuHidden(bool contextMenuHidden) = 0;
     virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc) = 0;
+    virtual void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) = 0;
+    virtual void SetCancelIconSize(const CalcDimension& iconSize) = 0;
+    virtual void SetCanacelIconSrc(const std::string& iconSrc) = 0;
+    virtual void SetCancelIconColor(const Color& iconColor) = 0;
+    virtual void SetPasswordRules(const std::string& passwordRules) = 0;
+    virtual void SetEnableAutoFill(bool enableAutoFill) = 0;
+
+    virtual void SetSelectAllValue(bool isSetSelectAllValue) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

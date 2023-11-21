@@ -829,7 +829,7 @@ napi_value JsiDeclarativeEngineInstance::GetContextValue()
     return napiValue;
 }
 
-std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
+thread_local std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
 panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 
 // -----------------------
@@ -2072,6 +2072,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     LocalScope scope(vm);
     globalRuntime_ = arkRuntime;
     // preload js views
+    LOGI("Preload js views.");
     JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList);
     // preload aceConsole
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
@@ -2094,6 +2095,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     global->SetProperty(arkRuntime, "exports", exportsUtilObj);
 
     // preload js enums
+    LOGI("Preload js enums.");
     bool jsEnumStyleResult = arkRuntime->EvaluateJsCode(
         (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
     if (!jsEnumStyleResult) {
@@ -2103,6 +2105,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     }
 
     // preload ark component
+    LOGI("Preload ark component.");
     bool arkComponentResult = arkRuntime->EvaluateJsCode(
         (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start);
     if (!arkComponentResult) {
@@ -2112,6 +2115,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     }
 
     // preload state management
+    LOGI("Preload state management.");
     uint8_t* codeStart;
     int32_t codeLength;
     codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
@@ -2120,7 +2124,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
 
     globalRuntime_ = nullptr;
     cardRuntime_ = runtime;
-    JSNApi::TriggerGC(vm, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
     LOGI("PreloadAceModuleCard end.");
 }
 

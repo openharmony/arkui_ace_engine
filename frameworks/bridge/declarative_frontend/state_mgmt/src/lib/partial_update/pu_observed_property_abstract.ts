@@ -19,7 +19,6 @@
  * all definitions in this file are framework internal
  */
 
-
 abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T> 
 implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber, IMultiPropertiesReadSubscriber
 // these interfaces implementations are all empty functions, overwrite FU base class implementations.
@@ -164,7 +163,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     super.unlinkSuscriber(id);
   }
 
-
   /**
    * put the property to delayed notification mode
    * feature is only used for @StorageLink/Prop, @LocalStorageLink/Prop
@@ -203,17 +201,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   protected notifyPropertyHasBeenReadPU() {
     stateMgmtProfiler.begin("ObservedPropertyAbstractPU.notifyPropertyHasBeenRead");
     stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasBeenReadPU.`)
-    this.subscriberRefs_.forEach((subscriber) => {
-      if (subscriber) {
-        // TODO
-        // propertyHasBeenReadPU is not use in the code
-        // defined by interface that is not used either: PropertyReadEventListener
-        // Maybe compiler generated code has it?
-        if ('propertyHasBeenReadPU' in subscriber) {
-          (subscriber as unknown as PropertyReadEventListener<T>).propertyHasBeenReadPU(this);
-        }
-      }
-    });
     this.recordDependentUpdate();
     stateMgmtProfiler.end();
   } 
@@ -360,7 +347,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     // keep it here until transpiler is updated.
   }
 
-  // FIXME check, is this used from AppStorage.
   // unified Appstorage, what classes to use, and the API
   public createLink(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstractPU<T> {

@@ -38,22 +38,40 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), std::nullopt));
 }
+
+static constexpr Dimension SELECT_MARGIN_VP = 4.0_vp;
+static constexpr Dimension SELECT_MIN_SPACE = 8.0_vp;
+static constexpr Dimension SELECT_HORIZONTAL_GAP = 24.0_vp;
 } // namespace
 
 void SelectModelNG::Create(const std::vector<SelectParam>& params)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::SELECT_ETS_TAG, nodeId);
     auto select = FrameNode::GetOrCreateFrameNode(
         V2::SELECT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
     ViewStackProcessor::GetInstance()->Push(select);
 
     SetSelectDefaultSize(select);
     auto pattern = select->GetPattern<SelectPattern>();
+    
+    CHECK_NULL_VOID(pattern);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pattern->SetSelectDefaultTheme();
+    
+    NG::PaddingProperty paddings;
+    paddings.top = std::nullopt;
+    paddings.bottom = std::nullopt;
+    paddings.left = NG::CalcLength(SELECT_MARGIN_VP);
+    paddings.right = NG::CalcLength(SELECT_MARGIN_VP);
+    ViewAbstract::SetPadding(paddings);
+    
     pattern->BuildChild();
     // create menu node
     if (!pattern->GetMenuNode()) {
-        auto menuWrapper = MenuView::Create(params, nodeId);
+        auto menuWrapper = MenuView::Create(params, nodeId, V2::SELECT_ETS_TAG);
         pattern->SetMenuNode(menuWrapper);
         pattern->InitSelected();
     } else {
@@ -230,7 +248,20 @@ void SelectModelNG::SetWidth(Dimension& value)
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
-    ViewAbstract::SetWidth(NG::CalcLength(value));
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    
+    double minWidth = 2 * pattern->GetFontSize().ConvertToVp() + SELECT_HORIZONTAL_GAP.ConvertToVp() +
+        theme->GetSpinnerWidth().ConvertToVp() + SELECT_MIN_SPACE.ConvertToVp();
+    if (value.ConvertToVp() < minWidth) {
+        pattern->SetSpace(SELECT_MIN_SPACE);
+    } else {
+        ViewAbstract::SetWidth(NG::CalcLength(value));
+    }
 }
 
 void SelectModelNG::SetHeight(Dimension& value)
@@ -408,5 +439,26 @@ void SelectModelNG::SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent)
     auto hub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SelectEventHub>();
     CHECK_NULL_VOID(hub);
     hub->SetValueChangeEvent(std::move(valueChangeEvent));
+}
+
+void SelectModelNG::SetOptionWidth(const Dimension& value)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionWidth(value);
+}
+
+void SelectModelNG::SetOptionHeight(const Dimension& value)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionHeight(value);
+}
+
+void SelectModelNG::SetOptionWidthFitTrigger(bool isFitTrigger)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionWidthFitTrigger(isFitTrigger);
 }
 } // namespace OHOS::Ace::NG

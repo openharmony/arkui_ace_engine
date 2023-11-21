@@ -121,7 +121,8 @@
                     "header": {
                         "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/ace/",
                         "header_files": [
-                            "ace_forward_compatibility.h"
+                            "ace_forward_compatibility.h",
+                            "ai/data_detector_interface.h"
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_forward_compatibility"
@@ -146,6 +147,15 @@
                 },
                 {
                     "header": {
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/xcomponent_controller/",
+                        "header_files": [
+                            "xcomponent_controller.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller"
+                },
+                {
+                    "header": {
                         "header_base": "//foundation/arkui/ace_engine/",
                         "header_files": [
                             "adapter/preview/entrance/ace_ability.h",
@@ -167,7 +177,6 @@
             ],
             "test": [
                 "//foundation/arkui/ace_engine/test/unittest:unittest",
-                "//foundation/arkui/ace_engine/frameworks/core/components_ng/test:unittest",
                 "//foundation/arkui/ace_engine/test/fuzztest:fuzztest"
             ]
         }

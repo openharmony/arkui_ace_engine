@@ -30,16 +30,22 @@ void TextModelNG::Create(const std::string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXT_ETS_TAG, nodeId);
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     stack->Push(frameNode);
 
-    // set draggable for framenode
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto draggable = pipeline->GetDraggable<TextTheme>();
-    frameNode->SetDraggable(draggable);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
+    // set draggable for framenode
+    if (frameNode->IsFirstBuilding()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto draggable = pipeline->GetDraggable<TextTheme>();
+        frameNode->SetDraggable(draggable);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetTextDraggable(true);
+    }
 }
 
 void TextModelNG::SetFont(const Font& value)
@@ -67,6 +73,15 @@ void TextModelNG::SetFontSize(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
 }
 
+void TextModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
+{
+    if (!value.IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, Dimension(), frameNode);
+        return;
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value, frameNode);
+}
+
 void TextModelNG::SetTextColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
@@ -74,6 +89,15 @@ void TextModelNG::SetTextColor(const Color& value)
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
+}
+
+void TextModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ForegroundColor, value, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
 }
 
 void TextModelNG::SetTextShadow(const std::vector<Shadow>& value)
@@ -84,6 +108,16 @@ void TextModelNG::SetTextShadow(const std::vector<Shadow>& value)
 void TextModelNG::SetItalicFontStyle(Ace::FontStyle value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ItalicFontStyle, value);
+}
+
+void TextModelNG::SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ItalicFontStyle, value, frameNode);
+}
+
+void TextModelNG::SetFontWeight(FrameNode* frameNode, Ace::FontWeight value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value, frameNode);
 }
 
 void TextModelNG::SetFontWeight(Ace::FontWeight value)
@@ -109,6 +143,11 @@ void TextModelNG::SetEllipsisMode(EllipsisMode value)
 void TextModelNG::SetTextAlign(Ace::TextAlign value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value);
+}
+
+void TextModelNG::SetTextAlign(FrameNode* frameNode, Ace::TextAlign value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value, frameNode);
 }
 
 void TextModelNG::SetTextOverflow(Ace::TextOverflow value)
@@ -174,6 +213,26 @@ void TextModelNG::SetAdaptMaxFontSize(const Dimension& value)
 void TextModelNG::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, HeightAdaptivePolicy, value);
+}
+
+void TextModelNG::SetTextDetectEnable(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextDetectEnable(value);
+}
+
+void TextModelNG::SetTextDetectConfig(const std::string& value,
+    std::function<void(const std::string&)>&& onResult)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextDetectTypes(value);
+    textPattern->SetOnResult(std::move(onResult));
 }
 
 void TextModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& click)

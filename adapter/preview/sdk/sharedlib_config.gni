@@ -291,6 +291,12 @@ napi_modules = [
     prefix = "arkui/advanced"
     shard_libs = [
       {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/chip/interfaces:chip"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "chip" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/counter/interfaces:counter"
         subsystem_name = "arkui"
         part_name = "ace_engine"
@@ -307,6 +313,12 @@ napi_modules = [
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "breadcrumb" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/selectionmenu/interfaces:selectionmenu"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "selectionmenu" ]
       },
     ]
   },

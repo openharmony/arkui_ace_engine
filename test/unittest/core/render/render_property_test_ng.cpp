@@ -39,6 +39,7 @@ const Dimension OFFSET_X { 40.0, DimensionUnit::PX };
 const Dimension OFFSET_Y { 80.0, DimensionUnit::PX };
 const Dimension ANCHOR_X { 100.0, DimensionUnit::PX };
 const Dimension ANCHOR_Y { 200.0, DimensionUnit::PX };
+const InvertVariant invert = 0.0f;
 
 const float VALUE_TEST = 720.0f;
 const Color WHITE = Color(0xffffffff);
@@ -61,7 +62,7 @@ void MakeGraphicsProperty(NG::GraphicsProperty& graphicsProperty)
     graphicsProperty.propFrontBrightness = POSITION_X;
     graphicsProperty.propFrontSaturate = POSITION_X;
     graphicsProperty.propFrontContrast = POSITION_X;
-    graphicsProperty.propFrontInvert = POSITION_X;
+    graphicsProperty.propFrontInvert = invert;
     graphicsProperty.propFrontSepia = POSITION_X;
     graphicsProperty.propFrontHueRotate = VALUE_TEST;
     graphicsProperty.propFrontColorBlend = WHITE;
@@ -223,6 +224,31 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest002, TestSize.Level1)
     graphicsProperty.propBackShadow = shadow;
     graphicsProperty.ToJsonValue(json);
     EXPECT_EQ(json->GetString(SHADOW_TEST), "ShadowStyle.OuterFloatingMD");
+    json->Delete(SHADOW_TEST);
+}
+
+/**
+ * @tc.name: GraphicsPropertyTest003
+ * @tc.desc: Test cast to RenderPropertyTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object graphicsProperty.
+     */
+    NG::GraphicsProperty graphicsProperty;
+    auto json = JsonUtil::Create(true);
+    Shadow shadow(VALUE_TEST, OFFSETS, WHITE, ShadowStyle::None);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.push propBackShadow colorStrategy_ == ShadowColorStrategy::AVERAGE.
+     * @tc.expected: Return expected results.
+     */
+    shadow.colorStrategy_ = ShadowColorStrategy::AVERAGE;
+    graphicsProperty.propBackShadow = shadow;
+    graphicsProperty.ToJsonValue(json);
+    EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("color"), "ColoringStrategy.AVERAGE");
     json->Delete(SHADOW_TEST);
 }
 

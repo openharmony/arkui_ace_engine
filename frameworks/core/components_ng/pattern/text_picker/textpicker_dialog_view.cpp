@@ -34,6 +34,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const int32_t BUFFER_NODE_NUMBER = 2;
+} // namespace
 
 WeakPtr<FrameNode> TextPickerDialogView::dialogNode_ = nullptr;
 
@@ -80,7 +83,7 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     pickerNodeLayout->UpdateUserDefinedIdealSize(
         CalcSize(NG::CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), std::nullopt));
     pickerNodeLayout->UpdateCanLoop(settingData.canLoop);
-    uint32_t showCount = pickerTheme->GetShowOptionCount();
+    uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     OptionsCreateNode(textPickerPattern, settingData, textPickerNode, showCount, 1, pickerTheme);
     SetDefaultPickerItemHeight(settingData.height);
     SetTextProperties(pickerTheme, settingData.properties);
@@ -200,7 +203,7 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     pickerNodeLayout->UpdateUserDefinedIdealSize(
         CalcSize(NG::CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), std::nullopt));
     pickerNodeLayout->UpdateCanLoop(settingData.canLoop);
-    uint32_t showCount = pickerTheme->GetShowOptionCount();
+    uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     OptionsShowInternal(textPickerPattern, settingData, textPickerNode, showCount, pickerTheme);
     SetDefaultPickerItemHeight(settingData.height);
     SetTextProperties(pickerTheme, settingData.properties);

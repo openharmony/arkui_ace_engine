@@ -24,6 +24,9 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
+namespace {
+    constexpr Dimension MARQUEE_FONT_SIZE = 37.5_px;
+}
 
 /**
  * MarqueeTheme defines color and styles of MarqueeComponent. MarqueeTheme should be built
@@ -44,8 +47,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->textColor_ = themeConstants->GetColor(THEME_MARQUEE_TEXT_COLOR);
-            theme->fontSize_ = themeConstants->GetDimension(THEME_MARQUEE_FONT_SIZE);
+
             auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {
                 return theme;
@@ -53,6 +55,7 @@ public:
             auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_MARQUEE, nullptr);
             if (pattern) {
                 theme->textColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK);
+                theme->fontSize_ = pattern->GetAttr<Dimension>("marquee_font_size", MARQUEE_FONT_SIZE);
             } else {
                 LOGW("find pattern of marquee fail");
             }

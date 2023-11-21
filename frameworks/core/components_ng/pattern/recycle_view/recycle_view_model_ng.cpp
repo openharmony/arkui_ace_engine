@@ -23,6 +23,7 @@ void RecycleViewModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[RecycleDummy][self:%d]", nodeId);
     auto dummyNode = RecycleDummyNode::CreateRecycleDummyNode(nodeId);
     stack->Push(dummyNode);
 }

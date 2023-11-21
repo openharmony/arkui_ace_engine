@@ -109,8 +109,11 @@ void DataPanelModifier::UpdateDate()
 {
     if (isEffect_->Get()) {
         // When the date update, the animation will repeat once.
-        date_->Set(ANIMATION_START);
         AnimationOption option = AnimationOption();
+        option.SetDuration(0);
+        option.SetDelay(ANIMATION_DELAY);
+        option.SetIteration(ANIMATION_TIMES);
+        AnimationUtils::Animate(option, [&]() { date_->Set(OHOS::Ace::NG::ANIMATION_START); });
         RefPtr<Curve> curve = AceType::MakeRefPtr<SpringCurve>(
             ANIMATION_CURVE_VELOCITY, ANIMATION_CURVE_MASS, ANIMATION_CURVE_STIFFNESS, ANIMATION_CURVE_DAMPING);
         option.SetDuration(ANIMATION_DURATION);
@@ -187,10 +190,10 @@ void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, ArcData arcData
 
 #ifndef USE_ROSEN_DRAWING
     gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle));
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle, nullptr));
 #else
     gradientPaint.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle));
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle, nullptr));
 #endif
     RSRect edgeRect(center.GetX() - thickness * PERCENT_HALF, center.GetY() - radius,
         center.GetX() + thickness * PERCENT_HALF, center.GetY() - radius + thickness);
@@ -541,10 +544,10 @@ void DataPanelModifier::PaintProgress(RSCanvas& canvas, ArcData arcData) const
 
 #ifndef USE_ROSEN_DRAWING
     gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle, nullptr));
 #else
     gradientPaint.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle, nullptr));
 #endif
 
     canvas.Save();

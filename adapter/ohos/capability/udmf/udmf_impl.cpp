@@ -304,8 +304,8 @@ bool UdmfClientImpl::GetFileUriRecord(const RefPtr<UnifiedData>& unifiedData, st
 
     for (auto record : records) {
         UDMF::UDType type = record->GetType();
-        if (type == UDMF::UDType::IMAGE ||
-            type == UDMF::UDType::FILE) {
+        if (type == UDMF::UDType::IMAGE || type == UDMF::UDType::AUDIO ||
+            type == UDMF::UDType::VIDEO || type == UDMF::UDType::FILE) {
             UDMF::File* file = reinterpret_cast<UDMF::File*>(record.get());
             if (file) {
                 uri.emplace_back(file->GetUri());

@@ -165,6 +165,10 @@ void JSPasteButton::JSBind(BindingTarget globalObj)
     JSClass<JSPasteButton>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);
     JSClass<JSPasteButton>::StaticMethod("offset", &JSViewAbstract::JsOffset);
     JSClass<JSPasteButton>::StaticMethod("pop", &JSViewAbstract::Pop, opt);
+    JSClass<JSPasteButton>::StaticMethod("width", &JSViewAbstract::JsWidth);
+    JSClass<JSPasteButton>::StaticMethod("height", &JSViewAbstract::JsHeight);
+    JSClass<JSPasteButton>::StaticMethod("size", &JSViewAbstract::JsSize);
+    JSClass<JSPasteButton>::StaticMethod("constraintSize", &JSViewAbstract::JsConstraintSize);
     JSClass<JSPasteButton>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
     JSClass<JSPasteButton>::Bind<>(globalObj);
 }

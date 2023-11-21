@@ -71,6 +71,15 @@ void GestureModelNG::Pop()
     gestureProcessor->PopGestureNG();
 }
 
+void GestureModelNG::SetTag(const std::string& tag)
+{
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto gesture = gestureProcessor->TopGestureNG();
+    CHECK_NULL_VOID(gesture);
+    gesture->SetTag(tag);
+}
+
 void TapGestureModelNG::Create(int32_t countNum, int32_t fingersNum)
 {
     RefPtr<GestureProcessor> gestureProcessor;

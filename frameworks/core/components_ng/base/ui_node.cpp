@@ -443,6 +443,27 @@ void UINode::OnAttachToMainTree(bool)
     }
 }
 
+void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap)
+{
+    DumpViewDataPageNode(viewDataWrap);
+    for (const auto& item : GetChildren()) {
+        item->DumpViewDataPageNodes(viewDataWrap);
+    }
+}
+
+bool UINode::NeedRequestAutoSave()
+{
+    if (CheckAutoSave()) {
+        return true;
+    }
+    for (const auto& item : GetChildren()) {
+        if (item->NeedRequestAutoSave()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void UINode::DumpTree(int32_t depth)
 {
     if (DumpLog::GetInstance().GetDumpFile()) {
@@ -646,8 +667,6 @@ RefPtr<LayoutWrapperNode> UINode::CreateLayoutWrapper(bool forceMeasure, bool fo
 
 void UINode::Build()
 {
-    ACE_SCOPED_TRACE("Build[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
-        GetParent() ? GetParent()->GetId() : 0);
     for (const auto& child : GetChildren()) {
         child->Build();
     }

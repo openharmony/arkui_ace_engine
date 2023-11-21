@@ -498,7 +498,9 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
 void ScrollBar::HandleDragUpdate(const GestureEvent& info)
 {
     if (scrollPositionCallback_) {
-        auto offset = CalcPatternOffset(info.GetMainDelta());
+        // The offset of the mouse wheel and gesture is opposite.
+        auto offset = info.GetInputEventType() == InputEventType::AXIS ?
+                      info.GetMainDelta() : CalcPatternOffset(info.GetMainDelta());
         scrollPositionCallback_(offset, SCROLL_FROM_BAR);
     }
 }
@@ -506,7 +508,7 @@ void ScrollBar::HandleDragUpdate(const GestureEvent& info)
 void ScrollBar::HandleDragEnd(const GestureEvent& info)
 {
     auto velocity = info.GetMainVelocity();
-    if (NearZero(velocity)) {
+    if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
         if (scrollEndCallback_) {
             scrollEndCallback_();
         }

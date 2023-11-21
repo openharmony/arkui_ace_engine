@@ -19,7 +19,6 @@
 namespace OHOS::Ace {
 std::shared_ptr<NativePreferences::Preferences> StorageImpl::GetPreference(const std::string& fileName)
 {
-    LOGI("Getting preference from distributed data management system");
     return NativePreferences::PreferencesHelper::GetPreferences(fileName, errCode_);
 }
 

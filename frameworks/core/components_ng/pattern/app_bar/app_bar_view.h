@@ -53,6 +53,8 @@ public:
     void SetContent(const std::string& content);
     void SetFontStyle(Ace::FontStyle fontStyle);
     void SetIconColor(const std::optional<Color>& color);
+    void iniBehavior();
+    void SetRowWidth(const Dimension& positionX);
 
 private:
     static RefPtr<FrameNode> BuildBarTitle();
@@ -63,6 +65,7 @@ private:
     static void SetEachIconColor(
         RefPtr<FrameNode> icon, const std::optional<Color>& color, InternalResource::ResourceId image);
     RefPtr<FrameNode> atom_;
+    bool hasBeSetted = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_APP_BAR_VIEW_H

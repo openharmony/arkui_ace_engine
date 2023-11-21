@@ -16,19 +16,12 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 pattern_test_output_path = "ace_engine/components"
-gestures_test_output_path = "ace_engine/gestures"
 event_test_output_path = "ace_engine/events"
 base_test_output_path = "ace_engine/base"
-syntax_test_output_path = "ace_engine/syntaxs"
 image_test_output_path = "ace_engine/image"
 basic_test_output_path = "ace_engine/basic"
-manager_test_output_path = "ace_engine/manager"
 interface_test_output_path = "ace_engine/interfaces"
-accessibility_test_output_path = "ace_engine/accessibility"
-property_test_output_path = "ace_engine/property"
-layout_test_output_path = "ace_engine/layout"
 svg_test_output_path = "ace_engine/svg"
-render_test_output_path = "ace_engine/render"
 
 template("ace_unittest") {
   forward_variables_from(invoker, "*")

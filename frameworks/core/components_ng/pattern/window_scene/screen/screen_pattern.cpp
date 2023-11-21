@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/window_scene/screen/screen_pattren.h"
 
+#include <mutex>
+
 #include "input_manager.h"
 #include "ipc_skeleton.h"
 #include "root_scene.h"
@@ -32,6 +34,10 @@ constexpr float DIRECTION90 = 90;
 constexpr float DIRECTION180 = 180;
 constexpr float DIRECTION270 = 270;
 constexpr uint32_t DOT_PER_INCH = 160;
+
+std::vector<MMI::DisplayInfo> g_displayInfoVector;
+
+std::mutex g_vecLock;
 
 MMI::Direction ConvertDegreeToMMIRotation(float degree)
 {
@@ -63,21 +69,6 @@ void ScreenPattern::OnAttachToFrameNode()
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(displayNode);
-
-    UpdateDisplayInfo();
-
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto window = static_cast<RosenWindow*>(container->GetWindow());
-    CHECK_NULL_VOID(window);
-    auto rootScene = static_cast<Rosen::RootScene*>(window->GetRSWindow().GetRefPtr());
-    CHECK_NULL_VOID(rootScene);
-    auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
-    Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
-        screenBounds.rect_.width_, screenBounds.rect_.height_ };
-    float density = screenSession_->GetScreenProperty().GetDensity();
-    rootScene->SetDisplayDensity(density);
-    rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
 }
 
 void ScreenPattern::UpdateDisplayInfo()
@@ -88,7 +79,7 @@ void ScreenPattern::UpdateDisplayInfo()
     auto uid = IPCSkeleton::GetCallingUid();
     auto screenId = screenSession_->GetScreenId();
     auto screenProperty = screenSession_->GetScreenProperty();
-    auto dpi = screenProperty.GetDensity() * DOT_PER_INCH;
+    auto dpi = screenProperty.GetDefaultDensity() * DOT_PER_INCH;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -99,9 +90,12 @@ void ScreenPattern::UpdateDisplayInfo()
 
     auto tempHeight = paintRect.Height();
     auto tempWidth = paintRect.Width();
-    auto temp = 0;
-    if (static_cast<int>(displayNode->GetStagingProperties().GetRotation()) != 0) {
-        temp = tempWidth;
+    auto displayNodeRotation = displayNode->GetStagingProperties().GetRotation();
+    if (displayNodeRotation < DIRECTION0) {
+        displayNodeRotation = -displayNodeRotation;
+    }
+    if (displayNodeRotation != DIRECTION0 && displayNodeRotation != DIRECTION180) {
+        auto temp = tempWidth;
         tempWidth = tempHeight;
         tempHeight = temp;
     }
@@ -124,10 +118,6 @@ void ScreenPattern::UpdateDisplayInfo()
         .flags = 0  // touchable
     };
 
-    float tempRotation = 0.0f;
-    if (static_cast<int>(displayNode->GetStagingProperties().GetRotation()) != 0) {
-        tempRotation = 90.0f;
-    }
     MMI::DisplayInfo displayInfo = {
         .id = screenId,
         .x = paintRect.Left(),
@@ -137,22 +127,39 @@ void ScreenPattern::UpdateDisplayInfo()
         .dpi = dpi,
         .name = "display" + std::to_string(screenId),
         .uniq = "default" + std::to_string(screenId),
-        .direction = ConvertDegreeToMMIRotation(tempRotation)
+        .direction = ConvertDegreeToMMIRotation(displayNodeRotation)
     };
+
+    std::lock_guard<std::mutex> lock(g_vecLock);
+    DeduplicateDisplayInfo();
+    g_displayInfoVector.insert(g_displayInfoVector.begin(), displayInfo);
 
     MMI::DisplayGroupInfo displayGroupInfo = {
         .width = paintRect.Width(),
         .height = paintRect.Height(),
         .focusWindowId = 0, // root scene id 0
         .windowsInfo = { windowInfo },
-        .displaysInfo = { displayInfo }
+        .displaysInfo = g_displayInfoVector
     };
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
+}
+
+void ScreenPattern::DeduplicateDisplayInfo()
+{
+    auto screenId = screenSession_->GetScreenId();
+    auto it = std::remove_if(g_displayInfoVector.begin(), g_displayInfoVector.end(),
+        [screenId](MMI::DisplayInfo displayInfo) {
+            return displayInfo.id == screenId;
+        });
+    g_displayInfoVector.erase(it, g_displayInfoVector.end());
 }
 
 bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
 {
     UpdateDisplayInfo();
+    if (screenSession_->GetScreenProperty().GetScreenType() == Rosen::ScreenType::VIRTUAL) {
+        return false;
+    }
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto window = static_cast<RosenWindow*>(container->GetWindow());
@@ -162,7 +169,7 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
     Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
         screenBounds.rect_.width_, screenBounds.rect_.height_ };
-    float density = screenSession_->GetScreenProperty().GetDensity();
+    float density = screenSession_->GetScreenProperty().GetDefaultDensity();
     rootScene->SetDisplayDensity(density);
     rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
     return true;

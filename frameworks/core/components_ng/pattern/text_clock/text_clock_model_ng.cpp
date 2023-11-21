@@ -26,6 +26,7 @@ RefPtr<TextClockController> TextClockModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXTCLOCK_ETS_TAG, nodeId);
     auto textClockNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXTCLOCK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextClockPattern>(); });
 
@@ -45,6 +46,16 @@ RefPtr<TextClockController> TextClockModelNG::Create()
 void TextClockModelNG::SetFormat(const std::string& format)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format);
+}
+
+void TextClockModelNG::SetTextShadow(const std::vector<Shadow>& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextShadow, value);
+}
+
+void TextClockModelNG::SetFontFeature(const FONT_FEATURES_MAP& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontFeature, value);
 }
 
 void TextClockModelNG::SetHoursWest(const int32_t& hoursWest)

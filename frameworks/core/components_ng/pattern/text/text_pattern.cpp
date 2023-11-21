@@ -24,6 +24,7 @@
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "base/window/drag_window.h"
+#include "core/common/ai/data_detector_mgr.h"
 #include "core/common/font_manager.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -96,8 +97,8 @@ void TextPattern::CloseSelectOverlay(bool animation)
 {
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         selectOverlayProxy_->Close(animation);
+        RemoveAreaChangeInner();
     }
-    RemoveAreaChangeInner();
 }
 
 void TextPattern::ResetSelection()
@@ -390,11 +391,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         CHECK_NULL_VOID(pattern);
         pattern->OnHandleMoveDone(handleRect, isFirst);
     };
-    if (!selectInfo.firstHandle.isShow && !selectInfo.secondHandle.isShow) {
-        selectInfo.menuInfo.menuIsShow = false;
-    } else {
-        selectInfo.menuInfo.menuIsShow = true;
-    }
+    selectInfo.menuInfo.menuIsShow = selectInfo.firstHandle.isShow || selectInfo.secondHandle.isShow;
     selectInfo.menuInfo.showCut = false;
     selectInfo.menuInfo.showPaste = false;
     selectInfo.menuInfo.showCopyAll = !IsSelectAll();
@@ -427,7 +424,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
 
 void TextPattern::HandleOnSelectAll()
 {
-    auto textSize = GetWideText().length() + imageCount_;
+    auto textSize = static_cast<int32_t>(GetWideText().length()) + imageCount_;
     textSelector_.Update(0, textSize);
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
@@ -532,7 +529,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
             }
             std::vector<RectF> selectedRects;
             paragraph_->GetRectsForRange(start, item->position, selectedRects);
-            start =  item->position;
+            start = item->position;
             for (auto&& rect : selectedRects) {
                 if (rect.IsInRegion(textOffset)) {
                     if (!item->onClick) {
@@ -650,6 +647,7 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
 
         if (info.GetAction() == MouseAction::MOVE) {
             if (blockPress_) {
+                dragBoxes_ = GetTextBoxes();
                 return;
             }
             mouseStatus_ = MouseStatus::MOVE;
@@ -841,11 +839,12 @@ void TextPattern::InitDragEvent()
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
     if (eventHub->HasOnDragStart()) {
+        gestureHub->SetTextDraggable(false);
         return;
     }
-
-    auto gestureHub = host->GetOrCreateGestureEventHub();
     gestureHub->InitDragDropEvent();
     gestureHub->SetTextDraggable(true);
     gestureHub->SetThumbnailCallback(GetThumbnailCallback());
@@ -938,6 +937,7 @@ void TextPattern::OnModifyDone()
     textForDisplay_ = textLayoutProperty->GetContent().value_or("");
     if (textCache != textForDisplay_) {
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
+        InitTextDetect();
     }
 
     auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
@@ -975,10 +975,42 @@ void TextPattern::OnModifyDone()
     }
 }
 
+void TextPattern::InitTextDetect()
+{
+    if (!GetTextDetectEnable()) {
+        return;
+    }
+
+    TextDataDetectInfo info;
+    info.text = textForDisplay_;
+    info.module = GetTextDetectTypes();
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    int32_t instanceID = context->GetInstanceId();
+    auto textFunc = [weak = WeakClaim(this), instanceID](const TextDataDetectResult result) {
+        ContainerScope scope(instanceID);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([result, weak, instanceID] {
+            ContainerScope scope(instanceID);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetTextDetectResult(result);
+            pattern->FireOnResult(result.entity);
+        });
+    };
+    DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
+}
+
 void TextPattern::ActSetSelection(int32_t start, int32_t end)
 {
     int32_t min = 0;
-    int32_t textSize = GetWideText().length() + imageCount_;
+    int32_t textSize = static_cast<int32_t>(GetWideText().length()) + imageCount_;
     start = start < min ? min : start;
     end = end < min ? min : end;
     start = start > textSize ? textSize : start;
@@ -1078,11 +1110,6 @@ void TextPattern::PreCreateLayoutWrapper()
     if (children.empty()) {
         return;
     }
-
-    if (paragraph_) {
-        // because ParagraphStyle can't be set directly yet, paragraph always needs to be rebuilt
-        paragraph_.Reset();
-    }
     spans_.clear();
 
     // Depth-first iterates through all host's child nodes to collect the SpanNode object, building a text rendering
@@ -1112,17 +1139,6 @@ void TextPattern::PreCreateLayoutWrapper()
 
 void TextPattern::BeforeCreateLayoutWrapper()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    const auto& layoutProperty = host->GetLayoutProperty();
-    auto flag = layoutProperty ? layoutProperty->GetPropertyChangeFlag() : PROPERTY_UPDATE_NORMAL;
-    // when updating the scenario, needs to determine whether the SpanNode is refreshed.
-    if (paragraph_ && (flag & PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST) != PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST) {
-        LOGD("no need to refresh span node");
-        return;
-    }
-
     PreCreateLayoutWrapper();
 }
 
@@ -1262,6 +1278,20 @@ void TextPattern::DumpAdvanceInfo()
                                        .append(std::to_string(contentRect_.GetX()))
                                        .append(" y:")
                                        .append(std::to_string(contentRect_.GetY())));
+    DumpLog::GetInstance().AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
+}
+
+void TextPattern::DumpInfo()
+{
+    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
+    DumpLog::GetInstance().AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
+    DumpLog::GetInstance().AddDesc(
+        std::string("FontColor: ").append(textLayoutProp->GetTextColor().value_or(Color::BLACK).ColorToString()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("FontSize: ")
+            .append(
+                (textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(16.0, DimensionUnit::FP)).ToString()));
     DumpLog::GetInstance().AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
 }
 
@@ -1405,6 +1435,40 @@ OffsetF TextPattern::GetDragUpperLeftCoordinates()
     return GetParentGlobalOffset() + offset;
 }
 
+void TextPattern::ProcessBoundRectByTextShadow(RectF& rect)
+{
+    auto property = GetHost()->GetLayoutProperty<TextLayoutProperty>();
+    auto shadows = property->GetTextShadow();
+    if (!shadows.has_value()) {
+        return;
+    }
+    float leftOffsetX = 0.0f;
+    float rightOffsetX = 0.0f;
+    float upOffsetY = 0.0f;
+    float downOffsetY = 0.0f;
+    for (const auto& shadow : shadows.value()) {
+        if (LessNotEqual(shadow.GetOffset().GetX(), 0.0f) && LessNotEqual(shadow.GetOffset().GetX(), leftOffsetX)) {
+            leftOffsetX = shadow.GetOffset().GetX();
+        }
+
+        if (GreatNotEqual(shadow.GetOffset().GetX(), 0.0f) &&
+            GreatNotEqual(shadow.GetOffset().GetX() + shadow.GetBlurRadius(), rightOffsetX)) {
+            rightOffsetX = shadow.GetOffset().GetX() + shadow.GetBlurRadius();
+        }
+
+        if (LessNotEqual(shadow.GetOffset().GetY(), 0.0f) && LessNotEqual(shadow.GetOffset().GetY(), upOffsetY)) {
+            upOffsetY = shadow.GetOffset().GetY();
+        }
+
+        if (GreatNotEqual(shadow.GetOffset().GetY(), 0.0f) &&
+            GreatNotEqual(shadow.GetOffset().GetY() + shadow.GetBlurRadius(), downOffsetY)) {
+            downOffsetY = shadow.GetOffset().GetY() + shadow.GetBlurRadius();
+        }
+    }
+    rect.SetRect(rect.GetX() + leftOffsetX, rect.GetY() + upOffsetY, rect.Width() + rightOffsetX - leftOffsetX,
+        rect.Height() + downOffsetY - upOffsetY);
+}
+
 RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
 {
     if (!contentMod_) {
@@ -1416,8 +1480,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
     if (isCustomFont_) {
         contentMod_->SetIsCustomFont(true);
     }
-    auto paintMethod =
-        MakeRefPtr<TextPaintMethod>(WeakClaim(this), baselineOffset_, contentMod_, overlayMod_);
+    auto paintMethod = MakeRefPtr<TextPaintMethod>(WeakClaim(this), baselineOffset_, contentMod_, overlayMod_);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, paintMethod);
     auto context = host->GetRenderContext();
@@ -1430,6 +1493,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
         auto height = static_cast<float>(paragraph_->GetHeight() + std::fabs(baselineOffset_));
         if (!context->GetClipEdge().value() && LessNotEqual(frameSize.Height(), height)) {
             RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(), height);
+            ProcessBoundRectByTextShadow(boundsRect);
             overlayMod_->SetBoundsRect(boundsRect);
         }
     }
@@ -1443,14 +1507,14 @@ int32_t TextPattern::GetHandleIndex(const Offset& offset) const
 
 void TextPattern::OnAreaChangedInner()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto parentGlobalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
-    if (parentGlobalOffset != parentGlobalOffset_) {
-        parentGlobalOffset_ = parentGlobalOffset;
-        if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto parentGlobalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+        if (parentGlobalOffset != parentGlobalOffset_) {
+            parentGlobalOffset_ = parentGlobalOffset;
             CalculateHandleOffsetAndShowOverlay();
             ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
         }
@@ -1463,6 +1527,12 @@ void TextPattern::RemoveAreaChangeInner()
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (eventHub->HasOnAreaChanged()) {
+        LOGD("RemoveAreaChangeInner do not remove external area change callback");
+        return;
+    }
     pipeline->RemoveOnAreaChangeNode(host->GetId());
 }
 } // namespace OHOS::Ace::NG

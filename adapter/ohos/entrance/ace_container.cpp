@@ -15,12 +15,15 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 
+#include <cerrno>
+#include <dirent.h>
 #include <fstream>
 #include <functional>
-#include <mutex>
+#include <regex>
 
 #include "ability_context.h"
 #include "ability_info.h"
+#include "auto_fill_manager.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
 #include "wm/wm_common.h"
@@ -30,8 +33,10 @@
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
+#include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
+#include "adapter/ohos/osal/view_data_wrap_ohos.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -170,6 +175,12 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     useStageModel_ = true;
 }
 
+AceContainer::~AceContainer()
+{
+    std::lock_guard lock(destructMutex_);
+    LOG_DESTROY();
+}
+
 void AceContainer::InitializeTask()
 {
     auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
@@ -199,6 +210,7 @@ bool AceContainer::MaybeRelease()
         LOGI("Destroy AceContainer on PLATFORM thread.");
         return true;
     } else {
+        std::lock_guard lock(destructMutex_);
         LOGI("Post Destroy AceContainer Task to PLATFORM thread.");
         return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::PLATFORM);
     }
@@ -944,6 +956,111 @@ bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::str
     return context->CallRouterBackToPopPage();
 }
 
+class FillRequestCallback : public AbilityRuntime::IFillRequestCallback {
+public:
+    FillRequestCallback(WeakPtr<NG::PipelineContext> pipelineContext, const RefPtr<NG::FrameNode>& node,
+        AceAutoFillType autoFillType)
+        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType) {}
+    virtual ~FillRequestCallback() = default;
+    void OnFillRequestSuccess(const AbilityBase::ViewData& viewData) override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, pageUrl=[%{private}s]", viewData.pageUrl.c_str());
+        auto pipelineContext = pipelineContext_.Upgrade();
+        CHECK_NULL_VOID(pipelineContext);
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto viewDataWrap = ViewDataWrap::CreateViewDataWrap(viewData);
+        CHECK_NULL_VOID(viewDataWrap);
+        taskExecutor->PostTask(
+            [viewDataWrap, pipelineContext, autoFillType = autoFillType_]() {
+                if (pipelineContext) {
+                    pipelineContext->NotifyFillRequestSuccess(autoFillType, viewDataWrap);
+                }
+            },
+            TaskExecutor::TaskType::UI);
+    }
+
+    void OnFillRequestFailed(int32_t errCode) override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, errCode: %{public}d", errCode);
+        auto pipelineContext = pipelineContext_.Upgrade();
+        CHECK_NULL_VOID(pipelineContext);
+        auto node = node_.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [errCode, pipelineContext, node]() {
+                if (pipelineContext) {
+                    pipelineContext->NotifyFillRequestFailed(node, errCode);
+                }
+            },
+            TaskExecutor::TaskType::UI);
+    }
+private:
+    WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
+    WeakPtr<NG::FrameNode> node_ = nullptr;
+    AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
+};
+
+bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType)
+{
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, autoFillType: %{public}d", static_cast<int32_t>(autoFillType));
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_RETURN(pipelineContext, false);
+    CHECK_NULL_RETURN(uiWindow_, false);
+    auto uiContent = uiWindow_->GetUIContent();
+    auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
+    CHECK_NULL_RETURN(uiContentImpl, false);
+    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
+    uiContentImpl->DumpViewData(node, viewDataWrap);
+
+    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType);
+    auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
+    CHECK_NULL_RETURN(viewDataWrapOhos, false);
+    auto viewData = viewDataWrapOhos->GetViewData();
+    if (AbilityRuntime::AutoFillManager::GetInstance().RequestAutoFill(
+        static_cast<AbilityBase::AutoFillType>(autoFillType), uiContent, viewData, callback) != 0) {
+        return false;
+    }
+    return true;
+}
+
+class SaveRequestCallback : public AbilityRuntime::ISaveRequestCallback {
+public:
+    SaveRequestCallback() = default;
+    virtual ~SaveRequestCallback() = default;
+    void OnSaveRequestSuccess() override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+    }
+
+    void OnSaveRequestFailed() override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+    }
+};
+
+bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node)
+{
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+    CHECK_NULL_RETURN(uiWindow_, false);
+    auto uiContent = uiWindow_->GetUIContent();
+    auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
+    CHECK_NULL_RETURN(uiContentImpl, false);
+    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
+    uiContentImpl->DumpViewData(node, viewDataWrap);
+
+    auto callback = std::make_shared<SaveRequestCallback>();
+    auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
+    CHECK_NULL_RETURN(viewDataWrapOhos, false);
+    auto viewData = viewDataWrapOhos->GetViewData();
+    if (AbilityRuntime::AutoFillManager::GetInstance().RequestAutoSave(uiContent, viewData, callback) != 0) {
+        return false;
+    }
+    return true;
+}
+
 void AceContainer::SetHapPath(const std::string& hapPath)
 {
     if (hapPath.empty()) {
@@ -1312,6 +1429,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
             themeManager->LoadCustomTheme(assetManager);
             themeManager->LoadResourceThemes();
         }
+        auto themeManager = pipelineContext->GetThemeManager();
+        if (themeManager) {
+            pipelineContext->SetAppBgColor(themeManager->GetBackgroundColor());
+        }
     };
 
     auto setupRootElementTask = [context = pipelineContext_, callback, isSubContainer = isSubContainer_]() {
@@ -1398,6 +1519,22 @@ void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetFontScale(fontScale);
+}
+
+bool AceContainer::ParseThemeConfig(const std::string& themeConfig)
+{
+    std::regex pattern("\"font\":(\\d+)");
+    std::smatch match;
+    if (std::regex_search(themeConfig, match, pattern)) {
+        std::string fontValue = match[1].str();
+        if (fontValue.length() > 1) {
+            LOGE("ParseThemeConfig error value");
+            return false;
+        }
+        int font = std::stoi(fontValue);
+        return font == 1;
+    }
+    return false;
 }
 
 void AceContainer::SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme)
@@ -1522,6 +1659,89 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
     return isFormRender_ ? nullptr : context->CreateModuleContext(bundle, module);
 }
 
+void AceContainer::CheckAndSetFontFamily()
+{
+    std::string familyName = "";
+    std::string path = "/data/themes/a/app";
+    if (!IsFontFileExistInPath(path)) {
+        path = "/data/themes/b/app";
+        if (!IsFontFileExistInPath(path)) {
+            return;
+        }
+    }
+    path = path.append("/font/");
+    familyName = GetFontFamilyName(path);
+    if (familyName.empty()) {
+        return;
+    }
+    path = path.append(familyName);
+    auto fontManager = pipelineContext_->GetFontManager();
+    fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+}
+
+bool AceContainer::IsFontFileExistInPath(std::string path)
+{
+    DIR* dir;
+    struct dirent* ent;
+    bool isFlagFileExist = false;
+    bool isFontDirExist = false;
+    if ((dir = opendir(path.c_str())) == nullptr) {
+        if (errno == ENOENT) {
+            LOGE("ERROR ENOENT");
+        } else if (errno == EACCES) {
+            LOGE("ERROR EACCES");
+        } else {
+            LOGE("ERROR Other");
+        }
+        return false;
+    }
+    while ((ent = readdir(dir)) != nullptr) {
+        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+            continue;
+        }
+        if (strcmp(ent->d_name, "flag") == 0) {
+            isFlagFileExist = true;
+        } else if (strcmp(ent->d_name, "font") == 0) {
+            isFontDirExist = true;
+        }
+    }
+    closedir(dir);
+    if (isFlagFileExist && isFontDirExist) {
+        LOGI("font path exist");
+        return true;
+    }
+    return false;
+}
+
+std::string AceContainer::GetFontFamilyName(std::string path)
+{
+    std::string fontFamilyName = "";
+    DIR* dir;
+    struct dirent* ent;
+    if ((dir = opendir(path.c_str())) == nullptr) {
+        return fontFamilyName;
+    }
+    while ((ent = readdir(dir)) != nullptr) {
+        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+            continue;
+        }
+        if (endsWith(ent->d_name, ".ttf")) {
+            fontFamilyName = ent->d_name;
+            break;
+        }
+    }
+    closedir(dir);
+    return fontFamilyName;
+}
+
+bool AceContainer::endsWith(std::string str, std::string suffix)
+{
+    if (str.length() < suffix.length()) {
+        return false;
+    }
+    return str.substr(str.length() - suffix.length()) == suffix;
+}
+
 void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)
 {
     if (!parsedConfig.IsValid()) {
@@ -1572,6 +1792,13 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
             resConfig.SetOrientation(resDirection);
         }
     }
+    if (!parsedConfig.themeTag.empty()) {
+        if (ParseThemeConfig(parsedConfig.themeTag)) {
+            CheckAndSetFontFamily();
+        } else {
+            LOGE("AceContainer::ParseThemeConfig false");
+        }
+    }
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     if (SystemProperties::GetResourceDecoupling()) {
@@ -1581,6 +1808,9 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     auto front = GetFrontend();
     CHECK_NULL_VOID(front);
     front->OnConfigurationUpdated(configuration);
+    if (!IsTransparentForm()) {
+        pipelineContext_->SetAppBgColor(themeManager->GetBackgroundColor());
+    }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
 #endif
@@ -1902,6 +2132,101 @@ void AceContainer::RegisterStopDragCallback(int32_t pointerId, StopDragCallback&
         list.emplace_back(std::move(stopDragCallback));
         stopDragCallbackMap_.emplace(pointerId, list);
     }
+}
+
+void AceContainer::SearchElementInfoByAccessibilityIdNG(
+    int32_t instanceId, int32_t elementId, int32_t mode,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (ngPipeline) {
+        auto frontend = container->GetFrontend();
+        CHECK_NULL_VOID(frontend);
+        auto accessibilityManager = frontend->GetAccessibilityManager();
+        if (accessibilityManager) {
+            accessibilityManager->SearchElementInfoByAccessibilityIdNG(
+                elementId, mode, output, ngPipeline, baseParent);
+        }
+    }
+}
+
+void AceContainer::SearchElementInfosByTextNG(
+    int32_t instanceId, int32_t elementId, const std::string& text,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (ngPipeline) {
+        auto frontend = container->GetFrontend();
+        CHECK_NULL_VOID(frontend);
+        auto accessibilityManager = frontend->GetAccessibilityManager();
+        if (accessibilityManager) {
+            accessibilityManager->SearchElementInfosByTextNG(
+                elementId, text, output, ngPipeline, baseParent);
+        }
+    }
+}
+
+void AceContainer::FindFocusedElementInfoNG(
+    int32_t instanceId, int32_t elementId, int32_t focusType,
+    int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (ngPipeline) {
+        auto frontend = container->GetFrontend();
+        CHECK_NULL_VOID(frontend);
+        auto accessibilityManager = frontend->GetAccessibilityManager();
+        if (accessibilityManager) {
+            accessibilityManager->FindFocusedElementInfoNG(
+                elementId, focusType, output, ngPipeline, baseParent);
+        }
+    }
+}
+
+void AceContainer::FocusMoveSearchNG(
+    int32_t instanceId, int32_t elementId, int32_t direction,
+    int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (ngPipeline) {
+        auto frontend = container->GetFrontend();
+        CHECK_NULL_VOID(frontend);
+        auto accessibilityManager = frontend->GetAccessibilityManager();
+        if (accessibilityManager) {
+            accessibilityManager->FocusMoveSearchNG(elementId, direction, output, ngPipeline, baseParent);
+        }
+    }
+}
+
+bool AceContainer::NotifyExecuteAction(int32_t instanceId, int32_t elementId,
+    const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
+{
+    bool IsExecuted = false;
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, IsExecuted);
+    auto pipelineContext = container->GetPipelineContext();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (ngPipeline) {
+        auto frontend = container->GetFrontend();
+        CHECK_NULL_RETURN(frontend, IsExecuted);
+        auto accessibilityManager = frontend->GetAccessibilityManager();
+        if (accessibilityManager) {
+            IsExecuted =
+            accessibilityManager->ExecuteExtensionActionNG(elementId, actionArguments, action, ngPipeline, offset);
+        }
+    }
+    return IsExecuted;
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()

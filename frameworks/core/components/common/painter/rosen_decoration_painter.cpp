@@ -45,7 +45,7 @@ namespace {
 constexpr int32_t DOUBLE_WIDTH = 2;
 constexpr int32_t DASHED_LINE_LENGTH = 3;
 constexpr int32_t DEL_NUM = 2;
-#ifndef USE_ROSEN_DRAWING
+
 constexpr float TOP_START = 225.0f;
 constexpr float TOP_END = 270.0f;
 constexpr float RIGHT_START = 315.0f;
@@ -55,7 +55,7 @@ constexpr float BOTTOM_END = 90.0f;
 constexpr float LEFT_START = 135.0f;
 constexpr float LEFT_END = 180.0f;
 constexpr float SWEEP_ANGLE = 45.0f;
-#endif
+
 constexpr float EXTEND = 1024.0f;
 constexpr uint32_t COLOR_MASK = 0xff000000;
 #ifdef USE_ROSEN_DRAWING
@@ -1009,7 +1009,7 @@ public:
 
         RSMatrix matrix;
         if (!NearZero(rotation_)) {
-            matrix.Rotate(rotation_, center_.GetX(), center_.GetY());
+            matrix.PreRotate(rotation_, center_.GetX(), center_.GetY());
         }
 
         std::vector<RSScalar> pos;
@@ -1019,7 +1019,8 @@ public:
         if (isRepeat_) {
             tileMode = RSTileMode::REPEAT;
         }
-        return RSRecordingShaderEffect::CreateSweepGradient(center_, colors, pos, tileMode, startAngle_, endAngle_);
+        return RSRecordingShaderEffect::CreateSweepGradient(
+            center_, colors, pos, tileMode, startAngle_, endAngle_, &matrix);
     }
 #endif
 
@@ -2613,7 +2614,10 @@ void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& bor
             topClipPath.Close();
             canvas->ClipPath(topClipPath, RSClipOp::DIFFERENCE, true);
         }
-        LOGE("Drawing is not supported");
+        topBorder.ArcTo(rectStart.GetLeft(), rectStart.GetTop(), rectStart.GetRight(), rectStart.GetBottom(),
+            TOP_START, SWEEP_ANGLE);
+        topBorder.ArcTo(rectEnd.GetLeft(), rectEnd.GetTop(), rectEnd.GetRight(), rectEnd.GetBottom(),
+            TOP_END, SWEEP_ANGLE + 0.5f);
         if (NearZero(trX) && !NearZero(rightW)) {
             topBorder.LineTo(offsetX + width, y);
             RSRecordingPath topClipPath;
@@ -2653,7 +2657,10 @@ void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& bor
             rightClipPath.Close();
             canvas->ClipPath(rightClipPath, RSClipOp::DIFFERENCE, true);
         }
-        LOGE("Drawing is not supported");
+        rightBorder.ArcTo(rectStart.GetLeft(), rectStart.GetTop(), rectStart.GetRight(), rectStart.GetBottom(),
+            RIGHT_START, SWEEP_ANGLE);
+        rightBorder.ArcTo(rectEnd.GetLeft(), rectEnd.GetTop(), rectEnd.GetRight(), rectEnd.GetBottom(),
+            RIGHT_END, SWEEP_ANGLE + 0.5f);
         if (NearZero(brX) && !NearZero(bottomW)) {
             rightBorder.LineTo(offsetX + width - rightW / 2.0f, offsetY + height);
             RSRecordingPath rightClipPath;
@@ -2692,7 +2699,10 @@ void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& bor
             bottomClipPath.Close();
             canvas->ClipPath(bottomClipPath, RSClipOp::DIFFERENCE, true);
         }
-        LOGE("Drawing is not supported");
+        bottomBorder.ArcTo(rectStart.GetLeft(), rectStart.GetTop(), rectStart.GetRight(), rectStart.GetBottom(),
+            BOTTOM_START, SWEEP_ANGLE);
+        bottomBorder.ArcTo(rectEnd.GetLeft(), rectEnd.GetTop(), rectEnd.GetRight(), rectEnd.GetBottom(),
+            BOTTOM_END, SWEEP_ANGLE + 0.5f);
         if (NearZero(blX) && !NearZero(leftW)) {
             bottomBorder.LineTo(offsetX, offsetY + height - bottomW / 2.0f);
             RSRecordingPath bottomClipPath;
@@ -2731,7 +2741,10 @@ void RosenDecorationPainter::PaintBorder(const Offset& offset, const Border& bor
             leftClipPath.Close();
             canvas->ClipPath(leftClipPath, RSClipOp::DIFFERENCE, true);
         }
-        LOGE("Drawing is not supported");
+        leftBorder.ArcTo(rectStart.GetLeft(), rectStart.GetTop(), rectStart.GetRight(), rectStart.GetBottom(),
+            LEFT_START, SWEEP_ANGLE);
+        leftBorder.ArcTo(rectEnd.GetLeft(), rectEnd.GetTop(), rectEnd.GetRight(), rectEnd.GetBottom(),
+            LEFT_END, SWEEP_ANGLE + 0.5f);
         if (NearZero(tlX) && !NearZero(topW)) {
             leftBorder.LineTo(offsetX + leftW / 2.0f, offsetY);
             RSRecordingPath topClipPath;

@@ -71,11 +71,13 @@ template("ace_core_source_set") {
       "common/ace_engine.cpp",
       "common/ace_engine_ext.cpp",
       "common/anr_thread.cpp",
+      "common/asset_manager_impl.cpp",
       "common/card_scope.cpp",
       "common/clipboard/clipboard_proxy.cpp",
       "common/container.cpp",
       "common/container_scope.cpp",
       "common/environment/environment_proxy.cpp",
+      "common/event_dump.cpp",
       "common/event_manager.cpp",
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
@@ -85,8 +87,13 @@ template("ace_core_source_set") {
       "common/resource/resource_manager.cpp",
       "common/sharedata/share_data.cpp",
       "common/storage/storage_proxy.cpp",
+      "common/task_executor_impl.cpp",
+      "common/task_runner_adapter_factory.cpp",
+      "common/task_runners.cpp",
       "common/text_field_manager.cpp",
       "common/thread_checker.cpp",
+      "common/thread_container.cpp",
+      "common/thread_model_impl.cpp",
       "common/vibrator/vibrator_proxy.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
@@ -259,6 +266,7 @@ template("ace_core_source_set") {
       sources += [
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
+        "common/task_runner_adapter_impl.cpp",
       ]
     } else {
       sources += [
@@ -471,6 +479,7 @@ template("ace_core_source_set") {
     if (defined(config.xcomponent_components_support) &&
         config.xcomponent_components_support) {
       deps += [ "$ace_root/frameworks/core/components/xcomponent:ace_core_components_xcomponent_$platform" ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/xcomponent:ace_core_components_xcomponent_pattern_ng_$platform" ]
     }
 
     if (defined(config.enable_ability_component) &&
@@ -626,11 +635,13 @@ template("ace_core_ng_source_set") {
       "common/ace_engine.cpp",
       "common/ace_engine_ext.cpp",
       "common/anr_thread.cpp",
+      "common/asset_manager_impl.cpp",
       "common/card_scope.cpp",
       "common/clipboard/clipboard_proxy.cpp",
       "common/container.cpp",
       "common/container_scope.cpp",
       "common/environment/environment_proxy.cpp",
+      "common/event_dump.cpp",
       "common/event_manager.cpp",
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
@@ -640,8 +651,13 @@ template("ace_core_ng_source_set") {
       "common/resource/resource_manager.cpp",
       "common/sharedata/share_data.cpp",
       "common/storage/storage_proxy.cpp",
+      "common/task_executor_impl.cpp",
+      "common/task_runner_adapter_factory.cpp",
+      "common/task_runners.cpp",
       "common/text_field_manager.cpp",
       "common/thread_checker.cpp",
+      "common/thread_container.cpp",
+      "common/thread_model_impl.cpp",
       "common/vibrator/vibrator_proxy.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
@@ -819,6 +835,7 @@ template("ace_core_ng_source_set") {
       sources += [
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
+        "common/task_runner_adapter_impl.cpp",
       ]
     }
 
@@ -947,6 +964,11 @@ template("ace_core_ng_source_set") {
         "$ace_root/frameworks/core/components_ng/pattern/ui_extension:ace_core_components_ui_extension_pattern_ng_$platform",
         "$ace_root/frameworks/core/components_ng/pattern/window_scene:ace_core_components_window_scene_$platform",
       ]
+    }
+
+    if (defined(config.xcomponent_components_support) &&
+        config.xcomponent_components_support) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/xcomponent:ace_core_components_xcomponent_pattern_ng_$platform" ]
     }
 
     # add sources needed by phone, tv and wearable. previews do not need them

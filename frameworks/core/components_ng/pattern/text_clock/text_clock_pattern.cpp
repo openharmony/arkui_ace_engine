@@ -36,6 +36,7 @@ constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
 constexpr int32_t MILLISECONDS_OF_SECOND = 1000;
 constexpr int32_t TOTAL_SECONDS_OF_MINUTE = 60;
 const std::string DEFAULT_FORMAT = "hms";
+const std::string FORM_FORMAT = "hm";
 constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
 constexpr char TEXTCLOCK_YEAR[] = "textclock.year";
 constexpr char TEXTCLOCK_MONTH[] = "textclock.month";
@@ -83,6 +84,16 @@ void TextClockPattern::OnAttachToFrameNode()
     InitUpdateTimeTextCallBack();
 }
 
+void TextClockPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveVisibleAreaChangeNode(host->GetId());
+    pipeline->RemoveFormVisibleChangeNode(host->GetId());
+}
+
 void TextClockPattern::UpdateTextLayoutProperty(
     RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
@@ -100,6 +111,12 @@ void TextClockPattern::UpdateTextLayoutProperty(
     }
     if (layoutProperty->GetItalicFontStyle().has_value()) {
         textLayoutProperty->UpdateItalicFontStyle(layoutProperty->GetItalicFontStyle().value());
+    }
+    if (layoutProperty->GetTextShadow().has_value()) {
+        textLayoutProperty->UpdateTextShadow(layoutProperty->GetTextShadow().value());
+    }
+    if (layoutProperty->GetFontFeature().has_value()) {
+        textLayoutProperty->UpdateFontFeature(layoutProperty->GetFontFeature().value());
     }
 }
 
@@ -140,23 +157,73 @@ void TextClockPattern::InitTextClockController()
     });
 }
 
+void TextClockPattern::OnVisibleChange(bool isVisible)
+{
+    if (isVisible && !isSetVisible_) {
+        isSetVisible_ = isVisible;
+        UpdateTimeText();
+    }
+    isSetVisible_ = isVisible;
+}
+
+void TextClockPattern::OnVisibleAreaChange(bool visible)
+{
+    if (visible && !isInVisibleArea_) {
+        isInVisibleArea_ = visible;
+        UpdateTimeText();
+    }
+    isInVisibleArea_ = visible;
+}
+
+void TextClockPattern::OnFormVisibleChange(bool visible)
+{
+    if (visible && !isFormVisible_) {
+        isFormVisible_ = visible;
+        UpdateTimeText();
+    }
+    isFormVisible_ = visible;
+}
+
+void TextClockPattern::RegistVisibleAreaChangeCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    auto areaCallback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnVisibleAreaChange(visible);
+    };
+    pipeline->RemoveVisibleAreaChangeNode(host->GetId());
+    pipeline->AddVisibleAreaChangeNode(host, 0.0f, areaCallback, false);
+
+    if (isForm_) {
+        pipeline->RemoveFormVisibleChangeNode(host->GetId());
+        auto formCallback = [weak = WeakClaim(this)](bool visible) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnFormVisibleChange(visible);
+        };
+        pipeline->AddFormVisibleChangeNode(host, formCallback);
+    }
+}
+
 void TextClockPattern::InitUpdateTimeTextCallBack()
 {
-    if (!timeCallback_) {
-        timeCallback_ = ([wp = WeakClaim(this)]() {
-            auto textClock = wp.Upgrade();
-            if (textClock) {
-                textClock->UpdateTimeText();
-            }
-        });
-    }
     auto context = UINode::GetContext();
-    CHECK_NULL_VOID(context);
-    isForm_ = context->IsFormRender();
+    if (context) {
+        isForm_ = context->IsFormRender();
+    }
+    RegistVisibleAreaChangeCallback();
 }
 
 void TextClockPattern::UpdateTimeText()
 {
+    if (!isStart_ || !isSetVisible_ || !isInVisibleArea_ || !isFormVisible_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textNode = GetTextNode();
@@ -165,9 +232,11 @@ void TextClockPattern::UpdateTimeText()
     CHECK_NULL_VOID(textLayoutProperty);
 
     std::string currentTime = GetCurrentFormatDateTime();
-    if (currentTime.empty()) {
+    if (currentTime.empty() || currentTime == prevTime_) {
         return;
     }
+    prevTime_ = currentTime;
+
     textLayoutProperty->UpdateContent(currentTime); // update time text.
     auto textContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textContext);
@@ -175,9 +244,8 @@ void TextClockPattern::UpdateTimeText()
     textContext->UpdateClipEdge(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     textNode->MarkModifyDone();
-    if (isStart_) {
-        RequestUpdateForNextSecond();
-    }
+    RequestUpdateForNextSecond();
+    FireChangeEvent();
 }
 
 void TextClockPattern::RequestUpdateForNextSecond()
@@ -205,6 +273,7 @@ void TextClockPattern::RequestUpdateForNextSecond()
 
     auto context = UINode::GetContext();
     CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(context->GetTaskExecutor());
     context->GetTaskExecutor()->PostDelayedTask(
         [wp = WeakClaim(this)] {
             auto textClock = wp.Upgrade();
@@ -212,17 +281,9 @@ void TextClockPattern::RequestUpdateForNextSecond()
             if (!textClock->isStart_) {
                 return;
             }
-            textClock->UpdateTimeTextCallBack();
+            textClock->UpdateTimeText();
         },
         TaskExecutor::TaskType::UI, delayTime);
-}
-
-void TextClockPattern::UpdateTimeTextCallBack()
-{
-    if (timeCallback_) {
-        timeCallback_();
-    }
-    FireChangeEvent();
 }
 
 std::string TextClockPattern::GetCurrentFormatDateTime()
@@ -241,7 +302,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     dateTime.hour = timeZoneTime->tm_hour;
     dateTime.minute = timeZoneTime->tm_min;
     dateTime.second = timeZoneTime->tm_sec;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && !isForm_) {
         return Localization::GetInstance()->FormatDateTime(dateTime, GetFormat());
     }
     dateTime.week = timeZoneTime->tm_wday;       // 0-6
@@ -281,6 +342,9 @@ std::vector<std::string> TextClockPattern::ParseInputFormat(
     bool& is24H, int32_t& weekType, int32_t& month, int32_t& day, bool& isMilliSecond)
 {
     std::string inputFormat = (GetFormat() == DEFAULT_FORMAT) ? "aa h:m:s" : GetFormat();
+    if (inputFormat == FORM_FORMAT && isForm_) {
+        inputFormat = "h:m";
+    }
     std::vector<std::string> formatSplitter;
     auto i = 0;
     auto j = 0;
@@ -511,6 +575,14 @@ void TextClockPattern::FireChangeEvent() const
 std::string TextClockPattern::GetFormat() const
 {
     auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
+    if (isForm_) {
+        CHECK_NULL_RETURN(textClockLayoutProperty, FORM_FORMAT);
+        std::string result = textClockLayoutProperty->GetFormat().value_or(FORM_FORMAT);
+        if (result.find("s") != std::string::npos || result.find("S") != std::string::npos) {
+            return FORM_FORMAT;
+        }
+        return result;
+    }
     CHECK_NULL_RETURN(textClockLayoutProperty, DEFAULT_FORMAT);
     return textClockLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
 }

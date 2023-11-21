@@ -75,6 +75,8 @@ public:
         return callback;
     }
 
+    virtual RefPtr<GestureSnapshot> Dump() const override;
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -98,6 +100,7 @@ private:
     Offset ComputeFocusPoint();
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    GestureJudgeResult TriggerGestureJudgeCallback();
     bool ExceedSlop();
     void InitGlobalValue(SourceType deviceId);
 

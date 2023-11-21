@@ -14,6 +14,7 @@
 group("advanced_ui_component") {
   deps = [
     "breadcrumb/interfaces:breadcrumb",
+    "chip/interfaces:chip",
     "composelistitem/interfaces:composelistitem",
     "composetitlebar/interfaces:composetitlebar",
     "counter/interfaces:counter",
@@ -22,6 +23,7 @@ group("advanced_ui_component") {
     "filter/interfaces:filter",
     "progressbutton/interfaces:progressbutton",
     "segmentbutton/interfaces:segmentbutton",
+    "selectionmenu/interfaces:selectionmenu",
     "selecttitlebar/interfaces:selecttitlebar",
     "splitlayout/interfaces:splitlayout",
     "subheader/interfaces:subheader",

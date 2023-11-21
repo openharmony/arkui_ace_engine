@@ -49,6 +49,11 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/inspector_node.h"
 
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+class AccessibilityEventInfo;
+}
+
 namespace OHOS::Ace::NG {
 class PipelineContext;
 class Pattern;
@@ -386,6 +391,7 @@ public:
     {
         draggable_ = draggable;
         userSet_ = true;
+        customerSet_ = false;
     }
 
     void SetCustomerDraggable(bool draggable) {
@@ -442,8 +448,10 @@ public:
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
 
+    RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName) const;
     void CreateAnimatablePropertyFloat(
         const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent);
+    void DeleteAnimatablePropertyFloat(const std::string& propertyName);
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
     void CreateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value,
         std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
@@ -583,6 +591,28 @@ public:
         isFirstBuilding_ = false;
     }
 
+    Matrix4 GetLocalMatrix() const
+    {
+        return localMat_;
+    }
+
+    RefPtr<FrameNode> GetPageNode();
+    void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
+    void NotifyFillRequestFailed(int32_t errCode);
+
+    int32_t GetUiExtensionId();
+    int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId);
+    void SearchExtensionElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
+        int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
+        int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void FindFocusedExtensionElementInfoNG(int32_t elementId, int32_t focusType,
+        int32_t offset, Accessibility::AccessibilityElementInfo& output);
+    void FocusMoveSearchNG(int32_t elementId, int32_t direction,
+        int32_t offset, Accessibility::AccessibilityElementInfo& output);
+    bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t offset);
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(
@@ -616,6 +646,8 @@ private:
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpAdvanceInfo() override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    bool CheckAutoSave() override;
     void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
@@ -636,6 +668,9 @@ private:
     void UpdatePercentSensitive();
 
     void UpdateParentAbsoluteOffset();
+    void AddFrameNodeSnapshot(bool isHit, int32_t parentId);
+
+    int32_t GetNodeExpectedRate();
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -692,11 +727,14 @@ private:
     bool customerSet_ = false;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
+    Matrix4 localMat_ = Matrix4::CreateIdentity();
 
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
 
     RefPtr<FrameNode> overlayNode_;
+
+    std::unordered_map<std::string, int32_t> sceneRateMap_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

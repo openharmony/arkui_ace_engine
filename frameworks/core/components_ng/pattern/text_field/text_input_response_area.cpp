@@ -32,7 +32,7 @@
 
 namespace OHOS::Ace::NG {
 // TextInputResponseArea begin
-void TextInputResponseArea::LayoutChild(LayoutWrapper* layoutWrapper)
+void TextInputResponseArea::LayoutChild(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth)
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
@@ -44,22 +44,23 @@ void TextInputResponseArea::LayoutChild(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(textInputGeometryNode);
     auto contentRect = textInputGeometryNode->GetContentRect();
     auto textInputFrameSize = textInputGeometryNode->GetFrameSize();
-    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(childWrapper);
     auto childGeometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(childGeometryNode);
     auto childFrameSize = childGeometryNode->GetFrameSize();
-    auto childOffset = GetChildOffset(textInputFrameSize, contentRect, childFrameSize);
+    auto childOffset = GetChildOffset(textInputFrameSize, contentRect, childFrameSize, nodeWidth);
     childGeometryNode->SetFrameOffset(childOffset);
     childWrapper->GetGeometryNode()->SetFrameSize(childFrameSize);
     areaRect_.SetSize(childFrameSize);
     areaRect_.SetOffset(childOffset);
     childWrapper->Layout();
+    nodeWidth += childFrameSize.Width();
 }
 
-SizeF TextInputResponseArea::Measure(LayoutWrapper* layoutWrapper)
+SizeF TextInputResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
 {
-    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     auto textfieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     SizeF size(0, 0);
     CHECK_NULL_RETURN(textfieldLayoutProperty, size);
@@ -91,7 +92,18 @@ void PasswordResponseArea::InitResponseArea()
     }
     auto passwordNode = CreateNode();
     CHECK_NULL_VOID(passwordNode);
-    passwordNode->MountToParent(host);
+    passwordNode->MountToParent(host, 0);
+}
+
+const RefPtr<FrameNode> PasswordResponseArea::GetFrameNode()
+{
+    auto frameNode = passwordNode_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto stackNode = frameNode->GetParent();
+    CHECK_NULL_RETURN(stackNode, nullptr);
+    auto ret = AceType::DynamicCast<FrameNode>(stackNode);
+    CHECK_NULL_RETURN(ret, nullptr);
+    return ret;
 }
 
 RefPtr<FrameNode> PasswordResponseArea::CreateNode()
@@ -138,7 +150,7 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
     imageNode->MarkModifyDone();
     imageNode->MountToParent(stackNode);
     passwordNode_ = imageNode;
-
+    stackNode_ = stackNode;
     return stackNode;
 }
 
@@ -188,27 +200,27 @@ void PasswordResponseArea::OnPasswordIconClicked()
     textFieldPattern->OnObscuredChanged(isObscured_);
 }
 
-SizeF PasswordResponseArea::Measure(LayoutWrapper* layoutWrapper)
+SizeF PasswordResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
 {
     if (!IsShowPasswordIcon()) {
         LOGD("show password icon is false");
         return SizeF(0, 0);
     }
-    return TextInputResponseArea::Measure(layoutWrapper);
+    return TextInputResponseArea::Measure(layoutWrapper, index);
 }
 
-void PasswordResponseArea::Layout(LayoutWrapper* layoutWrapper)
+void PasswordResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth)
 {
     if (!IsShowPasswordIcon()) {
         LOGD("show password icon is false");
         return;
     }
-    LayoutChild(layoutWrapper);
+    LayoutChild(layoutWrapper, index, nodeWidth);
 }
 
-OffsetF PasswordResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize)
+OffsetF PasswordResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
 {
-    return OffsetF(parentSize.Width() - childSize.Width(), 0);
+    return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
 }
 
 float PasswordResponseArea::GetIconSize()
@@ -310,31 +322,38 @@ void UnitResponseArea::InitResponseArea()
         return;
     }
     CHECK_NULL_VOID(unitNode_);
-    unitNode_->MountToParent(host);
+    unitNode_->MountToParent(host, 0);
     unitNode_.Reset();
 }
 
-SizeF UnitResponseArea::Measure(LayoutWrapper* layoutWrapper)
+const RefPtr<FrameNode> UnitResponseArea::GetFrameNode()
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(unitNode_);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode;
+}
+
+SizeF UnitResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
 {
     if (!IsShowUnit()) {
         LOGD("not show unit");
         return SizeF(0, 0);
     }
-    return TextInputResponseArea::Measure(layoutWrapper);
+    return TextInputResponseArea::Measure(layoutWrapper, index);
 }
 
-void UnitResponseArea::Layout(LayoutWrapper* layoutWrapper)
+void UnitResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth)
 {
     if (!IsShowUnit()) {
         LOGD("not show unit");
         return;
     }
-    LayoutChild(layoutWrapper);
+    LayoutChild(layoutWrapper, index, nodeWidth);
 }
 
-OffsetF UnitResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize)
+OffsetF UnitResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
 {
-    return OffsetF(contentRect.GetX() + contentRect.Width(), 0);
+    return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
 }
 
 bool UnitResponseArea::IsShowUnit()
@@ -345,4 +364,143 @@ bool UnitResponseArea::IsShowUnit()
     CHECK_NULL_RETURN(textFieldPattern, false);
     return textFieldPattern->IsShowUnit();
 } // UnitResponseArea end
+
+void CleanNodeResponseArea::InitResponseArea()
+{
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (textFieldLayoutProperty->HasIconSize()) {
+        iconSize_ = textFieldLayoutProperty->GetIconSizeValue();
+    }
+
+    if (textFieldLayoutProperty->HasIconSrc()) {
+        iconSrc_ = textFieldLayoutProperty->GetIconSrcValue();
+    }
+
+    if (textFieldLayoutProperty->HasIconColor()) {
+        iconColor_ = textFieldLayoutProperty->GetIconColorValue();
+    }
+    auto cleanNode = CreateNode();
+    CHECK_NULL_VOID(cleanNode);
+    cleanNode->MountToParent(host);
+}
+
+SizeF CleanNodeResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
+{
+    return TextInputResponseArea::Measure(layoutWrapper, index);
+}
+
+void CleanNodeResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth)
+{
+    LayoutChild(layoutWrapper, index, nodeWidth);
+}
+
+OffsetF CleanNodeResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
+{
+    return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
+}
+
+const RefPtr<FrameNode> CleanNodeResponseArea::GetFrameNode()
+{
+    return cleanNode_;
+}
+
+RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
+{
+    auto stackNode = FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    auto stackLayoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
+    stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), std::nullopt));
+    stackLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    stackNode->MarkModifyDone();
+    auto cleanNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_RETURN(cleanNode, nullptr);
+    cleanNode->SetDraggable(false);
+    ImageSourceInfo info;
+    if (iconSrc_.empty()) {
+        info.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
+    } else {
+        info.SetSrc(iconSrc_);
+    }
+    if (info.IsSvg()) {
+        info.SetFillColor(iconColor_);
+        auto imageRenderProperty = cleanNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_RETURN(imageRenderProperty, nullptr);
+        imageRenderProperty->UpdateSvgFillColor(iconColor_);
+    }
+    auto imageLayoutProperty = cleanNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
+    imageLayoutProperty->UpdateImageSourceInfo(info);
+    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
+    cleanNode->MarkModifyDone();
+    cleanNode->MountToParent(stackNode);
+    InitClickEvent(stackNode);
+    cleanNode_ = stackNode;
+    return stackNode;
+}
+
+void CleanNodeResponseArea::InitClickEvent(const RefPtr<FrameNode>& frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto cleanNode = weak.Upgrade();
+        CHECK_NULL_VOID(cleanNode);
+        cleanNode->OnCleanNodeClicked();
+    };
+    gesture->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(clickCallback)));
+}
+
+void CleanNodeResponseArea::OnCleanNodeClicked()
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->ClearEditingValue();
+}
+
+void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
+{
+    isShow_ = isShow;
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    CHECK_NULL_VOID(cleanNode_);
+    auto stackLayoutProperty = cleanNode_->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(stackLayoutProperty);
+    auto imageNode = cleanNode_->GetFirstChild();
+    CHECK_NULL_VOID(imageNode);
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
+    CHECK_NULL_VOID(imageFrameNode);
+    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    if (isShow) {
+        auto host = textFieldPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto themeManager = pipeline->GetThemeManager();
+        CHECK_NULL_VOID(themeManager);
+        auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto themePadding = textFieldTheme->GetPadding();
+        auto rightOffset = static_cast<float>(themePadding.Left().ConvertToPx());
+        auto iconSize = iconSize_.ConvertToPx() != 0.0f ? iconSize_.ConvertToPx()
+                                                   : static_cast<float>(textFieldTheme->GetIconSize().ConvertToPx());
+        auto hotZoneSize = iconSize + rightOffset;
+        imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+        stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), std::nullopt));
+    } else {
+        imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
+        stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), std::nullopt));
+    }
+    imageFrameNode->MarkModifyDone();
+    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
 } // namespace OHOS::Ace::NG

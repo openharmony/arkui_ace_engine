@@ -11,14 +11,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+
+ace_unittest("geometry_test") {
+  module_output = "basic"
+  type = "new"
+  sources = [
+    "animatable_dimension_test.cpp",
+    "animatable_matrix4_test.cpp",
+    "dimension_test.cpp",
+    "least_square_impl_test.cpp",
+    "matrix3_test.cpp",
+    "matrix4_test.cpp",
+    "quaternion_test.cpp",
+    "transform_util_test.cpp",
+  ]
+}
+
+ace_unittest("util_test") {
+  module_output = "basic"
+  type = "new"
+  sources = [
+    "base_utils_test.cpp",
+    "json_util_test.cpp",
+  ]
+}
 
 group("base_unittest") {
   testonly = true
   deps = [
-    "geometry:geometry_test",
-    "json_util:json_util_test",
-    "utils:base_utils_test",
+    ":geometry_test",
+    ":util_test",
   ]
 }

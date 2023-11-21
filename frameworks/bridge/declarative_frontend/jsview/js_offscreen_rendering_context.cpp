@@ -174,6 +174,8 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
 
         auto offscreenPattern = OffscreenContextModel::GetInstance()->CreateOffscreenPattern(width, height);
         CHECK_NULL_VOID(offscreenPattern);
+        size_t bitmapSize = OffscreenContextModel::GetInstance()->GetBitmapSize(offscreenPattern);
+        args.SetSize(bitmapSize);
         jsRenderContext->SetOffscreenPattern(offscreenPattern);
         std::lock_guard<std::mutex> lock(mutex_);
         offscreenPatternMap_[offscreenPatternCount_++] = offscreenPattern;

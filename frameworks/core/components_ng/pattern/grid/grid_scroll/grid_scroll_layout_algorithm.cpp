@@ -884,7 +884,6 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
     if (!GreatOrEqual(gridLayoutInfo_.currentOffset_ - gridLayoutInfo_.prevOffset_, mainSize)) {
         return;
     }
-
     // skip lines in matrix
     while (GreatOrEqual(gridLayoutInfo_.currentOffset_, mainSize)) {
         auto line = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_ - 1);
@@ -897,7 +896,7 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
         }
         gridLayoutInfo_.startMainLineIndex_--;
         gridLayoutInfo_.startIndex_ = line->second.begin()->second;
-        gridLayoutInfo_.currentOffset_ -= lineHeight->second;
+        gridLayoutInfo_.currentOffset_ -= lineHeight->second + mainGap_;
     }
 
     // skip lines not in matrix
@@ -911,16 +910,18 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
         if (LessOrEqual(estimatedHeight, 0)) {
             return;
         }
-        auto averageHeight = pattern->GetAverageHeight();
-        if (LessOrEqual(averageHeight, 0.0)) {
-            return;
+        if (!gridLayoutInfo_.hasBigItem_) {
+            SkipRegularLines(true);
+        } else {
+            auto averageHeight = pattern->GetAverageHeight();
+            if (LessOrEqual(averageHeight, 0.0)) {
+                return;
+            }
+            int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
+            gridLayoutInfo_.startIndex_ = std::max(gridLayoutInfo_.startIndex_ - estimatedIndex, 0);
+            gridLayoutInfo_.currentOffset_ =
+                gridLayoutInfo_.startIndex_ > estimatedIndex ? gridLayoutInfo_.prevOffset_ : 0.0f;
         }
-        int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
-        gridLayoutInfo_.startIndex_ = gridLayoutInfo_.startIndex_ > estimatedIndex
-                                          ? std::max(gridLayoutInfo_.startIndex_ - estimatedIndex, 0)
-                                          : 0;
-        gridLayoutInfo_.currentOffset_ =
-            gridLayoutInfo_.startIndex_ > estimatedIndex ? gridLayoutInfo_.prevOffset_ : 0.0f;
         TAG_LOGI(AceLogTag::ACE_GRID, "estimatedIndex:%{public}d", gridLayoutInfo_.startIndex_);
         grid->ChildrenUpdatedFrom(0);
     }
@@ -931,7 +932,6 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
     if (!GreatOrEqual(gridLayoutInfo_.prevOffset_ - gridLayoutInfo_.currentOffset_, mainSize)) {
         return;
     }
-
     // grid size change from big to small
     gridLayoutInfo_.UpdateEndLine(mainSize, mainGap_);
 
@@ -947,7 +947,7 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         }
         gridLayoutInfo_.startMainLineIndex_++;
         gridLayoutInfo_.endMainLineIndex_++;
-        gridLayoutInfo_.currentOffset_ += lineHeight->second;
+        gridLayoutInfo_.currentOffset_ += lineHeight->second + mainGap_;
     }
     gridLayoutInfo_.UpdateStartIndexByStartLine();
 
@@ -962,17 +962,37 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         if (LessOrEqual(estimatedHeight, 0)) {
             return;
         }
-        auto averageHeight = pattern->GetAverageHeight();
-        if (LessOrEqual(averageHeight, 0.0)) {
-            return;
+        if (!gridLayoutInfo_.hasBigItem_) {
+            SkipRegularLines(false);
+        } else {
+            auto averageHeight = pattern->GetAverageHeight();
+            if (LessOrEqual(averageHeight, 0.0)) {
+                return;
+            }
+            int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
+            gridLayoutInfo_.startIndex_ =
+                std::min(gridLayoutInfo_.startIndex_ - estimatedIndex, gridLayoutInfo_.childrenCount_);
+            gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_;
         }
-        int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
-        gridLayoutInfo_.startIndex_ =
-            std::min(gridLayoutInfo_.startIndex_ - estimatedIndex, gridLayoutInfo_.childrenCount_);
-        gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_;
         TAG_LOGI(AceLogTag::ACE_GRID, "estimatedIndex:%{public}d, currentOffset:%{public}f",
             gridLayoutInfo_.startIndex_, gridLayoutInfo_.currentOffset_);
         grid->ChildrenUpdatedFrom(0);
+    }
+}
+
+void GridScrollLayoutAlgorithm::SkipRegularLines(bool forward)
+{
+    auto lineHeight = gridLayoutInfo_.GetAverageLineHeight() + mainGap_;
+    if (LessOrEqual(lineHeight, 0.0)) {
+        return;
+    }
+    int32_t estimatedLines = gridLayoutInfo_.currentOffset_ / lineHeight;
+    if (forward && gridLayoutInfo_.startIndex_ < (estimatedLines) * crossCount_) {
+        gridLayoutInfo_.startIndex_ = 0;
+        gridLayoutInfo_.currentOffset_ = 0;
+    } else {
+        gridLayoutInfo_.startIndex_ -= estimatedLines * crossCount_;
+        gridLayoutInfo_.currentOffset_ -= lineHeight * estimatedLines;
     }
 }
 
@@ -1058,6 +1078,7 @@ void GridScrollLayoutAlgorithm::AddForwardLines(
     auto endIndex = gridLayoutInfo_.endIndex_;
     auto firstItem = GetStartingItem(layoutWrapper, currentIndex - 1);
     auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(firstItem);
+    CHECK_NULL_VOID(itemWrapper);
     AdjustRowColSpan(itemWrapper, layoutWrapper, firstItem);
     auto mainSpan = axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
     auto measureNumber = 0;

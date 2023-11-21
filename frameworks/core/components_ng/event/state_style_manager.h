@@ -18,6 +18,8 @@
 
 #include <set>
 
+#include "base/geometry/ng/point_t.h"
+#include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
@@ -145,6 +147,9 @@ private:
         CancelPressStyleTask();
         ResetPressedPendingState();
     }
+
+    bool IsOutOfPressedRegion(int32_t sourceType, const Offset& location) const;
+    void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node) const;
 
     WeakPtr<FrameNode> host_;
     RefPtr<TouchEventImpl> pressedFunc_;

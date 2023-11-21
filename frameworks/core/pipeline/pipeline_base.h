@@ -974,6 +974,8 @@ public:
         return onFocus_;
     }
 
+    virtual void UpdateTitleInTargetPos(bool isShow = true, int32_t height = 0) {}
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1057,6 +1059,7 @@ protected:
     RefPtr<SharedImageManager> sharedImageManager_;
     mutable std::shared_mutex imageMtx_;
     mutable std::shared_mutex themeMtx_;
+    mutable std::mutex destructMutex_;
     RefPtr<ThemeManager> themeManager_;
     RefPtr<DataProviderManagerInterface> dataProviderManager_;
     RefPtr<FontManager> fontManager_;

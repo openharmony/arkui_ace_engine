@@ -531,6 +531,19 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
 }
 } // namespace
 
+void NavBarPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    if (theme && theme->GetNavBarUnfocusEffectEnable()) {
+        pipelineContext->AddWindowFocusChangedCallback(host->GetId());
+    }
+}
+
 void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     CHECK_NULL_VOID(!panEvent_);
@@ -764,7 +777,7 @@ void NavBarPattern::ResetAssociatedScroll()
     titlePattern->ResetAssociatedScroll();
 }
 
-bool NavBarPattern::UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node)
+bool NavBarPattern::UpdateAssociatedScrollOffset(float offset)
 {
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, true);
@@ -772,7 +785,7 @@ bool NavBarPattern::UpdateAssociatedScrollOffset(float offset, const RefPtr<Fram
     CHECK_NULL_RETURN(titleNode, true);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, true);
-    return titlePattern->UpdateAssociatedScrollOffset(offset, node);
+    return titlePattern->UpdateAssociatedScrollOffset(offset);
 }
 
 bool NavBarPattern::IsTitleModeFree()
@@ -782,5 +795,28 @@ bool NavBarPattern::IsTitleModeFree()
     auto navBarLayoutProperty = frameNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_RETURN(navBarLayoutProperty, false);
     return navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE;
+}
+
+void NavBarPattern::WindowFocus(bool isFocus)
+{
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto navBarNode = GetHost();
+    CHECK_NULL_VOID(navBarNode);
+    auto parent = navBarNode->GetParent();
+    CHECK_NULL_VOID(parent);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(parent);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(pattern);
+    if (navigationPattern && navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
+        auto renderContext = navBarNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        Color maskColor = theme->GetNavBarUnfocusColor();
+        auto maskProperty = AceType::MakeRefPtr<ProgressMaskProperty>();
+        maskProperty->SetColor(isFocus?Color::TRANSPARENT:maskColor);
+        renderContext->UpdateProgressMask(maskProperty);
+    }
 }
 } // namespace OHOS::Ace::NG

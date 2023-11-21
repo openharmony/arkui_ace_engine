@@ -50,6 +50,8 @@ public:
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
+    void SetTextDetectEnable(bool value) override;
+    void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
     // TODO: add extra event for text.
     void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) override;
     void ClearOnClick() override;
@@ -63,6 +65,12 @@ public:
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetDraggable(bool draggable) override;
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
+
+    static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
+    static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
+    static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
+    static void SetTextColor(FrameNode* frameNode, const Color& value);
+    static void SetFontSize(FrameNode* frameNode, const Dimension& value);
 };
 } // namespace OHOS::Ace::NG
 

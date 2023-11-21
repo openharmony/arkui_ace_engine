@@ -33,8 +33,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     auto isInlineStyle = pattern->IsNormalInlineState();
 
-    auto isPasswordType =
-        textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
+    auto isPasswordType = pattern->IsInPasswordMode();
 
     // Create paragraph.
     auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
@@ -120,8 +119,18 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     auto responseArea = pattern->GetResponseArea();
-    if (responseArea && content) {
-        auto childWidth = responseArea->Measure(layoutWrapper).Width();
+    auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
+    float childWidth = 0.0f;
+    bool updateFrameSize = false;
+    if (responseArea) {
+        updateFrameSize = true;
+        childWidth += responseArea->Measure(layoutWrapper, 0).Width();
+    }
+    if (cleanNodeResponseArea) {
+        updateFrameSize = true;
+        childWidth += cleanNodeResponseArea->Measure(layoutWrapper, layoutWrapper->GetTotalChildCount() - 1).Width();
+    }
+    if (updateFrameSize) {
         if (LessOrEqual(contentWidth + childWidth, textFieldContentConstraint.maxSize.Width())) {
             frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + childWidth);
         } else {
@@ -193,8 +202,13 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         textRect_.SetOffset({ pattern->GetTextRect().GetOffset().GetX(), contentOffset.GetY() });
     }
     auto responseArea = pattern->GetResponseArea();
+    auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
+    float unitNodeWidth = 0.0f;
     if (responseArea) {
-        responseArea->Layout(layoutWrapper);
+        responseArea->Layout(layoutWrapper, 0, unitNodeWidth);
+    }
+    if (cleanNodeResponseArea) {
+        cleanNodeResponseArea->Layout(layoutWrapper, frameNode->GetChildren().size() - 1, unitNodeWidth);
     }
 }
 } // namespace OHOS::Ace::NG

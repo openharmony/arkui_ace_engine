@@ -213,7 +213,7 @@ std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(RSBrus
         std::vector<RSScalar> pos(gradientColors.size(), 0);
         double angle = gradient.GetConicGradient().startAngle->Value() / M_PI * 180.0;
         RSScalar startAngle = static_cast<RSScalar>(angle);
-        matrix.Rotate(startAngle, centerX, centerY);
+        matrix.PreRotate(startAngle, centerX, centerY);
         for (uint32_t i = 0; i < colorsSize; ++i) {
             const auto& gradientColor = gradientColors[i];
             colors.at(i) = gradientColor.GetColor().GetValue();
@@ -221,7 +221,7 @@ std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(RSBrus
         }
         auto mode = RSTileMode::CLAMP;
         shaderEffect = RSShaderEffect::CreateSweepGradient(RSPoint(centerX, centerY), colors, pos, mode,
-            static_cast<RSScalar>(CONIC_START_ANGLE), static_cast<RSScalar>(CONIC_END_ANGLE));
+            static_cast<RSScalar>(CONIC_START_ANGLE), static_cast<RSScalar>(CONIC_END_ANGLE), &matrix);
     }
     return shaderEffect;
 }
@@ -771,7 +771,11 @@ void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace:
     bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
     bitmap.SetPixels(data);
     auto contentOffset = GetContentOffset(paintWrapper);
+    RSBrush brush;
+    brush.SetBlendMode(RSBlendMode::SRC_OVER);
+    rsCanvas_->AttachBrush(brush);
     rsCanvas_->DrawBitmap(bitmap, imageData.x + contentOffset.GetX(), imageData.y + contentOffset.GetY());
+    rsCanvas_->DetachBrush();
 #endif
     delete[] data;
 }
@@ -1429,15 +1433,18 @@ void CustomPaintPaintMethod::Arc(PaintWrapper* paintWrapper, const ArcParam& par
 
 void CustomPaintPaintMethod::ArcTo(PaintWrapper* paintWrapper, const ArcToParam& param)
 {
-#ifndef USE_ROSEN_DRAWING
     OffsetF offset = GetContentOffset(paintWrapper);
     double x1 = param.x1 + offset.GetX();
     double y1 = param.y1 + offset.GetY();
     double x2 = param.x2 + offset.GetX();
     double y2 = param.y2 + offset.GetY();
     double radius = param.radius;
+#ifndef USE_ROSEN_DRAWING
     skPath_.arcTo(SkDoubleToScalar(x1), SkDoubleToScalar(y1), SkDoubleToScalar(x2), SkDoubleToScalar(y2),
         SkDoubleToScalar(radius));
+#else
+    rsPath_.ArcTo(static_cast<RSScalar>(x1), static_cast<RSScalar>(y1), static_cast<RSScalar>(x2),
+        static_cast<RSScalar>(y2), static_cast<RSScalar>(radius));
 #endif
 }
 
@@ -1700,13 +1707,16 @@ void CustomPaintPaintMethod::Path2DArc(const OffsetF& offset, const PathArgs& ar
 
 void CustomPaintPaintMethod::Path2DArcTo(const OffsetF& offset, const PathArgs& args)
 {
-#ifndef USE_ROSEN_DRAWING
     double x1 = args.para1 + offset.GetX();
     double y1 = args.para2 + offset.GetY();
     double x2 = args.para3 + offset.GetX();
     double y2 = args.para4 + offset.GetY();
     double r = args.para5;
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.arcTo(x1, y1, x2, y2, r);
+#else
+    rsPath2d_.ArcTo(static_cast<RSScalar>(x1), static_cast<RSScalar>(y1), static_cast<RSScalar>(x2),
+        static_cast<RSScalar>(y2), static_cast<RSScalar>(r));
 #endif
 }
 

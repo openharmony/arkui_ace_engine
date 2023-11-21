@@ -384,7 +384,7 @@ void GaugePaintMethod::PaintSingleSegmentGradientCircular(
     pen.SetWidth(data.thickness);
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(ToRSPoint(PointF(data.center.GetX(), data.center.GetY())),
-        colors, pos, RSTileMode::CLAMP, offsetDegree, data.sweepDegree - offsetDegree));
+        colors, pos, RSTileMode::CLAMP, offsetDegree, data.sweepDegree - offsetDegree, nullptr));
 
     RSRect rRect(data.center.GetX() - data.radius + data.thickness * PERCENT_HALF,
                  data.center.GetY() - data.radius + data.thickness * PERCENT_HALF,
@@ -428,7 +428,7 @@ void GaugePaintMethod::PaintSingleSegmentGradientCircularShadow(RSCanvas& canvas
     shadowPen.SetFilter(filter);
     shadowPen.SetShaderEffect(
         RSShaderEffect::CreateSweepGradient(ToRSPoint(PointF(data.center.GetX(), data.center.GetY())), colors, pos,
-            RSTileMode::CLAMP, offsetDegree, data.sweepDegree - offsetDegree));
+            RSTileMode::CLAMP, offsetDegree, data.sweepDegree - offsetDegree, nullptr));
 
     RSRect rRect(data.center.GetX() - data.radius + data.thickness * PERCENT_HALF,
                  data.center.GetY() - data.radius + data.thickness * PERCENT_HALF,
@@ -570,12 +570,12 @@ void GaugePaintMethod::DrawSingleSegmentGradient(RSCanvas& canvas, const RenderR
         }
         pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
             ToRSPoint(PointF(data.center.GetX(), data.center.GetY())), colorValues, pos, RSTileMode::CLAMP,
-            drawStartDegree - offsetDegree, drawStartDegree + drawSweepDegree - offsetDegree));
+            drawStartDegree - offsetDegree, drawStartDegree + drawSweepDegree - offsetDegree, nullptr));
         path.AddArc(rRect, drawStartDegree - offsetDegree, drawSweepDegree);
     } else {
         pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
             ToRSPoint(PointF(data.center.GetX(), data.center.GetY())), colorValues, pos, RSTileMode::CLAMP,
-            drawStartDegree + offsetDegree, drawStartDegree + drawSweepDegree + offsetDegree));
+            drawStartDegree + offsetDegree, drawStartDegree + drawSweepDegree + offsetDegree, nullptr));
         path.AddArc(rRect, drawStartDegree + offsetDegree, drawSweepDegree - 2.0f * offsetDegree);
     }
 

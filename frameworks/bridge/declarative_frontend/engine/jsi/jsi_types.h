@@ -130,6 +130,7 @@ public:
     void SetValueAt(size_t index, JsiRef<JsiValue> value) const;
     JsiRef<JsiValue> GetProperty(const char* prop) const;
     size_t Length() const;
+    void SetLength(size_t length) const;
     bool IsArray() const;
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiArray)
 };
@@ -266,9 +267,19 @@ public:
         return info_->GetVM();
     }
 
-private:
-    panda::JsiRuntimeCallInfo* info_ = nullptr;
+    void SetSize(size_t size) const
+    {
+        size_ = size;
+    }
 
+    size_t GetSize() const
+    {
+        return size_;
+    }
+
+private:
+    mutable size_t size_ = 0;
+    panda::JsiRuntimeCallInfo* info_ = nullptr;
     mutable std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal_;
 };
 

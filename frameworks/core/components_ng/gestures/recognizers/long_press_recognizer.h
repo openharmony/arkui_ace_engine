@@ -20,6 +20,8 @@
 
 #include "base/thread/cancelable_callback.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
@@ -91,6 +93,8 @@ public:
 
     GestureEventFunc GetLongPressActionFunc();
 
+    virtual RefPtr<GestureSnapshot> Dump() const override;
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -102,9 +106,11 @@ private:
     void DoRepeat();
     void StartRepeatTimer();
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat);
+    GestureJudgeResult TriggerGestureJudgeCallback();
     void OnResetStatus() override;
     double ConvertPxToVp(double offset) const;
     void ThumbnailTimer(int32_t time);
+    RefPtr<DragEventActuator> GetDragEventActuator();
 
     WeakPtr<GestureEventHub> gestureHub_;
     CancelableCallback<void()> thumbnailTimer_;
@@ -120,6 +126,7 @@ private:
     bool isForDrag_ = false;
     bool isDisableMouseLeft_ = false;
     Point globalPoint_;
+    DelayedTask task_;
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
 };
 

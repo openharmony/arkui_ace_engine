@@ -53,6 +53,7 @@ struct DragDataCore {
     int32_t displayY = -1;
     int32_t displayId = -1;
     bool hasCanceledAnimation = false;
+    std::map<std::string, int64_t> summary;
 };
 
 struct DragNotifyMsg {
@@ -70,6 +71,14 @@ struct DragDropRet {
 #endif
     bool hasCustomAnimation = false;
     int32_t windowId = -1;
+};
+
+enum class DragState {
+    ERROR = 0,
+    START,
+    STOP,
+    CANCEL,
+    MOTION_DRAGGING
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INTERACTION_DATA_H

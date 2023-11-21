@@ -632,6 +632,13 @@ void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
     gestureHub->SetUserOnClick(std::move(clickEventFunc));
 }
 
+void ViewAbstract::SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
+}
+
 void ViewAbstract::SetOnTouch(TouchEventFunc&& touchEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
@@ -901,6 +908,11 @@ void ViewAbstract::SetAlign(Alignment alignment)
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
+}
+
+void ViewAbstract::SetAlign(FrameNode* frameNode, Alignment alignment)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment, frameNode);
 }
 
 void ViewAbstract::SetVisibility(VisibleType visible)
@@ -1207,7 +1219,7 @@ void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool is
     overlayManager->ShowMenu(targetId, offset, nullptr);
 }
 
-void ViewAbstract::SetBackdropBlur(const Dimension& radius)
+void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -1219,7 +1231,7 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
         if (target->GetBackgroundEffect().has_value()) {
             target->UpdateBackgroundEffect(std::nullopt);
         }
-        target->UpdateBackBlurRadius(radius);
+        target->UpdateBackBlur(radius, blurOption);
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
@@ -1243,7 +1255,7 @@ void ViewAbstract::SetDynamicLightUp(float rate, float lightUpDegree)
     ACE_UPDATE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree);
 }
 
-void ViewAbstract::SetFrontBlur(const Dimension& radius)
+void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -1252,7 +1264,7 @@ void ViewAbstract::SetFrontBlur(const Dimension& radius)
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
-        target->UpdateFrontBlurRadius(radius);
+        target->UpdateFrontBlur(radius, blurOption);
         if (target->GetFrontBlurStyle().has_value()) {
             target->UpdateFrontBlurStyle(std::nullopt);
         }
@@ -1397,7 +1409,15 @@ void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(ClipMask, basicShape);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->HasProgressMask()) {
+            target->UpdateProgressMask(nullptr);
+        }
+        target->UpdateClipMask(basicShape);
+    }
 }
 
 void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty>& progress)
@@ -1405,7 +1425,15 @@ void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty>& progress)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(ProgressMask, progress);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->HasClipMask()) {
+            target->UpdateClipMask(nullptr);
+        }
+        target->UpdateProgressMask(progress);
+    }
 }
 
 void ViewAbstract::SetBrightness(const Dimension& brightness)
@@ -1448,7 +1476,7 @@ void ViewAbstract::SetSepia(const Dimension& sepia)
     ACE_UPDATE_RENDER_CONTEXT(FrontSepia, sepia);
 }
 
-void ViewAbstract::SetInvert(const Dimension& invert)
+void ViewAbstract::SetInvert(const InvertVariant& invert)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -1563,6 +1591,14 @@ void ViewAbstract::SetUseEffect(bool useEffect)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(UseEffect, useEffect);
+}
+
+void ViewAbstract::SetUseShadowBatching(bool useShadowBatching)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(UseShadowBatching, useShadowBatching);
 }
 
 void ViewAbstract::SetForegroundColor(const Color& color)

@@ -120,10 +120,10 @@ public:
     void SetClipEdge(bool isClip) override;
     void SetMask(const RefPtr<BasicShape>& shape) override;
 
-    void SetBackdropBlur(const Dimension& radius) override;
+    void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override {};
     void SetDynamicLightUp(float rate, float lightUpDegree) override {};
-    void SetFrontBlur(const Dimension& radius) override;
+    void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void SetBackShadow(const std::vector<Shadow>& shadows) override;
     void SetBlendMode(BlendMode blendMode) override;
     void SetColorBlend(const Color& value) override;
@@ -133,12 +133,14 @@ public:
     void SetContrast(const Dimension& value) override;
     void SetSaturate(const Dimension& value) override;
     void SetSepia(const Dimension& value) override;
-    void SetInvert(const Dimension& value) override;
+    void SetInvert(const InvertVariant& invert) override;
     void SetHueRotate(float value) override;
     void SetUseEffect(bool) override {}
+    void SetUseShadowBatching(bool) override {}
 
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
+    void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;

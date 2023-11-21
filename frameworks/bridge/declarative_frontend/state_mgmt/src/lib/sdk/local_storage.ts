@@ -206,9 +206,14 @@ class LocalStorage extends NativeLocalStorage {
    * Not a public / sdk method.
    */
   private addNewPropertyInternal<T>(propName: string, value: T): ObservedPropertyAbstract<T> {
-    const newProp = (typeof value === "object") ?
-      new ObservedPropertyObject<T>(value, undefined, propName)
-      : new ObservedPropertySimple<T>(value, undefined, propName);
+    let newProp;
+    if (ViewStackProcessor.UsesNewPipeline()) {
+      newProp = new ObservedPropertyPU<T>(value, undefined, propName);
+    } else {
+      newProp = (typeof value === "object") ?
+        new ObservedPropertyObject<T>(value, undefined, propName)
+        : new ObservedPropertySimple<T>(value, undefined, propName);
+    }
     this.storage_.set(propName, newProp);
     return newProp;
   }
@@ -237,9 +242,7 @@ class LocalStorage extends NativeLocalStorage {
     }
     let linkResult;
     if (ViewStackProcessor.UsesNewPipeline()) {
-        linkResult = (p instanceof ObservedPropertySimple)
-                ? new SynchedPropertySimpleTwoWayPU<T>(p, linkUser, propName)
-                : new SynchedPropertyObjectTwoWayPU<T>(p, linkUser, propName);
+        linkResult = new SynchedPropertyTwoWayPU(p, linkUser, propName);
     } else {
         linkResult = p.createLink(linkUser, propName);
     }
@@ -298,9 +301,7 @@ class LocalStorage extends NativeLocalStorage {
 
     let propResult;
     if (ViewStackProcessor.UsesNewPipeline()) {
-        propResult = (p instanceof ObservedPropertySimple)
-                ? new SynchedPropertySimpleOneWayPU<T>(p, propUser, propName)
-                : new SynchedPropertyObjectOneWayPU<T>(p, propUser, propName);
+        propResult = new SynchedPropertyOneWayPU<T>(p, propUser, propName);
     } else {
         propResult = p.createProp(propUser, propName);
     }
@@ -443,20 +444,6 @@ class LocalStorage extends NativeLocalStorage {
     return false;
   }
 
-  /** 
-   * return number of subscribers to named property
-   *  useful for debug purposes
-   * 
-   * Not a public / sdk function
-  */
-  public numberOfSubscrbersTo(propName: string): number | undefined {
-    var p: ObservedPropertyAbstract<any> | undefined = this.storage_.get(propName);
-    if (p) {
-      return p.numberOfSubscrbers();
-    }
-    return undefined;
-  }
-
   public __createSync<T>(storagePropName: string, defaultValue: T,
     factoryFunc: SynchedPropertyFactoryFunc): ObservedPropertyAbstract<T> {
 
@@ -471,7 +458,6 @@ class LocalStorage extends NativeLocalStorage {
 
       p = this.addNewPropertyInternal<T>(storagePropName, defaultValue);
     }
-
     return factoryFunc(p);
   }
 }

@@ -30,8 +30,7 @@ class GeometryTransition : public AceType {
     DECLARE_ACE_TYPE(GeometryTransition, AceType);
 
 public:
-    GeometryTransition(const std::string& id, const WeakPtr<FrameNode>& frameNode,
-        bool followWithoutTransition = false);
+    GeometryTransition(const std::string& id, bool followWithoutTransition = false);
     ~GeometryTransition() override = default;
 
     bool IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const;

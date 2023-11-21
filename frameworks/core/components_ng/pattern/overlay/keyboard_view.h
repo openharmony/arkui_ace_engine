@@ -36,9 +36,11 @@ public:
     {
         CHECK_NULL_RETURN(builder, nullptr);
 
+        auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::KEYBOARD_ETS_TAG, targetId);
         // create wrapper node
         auto wrapperNode = FrameNode::CreateFrameNode(V2::KEYBOARD_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<KeyboardPattern>(targetId));
+            nodeId, AceType::MakeRefPtr<KeyboardPattern>(targetId));
         auto wrapperLayoutProperty = wrapperNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_RETURN(wrapperLayoutProperty, nullptr);
 

@@ -28,6 +28,7 @@
 #include "base/geometry/rect.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/view_data/view_data_wrap.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -74,6 +75,8 @@ struct TextConfig;
 #endif
 
 namespace OHOS::Ace::NG {
+
+enum class FocuseIndex { TEXT = 0, CANCEL, UNIT };
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
@@ -502,8 +505,7 @@ public:
     {
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, false);
-        return layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD &&
-               layoutProperty->GetShowPasswordIconValue(true);
+        return IsInPasswordMode() && layoutProperty->GetShowPasswordIconValue(true);
     }
 
     void SetEnableTouchAndHoverEffect(bool enable)
@@ -511,7 +513,7 @@ public:
         enableTouchAndHoverEffect_ = enable;
     }
 
-    RectF GetCaretRect() const
+    RectF GetCaretRect() const override
     {
         return selectController_->GetCaretRect();
     }
@@ -711,7 +713,7 @@ public:
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
     void HandleBlurEvent();
     void HandleFocusEvent();
-    bool OnBackPressed();
+    bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
@@ -853,6 +855,10 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
+    void NotifyFillRequestFailed(int32_t errCode) override;
+    bool CheckAutoSave() override;
     void OnColorConfigurationUpdate() override;
     bool NeedPaintSelect();
 
@@ -922,24 +928,76 @@ public:
     {
         return responseArea_;
     }
+
+    const RefPtr<TextInputResponseArea>& GetCleanNodeResponseArea()
+    {
+        return cleanNodeResponseArea_;
+    }
+
+    void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
+    {
+        cleanNodeStyle_ = cleanNodeStyle;
+    }
+
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
+    bool IsInPasswordMode() const;
 
     bool GetShowSelect() const
     {
         return showSelect_;
     }
+
+    bool UpdateFocusForward();
+
+    bool UpdateFocusBackward();
+
+    bool HandleSpaceEvent();
+
+    RefPtr<PixelMap> GetPixelMap();
+
+    void UpdateShowMagnifier(bool isShowMagnifier = false)
+    {
+        isShowMagnifier_ = isShowMagnifier;
+    }
+
+    bool GetShowMagnifier() const
+    {
+        return isShowMagnifier_;
+    }
+
+    void SetLocalOffset(OffsetF localOffset)
+    {
+        localOffset_.SetX(localOffset.GetX());
+        localOffset_.SetY(localOffset.GetY());
+        isShowMagnifier_ = true;
+    }
+
+    OffsetF GetLocalOffset() const
+    {
+        return localOffset_;
+    }
+
+    int32_t GetContentWideTextLength()
+    {
+        return static_cast<int32_t>(contentController_->GetWideText().length());
+    }
+
+    void ShowMenu();
+
 #ifdef ENABLE_DRAG_FRAMEWORK
 protected:
     virtual void InitDragEvent();
 #endif
+
 private:
     void GetTextSelectRectsInRangeAndWillChange();
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
-
+    void HandleTouchMove(const TouchEventInfo& info);
+    void UpdateCaretByTouchMove(const TouchEventInfo& info);
     void InitDisableColor();
     void InitFocusEvent();
     void InitTouchEvent();
@@ -962,6 +1020,7 @@ private:
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
+    void ChangeMouseState(const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId);
     void HandleMouseEvent(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);
     void HandleRightMouseEvent(MouseInfo& info);
@@ -1040,7 +1099,7 @@ private:
     void RestorePreInlineStates();
 
     bool ResetObscureTickCountDown();
-    bool IsInPasswordMode() const;
+
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
     void UpdateErrorTextMargin();
@@ -1048,6 +1107,21 @@ private:
     void UpdateSelectController();
     void UpdateHandlesOffsetOnScroll(float offset);
     void CloseHandleAndSelect() override;
+    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex);
+    void PaintTextRect();
+    void PaintResponseAreaRect();
+    void PaintCancelRect();
+    void PaintUnitRect();
+    void PaintPasswordRect();
+    bool CancelNodeIsShow()
+    {
+        auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+        CHECK_NULL_RETURN(cleanNodeArea, false);
+        return cleanNodeArea->IsShow();
+    }
+    void CleanNodeResponseKeyEvent();
+    void PasswordResponseKeyEvent();
+    void UnitResponseKeyEvent();
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif
@@ -1060,6 +1134,10 @@ private:
     void StartRequestSelectOverlay(const ShowSelectOverlayParams& params, bool isShowPaste = false);
     void ProcessResponseArea();
     bool HasInputOperation();
+    AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
+    bool CheckAutoFill();
+    bool ProcessAutoFill();
+    void ScrollToSafeArea() const override;
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1200,8 +1278,15 @@ private:
     RefPtr<TextSelectController> selectController_;
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
+    RefPtr<TextInputResponseArea> cleanNodeResponseArea_;
+    std::string lastAutoFillPasswordTextValue_;
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
+    CleanNodeStyle cleanNodeStyle_ = CleanNodeStyle::INVISIBLE;
+    FocuseIndex focusIndex_ = FocuseIndex::TEXT;
+    bool isShowMagnifier_ = false;
+    OffsetF localOffset_;
+    bool isTouchCaret_ = false;
 };
 } // namespace OHOS::Ace::NG
 
