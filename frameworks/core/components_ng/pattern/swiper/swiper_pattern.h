@@ -319,6 +319,18 @@ public:
         }
     }
 
+    void UpdateAnimationEndEvent(AnimationEndEvent&& event)
+    {
+        if (!animationEndEvent_) {
+            animationEndEvent_ = std::make_shared<AnimationEndEvent>(event);
+            auto eventHub = GetEventHub<SwiperEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->AddAnimationEndEvent(animationEndEvent_);
+        } else {
+            (*animationEndEvent_).swap(event);
+        }
+    }
+
     void SetSwiperParameters(const SwiperParameters& swiperParameters)
     {
         swiperParameters_ = std::make_shared<SwiperParameters>(swiperParameters);
@@ -458,6 +470,16 @@ public:
             SetLazyLoadFeature(true);
         }
         cachedCount_ = cachedCount;
+    }
+
+    void SetFinishCallbackType(FinishCallbackType finishCallbackType)
+    {
+        finishCallbackType_ = finishCallbackType;
+    }
+
+    FinishCallbackType GetFinishCallbackType() const
+    {
+        return finishCallbackType_;
     }
 
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
@@ -711,6 +733,7 @@ private:
 
     ChangeEventPtr changeEvent_;
     ChangeEventPtr onIndexChangeEvent_;
+    AnimationEndEventPtr animationEndEvent_;
 
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;
     mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
@@ -758,6 +781,7 @@ private:
 
     WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
+    FinishCallbackType finishCallbackType_ = FinishCallbackType::REMOVED;
 };
 } // namespace OHOS::Ace::NG
 
