@@ -41,7 +41,7 @@ export interface SelectionMenuOptions {
   onSelectAll?: (event?: EditorEventInfo) => void;
 }
 
-export interface SelectionMenuTheme {
+interface SelectionMenuTheme {
   imageSize: number;
   buttonSize: number;
   menuSpacing: number;
@@ -63,7 +63,7 @@ export interface SelectionMenuTheme {
   iconPanelShadowStyle: ShadowStyle;
 }
 
-export const defaultTheme: SelectionMenuTheme = {
+const defaultTheme: SelectionMenuTheme = {
   imageSize: 24,
   buttonSize: 48,
   menuSpacing: 8,
@@ -137,6 +137,108 @@ struct SelectionMenuComponent {
     }
   }
 
+  pushDataToPasteboard(richEditorSelection: RichEditorSelection) {
+    let sysBoard = pasteboard.getSystemPasteboard()
+    let pasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, '')
+    if (richEditorSelection.spans && richEditorSelection.spans.length > 0) {
+      let count = richEditorSelection.spans.length
+      for (let i = count - 1; i >= 0; i--) {
+        let item = richEditorSelection.spans[i]
+        if ((item as RichEditorTextSpanResult)?.textStyle) {
+          let span = item as RichEditorTextSpanResult
+          let style = span.textStyle
+          let data = pasteboard.createRecord(pasteboard.MIMETYPE_TEXT_PLAIN, span.value.substring(span.offsetInSpan[0], span.offsetInSpan[1]))
+          let prop = pasteData.getProperty()
+          let temp: Record<string, Object> = {
+            'color': style.fontColor,
+            'size': style.fontSize,
+            'style': style.fontStyle,
+            'weight': this.fontWeightTable[style.fontWeight],
+            'fontFamily': style.fontFamily,
+            'decorationType': style.decoration.type,
+            'decorationColor': style.decoration.color
+          }
+          prop.additions[i] = temp;
+          pasteData.addRecord(data)
+          pasteData.setProperty(prop)
+        }
+      }
+    }
+    sysBoard.clearData()
+    sysBoard.setData(pasteData).then(() => {
+      hilog.info(0x3900, "Ace", 'SelectionMenu copy option, Succeeded in setting PasteData.');
+    }).catch((err: BusinessError) => {
+      hilog.info(0x3900, "Ace", 'SelectionMenu copy option, Failed to set PasteData. Cause:' + err.message);
+    })
+  }
+
+  popDataFromPasteboard(richEditorSelection: RichEditorSelection) {
+    let start = richEditorSelection.selection[0]
+    let end = richEditorSelection.selection[1]
+    let moveOffset = 0
+    let sysBoard = pasteboard.getSystemPasteboard()
+    sysBoard.getData((err, data) => {
+      if (err) {
+        return
+      }
+      let count = data.getRecordCount()
+      for (let i = 0; i < count; i++) {
+        const element = data.getRecord(i);
+        let tex: RichEditorTextStyle = {
+          fontSize: 16,
+          fontColor: Color.Black,
+          fontWeight: FontWeight.Normal,
+          fontFamily: "HarmonyOS Sans",
+          fontStyle: FontStyle.Normal,
+          decoration: { type: TextDecorationType.None, color: "#FF000000" }
+        }
+        if (data.getProperty() && data.getProperty().additions[i]) {
+          const tmp = data.getProperty().additions[i] as Record<string, Object | undefined>;
+          if (tmp.color) {
+            tex.fontColor = tmp.color as ResourceColor;
+          }
+          if (tmp.size) {
+            tex.fontSize = tmp.size as Length | number;
+          }
+          if (tmp.style) {
+            tex.fontStyle = tmp.style as FontStyle;
+          }
+          if (tmp.weight) {
+            tex.fontWeight = tmp.weight as number | FontWeight | string;
+          }
+          if (tmp.fontFamily) {
+            tex.fontFamily = tmp.fontFamily as ResourceStr;
+          }
+          if (tmp.decorationType && tex.decoration) {
+            tex.decoration.type = tmp.decorationType as TextDecorationType;
+          }
+          if (tmp.decorationColor && tex.decoration) {
+            tex.decoration.color = tmp.decorationColor as ResourceColor;
+          }
+          if (tex.decoration) {
+            tex.decoration = { type: tex.decoration.type, color: tex.decoration.color }
+          }
+        }
+        if (element && element.plainText && element.mimeType === pasteboard.MIMETYPE_TEXT_PLAIN && this.controller) {
+          this.controller.addTextSpan(element.plainText,
+            {
+              style: tex,
+              offset: start + moveOffset
+            }
+          )
+          moveOffset += element.plainText.length
+        }
+      }
+      if (this.controller) {
+        this.controller.setCaretOffset(start + moveOffset)
+        this.controller.closeSelectionMenu()
+      }
+      if (start !== end && this.controller) {
+        this.controller.deleteSpans({ start: start + moveOffset, end: end + moveOffset })
+      }
+    })
+  }
+
   @Builder
   IconPanel() {
     Flex({ wrap: FlexWrap.Wrap }) {
@@ -196,38 +298,7 @@ struct SelectionMenuComponent {
                   if (this.onCut) {
                     this.onCut({ content: richEditorSelection })
                   } else {
-                    let sysBoard = pasteboard.getSystemPasteboard()
-                    let pasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, '')
-                    if (richEditorSelection.spans && richEditorSelection.spans.length > 0) {
-                      let count = richEditorSelection.spans.length
-                      for (let i = count - 1; i >= 0; i--) {
-                        let item = richEditorSelection.spans[i]
-                        if ((item as RichEditorTextSpanResult)?.textStyle) {
-                          let span = item as RichEditorTextSpanResult
-                          let style = span.textStyle
-                          let data = pasteboard.createRecord(pasteboard.MIMETYPE_TEXT_PLAIN, span.value.substring(span.offsetInSpan[0], span.offsetInSpan[1]))
-                          let prop = pasteData.getProperty()
-                          let temp: Record<string, Object> = {
-                            'color': style.fontColor,
-                            'size': style.fontSize,
-                            'style': style.fontStyle,
-                            'weight': this.fontWeightTable[style.fontWeight],
-                            'fontFamily': style.fontFamily,
-                            'decorationType': style.decoration.type,
-                            'decorationColor': style.decoration.color
-                          }
-                          prop.additions[i] = temp;
-                          pasteData.addRecord(data)
-                          pasteData.setProperty(prop)
-                        }
-                      }
-                    }
-                    sysBoard.clearData()
-                    sysBoard.setData(pasteData).then(() => {
-                      hilog.info(0x3900, "Ace", 'SelectionMenu cut option, Succeeded in setting PasteData.');
-                    }).catch((err: BusinessError) => {
-                      hilog.info(0x3900, "Ace", 'SelectionMenu cut option, Failed to set PasteData. Cause:' + err.message);
-                    })
+                    this.pushDataToPasteboard(richEditorSelection);
                     this.controller.deleteSpans({
                       start: richEditorSelection.selection[0],
                       end: richEditorSelection.selection[1]
@@ -244,38 +315,7 @@ struct SelectionMenuComponent {
                   if (this.onCopy) {
                     this.onCopy({ content: richEditorSelection })
                   } else {
-                    let sysBoard = pasteboard.getSystemPasteboard()
-                    let pasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, '')
-                    if (richEditorSelection.spans && richEditorSelection.spans.length > 0) {
-                      let count = richEditorSelection.spans.length
-                      for (let i = count - 1; i >= 0; i--) {
-                        let item = richEditorSelection.spans[i]
-                        if ((item as RichEditorTextSpanResult)?.textStyle) {
-                          let span = item as RichEditorTextSpanResult
-                          let style = span.textStyle
-                          let data = pasteboard.createRecord(pasteboard.MIMETYPE_TEXT_PLAIN, span.value.substring(span.offsetInSpan[0], span.offsetInSpan[1]))
-                          let prop = pasteData.getProperty()
-                          let temp: Record<string, Object> = {
-                            'color': style.fontColor,
-                            'size': style.fontSize,
-                            'style': style.fontStyle,
-                            'weight': this.fontWeightTable[style.fontWeight],
-                            'fontFamily': style.fontFamily,
-                            'decorationType': style.decoration.type,
-                            'decorationColor': style.decoration.color
-                          }
-                          prop.additions[i] = temp;
-                          pasteData.addRecord(data)
-                          pasteData.setProperty(prop)
-                        }
-                      }
-                    }
-                    sysBoard.clearData()
-                    sysBoard.setData(pasteData).then(() => {
-                      hilog.info(0x3900, "Ace", 'SelectionMenu copy option, Succeeded in setting PasteData.');
-                    }).catch((err: BusinessError) => {
-                      hilog.info(0x3900, "Ace", 'SelectionMenu copy option, Failed to set PasteData. Cause:' + err.message);
-                    })
+                    this.pushDataToPasteboard(richEditorSelection);
                     this.controller.closeSelectionMenu()
                   }
                 })
@@ -289,76 +329,7 @@ struct SelectionMenuComponent {
                   if (this.onPaste) {
                     this.onPaste({ content: richEditorSelection })
                   } else {
-                    let start = richEditorSelection.selection[0]
-                    let end = richEditorSelection.selection[1]
-                    let moveOffset = 0
-                    let sysBoard = pasteboard.getSystemPasteboard()
-                    sysBoard.getData((err, data) => {
-                      if (err) {
-                        return
-                      }
-                      let count = data.getRecordCount()
-                      for (let i = 0; i < count; i++) {
-                        const element = data.getRecord(i);
-                        let tex: RichEditorTextStyle = {
-                          fontSize: 16,
-                          fontColor: Color.Black,
-                          fontWeight: FontWeight.Normal,
-                          fontFamily: "HarmonyOS Sans",
-                          fontStyle: FontStyle.Normal,
-                          decoration: { type: TextDecorationType.None, color: "#FF000000" }
-                        }
-                        if (data.getProperty() && data.getProperty().additions[i]) {
-                          const tmp = data.getProperty().additions[i] as Record<string, Object | undefined>;
-                          if (tmp.color) {
-                            tex.fontColor = tmp.color as ResourceColor;
-                          }
-                          if (tmp.size) {
-                            tex.fontSize = tmp.size as Length | number;
-                          }
-                          if (tmp.style) {
-                            tex.fontStyle = tmp.style as FontStyle;
-                          }
-                          if (tmp.weight) {
-                            tex.fontWeight = tmp.weight as number | FontWeight | string;
-                          }
-                          if (tmp.fontFamily) {
-                            tex.fontFamily = tmp.fontFamily as ResourceStr;
-                          }
-                          if (tmp.decorationType && tex.decoration) {
-                            tex.decoration.type = tmp.decorationType as TextDecorationType;
-                          }
-                          if (tmp.decorationColor && tex.decoration) {
-                            tex.decoration.color = tmp.decorationColor as ResourceColor;
-                          }
-                          if (tex.decoration) {
-                            tex.decoration = { type: tex.decoration.type, color: tex.decoration.color }
-                          }
-                        }
-                        if (element && element.plainText) {
-                          if (element.mimeType === pasteboard.MIMETYPE_TEXT_PLAIN) {
-                            if (this.controller) {
-                              this.controller.addTextSpan(element.plainText,
-                                {
-                                  style: tex,
-                                  offset: start + moveOffset
-                                }
-                              )
-                            }
-                          }
-                          moveOffset += element.plainText.length
-                        }
-                      }
-                      if (this.controller) {
-                        this.controller.setCaretOffset(start + moveOffset)
-                        this.controller.closeSelectionMenu()
-                      }
-                      if (start !== end) {
-                        if (this.controller) {
-                          this.controller.deleteSpans({ start: start + moveOffset, end: end + moveOffset })
-                        }
-                      }
-                    })
+                    this.popDataFromPasteboard(richEditorSelection)
                   }
                 })
               MenuItem({ startIcon: this.theme.selectAllIcon, content: "全选", labelInfo: "Ctrl+A" })
