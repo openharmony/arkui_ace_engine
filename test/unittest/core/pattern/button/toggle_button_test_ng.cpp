@@ -445,4 +445,31 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest010, TestSize.Level1)
     ASSERT_NE(toggleButtonPaintProperty, nullptr);
     EXPECT_TRUE(toggleButtonPaintProperty->GetIsOnValue(false));
 }
+
+/**
+ * @tc.name: ToggleButtonPatternTest011
+ * @tc.desc: Test ToggleButton Accessibility PerformAction test Select and ClearSelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest011, TestSize.Level1)
+{
+    ToggleButtonModelNG toggleButtonModelNG;
+    toggleButtonModelNG.Create(TOGGLE_ETS_TAG);
+    toggleButtonModelNG.SetIsOn(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isOn_ = false;
+    pattern->SetAccessibilityAction();
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<ToggleButtonAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(accessibilityProperty->ActActionSelect());
+
+    bool isSelected = true;
+    pattern->isOn_ = false;
+    pattern->UpdateSelectStatus(isSelected);
+    EXPECT_TRUE(accessibilityProperty->ActActionClearSelection());
+}
 } // namespace OHOS::Ace::NG

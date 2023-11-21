@@ -1247,6 +1247,32 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0019, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TogglePatternTest020
+ * @tc.desc: Test Radio Accessibility PerformAction test Select and ClearSelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, TogglePatternTest020, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isOn_ = false;
+    pattern->SetAccessibilityAction();
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<SwitchAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(accessibilityProperty->ActActionSelect());
+
+    bool isSelected = true;
+    pattern->isOn_ = false;
+    pattern->UpdateSelectStatus(isSelected);
+    EXPECT_TRUE(accessibilityProperty->ActActionClearSelection());
+}
+
+/**
  * @tc.name: ToggleModelTest004
  * @tc.desc: Test checkbox create twice.
  * @tc.type: FUNC
