@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/ui_node.h"
@@ -45,6 +46,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
+constexpr Dimension MIN_SELECT_MENU_WIDTH = 64.0_vp;
+constexpr int32_t COLUMN_NUM = 2;
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
@@ -967,5 +970,30 @@ void MenuPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(
         std::string("MenuType: ").append(std::to_string(static_cast<int32_t>(GetMenuType()))));
+}
+
+float MenuPattern::GetSelectMenuWidth()
+{
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    CHECK_NULL_RETURN(columnInfo, MIN_SELECT_MENU_WIDTH.ConvertToPx());
+    auto parent = columnInfo->GetParent();
+    CHECK_NULL_RETURN(parent, MIN_SELECT_MENU_WIDTH.ConvertToPx());
+    parent->BuildColumnWidth();
+    auto defaultWidth = static_cast<float>(columnInfo->GetWidth(COLUMN_NUM));
+    float finalWidth = MIN_SELECT_MENU_WIDTH.ConvertToPx();
+    
+    if (IsWidthModifiedBySelect()) {
+        auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
+        auto selectmodifiedwidth = menuLayoutProperty->GetSelectMenuModifiedWidth();
+        finalWidth = selectmodifiedwidth.value();
+    } else {
+        finalWidth = defaultWidth;
+    }
+    
+    if (finalWidth < MIN_SELECT_MENU_WIDTH.ConvertToPx()) {
+        finalWidth = defaultWidth;
+    }
+    
+    return finalWidth;
 }
 } // namespace OHOS::Ace::NG

@@ -60,6 +60,9 @@ public:
     void SetMenuAlign(const MenuAlign& menuAlign) override;
     void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent) override;
     void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent) override;
+    void SetOptionWidth(const Dimension& value) override;
+    void SetOptionHeight(const Dimension& value) override;
+    void SetOptionWidthFitTrigger(bool isFitTrigger) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SELECT_MODEL_IMPL_H

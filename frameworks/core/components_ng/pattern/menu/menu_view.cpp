@@ -510,6 +510,9 @@ RefPtr<FrameNode> MenuView::Create(
     CHECK_NULL_RETURN(menuPattern, nullptr);
     for (size_t i = 0; i < params.size(); ++i) {
         auto optionNode = OptionView::CreateSelectOption(params[i].first, params[i].second, i);
+        auto optionPattern = optionNode->GetPattern<OptionPattern>();
+        CHECK_NULL_RETURN(optionPattern, nullptr);
+        optionPattern->SetIsSelectOption(true);
         menuPattern->AddOptionNode(optionNode);
         auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
         OptionKeepMenu(optionNode, menuWeak);
@@ -523,6 +526,9 @@ RefPtr<FrameNode> MenuView::Create(
     }
     auto scroll = CreateMenuScroll(column);
     CHECK_NULL_RETURN(scroll, nullptr);
+    auto scrollPattern = scroll->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(scrollPattern, nullptr);
+    scrollPattern->SetIsSelectScroll(true);
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
     menuNode->MarkModifyDone();

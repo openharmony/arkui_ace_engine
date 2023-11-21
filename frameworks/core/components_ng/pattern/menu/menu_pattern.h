@@ -221,6 +221,18 @@ public:
     {
         return showedSubMenu_;
     }
+    
+    void SetIsWidthModifiedBySelect(bool isModified)
+    {
+        isWidthModifiedBySelect_ = isModified;
+    }
+    
+    bool IsWidthModifiedBySelect() const
+    {
+        return isWidthModifiedBySelect_;
+    }
+    
+    float GetSelectMenuWidth();
     void HideSubMenu();
     void OnModifyDone() override;
 
@@ -314,6 +326,8 @@ private:
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF previewOriginOffset_;
+	
+    bool isWidthModifiedBySelect_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

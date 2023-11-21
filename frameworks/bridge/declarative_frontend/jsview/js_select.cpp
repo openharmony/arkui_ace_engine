@@ -115,6 +115,9 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("paddingBottom", &JSSelect::SetPaddingBottom, opt);
     JSClass<JSSelect>::StaticMethod("paddingLeft", &JSSelect::SetPaddingLeft, opt);
     JSClass<JSSelect>::StaticMethod("paddingRight", &JSSelect::SetPaddingRight, opt);
+    JSClass<JSSelect>::StaticMethod("optionWidth", &JSSelect::SetOptionWidth, opt);
+    JSClass<JSSelect>::StaticMethod("optionHeight", &JSSelect::SetOptionHeight, opt);
+    JSClass<JSSelect>::StaticMethod("optionWidthFitTrigger", &JSSelect::SetOptionWidthFitTrigger, opt);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -734,5 +737,47 @@ void JSSelect::SetMenuAlign(const JSCallbackInfo& info)
     }
 
     SelectModel::GetInstance()->SetMenuAlign(menuAlignObj);
+}
+
+void JSSelect::SetOptionWidth(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    
+    if (info[0]->IsString()) {
+        std::string modeFlag = info[0]->ToString();
+        if (modeFlag.compare("fit_content") == 0) {
+            SelectModel::GetInstance()->SetOptionWidthFitTrigger(false);
+        } else if (modeFlag.compare("fit_trigger") == 0) {
+            SelectModel::GetInstance()->SetOptionWidthFitTrigger(true);
+        } else {
+            ParseJsDimensionVp(info[0], value);
+            SelectModel::GetInstance()->SetOptionWidth(value);
+        }
+    } else {
+        if (!ParseJsDimensionVp(info[0], value)) {
+            return;
+        }
+        SelectModel::GetInstance()->SetOptionWidth(value);
+    }
+}
+
+void JSSelect::SetOptionHeight(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    
+    SelectModel::GetInstance()->SetOptionHeight(value);
+}
+
+void JSSelect::SetOptionWidthFitTrigger(const JSCallbackInfo& info)
+{
+    bool isFitTrigger = false;
+    if (info[0]->IsBoolean()) {
+        isFitTrigger = info[0]->ToBoolean();
+    }
+    
+    SelectModel::GetInstance()->SetOptionWidthFitTrigger(isFitTrigger);
 }
 } // namespace OHOS::Ace::Framework
