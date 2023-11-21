@@ -3647,6 +3647,9 @@ bool JSViewAbstract::ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, Sha
         if (colorStr.compare("average") == 0) {
             strategy = ShadowColorStrategy::AVERAGE;
             return true;
+        } else if (colorStr.compare("primary") == 0) {
+            strategy = ShadowColorStrategy::PRIMARY;
+            return true;
         }
     }
     return false;

@@ -34,6 +34,7 @@ var ColoringStrategy;
 (function (ColoringStrategy) {
   ColoringStrategy["INVERT"] = "invert";
   ColoringStrategy["AVERAGE"] = "average";
+  ColoringStrategy["PRIMARY"] = "primary";
 })(ColoringStrategy || (ColoringStrategy = {}));
 
 var TextInputStyle;
