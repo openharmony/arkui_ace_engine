@@ -3622,8 +3622,11 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end)
     }
 
     auto oldSelectedType = selectedType_;
-    if (textSelector_.IsValid() && !textSelector_.StartEqualToDest() && changeSelected) {
-        FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+    if (textSelector_.IsValid() && !textSelector_.StartEqualToDest()) {
+        StopTwinkling();
+        if (changeSelected) {
+            FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+        }
     }
     if (SelectOverlayIsOn()) {
         isMousePressed_ = selectOverlayProxy_->GetSelectOverlayMangerInfo().isUsingMouse;
