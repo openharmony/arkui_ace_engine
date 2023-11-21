@@ -1172,6 +1172,7 @@ void RefreshPattern::QuickFirstChildDisappear()
     }
     CHECK_NULL_VOID(offsetProperty_);
     animationId_++;
+    updatePerFrame_ = true;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     AnimationOption option;
     option.SetCurve(curve);
@@ -1201,6 +1202,7 @@ void RefreshPattern::QuickFirstChildDisappear()
             if (pattern->animationId_ != animationId) {
                 return;
             }
+            pattern->updatePerFrame_ = false;
         });
 }
 } // namespace OHOS::Ace::NG
