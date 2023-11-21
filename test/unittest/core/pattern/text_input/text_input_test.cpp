@@ -832,6 +832,93 @@ HWTEST_F(TextInputCursorTest, OnHandleMove002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnHandleMove003
+ * @tc.desc: Test the clip board interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, OnHandleMove003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Initialize text input and Move the handles and then do handle selection.
+     */
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
+
+    /**
+     * @tc.steps: Move the handles and selection left word.
+     *            Verify the selection data.
+     */
+    auto textFiledController = pattern_->GetTextFieldController();
+    textFiledController->CaretPosition(5);
+    pattern_->HandleSelectionLeftWord();
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 0);
+
+    /**
+     * @tc.steps: Move the handles and selection right word.
+     *            Verify the selection data.
+     */
+    pattern_->HandleSelectionRightWord();
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 21);
+}
+
+/**
+ * @tc.name: OnHandleMove004
+ * @tc.desc: Test the clip board interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, OnHandleMove004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Initialize text input and Move the handles and then do handle selection.
+     */
+    int32_t start = 5;
+    int32_t end = 10;
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
+
+    /**
+     * @tc.steps: Move the handles and selection line begin.
+     *            Verify the selection data.
+     */
+    pattern_->HandleSetSelection(start, end);
+    pattern_->HandleSelectionLineBegin();
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end);
+
+    /**
+     * @tc.steps: Move the handles and selection line end.
+     *            Verify the selection data.
+     */
+    pattern_->HandleSetSelection(start, end);
+    pattern_->HandleSelectionLineEnd();
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
+
+    /**
+     * @tc.steps: Move the handles and selection home.
+     *            Verify the selection data.
+     */
+    pattern_->HandleSelectionHome();
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 0);
+
+    /**
+     * @tc.steps: Move the handles and selection end.
+     *            Verify the selection data.
+     */
+    pattern_->HandleSetSelection(start, end);
+    pattern_->HandleSelectionEnd();
+    RunMeasureAndLayout();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
+}
+
+/**
  * @tc.name: CursonMoveLeftTest001
  * @tc.desc: Test the curson move left
  * @tc.type: FUNC
