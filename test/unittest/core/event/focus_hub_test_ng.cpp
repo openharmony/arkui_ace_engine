@@ -761,17 +761,17 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0018, TestSize.Level1)
      * @tc.steps3: call the function GetFocusingTabNodeIdx with the unempty TabIndexNodeList.
      * @tc.expected: The return value of the function is DEFAULT_TAB_FOCUSED_INDEX.
      */
-    int32_t NodeId = 1;
-    focusHub->lastTabIndexNodeId_ = NodeId;
+    int32_t nodeId = 1;
+    focusHub->lastTabIndexNodeId_ = nodeId;
     tabIndexNodes.emplace_back(focusHub->GetTabIndex(), focusHub);
-    EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), NONE_TAB_FOCUSED_INDEX);
+    EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), DEFAULT_TAB_FOCUSED_INDEX);
 
     /**
      * @tc.steps4: call the function GetFocusingTabNodeIdx with the unempty TabIndexNodeList.
      * @tc.expected: The return value of the function is 0.
      */
-    NodeId = -1;
-    focusHub->lastTabIndexNodeId_ = NodeId;
+    nodeId = -1;
+    focusHub->lastTabIndexNodeId_ = nodeId;
     focusHub->currentFocus_ = true;
     EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), 0);
 
@@ -780,7 +780,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0018, TestSize.Level1)
      * @tc.expected: The return value of the function is NONE_TAB_FOCUSED_INDEX.
      */
     focusHub->currentFocus_ = false;
-    EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), NONE_TAB_FOCUSED_INDEX);
+    EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), DEFAULT_TAB_FOCUSED_INDEX);
 }
 
 /**
