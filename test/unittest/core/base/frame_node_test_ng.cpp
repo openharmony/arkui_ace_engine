@@ -1618,4 +1618,33 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest042, TestSize.Level1)
     test = FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
     EXPECT_EQ(test, HitTestResult::STOP_BUBBLING);
 }
+
+/**
+ * @tc.name: FrameNodeTestNg_TouchTest043
+ * @tc.desc: Test frameNode TouchTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest043, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct TouchTest parameters.
+     */
+    PointF globalPoint;
+    PointF parentLocalPoint;
+    TouchRestrict touchRestrict;
+    TouchTestResult result;
+    /**
+     * @tc.steps:    step2. eventHub_->GetGestureEventHub() != nullptr and callback != null.
+     * @tc.expected: expect The function return value is STOP_BUBBLING.
+     */
+    FRAME_NODE2->isActive_ = true;
+    FRAME_NODE2->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;};
+    auto gestureEventHub = FRAME_NODE2->eventHub_->GetOrCreateGestureEventHub();
+    gestureEventHub->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    auto test = FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+    EXPECT_EQ(test, HitTestResult::STOP_BUBBLING);
+}
 } // namespace OHOS::Ace::NG
