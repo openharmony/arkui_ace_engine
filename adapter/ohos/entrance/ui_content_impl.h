@@ -88,6 +88,9 @@ public:
     // Set UIContent callback for custom window animation
     void SetNextFrameLayoutCallback(std::function<void()>&& callback) override;
 
+    // Set UIContent callback after layout finish
+    void SetFrameLayoutFinishCallback(std::function<void()>&& callback) override;
+
     // Receive memory level notification
     void NotifyMemoryLevel(int32_t level) override;
 

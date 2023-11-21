@@ -399,6 +399,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 
     taskScheduler_->StartRecordFrameInfo(GetCurrentFrameInfo(recvTime, nanoTimestamp));
     taskScheduler_->FlushTask();
+    // flush correct rect again
+    taskScheduler_->FlushPersistAfterLayoutTask();
     taskScheduler_->FinishRecordFrameInfo();
     FlushAnimationClosure();
     TryCallNextFrameLayoutCallback();
@@ -599,6 +601,8 @@ void PipelineContext::FlushBuild()
     FlushDirtyNodeUpdate();
     isRebuildFinished_ = true;
     FlushBuildFinishCallbacks();
+    // need notify after flush dirty node
+    taskScheduler_->FlushPersistAfterLayoutTask();
 }
 
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation)
@@ -2388,6 +2392,11 @@ void PipelineContext::Finish(bool /* autoFinish */) const
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
 {
     taskScheduler_->AddAfterLayoutTask(std::move(task));
+}
+
+void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
+{
+    taskScheduler_->AddPersistAfterLayoutTask(std::move(task));
 }
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)

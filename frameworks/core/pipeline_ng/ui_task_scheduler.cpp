@@ -26,7 +26,10 @@
 namespace OHOS::Ace::NG {
 uint64_t UITaskScheduler::frameId_ = 0;
 
-UITaskScheduler::~UITaskScheduler() = default;
+UITaskScheduler::~UITaskScheduler()
+{
+    persistAfterLayoutTasks_.clear();
+}
 
 void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
@@ -201,10 +204,30 @@ void UITaskScheduler::AddAfterLayoutTask(std::function<void()>&& task)
     afterLayoutTasks_.emplace_back(std::move(task));
 }
 
+void UITaskScheduler::AddPersistAfterLayoutTask(std::function<void()>&& task)
+{
+    persistAfterLayoutTasks_.emplace_back(std::move(task));
+    LOGI("AddPersistAfterLayoutTask size: %{public}u", static_cast<uint32_t>(persistAfterLayoutTasks_.size()));
+}
+
 void UITaskScheduler::FlushAfterLayoutTask()
 {
     decltype(afterLayoutTasks_) tasks(std::move(afterLayoutTasks_));
     for (const auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
+}
+
+void UITaskScheduler::FlushPersistAfterLayoutTask()
+{
+    // only execute after layout
+    if (persistAfterLayoutTasks_.empty()) {
+        return;
+    }
+    ACE_SCOPED_TRACE("UITaskScheduler::FlushPersistAfterLayoutTask");
+    for (const auto& task : persistAfterLayoutTasks_) {
         if (task) {
             task();
         }

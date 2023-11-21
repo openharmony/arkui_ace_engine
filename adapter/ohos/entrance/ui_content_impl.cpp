@@ -1695,6 +1695,17 @@ void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)
     pipelineContext->SetNextFrameLayoutCallback(std::move(callback));
 }
 
+void UIContentImpl::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddPersistAfterLayoutTask(std::move(callback));
+    LOGI("SetFrameLayoutFinishCallback SUCCESS");
+}
+
 void UIContentImpl::NotifyMemoryLevel(int32_t level)
 {
     LOGI("Receive Memory level notification, level: %{public}d", level);

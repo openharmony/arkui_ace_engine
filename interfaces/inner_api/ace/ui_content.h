@@ -253,6 +253,12 @@ public:
         return false;
     }
 #endif
+
+    /**
+     * @description: Set UIContent callback after layout finish.
+     * @param callback callback func.
+     */
+    virtual void SetFrameLayoutFinishCallback(std::function<void()>&& callback) {};
 };
 
 } // namespace OHOS::Ace
