@@ -96,6 +96,7 @@ const std::string TEST_TAG("test");
 const std::string ACCESS_TAG("-accessibility");
 const std::string TEST_FORM_INFO("test_info");
 const int64_t RENDER_EVENT_ID = 10;
+constexpr int32_t EXCEPTIONAL_CURSOR = 99;
 } // namespace
 
 class PipelineContextTestNg : public testing::Test {
@@ -2815,5 +2816,41 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg061, TestSize.Level1)
     containerPattern->isFocus_ = true;
     containerPattern->OnWindowForceUnfocused();
     EXPECT_TRUE(containerPattern->isFocus_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg062
+ * @tc.desc: Test the function SetCursor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg062, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
+    
+    /**
+     * @tc.steps2: set cursor with an exceptional value.
+     * @tc.expected: context_->cursor_ is MouseFormat::DEFAULT.
+     */
+    context_->SetCursor(EXCEPTIONAL_CURSOR);
+    ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
+
+    /**
+     * @tc.steps3: set cursor with a normal value.
+     * @tc.expected: context_->cursor_ is correct value.
+     */
+    context_->SetCursor(static_cast<int32_t>(MouseFormat::EAST));
+    ASSERT_EQ(context_->cursor_, MouseFormat::EAST);
+
+    /**
+     * @tc.steps4: restore mouse style.
+     * @tc.expected: context_->cursor_ is MouseFormat::DEFAULT.
+     */
+    context_->RestoreDefault();
+    ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
 }
 } // namespace OHOS::Ace::NG

@@ -106,6 +106,8 @@ public:
     MOCK_METHOD0(NotifyConfigurationChange, void());
     MOCK_CONST_METHOD0(GetTaskExecutor, RefPtr<TaskExecutor>());
     MOCK_METHOD1(SetIsFocusActive, bool(bool isFocusActive));
+    MOCK_METHOD1(SetCursor, void(int32_t cursorValue));
+    MOCK_METHOD0(RestoreDefault, void());
 
     static RefPtr<MockPipelineBase> pipeline_;
 
