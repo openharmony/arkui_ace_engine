@@ -1378,31 +1378,7 @@ float GridPattern::EstimateHeight() const
         return info.GetContentOffset(mainGap);
     }
 
-    float heightSum = 0;
-    int32_t itemCount = 0;
-    float height = 0;
-    for (const auto& item : info.lineHeightMap_) {
-        auto line = info.gridMatrix_.find(item.first);
-        if (line == info.gridMatrix_.end()) {
-            continue;
-        }
-        if (line->second.empty()) {
-            continue;
-        }
-        auto lineStart = line->second.begin()->second;
-        auto lineEnd = line->second.rbegin()->second;
-        itemCount += (lineEnd - lineStart + 1);
-        heightSum += item.second + mainGap;
-    }
-    if (itemCount == 0) {
-        return 0;
-    }
-    auto averageHeight = heightSum / itemCount;
-    height = info.startIndex_ * averageHeight - info.currentOffset_;
-    if (itemCount >= (info.childrenCount_ - 1)) {
-        height = info.GetStartLineOffset(mainGap);
-    }
-    return height;
+    return info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
 }
 
 float GridPattern::GetAverageHeight() const
@@ -1475,26 +1451,8 @@ void GridPattern::UpdateScrollBarOffset()
             offset = gridLayoutInfo_.GetContentOffset(mainGap);
             estimatedHeight = gridLayoutInfo_.GetContentHeight(mainGap);
         } else {
-            float heightSum = 0;
-            int32_t itemCount = 0;
-            for (const auto& item : info.lineHeightMap_) {
-                auto line = info.gridMatrix_.find(item.first);
-                if (line == info.gridMatrix_.end() || line->second.empty()) {
-                    continue;
-                }
-                auto lineStart = line->second.begin()->second;
-                auto lineEnd = line->second.rbegin()->second;
-                itemCount += (lineEnd - lineStart + 1);
-                heightSum += item.second + mainGap;
-            }
-            auto averageHeight = itemCount == 0 ? 0.0 : heightSum / itemCount;
-            offset = info.startIndex_ * averageHeight - info.currentOffset_;
-            if (itemCount >= (info.childrenCount_ - 1)) {
-                estimatedHeight = heightSum - mainGap;
-                offset = info.GetStartLineOffset(mainGap);
-            } else {
-                estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight;
-            }
+            offset = info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
+            estimatedHeight = info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), mainGap);
         }
     }
     if (info.startMainLineIndex_ != 0 && info.startIndex_ == 0) {
