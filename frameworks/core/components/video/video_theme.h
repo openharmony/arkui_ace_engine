@@ -25,10 +25,7 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
-namespace {
-constexpr double MAX_ALPHA_VALUE = 255.0f;
-constexpr double DEFAULT_CONTROL_BAR_ALPHA_VALUE = 100.0f;
-} // namespace
+
 /**
  * VideoTheme defines color and styles of VideoComponent. VideoTheme should be built
  * using VideoTheme::Builder.
@@ -85,9 +82,7 @@ public:
             theme->errorTextStyle_.SetFontSize(videoPattern->GetAttr<Dimension>("control_bar_text_font_size", 15.0_vp));
             theme->errorTextStyle_.SetTextColor(videoPattern->GetAttr<Color>("control_bar_error_text_color",
                 Color::GRAY));
-            theme->bkgColor_ = videoPattern->GetAttr<Color>("control_bar_background_color", Color(0xffc8c8c8))
-                .BlendOpacity(videoPattern->GetAttr<double>("control_bar_background_alpha",
-                DEFAULT_CONTROL_BAR_ALPHA_VALUE) / MAX_ALPHA_VALUE);
+            theme->bkgColor_ = videoPattern->GetAttr<Color>("control_bar_background_color", Color(0x64c8c8c8));
         }
     };
 
