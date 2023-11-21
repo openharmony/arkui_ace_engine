@@ -570,7 +570,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 CHECK_NULL_VOID(navBarLayoutProperty);
                 if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
                     (pattern->GetNavigationMode() == NavigationMode::STACK &&
-                        navigationGroupNode->GetNeedSetInvisible())) {
+                        (navigationGroupNode->GetNeedSetInvisible() || navigationStack->Size() >= 1))) {
                     navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
                 } else {
                     navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
