@@ -674,6 +674,7 @@ void PipelineContext::SetupRootElement()
     auto container = Container::Current();
     if (container && atomicService) {
         auto appBar = Referenced::MakeRefPtr<AppBarView>(atomicService);
+        appBar->iniBehavior();
         container->SetAppBar(appBar);
     }
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {

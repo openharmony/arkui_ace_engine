@@ -65,23 +65,33 @@ RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
     content->GetLayoutProperty()->UpdateLayoutWeight(1.0f);
     content->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto stagePattern = content->GetPattern<StagePattern>();
-    if (stagePattern) {
-        stagePattern->SetOnRebuildFrameCallback([titleBar, content]() {
-            CHECK_NULL_VOID(titleBar);
-            CHECK_NULL_VOID(content);
-            auto backButton = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
-            CHECK_NULL_VOID(backButton);
-            if (content->GetChildren().size() > 1) {
-                backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-                return;
-            }
-            backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-            if (HasNavigation(content)) {
-                titleBar->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-            }
-        });
-    }
     return atom;
+}
+
+void AppBarView::iniBehavior()
+{
+    CHECK_NULL_VOID(atom_);
+    auto titleBar = AceType::DynamicCast<FrameNode>(atom_->GetFirstChild());
+    CHECK_NULL_VOID(titleBar);
+    auto content = AceType::DynamicCast<FrameNode>(atom_->GetChildAtIndex(1));
+    CHECK_NULL_VOID(content);
+    auto stagePattern = content->GetPattern<StagePattern>();
+    CHECK_NULL_VOID(stagePattern);
+    stagePattern->SetOnRebuildFrameCallback([titleBar, content, this]() {
+        auto backButton = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
+        CHECK_NULL_VOID(backButton);
+        if (content->GetChildren().size() > 1) {
+            backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+            if (!hasBeSetted) {
+                titleBar->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+            }
+            return;
+        }
+        backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        if (HasNavigation(content)) {
+            titleBar->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        }
+    });
 }
 
 RefPtr<FrameNode> AppBarView::BuildBarTitle()
@@ -290,6 +300,7 @@ void AppBarView::BindContentCover(int32_t targetId)
 
 void AppBarView::SetVisible(bool visible)
 {
+    hasBeSetted = true;
     CHECK_NULL_VOID(atom_);
     auto uiRow = atom_->GetFirstChild();
     CHECK_NULL_VOID(uiRow);
