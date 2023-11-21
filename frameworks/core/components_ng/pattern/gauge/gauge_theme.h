@@ -57,9 +57,9 @@ inline constexpr int32_t COLORS_MAX_COUNT = 9;
 inline constexpr float RADIUS_TO_DIAMETER = 2.0f;
 inline constexpr float INDICATOR_WIDTH_RADIO = 0.135f;
 inline constexpr float INDICATOR_HEIGHT_RADIO = 0.095f;
-inline constexpr Dimension LIMIT_VALUE_MIN_SAFE_DISTANCE = 8.0_vp;
-inline constexpr Dimension LIMIT_VALUE_MAX_SAFE_DISTANCE = 8.0_vp;
-inline constexpr Dimension LIMIT_VALUE_SPACE_SAFE_DISTANCE = 16.0_vp;
+inline constexpr float LIMIT_VALUE_MIN_SAFE_DISTANCE_RATIO = 0.031;
+inline constexpr float LIMIT_VALUE_MAX_SAFE_DISTANCE_RATIO = 0.031;
+inline constexpr float LIMIT_VALUE_SPACE_SAFE_DISTANCE_RATIO = 0.0635;
 inline const std::vector<Color> GAUGE_DEFAULT_COLOR { Color(0xFF64BB5C), Color(0xFFF7CE00), Color(0xFFE84026) };
 } // namespace
 
