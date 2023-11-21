@@ -87,6 +87,8 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     } else if (head == "file") {
         if (IsUriOfDataAbilityEncoded(uri, "^file://media/.*thumbnail.*$")) {
             return SrcType::DATA_ABILITY_DECODED;
+        } else if (IsUriOfDataAbilityEncoded(uri, "^file://media/.*astc.*$")) {
+            return SrcType::ASTC;
         } else if (IsUriOfDataAbilityEncoded(uri, "^file://media/.*")) {
             return SrcType::DATA_ABILITY;
         }
@@ -254,7 +256,7 @@ bool ImageSourceInfo::IsSvg() const
 
 bool ImageSourceInfo::IsPixmap() const
 {
-    return pixmap_ != nullptr || SrcType::DATA_ABILITY_DECODED == srcType_;
+    return pixmap_ != nullptr || SrcType::DATA_ABILITY_DECODED == srcType_ || SrcType::ASTC == srcType_;
 }
 
 const std::string& ImageSourceInfo::GetBundleName() const
