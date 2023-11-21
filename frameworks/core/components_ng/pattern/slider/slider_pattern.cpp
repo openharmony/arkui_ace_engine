@@ -1151,7 +1151,11 @@ void SliderPattern::OnIsFocusActiveUpdate(bool isFocusActive)
 void SliderPattern::AddIsFocusActiveUpdateEvent()
 {
     if (!isFocusActiveUpdateEvent_) {
-        isFocusActiveUpdateEvent_ = std::bind(&SliderPattern::OnIsFocusActiveUpdate, this, std::placeholders::_1);
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
     }
 
     auto pipline = PipelineContext::GetCurrentContext();
@@ -1164,5 +1168,10 @@ void SliderPattern::RemoveIsFocusActiveUpdateEvent()
     auto pipline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipline);
     pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    RemoveIsFocusActiveUpdateEvent();
 }
 } // namespace OHOS::Ace::NG

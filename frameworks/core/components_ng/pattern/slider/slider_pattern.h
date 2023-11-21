@@ -124,6 +124,7 @@ public:
     void OnVisibleChange(bool isVisible) override;
 private:
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
     void CancelExceptionValue(float& min, float& max, float& step);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
