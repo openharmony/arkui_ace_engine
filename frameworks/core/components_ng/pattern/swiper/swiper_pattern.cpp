@@ -2690,7 +2690,7 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
                 return;
             }
             if (!swiper->IsLoop() &&
-                swiper->GetLoopIndex(swiper->currentIndex_ + 1) > (childrenSize - displayCount)) {
+                swiper->GetLoopIndex(swiper->currentIndex_) + 1 > (childrenSize - displayCount)) {
                 return;
             }
             swiper->targetIndex_ = swiper->currentIndex_ + 1;
