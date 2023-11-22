@@ -20,6 +20,13 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_span_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_toggle_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_radio_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_checkbox_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_textpicker_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_timepicker_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rating_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_slider_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_select_modifier.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -41,6 +48,13 @@ static struct ArkUINodeAPI impl = {
     GetToggleModifier,
     GetImageSpanModifier,
     GetBlankModifier,
+    GetSelectModifier,
+    GetRadioModifier,
+    GetCheckboxModifier,
+    GetTimepickerModifier,
+    GetTextpickerModifier,
+    GetRatingModifier,
+    GetSliderModifier
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI()

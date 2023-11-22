@@ -1,5 +1,4 @@
 /// <reference path="./import.ts" />
-const HashMap = globalThis.requireNapi('util.HashMap')
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function GetUINativeModule() {
     if (arkUINativeModule) {
@@ -469,7 +468,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
             this._modifiers.delete(key);
         });
     }
-
+    onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
+        throw new Error("Method not implemented.");
+    }
     width(value: Length): this {
         if (typeof value !== "number" && typeof value !== "string") {
             modifier(this._modifiers, WidthModifier, undefined);
