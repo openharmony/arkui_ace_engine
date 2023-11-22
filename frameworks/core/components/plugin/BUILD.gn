@@ -18,7 +18,9 @@ import(
 build_component("plugin") {
   sources = [
     "file_asset_provider.cpp",
+    "file_asset_provider_impl.cpp",
     "hap_asset_provider.cpp",
+    "hap_asset_provider_impl.cpp",
     "plugin_component.cpp",
     "plugin_component_manager.cpp",
     "plugin_element.cpp",
