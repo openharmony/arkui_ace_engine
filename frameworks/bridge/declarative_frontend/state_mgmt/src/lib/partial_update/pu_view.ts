@@ -53,6 +53,8 @@ interface UpdateFuncRecord {
 // function type of recycle node update function
 type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
 
+type ExtraInfo = { page:string, line:number };
+
 // NativeView
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
@@ -87,6 +89,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     = new Map<string, (propName: string) => void>();
 
   private recycleManager: RecycleManager = undefined;
+
+  private extraInfo_:ExtraInfo = undefined;
 
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: ProvidedVarsMapPU;
@@ -147,7 +151,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
    *    - localStorage do not specify, will inherit from parent View.
    *
   */
-  constructor(parent: ViewPU, localStorage: LocalStorage, elmtId : number = -1) {
+  constructor(parent: ViewPU, localStorage: LocalStorage, elmtId : number = -1, extraInfo : ExtraInfo = undefined) {
     super();
     // if set use the elmtId also as the ViewPU object's subscribable id.
     // these matching is requiremrnt for updateChildViewById(elmtId) being able to
@@ -158,6 +162,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     this.localStoragebackStore_ = undefined;
     stateMgmtConsole.log(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}}'`);
+    if (extraInfo) {
+      this.extraInfo_ = extraInfo;
+    }
     if (parent) {
       // this View is not a top-level View
       this.setCardId(parent.getCardId());

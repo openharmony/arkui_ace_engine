@@ -89,6 +89,7 @@ public:
     static std::unique_ptr<UIContent> Create(OHOS::AppExecFwk::Ability* ability);
     static void ShowDumpHelp(std::vector<std::string>& info);
     static UIContent* GetUIContent(int32_t instanceId);
+    static std::string GetCurrentUIStackInfo();
 
     virtual ~UIContent() = default;
 

@@ -485,4 +485,9 @@ RefPtr<NG::FrameNode> NG::PipelineContext::FindNavigationNodeToHandleBack(const 
 }
 
 void HandleSubwindow(bool isShow) {}
+
+std::string NG::PipelineContext::GetCurrentExtraInfo()
+{
+    return std::string();
+}
 } // namespace OHOS::Ace

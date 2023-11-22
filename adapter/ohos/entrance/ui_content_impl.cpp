@@ -152,6 +152,18 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_GetUIContent(int32_t instanceId)
     return uiWindow->GetUIContent();
 }
 
+extern "C" ACE_FORCE_EXPORT char* OHOS_ACE_GetCurrentUIStackInfo()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    static auto tmp= pipeline->GetCurrentExtraInfo();
+    std::replace(tmp.begin(), tmp.end(), '\\', '/');
+    LOGI("UIContentImpl::GetCurrentExtraInfo:%{public}s", tmp.c_str());
+    return tmp.data();
+}
+
 class OccupiedAreaChangeListener : public OHOS::Rosen::IOccupiedAreaChangeListener {
 public:
     explicit OccupiedAreaChangeListener(int32_t instanceId) : instanceId_(instanceId) {}

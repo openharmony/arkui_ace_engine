@@ -974,6 +974,10 @@ public:
         return onFocus_;
     }
 
+    virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
+
+    virtual std::string GetCurrentExtraInfo() { return ""; }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

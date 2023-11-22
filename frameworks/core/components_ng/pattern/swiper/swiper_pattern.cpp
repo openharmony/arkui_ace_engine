@@ -2856,7 +2856,7 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
                     for (auto index : forEachIndexSet) {
                         auto childNode = forEachNode->GetChildAtIndex(index);
                         CHECK_NULL_VOID(childNode);
-                        childNode->Build();
+                        childNode->Build(nullptr);
                     }
                 },
                 TaskExecutor::TaskType::UI);

@@ -88,7 +88,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
         AceType::MakeRefPtr<DialogPattern>(dialogTheme, customNode));
 
     if (customNode) {
-        customNode->Build();
+        customNode->Build(nullptr);
     }
 
     // update layout and render props

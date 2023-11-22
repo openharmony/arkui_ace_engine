@@ -104,6 +104,7 @@ public:
     MOCK_METHOD1(UpdateCutoutSafeArea, void(const SafeAreaInsets& cutoutSafeArea));
     MOCK_METHOD0(NotifyConfigurationChange, void());
     MOCK_CONST_METHOD0(GetTaskExecutor, RefPtr<TaskExecutor>());
+    MOCK_METHOD0(GetCurrentExtraInfo, std::string());
 
     static RefPtr<MockPipelineBase> pipeline_;
 

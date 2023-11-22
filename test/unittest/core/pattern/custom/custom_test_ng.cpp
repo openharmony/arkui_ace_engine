@@ -107,7 +107,7 @@ HWTEST_F(CustomTestNg, CustomTest001, TestSize.Level1)
      * @tc.steps: step4. Invoke Build and AdjustLayoutWrapperTree.
      * @tc.expected: parentLayoutWrapper's childCount is zero.
      */
-    customNode->Build();
+    customNode->Build(nullptr);
     customNode->AdjustLayoutWrapperTree(parentLayoutWrapper, false, false);
     EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), CHILD_COUNT_0);
 
@@ -118,7 +118,7 @@ HWTEST_F(CustomTestNg, CustomTest001, TestSize.Level1)
         return AceType::DynamicCast<UINode>(uiNode);
     };
     customNode->SetRenderFunction(std::move(renderFunction));
-    customNode->Build();
+    customNode->Build(nullptr);
     customNode->AdjustLayoutWrapperTree(parentLayoutWrapper, false, false);
     EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), CHILD_COUNT_0);
 }
@@ -154,7 +154,7 @@ HWTEST_F(CustomTestNg, CustomTest002, TestSize.Level1)
      * @tc.steps: step4. Invoke Build and AdjustLayoutWrapperTree.
      * @tc.expected: parentLayoutWrapper's childCount is zero.
      */
-    customNode->Build();
+    customNode->Build(nullptr);
     customNode->AdjustLayoutWrapperTree(parentLayoutWrapper, false, false);
     EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), CHILD_COUNT_0);
 
@@ -165,7 +165,7 @@ HWTEST_F(CustomTestNg, CustomTest002, TestSize.Level1)
         return AceType::DynamicCast<UINode>(uiNode);
     };
     customNode->SetRenderFunction(std::move(renderFunction));
-    customNode->Build();
+    customNode->Build(nullptr);
     customNode->AdjustLayoutWrapperTree(parentLayoutWrapper, false, false);
     EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), CHILD_COUNT_1);
 }

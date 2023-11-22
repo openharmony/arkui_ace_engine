@@ -919,7 +919,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg027, TestSize.Level1)
      * @tc.expected: the Build function is run ok
      */
     ZERO->AddChild(ONE, 1, false);
-    ZERO->Build();
+    ZERO->Build(nullptr);
     EXPECT_EQ(ZERO->children_.size(), 1);
     ZERO->Clean();
 }

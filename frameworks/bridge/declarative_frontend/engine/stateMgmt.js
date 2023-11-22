@@ -4488,7 +4488,7 @@ class ViewPU extends NativeViewPartialUpdate {
      *    - localStorage do not specify, will inherit from parent View.
      *
     */
-    constructor(parent, localStorage, elmtId = -1) {
+    constructor(parent, localStorage, elmtId = -1, extraInfo = undefined) {
         super();
         this.parent_ = undefined;
         this.childrenWeakrefMap_ = new Map();
@@ -4502,6 +4502,7 @@ class ViewPU extends NativeViewPartialUpdate {
         this.isDeleting_ = false;
         this.watchedProps = new Map();
         this.recycleManager = undefined;
+        this.extraInfo_ = undefined;
         // Set of dependent elmtIds that need partial update
         // during next re-render
         this.dirtDescendantElementIds_ = new Set();
@@ -4521,6 +4522,10 @@ class ViewPU extends NativeViewPartialUpdate {
             : new Map();
         this.localStoragebackStore_ = undefined;
         
+        if (extraInfo) {
+            this.extraInfo_ = extraInfo;
+        }
+
         if (parent) {
             // this View is not a top-level View
             this.setCardId(parent.getCardId());
