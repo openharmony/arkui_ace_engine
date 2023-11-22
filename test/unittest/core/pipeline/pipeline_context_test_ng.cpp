@@ -69,7 +69,12 @@
 using namespace testing;
 using namespace testing::ext;
 
-namespace OHOS::Ace::NG {
+namespace OHOS::Ace {
+bool SystemProperties::changeTitleStyleEnabled_ = false;
+int32_t SystemProperties::devicePhysicalWidth_ = 0;
+int32_t SystemProperties::devicePhysicalHeight_ = 0;
+
+namespace NG {
 namespace {
 constexpr int32_t DEFAULT_INSTANCE_ID = 0;
 constexpr int32_t DEFAULT_INT0 = 0;
@@ -2853,5 +2858,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg062, TestSize.Level1)
      */
     context_->RestoreDefault();
     ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
+}
 }
 } // namespace OHOS::Ace::NG
