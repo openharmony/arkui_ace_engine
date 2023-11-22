@@ -147,6 +147,7 @@ template("declarative_js_engine_ark") {
       "components/arkts_native_api_impl.cpp",
       "components/arkts_native_button_modifier.cpp",
       "components/arkts_native_common_modifier.cpp",
+      "components/arkts_native_image_span_modifier.cpp",
       "components/arkts_native_text_modifier.cpp",
       "components/arkts_native_toggle_modifier.cpp",
       "js_converter.cpp",
@@ -166,6 +167,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_api_impl_bridge.cpp",
       "nativeModule/arkts_native_button_bridge.cpp",
       "nativeModule/arkts_native_common_bridge.cpp",
+      "nativeModule/arkts_native_image_span_bridge.cpp",
       "nativeModule/arkts_native_text_bridge.cpp",
       "nativeModule/arkts_native_toggle_bridge.cpp",
     ]

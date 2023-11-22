@@ -1711,3 +1711,56 @@ class ArkTransformMatrix {
         return this.compareArrays(this.matrix, another.matrix);
     }
 }
+/// <reference path="./import.ts" />
+class ImageSpanObjectFitModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().imageSpan.resetObjectFit(node);
+        }
+        else {
+            GetUINativeModule().imageSpan.setObjectFit(node, this.value);
+        }
+    }
+}
+ImageSpanObjectFitModifier.identity = Symbol('imageSpanObjectFit');
+class ImageSpanVerticalAlignModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().imageSpan.resetVerticalAlign(node);
+        }
+        else {
+            GetUINativeModule().imageSpan.setVerticalAlign(node, this.value);
+        }
+    }
+}
+ImageSpanVerticalAlignModifier.identity = Symbol('imageSpanVerticalAlign');
+class ArkImageSpanComponent extends ArkComponent {
+    objectFit(value) {
+        if (value) {
+            modifier(this._modifiers, ImageSpanObjectFitModifier, value);
+        }
+        else {
+            modifier(this._modifiers, ImageSpanObjectFitModifier, undefined);
+        }
+        return this;
+    }
+    verticalAlign(value) {
+        if (value) {
+            modifier(this._modifiers, ImageSpanVerticalAlignModifier, value);
+        }
+        else {
+            modifier(this._modifiers, ImageSpanVerticalAlignModifier, undefined);
+        }
+        return this;
+    }
+}
+// @ts-ignore
+globalThis.ImageSpan.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkImageSpanComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
