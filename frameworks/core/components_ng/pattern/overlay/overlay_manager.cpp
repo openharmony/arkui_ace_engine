@@ -2243,8 +2243,13 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
 
 void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode)
 {
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto manager = context->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    auto statusBarHeight = manager->GetSystemSafeArea().top_.Length();
     auto sheetHeight = sheetNode->GetGeometryNode()->GetFrameSize().Height();
-    auto largeHeight = sheetHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
+    auto largeHeight = sheetHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight;
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
             sheetHeight_ = sheetHeight / 2; // 2 : half

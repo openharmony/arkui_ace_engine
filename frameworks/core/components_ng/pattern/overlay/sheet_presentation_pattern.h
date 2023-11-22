@@ -91,6 +91,10 @@ public:
 
     void InitialLayoutProps();
 
+    void AvoidSafeArea();
+    float GetSheetHeightChange();
+    void ScrollTo(float height);
+
     // initial drag gesture event
     void InitPanEvent();
 
@@ -115,22 +119,37 @@ public:
         return isExecuteOnDisappear_;
     }
 
+    bool AvoidKeyboard() const override
+    {
+        return false;
+    }
+
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void InitPageHeight();
+    void TranslateTo(float height);
+    void SetColumnMinSize(bool reset = false);
 
+    uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
     std::function<void(const std::string&)> callback_;
     std::function<void()> onDisappear_;
     RefPtr<PanEvent> panEvent_;
     float currentOffset_ = 0.0f;
     float height_ = 0.0f;
+    float sheetHeight_ = 0.0f;
     float heightBoundary_ = 0.0f;
     float pageHeight_ = 0.0f;
+    float scrollHeight_ = 0.0f;
+    float statusBarHeight_ = .0f;
     bool isExecuteOnDisappear_ = false;
+    bool windowRotate_ = false;
+    bool firstMeasure_ = true;
+    bool isScrolling_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationPattern);
 };

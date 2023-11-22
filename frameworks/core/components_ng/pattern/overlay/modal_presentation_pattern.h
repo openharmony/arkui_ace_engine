@@ -85,6 +85,10 @@ public:
         return isExecuteOnDisappear_;
     }
 
+    bool AvoidKeyboard() const override
+    {
+        return false;
+    }
 private:
     void OnAttachToFrameNode() override;
     int32_t targetId_ = -1;
