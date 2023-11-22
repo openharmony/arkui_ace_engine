@@ -1519,7 +1519,6 @@ void ListPattern::UpdateScrollBarOffset()
     }
     float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     float currentOffset = itemsSize / itemPosition_.size() * itemPosition_.begin()->first - startMainPos_;
-    Offset scrollOffset = { currentOffset, currentOffset }; // fit for w/h switched.
     auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1);
     if (GetAlwaysEnabled()) {
         estimatedHeight = estimatedHeight - spaceWidth_;
@@ -1530,12 +1529,12 @@ void ListPattern::UpdateScrollBarOffset()
     CHECK_NULL_VOID(host);
     auto layoutPriority = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutPriority);
-    auto paddingOffset = layoutPriority->CreatePaddingAndBorder().Offset();
-    Offset viewOffset = { paddingOffset.GetX(), paddingOffset.GetY() };
+    auto padding = layoutPriority->CreatePaddingAndBorder();
+    auto paddingMain = GetAxis() == Axis::VERTICAL ? padding.Height() : padding.Width();
     const auto& geometryNode = host->GetGeometryNode();
     auto frameSize = geometryNode->GetFrameSize();
     Size size(frameSize.Width(), frameSize.Height());
-    UpdateScrollBarRegion(currentOffset, estimatedHeight, size, Offset(0.0f, 0.0f));
+    UpdateScrollBarRegion(currentOffset, estimatedHeight + paddingMain, size, Offset(0.0f, 0.0f));
 }
 
 float ListPattern::GetTotalHeight() const
