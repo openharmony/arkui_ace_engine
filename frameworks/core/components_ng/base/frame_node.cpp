@@ -729,8 +729,13 @@ void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configuration
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (configurationChange.DirectionOrDpiUpdate) {
-        pattern_->OnDirectionOrDpiConfigurationUpdate();
+    if (configurationChange.directionUpdate) {
+        pattern_->OnDirectionConfigurationUpdate();
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    if (configurationChange.dpiUpdate) {
+        pattern_->OnDpiConfigurationUpdate();
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }

@@ -406,7 +406,8 @@ public:
 
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
-    virtual void OnDirectionOrDpiConfigurationUpdate() {}
+    virtual void OnDirectionConfigurationUpdate() {}
+    virtual void OnDpiConfigurationUpdate() {}
 
     virtual bool ShouldDelayChildPressedState() const
     {
