@@ -38,7 +38,6 @@ using namespace OHOS::Ace::Framework;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t HOURS_WEST = -8;
-constexpr int32_t DATE_INDEX = 0;
 inline const std::string CLOCK_FORMAT = "aa h:m:s";
 inline const std::string UTC_1 = "1000000000000";
 inline const std::string UTC_2 = "2000000000000";
@@ -317,7 +316,7 @@ HWTEST_F(TextClockTestNG, TextClockTest005, TestSize.Level1)
      * @tc.steps: step1. Initialize all properties of textclock.
      */
     TestProperty testProperty;
-    testProperty.format = std::make_optional("M月d日yy年 E HH:mm:ss.SSS aa");
+    testProperty.format = std::make_optional("M月d日yy年y E EEEE HH:mm:ss.SSS aa");
     testProperty.hoursWest = std::make_optional(HOURS_WEST);
     /**
      * @tc.steps: step2. create frameNode to get layout properties.
@@ -340,13 +339,8 @@ HWTEST_F(TextClockTestNG, TextClockTest005, TestSize.Level1)
      * @tc.steps: step4. call the format and datetime split, and datetime splice function.
      * @tc.expected: check whether the value is correct.
      */
-    int32_t weekType = 0;
     bool is24H = false;
-    int32_t month = 0;
-    int32_t day = 0;
-    bool isMilliSecond = false;
-    std::vector<std::string> inputFormatSplitter =
-        pattern->ParseInputFormat(is24H, weekType, month, day, isMilliSecond);
+    pattern->ParseInputFormat(is24H);
     std::vector<std::string> curDateTime = { "1900", "0", "1", "0", "0", "0", "0", "", "2" };
     std::string dateTimeValue = "2023/07/08, 下午8:35:07.007";
     curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
@@ -354,16 +348,14 @@ HWTEST_F(TextClockTestNG, TextClockTest005, TestSize.Level1)
     curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
     dateTimeValue = "07/08/2023, 20:35:07.007";
     curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
-    pattern->SpliceDateTime(curDateTime, inputFormatSplitter);
-    pattern->CheckDateTimeElement(curDateTime, "yy", 'y', (int32_t)DATE_INDEX, true);
-    pattern->CheckDateTimeElement(curDateTime, "MM", 'M', (int32_t)DATE_INDEX, true);
-    pattern->CheckDateTimeElement(curDateTime, "dd", 'd', (int32_t)DATE_INDEX, true);
-    pattern->CheckDateTimeElement(curDateTime, "mm", 'm', (int32_t)DATE_INDEX, true);
+    pattern->SpliceDateTime(curDateTime);
+    pattern->CheckDateTimeElement(curDateTime, 'y', 0, true);
+    pattern->CheckDateTimeElement(curDateTime, 'M', 1, true);
+    pattern->CheckDateTimeElement(curDateTime, 'd', 2, true);
+    pattern->CheckDateTimeElement(curDateTime, 'm', 4, true);
+    pattern->CheckDateTimeElement(curDateTime, 'E', 13, true);
+    pattern->CheckDateTimeElement(curDateTime, 'E', 8, true);
     EXPECT_EQ(is24H, true);
-    EXPECT_EQ(weekType, 2);
-    EXPECT_EQ(month, 1);
-    EXPECT_EQ(day, 1);
-    EXPECT_EQ(isMilliSecond, true);
 }
 
 /**
@@ -377,7 +369,7 @@ HWTEST_F(TextClockTestNG, TextClockTest006, TestSize.Level1)
      * @tc.steps: step1. Initialize all properties of textclock.
      */
     TestProperty testProperty;
-    testProperty.format = std::make_optional("yyyy-MM-dd EEEE hh:mm:ss.SS aa");
+    testProperty.format = std::make_optional("yyyy-M-M-d-d EEEE hh:mm:ss.SS.SSS aa");
     testProperty.hoursWest = std::make_optional(HOURS_WEST);
 
     /**
@@ -402,21 +394,12 @@ HWTEST_F(TextClockTestNG, TextClockTest006, TestSize.Level1)
      * @tc.steps: step4. call the format split function.
      * @tc.expected: check whether the value is correct.
      */
-    int32_t weekType = 0;
     bool is24H = false;
-    int32_t month = 0;
-    int32_t day = 0;
-    bool isMilliSecond = false;
     pattern->GetWeek(true, 3);
     pattern->GetWeek(false, 5);
     pattern->GetDigitNumber("12345abcde-=_+");
-    std::vector<std::string> inputFormatSplitter =
-        pattern->ParseInputFormat(is24H, weekType, month, day, isMilliSecond);
+    pattern->ParseInputFormat(is24H);
     EXPECT_EQ(is24H, false);
-    EXPECT_EQ(weekType, 1);
-    EXPECT_EQ(month, 2);
-    EXPECT_EQ(day, 2);
-    EXPECT_EQ(isMilliSecond, false);
 }
 
 /**
@@ -575,7 +558,7 @@ HWTEST_F(TextClockTestNG, TextClockTest009, TestSize.Level1)
      * @tc.steps: step3. ParseDateTimeValue function is called..
      * @tc.expected: step3. check whether the properties is correct.
      */
-    std::vector<std::string> strVec = { "1900", "0", "1", "0", "0", "0", "0", "", "0" };
+    std::vector<std::string> strVec = { "1900", "0", "1", "0", "0", "0", "0", "", "0", "", "", "", "", "" };
     std::string strDateTimeValue = "1970.01.01";
     std::vector<std::string> str = pattern->ParseDateTimeValue(strDateTimeValue);
     EXPECT_EQ(str, strVec);
@@ -588,7 +571,7 @@ HWTEST_F(TextClockTestNG, TextClockTest009, TestSize.Level1)
     str = pattern->ParseDateTimeValue(strDateTimeValue);
     EXPECT_EQ(str, strVec);
 
-    std::vector<std::string> strVec2 = { "1970", "01", "01", "0", "0", "0", "0", "", "0" };
+    std::vector<std::string> strVec2 = { "1970", "01", "01", "0", "0", "0", "0", "", "0", "70", "1", "1", "0", "" };
     strDateTimeValue = "1970/01/01,";
     str = pattern->ParseDateTimeValue(strDateTimeValue);
     EXPECT_EQ(str, strVec2);
@@ -605,7 +588,8 @@ HWTEST_F(TextClockTestNG, TextClockTest009, TestSize.Level1)
     str = pattern->ParseDateTimeValue(strDateTimeValue);
     EXPECT_EQ(str, strVec2);
 
-    std::vector<std::string> strVec3 = { "1970", "01", "01", "01", "01", "01", "001", "", "0" };
+    std::vector<std::string> strVec3 = { "1970", "01", "01", "01", "01", "01", "001", "", "0", "70", "1", "1", "00",
+        "" };
     strDateTimeValue = "1970/01/01, 01:01:01.001";
     str = pattern->ParseDateTimeValue(strDateTimeValue);
     EXPECT_EQ(str, strVec3);
@@ -665,20 +649,11 @@ HWTEST_F(TextClockTestNG, TextClockTest010, TestSize.Level1)
     textClockLayoutProperty->UpdateFormat("mm:SS");
     format = pattern->GetFormat();
     EXPECT_EQ(format, FORM_FORMAT);
-    int32_t weekType = 0;
     bool is24H = false;
-    int32_t month = 0;
-    int32_t day = 0;
-    bool isMilliSecond = false;
     pattern->GetWeek(true, 3);
     pattern->GetWeek(false, 5);
-    std::vector<std::string> inputFormatSplitter =
-        pattern->ParseInputFormat(is24H, weekType, month, day, isMilliSecond);
+    pattern->ParseInputFormat(is24H);
     EXPECT_EQ(is24H, false);
-    EXPECT_EQ(weekType, 0);
-    EXPECT_EQ(month, 0);
-    EXPECT_EQ(day, 0);
-    EXPECT_EQ(isMilliSecond, false);
 
     /**
      * @tc.steps: step6. isForm_ is change to false.
