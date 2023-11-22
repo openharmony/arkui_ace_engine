@@ -241,6 +241,11 @@ public:
         realNavBarWidth_ = static_cast<float>(initNavBarWidth.ConvertToPx());
     }
     
+    void SetIfNeedInit(bool ifNeedInit)
+    {
+        ifNeedInit_ = ifNeedInit;
+    }
+
     void UpdateContextRect(
         const RefPtr<NavDestinationGroupNode>& curDestination, const RefPtr<NavigationGroupNode>& navigation);
 
@@ -303,7 +308,7 @@ private:
     RectF dragRect_;
     bool ifNeedInit_ = true;
     float preNavBarWidth_ = 0.0f;
-    float realNavBarWidth_ = 360.0f;
+    float realNavBarWidth_ = DEFAULT_NAV_BAR_WIDTH.ConvertToPx();
     float realDividerWidth_ = 2.0f;
     bool navigationStackProvided_ = false;
     bool navBarVisibilityChange_ = false;

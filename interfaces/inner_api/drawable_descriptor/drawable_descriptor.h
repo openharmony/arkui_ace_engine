@@ -28,6 +28,7 @@
 
 #include <optional>
 #include <string>
+#include <tuple>
 
 #include "foundation/arkui/ace_engine/interfaces/inner_api/form_render/include/form_renderer_hilog.h"
 #include "image_converter.h"
@@ -76,6 +77,9 @@ public:
     std::unique_ptr<DrawableDescriptor> GetMask();
     std::shared_ptr<Media::PixelMap> GetPixelMap() override;
     static std::string GetStaticMaskClipPath();
+    void SetMaskPath(std::string& path);
+    void SetIconType(uint32_t iconType);
+    void SetDensity(uint32_t density);
 
 private:
     friend class ImageConverter;
@@ -84,6 +88,7 @@ private:
     bool GetDefaultMask();
     bool GetMaskByName(const std::string& name);
     bool CreatePixelMap();
+    bool GetMaskByPath();
 #ifndef USE_ROSEN_DRAWING
     void DrawOntoCanvas(
         const std::shared_ptr<SkBitmap>& bitMap, float width, float height, SkCanvas& canvas, const SkPaint& paint);
@@ -94,6 +99,9 @@ private:
 
     std::unique_ptr<uint8_t[]> jsonBuf_;
     size_t len_ = 0;
+    std::string maskPath_;
+    uint32_t iconType_ = 0;
+    uint32_t density_ = 0;
     const std::shared_ptr<Global::Resource::ResourceManager> resourceMgr_;
     OptionalPixelMap foreground_;
     OptionalPixelMap background_;
@@ -156,6 +164,77 @@ public:
             HILOG_DEBUG("Create DrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::BASE;
             state = Global::Resource::SUCCESS;
+            return std::make_unique<DrawableDescriptor>(std::move(jsonBuf), len);
+        }
+        HILOG_ERROR("unknow resource type: %{public}s", type.c_str());
+        state = Global::Resource::INVALID_FORMAT;
+        return nullptr;
+    }
+    static std::unique_ptr<DrawableDescriptor> Create(std::tuple<int32_t, uint32_t, uint32_t>& drawableInfo,
+        const std::shared_ptr<ResourceManager>& resourceMgr, RState& state, DrawableType& drawableType)
+    {
+        int32_t resId = std::get<0>(drawableInfo);
+        uint32_t iconType = std::get<1>(drawableInfo);
+        uint32_t density = std::get<2>(drawableInfo);
+        std::unique_ptr<uint8_t[]> jsonBuf;
+        std::tuple<std::string, size_t, std::string> info;
+        state = resourceMgr->GetDrawableInfoById(resId, info, jsonBuf, iconType, density);
+        if (state != Global::Resource::SUCCESS) {
+            HILOG_WARN("Failed to get drawable info from resmgr");
+            return nullptr;
+        }
+        std::string type = std::get<0>(info);
+        size_t len = std::get<1>(info);
+        std::string path = std::get<2>(info);
+        if (type == "json") {
+            HILOG_DEBUG("Create LayeredDrawableDescriptor object");
+            drawableType = DrawableDescriptor::DrawableType::LAYERED;
+            auto layeredDrawableDescriptor =
+                std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
+            layeredDrawableDescriptor->SetMaskPath(path);
+            layeredDrawableDescriptor->SetDensity(density);
+            layeredDrawableDescriptor->SetIconType(iconType);
+            return layeredDrawableDescriptor;
+        }
+        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
+            HILOG_DEBUG("Create DrawableDescriptor object");
+            drawableType = DrawableDescriptor::DrawableType::BASE;
+            return std::make_unique<DrawableDescriptor>(std::move(jsonBuf), len);
+        }
+        HILOG_ERROR("unknow resource type: %{public}s", type.c_str());
+        state = Global::Resource::INVALID_FORMAT;
+        return nullptr;
+    }
+
+    static std::unique_ptr<DrawableDescriptor> Create(std::tuple<const char*, uint32_t, uint32_t>& drawableInfo,
+        const std::shared_ptr<ResourceManager>& resourceMgr, RState& state, DrawableType& drawableType)
+    {
+        const char* name = std::get<0>(drawableInfo);
+        uint32_t iconType = std::get<1>(drawableInfo);
+        uint32_t density = std::get<2>(drawableInfo);
+        std::unique_ptr<uint8_t[]> jsonBuf;
+        std::tuple<std::string, size_t, std::string> info;
+        state = resourceMgr->GetDrawableInfoByName(name, info, jsonBuf, iconType, density);
+        if (state != Global::Resource::SUCCESS) {
+            HILOG_WARN("Failed to get drawable info from resmgr");
+            return nullptr;
+        }
+        std::string type = std::get<0>(info);
+        size_t len = std::get<1>(info);
+        std::string path = std::get<2>(info);
+        if (type == "json") {
+            HILOG_DEBUG("Create LayeredDrawableDescriptor object");
+            drawableType = DrawableDescriptor::DrawableType::LAYERED;
+            auto layeredDrawableDescriptor =
+                std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
+            layeredDrawableDescriptor->SetMaskPath(path);
+            layeredDrawableDescriptor->SetDensity(density);
+            layeredDrawableDescriptor->SetIconType(iconType);
+            return layeredDrawableDescriptor;
+        }
+        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
+            HILOG_DEBUG("Create DrawableDescriptor object");
+            drawableType = DrawableDescriptor::DrawableType::BASE;
             return std::make_unique<DrawableDescriptor>(std::move(jsonBuf), len);
         }
         HILOG_ERROR("unknow resource type: %{public}s", type.c_str());

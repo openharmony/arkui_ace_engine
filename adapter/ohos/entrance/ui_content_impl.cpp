@@ -277,7 +277,7 @@ public:
         taskExecutor->PostTask(
             [instanceId = instanceId_] {
                 SubwindowManager::GetInstance()->ClearMenu();
-                SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
+                SubwindowManager::GetInstance()->HidePopupNG(-1, instanceId);
             },
             TaskExecutor::TaskType::UI);
     }
@@ -1233,6 +1233,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
     pipeline->SetHalfLeading(halfLeading);
+    container->CheckAndSetFontFamily();
     if (pipeline) {
         auto rsConfig = window_->GetKeyboardAnimationConfig();
         KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
@@ -1483,6 +1484,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             parsedConfig.languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
             parsedConfig.direction = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
             parsedConfig.densitydpi = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
+            parsedConfig.themeTag = config->GetItem("ohos.application.theme");
             container->UpdateConfiguration(parsedConfig, config->GetName());
             LOGI("UIContentImpl: UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
         },
@@ -1605,6 +1607,23 @@ void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, boo
         TaskExecutor::TaskType::UI);
 }
 
+void UIContentImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    LOGI("UIContentImpl: UpdateTitleInTargetPos, isShow %{public}d, height is %{public}d", isShow, height);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, isShow, height]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateTitleInTargetPos(isShow, height);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -1674,6 +1693,17 @@ void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetNextFrameLayoutCallback(std::move(callback));
+}
+
+void UIContentImpl::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddPersistAfterLayoutTask(std::move(callback));
+    LOGI("SetFrameLayoutFinishCallback SUCCESS");
 }
 
 void UIContentImpl::NotifyMemoryLevel(int32_t level)
@@ -1784,7 +1814,7 @@ void UIContentImpl::SetFormBackgroundColor(const std::string& color)
     if (!Color::ParseColorString(color, bgColor)) {
         return;
     }
-    auto container = AceEngine::Get().GetContainer(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
     auto taskExecutor = container->GetTaskExecutor();
@@ -1794,6 +1824,7 @@ void UIContentImpl::SetFormBackgroundColor(const std::string& color)
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetAppBgColor(bgColor);
+            container->SetIsTransparentForm(bgColor == Color::TRANSPARENT);
         },
         TaskExecutor::TaskType::UI);
 }
@@ -2051,7 +2082,7 @@ void UIContentImpl::FocusMoveSearch(
     int32_t elementId, int32_t direction,
     int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
-    Platform::AceContainer::FindFocusedElementInfoNG(instanceId_, elementId, direction, baseParent, output);
+    Platform::AceContainer::FocusMoveSearchNG(instanceId_, elementId, direction, baseParent, output);
 }
 
 bool UIContentImpl::NotifyExecuteAction(

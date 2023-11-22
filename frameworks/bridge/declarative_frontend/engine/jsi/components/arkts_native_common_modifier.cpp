@@ -22,6 +22,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t DEFAULT_BUTTON_COLOR = 0xFF007DFF;
+constexpr double PERCENT_100 = 100.0;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -39,6 +40,7 @@ constexpr int NUM_13 = 13;
 constexpr int NUM_14 = 14;
 constexpr int NUM_15 = 15;
 constexpr int DEFAULT_LENGTH = 4;
+constexpr double ROUND_UNIT = 360.0;
 
 
 BorderStyle ConvertBorderStyle(int32_t value)
@@ -48,6 +50,137 @@ BorderStyle ConvertBorderStyle(int32_t value)
         style = BorderStyle::SOLID;
     }
     return style;
+}
+Alignment ParseAlignment(int32_t align)
+{
+    Alignment alignment = Alignment::CENTER;
+    switch (align) {
+        case NUM_0:
+            alignment = Alignment::TOP_LEFT;
+            break;
+        case NUM_1:
+            alignment = Alignment::TOP_CENTER;
+            break;
+        case NUM_2:
+            alignment = Alignment::TOP_RIGHT;
+            break;
+        case NUM_3:
+            alignment = Alignment::CENTER_LEFT;
+            break;
+        case NUM_4:
+            alignment = Alignment::CENTER;
+            break;
+        case NUM_5:
+            alignment = Alignment::CENTER_RIGHT;
+            break;
+        case NUM_6:
+            alignment = Alignment::BOTTOM_LEFT;
+            break;
+        case NUM_7:
+            alignment = Alignment::BOTTOM_CENTER;
+            break;
+        case NUM_8:
+            alignment = Alignment::BOTTOM_RIGHT;
+            break;
+        default:
+            break;
+    }
+    return alignment;
+}
+
+/**
+ * @param colors color value
+ * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
+ * colors[3], colors[4], colors[5] : color[1](color, hasDimension, dimension)
+ * ...
+ * @param colorsLength colors length
+ */
+void SetGradientColors(NG::Gradient& gradient, const double* colors, int32_t colorsLength)
+{
+    if ((colors == nullptr) || (colorsLength % NUM_3) != 0) {
+        return;
+    }
+    for (int32_t index = 0; index < colorsLength; index += NUM_3) {
+        auto colorValue = colors[index];
+        auto colorHasDimension = colors[index + NUM_1];
+        auto colorDimension = colors[index + NUM_2];
+        auto color = static_cast<uint32_t>(colorValue);
+        auto hasDimension = static_cast<bool>(colorHasDimension);
+        auto dimension = colorDimension;
+        NG::GradientColor gradientColor;
+        gradientColor.SetColor(Color(color));
+        gradientColor.SetHasValue(hasDimension);
+        if (hasDimension) {
+            gradientColor.SetDimension(CalcDimension(dimension * PERCENT_100, DimensionUnit::PERCENT));
+        }
+        gradient.AddColor(gradientColor);
+    }
+}
+
+void SetLinearGradientDirectionTo(std::shared_ptr<LinearGradient>& linearGradient, const GradientDirection direction)
+{
+    switch (direction) {
+        case GradientDirection::LEFT:
+            linearGradient->linearX = NG::GradientDirection::LEFT;
+            break;
+        case GradientDirection::RIGHT:
+            linearGradient->linearX = NG::GradientDirection::RIGHT;
+            break;
+        case GradientDirection::TOP:
+            linearGradient->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::BOTTOM:
+            linearGradient->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::LEFT_TOP:
+            linearGradient->linearX = NG::GradientDirection::LEFT;
+            linearGradient->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::LEFT_BOTTOM:
+            linearGradient->linearX = NG::GradientDirection::LEFT;
+            linearGradient->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::RIGHT_TOP:
+            linearGradient->linearX = NG::GradientDirection::RIGHT;
+            linearGradient->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::RIGHT_BOTTOM:
+            linearGradient->linearX = NG::GradientDirection::RIGHT;
+            linearGradient->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::NONE:
+        case GradientDirection::START_TO_END:
+        case GradientDirection::END_TO_START:
+        default:
+            break;
+    }
+}
+
+/**
+ * @param values value value
+ * values[0], values[1] : angle: hasValue, angle value
+ * values[2] : direction
+ * values[3] : repeating
+ * @param valuesLength values length
+ */
+void SetLinearGradientValues(NG::Gradient& gradient, const double* values, int32_t valuesLength)
+{
+    if ((values == nullptr) || (valuesLength != NUM_4)) {
+        return;
+    }
+    auto angleHasValue = values[NUM_0];
+    auto angleValue = values[NUM_1];
+    auto directionValue = values[NUM_2];
+    auto repeating = values[NUM_3];
+    auto linearGradient = gradient.GetLinearGradient();
+    if (linearGradient == nullptr) {
+        return;
+    }
+    if (static_cast<bool>(angleHasValue)) {
+        linearGradient->angle = CalcDimension(angleValue, DimensionUnit::PX);
+    }
+    SetLinearGradientDirectionTo(linearGradient, static_cast<GradientDirection>(directionValue));
+    gradient.SetRepeat(static_cast<bool>(repeating));
 }
 } // namespace
 
@@ -336,6 +469,249 @@ void ResetOpacity(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetOpacity(frameNode, 1.0f);
 }
+void SetAlign(NodeHandle node, int32_t align)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Alignment alignment = ParseAlignment(align);
+    ViewAbstract::SetAlign(frameNode, alignment);
+}
+
+void ResetAlign(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetAlign(frameNode, Alignment::CENTER);
+}
+
+void SetBackdropBlur(NodeHandle node, double value)
+{
+    float blur = 0.0f;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (value > 0) {
+        blur = value;
+    }
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius);
+}
+
+void ResetBackdropBlur(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    double blur = 0.0;
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius);
+}
+
+void SetHueRotate(NodeHandle node, float deg)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    deg = std::fmod(deg, ROUND_UNIT);
+    if (deg < 0.0f) {
+        deg += ROUND_UNIT;
+    }
+    ViewAbstract::SetHueRotate(frameNode, deg);
+}
+
+void ResetHueRotate(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    float deg = 0.0f;
+    ViewAbstract::SetHueRotate(frameNode, deg);
+}
+
+void SetInvert(NodeHandle node, double invert)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    InvertVariant invertVariant = static_cast<float>(invert);
+    ViewAbstract::SetInvert(frameNode, invertVariant);
+}
+
+void ResetInvert(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    InvertVariant invert = 0.0f;
+    ViewAbstract::SetInvert(frameNode, invert);
+}
+
+void SetSepia(NodeHandle node, double sepia)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value = CalcDimension(sepia, DimensionUnit::VP);
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    if (GreatNotEqual(value.Value(), 1.0)) {
+        value.SetValue(1.0);
+    }
+    ViewAbstract::SetSepia(frameNode, value);
+}
+
+void ResetSepia(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value(0.0, DimensionUnit::VP);
+    ViewAbstract::SetSepia(frameNode, value);
+}
+
+void SetSaturate(NodeHandle node, double saturate)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value = CalcDimension(saturate, DimensionUnit::VP);
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    ViewAbstract::SetSaturate(frameNode, value);
+}
+
+void ResetSaturate(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value(1.0, DimensionUnit::VP);
+    ViewAbstract::SetSaturate(frameNode, value);
+}
+
+void SetColorBlend(NodeHandle node, uint32_t color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetColorBlend(frameNode, Color(color));
+}
+
+void ResetColorBlend(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color colorBlend = Color::TRANSPARENT;
+    ViewAbstract::SetColorBlend(frameNode, colorBlend);
+}
+
+void SetGrayscale(NodeHandle node, double grayScale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value = CalcDimension(grayScale, DimensionUnit::VP);
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    if (GreatNotEqual(value.Value(), 1.0)) {
+        value.SetValue(1.0);
+    }
+    ViewAbstract::SetGrayScale(frameNode, value);
+}
+
+void ResetGrayscale(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value(0.0, DimensionUnit::VP);
+    ViewAbstract::SetGrayScale(frameNode, value);
+}
+
+void SetContrast(NodeHandle node, double contrast)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value = CalcDimension(contrast, DimensionUnit::VP);
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    ViewAbstract::SetContrast(frameNode, value);
+}
+
+void ResetContrast(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value(1.0, DimensionUnit::VP);
+    ViewAbstract::SetContrast(frameNode, value);
+}
+
+void SetBrightness(NodeHandle node, double brightness)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value = CalcDimension(brightness, DimensionUnit::VP);
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    ViewAbstract::SetBrightness(frameNode, value);
+}
+
+void ResetBrightness(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value(1.0, DimensionUnit::VP);
+    ViewAbstract::SetBrightness(frameNode, value);
+}
+
+void SetBlur(NodeHandle node, double value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    float blur = 0.0f;
+    if (value > 0) {
+        blur = value;
+    }
+    CalcDimension dimensionBlur(blur, DimensionUnit::PX);
+    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur);
+}
+
+void ResetBlur(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    double blur = 0.0;
+    CalcDimension dimensionBlur(blur, DimensionUnit::PX);
+    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur);
+}
+
+/**
+ * @param values value value
+ * values[0], values[1] : angle: hasValue, angle value
+ * values[2] : direction
+ * values[3] : repeating
+ * @param valuesLength values length
+ * @param colors color value
+ * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
+ * colors[3], colors[4], colors[5] : color[1](color, hasDimension, dimension)
+ * ...
+ * @param colorsLength colors length
+ */
+void SetLinearGradient(NodeHandle node, const double* values, int32_t valuesLength,
+    const double* colors, int32_t colorsLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesLength != NUM_4) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
+        return;
+    }
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    SetLinearGradientValues(gradient, values, valuesLength);
+    SetGradientColors(gradient, colors, colorsLength);
+    ViewAbstract::SetLinearGradient(frameNode, gradient);
+}
+
+void ResetLinearGradient(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    ViewAbstract::SetLinearGradient(frameNode, gradient);
+}
 
 ArkUICommonModifierAPI GetCommonModifier()
 {
@@ -343,7 +719,11 @@ ArkUICommonModifierAPI GetCommonModifier()
         SetHeight, ResetHeight, SetBorderRadius, ResetBorderRadius, SetBorderWidth, ResetBorderWidth, SetTransform,
         ResetTransform, SetBorderColor, ResetBorderColor, SetPosition, ResetPosition, SetBorderStyle, ResetBorderStyle,
         SetBackShadow, ResetBackShadow, SetHitTestBehavior, ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity,
-        ResetOpacity };
+        ResetOpacity, SetAlign, ResetAlign, SetBackdropBlur, ResetBackdropBlur, SetHueRotate, ResetHueRotate, SetInvert,
+        ResetInvert, SetSepia, ResetSepia, SetSaturate, ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale,
+        ResetGrayscale, SetContrast, ResetContrast, SetBrightness, ResetBrightness, SetBlur, ResetBlur,
+        SetLinearGradient, ResetLinearGradient,
+    };
 
     return modifier;
 }

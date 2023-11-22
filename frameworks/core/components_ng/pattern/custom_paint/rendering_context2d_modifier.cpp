@@ -63,8 +63,12 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
     if (!drawCmdList) {
         return;
     }
-    if (drawCmdList->GetData().second == 0) {
+    if (drawCmdList->IsEmpty()) {
         return;
+    }
+    if (recordingCanvas.GetDrawingType() == Rosen::Drawing::Drawing::Type::RECORDING) {
+        static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->SetWidth(drawCmdList->GetWidth());
+        static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->SetHeight(drawCmdList->GetHeight());
     }
     drawCmdList->Playback(recordingCanvas);
     rsRecordingCanvas_->Clear();

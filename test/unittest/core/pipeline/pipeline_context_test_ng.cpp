@@ -96,6 +96,7 @@ const std::string TEST_TAG("test");
 const std::string ACCESS_TAG("-accessibility");
 const std::string TEST_FORM_INFO("test_info");
 const int64_t RENDER_EVENT_ID = 10;
+constexpr int32_t EXCEPTIONAL_CURSOR = 99;
 } // namespace
 
 class PipelineContextTestNg : public testing::Test {
@@ -2234,6 +2235,39 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UITaskSchedulerTestNg002
+ * @tc.desc: Test FlushAfterLayoutTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg006, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Call FlushAfterLayoutTask.
+     */
+    taskScheduler.FlushAfterLayoutTask();
+
+    /**
+     * @tc.steps3: Call AddAfterLayoutTask.
+     * @tc.expected: afterLayoutTasks_ in the taskScheduler size is 2.
+     */
+    taskScheduler.AddPersistAfterLayoutTask([]() {});
+    taskScheduler.AddPersistAfterLayoutTask(nullptr);
+    EXPECT_EQ(taskScheduler.persistAfterLayoutTasks_.size(), 2);
+
+    /**
+     * @tc.steps4: Call FlushTask.
+     * @tc.expected: afterLayoutTasks_ in the taskScheduler size is 0.
+     */
+    taskScheduler.FlushTask();
+    EXPECT_EQ(taskScheduler.afterLayoutTasks_.size(), 2);
+}
+
+/**
  * @tc.name: PipelineContextTestNg043
  * @tc.desc: Test SetCloseButtonStatus function.
  * @tc.type: FUNC
@@ -2782,5 +2816,41 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg061, TestSize.Level1)
     containerPattern->isFocus_ = true;
     containerPattern->OnWindowForceUnfocused();
     EXPECT_TRUE(containerPattern->isFocus_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg062
+ * @tc.desc: Test the function SetCursor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg062, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
+    
+    /**
+     * @tc.steps2: set cursor with an exceptional value.
+     * @tc.expected: context_->cursor_ is MouseFormat::DEFAULT.
+     */
+    context_->SetCursor(EXCEPTIONAL_CURSOR);
+    ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
+
+    /**
+     * @tc.steps3: set cursor with a normal value.
+     * @tc.expected: context_->cursor_ is correct value.
+     */
+    context_->SetCursor(static_cast<int32_t>(MouseFormat::EAST));
+    ASSERT_EQ(context_->cursor_, MouseFormat::EAST);
+
+    /**
+     * @tc.steps4: restore mouse style.
+     * @tc.expected: context_->cursor_ is MouseFormat::DEFAULT.
+     */
+    context_->RestoreDefault();
+    ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
 }
 } // namespace OHOS::Ace::NG

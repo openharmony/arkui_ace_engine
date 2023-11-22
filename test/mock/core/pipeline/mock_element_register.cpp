@@ -113,11 +113,6 @@ bool ElementRegister::RemoveItem(ElementIdType elementId, const std::string& tag
     }
     auto removed = itemMap_.erase(elementId);
     if (removed) {
-        auto iter = deletedCachedItems_.find(elementId);
-        if (iter != deletedCachedItems_.end()) {
-            deletedCachedItems_.erase(iter);
-            return true;
-        }
         removedItems_.insert(std::pair(elementId, tag));
     }
     return removed;
@@ -191,8 +186,6 @@ void ElementRegister::AddPendingRemoveNode(const RefPtr<NG::UINode>& node)
 void ElementRegister::ClearPendingRemoveNodes()
 {
     pendingRemoveNodes_.clear();
-    CallJSUINodeRegisterCallbackFunc();
-    CallJSUINodeRegisterGlobalFunc();
 }
 
 } // namespace OHOS::Ace

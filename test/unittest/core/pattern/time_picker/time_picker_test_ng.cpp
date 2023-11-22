@@ -24,6 +24,7 @@
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 #include "base/geometry/dimension.h"
@@ -186,12 +187,25 @@ void TimePickerPatternTestNg::TearDownTestSuite()
 void TimePickerPatternTestNg::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+            if (type == IconTheme::TypeId()) {
+                return AceType::MakeRefPtr<IconTheme>();
+            } else if (type == DialogTheme::TypeId()) {
+                return AceType::MakeRefPtr<DialogTheme>();
+            } else if (type == PickerTheme::TypeId()) {
+                return MockThemeDefault::GetPickerTheme();
+            } else {
+                return nullptr;
+            }
+        });
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
 }
 
 void TimePickerPatternTestNg::TearDown()
 {
     MockPipelineBase::GetCurrent()->themeManager_ = nullptr;
+    ViewStackProcessor::GetInstance()->ClearStack();
 }
 
 void TimePickerPatternTestNg::CreateTimePickerColumnNode()
@@ -199,7 +213,7 @@ void TimePickerPatternTestNg::CreateTimePickerColumnNode()
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
     pickerFrameNode->MarkModifyDone();
 
@@ -226,7 +240,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGCreateTimePicker001, TestSize
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto timePickerPattern = AceType::MakeRefPtr<TimePickerRowPattern>();
     timePickerPattern->AttachToFrameNode(frameNode);
@@ -246,7 +260,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle001, Tes
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     TimePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -269,7 +283,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle002, Tes
     data.textColor = Color::RED;
     data.fontWeight = Ace::FontWeight::BOLD;
     TimePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -290,7 +304,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle003, Tes
     PickerTextStyle data;
     data.fontSize = Dimension(0);
     TimePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -308,7 +322,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle001, TestSi
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     TimePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -331,7 +345,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle002, TestSi
     data.textColor = Color::RED;
     data.fontWeight = Ace::FontWeight::BOLD;
     TimePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -353,7 +367,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle003, TestSi
     PickerTextStyle data;
     data.fontSize = Dimension(0);
     TimePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
@@ -373,7 +387,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle001, Test
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     TimePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
@@ -398,7 +412,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle002, Test
     data.textColor = Color::RED;
     data.fontWeight = Ace::FontWeight::BOLD;
     TimePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
@@ -421,7 +435,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle003, Test
     PickerTextStyle data;
     data.fontSize = Dimension(0);
     TimePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
@@ -439,7 +453,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern001, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
 
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -469,7 +483,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern002, TestSize.Level1)
     data.textColor = Color::RED;
     data.fontWeight = Ace::FontWeight::BOLD;
     TimePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -498,7 +512,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern003, TestSize.Level1)
     data.textColor = Color::RED;
     data.fontWeight = Ace::FontWeight::BOLD;
     TimePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -522,7 +536,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern004, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -548,7 +562,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern005, TestSize.Level1)
     PickerTextStyle data;
     data.fontSize = Dimension(10);
     TimePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -612,7 +626,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerLayoutPropertyToJsonValue001, TestSi
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
 
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
@@ -632,7 +646,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerLayoutPropertyReset001, TestSize.Lev
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
 
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
@@ -650,7 +664,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerLayoutPropertyClone001, TestSize.Lev
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
 
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
@@ -667,7 +681,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg001, Test
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -698,7 +712,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg002, Test
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -728,7 +742,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg003, Test
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -773,7 +787,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg004, Test
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -810,7 +824,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg005, Test
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -849,7 +863,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg006, Test
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -887,7 +901,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg007, Test
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -937,7 +951,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern006, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1019,7 +1033,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern007, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1054,7 +1068,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern008, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1083,7 +1097,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern009, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1109,7 +1123,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1219,7 +1233,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern012, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1264,7 +1278,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern013, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1295,7 +1309,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern014, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1324,7 +1338,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern015, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1359,7 +1373,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1400,7 +1414,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern002, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1430,7 +1444,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern003, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1458,7 +1472,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern004, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1504,7 +1518,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern005, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1535,7 +1549,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern006, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1558,7 +1572,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern007, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetHour24(false);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1581,7 +1595,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern008, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetHour24(false);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1621,7 +1635,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern009, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetHour24(false);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1641,7 +1655,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern010, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetHour24(false);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1664,7 +1678,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetHour24(false);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1782,7 +1796,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern012, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetHour24(false);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1805,7 +1819,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern013, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetHour24(false);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1871,7 +1885,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerFireChangeEventTest001, TestSize.Lev
 
     auto changeEvent = [](const BaseEventInfo* info) { EXPECT_EQ(info->GetType(), "DatePickerChangeEvent"); };
     TimePickerModelNG::GetInstance()->SetChangeEvent(std::move(changeEvent));
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -1892,7 +1906,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerHasSecond001, TestSize.Level1)
     TimePickerModelNG::GetInstance()->SetHour24(true);
     TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1932,7 +1946,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerHasSecond002, TestSize.Level1)
     TimePickerModelNG::GetInstance()->SetHour24(false);
     TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -1977,7 +1991,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerHasSecond003, TestSize.Level1)
     TimePickerModelNG::GetInstance()->SetHour24(false);
     TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -2008,7 +2022,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode001, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetWheelModeEnabled(false);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -2032,7 +2046,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode002, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -2057,7 +2071,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode003, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetWheelModeEnabled(false);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -2083,7 +2097,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode004, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetWheelModeEnabled(true);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -2112,7 +2126,7 @@ HWTEST_F(TimePickerPatternTestNg, PerformActionTest001, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
 
     /**
@@ -2177,7 +2191,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAlgorithmTest001, TestSize.Level1)
      * @tc.cases: case. cover branch DeviceOrientation is LANDSCAPE.
      */
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
     frameNode->MarkModifyDone();
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
@@ -2262,7 +2276,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern019, TestSize.Level1)
     /**
      * @tc.step: step1. create column pattern.
      */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -2338,7 +2352,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern020, TestSize.Level1)
     /**
      * @tc.step: step1. create column pattern.
      */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -2374,7 +2388,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern021, TestSize.Level1)
     /**
      * @tc.step: step1. create column pattern.
      */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
@@ -2504,7 +2518,7 @@ HWTEST_F(TimePickerPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
 
@@ -2553,7 +2567,7 @@ HWTEST_F(TimePickerPatternTestNg, OnColorConfigurationUpdate002, TestSize.Level1
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
 

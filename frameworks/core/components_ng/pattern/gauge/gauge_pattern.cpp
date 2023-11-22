@@ -56,7 +56,7 @@ void GaugePattern::OnModifyDone()
         auto gaugeLayoutProperty = GetLayoutProperty<GaugeLayoutProperty>();
         CHECK_NULL_VOID(gaugeLayoutProperty);
 
-        if (gaugeLayoutProperty->GetIsShowLimitValueValue(false) &&
+        if (gaugeLayoutProperty->GetIsShowLimitValueValue(false) && gaugePaintProperty->HasGradientColors() &&
             gaugePaintProperty->GetGradientColorsValue().size() != 0) {
             InitLimitValueText(GetMinValueTextId(), true);
             InitLimitValueText(GetMaxValueTextId(), false);

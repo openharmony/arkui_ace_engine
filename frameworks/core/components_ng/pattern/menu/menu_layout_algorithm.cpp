@@ -484,6 +484,11 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+    
+    if (menuPattern->IsSelectMenu()) {
+        auto selectMenuWidth = menuPattern->GetSelectMenuWidth();
+        idealSize.SetWidth(selectMenuWidth);
+    }
     geometryNode->SetFrameSize(idealSize);
 }
 
@@ -1198,6 +1203,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto menuEndOffset =
             menuPosition - (previewOffset_ - previewOriginOffset_) + FixMenuOriginOffset(1.0f, afterAnimationScale);
         menuPattern->SetEndOffset(menuEndOffset);
+        menuPattern->SetHasLaid(true);
     }
 
     // translate each option by the height of previous options

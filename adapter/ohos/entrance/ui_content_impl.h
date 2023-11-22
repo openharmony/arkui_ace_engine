@@ -77,6 +77,7 @@ public:
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
     void ProcessFormVisibleChange(bool isVisible) override;
+    void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
 
     // Window color
     uint32_t GetBackgroundColor() override;
@@ -86,6 +87,9 @@ public:
 
     // Set UIContent callback for custom window animation
     void SetNextFrameLayoutCallback(std::function<void()>&& callback) override;
+
+    // Set UIContent callback after layout finish
+    void SetFrameLayoutFinishCallback(std::function<void()>&& callback) override;
 
     // Receive memory level notification
     void NotifyMemoryLevel(int32_t level) override;

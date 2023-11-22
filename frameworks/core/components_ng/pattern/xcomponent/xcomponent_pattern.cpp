@@ -152,8 +152,9 @@ void XComponentPattern::OnAttachToFrameNode()
             }
             handlingSurfaceRenderContext_ = renderContextForSurface_;
             auto* controllerNG = static_cast<XComponentControllerNG*>(xcomponentController_.get());
-            CHECK_NULL_VOID(controllerNG);
-            controllerNG->SetPattern(AceType::Claim(this));
+            if (controllerNG) {
+                controllerNG->SetPattern(AceType::Claim(this));
+            }
         } else if (type_ == XComponentType::TEXTURE) {
             renderSurface_->SetRenderContext(renderContext);
             renderSurface_->SetIsTexture(true);

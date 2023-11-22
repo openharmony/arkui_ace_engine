@@ -69,6 +69,14 @@ RectF TextSelectController::CalculateEmptyValueCaretRect() const
     }
 }
 
+void TextSelectController::FitCaretMetricsToContentRect(CaretMetricsF& caretMetrics)
+{
+    if (caretMetrics.height > contentRect_.Height()) {
+        caretMetrics.offset.SetY(caretMetrics.offset.GetY() + caretMetrics.height - contentRect_.Height());
+        caretMetrics.height = contentRect_.Height();
+    }
+}
+
 void TextSelectController::CalcCaretMetricsByPosition(
     int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
 {
@@ -81,6 +89,7 @@ void TextSelectController::CalcCaretMetricsByPosition(
     auto textRect = textFiled->GetTextRect();
     caretCaretMetric.offset.AddX(textRect.GetX());
     caretCaretMetric.offset.AddY(textRect.GetY());
+    FitCaretMetricsToContentRect(caretCaretMetric);
 }
 
 void TextSelectController::CalcCaretMetricsByPositionNearTouchOffset(
@@ -95,6 +104,7 @@ void TextSelectController::CalcCaretMetricsByPositionNearTouchOffset(
     paragraph_->CalcCaretMetricsByPosition(extent, caretMetrics, touchOffset - textRect.GetOffset());
     caretMetrics.offset.AddX(textRect.GetX());
     caretMetrics.offset.AddY(textRect.GetY());
+    FitCaretMetricsToContentRect(caretMetrics);
 }
 
 void TextSelectController::UpdateCaretRectByPositionNearTouchOffset(int32_t position, const Offset& touchOffset)
@@ -151,14 +161,6 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
             pos + GetGraphemeClusterLength(contentController_->GetWideText(), pos, true));
     }
     UpdateHandleIndex(start, end);
-    if (CaretAtLast() && GreatNotEqual(localOffset.GetX(), caretInfo_.rect.GetOffset().GetX())) {
-        UpdateHandleIndex(GetCaretIndex());
-    }
-    if (IsSelected()) {
-        MoveSecondHandleToContentRect(GetSecondHandleIndex());
-    } else {
-        MoveCaretToContentRect(GetCaretIndex());
-    }
 }
 
 int32_t TextSelectController::GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev)
@@ -436,5 +438,28 @@ void TextSelectController::ResetHandles()
     secondHandleInfo_.index = caretInfo_.index;
     UpdateFirstHandleOffset();
     UpdateSecondHandleOffset();
+}
+
+void TextSelectController::UpdateSelectByDoubleClick(const Offset& localOffset)
+{
+    UpdateSelectByOffset(localOffset);
+    if (IsSelected()) {
+        MoveSecondHandleToContentRect(GetSecondHandleIndex());
+    } else {
+        MoveCaretToContentRect(GetCaretIndex());
+    }
+}
+
+void TextSelectController::UpdateSelectByLongPress(const Offset& localOffset)
+{
+    UpdateSelectByOffset(localOffset);
+    if (CaretAtLast() && GreatNotEqual(localOffset.GetX(), caretInfo_.rect.GetOffset().GetX())) {
+        UpdateHandleIndex(GetCaretIndex());
+    }
+    if (IsSelected()) {
+        MoveSecondHandleToContentRect(GetSecondHandleIndex());
+    } else {
+        MoveCaretToContentRect(GetCaretIndex());
+    }
 }
 } // namespace OHOS::Ace::NG

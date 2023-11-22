@@ -46,6 +46,9 @@ public:
     static void SetSpace(const JSCallbackInfo& info);
     static void SetArrowPosition(const JSCallbackInfo& info);
     static void SetMenuAlign(const JSCallbackInfo& info);
+    static void SetOptionWidth(const JSCallbackInfo& info);
+    static void SetOptionHeight(const JSCallbackInfo& info);
+    static void SetOptionWidthFitTrigger(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif

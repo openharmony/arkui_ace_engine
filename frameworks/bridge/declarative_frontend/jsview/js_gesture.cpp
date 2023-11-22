@@ -477,6 +477,15 @@ void JSGesture::JsHandlerOnGestureEvent(Ace::GestureEventAction action, const JS
     GestureModel::GetInstance()->SetOnActionFunc(onActionFunc, action);
 }
 
+void JSGesture::SetTag(const JSCallbackInfo& args)
+{
+    std::string tag;
+    if (args.Length() > 0 && args[0]->IsString()) {
+        tag = args[0]->ToString();
+    }
+    GestureModel::GetInstance()->SetTag(tag);
+}
+
 void JSGesture::JsHandlerOnAction(const JSCallbackInfo& args)
 {
     JSGesture::JsHandlerOnGestureEvent(Ace::GestureEventAction::ACTION, args);
@@ -608,6 +617,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
 
     JSClass<JSTapGesture>::Declare("TapGesture");
     JSClass<JSTapGesture>::StaticMethod("create", &JSTapGesture::Create, opt);
+    JSClass<JSTapGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
     JSClass<JSTapGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSTapGesture>::StaticMethod("onAction", &JSGesture::JsHandlerOnAction);
     JSClass<JSTapGesture>::StaticMethod("onActionUpdate", &JSGesture::JsHandlerOnActionUpdate);
@@ -615,6 +625,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
 
     JSClass<JSLongPressGesture>::Declare("LongPressGesture");
     JSClass<JSLongPressGesture>::StaticMethod("create", &JSLongPressGesture::Create, opt);
+    JSClass<JSLongPressGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
     JSClass<JSLongPressGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSLongPressGesture>::StaticMethod("onAction", &JSGesture::JsHandlerOnAction);
     JSClass<JSLongPressGesture>::StaticMethod("onActionEnd", &JSGesture::JsHandlerOnActionEnd);
@@ -624,6 +635,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
 
     JSClass<JSPanGesture>::Declare("PanGesture");
     JSClass<JSPanGesture>::StaticMethod("create", &JSPanGesture::Create, opt);
+    JSClass<JSPanGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
     JSClass<JSPanGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSPanGesture>::StaticMethod("onActionStart", &JSGesture::JsHandlerOnActionStart);
     JSClass<JSPanGesture>::StaticMethod("onActionUpdate", &JSGesture::JsHandlerOnActionUpdate);
@@ -633,12 +645,14 @@ void JSGesture::JSBind(BindingTarget globalObj)
 
     JSClass<JSSwipeGesture>::Declare("SwipeGesture");
     JSClass<JSSwipeGesture>::StaticMethod("create", &JSSwipeGesture::Create, opt);
+    JSClass<JSSwipeGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
     JSClass<JSSwipeGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSSwipeGesture>::StaticMethod("onAction", &JSGesture::JsHandlerOnAction);
     JSClass<JSSwipeGesture>::Bind(globalObj);
 
     JSClass<JSPinchGesture>::Declare("PinchGesture");
     JSClass<JSPinchGesture>::StaticMethod("create", &JSPinchGesture::Create, opt);
+    JSClass<JSPinchGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
     JSClass<JSPinchGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSPinchGesture>::StaticMethod("onActionStart", &JSGesture::JsHandlerOnActionStart);
     JSClass<JSPinchGesture>::StaticMethod("onActionUpdate", &JSGesture::JsHandlerOnActionUpdate);
@@ -648,6 +662,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
 
     JSClass<JSRotationGesture>::Declare("RotationGesture");
     JSClass<JSRotationGesture>::StaticMethod("create", &JSRotationGesture::Create, opt);
+    JSClass<JSRotationGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
     JSClass<JSRotationGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSRotationGesture>::StaticMethod("onActionStart", &JSGesture::JsHandlerOnActionStart);
     JSClass<JSRotationGesture>::StaticMethod("onActionUpdate", &JSGesture::JsHandlerOnActionUpdate);

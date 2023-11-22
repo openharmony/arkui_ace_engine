@@ -55,6 +55,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -398,6 +399,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 
     taskScheduler_->StartRecordFrameInfo(GetCurrentFrameInfo(recvTime, nanoTimestamp));
     taskScheduler_->FlushTask();
+    // flush correct rect again
+    taskScheduler_->FlushPersistAfterLayoutTask();
     taskScheduler_->FinishRecordFrameInfo();
     FlushAnimationClosure();
     TryCallNextFrameLayoutCallback();
@@ -416,6 +419,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (hasAnimation) {
         RequestFrame();
     }
+    FlushFrameRate();
     FlushMessages();
     if (dragCleanTask_) {
         dragCleanTask_();
@@ -581,12 +585,24 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     FlushFocus();
 }
 
+void PipelineContext::FlushFrameRate()
+{
+    if (frameRateManager_->IsRateChanged()) {
+        auto rate = frameRateManager_->GetExpectedRate();
+        ACE_SCOPED_TRACE("FlushFrameRate Expected frameRate = %d", rate);
+        window_->FlushFrameRate(rate);
+        frameRateManager_->SetIsRateChanged(false);
+    }
+}
+
 void PipelineContext::FlushBuild()
 {
     isRebuildFinished_ = false;
     FlushDirtyNodeUpdate();
     isRebuildFinished_ = true;
     FlushBuildFinishCallbacks();
+    // need notify after flush dirty node
+    taskScheduler_->FlushPersistAfterLayoutTask();
 }
 
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation)
@@ -662,6 +678,7 @@ void PipelineContext::SetupRootElement()
     auto container = Container::Current();
     if (container && atomicService) {
         auto appBar = Referenced::MakeRefPtr<AppBarView>(atomicService);
+        appBar->iniBehavior();
         container->SetAppBar(appBar);
     }
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
@@ -2071,6 +2088,19 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     }
 }
 
+void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->UpdateTitleInTargetPos(isShow, height);
+}
+
 void PipelineContext::SetContainerWindow(bool isShow)
 {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2349,6 +2379,9 @@ void PipelineContext::OnIdle(int64_t deadline)
     ACE_SCOPED_TRACE("OnIdle, targettime:%" PRId64 "", deadline);
     taskScheduler_->FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
     canUseLongPredictTask_ = false;
+    if (GetSysTimestamp() < deadline) {
+        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc();
+    }
 }
 
 void PipelineContext::Finish(bool /* autoFinish */) const
@@ -2362,6 +2395,11 @@ void PipelineContext::Finish(bool /* autoFinish */) const
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
 {
     taskScheduler_->AddAfterLayoutTask(std::move(task));
+}
+
+void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
+{
+    taskScheduler_->AddPersistAfterLayoutTask(std::move(task));
 }
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
@@ -2509,5 +2547,23 @@ void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& no
 void PipelineContext::SetJSViewActive(bool active, WeakPtr<CustomNode> custom)
 {
     taskScheduler_->SetJSViewActive(active, custom);
+}
+
+void PipelineContext::SetCursor(int32_t cursorValue)
+{
+    if (cursorValue >= 0 && cursorValue <= static_cast<int32_t>(MouseFormat::RUNNING)) {
+        cursor_ = static_cast<MouseFormat>(cursorValue);
+        auto mouseStyle = MouseStyle::CreateMouseStyle();
+        CHECK_NULL_VOID(mouseStyle);
+        mouseStyle->ChangePointerStyle(GetWindowId(), cursor_);
+    }
+}
+
+void PipelineContext::RestoreDefault()
+{
+    cursor_ = MouseFormat::DEFAULT;
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    CHECK_NULL_VOID(mouseStyle);
+    mouseStyle->ChangePointerStyle(GetWindowId(), MouseFormat::DEFAULT);
 }
 } // namespace OHOS::Ace::NG

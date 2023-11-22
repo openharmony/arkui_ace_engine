@@ -157,9 +157,11 @@ public:
     }
     void ScrollTo(float position) override;
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
-    void ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align);
+    void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
+        ScrollAlign align = ScrollAlign::START);
     bool ScrollPage(bool reverse);
     void ScrollBy(float offset);
+    bool AnimateToTarget(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     Offset GetCurrentOffset() const;
     Rect GetItemRect(int32_t index) const override;
     Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const;
@@ -243,7 +245,7 @@ private:
 
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    float CalculateTargetPos(float startPos, float endPos, ScrollAutoType scrollAutoType);
+    float CalculateTargetPos(float startPos, float endPos);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -274,6 +276,11 @@ private:
         RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
     bool NeedScrollSnapAlignEffect() const;
     ScrollAlign GetScrollAlignByScrollSnapAlign() const;
+    bool GetListItemAnimatePos(float startPos, float endPos, ScrollAlign align, float& targetPos);
+    bool GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, float startPos, float endPos,
+        ScrollAlign align, float& targetPos);
+    bool GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int32_t indexInGroup, float startPos,
+        ScrollAlign align, float& targetPos);
 
     // multiSelectable
     void ClearMultiSelect() override;
@@ -313,6 +320,7 @@ private:
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> targetIndexInGroup_;
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;

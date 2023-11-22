@@ -1,6 +1,6 @@
+/// <reference path="./import.ts" />
 
-
-class ArkBorderStyle {
+class ArkBorderStyle implements Equable {
     type: boolean | undefined;
     style: number | undefined;
     top: number | undefined;
@@ -90,10 +90,10 @@ class ArkShadow {
 }
 
 class ArkBorderColor {
-    leftColor: number | undefined;
-    rightColor: number | undefined;
-    topColor: number | undefined;
-    bottomColor: number | undefined;
+    leftColor: number | undefined | Resource;
+    rightColor: number | undefined | Resource;
+    topColor: number | undefined | Resource;
+    bottomColor: number | undefined | Resource;
 
     constructor() {
         this.leftColor = undefined;
@@ -107,9 +107,9 @@ class ArkBorderColor {
     }
 }
 
-class ArkPosition {
-    x: number | undefined;
-    y: number | undefined;
+class ArkPosition implements Equable {
+    x: number | string | undefined | Resource;
+    y: number | string | undefined | Resource;
 
     constructor() {
         this.x = undefined;
@@ -122,11 +122,11 @@ class ArkPosition {
 }
 
 
-class ArkBorderWidth {
-    left: number | undefined;
-    right: number | undefined;
-    top: number | undefined;
-    bottom: number | undefined;
+class ArkBorderWidth implements Equable {
+    left: number | string | undefined | Resource;
+    right: number | string | undefined| Resource;
+    top: number | string | undefined| Resource;
+    bottom: number | string | undefined| Resource;
 
     constructor() {
         this.left = undefined;
@@ -140,11 +140,11 @@ class ArkBorderWidth {
     }
 }
 
-class ArkBorderRadius {
-    topLeft: number | undefined;
-    topRight: number | undefined;
-    bottomLeft: number | undefined;
-    bottomRight: number | undefined;
+class ArkBorderRadius implements Equable {
+    topLeft: number | string | undefined | Resource;
+    topRight: number | string | undefined | Resource;
+    bottomLeft: number | string | undefined | Resource;
+    bottomRight: number | string | undefined | Resource;
 
     constructor() {
         this.topLeft = undefined;
@@ -158,7 +158,7 @@ class ArkBorderRadius {
     }
 }
 
-class ArkTransformMatrix {
+class ArkTransformMatrix implements Equable  {
     matrix: [];
     length: number;
 
@@ -174,7 +174,84 @@ class ArkTransformMatrix {
             && arr1.every((value, index) => value === arr2[index]);
     }
 
-    isEqual(another: ArkTransformMatrix): void {
-        this.compareArrays(this.matrix, another.matrix)
+    isEqual(another: ArkTransformMatrix): boolean {
+        return this.compareArrays(this.matrix, another.matrix)
+    }
+}
+
+class ArkLabelStyle {
+    overflow: number | undefined;
+    maxLines: number | undefined;
+    minFontSize: number | string | undefined| Resource;
+    maxFontSize: number | string | undefined| Resource;
+    heightAdaptivePolicy: number | undefined;
+    font: ArkLabelFont;
+
+    constructor() {
+        this.overflow = undefined;
+        this.maxLines = undefined;
+        this.minFontSize = undefined;
+        this.maxFontSize = undefined;
+        this.heightAdaptivePolicy = undefined;
+        this.font = undefined;
+    }
+
+    isEqual(another: ArkLabelStyle): boolean {
+        return (this.overflow === another.overflow && this.maxLines === another.maxLines &&
+            this.minFontSize === another.minFontSize && this.maxFontSize === another.maxFontSize &&
+            this.heightAdaptivePolicy === another.heightAdaptivePolicy && this.font.isEqual(another.font));
+    }
+}
+
+class ArkLabelFont {
+    size: number | string | undefined| Resource;
+    weight: string | undefined;
+    family: string | undefined;
+    style:  number | undefined;
+    constructor() {
+        this.size = undefined;
+        this.weight = undefined;
+        this.family = undefined;
+        this.style = undefined;
+    }
+
+    isEqual(another: ArkLabelFont): boolean {
+        return (this.size === another.size && this.weight === another.weight && this.family === another.family &&
+            this.style === another.style);
+    }
+}
+
+function ArkDeepCompareArrays(arr1: Array<any>, arr2: Array<any>): boolean {
+    return Array.isArray(arr1)
+        && Array.isArray(arr2)
+        && arr1.length === arr2.length
+        && arr1.every((value, index) => {
+            if (Array.isArray(value) && Array.isArray(arr2[index])) {
+                return ArkDeepCompareArrays(value, arr2[index]);
+            } else {
+                return (value === arr2[index]);
+            }
+        });
+}
+
+class ArkLinearGradient {
+    angle: number | string | undefined;
+    direction: number | undefined;
+    colors: Array<any>;
+    repeating: boolean | undefined;
+
+    constructor(angle: number | string | undefined,
+        direction: number | undefined,
+        colors: Array<any>,
+        repeating: boolean | undefined) {
+        this.angle = angle;
+        this.direction = direction;
+        this.colors = colors;
+        this.repeating = repeating;
+    }
+
+    isEqual(another: ArkLinearGradient): boolean {
+        return ((this.angle === another.angle) && (this.direction === another.direction) &&
+            (ArkDeepCompareArrays(this.colors, another.colors)) && (this.repeating === another.repeating));
     }
 }

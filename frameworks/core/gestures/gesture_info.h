@@ -31,7 +31,6 @@
 #include "base/utils/type_definition.h"
 #include "core/event/ace_events.h"
 #include "core/gestures/velocity.h"
-#include "core/gestures/velocity_tracker.h"
 
 namespace OHOS::Ace {
 

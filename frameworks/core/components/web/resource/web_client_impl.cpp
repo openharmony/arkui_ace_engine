@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,6 +129,13 @@ void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::st
         return;
     }
     delegate->OnDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength);
+}
+
+void AccessibilityEventListenerImpl::OnAccessibilityEvent(int32_t nodeId, uint32_t eventType)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(webDelegate_);
+    webDelegate_->OnAccessibilityEvent(nodeId, static_cast<AccessibilityEventType>(eventType));
 }
 
 void FindListenerImpl::OnFindResultReceived(

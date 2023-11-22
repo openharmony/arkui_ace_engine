@@ -875,6 +875,8 @@ HWTEST_F(ToggleTestNg, TogglePaintTest001, TestSize.Level1)
 HWTEST_F(ToggleTestNg, TogglePaintTest002, TestSize.Level1)
 {
     auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
+    SizeF toggleSize(SWITCH_WIDTH, SWITCH_HEIGHT);
+    switchModifier->SetSize(toggleSize);
     switchModifier->hoverColor_ = Color::RED;
     switchModifier->clickEffectColor_ = Color::BLUE;
     switchModifier->touchHoverType_ = TouchHoverAnimationType::HOVER;

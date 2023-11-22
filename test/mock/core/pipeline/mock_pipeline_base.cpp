@@ -107,6 +107,8 @@ void PipelineContext::ContainerModalUnFocus() {}
 
 void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpdate) {}
 
+void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height) {}
+
 void PipelineContext::SetContainerWindow(bool isShow) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
@@ -483,6 +485,15 @@ RefPtr<NG::FrameNode> NG::PipelineContext::FindNavigationNodeToHandleBack(const 
 {
     return nullptr;
 }
+
+bool NG::PipelineContext::SetIsFocusActive(bool isFocusActive)
+{
+    return false;
+}
+
+void NG::PipelineContext::SetCursor(int32_t cursorValue) {}
+
+void NG::PipelineContext::RestoreDefault() {}
 
 void HandleSubwindow(bool isShow) {}
 } // namespace OHOS::Ace

@@ -31,6 +31,17 @@
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace {
+enum class RichEditorResponseType : int32_t {
+    RIGHT_CLICK = 0,
+    LONG_PRESS,
+    SELECTED_BY_MOUSE,
+};
+
+struct UserGestureOptions {
+    GestureEventFunc onClick;
+    GestureEventFunc onLongPress;
+};
+
 struct ImageSpanSize {
     CalcDimension width;
     CalcDimension height;
@@ -50,8 +61,7 @@ struct ImageSpanOptions {
     std::optional<std::string> moduleName;
     std::optional<RefPtr<PixelMap>> imagePixelMap;
     std::optional<ImageSpanAttribute> imageAttribute;
-    GestureEventFunc onClick;
-    GestureEventFunc onLongPress;
+    UserGestureOptions userGestureOption;
 };
 
 struct SpanPositionInfo {
@@ -133,8 +143,7 @@ struct TextSpanOptions {
     std::string value;
     std::optional<TextStyle> style;
     std::optional<UpdateParagraphStyle> paraStyle;
-    GestureEventFunc onClick;
-    GestureEventFunc onLongPress;
+    UserGestureOptions userGestureOption;
 };
 
 class ACE_EXPORT RichEditorControllerBase : public AceType {
@@ -153,6 +162,8 @@ public:
     virtual std::vector<ParagraphInfo> GetParagraphsInfo(int32_t start, int32_t end) = 0;
     virtual void DeleteSpans(const RangeOptions& options) = 0;
     virtual void CloseSelectionMenu() = 0;
+    virtual RichEditorSelection GetSelectionSpansInfo() = 0;
+    virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd) = 0;
 };
 
 class ACE_EXPORT RichEditorModel {
@@ -169,7 +180,7 @@ public:
     virtual void SetOnDeleteComplete(std::function<void()>&& func) = 0;
     virtual void SetCustomKeyboard(std::function<void()>&& func) = 0;
     virtual void SetCopyOption(CopyOptions& copyOptions) = 0;
-    virtual void BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
+    virtual void BindSelectionMenu(RichEditorType& editorType, RichEditorResponseType& responseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) = 0;
     virtual void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
 

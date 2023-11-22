@@ -12,14 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
-
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_button_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_common_modifier.h"
-#include "core/pipeline/base/element_register.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_toggle_modifier.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components/common/layout/constants.h"
-#include "base/memory/ace_type.h"
+#include "core/pipeline/base/element_register.h"
 
 using namespace OHOS::Ace::NG;
 
@@ -32,6 +34,9 @@ NodeHandle GetFrameNodeById(int nodeId)
 static struct ArkUINodeAPI impl = {
     GetFrameNodeById,
     GetCommonModifier,
+    GetTextModifier,
+    GetButtonModifier,
+    GetToggleModifier,
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI()

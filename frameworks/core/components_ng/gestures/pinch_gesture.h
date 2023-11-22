@@ -31,7 +31,14 @@ class ACE_EXPORT PinchGesture : public Gesture {
     DECLARE_ACE_TYPE(PinchGesture, Gesture);
 
 public:
-    PinchGesture(int32_t fingers, double distance) : Gesture(fingers), distance_(distance) {}
+    PinchGesture(int32_t fingers, double distance) : Gesture(fingers), distance_(distance)
+    {
+        if (gestureInfo_) {
+            gestureInfo_->SetType(GestureTypeName::PINCH_GESTURE);
+        } else {
+            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::PINCH_GESTURE);
+        }
+    }
     ~PinchGesture() override = default;
 
 protected:

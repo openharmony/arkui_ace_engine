@@ -111,11 +111,12 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
     const auto& selection = textPattern->GetTextSelector();
+    auto contentRect = textPattern->GetTextContentRect();
     std::vector<RectF> selectedRects;
     if (selection.GetTextStart() != selection.GetTextEnd()) {
         paragraph->GetRectsForRange(selection.GetTextStart(), selection.GetTextEnd(), selectedRects);
+        TextBase::CalculateSelectedRect(selectedRects, contentRect.Width());
     }
-    auto contentRect = textPattern->GetTextContentRect();
     textOverlayModifier_->SetContentRect(contentRect);
     textOverlayModifier_->SetSelectedRects(selectedRects);
     auto pipelineContext = PipelineContext::GetCurrentContext();

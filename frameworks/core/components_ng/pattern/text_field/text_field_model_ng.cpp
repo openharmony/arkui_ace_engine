@@ -82,9 +82,14 @@ void TextFieldModelNG::CreateNode(
     AddDragFrameNodeToManager();
     PaddingProperty paddings;
     ProcessDefaultPadding(paddings);
-    auto draggable = pipeline->GetDraggable<TextFieldTheme>();
-    SetDraggable(draggable);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, paddings);
+    if (frameNode->IsFirstBuilding()) {
+        auto draggable = pipeline->GetDraggable<TextFieldTheme>();
+        SetDraggable(draggable);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetTextDraggable(true);
+    }
 }
 
 void TextFieldModelNG::SetDraggable(bool draggable)
@@ -123,6 +128,13 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
+    auto focusHub = pattern->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
+    focusHub->SetFocusType(FocusType::NODE);
+    focusHub->SetFocusStyleType(FocusStyleType::CUSTOM_REGION);
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    pipeline->SetIsFocusActive(true);
     return pattern->GetTextFieldController();
 };
 
@@ -572,6 +584,7 @@ void TextFieldModelNG::SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCleanNodeStyle(cleanNodeStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CleanNodeStyle, cleanNodeStyle);
 }
 
 void TextFieldModelNG::SetCancelIconSize(const CalcDimension& iconSize)

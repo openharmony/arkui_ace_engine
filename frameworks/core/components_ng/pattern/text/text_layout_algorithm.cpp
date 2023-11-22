@@ -161,23 +161,17 @@ void TextLayoutAlgorithm::FontRegisterCallback(const RefPtr<FrameNode>& frameNod
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
-        bool isCustomFont = false;
         for (const auto& familyName : textStyle.GetFontFamilies()) {
-            bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
-            if (customFont) {
-                isCustomFont = true;
-            }
+            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
         }
         fontManager->AddVariationNodeNG(frameNode);
-        if (isCustomFont) {
-            auto pattern = frameNode->GetPattern<TextPattern>();
-            CHECK_NULL_VOID(pattern);
-            pattern->SetIsCustomFont(true);
-            auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
-            CHECK_NULL_VOID(modifier);
-            modifier->SetIsCustomFont(true);
-        }
     }
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsCustomFont(true);
+    auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
+    CHECK_NULL_VOID(modifier);
+    modifier->SetIsCustomFont(true);
 }
 
 void TextLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -202,6 +196,9 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
     auto frameNode = layoutWrapper->GetHostNode();
     const auto& layoutConstrain = layoutProperty->CreateChildConstraint();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto aiSpanMap = pattern->GetAISpanMap();
     for (const auto& child : spanItemChildren_) {
         if (!child) {
             continue;
@@ -236,10 +233,62 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             spanTextLength += 1;
             iterItems++;
         } else {
+            child->aiSpanMap = aiSpanMap;
             child->UpdateParagraph(frameNode, paragraph_);
+            aiSpanMap = child->aiSpanMap;
             child->position = spanTextLength + StringUtils::ToWstring(child->content).length();
             spanTextLength += StringUtils::ToWstring(child->content).length();
         }
+    }
+}
+
+void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto textCase = textStyle.GetTextCase();
+    auto builder = paragraph_;
+    auto updateTextAction = [builder, textCase](const std::string content, TextStyle textStyle) {
+        if (content.empty()) {
+            return;
+        }
+        auto displayText = content;
+        StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
+        builder->PushStyle(textStyle);
+        builder->AddText(StringUtils::Str8ToStr16(displayText));
+        builder->PopStyle();
+    };
+    auto textForAI = pattern->GetTextForAI();
+    auto wTextForAI = StringUtils::ToWstring(textForAI);
+    int32_t wTextForAILength = static_cast<int32_t>(wTextForAI.length());
+    int32_t preEnd = 0;
+    for (auto kv : pattern->GetAISpanMap()) {
+        auto aiSpan = kv.second;
+        if (aiSpan.start <= preEnd) {
+            LOGD("Error prediction");
+            continue;
+        }
+        if (preEnd < aiSpan.start) {
+            auto beforeContent = StringUtils::ToString(wTextForAI.substr(preEnd, aiSpan.start - preEnd));
+            updateTextAction(beforeContent, textStyle);
+        }
+        TextStyle aiSpanTextStyle = textStyle;
+        aiSpanTextStyle.SetTextColor(Color::BLUE);
+        aiSpanTextStyle.SetTextDecoration(TextDecoration::UNDERLINE);
+        aiSpanTextStyle.SetTextDecorationColor(Color::BLUE);
+        preEnd = aiSpan.end;
+        updateTextAction(aiSpan.content, aiSpanTextStyle);
+    }
+    if (preEnd < wTextForAILength) {
+        auto afterContent = StringUtils::ToString(wTextForAI.substr(preEnd, wTextForAILength - preEnd));
+        updateTextAction(afterContent, textStyle);
     }
 }
 
@@ -250,9 +299,17 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
     CHECK_NULL_RETURN(paragraph_, false);
     paragraph_->PushStyle(textStyle);
 
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(pattern, -1);
     if (spanItemChildren_.empty()) {
-        StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-        paragraph_->AddText(StringUtils::Str8ToStr16(content));
+        if (pattern->GetTextDetectEnable() && !pattern->GetAISpanMap().empty()) {
+            UpdateParagraphForAISpan(textStyle, layoutWrapper);
+        } else {
+            StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
+            paragraph_->AddText(StringUtils::Str8ToStr16(content));
+        }
     } else {
         UpdateParagraph(layoutWrapper);
     }
@@ -299,10 +356,15 @@ OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper) cons
     return contentOffset;
 }
 
+OffsetF TextLayoutAlgorithm::GetTextRectOffset(LayoutWrapper* layoutWrapper) const
+{
+    return GetContentOffset(layoutWrapper);
+}
+
 void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto contentOffset = GetContentOffset(layoutWrapper);
+    auto textOffset = GetTextRectOffset(layoutWrapper);
     std::vector<int32_t> placeHolderIndex;
     for (const auto& child : spanItemChildren_) {
         if (!child) {
@@ -336,7 +398,7 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             ++index;
             continue;
         }
-        geometryNode->SetMarginFrameOffset(contentOffset + OffsetF(rect.Left(), rect.Top()));
+        geometryNode->SetMarginFrameOffset(textOffset + OffsetF(rect.Left(), rect.Top()));
         child->Layout();
         ++index;
     }
@@ -348,6 +410,7 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
+    auto contentOffset = GetContentOffset(layoutWrapper);
     pattern->InitSpanImageLayout(placeHolderIndex, rectsForPlaceholders, contentOffset);
 #endif
 }

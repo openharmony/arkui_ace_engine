@@ -353,7 +353,7 @@ void UnitResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float
 
 OffsetF UnitResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
 {
-    return OffsetF(contentRect.GetX() + contentRect.Width() - nodeWidth, 0);
+    return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
 }
 
 bool UnitResponseArea::IsShowUnit()
@@ -468,6 +468,7 @@ void CleanNodeResponseArea::OnCleanNodeClicked()
 
 void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
 {
+    isShow_ = isShow;
     auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     CHECK_NULL_VOID(cleanNode_);

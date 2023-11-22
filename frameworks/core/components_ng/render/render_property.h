@@ -145,6 +145,15 @@ struct BorderProperty {
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
+struct PointLightProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LightPosition, TranslateOptions);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LightIntensity, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LightIlluminated, uint32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Bloom, float);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+};
+
 struct TransformProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformScale, VectorF);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformCenter, DimensionOffset);
@@ -159,7 +168,7 @@ struct GraphicsProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontContrast, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontSaturate, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontSepia, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontInvert, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontInvert, InvertVariant);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontColorBlend, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBlurRadius, Dimension);

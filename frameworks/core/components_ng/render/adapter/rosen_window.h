@@ -53,6 +53,8 @@ public:
 
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
 
+    void FlushFrameRate(int32_t rate) override;
+
     std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const override
     {
         return rsUIDirector_;

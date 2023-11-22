@@ -72,9 +72,8 @@ public:
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
     void RemoveIndexerPopupById(int32_t targetId);
     void RemoveIndexerPopup();
+    void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
-    void HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo);
-    void ShowPopup(int32_t targetId, const PopupInfo& popupInfo);
     void ErasePopup(int32_t targetId);
     void HideAllPopups();
     void HideCustomPopups();
@@ -102,7 +101,6 @@ public:
     void HideMenuInSubWindow(bool showPreviewAnimation = true, bool startDrag = false);
     void CleanMenuInSubWindow();
     void CleanPreviewInSubWindow();
-    void CleanPopupInSubWindow();
     void CleanMenuInSubWindowWithAnimation();
     void HideAllMenus();
 
@@ -253,6 +251,12 @@ public:
     int32_t CreateModalUIExtension(
         const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack);
     void CloseModalUIExtension(int32_t sessionId);
+
+    RefPtr<FrameNode> BindUIExtensionToMenu(
+        const RefPtr<FrameNode>& uiExtNode, const std::vector<std::string>& aiMenuOptions);
+    SizeF CaculateMenuSize(const RefPtr<FrameNode>& menuNode, const std::vector<std::string>& aiMenuOptions);
+    bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF safeArea,
+        const std::vector<std::string>& aiMenuOptions, const RefPtr<NG::FrameNode>& targetNode);
 
     void MarkDirty(PropertyChangeFlag flag);
     float GetRootHeight() const;

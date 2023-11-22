@@ -48,13 +48,81 @@ struct ArkUICommonModifierAPI {
     void (*ResetZIndex)(NodeHandle node);
     void (*SetOpacity)(NodeHandle node, double opacity);
     void (*ResetOpacity)(NodeHandle node);
+    void (*SetAlign)(NodeHandle node, int32_t align);
+    void (*ResetAlign)(NodeHandle node);
+    void (*SetBackdropBlur)(NodeHandle node, double value);
+    void (*ResetBackdropBlur)(NodeHandle node);
+    void (*SetHueRotate)(NodeHandle node, float deg);
+    void (*ResetHueRotate)(NodeHandle node);
+    void (*SetInvert)(NodeHandle node, double invert);
+    void (*ResetInvert)(NodeHandle node);
+    void (*SetSepia)(NodeHandle node, double sepia);
+    void (*ResetSepia)(NodeHandle node);
+    void (*SetSaturate)(NodeHandle node, double saturate);
+    void (*ResetSaturate)(NodeHandle node);
+    void (*SetColorBlend)(NodeHandle node, uint32_t color);
+    void (*ResetColorBlend)(NodeHandle node);
+    void (*SetGrayscale)(NodeHandle node, double grayScale);
+    void (*ResetGrayscale)(NodeHandle node);
+    void (*SetContrast)(NodeHandle node, double contrast);
+    void (*ResetContrast)(NodeHandle node);
+    void (*SetBrightness)(NodeHandle node, double brightness);
+    void (*ResetBrightness)(NodeHandle node);
+    void (*SetBlur)(NodeHandle node, double value);
+    void (*ResetBlur)(NodeHandle node);
+    void (*SetLinearGradient)(NodeHandle node, const double* values, int32_t valuesLength,
+        const double* colors, int32_t colorsLength);
+    void (*ResetLinearGradient)(NodeHandle node);
+};
+
+struct ArkUITextModifierAPI {
+    void (*SetFontWeight)(NodeHandle node, const char* weight);
+    void (*ResetFontWeight)(NodeHandle node);
+    void (*SetFontStyle)(NodeHandle node, uint32_t fontStyle);
+    void (*ResetFontStyle)(NodeHandle node);
+    void (*SetTextAlign)(NodeHandle node, uint32_t testAlign);
+    void (*ResetTextAlign)(NodeHandle node);
+    void (*SetFontColor)(NodeHandle node, uint32_t color);
+    void (*ResetFontColor)(NodeHandle node);
+    void (*SetFontSize)(NodeHandle node, double value, int unit);
+    void (*ResetFontSize)(NodeHandle node);
+};
+
+struct ArkUIButtonModifierAPI {
+    void (*SetButtonType)(NodeHandle node, int type);
+    void (*ResetButtonType)(NodeHandle node);
+    void (*SetButtonStateEffect)(NodeHandle node, bool stateEffect);
+    void (*ResetButtonStateEffect)(NodeHandle node);
+    void (*SetButtonFontColor)(NodeHandle node, uint32_t fontColor);
+    void (*ResetButtonFontColor)(NodeHandle node);
+    void (*SetButtonFontSize)(NodeHandle node, double fontSizeValue, int fontSizeUnit);
+    void (*ResetButtonFontSize)(NodeHandle node);
+    void (*SetButtonFontWeight)(NodeHandle node, const char* fontWeight);
+    void (*ResetButtonFontWeight)(NodeHandle node);
+    void (*SetButtonFontStyle)(NodeHandle node, int32_t fontStyle);
+    void (*ResetButtonFontStyle)(NodeHandle node);
+    void (*SetButtonFontFamily)(NodeHandle node, const char* fontFamily);
+    void (*ResetButtonFontFamily)(NodeHandle node);
+    void (*SetButtonLabelStyle)(NodeHandle node, const char* fontFamily, const double* valueArray,
+        const double* dimensionValueArray, const int* dimensionUnitArray);
+    void (*ResetButtonLabelStyle)(NodeHandle node);
+};
+
+struct ArkUIToggleModifierAPI {
+    void (*SetToggleSelectedColor)(NodeHandle node, uint32_t selectedColor);
+    void (*ResetToggleSelectedColor)(NodeHandle node);
+    void (*SetToggleSwitchPointColor)(NodeHandle node, uint32_t switchPointColor);
+    void (*ResetToggleSwitchPointColor)(NodeHandle node);
 };
 
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
+    ArkUITextModifierAPI (*GetTextModifier)();
+    ArkUIButtonModifierAPI (*GetButtonModifier)();
+    ArkUIToggleModifierAPI (*GetToggleModifier)();
 };
 
-ArkUINodeAPI* GetArkUIInternalNodeAPI();
+ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H

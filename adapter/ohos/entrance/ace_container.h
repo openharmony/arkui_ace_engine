@@ -32,12 +32,17 @@
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
+#include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/pipeline/pipeline_context.h"
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
+}
+
+namespace OHOS::Ace {
+class FontManager;
 }
 
 namespace OHOS::Ace::Platform {
@@ -50,10 +55,11 @@ struct ParsedConfig {
     std::string languageTag;
     std::string direction;
     std::string densitydpi;
+    std::string themeTag;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
-                 densitydpi.empty());
+                 densitydpi.empty() && themeTag.empty());
     }
 };
 
@@ -251,6 +257,10 @@ public:
 
     void SetLocalStorage(NativeReference* storage, NativeReference* context);
 
+    bool ParseThemeConfig(const std::string& themeConfig);
+
+    void CheckAndSetFontFamily();
+
     void OnFinish()
     {
         if (platformEventCallback_) {
@@ -315,6 +325,16 @@ public:
         if (pipelineContext_) {
             pipelineContext_->SetFocusWindowId(focusWindowId);
         }
+    }
+
+    void SetIsTransparentForm(bool isTransparentForm)
+    {
+        isTransparentForm_ = isTransparentForm;
+    }
+
+    bool IsTransparentForm() const
+    {
+        return isTransparentForm_;
     }
 
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
@@ -481,6 +501,9 @@ private:
     void InitializeCallback();
     void InitializeTask();
     void InitWindowCallback();
+    bool IsFontFileExistInPath(std::string path);
+    std::string GetFontFamilyName(std::string path);
+    bool endsWith(std::string str, std::string suffix);
 
     void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
         uint32_t windowId, UIEnvCallback callback = nullptr);
@@ -522,6 +545,7 @@ private:
     bool isFormRender_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
+    bool isTransparentForm_ = false;
 
     mutable std::mutex frontendMutex_;
     mutable std::mutex pipelineMutex_;

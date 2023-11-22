@@ -102,6 +102,8 @@ void ConvertMouseEvent(const std::vector<uint8_t>& data, MouseEvent& events)
     events.scrollX = mouseActionData->scrollDeltaX;
     events.scrollY = mouseActionData->scrollDeltaY;
     events.scrollZ = mouseActionData->scrollDeltaZ;
+    events.screenX = mouseActionData->physicalX;
+    events.screenY = mouseActionData->physicalY;
     switch (mouseActionData->action) {
         case AceMouseData::Action::PRESS:
             events.action = MouseAction::PRESS;
@@ -148,6 +150,7 @@ void ConvertMouseEvent(const std::vector<uint8_t>& data, MouseEvent& events)
     events.pressedButtons = static_cast<int32_t>(mouseActionData->pressedButtons);
     events.time = time;
     events.deviceId = mouseActionData->deviceId;
+    events.sourceType = static_cast<SourceType>(mouseActionData->deviceType);
 }
 
 } // namespace OHOS::Ace

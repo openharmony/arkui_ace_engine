@@ -22,6 +22,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/rect_t.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/pattern/grid/grid_layout_options.h"
 
 namespace OHOS::Ace::NG {
 
@@ -109,6 +110,8 @@ struct GridLayoutInfo {
 
     float GetContentOffset(float mainGap) const;
     float GetContentHeight(float mainGap) const;
+    float GetContentOffset(const GridLayoutOptions& options, float mainGap) const;
+    float GetContentHeight(const GridLayoutOptions& options, float mainGap) const;
 
     Axis axis_ = Axis::VERTICAL;
 
@@ -116,6 +119,7 @@ struct GridLayoutInfo {
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
     float totalHeightOfItemsInView_ = 0.0f;
+    float contentEndPadding_ = 0.0f;
 
     std::optional<int32_t> lastCrossCount_;
     // index of first and last GridItem in viewport

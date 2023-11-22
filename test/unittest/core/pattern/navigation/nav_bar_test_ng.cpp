@@ -881,6 +881,8 @@ HWTEST_F(NavBarTestNg, NavBarPattern006, TestSize.Level1)
     SystemProperties::SetDeviceType(DeviceType::TABLET);
     navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
     SystemProperties::SetDeviceType(DeviceType::PHONE);
+
+    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**

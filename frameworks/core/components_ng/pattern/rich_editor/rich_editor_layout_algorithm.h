@@ -39,6 +39,16 @@ public:
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
+    const RectF& GetTextRect()
+    {
+        return richTextRect_;
+    }
+
+    OffsetF GetTextRectOffset(LayoutWrapper* layoutWrapper) const override
+    {
+        return richTextRect_.GetOffset();
+    }
+
 private:
     void GetPlaceholderRects(std::vector<RectF>& rectF) override;
     int32_t GetPreviousLength() const override;
@@ -51,6 +61,7 @@ private:
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     ParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
+    RectF richTextRect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);
 };

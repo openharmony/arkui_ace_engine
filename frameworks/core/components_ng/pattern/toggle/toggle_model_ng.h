@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,9 @@ public:
     void OnChangeEvent(ChangeEvent&& onChangeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
+    static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
+    static void SetSwitchPointColor(FrameNode* frameNode, const Color& switchPointColor);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
 
 private:
     static void CreateCheckbox(int32_t nodeId);
@@ -41,6 +44,7 @@ private:
     static void CreateButton(int32_t nodeId);
     static void AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index);
     static int32_t RemoveNode(const RefPtr<FrameNode>& childFrameNode, int32_t nodeId);
+    static void SetSwitchSelected(const RefPtr<FrameNode>& childFrameNode, bool isOn);
 };
 
 } // namespace OHOS::Ace::NG

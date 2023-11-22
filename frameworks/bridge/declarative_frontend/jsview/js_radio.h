@@ -35,6 +35,7 @@ public:
     static void JsSize(const JSCallbackInfo& args);
     static void JsOnClick(const JSCallbackInfo& args);
     static void OnChange(const JSCallbackInfo& info);
+    static void JsHoverEffect(const JSCallbackInfo& info);
     static NG::PaddingPropertyF GetOldPadding(const JSCallbackInfo& info);
     static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);
     static NG::PaddingProperty GetPadding(const std::optional<CalcDimension>& top,

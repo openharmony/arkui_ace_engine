@@ -483,6 +483,8 @@ public:
         }
     }
 
+    static int32_t GenerateAccessibilityId();
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {

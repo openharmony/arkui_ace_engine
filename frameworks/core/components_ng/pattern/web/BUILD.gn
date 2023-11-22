@@ -25,6 +25,7 @@ if (is_ohos_standard_system) {
       "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
       "//foundation/multimedia/image_framework/interfaces/innerkits/include",
       "//foundation/window/window_manager/interfaces/innerkits",
+      "//foundation/window/window_manager/interfaces/innerkits/dm",
     ]
   }
 }

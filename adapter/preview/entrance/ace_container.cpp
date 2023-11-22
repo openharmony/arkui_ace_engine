@@ -31,11 +31,11 @@
 #include "core/common/rosen/rosen_asset_manager.h"
 #endif
 
-#include "jsapp/rich/external/StageContext.h"
 #include "native_engine/native_engine.h"
 #include "previewer/include/window.h"
 
 #include "adapter/preview/entrance/ace_application_info.h"
+#include "adapter/preview/entrance/ace_preview_helper.h"
 #include "adapter/preview/osal/stage_card_parser.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -261,18 +261,7 @@ void AceContainer::SetHspBufferTrackerCallback()
             ContainerScope scope(instanceId);
             auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(weak.Upgrade());
             CHECK_NULL_VOID(jsEngine);
-            jsEngine->SetHspBufferTrackerCallback(
-                [](const std::string& inputPath, uint8_t** buff, size_t* buffSize) -> bool {
-                    if (!buff || !buffSize || inputPath.empty()) {
-                        LOGI("The pointer of buff or buffSize is null or inputPath is empty.");
-                        return false;
-                    }
-                    auto data = OHOS::Ide::StageContext::GetInstance().GetModuleBuffer(inputPath);
-                    CHECK_NULL_RETURN(data, false);
-                    *buff = data->data();
-                    *buffSize = data->size();
-                    return true;
-                });
+            jsEngine->SetHspBufferTrackerCallback(AcePreviewHelper::GetInstance()->GetCallbackOfHspBufferTracker());
         },
         TaskExecutor::TaskType::JS);
 }

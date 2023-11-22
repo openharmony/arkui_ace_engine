@@ -494,6 +494,7 @@ const char TIME_PICKER_DIALOG_ETS_TAG[] = "TimePickerDialog";
 // web
 const char WEB_COMPONENT_TAG[] = "WebComponent";
 const char WEB_ETS_TAG[] = "Web";
+const char WEB_CORE_TAG[] = "WebCore";
 
 // richText
 const char RICH_TEXT_COMPONENT_TAG[] = "RichTextComponent";

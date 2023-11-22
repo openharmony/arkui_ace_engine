@@ -34,6 +34,7 @@ var ColoringStrategy;
 (function (ColoringStrategy) {
   ColoringStrategy["INVERT"] = "invert";
   ColoringStrategy["AVERAGE"] = "average";
+  ColoringStrategy["PRIMARY"] = "primary";
 })(ColoringStrategy || (ColoringStrategy = {}));
 
 var TextInputStyle;
@@ -581,7 +582,7 @@ var FormDimension;
   FormDimension["Dimension_2_4"] = 3;
   FormDimension["Dimension_4_4"] = 4;
   FormDimension["Dimension_2_1"] = 5;
-  FormDimension["Dimension_1_1"] = 6;
+  FormDimension["DIMENSION_1_1"] = 6;
 })(FormDimension || (FormDimension = {}));
 
 var TransitionType;
@@ -869,6 +870,13 @@ var ResponseType;
   ResponseType[ResponseType["LongPress"] = 1] = "LongPress";
 })(ResponseType || (ResponseType = {}));
 
+var RichEditorResponseType;
+(function (RichEditorResponseType) {
+  RichEditorResponseType[RichEditorResponseType["RIGHT_CLICK"] = 0] = "RIGHT_CLICK";
+  RichEditorResponseType[RichEditorResponseType["LONG_PRESS"] = 1] = "LONG_PRESS";
+  RichEditorResponseType[RichEditorResponseType["SELECT"] = 2] = "SELECT";
+})(RichEditorResponseType || (RichEditorResponseType = {}));
+
 var MenuPreviewMode;
 (function (MenuPreviewMode) {
   MenuPreviewMode[MenuPreviewMode["NONE"] = 0] = "NONE";
@@ -1095,6 +1103,11 @@ var BlurStyle;
   BlurStyle[BlurStyle["BACKGROUND_REGULAR"] = 5] = "BACKGROUND_REGULAR";
   BlurStyle[BlurStyle["BACKGROUND_THICK"] = 6] = "BACKGROUND_THICK";
   BlurStyle[BlurStyle["BACKGROUND_ULTRA_THICK"] = 7] = "BACKGROUND_ULTRA_THICK";
+  BlurStyle[BlurStyle["COMPONENT_ULTRA_THIN"] = 8] = "COMPONENT_ULTRA_THIN";
+  BlurStyle[BlurStyle["COMPONENT_THIN"] = 9] = "COMPONENT_THIN";
+  BlurStyle[BlurStyle["COMPONENT_REGULAR"] = 10] = "COMPONENT_REGULAR";
+  BlurStyle[BlurStyle["COMPONENT_THICK"] = 11] = "COMPONENT_THICK";
+  BlurStyle[BlurStyle["COMPONENT_ULTRA_THICK"] = 12] = "COMPONENT_ULTRA_THICK";
   BlurStyle[BlurStyle["NONE"] = 0] = "NONE";
 })(BlurStyle || (BlurStyle = {}));
 
@@ -1252,6 +1265,27 @@ var FunctionKey;
   FunctionKey[FunctionKey["F11"] = 11] = "F11";
   FunctionKey[FunctionKey["F12"] = 12] = "F12";
 })(FunctionKey || (FunctionKey = {}));
+
+var GestureJudgeResult;
+(function (GestureJudgeResult) {
+  GestureJudgeResult[GestureJudgeResult["CONTINUE"] = 0] = "CONTINUE";
+  GestureJudgeResult[GestureJudgeResult["REJECT"] = 1] = "REJECT";
+})(GestureJudgeResult || (GestureJudgeResult = {}));
+
+var GestureControl;
+(function (GestureControl) {
+    let GestureType;
+    (function (GestureType) {
+        GestureType[GestureType["TAP_GESTURE"] = 0] = "TAP_GESTURE";
+        GestureType[GestureType["LONG_PRESS_GESTURE"] = 1] = "LONG_PRESS_GESTURE";
+        GestureType[GestureType["PAN_GESTURE"] = 2] = "PAN_GESTURE";
+        GestureType[GestureType["PINCH_GESTURE"] = 3] = "PINCH_GESTURE";
+        GestureType[GestureType["SWIPE_GESTURE"] = 4] = "SWIPE_GESTURE";
+        GestureType[GestureType["ROTATION_GESTURE"] = 5] = "ROTATION_GESTURE";
+        GestureType[GestureType["DRAG"] = 6] = "DRAG";
+        GestureType[GestureType["CLICK"] = 7] = "CLICK";
+    })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
+})(GestureControl || (GestureControl = {}));
 
 class SubTabBarStyle {
   constructor(content) {
@@ -1868,6 +1902,16 @@ var NestedScrollMode;
   NestedScrollMode[NestedScrollMode["PARALLEL"] = 3] = "PARALLEL";
 })(NestedScrollMode || (NestedScrollMode = {}));
 
+var IlluminatedType;
+(function (IlluminatedType) {
+  IlluminatedType[IlluminatedType["NONE"] = 0] = "NONE";
+  IlluminatedType[IlluminatedType["BORDER"] = 1] = "BORDER";
+  IlluminatedType[IlluminatedType["CONTENT"] = 2] = "CONTENT";
+  IlluminatedType[IlluminatedType["BORDER_CONTENT"] = 3] = "BORDER_CONTENT";
+  IlluminatedType[IlluminatedType["BLOOM_BORDER"] = 4] = "BLOOM_BORDER";
+  IlluminatedType[IlluminatedType["BLOOM_BORDER_CONTENT"] = 5] = "BLOOM_BORDER_CONTENT";
+})(IlluminatedType || (IlluminatedType = {}));
+
 var ScrollAlign;
 (function (ScrollAlign) {
   ScrollAlign[ScrollAlign["START"] = 0] = "START";
@@ -2018,3 +2062,9 @@ var WebLayoutMode;
   WebLayoutMode[WebLayoutMode["NONE"] = 0] = "NONE";
   WebLayoutMode[WebLayoutMode["FIT_CONTENT"] = 1] = "FIT_CONTENT";
 })(WebLayoutMode || (WebLayoutMode = {}));
+
+var OptionWidthMode;
+(function (OptionWidthMode) {
+  OptionWidthMode["FIT_CONTENT"] = "fit_content";
+  OptionWidthMode["FIT_TRIGGER"] = "fit_trigger";
+})(OptionWidthMode || (OptionWidthMode = {}));

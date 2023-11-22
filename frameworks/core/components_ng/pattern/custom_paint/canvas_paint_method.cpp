@@ -246,7 +246,7 @@ void CanvasPaintMethod::DrawImage(
     RSRect bounds = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
     rosen::SaveLayerOps layerOps(&bounds, &imageBrush_);
     switch (canvasImage.flag) {
-        case 0:
+        case 0: {
             if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
                 rsCanvas_->AttachBrush(imageBrush_);
                 rsCanvas_->DrawImage(*image, canvasImage.dx, canvasImage.dy, sampleOptions_);
@@ -260,6 +260,7 @@ void CanvasPaintMethod::DrawImage(
                 rsCanvas_->Restore();
             }
             break;
+        }
         case 1: {
             RSRect rect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
                 canvasImage.dHeight + canvasImage.dy);
@@ -276,7 +277,6 @@ void CanvasPaintMethod::DrawImage(
                 rsCanvas_->DetachBrush();
                 rsCanvas_->Restore();
             }
-            }
             break;
         }
         case 2: {
@@ -292,7 +292,7 @@ void CanvasPaintMethod::DrawImage(
             } else {
                 InitPaintBlend(imageBrush_);
                 rsCanvas_->SaveLayer(layerOps);
-                rsCanvas_->AttachBrush(&imageBrush_);
+                rsCanvas_->AttachBrush(imageBrush_);
                 rsCanvas_->DrawImageRect(*image, srcRect, dstRect, sampleOptions_);
                 rsCanvas_->DetachBrush();
                 rsCanvas_->Restore();
@@ -441,19 +441,16 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
         currentBitmap.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kStrict_SrcRectConstraint);
     pixels = tempCache.pixmap().addr8();
 #else
-    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
-    RSBitmap tempCache;
-    tempCache.Build(width, height, format);
-
     RSBitmap currentBitmap;
-    CHECK_NULL_RETURN(rsRecordingCanvas_, nullptr);
-    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
-    bool res = renderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
-    if (!res || !currentBitmap.IsValid()) {
+    if (!DrawBitmap(renderContext, currentBitmap)) {
         return nullptr;
     }
 
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    RSBitmap tempCache;
+    tempCache.Build(dirtyWidth, dirtyHeight, format);
     int32_t size = dirtyWidth * dirtyHeight;
+
     RSCanvas tempCanvas;
     tempCanvas.Bind(tempCache);
     auto srcRect =
@@ -528,26 +525,27 @@ void CanvasPaintMethod::GetImageData(
         drawCmdList->Playback(canvas, &rect);
     }
 #else
-    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
-    RSBitmap tempCache;
-    tempCache.Build(dirtyWidth * viewScale, dirtyHeight * viewScale, format);
-
-    RSBitmap currentBitmap;
     CHECK_NULL_VOID(rsRecordingCanvas_);
     auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
-    bool res = rosenRenderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
-    if (!res || !currentBitmap.IsValid()) {
-        return;
+    auto rect = RSRect(scaledLeft, scaledTop,
+        dirtyWidth * viewScale + scaledLeft, dirtyHeight * viewScale + scaledTop);
+    auto pixelMap = imageData->pixelMap;
+    CHECK_NULL_VOID(pixelMap);
+    auto sharedPixelMap = pixelMap->GetPixelMapSharedPtr();
+    auto ret = rosenRenderContext->GetPixelMap(sharedPixelMap, drawCmdList, &rect);
+    if (!ret) {
+        if (!drawCmdList || drawCmdList->IsEmpty()) {
+            return;
+        }
+        RSBitmap bitmap;
+        RSImageInfo info = RSImageInfo(rect.GetWidth(), rect.GetHeight(),
+            RSColorType::COLORTYPE_BRGBA_8888, RSAlphaType::ALPHATYPE_PREMUL);
+        bitmap.InstallPixels(info, pixelMap->GetWritablePixels(), pixelMap->GetRowBytes());
+        RSCanvas canvas;
+        canvas.Bind(bitmap);
+        canvas.Translate(-rect.GetLeft(), -rect.GetTop());
+        drawCmdList->Playback(canvas, &rect);
     }
-
-    RSCanvas tempCanvas;
-    tempCanvas.Bind(tempCache);
-    auto srcRect =
-        RSRect(scaledLeft, scaledTop, dirtyWidth * viewScale + scaledLeft, dirtyHeight * viewScale + scaledTop);
-    auto dstRect = RSRect(0.0, 0.0, dirtyWidth, dirtyHeight);
-    RSImage rsImage;
-    rsImage.BuildFromBitmap(currentBitmap);
-    tempCanvas.DrawImageRect(rsImage, srcRect, dstRect, RSSamplingOptions());
 #endif
 }
 
@@ -1028,13 +1026,13 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         if (globalState_.HasGlobalAlpha()) {
             if (txtStyle.has_foreground_brush) {
                 txtStyle.foreground_brush.SetColor(fillState_.GetColor().GetValue());
-                txtStyle.foreground_brush.SetAlphaf(globalState_.GetAlpha()); // set alpha after color
+                txtStyle.foreground_brush.SetAlphaF(globalState_.GetAlpha()); // set alpha after color
             } else {
                 RSBrush brush;
                 RSSamplingOptions options;
                 InitImagePaint(nullptr, &brush, options);
                 brush.SetColor(fillState_.GetColor().GetValue());
-                brush.SetAlphaf(globalState_.GetAlpha()); // set alpha after color
+                brush.SetAlphaF(globalState_.GetAlpha()); // set alpha after color
                 InitPaintBlend(brush);
                 txtStyle.foreground_brush = brush;
                 txtStyle.has_foreground_brush = true;
@@ -1056,7 +1054,7 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         if (hasShadow) {
             pen.SetColor(shadow_.GetColor().GetValue());
             RSFilter filter;
-            filter.SetMaskFilter(RSRecordingMaskFilter::CreateBlurMaskFilter(SkBlurType::NORMAL,
+            filter.SetMaskFilter(RSRecordingMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL,
                 RosenDecorationPainter::ConvertRadiusToSigma(shadow_.GetBlurRadius())));
             pen.SetFilter(filter);
         }
@@ -1121,12 +1119,12 @@ std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContex
     double width = lastLayoutSize_.Width();
     double height = lastLayoutSize_.Height();
 
+#ifndef USE_ROSEN_DRAWING
     auto imageInfo = SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType);
     SkBitmap tempCache;
     tempCache.allocPixels(imageInfo);
 
-#ifndef USE_ROSEN_DRAWING
     SkBitmap currentBitmap;
     if (!DrawBitmap(renderContext, currentBitmap)) {
         return UNSUPPORTED;
@@ -1199,6 +1197,30 @@ bool CanvasPaintMethod::DrawBitmap(RefPtr<RosenRenderContext> renderContext, SkB
     // tryAllocPixels is more safe than allocPixels
     currentBitmap.allocPixels(imageInfo);
     SkCanvas currentCanvas(currentBitmap);
+    drawCmdList->Playback(currentCanvas);
+    return true;
+}
+#else
+bool CanvasPaintMethod::DrawBitmap(RefPtr<RosenRenderContext> renderContext, RSBitmap& currentBitmap)
+{
+    CHECK_NULL_RETURN(rsRecordingCanvas_, false);
+    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
+    bool res = renderContext->GetBitmap(currentBitmap, drawCmdList);
+    if (res) {
+        return true;
+    }
+    if (!drawCmdList) {
+        return false;
+    }
+    if (drawCmdList->IsEmpty()) {
+        return false;
+    }
+    currentBitmap.Free();
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    currentBitmap.Build(lastLayoutSize_.Width(), lastLayoutSize_.Height(), format);
+
+    RSCanvas currentCanvas;
+    currentCanvas.Bind(currentBitmap);
     drawCmdList->Playback(currentCanvas);
     return true;
 }

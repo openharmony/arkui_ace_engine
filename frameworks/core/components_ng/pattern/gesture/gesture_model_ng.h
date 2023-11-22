@@ -27,6 +27,7 @@ public:
     void Pop() override;
     void SetOnGestureEvent(const GestureEventNoParameter& gestureEventNoParameter) override;
     void SetOnActionFunc(const GestureEventFunc& gestureEventFunc, const Ace::GestureEventAction& action) override;
+    void SetTag(const std::string& tag) override;
 };
 
 class ACE_EXPORT TapGestureModelNG : public OHOS::Ace::TapGestureModel {

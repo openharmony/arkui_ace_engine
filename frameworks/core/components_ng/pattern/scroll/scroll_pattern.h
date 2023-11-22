@@ -109,8 +109,7 @@ public:
 
     float GetTotalOffset() const override
     {
-        return GetScrollSource() == SCROLL_FROM_JUMP || GetScrollSource() == SCROLL_FROM_BAR
-                                    ? -std::clamp(currentOffset_, -scrollableDistance_, 0.0f) : -currentOffset_;
+        return -currentOffset_;
     }
 
     void ResetPosition();
@@ -189,6 +188,8 @@ public:
     void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign);
     void CaleSnapOffsetsByPaginations();
 
+    float GetSelectScrollWidth();
+
     bool IsSnapToInterval() const
     {
         return snapPaginations_.empty();
@@ -263,6 +264,26 @@ public:
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+	
+    void SetIsWidthModifiedBySelect(bool isModified)
+    {
+        isWidthModifiedBySelect_ = isModified;
+    }
+    
+    bool IsWidthModifiedBySelect() const
+    {
+        return isWidthModifiedBySelect_;
+    }
+    
+    void SetIsSelectScroll(bool isSelect)
+    {
+        isSelectScroll_ = isSelect;
+    }
+    
+    bool IsSelectScroll() const
+    {
+        return isSelectScroll_;
+    }
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
@@ -309,6 +330,9 @@ private:
     std::pair<bool, bool> enableSnapToSide_ = { true, true };
     Dimension intervalSize_;
     bool scrollSnapUpdate_ = false;
+    
+    bool isWidthModifiedBySelect_ = false;
+    bool isSelectScroll_ = false;
 };
 
 } // namespace OHOS::Ace::NG

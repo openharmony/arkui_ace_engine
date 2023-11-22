@@ -249,6 +249,14 @@ void GridPattern::FireOnScrollStart()
     if (GetScrollAbort()) {
         return;
     }
+    if (scrollStop_) {
+        // onScrollStart triggers immediately on gesture dragStart, but onScrollStop marks scrollStop_ to true on
+        // gesture dragEnd, and consumes it/fires onScrollStop after layout. When the user quickly swipes twice, the
+        // second onScrollStart can trigger before the first onScrollEnd. In this case, we let the two events annihilate
+        // each other and fire neither.
+        scrollStop_ = false;
+        return;
+    }
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
         scrollBar->PlayScrollBarAppearAnimation();
@@ -298,7 +306,7 @@ void GridPattern::CheckRestartSpring()
     edgeEffect->ProcessScrollOver(0);
 }
 
-float GridPattern::GetMainGap()
+float GridPattern::GetMainGap() const
 {
     float mainGap = 0.0;
     auto host = GetHost();
@@ -414,6 +422,9 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
                         (gridLayoutInfo.endIndex_ != gridLayoutInfo_.endIndex_);
     bool offsetEnd = gridLayoutInfo_.offsetEnd_;
     gridLayoutInfo_ = gridLayoutInfo;
+    if (gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_)) {
+        gridLayoutInfo_.reachStart_ = true;
+    }
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
     currentHeight_ = EstimateHeight();
     if (!offsetEnd && gridLayoutInfo_.offsetEnd_) {
@@ -1375,31 +1386,7 @@ float GridPattern::EstimateHeight() const
         return info.GetContentOffset(mainGap);
     }
 
-    float heightSum = 0;
-    int32_t itemCount = 0;
-    float height = 0;
-    for (const auto& item : info.lineHeightMap_) {
-        auto line = info.gridMatrix_.find(item.first);
-        if (line == info.gridMatrix_.end()) {
-            continue;
-        }
-        if (line->second.empty()) {
-            continue;
-        }
-        auto lineStart = line->second.begin()->second;
-        auto lineEnd = line->second.rbegin()->second;
-        itemCount += (lineEnd - lineStart + 1);
-        heightSum += item.second + mainGap;
-    }
-    if (itemCount == 0) {
-        return 0;
-    }
-    auto averageHeight = heightSum / itemCount;
-    height = info.startIndex_ * averageHeight - info.currentOffset_;
-    if (itemCount >= (info.childrenCount_ - 1)) {
-        height = info.GetStartLineOffset(mainGap);
-    }
-    return height;
+    return info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
 }
 
 float GridPattern::GetAverageHeight() const
@@ -1472,26 +1459,8 @@ void GridPattern::UpdateScrollBarOffset()
             offset = gridLayoutInfo_.GetContentOffset(mainGap);
             estimatedHeight = gridLayoutInfo_.GetContentHeight(mainGap);
         } else {
-            float heightSum = 0;
-            int32_t itemCount = 0;
-            for (const auto& item : info.lineHeightMap_) {
-                auto line = info.gridMatrix_.find(item.first);
-                if (line == info.gridMatrix_.end() || line->second.empty()) {
-                    continue;
-                }
-                auto lineStart = line->second.begin()->second;
-                auto lineEnd = line->second.rbegin()->second;
-                itemCount += (lineEnd - lineStart + 1);
-                heightSum += item.second + mainGap;
-            }
-            auto averageHeight = itemCount == 0 ? 0.0 : heightSum / itemCount;
-            offset = info.startIndex_ * averageHeight - info.currentOffset_;
-            if (itemCount >= (info.childrenCount_ - 1)) {
-                estimatedHeight = heightSum - mainGap;
-                offset = info.GetStartLineOffset(mainGap);
-            } else {
-                estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight;
-            }
+            offset = info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
+            estimatedHeight = info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), mainGap);
         }
     }
     if (info.startMainLineIndex_ != 0 && info.startIndex_ == 0) {
@@ -1592,6 +1561,18 @@ bool GridPattern::IsOutOfBoundary(bool useCurrentDelta)
     return (outOfStart || outOfEnd) && scrollable;
 }
 
+float GridPattern::GetEndOffset()
+{
+    float contentHeight = gridLayoutInfo_.lastMainSize_ - gridLayoutInfo_.contentEndPadding_;
+    float mainGap = GetMainGap();
+    if (GetAlwaysEnabled() &&
+        GreatNotEqual(contentHeight, gridLayoutInfo_.GetTotalLineHeight(mainGap))) {
+        return gridLayoutInfo_.GetTotalLineHeight(mainGap) -
+                gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+    }
+    return contentHeight - gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+}
+
 void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
 {
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
@@ -1602,23 +1583,13 @@ void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto grid = weak.Upgrade();
         CHECK_NULL_RETURN(grid, 0.0);
-        if (grid->GetAlwaysEnabled() &&
-            GreatNotEqual(grid->GetMainContentSize(), grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()))) {
-            return grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()) -
-                   grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
-        }
-        return grid->GetMainContentSize() - grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
+        return grid->GetEndOffset();
     });
     scrollEffect->SetTrailingCallback([]() -> double { return 0.0; });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto grid = weak.Upgrade();
         CHECK_NULL_RETURN(grid, 0.0);
-        if (grid->GetAlwaysEnabled() &&
-            GreatNotEqual(grid->GetMainContentSize(), grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()))) {
-            return grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()) -
-                   grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
-        }
-        return grid->GetMainContentSize() - grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
+        return grid->GetEndOffset();
     });
     scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
 }

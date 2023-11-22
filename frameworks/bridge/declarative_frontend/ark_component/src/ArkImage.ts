@@ -1,4 +1,5 @@
-//@ts-nocheck
+
+/// <reference path="./import.ts" />
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
     alt(value: any): ImageAttribute {
         throw new Error("Method not implemented.");
@@ -42,9 +43,6 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
     onComplete(callback: (event?: { width: number; height: number; componentWidth: number; componentHeight: number; loadingStatus: number; contentWidth: number; contentHeight: number; contentOffsetX: number; contentOffsetY: number; } | undefined) => void): ImageAttribute {
         throw new Error("Method not implemented.");
     }
-    onError(callback: (event: { componentWidth: number; componentHeight: number; }) => void): ImageAttribute {
-        throw new Error("Method not implemented.");
-    }
     onError(callback: (event: { componentWidth: number; componentHeight: number; message: string; }) => void): ImageAttribute {
         throw new Error("Method not implemented.");
     }
@@ -52,10 +50,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
         throw new Error("Method not implemented.");
     }
 }
-
+// @ts-ignore
 globalThis.Image.attributeModifier = function(modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
     var component = this.createOrGetNode(elmtId, () =>
     {
         return new ArkImageComponent(nativeNode);

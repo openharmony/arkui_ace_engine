@@ -79,6 +79,11 @@ public:
         return disabledAlpha_;
     }
 
+    const Dimension& GetScrollbarMinHeight()
+    {
+        return scrollbarMinHeight_;
+    }
+
 protected:
     RichEditorTheme() = default;
 
@@ -86,6 +91,7 @@ private:
     float disabledAlpha_ = 0.0f;
     bool draggable_ = false;
     Dimension defaultCaretHeight_ = 18.5_vp;
+    Dimension scrollbarMinHeight_ = 4.0_vp;
 };
 } // namespace OHOS::Ace::NG
 

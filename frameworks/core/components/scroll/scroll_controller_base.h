@@ -70,6 +70,9 @@ public:
     virtual void JumpTo(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::NONE,
         int32_t source = 3) {}
 
+    virtual void JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
+        ScrollAlign align = ScrollAlign::NONE, int32_t source = 3) {} // 3 is SCROLL_FROM_JUMP
+
     virtual Axis GetScrollDirection() const
     {
         return Axis::NONE;

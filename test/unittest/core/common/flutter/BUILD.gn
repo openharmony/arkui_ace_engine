@@ -22,6 +22,7 @@ ohos_unittest("flutter_test") {
     "$ace_root/frameworks/core/common/flutter/flutter_task_executor.cpp",
     "$ace_root/frameworks/core/common/flutter/flutter_thread_model.cpp",
     "$ace_root/frameworks/core/common/flutter/flutter_window.cpp",
+    "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/plugin/file_asset_provider.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/unittest/core/common/flutter/flutter_test.cpp",

@@ -162,8 +162,6 @@ For the purpose of logging the following commands are accepted as input:
     * Prints a list of components, namely JS classes such as `Column`, `TapGesture` etc. and their ID-s owned by the view. Accepts `-viewId` argument. Default print is for root view if not specified otherwise.
 - `-dirtyElementIds`
     * Prints a list of dependent elmtIds that need partial update in next re-render. Accepts `-viewId` argument. Default print is for root view if not specified otherwise.
-- `-uiNodeRegister`
-    * Prints a global list of elements whose `UINode` has been deleted and ned to be unregistered from state management. Accepts no flags.
 
 The application must be running and visible in order to receive commands. The `hidumper` service delivers the commands through the `WindowManagerService`. and the window ID is used to target a specific application.
 
@@ -200,4 +198,3 @@ All the following commands concern a hypothetical window with ID 11 and view wit
 |Dump view hierarchy only for the target view | `hidumper -s WindowManagerService -a '-w 11 -jsdump -viewHierarchy -viewId=42'`|
 |Dump the list of all registered element ids | `hidumper -s WindowManagerService -a '-w 11 -jsdump -registeredElementIds -viewId=42'`|
 |Dump the list of all dirty element ids | `hidumper -s WindowManagerService -a '-w 11 -jsdump -dirtyElementIds -viewId=42'`|
-|Dump the list of all dirty element ids | `hidumper -s uiNodeRegister -a '-w 11 -jsdump -uiNodeRegister'`|

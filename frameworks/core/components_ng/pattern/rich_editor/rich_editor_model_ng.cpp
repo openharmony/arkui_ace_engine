@@ -41,10 +41,15 @@ void RichEditorModelNG::Create()
     richEditorPattern->InitSurfacePositionChangedCallback();
     richEditorPattern->ClearSelectionMenu();
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto draggable = pipeline->GetDraggable<RichEditorTheme>();
-    SetDraggable(draggable);
+    if (frameNode->IsFirstBuilding()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto draggable = pipeline->GetDraggable<RichEditorTheme>();
+        SetDraggable(draggable);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetTextDraggable(true);
+    }
 }
 
 void RichEditorModelNG::SetDraggable(bool draggable)
@@ -118,8 +123,8 @@ void RichEditorModelNG::SetCopyOption(CopyOptions& copyOptions)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOptions);
 }
 
-void RichEditorModelNG::BindSelectionMenu(
-    RichEditorType& editorType, ResponseType& type, std::function<void()>& buildFunc, SelectMenuParam& menuParam)
+void RichEditorModelNG::BindSelectionMenu(RichEditorType& editorType, RichEditorResponseType& type,
+    std::function<void()>& buildFunc, SelectMenuParam& menuParam)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

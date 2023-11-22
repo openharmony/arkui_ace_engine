@@ -79,6 +79,7 @@ public:
     void AddPredictTask(PredictTask&& task);
     void AddAfterLayoutTask(std::function<void()>&& task);
     void AddAfterRenderTask(std::function<void()>&& task);
+    void AddPersistAfterLayoutTask(std::function<void()>&& task);
 
     void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
@@ -86,6 +87,7 @@ public:
     void FlushPredictTask(int64_t deadline, bool canUseLongPredictTask = false);
     void FlushAfterLayoutTask();
     void FlushAfterRenderTask();
+    void FlushPersistAfterLayoutTask();
 
     void FlushDelayJsActive();
 
@@ -151,6 +153,7 @@ private:
     std::list<PredictTask> predictTask_;
     std::list<std::function<void()>> afterLayoutTasks_;
     std::list<std::function<void()>> afterRenderTasks_;
+    std::list<std::function<void()>> persistAfterLayoutTasks_;
 
     uint32_t currentPageId_ = 0;
     bool isLayouting_ = false;

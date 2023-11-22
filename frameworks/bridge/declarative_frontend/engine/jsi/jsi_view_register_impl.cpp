@@ -179,9 +179,11 @@
 #ifndef WEARABLE_PRODUCT
 #include "bridge/declarative_frontend/jsview/js_piece.h"
 #include "bridge/declarative_frontend/jsview/js_rating.h"
+#if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_video.h"
 #include "bridge/declarative_frontend/jsview/js_video_controller.h"
+#endif
 #endif
 #endif
 
@@ -219,7 +221,9 @@
 #endif
 
 #ifndef WEARABLE_PRODUCT
+#if defined(CAMERA_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
 #include "bridge/declarative_frontend/jsview/js_camera.h"
+#endif
 #endif
 
 #if defined(WINDOW_SCENE_SUPPORTED)
@@ -585,11 +589,15 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "EffectComponent", JSEffectComponent::JSBind },
 #endif
 #ifndef WEARABLE_PRODUCT
+#if defined(CAMERA_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
     { "Camera", JSCamera::JSBind },
+#endif
     { "Piece", JSPiece::JSBind },
     { "Rating", JSRating::JSBind },
+#if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
     { "Video", JSVideo::JSBind },
+#endif
 #endif
 #endif
 #if defined(XCOMPONENT_SUPPORTED)
@@ -631,8 +639,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
     { "Matrix2D", JSMatrix2d::JSBind },
     { "CanvasPattern", JSCanvasPattern::JSBind },
+#if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
     { "VideoController", JSVideoController::JSBind },
+#endif
 #endif
     { "Search", JSSearch::JSBind },
     { "Select", JSSelect::JSBind },
@@ -663,8 +673,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
+#if defined(PLAYER_FRAMEWORK_EXISTS)
     { "Video", JSVideo::JSBind },
     { "VideoController", JSVideoController::JSBind },
+#endif
     { "PluginComponent", JSPlugin::JSBind },
     { "UIExtensionComponent", JSUIExtension::JSBind },
 #endif
@@ -701,8 +713,10 @@ void RegisterAllModule(BindingTarget globalObj)
 #ifdef ABILITY_COMPONENT_SUPPORTED
     JSAbilityComponentController::JSBind(globalObj);
 #endif
+#if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
     JSVideoController::JSBind(globalObj);
+#endif
 #endif
     JSTextInputController::JSBind(globalObj);
     JSTextAreaController::JSBind(globalObj);
@@ -787,8 +801,10 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         JSAbilityComponentController::JSBind(globalObj);
 #endif
     } else if ((*func).first == "Video") {
+#if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
         JSVideoController::JSBind(globalObj);
+#endif
 #endif
     } else if ((*func).first == "Grid") {
         JSColumn::JSBind(globalObj);
@@ -817,21 +833,15 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
 {
     // globalObj is panda::Local<panda::ObjectRef>
     const auto globalObject = JSRef<JSObject>::Make(globalObj);
-    const JSRef<JSVal> globalFuncVal = globalObject->GetProperty("uiNodeRegisterCleanUpFunction");
-    const JSRef<JSVal> globalCleanUpFunc = globalObject->GetProperty("globalRegisterCleanUpFunction");
 
-    if (globalFuncVal->IsFunction()) {
-        const auto globalFunc = JSRef<JSFunc>::Cast(globalFuncVal);
+    const JSRef<JSVal> cleanUpIdleTask = globalObject->GetProperty("uiNodeCleanUpIdleTask");
+    if (cleanUpIdleTask->IsFunction()) {
+        LOGI("CleanUpIdleTask is a valid function");
+        const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
         const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
             jsFunc->Call(globalObject);
         };
-        ElementRegister::GetInstance()->RegisterJSUINodeRegisterCallbackFunc(callback);
-    } else if (globalCleanUpFunc->IsFunction()) {
-        const auto globalFunc = JSRef<JSFunc>::Cast(globalCleanUpFunc);
-        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
-            jsFunc->Call(globalObject);
-        };
-        ElementRegister::GetInstance()->RegisterJSUINodeRegisterGlobalFunc(callback);
+        ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
     }
 }
 
@@ -843,7 +853,7 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
         RegisterModuleByName(globalObj, moduleName);
     }
     JsUINodeRegisterCleanUp(globalObj);
-    
+
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);
@@ -853,8 +863,7 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
     JSRenderingContextSettings::JSBind(globalObj);
 }
 
-void JsBindFormViews(
-    BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload)
+void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload)
 {
     if (!isReload) {
         JSViewAbstract::JSBind(globalObj);

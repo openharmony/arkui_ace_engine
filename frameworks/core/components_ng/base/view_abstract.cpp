@@ -69,6 +69,7 @@ void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuPa
     CHECK_NULL_VOID(pattern);
     pattern->RegisterMenuAppearCallback(menuParam.onAppear);
     pattern->RegisterMenuDisappearCallback(menuParam.onDisappear);
+    pattern->RegisterMenuStateChangeCallback(menuParam.onStateChange);
 }
 } // namespace
 
@@ -632,6 +633,13 @@ void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
     gestureHub->SetUserOnClick(std::move(clickEventFunc));
 }
 
+void ViewAbstract::SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
+}
+
 void ViewAbstract::SetOnTouch(TouchEventFunc&& touchEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
@@ -903,6 +911,11 @@ void ViewAbstract::SetAlign(Alignment alignment)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
 }
 
+void ViewAbstract::SetAlign(FrameNode* frameNode, Alignment alignment)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment, frameNode);
+}
+
 void ViewAbstract::SetVisibility(VisibleType visible)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1127,8 +1140,15 @@ void ViewAbstract::BindPopup(
     if (showInSubWindow) {
         if (isShow) {
             SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
+            if (popupPattern) {
+                popupPattern->SetContainerId(Container::CurrentId());
+                popupPattern->StartEnteringAnimation(nullptr);
+            }
         } else {
-            SubwindowManager::GetInstance()->HidePopupNG(targetId);
+            if (popupPattern) {
+                popupPattern->StartExitingAnimation(
+                    [targetId]() { SubwindowManager::GetInstance()->HidePopupNG(targetId); });
+            }
         }
         return;
     }
@@ -1137,9 +1157,19 @@ void ViewAbstract::BindPopup(
             AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     }
     if (isShow) {
-        overlayManager->ShowPopup(targetId, popupInfo);
+        overlayManager->UpdatePopupNode(targetId, popupInfo);
+        if (popupPattern) {
+            popupPattern->StartEnteringAnimation(nullptr);
+        }
     } else {
-        overlayManager->HidePopup(targetId, popupInfo);
+        if (popupPattern) {
+            popupPattern->StartExitingAnimation(
+                [targetId, popupInfo, weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
+                    auto overlay = weakOverlayManger.Upgrade();
+                    CHECK_NULL_VOID(overlay);
+                    overlay->UpdatePopupNode(targetId, popupInfo);
+                });
+        }
     }
 }
 
@@ -1190,12 +1220,27 @@ void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool is
     overlayManager->ShowMenu(targetId, offset, nullptr);
 }
 
-void ViewAbstract::SetBackdropBlur(const Dimension& radius)
+void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
+        target->UpdateBackBlur(radius, blurOption);
+        if (target->GetBackBlurStyle().has_value()) {
+            target->UpdateBackBlurStyle(std::nullopt);
+        }
+    }
+}
+
+void ViewAbstract::SetBackdropBlur(FrameNode* frameNode, const Dimension& radius)
+{
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
@@ -1226,12 +1271,24 @@ void ViewAbstract::SetDynamicLightUp(float rate, float lightUpDegree)
     ACE_UPDATE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree);
 }
 
-void ViewAbstract::SetFrontBlur(const Dimension& radius)
+void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateFrontBlur(radius, blurOption);
+        if (target->GetFrontBlurStyle().has_value()) {
+            target->UpdateFrontBlurStyle(std::nullopt);
+        }
+    }
+}
+
+void ViewAbstract::SetFrontBlur(FrameNode* frameNode, const Dimension& radius)
+{
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
@@ -1415,12 +1472,22 @@ void ViewAbstract::SetBrightness(const Dimension& brightness)
     ACE_UPDATE_RENDER_CONTEXT(FrontBrightness, brightness);
 }
 
+void ViewAbstract::SetBrightness(FrameNode* frameNode, const Dimension& brightness)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontBrightness, brightness, frameNode);
+}
+
 void ViewAbstract::SetGrayScale(const Dimension& grayScale)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontGrayScale, grayScale);
+}
+
+void ViewAbstract::SetGrayScale(FrameNode* frameNode, const Dimension& grayScale)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontGrayScale, grayScale, frameNode);
 }
 
 void ViewAbstract::SetContrast(const Dimension& contrast)
@@ -1431,12 +1498,22 @@ void ViewAbstract::SetContrast(const Dimension& contrast)
     ACE_UPDATE_RENDER_CONTEXT(FrontContrast, contrast);
 }
 
+void ViewAbstract::SetContrast(FrameNode* frameNode, const Dimension& contrast)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontContrast, contrast, frameNode);
+}
+
 void ViewAbstract::SetSaturate(const Dimension& saturate)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontSaturate, saturate);
+}
+
+void ViewAbstract::SetSaturate(FrameNode* frameNode, const Dimension& saturate)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontSaturate, saturate, frameNode);
 }
 
 void ViewAbstract::SetSepia(const Dimension& sepia)
@@ -1447,12 +1524,22 @@ void ViewAbstract::SetSepia(const Dimension& sepia)
     ACE_UPDATE_RENDER_CONTEXT(FrontSepia, sepia);
 }
 
-void ViewAbstract::SetInvert(const Dimension& invert)
+void ViewAbstract::SetSepia(FrameNode* frameNode, const Dimension& sepia)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontSepia, sepia, frameNode);
+}
+
+void ViewAbstract::SetInvert(const InvertVariant& invert)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontInvert, invert);
+}
+
+void ViewAbstract::SetInvert(FrameNode* frameNode, const InvertVariant& invert)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontInvert, invert, frameNode);
 }
 
 void ViewAbstract::SetHueRotate(float hueRotate)
@@ -1463,12 +1550,22 @@ void ViewAbstract::SetHueRotate(float hueRotate)
     ACE_UPDATE_RENDER_CONTEXT(FrontHueRotate, hueRotate);
 }
 
+void ViewAbstract::SetHueRotate(FrameNode* frameNode, float hueRotate)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontHueRotate, hueRotate, frameNode);
+}
+
 void ViewAbstract::SetColorBlend(const Color& colorBlend)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FrontColorBlend, colorBlend);
+}
+
+void ViewAbstract::SetColorBlend(FrameNode* frameNode, const Color& colorBlend)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontColorBlend, colorBlend, frameNode);
 }
 
 void ViewAbstract::SetBorderImage(const RefPtr<BorderImage>& borderImage)
@@ -1562,6 +1659,14 @@ void ViewAbstract::SetUseEffect(bool useEffect)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(UseEffect, useEffect);
+}
+
+void ViewAbstract::SetUseShadowBatching(bool useShadowBatching)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(UseShadowBatching, useShadowBatching);
 }
 
 void ViewAbstract::SetForegroundColor(const Color& color)
@@ -1784,4 +1889,42 @@ void ViewAbstract::SetZIndex(FrameNode* frameNode, int32_t value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(ZIndex, value, frameNode);
 }
+
+void ViewAbstract::SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradient, gradient, frameNode);
+}
+
+void ViewAbstract::SetLightPosition(
+    const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(LightPosition, TranslateOptions(positionX, positionY, positionZ));
+}
+
+void ViewAbstract::SetLightIntensity(const float value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(LightIntensity, value);
+}
+
+void ViewAbstract::SetLightIlluminated(const uint32_t value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(LightIlluminated, value);
+}
+void ViewAbstract::SetBloom(const float value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(Bloom, value);
+}
+
 } // namespace OHOS::Ace::NG

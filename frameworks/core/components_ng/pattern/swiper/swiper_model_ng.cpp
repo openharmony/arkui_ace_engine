@@ -194,10 +194,10 @@ void SwiperModelNG::SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
-    CHECK_NULL_VOID(eventHub);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
 
-    eventHub->SetAnimationEndEvent(
+    pattern->UpdateAnimationEndEvent(
         [event = std::move(onAnimationEnd)](int32_t index, const AnimationCallbackInfo& info) { event(index, info); });
 }
 

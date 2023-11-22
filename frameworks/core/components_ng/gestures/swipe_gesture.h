@@ -32,6 +32,11 @@ public:
         fingers_ = fingers;
         direction_ = direction;
         speed_ = speed;
+        if (gestureInfo_) {
+            gestureInfo_->SetType(GestureTypeName::SWIPE_GESTURE);
+        } else {
+            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::SWIPE_GESTURE);
+        }
     };
 
     ~SwipeGesture() override = default;

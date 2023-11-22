@@ -47,6 +47,8 @@ public:
 
     virtual void RequestFrame();
 
+    virtual void FlushFrameRate(int32_t rate) {}
+
     virtual void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor) {}
 
     virtual void SetInstanceId(int32_t instanceId) {}

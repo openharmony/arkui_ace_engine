@@ -20,6 +20,7 @@ ohos_unittest("environment_test") {
 
   sources = [
     "$ace_root/frameworks/core/common/environment/environment_proxy.cpp",
+    "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "environment_test.cpp",
   ]
