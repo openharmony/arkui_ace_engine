@@ -833,6 +833,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text_field/text_input_ai_checker.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_input_response_area.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_select_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_input/text_input_layout_algorithm.cpp",

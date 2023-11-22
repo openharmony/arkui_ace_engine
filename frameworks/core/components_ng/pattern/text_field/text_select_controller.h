@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_field/content_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
 
@@ -165,7 +166,8 @@ public:
         return caretInfo_;
     }
 
-    bool HasReverse() {
+    bool HasReverse()
+    {
         return firstHandleInfo_.index > secondHandleInfo_.index;
     }
 
@@ -198,6 +200,8 @@ public:
     int32_t ConvertTouchOffsetToPosition(const Offset& localOffset);
 
 private:
+    constexpr static uint32_t SECONDS_TO_MILLISECONDS = 1000;
+
     void FitCaretMetricsToContentRect(CaretMetricsF& caretMetrics);
     void CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity);
     void CalcCaretMetricsByPositionNearTouchOffset(
@@ -205,6 +209,14 @@ private:
     // The cursor needs to fit the line where the touch is located.
     void UpdateCaretRectByPositionNearTouchOffset(int32_t position, const Offset& touchOffset);
     void UpdateSelectByOffset(const Offset& localOffset);
+    // ai text analysis or detect
+    bool NeedAIAnalysis(int32_t& index, const CaretUpdateType targetType, const Offset& touchOffset,
+        std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout);
+    void AdjustCursorPosition(int32_t& index, const Offset& touchOffset);
+    bool AdjustWordSelection(int32_t& index, int32_t& start, int32_t& end, const Offset& touchOffset);
+    bool IsClickAtBoundary(int32_t index, const Offset& touchOffset);
+    const TimeStamp& GetLastClickTime();
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FirstIndex, int32_t, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SecondIndex, int32_t, PROPERTY_UPDATE_RENDER);
 
@@ -216,6 +228,7 @@ private:
     RefPtr<ContentController> contentController_;
     OnAccessibilityCallback onAccessibilityCallback_;
     WeakPtr<Pattern> pattern_;
+    TimeStamp lastAiPosTimeStamp_;
 };
 } // namespace OHOS::Ace::NG
 

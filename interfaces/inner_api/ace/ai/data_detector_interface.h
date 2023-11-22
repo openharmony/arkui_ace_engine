@@ -16,8 +16,11 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_DATA_DETECTOR_INTERFACE_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_DATA_DETECTOR_INTERFACE_H
 
-#include <string>
 #include <functional>
+#include <string>
+#include <vector>
+
+#include "base/utils/type_definition.h"
 
 namespace OHOS::Ace {
 struct TextDataDetectInfo {
@@ -40,6 +43,17 @@ class DataDetectorInterface {
 public:
     virtual bool IsDataDetectorSupported() = 0;
     virtual void DataDetect(const TextDataDetectInfo& info, const TextDetectResultFunc& resultFunc) = 0;
+
+    virtual int8_t GetCursorPosition(const std::string& text, int8_t offset)
+    {
+        return -1;
+    }
+
+    virtual std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset)
+    {
+        return std::vector<int8_t> { -1, -1 };
+    }
+
 protected:
     virtual ~DataDetectorInterface() {}
 };
