@@ -256,6 +256,13 @@ void ScrollBar::SetRectTrickRegion(
         } else {
             needAdaptAnimation_ = false;
         }
+    } else {
+        needAdaptAnimation_ = false;
+        if (positionMode_ == PositionMode::BOTTOM) {
+            activeRect_.SetHeight(NormalizeToPx(normalWidth_));
+        } else {
+            activeRect_.SetWidth(NormalizeToPx(normalWidth_));
+        }
     }
 }
 
