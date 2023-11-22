@@ -263,7 +263,7 @@ LayoutConstraintF WaterFlowLayoutAlgorithm::CreateChildConstraint(int32_t crossI
     CHECK_NULL_RETURN(childLayoutProperty, itemConstraint);
     if (childLayoutProperty->HasLayoutConstraint()) {
         if (childLayoutProperty->GetMaxSize().has_value()) {
-            itemConstraint.UpdateMaxSizeWithCheck(ConvertToSize(childLayoutProperty->GetMinSize().value(),
+            itemConstraint.UpdateMaxSizeWithCheck(ConvertToSize(childLayoutProperty->GetMaxSize().value(),
                 itemConstraint.scaleProperty, itemConstraint.percentReference));
         }
         if (childLayoutProperty->GetMinSize().has_value()) {
