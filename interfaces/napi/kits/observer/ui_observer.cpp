@@ -15,6 +15,8 @@
 
 #include "ui_observer.h"
 
+#include <algorithm>
+
 namespace OHOS::Ace::Napi {
 std::list<std::shared_ptr<UIObserverListener>> UIObserver::unspecifiedNavigationListeners_;
 std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>

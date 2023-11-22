@@ -52,16 +52,15 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
-    auto custom = AceType::DynamicCast<UINode>(node);
-    auto parent = custom->GetParent();
-    while (parent) {
-        if (parent->GetTag() == V2::NAVDESTINATION_CONTENT_ETS_TAG) {
+    auto current = AceType::DynamicCast<UINode>(node);
+    while (current) {
+        if (current->GetTag() == V2::NAVDESTINATION_CONTENT_ETS_TAG) {
             break;
         }
-        parent = parent->GetParent();
+        current = current->GetParent();
     }
-    CHECK_NULL_RETURN(parent, nullptr);
-    auto nav = AceType::DynamicCast<FrameNode>(parent);
+    CHECK_NULL_RETURN(current, nullptr);
+    auto nav = AceType::DynamicCast<FrameNode>(current);
     CHECK_NULL_RETURN(nav, nullptr);
     auto pattern = nav->GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
