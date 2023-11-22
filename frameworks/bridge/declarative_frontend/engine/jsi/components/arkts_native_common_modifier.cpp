@@ -713,6 +713,138 @@ void ResetLinearGradient(NodeHandle node)
     ViewAbstract::SetLinearGradient(frameNode, gradient);
 }
 
+void SetForegroundBlurStyle(NodeHandle node, int32_t blurStyle, int32_t colorMode,
+    int32_t adaptiveColor, double scale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BlurStyleOption fgBlurStyle;
+    if (blurStyle >= 0) {
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            fgBlurStyle.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
+    }
+    bool isHasOptions = !((colorMode < 0) && (adaptiveColor < 0) && (scale < 0));
+    if (isHasOptions) {
+        if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
+            colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
+            fgBlurStyle.colorMode = static_cast<ThemeColorMode>(colorMode);
+        }
+        if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+            adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+            fgBlurStyle.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
+        }
+        if (scale >= 0) {
+            fgBlurStyle.scale = std::clamp(scale, 0.0, 1.0);
+        }
+    }
+    ViewAbstract::SetForegroundBlurStyle(frameNode, fgBlurStyle);
+}
+
+void ResetForegroundBlurStyle(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BlurStyleOption styleOption;
+    ViewAbstract::SetForegroundBlurStyle(frameNode, styleOption);
+}
+
+/**
+ * @param blurRadius blurRadius value
+ * @param stops stop value
+ * stops[0], stops[1] : fractionStops pair[0]
+ * stops[2], stops[3] : fractionStops pair[1] ...
+ * @param stopsLength stops length
+ * @param directionValue direction value
+ */
+void SetLinearGradientBlur(NodeHandle node, double blurRadius,
+    const double* stops, int32_t stopsLength, int32_t directionValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    blurRadius = std::clamp(blurRadius, 0.0, 60.0); // 60.0 represents largest blur radius;
+    std::vector<std::pair<float, float>> fractionStops;
+    if ((stopsLength & 0x1) == 0) {
+        float tmpPos = -1.0f;
+        for (int32_t index = 0; index < stopsLength; index += NUM_2) {
+            auto first = stops[index];
+            auto second = stops[index + NUM_1];
+            std::pair<float, float> fractionStop;
+            fractionStop.first = static_cast<float>(std::clamp(first, 0.0, 1.0));
+            fractionStop.second = static_cast<float>(std::clamp(second, 0.0, 1.0));
+            if (fractionStop.second <= tmpPos) {
+                fractionStops.clear();
+                break;
+            }
+            tmpPos = fractionStop.second;
+            fractionStops.push_back(fractionStop);
+        }
+    }
+    if (static_cast<int32_t>(fractionStops.size()) <= 1) {
+        fractionStops.clear();
+        fractionStops.push_back(std::pair<float, float>(0.0f, 0.0f));
+        fractionStops.push_back(std::pair<float, float>(0.0f, 1.0f));
+    }
+    if (directionValue < static_cast<int8_t>(GradientDirection::LEFT) ||
+        directionValue >= static_cast<int8_t>(GradientDirection::NONE)) {
+        directionValue = static_cast<int8_t>(GradientDirection::BOTTOM);
+    }
+    auto direction = static_cast<GradientDirection>(directionValue);
+    Dimension dimensionRadius(blurRadius, DimensionUnit::PX);
+    NG::LinearGradientBlurPara blurPara(dimensionRadius, fractionStops, direction);
+    ViewAbstract::SetLinearGradientBlur(frameNode, blurPara);
+}
+
+void ResetLinearGradientBlur(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<std::pair<float, float>> fractionStops;
+    fractionStops.push_back(std::pair<float, float>(0.0f, 0.0f));
+    fractionStops.push_back(std::pair<float, float>(0.0f, 1.0f));
+    Dimension dimensionRadius(0.0f, DimensionUnit::PX);
+    NG::LinearGradientBlurPara blurPara(dimensionRadius, fractionStops, GradientDirection::BOTTOM);
+    ViewAbstract::SetLinearGradientBlur(frameNode, blurPara);
+}
+
+void SetBackgroundBlurStyle(NodeHandle node, int32_t blurStyle, int32_t colorMode,
+    int32_t adaptiveColor, double scale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BlurStyleOption bgBlurStyle;
+    if (blurStyle >= 0) {
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            bgBlurStyle.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
+    }
+    bool isHasOptions = !((colorMode < 0) && (adaptiveColor < 0) && (scale < 0));
+    if (isHasOptions) {
+        if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
+            colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
+            bgBlurStyle.colorMode = static_cast<ThemeColorMode>(colorMode);
+        }
+        if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+            adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+            bgBlurStyle.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
+        }
+        if (scale >= 0) {
+            bgBlurStyle.scale = std::clamp(scale, 0.0, 1.0);
+        }
+    }
+    ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
+}
+
+void ResetBackgroundBlurStyle(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BlurStyleOption bgBlurStyle;
+    ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
+}
+
 ArkUICommonModifierAPI GetCommonModifier()
 {
     static const ArkUICommonModifierAPI modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
@@ -723,6 +855,9 @@ ArkUICommonModifierAPI GetCommonModifier()
         ResetInvert, SetSepia, ResetSepia, SetSaturate, ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale,
         ResetGrayscale, SetContrast, ResetContrast, SetBrightness, ResetBrightness, SetBlur, ResetBlur,
         SetLinearGradient, ResetLinearGradient,
+        SetForegroundBlurStyle, ResetForegroundBlurStyle,
+        SetLinearGradientBlur, ResetLinearGradientBlur,
+        SetBackgroundBlurStyle, ResetBackgroundBlurStyle,
     };
 
     return modifier;
