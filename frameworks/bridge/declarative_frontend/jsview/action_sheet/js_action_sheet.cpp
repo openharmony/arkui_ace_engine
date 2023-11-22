@@ -262,6 +262,19 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         properties.gridCount = gridCountValue->ToNumber<int32_t>();
     }
 
+    // Parse showInSubWindowValue.
+    auto showInSubWindowValue = obj->GetProperty("showInSubWindow");
+    if (showInSubWindowValue->IsBoolean()) {
+        LOGI("Parse showInSubWindowValue");
+        properties.isShowInSubWindow = showInSubWindowValue->ToBoolean();
+    }
+
+    // Parse isModalValue.
+    auto isModalValue = obj->GetProperty("isModal");
+    if (isModalValue->IsBoolean()) {
+        LOGI("Parse isModalValue");
+        properties.isModal = isModalValue->ToBoolean();
+    }
     ActionSheetModel::GetInstance()->ShowActionSheet(properties);
     args.SetReturnValue(args.This());
 }

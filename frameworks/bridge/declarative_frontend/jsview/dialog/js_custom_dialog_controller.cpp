@@ -189,6 +189,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.closeAnimation = closeAnimation;
         }
 
+        // Parse showInSubWindowValue.
         auto showInSubWindowValue = constructorArg->GetProperty("showInSubWindow");
         if (showInSubWindowValue->IsBoolean()) {
 #if defined(PREVIEW)
@@ -199,6 +200,11 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 #endif
         }
 
+        // Parse isModal.
+        auto isModalValue = constructorArg->GetProperty("isModal");
+        if (isModalValue->IsBoolean()) {
+            instance->dialogProperties_.isModal = isModalValue->ToBoolean();
+        }
         info.SetReturnValue(instance);
     } else {
         LOGE("JSView creation with invalid arguments.");

@@ -111,6 +111,11 @@ public:
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft,
         const ToastShowMode& showMode = ToastShowMode::DEFAULT);
 
+    std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap()
+    {
+        return dialogMap_;
+    };
+    void CloseMask ();
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft = false);
@@ -127,9 +132,20 @@ public:
     void ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-
+    void PopModalDialog();
+	
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
-
+    void SetSubWindowId(int32_t subWindowId)
+    {
+        subWindowId_=subWindowId;
+    }
+    int32_t GetSubwindowId()
+    {
+        return subWindowId_;
+    }
+    RefPtr<FrameNode> GetMaskNode() {
+        return maskNode_;
+    }
     /**  pop overlays (if any) on back press
      *
      *   @return    true if popup was removed, false if no overlay exists
@@ -333,6 +349,8 @@ private:
     float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;
     int32_t dialogCount_ = 0;
+    RefPtr<FrameNode> maskNode_;
+    int32_t subWindowId_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool hasPixelMap_ { false };
     bool hasFilter_ { false };

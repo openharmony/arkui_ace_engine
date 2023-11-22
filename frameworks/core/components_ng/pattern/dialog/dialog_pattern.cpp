@@ -25,8 +25,10 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "bridge/common/dom/dom_type.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/alignment.h"
@@ -136,6 +138,14 @@ void DialogPattern::HandleClick(const GestureEvent& info)
         if (!contentRect.IsInRegion(
                 PointF(clickPosition.GetX() - globalOffset.GetX(), clickPosition.GetY() - globalOffset.GetY()))) {
             PopDialog(-1);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            CHECK_NULL_VOID(overlayManager->GetMaskNode());
+            if (GetHost()->GetId() == overlayManager->GetMaskNode()->GetId()) {
+                overlayManager->PopModalDialog();
+            }
         }
     }
 }
@@ -160,8 +170,17 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
         // trigger onCancel callback
         hub->FireCancelEvent();
     }
-
+    if (dialogProperties_.isShowInSubWindow) {
+        SubwindowManager::GetInstance()->DeleteHotAreas(overlayManager->GetSubwindowId(), host->GetId());
+    }
     overlayManager->CloseDialog(host);
+    if (dialogProperties_.isShowInSubWindow && dialogProperties_.isModal) {
+        auto parentPipelineContext = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_VOID(parentPipelineContext);
+        auto parentOverlayManager = parentPipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(parentOverlayManager);
+        parentOverlayManager->CloseMask();
+    }
 }
 
 // set render context properties of content frame

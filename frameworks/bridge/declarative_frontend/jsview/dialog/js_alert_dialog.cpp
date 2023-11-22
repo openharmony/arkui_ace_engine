@@ -259,6 +259,20 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
             properties.maskRect = maskRect;
         }
+
+        // Parse showInSubWindowValue.
+        auto showInSubWindowValue = obj->GetProperty("showInSubWindow");
+        if (showInSubWindowValue->IsBoolean()) {
+            LOGI("Parse showInSubWindowValue");
+            properties.isShowInSubWindow = showInSubWindowValue->ToBoolean();
+        }
+
+        // Parse isModal.
+        auto isModalValue = obj->GetProperty("isModal");
+        if (isModalValue->IsBoolean()) {
+            LOGI("Parse isModalValue");
+            properties.isModal = isModalValue->ToBoolean();
+        }
         AlertDialogModel::GetInstance()->SetShowDialog(properties);
     }
 }

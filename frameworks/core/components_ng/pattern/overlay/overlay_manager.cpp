@@ -1248,6 +1248,10 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     }
 
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
+    CHECK_NULL_RETURN(dialog, nullptr);
+    if (dialogProps.isMask) {
+        maskNode_ = dialog;
+    }
     BeforeShowDialog(dialog);
     OpenDialogAnimation(dialog);
     dialogCount_++;
@@ -1300,6 +1304,23 @@ void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, con
     OpenDialogAnimation(dialogNode);
 }
 
+void OverlayManager::PopModalDialog()
+{
+    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(subWindowId_);
+    CHECK_NULL_VOID(subWindow);
+    auto subOverlayManager = subWindow->GetOverlayManager();
+    CHECK_NULL_VOID(subOverlayManager);
+    std::map<int32_t, RefPtr<FrameNode>> DialogMap(
+        subOverlayManager->GetDialogMap().begin(), subOverlayManager->GetDialogMap().end());
+    for (auto it = DialogMap.begin(); it != DialogMap.end(); it++) {
+        auto dialogProp = DynamicCast<DialogLayoutProperty>(it->second->GetLayoutProperty());
+        if (dialogProp->GetIsModal().value_or(true) && dialogProp->GetAutoCancel().value_or(true) &&
+            dialogProp->GetShowInSubWindowValue(false)) {
+            subOverlayManager->CloseDialog(it->second);
+        }
+    }
+}
+
 void OverlayManager::RemoveDialogFromMap(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
@@ -1324,7 +1345,25 @@ bool OverlayManager::DialogInMapHoldingFocus()
     }
     return false;
 }
-
+void OverlayManager::CloseMask()
+{
+    CHECK_NULL_VOID(maskNode_);
+    RemoveDialogFromMap(maskNode_);
+    if (maskNode_->IsRemoving()) {
+        // already in close animation
+        return;
+    }
+    maskNode_->MarkRemoving();
+    CloseDialogAnimation(maskNode_);
+    dialogCount_--;
+    // set close button enable
+    if (dialogCount_ == 0) {
+        SetContainerButtonEnable(true);
+    }
+    maskNode_->OnAccessibilityEvent(
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    CallOnHideDialogCallback();
+}
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
     RemoveDialogFromMap(dialogNode);

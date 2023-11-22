@@ -177,7 +177,7 @@ public:
                 dialogPattern->GetAttr<Dimension>("muti_button_padding_horizontal", 8.0_vp);
             theme->mutiButtonPaddingVertical_ =
                 dialogPattern->GetAttr<Dimension>("muti_button_padding_vertical", 4.0_vp);
-
+            theme->multipleDialogDisplay_ = dialogPattern->GetAttr<std::string>("multiple_dialog_display", "stack");
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }
@@ -528,7 +528,10 @@ public:
     {
         return defaultDialogMarginBottom_;
     }
-
+    const std::string& GetMultipleDialogDisplay()
+    {
+        return multipleDialogDisplay_;
+    }
 protected:
     DialogTheme() = default;
 
@@ -598,6 +601,7 @@ private:
     Dimension mutiButtonPaddingEnd_;
     Dimension mutiButtonPaddingHorizontal_;
     Dimension mutiButtonPaddingVertical_;
+    std::string multipleDialogDisplay_;
 };
 
 } // namespace OHOS::Ace
