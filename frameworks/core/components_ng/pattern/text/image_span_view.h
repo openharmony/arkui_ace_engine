@@ -20,12 +20,14 @@
 #include "base/image/pixel_map.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ImageSpanView {
 public:
     static void SetObjectFit(ImageFit value);
     static void SetVerticalAlign(VerticalAlign verticalAlign);
+    static void SetVerticalAlign(FrameNode* frameNode, VerticalAlign verticalAlign);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_SPAN_VIEW_H

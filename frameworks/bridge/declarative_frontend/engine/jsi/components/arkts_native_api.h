@@ -124,12 +124,20 @@ struct ArkUIToggleModifierAPI {
     void (*ResetToggleSwitchPointColor)(NodeHandle node);
 };
 
+struct ArkUIImageSpanModifierAPI {
+    void (*SetImageSpanVerticalAlign)(NodeHandle node, int32_t value);
+    void (*ResetImageSpanVerticalAlign)(NodeHandle node);
+    void (*SetImageSpanObjectFit)(NodeHandle node, int32_t value);
+    void (*ResetImageSpanObjectFit)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
     ArkUITextModifierAPI (*GetTextModifier)();
     ArkUIButtonModifierAPI (*GetButtonModifier)();
     ArkUIToggleModifierAPI (*GetToggleModifier)();
+    ArkUIImageSpanModifierAPI (*GetImageSpanModifier)();
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
