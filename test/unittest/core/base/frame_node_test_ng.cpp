@@ -1447,7 +1447,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0039, TestSize.Level1)
     childNode->OnConfigurationUpdate(configurationChange);
     configurationChange.colorModeUpdate = true;
     childNode->OnConfigurationUpdate(configurationChange);
-    configurationChange.DirectionOrDpiUpdate = true;
+    configurationChange.directionUpdate = true;
+    childNode->OnConfigurationUpdate(configurationChange);
+    configurationChange.dpiUpdate = true;
     childNode->OnConfigurationUpdate(configurationChange);
 
     childNode->SetBackgroundLayoutConstraint(itemNode);
