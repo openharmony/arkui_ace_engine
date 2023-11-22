@@ -30,6 +30,7 @@ inline RefPtr<NavigationBarTheme> NavigationGetTheme()
 {
     // get theme
     auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<NavigationBarTheme>();
     return theme;
 }
