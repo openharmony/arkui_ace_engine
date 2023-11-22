@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
@@ -64,9 +65,17 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // calculate idealSize and set FrameSize
     axis_ = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+    contentStartOffset_ = listLayoutProperty->GetContentStartOffset().value_or(0.0f);
+    contentEndOffset_ = listLayoutProperty->GetContentEndOffset().value_or(0.0f);
 
     // calculate main size.
     auto contentConstraint = listLayoutProperty->GetContentLayoutConstraint().value();
+
+    float expandHeight = ScrollableUtils::CheckHeightExpansion(listLayoutProperty, axis_);
+    contentEndOffset_ += expandHeight;
+    // expand contentSize
+    contentConstraint.MinusPadding(std::nullopt, std::nullopt, std::nullopt, -expandHeight);
+
     auto contentIdealSize = CreateIdealSize(
         contentConstraint, axis_, listLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
 
@@ -74,8 +83,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     paddingBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
     contentMainSize_ = 0.0f;
-    contentStartOffset_ = listLayoutProperty->GetContentStartOffset().value_or(0.0f);
-    contentEndOffset_ = listLayoutProperty->GetContentEndOffset().value_or(0.0f);
     totalItemCount_ = layoutWrapper->GetTotalChildCount();
     if (!GetMainAxisSize(contentIdealSize, axis_)) {
         if (totalItemCount_ == 0) {
@@ -137,7 +144,12 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     contentIdealSize.SetMainSize(contentMainSize_, axis_);
     AddPaddingToSize(padding, contentIdealSize);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(contentIdealSize.ConvertToSizeT());
+
+    auto size = contentIdealSize.ConvertToSizeT();
+    // Cancel frame size expansion, only expand content size here.
+    // Frame expansion will be determined after Layout.
+    size.MinusHeight(expandHeight);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 
     // set list cache info.
     layoutWrapper->SetCacheCount(listLayoutProperty->GetCachedCountValue(1) * GetLanes());
