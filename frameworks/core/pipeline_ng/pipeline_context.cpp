@@ -384,6 +384,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 #endif
     ProcessDelayTasks();
     FlushAnimation(nanoTimestamp);
+    bool hasAnimation = window_->FlushAnimation(nanoTimestamp);
+    if (hasAnimation) {
+        RequestFrame();
+    }
     FlushTouchEvents();
     FlushBuild();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
@@ -415,10 +419,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     } while (false);
 #endif
 
-    bool hasAnimation = window_->FlushCustomAnimation(nanoTimestamp);
-    if (hasAnimation) {
-        RequestFrame();
-    }
+    window_->FlushModifier();
     FlushFrameRate();
     FlushMessages();
     if (dragCleanTask_) {

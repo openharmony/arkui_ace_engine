@@ -147,10 +147,11 @@ void PipelineContextTestNg::SetUpTestSuite()
     EXPECT_CALL(*window, OnHide()).Times(AnyNumber());
     EXPECT_CALL(*window, RecordFrameTime(_, _)).Times(AnyNumber());
     EXPECT_CALL(*window, OnShow()).Times(AnyNumber());
-    EXPECT_CALL(*window, FlushCustomAnimation(NANO_TIME_STAMP))
+    EXPECT_CALL(*window, FlushAnimation(NANO_TIME_STAMP))
         .Times(AtLeast(1))
         .WillOnce(testing::Return(true))
         .WillRepeatedly(testing::Return(false));
+    EXPECT_CALL(*window, FlushModifier()).Times(AtLeast(1));
     EXPECT_CALL(*window, SetRootFrameNode(_)).Times(AnyNumber());
     context_ = AceType::MakeRefPtr<PipelineContext>(
         window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
