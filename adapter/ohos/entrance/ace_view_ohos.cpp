@@ -45,13 +45,28 @@ constexpr int32_t ROTATION_DIVISOR = 64;
 
 AceViewOhos* AceViewOhos::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatformThread)
 {
-    auto* aceView = new AceViewOhos(instanceId, FlutterThreadModel::CreateThreadModel(useCurrentEventRunner,
-                                                    !usePlatformThread, !SystemProperties::GetRosenBackendEnabled()));
-    if (aceView != nullptr) {
-        aceView->IncRefCount();
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        auto* aceView =
+            new AceViewOhos(instanceId, ThreadModelImpl::CreateThreadModel(useCurrentEventRunner, !usePlatformThread,
+                !SystemProperties::GetRosenBackendEnabled()));
+        if (aceView != nullptr) {
+            aceView->IncRefCount();
+        }
+        return aceView;
+    } else {
+        auto* aceView =
+            new AceViewOhos(instanceId, FlutterThreadModel::CreateThreadModel(useCurrentEventRunner, !usePlatformThread,
+                !SystemProperties::GetRosenBackendEnabled()));
+        if (aceView != nullptr) {
+            aceView->IncRefCount();
+        }
+        return aceView;
     }
-    return aceView;
 }
+
+AceViewOhos::AceViewOhos(int32_t id, std::unique_ptr<ThreadModelImpl> threadModelImpl)
+    : instanceId_(id), threadModelImpl_(std::move(threadModelImpl))
+{}
 
 AceViewOhos::AceViewOhos(int32_t id, std::unique_ptr<FlutterThreadModel> threadModel)
     : instanceId_(id), threadModel_(std::move(threadModel))
