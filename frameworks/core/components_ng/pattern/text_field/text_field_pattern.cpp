@@ -2617,7 +2617,8 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         CHECK_NULL_RETURN(optionalTextConfig.has_value(), false);
         MiscServices::TextConfig textConfig = optionalTextConfig.value();
         TAG_LOGI(
-            AceLogTag::ACE_TEXT_FIELD, "RequestKeyboard set calling window id is : %{public}u", textConfig.windowId);
+            AceLogTag::ACE_TEXT_FIELD, "RequestKeyboard set calling window id:%{public}u, inputType: %{public}d"
+            , textConfig.windowId, textConfig.inputAttribute.inputPattern);
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
 #else
         if (!HasConnection()) {
