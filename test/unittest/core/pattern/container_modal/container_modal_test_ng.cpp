@@ -16,6 +16,11 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
+
 #include "base/log/log_wrapper.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/test/mock/mock_resource_adapter.h"
@@ -31,16 +36,12 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/unittest/core/pattern/test_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace {
-    bool SystemProperties::changeTitleStyleEnabled_ = false;
+bool SystemProperties::changeTitleStyleEnabled_ = false;
 }
 namespace OHOS::Ace::NG {
 namespace {
@@ -524,6 +525,7 @@ HWTEST_F(ContainerModelTestNg, Test007, TestSize.Level1)
     pattern_->SetAppTitle("ContainerModelTest");
 
     auto host = pattern_->GetHost();
+    CHECK_NULL_VOID(host);
     auto titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front()->GetChildren().front());
     CHECK_NULL_VOID(titleNode);
     auto titleLabel = AceType::DynamicCast<FrameNode>(pattern_->GetTitleItemByIndex(titleNode, TITLE_LABEL_INDEX));
@@ -540,8 +542,6 @@ HWTEST_F(ContainerModelTestNg, Test007, TestSize.Level1)
      * @tc.expected: front and back both are HIDE VIVIBLE HIDE.
      */
     pattern_->SetContainerButtonHide(true, false, true);
-
-    CHECK_NULL_VOID(host);
     titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front()->GetChildren().front());
     CHECK_NULL_VOID(titleNode);
     auto leftSplitButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
