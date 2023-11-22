@@ -1452,6 +1452,13 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     if (!focusHub->IsFocusable()) {
         return;
     }
+    if (!HasFocus()) {
+        if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
+            CloseSelectOverlay(true);
+            StopTwinkling();
+            return;
+        }
+    }
     TimeStamp clickTimeStamp = info.GetTimeStamp();
     std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout = clickTimeStamp - lastClickTimeStamp_;
     lastClickTimeStamp_ = info.GetTimeStamp();
@@ -1477,15 +1484,6 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    auto hasFocus = HasFocus();
-    auto focusHub = GetFocusHub();
-    if (!hasFocus) {
-        if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
-            CloseSelectOverlay(true);
-            StopTwinkling();
-            return;
-        }
-    }
     auto lastCaretIndex = selectController_->GetCaretIndex();
     selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
     StartTwinkling();
@@ -1508,7 +1506,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     // emulate clicking bottom of the textField
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     auto isSelectAll = layoutProperty->GetSelectAllValueValue(false);
-    if (isSelectAll && !contentController_->IsEmpty() && !hasFocus) {
+    if (isSelectAll && !contentController_->IsEmpty() && !HasFocus()) {
         HandleOnSelectAll(true);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
