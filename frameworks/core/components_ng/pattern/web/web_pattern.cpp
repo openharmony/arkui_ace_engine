@@ -40,6 +40,7 @@
 #include "frameworks/base/utils/system_properties.h"
 #include "parameters.h"
 #include "image_source.h"
+#include "display_manager.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
@@ -1118,6 +1119,11 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     drawSizeCache_ = drawSize_;
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     delegate_->SetBoundsOrResize(drawSize_, offset);
+    if (isOfflineMode_) {
+        isOfflineMode_ = false;
+        OnWindowShow();
+    }
+
     // first update size to load url.
     if (!isUrlLoaded_) {
         isUrlLoaded_ = true;
@@ -1579,6 +1585,42 @@ void WebPattern::OnModifyDone()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddOnAreaChangeNode(host->GetId());
+
+    // offline mode
+    if (!host->IsOnMainTree()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "Web offline mode type");
+        isOfflineMode_ = true;
+        OfflineMode();
+    }
+}
+
+void WebPattern::OfflineMode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int width = 0;
+    int height = 0;
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto& calcLayout = layoutProperty->GetCalcLayoutConstraint();
+    if (calcLayout) {
+        width = calcLayout->selfIdealSize ?
+            calcLayout->selfIdealSize->Width()->GetDimension().ConvertToPx() : 0;
+        height = calcLayout->selfIdealSize ?
+            calcLayout->selfIdealSize->Height()->GetDimension().ConvertToPx() : 0;
+    }
+    bool isUnSetSize = (width == 0) && (height == 0);
+    auto defaultDisplay = OHOS::Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (isUnSetSize && defaultDisplay) {
+        width = defaultDisplay->GetWidth();
+        height = defaultDisplay->GetHeight();
+    }
+    Size drawSize = Size(width, height);
+    Offset offset = Offset(0, 0);
+    delegate_->SetBoundsOrResize(drawSize, offset);
+    isUrlLoaded_ = true;
+    delegate_->LoadUrl();
+    OnWindowHide();
 }
 
 bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard)
