@@ -160,6 +160,8 @@ private:
     void OnClick();
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
+    void UpdateSwitchPaintProperty();
+    void UpdateSwitchLayoutProperty();
 
     RefPtr<PanEvent> panEvent_;
 
