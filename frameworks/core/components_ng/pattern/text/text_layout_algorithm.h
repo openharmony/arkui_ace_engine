@@ -89,6 +89,8 @@ protected:
 
     virtual ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const;
 
+    virtual void UpdateParagraphForAISpan(const TextStyle& textStyle, LayoutWrapper* layoutWrapper);
+
 private:
     virtual void ApplyIndent(const TextStyle& textStyle, double width);
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);

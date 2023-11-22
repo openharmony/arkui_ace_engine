@@ -21,6 +21,7 @@
 #include <string>
 
 #include "base/memory/referenced.h"
+#include "core/common/ai/data_detector_mgr.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -153,6 +154,7 @@ public:
     GestureEventFunc onClick;
     GestureEventFunc onLongPress;
     [[deprecated]] std::list<RefPtr<SpanItem>> children;
+    std::map<int32_t, AISpan> aiSpanMap;
     int32_t placeHolderIndex = -1;
     // when paragraph ends with a \n, it causes the paragraph height to gain an extra line
     // to have normal spacing between paragraphs, remove \n from every paragraph except the last one.
@@ -163,7 +165,10 @@ public:
 #endif // ENABLE_DRAG_FRAMEWORK
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         double width = 0.0f, double height = 0.0f, VerticalAlign verticalAlign = VerticalAlign::BASELINE);
-    virtual void UpdateTextStyle(const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
+    virtual void UpdateTextStyleForAISpan(
+        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
+    virtual void UpdateTextStyle(
+        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;

@@ -31,6 +31,7 @@ struct TextDataDetectResult {
     std::string entity;
     std::string wordPos;
     std::string menuOption;
+    std::string entityMenuServiceInfo;
 };
 
 using TextDetectResultFunc = std::function<void(const TextDataDetectResult)>;

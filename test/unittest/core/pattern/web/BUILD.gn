@@ -31,6 +31,7 @@ template("web_pattern_unit_source_set") {
         "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
         "//foundation/multimedia/image_framework/interfaces/innerkits/include",
         "//foundation/window/window_manager/interfaces/innerkits",
+        "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
       ]
       sources += [
         "web_accessibility_property_test_ng.cpp",
@@ -60,6 +61,7 @@ template("web_pattern_unit_source_set") {
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
       sources += [ "$ace_root/test/mock/core/common/mock_udmf.cpp" ]
       sources += [ "$ace_root/test/mock/core/common/mock_interaction.cpp" ]
+      sources += [ "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp" ]
       defines += [ "ENABLE_DRAG_FRAMEWORK" ]
     }
   }
