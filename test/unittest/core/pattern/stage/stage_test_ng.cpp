@@ -682,47 +682,6 @@ HWTEST_F(StageTestNg, PagePatternTest005, TestSize.Level1)
      */
     pattern->ClearPageTransitionEffect();
     EXPECT_EQ(pattern->GetTopTransition(), nullptr);
-
-    /**
-     * @tc.steps: step8. add Element to nodeAnimatablePropertyMap_.
-     * @tc.expected: GetAnimatablePropertyFloat seccuess.
-     */
-    auto FRAME_NODE = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<Pattern>());
-    FRAME_NODE->nodeAnimatablePropertyMap_.emplace(
-        "pageTransitionProperty", AceType::MakeRefPtr<NodeAnimatablePropertyBase>());
-    pattern->frameNode_ = FRAME_NODE;
-    pattern->StopPageTransition();
-    EXPECT_TRUE(FRAME_NODE->GetAnimatablePropertyFloat("pageTransitionProperty"));
-
-    /**
-     * @tc.steps: step9. test BeforeCreateLayoutWrapper.
-     */
-    // auto pipeline = AceType::DynamicCast<NG::MockPipelineBase>(PipelineBase::GetCurrentContext());
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pattern->BeforeCreateLayoutWrapper();
-    EXPECT_FALSE(pipeline->GetInstallationFree());
-
-    pipeline->windowManager_ = AceType::MakeRefPtr<WindowManager>();
-    pipeline->safeAreaManager_->keyboardSafeAreaEnabled_ = true;
-    pipeline->windowManager_->windowGetModeCallback_ = []() -> WindowMode { return WindowMode::WINDOW_MODE_FLOATING; };
-    pipeline->SetWindowModal(WindowModal::CONTAINER_MODAL);
-    auto inset = pipeline->GetSafeArea();
-    inset.bottom_.start = 0;
-    inset.bottom_.end = 1;
-    pattern->BeforeCreateLayoutWrapper();
-    EXPECT_FALSE(pipeline->GetInstallationFree());
-
-    pipeline->SetInstallationFree(1);
-    pattern->BeforeCreateLayoutWrapper();
-    EXPECT_TRUE(pipeline->GetInstallationFree());
-
-    /**
-     * @tc.steps: step10. coverage AvoidKeyboard.
-     * @tc.expected: true.
-     */
-    pipeline->safeAreaManager_->keyboardSafeAreaEnabled_ = true;
-    bool bResult = pattern->AvoidKeyboard();
-    EXPECT_TRUE(bResult);
 }
 
 /**
@@ -755,6 +714,65 @@ HWTEST_F(StageTestNg, PagePatternTest006, TestSize.Level1)
     animatorInfo->SetAnimator(AceType::MakeRefPtr<Animator>(TEST_ANIMATOR_ID.c_str()));
     pattern.AddJsAnimator(TEST_ANIMATOR_ID, animatorInfo);
     EXPECT_NE(pattern.GetJsAnimator(TEST_ANIMATOR_ID), nullptr);
+}
+/**
+ * @tc.name: PagePatternTest007
+ * @tc.desc: Test the PagePattern related functions in the PagePattern work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePatternTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some node and PagePattern.
+     */
+    auto parent = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto node = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 1, AceType::MakeRefPtr<StagePattern>());
+    auto child = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(2, "child");
+    parent->AddChild(node);
+    node->AddChild(child);
+    auto pattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    pattern->AttachToFrameNode(node);
+    pattern->ReloadPage();
+
+    /**
+     * @tc.steps: step2. add Element to nodeAnimatablePropertyMap_.
+     * @tc.expected: GetAnimatablePropertyFloat seccuess.
+     */
+    auto FRAME_NODE = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<Pattern>());
+    FRAME_NODE->nodeAnimatablePropertyMap_.emplace(
+        "pageTransitionProperty", AceType::MakeRefPtr<NodeAnimatablePropertyBase>());
+    pattern->frameNode_ = FRAME_NODE;
+    pattern->StopPageTransition();
+    EXPECT_TRUE(FRAME_NODE->GetAnimatablePropertyFloat("pageTransitionProperty"));
+
+    /**
+     * @tc.steps: step3. test BeforeCreateLayoutWrapper.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_FALSE(pipeline->GetInstallationFree());
+
+    pipeline->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+    pipeline->safeAreaManager_->keyboardSafeAreaEnabled_ = true;
+    pipeline->windowManager_->windowGetModeCallback_ = []() -> WindowMode { return WindowMode::WINDOW_MODE_FLOATING; };
+    pipeline->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    auto inset = pipeline->GetSafeArea();
+    inset.bottom_.start = 0;
+    inset.bottom_.end = 1;
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_FALSE(pipeline->GetInstallationFree());
+
+    pipeline->SetInstallationFree(1);
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(pipeline->GetInstallationFree());
+
+    /**
+     * @tc.steps: step4. coverage AvoidKeyboard.
+     * @tc.expected: true.
+     */
+    pipeline->safeAreaManager_->keyboardSafeAreaEnabled_ = true;
+    bool bResult = pattern->AvoidKeyboard();
+    EXPECT_TRUE(bResult);
 }
 /**
  * @tc.name: PageTransitionModelTest001

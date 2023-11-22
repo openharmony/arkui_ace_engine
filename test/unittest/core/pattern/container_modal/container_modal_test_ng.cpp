@@ -527,12 +527,10 @@ HWTEST_F(ContainerModelTestNg, Test007, TestSize.Level1)
     auto host = pattern_->GetHost();
     CHECK_NULL_VOID(host);
     auto titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front()->GetChildren().front());
-    CHECK_NULL_VOID(titleNode);
     auto titleLabel = AceType::DynamicCast<FrameNode>(pattern_->GetTitleItemByIndex(titleNode, TITLE_LABEL_INDEX));
     EXPECT_EQ(titleLabel->GetLayoutProperty<TextLayoutProperty>()->GetContentValue(), "ContainerModelTest");
 
     auto floatingNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());
-    CHECK_NULL_VOID(floatingNode);
     auto floatingTitleLabel =
         AceType::DynamicCast<FrameNode>(pattern_->GetTitleItemByIndex(floatingNode, TITLE_LABEL_INDEX));
     EXPECT_EQ(floatingTitleLabel->GetLayoutProperty<TextLayoutProperty>()->GetContentValue(), "ContainerModelTest");
@@ -543,7 +541,6 @@ HWTEST_F(ContainerModelTestNg, Test007, TestSize.Level1)
      */
     pattern_->SetContainerButtonHide(true, false, true);
     titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front()->GetChildren().front());
-    CHECK_NULL_VOID(titleNode);
     auto leftSplitButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
     EXPECT_EQ(leftSplitButton->GetLayoutProperty()->propVisibility_.value(), VisibleType::GONE);
     auto maximizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MAX_RECOVER_BUTTON_INDEX));
@@ -552,7 +549,6 @@ HWTEST_F(ContainerModelTestNg, Test007, TestSize.Level1)
     EXPECT_EQ(minimizeButton->GetLayoutProperty()->propVisibility_.value(), VisibleType::GONE);
 
     titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());
-    CHECK_NULL_VOID(titleNode);
     leftSplitButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
     EXPECT_EQ(leftSplitButton->GetLayoutProperty()->propVisibility_.value(), VisibleType::GONE);
     maximizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MAX_RECOVER_BUTTON_INDEX));
@@ -566,38 +562,25 @@ HWTEST_F(ContainerModelTestNg, Test007, TestSize.Level1)
      */
     pattern_->SetCloseButtonStatus(true);
     titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front()->GetChildren().front());
-    CHECK_NULL_VOID(titleNode);
     auto floatingTitleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());
-    CHECK_NULL_VOID(floatingTitleNode);
     auto closeButton = AceType::DynamicCast<FrameNode>(pattern_->GetTitleItemByIndex(titleNode, CLOSE_BUTTON_INDEX));
-    CHECK_NULL_VOID(closeButton);
     auto buttonEvent = closeButton->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_VOID(buttonEvent);
     EXPECT_EQ(buttonEvent->IsEnabled(), true);
     auto floatingCloseButton =
         AceType::DynamicCast<FrameNode>(pattern_->GetTitleItemByIndex(floatingTitleNode, CLOSE_BUTTON_INDEX));
-    CHECK_NULL_VOID(floatingCloseButton);
     auto floatingButtonEvent = floatingCloseButton->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_VOID(floatingButtonEvent);
     EXPECT_EQ(floatingButtonEvent->IsEnabled(), true);
 
     pattern_->SetCloseButtonStatus(false);
     titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front()->GetChildren().front());
-    CHECK_NULL_VOID(titleNode);
     floatingTitleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());
-    CHECK_NULL_VOID(floatingTitleNode);
     closeButton = AceType::DynamicCast<FrameNode>(pattern_->GetTitleItemByIndex(titleNode, CLOSE_BUTTON_INDEX));
-    CHECK_NULL_VOID(closeButton);
     buttonEvent = closeButton->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_VOID(buttonEvent);
     EXPECT_EQ(buttonEvent->IsEnabled(), false);
     floatingCloseButton =
         AceType::DynamicCast<FrameNode>(pattern_->GetTitleItemByIndex(floatingTitleNode, CLOSE_BUTTON_INDEX));
-    CHECK_NULL_VOID(floatingCloseButton);
     floatingButtonEvent = floatingCloseButton->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_VOID(floatingButtonEvent);
     EXPECT_EQ(floatingButtonEvent->IsEnabled(), false);
-
     pattern_->SetAppIcon(nullptr);
 }
 /**
