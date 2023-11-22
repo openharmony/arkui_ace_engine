@@ -1452,7 +1452,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest028, TestSize.Level1)
 
 /**
  * @tc.name: RadioPatternTest029
- * @tc.desc: Test Radio Accessibility PerformAction test Select and ClearSelection.
+ * @tc.desc: Radio Accessibility PerformAction test Select and ClearSelection.
  * @tc.type: FUNC
  */
 HWTEST_F(RadioTestNg, RadioPatternTest029, TestSize.Level1)
