@@ -200,6 +200,28 @@ void ParseGradientColorStops(const EcmaVM* vm, const Local<JSValueRef>& value, s
         colors.push_back(dimension);
     }
 }
+
+bool ParseJsDoublePair(const EcmaVM* vm, const Local<JSValueRef>& value, double& first, double& second)
+{
+    if (!value->IsArray(vm)) {
+        return false;
+    }
+    auto array = panda::Local<panda::ArrayRef>(value);
+    if (array->Length(vm) != NUM_2) {
+        return false;
+    }
+    auto firstArg = panda::ArrayRef::GetValueAt(vm, array, NUM_0);
+    if (!firstArg->IsNumber()) {
+        return false;
+    }
+    auto secondArg = panda::ArrayRef::GetValueAt(vm, array, NUM_1);
+    if (!secondArg->IsNumber()) {
+        return false;
+    }
+    first = firstArg->ToNumber(vm)->Value();
+    second = secondArg->ToNumber(vm)->Value();
+    return true;
+}
 } // namespace
 
 ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1001,6 +1023,137 @@ ArkUINativeModuleValue CommonBridge::ResetLinearGradient(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetCommonModifier().ResetLinearGradient(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetForegroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto blurStyleArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto colorModeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto adaptiveColorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto scaleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    int32_t blurStyle = -1;
+    if (blurStyleArg->IsNumber()) {
+        blurStyle = blurStyleArg->Int32Value(vm);
+    }
+    bool isHasOptions = !(colorModeArg->IsUndefined() && adaptiveColorArg->IsUndefined() && scaleArg->IsUndefined());
+    int32_t colorMode = -1;
+    int32_t adaptiveColor = -1;
+    double scale = -1.0;
+    if (isHasOptions) {
+        colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
+        ParseJsInt32(vm, colorModeArg, colorMode);
+        adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+        ParseJsInt32(vm, adaptiveColorArg, adaptiveColor);
+        scale = 1.0;
+        if (scaleArg->IsNumber()) {
+            scale = scaleArg->ToNumber(vm)->Value();
+        }
+    }
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetForegroundBlurStyle(nativeNode,
+        blurStyle, colorMode, adaptiveColor, scale);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetForegroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetForegroundBlurStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetLinearGradientBlur(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto blurRadiusArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto fractionStopsArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto directionArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    double blurRadius = 0.0;
+    ParseJsDouble(vm, blurRadiusArg, blurRadius);
+    auto direction = static_cast<int32_t>(GradientDirection::BOTTOM);
+    if (directionArg->IsInt()) {
+        direction = directionArg->Int32Value(vm);
+    }
+    std::vector<double> fractionStops;
+    if (fractionStopsArg->IsArray(vm)) {
+        auto array = panda::Local<panda::ArrayRef>(fractionStopsArg);
+        auto length = array->Length(vm);
+        for (uint32_t index = 0; index < length; index++) {
+            auto fractionStop = panda::ArrayRef::GetValueAt(vm, array, index);
+            double first = 0.0;
+            double second = 0.0;
+            if (!ParseJsDoublePair(vm, fractionStop, first, second)) {
+                continue;
+            }
+            fractionStops.push_back(first);
+            fractionStops.push_back(second);
+        }
+    }
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetLinearGradientBlur(nativeNode, blurRadius,
+        fractionStops.data(), fractionStops.size(), direction);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetLinearGradientBlur(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetLinearGradientBlur(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto blurStyleArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto colorModeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto adaptiveColorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto scaleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    int32_t blurStyle = -1;
+    if (blurStyleArg->IsNumber()) {
+        blurStyle = blurStyleArg->Int32Value(vm);
+    }
+    bool isHasOptions = !(colorModeArg->IsUndefined() && adaptiveColorArg->IsUndefined() && scaleArg->IsUndefined());
+    int32_t colorMode = -1;
+    int32_t adaptiveColor = -1;
+    double scale = -1.0;
+    if (isHasOptions) {
+        colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
+        ParseJsInt32(vm, colorModeArg, colorMode);
+        adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+        ParseJsInt32(vm, adaptiveColorArg, adaptiveColor);
+        scale = 1.0;
+        if (scaleArg->IsNumber()) {
+            scale = scaleArg->ToNumber(vm)->Value();
+        }
+    }
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundBlurStyle(nativeNode,
+        blurStyle, colorMode, adaptiveColor, scale);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBackgroundBlurStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

@@ -352,6 +352,45 @@ class LinearGradientModifier extends Modifier<ArkLinearGradient> {
     }
 }
 
+class ForegroundBlurStyleModifier extends Modifier<ArkForegroundBlurStyle> {
+    static identity: Symbol = Symbol("foregroundBlurStyle");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetForegroundBlurStyle(node);
+        }
+        else {
+            GetUINativeModule().common.setForegroundBlurStyle(node,
+                this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
+        }
+    }
+}
+
+class LinearGradientBlurModifier extends Modifier<ArkLinearGradientBlur> {
+    static identity: Symbol = Symbol("linearGradientBlur");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetLinearGradientBlur(node);
+        }
+        else {
+            GetUINativeModule().common.setLinearGradientBlur(node,
+                this.value.blurRadius, this.value.fractionStops, this.value.direction);
+        }
+    }
+}
+
+class BackgroundBlurStyleModifier extends Modifier<ArkBackgroundBlurStyle> {
+    static identity: Symbol = Symbol("backgroundBlurStyle");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetBackgroundBlurStyle(node);
+        }
+        else {
+            GetUINativeModule().common.setBackgroundBlurStyle(node,
+                this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
+        }
+    }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType) => typeof val === 'string'
@@ -527,11 +566,27 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     backgroundBlurStyle(value: BlurStyle, options?: BackgroundBlurStyleOptions): this {
-        throw new Error("Method not implemented.");
+        let arkBackgroundBlurStyle = new ArkBackgroundBlurStyle();
+        arkBackgroundBlurStyle.blurStyle = value;
+        if (typeof options === "object") {
+            arkBackgroundBlurStyle.colorMode = options.colorMode;
+            arkBackgroundBlurStyle.adaptiveColor = options.adaptiveColor;
+            arkBackgroundBlurStyle.scale = options.scale;
+        }
+        modifier(this._modifiers, BackgroundBlurStyleModifier, arkBackgroundBlurStyle);
+        return this;
     }
 
     foregroundBlurStyle(value: BlurStyle, options?: ForegroundBlurStyleOptions): this {
-        throw new Error("Method not implemented.");
+        let arkForegroundBlurStyle = new ArkForegroundBlurStyle();
+        arkForegroundBlurStyle.blurStyle = value;
+        if (typeof options === "object") {
+            arkForegroundBlurStyle.colorMode = options.colorMode;
+            arkForegroundBlurStyle.adaptiveColor = options.adaptiveColor;
+            arkForegroundBlurStyle.scale = options.scale;
+        }
+        modifier(this._modifiers, ForegroundBlurStyleModifier, arkForegroundBlurStyle);
+        return this;
     }
 
     opacity(value: number | Resource): this {
@@ -747,7 +802,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     linearGradientBlur(value: number, options: LinearGradientBlurOptions): this {
-        throw new Error("Method not implemented.");
+        let arkLinearGradientBlur = new ArkLinearGradientBlur();
+        arkLinearGradientBlur.blurRadius = value;
+        arkLinearGradientBlur.fractionStops = options.fractionStops;
+        arkLinearGradientBlur.direction = options.direction;
+        modifier(this._modifiers, LinearGradientBlurModifier, arkLinearGradientBlur);
+        return this;
     }
 
     brightness(value: number): this {

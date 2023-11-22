@@ -255,3 +255,61 @@ class ArkLinearGradient {
             (ArkDeepCompareArrays(this.colors, another.colors)) && (this.repeating === another.repeating));
     }
 }
+
+class ArkForegroundBlurStyle {
+    blurStyle: number | undefined;
+    colorMode: number | undefined;
+    adaptiveColor: number | undefined;
+    scale: number | undefined;
+
+    constructor() {
+        this.blurStyle = undefined;
+        this.colorMode = undefined;
+        this.adaptiveColor = undefined;
+        this.scale = undefined;
+    }
+
+    isEqual(another: ArkForegroundBlurStyle): boolean {
+        return ((this.blurStyle === another.blurStyle) &&
+            (this.colorMode === another.colorMode) && (this.adaptiveColor === another.adaptiveColor) &&
+            (this.scale === another.scale));
+    }
+}
+
+class ArkLinearGradientBlur {
+    blurRadius: number | undefined;
+    fractionStops: FractionStop[] | undefined;
+    direction: number | undefined;
+
+    constructor() {
+        this.blurRadius = undefined;
+        this.fractionStops = undefined;
+        this.direction = undefined;
+    }
+
+    isEqual(another: ArkLinearGradientBlur): boolean {
+        return ((this.blurRadius === another.blurRadius) &&
+            (ArkDeepCompareArrays(this.fractionStops, another.fractionStops)) &&
+            (this.direction === another.direction));
+    }
+}
+
+class ArkBackgroundBlurStyle {
+    blurStyle: number | undefined;
+    colorMode: number | undefined;
+    adaptiveColor: number | undefined;
+    scale: number | undefined;
+
+    constructor() {
+        this.blurStyle = undefined;
+        this.colorMode = undefined;
+        this.adaptiveColor = undefined;
+        this.scale = undefined;
+    }
+
+    isEqual(another: ArkBackgroundBlurStyle): boolean {
+        return ((this.blurStyle === another.blurStyle) &&
+            (this.colorMode === another.colorMode) && (this.adaptiveColor === another.adaptiveColor) &&
+            (this.scale === another.scale));
+    }
+}

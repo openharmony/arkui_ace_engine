@@ -1895,6 +1895,36 @@ void ViewAbstract::SetLinearGradient(FrameNode* frameNode, const NG::Gradient& g
     ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradient, gradient, frameNode);
 }
 
+void ViewAbstract::SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle)
+{
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateFrontBlurStyle(fgBlurStyle);
+        if (target->GetFrontBlurRadius().has_value()) {
+            target->UpdateFrontBlurRadius(Dimension());
+        }
+    }
+}
+
+void ViewAbstract::SetLinearGradientBlur(FrameNode* frameNode, NG::LinearGradientBlurPara blurPara)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradientBlur, blurPara, frameNode);
+}
+
+void ViewAbstract::SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle)
+{
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
+        target->UpdateBackBlurStyle(bgBlurStyle);
+        if (target->GetBackBlurRadius().has_value()) {
+            target->UpdateBackBlurRadius(Dimension());
+        }
+    }
+}
+
 void ViewAbstract::SetLightPosition(
     const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ)
 {
