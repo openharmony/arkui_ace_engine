@@ -29,18 +29,11 @@ ohos_fuzztest("ArkuiFormRenderProxyFuzzTest") {
     "$ace_root/interfaces/inner_api",
     "$root_out_dir/arkui/framework",
   ]
-  cflags = [
-    "-g",
-    "-O0",
-    "-Wno-unused-variable",
-    "-fno-omit-frame-pointer",
-  ]
   sources = [ "arkuiformrenderproxy_fuzzer.cpp" ]
 
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/interfaces/inner_api/form_render:ace_form_render",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
 
   external_deps = [
@@ -48,6 +41,7 @@ ohos_fuzztest("ArkuiFormRenderProxyFuzzTest") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "form_fwk:form_manager",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
