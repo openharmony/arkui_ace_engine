@@ -387,6 +387,17 @@ public:
 
     static bool GetResourceDecoupling();
 
+    static int32_t GetJankFrameThreshold();
+
+    static bool GetTitleStyleEnabled() {
+        return changeTitleStyleEnabled_;
+    }
+
+    static bool GetFlutterDecouplingEnabled()
+    {
+        return flutterDecouplingEnabled_;
+    }
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
@@ -426,6 +437,8 @@ private:
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;
+    static bool changeTitleStyleEnabled_;
+    static bool flutterDecouplingEnabled_;
 };
 
 } // namespace OHOS::Ace
