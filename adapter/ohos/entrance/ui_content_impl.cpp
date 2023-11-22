@@ -1589,6 +1589,24 @@ void UIContentImpl::UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode)
         TaskExecutor::TaskType::UI);
 }
 
+bool UIContentImpl::NeedSoftKeyboard()
+{
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->NeedSoftKeyboard();
+}
+
+void UIContentImpl::SetOnWindowFocused(const std::function<void()>& callback)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetOnWindowFocused(callback);
+}
+
 void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize)
 {
     LOGI("HideWindowTitleButton hideSplit: %{public}d, hideMaximize: %{public}d, hideMinimize: %{public}d", hideSplit,

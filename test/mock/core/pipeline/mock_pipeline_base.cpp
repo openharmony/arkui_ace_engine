@@ -491,5 +491,10 @@ bool NG::PipelineContext::SetIsFocusActive(bool isFocusActive)
     return false;
 }
 
+bool NG::PipelineContext::NeedSoftKeyboard()
+{
+    return false;
+}
+
 void HandleSubwindow(bool isShow) {}
 } // namespace OHOS::Ace

@@ -110,6 +110,11 @@ public:
         return timestamp_;
     }
 
+    bool NeedSoftKeyboard() const override
+    {
+        return true;
+    }
+
     void ResetBeforePaste();
     void ResetAfterPaste();
 

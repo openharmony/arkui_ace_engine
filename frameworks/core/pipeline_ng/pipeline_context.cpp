@@ -121,6 +121,21 @@ RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
     return DynamicCast<PipelineContext>(pipeline);
 }
 
+bool PipelineContext::NeedSoftKeyboard()
+{
+    auto focusNode = GetFocusNode();
+    if (!focusNode) {
+        return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Focus node id is: %{public}d, tag is %{public}s",
+        focusNode->GetId(), focusNode->GetTag().c_str());
+    auto pattern = focusNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    bool isNeed = pattern->NeedSoftKeyboard();
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "need soft keyboard: %{public}d", isNeed);
+    return isNeed;
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     auto context = GetCurrentContext();
@@ -2045,6 +2060,9 @@ void PipelineContext::WindowFocus(bool isFocus)
             if (curMainView) {
                 curMainView->HandleFocusOnMainView();
             }
+        }
+        if (focusOnNodeCallback_) {
+            focusOnNodeCallback_();
         }
     }
     FlushWindowFocusChangedCallback(isFocus);

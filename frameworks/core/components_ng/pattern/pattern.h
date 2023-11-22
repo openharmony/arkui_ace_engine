@@ -79,6 +79,11 @@ public:
         return true;
     }
 
+    virtual bool NeedSoftKeyboard() const
+    {
+        return false;
+    }
+
     virtual bool DefaultSupportDrag()
     {
         return false;

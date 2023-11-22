@@ -106,6 +106,7 @@ public:
     MOCK_METHOD0(NotifyConfigurationChange, void());
     MOCK_CONST_METHOD0(GetTaskExecutor, RefPtr<TaskExecutor>());
     MOCK_METHOD1(SetIsFocusActive, bool(bool isFocusActive));
+    MOCK_METHOD0(NeedSoftKeyboard, bool());
 
     static RefPtr<MockPipelineBase> pipeline_;
 
