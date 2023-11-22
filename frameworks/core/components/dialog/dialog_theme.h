@@ -178,6 +178,10 @@ public:
             theme->mutiButtonPaddingVertical_ =
                 dialogPattern->GetAttr<Dimension>("muti_button_padding_vertical", 4.0_vp);
             theme->multipleDialogDisplay_ = dialogPattern->GetAttr<std::string>("multiple_dialog_display", "stack");
+            theme->actionsPadding_ = Edge(dialogPattern->GetAttr<Dimension>("dialog_padding_actions_left", 16.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_padding_actions_top", 8.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_padding_actions_right", 16.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_padding_actions_bottom", 16.0_vp));
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }
@@ -189,7 +193,6 @@ public:
             theme->adjustPadding_ = Edge(defaultPadding, defaultPadding, defaultPadding, 0.0_vp);
             theme->contentDefaultPadding_ = Edge(defaultPadding, 0.0_vp, defaultPadding, defaultPadding);
             theme->contentAdjustPadding_ = Edge(defaultPadding, 0.0_vp, defaultPadding, 0.0_vp);
-            theme->actionsPadding_ = Edge(defaultPadding, actionsTopPadding, defaultPadding, actionsTopPadding);
             theme->buttonHeight_ = dialogPattern->GetAttr<Dimension>(DIALOG_BUTTON_HEIGHT, 0.0_vp);
             theme->titleMaxLines_ = static_cast<uint32_t>(dialogPattern->GetAttr<int32_t>(DIALOG_TITLE_MAX_LINES, 2));
             theme->buttonSpacingHorizontal_ = actionsTopPadding;
