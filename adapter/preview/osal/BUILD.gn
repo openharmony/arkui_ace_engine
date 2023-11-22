@@ -79,6 +79,7 @@ ohos_source_set("preview_osal_source") {
       "socperf_client_impl.cpp",
       "stage_card_parser.cpp",
       "system_properties.cpp",
+      "task/task_runner_adapter_impl.cpp",
       "trace_id_impl.cpp",
     ]
 
@@ -100,7 +101,10 @@ ohos_source_set("preview_osal_source") {
       "//third_party/curl:curl_config",
     ]
 
-    include_dirs = [ "//commonlibrary/c_utils/base/include" ]
+    include_dirs = [
+      "//commonlibrary/c_utils/base/include",
+      "//ide/tools/previewer",
+    ]
 
     if (is_ohos_standard_system) {
       sources += [
