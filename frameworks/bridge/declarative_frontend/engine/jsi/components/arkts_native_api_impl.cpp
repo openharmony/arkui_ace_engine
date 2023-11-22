@@ -14,6 +14,7 @@
  */
 #include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_blank_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_button_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_common_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_span_modifier.h"
@@ -39,6 +40,7 @@ static struct ArkUINodeAPI impl = {
     GetButtonModifier,
     GetToggleModifier,
     GetImageSpanModifier,
+    GetBlankModifier,
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI()

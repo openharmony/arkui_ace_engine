@@ -70,17 +70,17 @@ struct ArkUICommonModifierAPI {
     void (*ResetBrightness)(NodeHandle node);
     void (*SetBlur)(NodeHandle node, double value);
     void (*ResetBlur)(NodeHandle node);
-    void (*SetLinearGradient)(NodeHandle node, const double* values, int32_t valuesLength,
-        const double* colors, int32_t colorsLength);
+    void (*SetLinearGradient)(
+        NodeHandle node, const double* values, int32_t valuesLength, const double* colors, int32_t colorsLength);
     void (*ResetLinearGradient)(NodeHandle node);
-    void (*SetForegroundBlurStyle)(NodeHandle node, int32_t blurStyle, int32_t colorMode,
-        int32_t adaptiveColor, double scale);
+    void (*SetForegroundBlurStyle)(
+        NodeHandle node, int32_t blurStyle, int32_t colorMode, int32_t adaptiveColor, double scale);
     void (*ResetForegroundBlurStyle)(NodeHandle node);
-    void (*SetLinearGradientBlur)(NodeHandle node, double blurRadius, const double* stops, int32_t stopsLength,
-        int32_t directionValue);
+    void (*SetLinearGradientBlur)(
+        NodeHandle node, double blurRadius, const double* stops, int32_t stopsLength, int32_t directionValue);
     void (*ResetLinearGradientBlur)(NodeHandle node);
-    void (*SetBackgroundBlurStyle)(NodeHandle node, int32_t blurStyle, int32_t colorMode,
-        int32_t adaptiveColor, double scale);
+    void (*SetBackgroundBlurStyle)(
+        NodeHandle node, int32_t blurStyle, int32_t colorMode, int32_t adaptiveColor, double scale);
     void (*ResetBackgroundBlurStyle)(NodeHandle node);
 };
 
@@ -131,6 +131,11 @@ struct ArkUIImageSpanModifierAPI {
     void (*ResetImageSpanObjectFit)(NodeHandle node);
 };
 
+struct ArkUIBlankModifierAPI {
+    void (*SetColor)(NodeHandle node, uint32_t value);
+    void (*ResetColor)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -138,6 +143,7 @@ struct ArkUINodeAPI {
     ArkUIButtonModifierAPI (*GetButtonModifier)();
     ArkUIToggleModifierAPI (*GetToggleModifier)();
     ArkUIImageSpanModifierAPI (*GetImageSpanModifier)();
+    ArkUIBlankModifierAPI (*GetBlankModifier)();
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);

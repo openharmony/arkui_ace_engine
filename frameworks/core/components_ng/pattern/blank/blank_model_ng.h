@@ -20,12 +20,13 @@
 #include "core/components_ng/pattern/blank/blank_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT BlankModelNG: public OHOS::Ace::BlankModel {
+class ACE_EXPORT BlankModelNG : public OHOS::Ace::BlankModel {
 public:
     void Create() override;
     void SetBlankMin(const Dimension& blankMin) override;
     void SetHeight(const Dimension& height) override;
     void SetColor(const Color& color) override;
+    static void SetColor(FrameNode* frameNode, const Color& color);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BLANK_BLANK_MODEL_NG_H

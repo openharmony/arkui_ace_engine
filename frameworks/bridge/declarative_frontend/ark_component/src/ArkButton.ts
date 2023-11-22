@@ -175,7 +175,7 @@ class ButtonFontWeightModifier extends Modifier<string> {
     }
   }
 }
-// @ts-ignore
+
 globalThis.Button.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
