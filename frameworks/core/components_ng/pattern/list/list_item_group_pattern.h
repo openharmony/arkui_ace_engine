@@ -33,6 +33,7 @@ struct ListItemGroupPaintInfo {
     int32_t lanes = 1;
     float spaceWidth = 0.0f;
     float laneGutter = 0.0f;
+    int32_t totalItemCount = 0;
 };
 
 class ACE_EXPORT ListItemGroupPattern : public Pattern {
