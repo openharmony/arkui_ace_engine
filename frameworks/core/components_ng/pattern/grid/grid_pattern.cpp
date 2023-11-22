@@ -73,10 +73,12 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
         auto result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
         result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
+        result->SetScrollSource(GetScrollSource());
         return result;
     } else {
         auto result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
         result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
+        result->SetScrollSource(GetScrollSource());
         return result;
     }
 }
