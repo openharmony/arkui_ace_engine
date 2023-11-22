@@ -56,7 +56,7 @@ public:
 
     void FireOnShownEvent() const
     {
-        UIObserverHandler::NotifyNavigationStateChange(navDestinationPattern_, NavDestinationState::ON_SHOW);
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(navDestinationPattern_, NavDestinationState::ON_SHOW);
         if (onShownEvent_) {
             auto onShownEvent = onShownEvent_;
             onShownEvent();
@@ -70,7 +70,7 @@ public:
 
     void FireOnHiddenEvent() const
     {
-        UIObserverHandler::NotifyNavigationStateChange(navDestinationPattern_, NavDestinationState::ON_HIDDEN);
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(navDestinationPattern_, NavDestinationState::ON_HIDDEN);
         if (onHiddenEvent_) {
             onHiddenEvent_();
         }

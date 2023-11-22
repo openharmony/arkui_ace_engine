@@ -22,7 +22,7 @@ build_component_ng("base_ng") {
     "geometry_node.cpp",
     "inspector.cpp",
     "modifier.cpp",
-    "observer.cpp",
+    "observer_handler.cpp",
     "ui_node.cpp",
     "view_abstract.cpp",
     "view_abstract_model_ng.cpp",
@@ -30,6 +30,4 @@ build_component_ng("base_ng") {
     "view_partial_update_model_ng.cpp",
     "view_stack_processor.cpp",
   ]
-
-  external_deps = [ "napi:ace_napi" ]
 }

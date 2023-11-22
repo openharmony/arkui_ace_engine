@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACES_OBSERVER_H
-#define FOUNDATION_ACE_INTERFACES_OBSERVER_H
+#ifndef FOUNDATION_ACE_INTERFACES_JS_OBSERVER_H
+#define FOUNDATION_ACE_INTERFACES_JS_OBSERVER_H
 
 #include <string>
 #include <map>
@@ -42,4 +42,4 @@ private:
 };
 } // namespace OHOS::Ace::Napi
 
-#endif // FOUNDATION_ACE_INTERFACES_OBSERVER_H
+#endif // FOUNDATION_ACE_INTERFACES_JS_OBSERVER_H

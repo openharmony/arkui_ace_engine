@@ -14,6 +14,8 @@
  */
 
 #include "js_ui_observer.h"
+#include "ui_observer.h"
+#include "ui_observer_listener.h"
 
 #include <map>
 #include <string>
@@ -22,8 +24,7 @@
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 
-#include "base/want/want_wrap.h"
-#include "core/components_ng/base/observer.h"
+#include "core/components_ng/base/observer_handler.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -110,15 +111,15 @@ napi_value ObserverProcess::ProcessNavigationRegister(napi_env env, napi_callbac
     GET_PARAMS(env, info, 3);
 
     if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
-        auto listener = std::make_shared<NG::UIObserverListener>(env, argv[1]);
-        NG::UIObserver::RegisterNavigationCallback(listener);
+        auto listener = std::make_shared<UIObserverListener>(env, argv[1]);
+        UIObserver::RegisterNavigationCallback(listener);
     }
 
     if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
         std::string id;
         if (ParseNavigationId(env, argv[1], id)) {
-            auto listener = std::make_shared<NG::UIObserverListener>(env, argv[2]);
-            NG::UIObserver::RegisterNavigationCallback(id, listener);
+            auto listener = std::make_shared<UIObserverListener>(env, argv[2]);
+            UIObserver::RegisterNavigationCallback(id, listener);
         }
     }
 
@@ -131,24 +132,24 @@ napi_value ObserverProcess::ProcessNavigationUnRegister(napi_env env, napi_callb
     GET_PARAMS(env, info, 3);
 
     if (argc == 1) {
-        NG::UIObserver::UnRegisterNavigationCallback(nullptr);
+        UIObserver::UnRegisterNavigationCallback(nullptr);
     }
 
     if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
-        NG::UIObserver::UnRegisterNavigationCallback(argv[1]);
+        UIObserver::UnRegisterNavigationCallback(argv[1]);
     }
 
     if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
         std::string id;
         if (ParseNavigationId(env, argv[1], id)) {
-            NG::UIObserver::UnRegisterNavigationCallback(id, nullptr);
+            UIObserver::UnRegisterNavigationCallback(id, nullptr);
         }
     }
 
     if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
         std::string id;
         if (ParseNavigationId(env, argv[1], id)) {
-            NG::UIObserver::UnRegisterNavigationCallback(id, argv[2]);
+            UIObserver::UnRegisterNavigationCallback(id, argv[2]);
         }
     }
 
@@ -168,6 +169,7 @@ napi_value ObserverOff(napi_env env, napi_callback_info info)
 
 static napi_value UIObserverExport(napi_env env, napi_value exports)
 {
+    NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFunc(&UIObserver::HandleNavigationStateChange);
     napi_property_descriptor uiObserverDesc[] = {
         DECLARE_NAPI_FUNCTION("on", ObserverOn),
         DECLARE_NAPI_FUNCTION("off", ObserverOff),

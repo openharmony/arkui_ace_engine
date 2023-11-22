@@ -30,7 +30,11 @@ template("napi_observer_static") {
       "$root_out_dir/arkui/framework",
     ]
 
-    sources = [ "js_ui_observer.cpp" ]
+    sources = [
+      "js_ui_observer.cpp",
+      "ui_observer_listener.cpp",
+      "ui_observer.cpp",
+    ]
 
     deps = []
     external_deps = []

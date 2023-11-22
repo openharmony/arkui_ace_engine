@@ -38,10 +38,17 @@ struct NavDestinationInfo {
     {}
 };
 
-class UIObserverHandler {
+class ACE_FORCE_EXPORT UIObserverHandler {
 public:
-    static void NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
-    static std::shared_ptr<NavDestinationInfo> GetNavigationState(const RefPtr<AceType>& node);
+    UIObserverHandler() = default;
+    ~UIObserverHandler() = default;
+    static UIObserverHandler& GetInstance();
+    void NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
+    std::shared_ptr<NavDestinationInfo> GetNavigationState(const RefPtr<AceType>& node);
+    using HandleFunc = void (*)(std::string, std::string, NavDestinationState);
+    void SetHandleNavigationChangeFunc(HandleFunc func);
+private:
+    HandleFunc handleFunc_;
 };
 } // namespace OHOS::Ace::NG
 

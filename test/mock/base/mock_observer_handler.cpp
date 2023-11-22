@@ -15,6 +15,12 @@
 
 #include "core/components_ng/base/observer_handler.h"
 namespace OHOS::Ace::NG {
+UIObserverHandler& UIObserverHandler::GetInstance()
+{
+    static UIObserverHandler instance;
+    return instance;
+}
+
 void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state) {}
 
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)

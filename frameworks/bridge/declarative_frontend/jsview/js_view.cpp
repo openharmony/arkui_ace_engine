@@ -914,7 +914,7 @@ void JSViewPartialUpdate::OnDumpInfo(const std::vector<std::string>& params)
 
 void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
 {
-    auto result = NG::UIObserverHandler::GetNavigationState(GetViewNode());
+    auto result = NG::UIObserverHandler::GetInstance().GetNavigationState(GetViewNode());
     if (result) {
         JSRef<JSObject> obj = JSRef<JSObject>::New();
         obj->SetProperty<std::string>("navigationId", result->navigationId);

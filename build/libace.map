@@ -75,7 +75,7 @@
       OHOS::Ace::ResourceManager::*;
       OHOS::Ace::NG::AppBarView::*;
       OHOS::Ace::Color::*;
-      OHOS::Ace::NG::UIObserver::*;
+      OHOS::Ace::NG::UIObserverHandler::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
 
@@ -95,7 +95,6 @@
       vtable?for?OHOS::Ace::SubwindowManager;
       vtable?for?OHOS::Ace::ThemeConstants;
       vtable?for?OHOS::Ace::UIContentImpl;
-      vtable?for?OHOS::Ace::NG::UIObserverListener;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
@@ -104,7 +103,6 @@
       VTT?for?OHOS::Ace::PluginComponentManager::UIServiceListener;
       VTT?for?OHOS::Ace::Scheduler;
       VTT?for?OHOS::Ace::ThemeConstants;
-      VTT?for?OHOS::Ace::NG::UIObserverListener;
     };
   local:
     *;
