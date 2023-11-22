@@ -127,9 +127,13 @@ public:
     {
         return popupTextStyle_;
     }
-    const Color& GetPopupDefaultColor() const
+    const Color& GetPopupSelectedTextColor() const
     {
-        return popupDefaultColor_;
+        return popupSelectedTextColor_;
+    }
+    const Color& GetPopupUnselectedTextColor() const
+    {
+        return popupUnselectedTextColor_;
     }
     static constexpr double SLIP_BACKGROUND_OPACITY = 0.05;
     static constexpr double SLIP_PRESS_BACKGROUND_OPACITY = 0.1;
@@ -146,7 +150,8 @@ protected:
     Color selectedBackgroundColor_;
     Color popupBackgroundColor_;
     Color popupSeparateColor_;
-    Color popupDefaultColor_;
+    Color popupSelectedTextColor_;
+    Color popupUnselectedTextColor_;
     Dimension popupAreaSize_;
     Dimension hoverRadiusSize_;
     Dimension hoverBgAreaSize_;
@@ -171,20 +176,23 @@ private:
             LOGE("Pattern of indexer is null, please check!");
             return;
         }
-        theme->defaultTextColor_ = indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR))
-                                       .ChangeOpacity(TEXT_COLOR_OPACITY);
+        theme->defaultTextColor_ =
+            indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR));
         theme->selectedTextColor_ = indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR));
         theme->popupTextColor_ = indexerPattern->GetAttr<Color>("popup_text_color", Color(POPUP_TEXT_COLOR));
         theme->popupTextSize_ =
             indexerPattern->GetAttr<Dimension>("popup_text_size", Dimension(POPUP_TEXT_SIZE, DimensionUnit::FP));
         theme->selectedBackgroundColor_ =
-            indexerPattern->GetAttr<Color>("selected_background_color", Color(SELECT_BACKGROUD_COLOR))
-                .ChangeOpacity(SELECT_BACKGROUND_OPACITY);
+            indexerPattern->GetAttr<Color>("selected_background_color", Color(SELECT_BACKGROUD_COLOR)).ChangeOpacity(
+                indexerPattern->GetAttr<double>("selected_background_color_opacity", SELECT_BACKGROUND_OPACITY));
         theme->popupBackgroundColor_ =
             indexerPattern->GetAttr<Color>("popup_background_color", Color(POPUP_BACKGROUND_COLOR));
         theme->popupSeparateColor_ =
             indexerPattern->GetAttr<Color>("popup_separator_color", Color(POPUP_SEPARATOR_COLOR));
-        theme->popupDefaultColor_ = indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR));
+        theme->popupSelectedTextColor_ =
+            indexerPattern->GetAttr<Color>("popup_selected_text_color", Color(POPUP_SELECTED_TEXT_COLOR));
+        theme->popupUnselectedTextColor_ =
+            indexerPattern->GetAttr<Color>("popup_unselected_text_color", Color(POPUP_UNSELECTED_TEXT_COLOR));
         theme->popupAreaSize_ =
             indexerPattern->GetAttr<Dimension>("popup_area_size", Dimension(POPUP_AREA_SIZE, DimensionUnit::VP));
         theme->hoverRadiusSize_ =
@@ -216,8 +224,7 @@ private:
         theme->defaultTextStyle_.SetFontSize(
             indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP)));
         theme->defaultTextStyle_.SetTextColor(
-            indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR))
-                .ChangeOpacity(TEXT_COLOR_OPACITY));
+            indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR)));
         theme->defaultTextStyle_.SetFontWeight(FontWeight::REGULAR);
         theme->defaultTextStyle_.SetFontStyle(FontStyle::NORMAL);
         theme->defaultTextStyle_.SetFontFamilies(fontFamilies);
@@ -229,7 +236,9 @@ private:
         theme->popupTextStyle_.SetFontStyle(FontStyle::NORMAL);
         theme->popupTextStyle_.SetFontFamilies(fontFamilies);
     }
-    static constexpr uint32_t DEFAULT_TEXT_COLOR = 0xff182431;
+    static constexpr uint32_t DEFAULT_TEXT_COLOR = 0x99182431;
+    static constexpr uint32_t POPUP_SELECTED_TEXT_COLOR = 0xff182431;
+    static constexpr uint32_t POPUP_UNSELECTED_TEXT_COLOR = 0xff182431;
     static constexpr uint32_t SELECT_TEXT_COLOR = 0xff007dff;
     static constexpr uint32_t POPUP_TEXT_COLOR = 0xff007dff;
     static constexpr float POPUP_TEXT_SIZE = 24.0;
