@@ -44,10 +44,8 @@ public:
         return richTextRect_;
     }
 
-    OffsetF GetTextRectOffset(LayoutWrapper* layoutWrapper) const override
-    {
-        return richTextRect_.GetOffset();
-    }
+protected:
+    OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;
 
 private:
     void GetPlaceholderRects(std::vector<RectF>& rectF) override;

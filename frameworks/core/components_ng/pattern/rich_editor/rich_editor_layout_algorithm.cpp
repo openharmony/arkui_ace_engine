@@ -126,13 +126,6 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(context);
     parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
 
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern<RichEditorPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto contentOffset = layoutWrapper->GetGeometryNode()->GetContentOffset();
-    richTextRect_.SetOffset(OffsetF(contentOffset.GetX(), pattern->GetTextRect().GetY()));
-
     // merge spans
     std::list<RefPtr<SpanItem>> allSpans;
     for (auto&& group : spans_) {
@@ -140,6 +133,17 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     SetSpans(allSpans);
     TextLayoutAlgorithm::Layout(layoutWrapper);
+}
+
+OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
+{
+    auto contentOffset = TextLayoutAlgorithm::GetContentOffset(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, contentOffset);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, contentOffset);
+    richTextRect_.SetOffset(OffsetF(contentOffset.GetX(), pattern->GetTextRect().GetY()));
+    return richTextRect_.GetOffset();
 }
 
 void RichEditorLayoutAlgorithm::GetPlaceholderRects(std::vector<RectF>& rects)
