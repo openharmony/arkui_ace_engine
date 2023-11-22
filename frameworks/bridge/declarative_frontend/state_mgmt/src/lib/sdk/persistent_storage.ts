@@ -281,13 +281,11 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     });
   }
 
-  // FU code path method
   public propertyHasChanged(info?: PropertyInfo): void {
     stateMgmtConsole.debug("PersistentStorage: property changed");
     this.write();
   }
 
-  // PU code path method
   public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<any>) {
     stateMgmtConsole.debug(`PersistentStorage: sync peer ${eventSource.info()} has changed`);
     this.write();

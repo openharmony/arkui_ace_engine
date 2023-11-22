@@ -384,6 +384,18 @@ class AppStorage extends LocalStorage {
         AppStorage.getOrCreate().aboutToBeDeleted();
     }
 
+
+    /** 
+     * return number of subscribers to named property
+     * useful for debug purposes
+     * 
+     * not a public / sdk function
+    */
+    public static numberOfSubscribersTo(propName: string): number | undefined {
+        return AppStorage.getOrCreate().numberOfSubscrbersTo(propName);
+    }
+
+
     /**
     * Subscribe to value change notifications of named property
     * Any object implementing ISinglePropertyChangeSubscriber interface 
