@@ -338,6 +338,20 @@ class BlurModifier extends Modifier<number> {
     }
 }
 
+class LinearGradientModifier extends Modifier<ArkLinearGradient> {
+    static identity: Symbol = Symbol("linearGradient");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetLinearGradient(node);
+        }
+        else {
+            GetUINativeModule().common.setLinearGradient(node,
+                this.value.angle, this.value.direction,
+                this.value.colors, this.value.repeating);
+        }
+    }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType) => typeof val === 'string'
@@ -1020,7 +1034,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         colors: Array<any>;
         repeating?: boolean;
     }): this {
-        throw new Error("Method not implemented.");
+        let arkLinearGradient = new ArkLinearGradient(value.angle, value.direction, value.colors, value.repeating);
+        modifier(this._modifiers, LinearGradientModifier, arkLinearGradient);
+        return this;
     }
 
     sweepGradient(value: {

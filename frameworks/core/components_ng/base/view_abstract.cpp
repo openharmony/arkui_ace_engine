@@ -1890,6 +1890,11 @@ void ViewAbstract::SetZIndex(FrameNode* frameNode, int32_t value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(ZIndex, value, frameNode);
 }
 
+void ViewAbstract::SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradient, gradient, frameNode);
+}
+
 void ViewAbstract::SetLightPosition(
     const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ)
 {

@@ -126,6 +126,80 @@ bool ParseJsDimensionVpNG(
 {
     return ParseJsDimensionNG(vm, jsValue, result, DimensionUnit::VP, isSupportPercent);
 }
+
+bool ParseJsInt32(const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& result)
+{
+    if (value->IsNumber()) {
+        result = value->Int32Value(vm);
+        return true;
+    }
+    if (value->IsString()) {
+        result = StringUtils::StringToInt(value->ToString(vm)->ToString());
+        return true;
+    }
+    // resource ignore by design
+    return false;
+}
+
+void ParseJsAngle(const EcmaVM* vm, const Local<JSValueRef>& value, std::optional<float>& angle)
+{
+    if (value->IsNumber()) {
+        angle = static_cast<float>(value->ToNumber(vm)->Value());
+        return;
+    }
+    if (value->IsString()) {
+        angle = static_cast<float>(StringUtils::StringToDegree(value->ToString(vm)->ToString()));
+        return;
+    }
+    return;
+}
+
+void ParseGradientAngle(const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<double>& values)
+{
+    std::optional<float> degree;
+    ParseJsAngle(vm, value, degree);
+    auto angleHasValue = degree.has_value();
+    auto angleValue = angleHasValue ? degree.value() : 0.0f;
+    degree.reset();
+    values.push_back(static_cast<double>(angleHasValue));
+    values.push_back(static_cast<double>(angleValue));
+}
+
+void ParseGradientColorStops(const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<double>& colors)
+{
+    if (!value->IsArray(vm)) {
+        return;
+    }
+    auto array = panda::Local<panda::ArrayRef>(value);
+    auto length = array->Length(vm);
+    for (uint32_t index = 0; index < length; index++) {
+        auto item = panda::ArrayRef::GetValueAt(vm, array, index);
+        if (!item->IsArray(vm)) {
+            continue;
+        }
+        auto itemArray = panda::Local<panda::ArrayRef>(item);
+        auto itemLength = itemArray->Length(vm);
+        if (itemLength < NUM_1) {
+            continue;
+        }
+        Color color;
+        auto colorParams = panda::ArrayRef::GetValueAt(vm, itemArray, NUM_0);
+        if (!ParseJsColor(vm, colorParams, color)) {
+            continue;
+        }
+        bool hasDimension = false;
+        double dimension = 0.0;
+        if (itemLength > NUM_1) {
+            auto stopDimension = panda::ArrayRef::GetValueAt(vm, itemArray, NUM_1);
+            if (ParseJsDouble(vm, stopDimension, dimension)) {
+                hasDimension = true;
+            }
+        }
+        colors.push_back(static_cast<double>(color.GetValue()));
+        colors.push_back(static_cast<double>(hasDimension));
+        colors.push_back(dimension);
+    }
+}
 } // namespace
 
 ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -893,6 +967,40 @@ ArkUINativeModuleValue CommonBridge::ResetBlur(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBlur(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetLinearGradient(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto angleArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto directionArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto colorsArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    std::vector<double> values;
+    ParseGradientAngle(vm, angleArg, values);
+    int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
+    ParseJsInt32(vm, directionArg, direction);
+    values.push_back(static_cast<double>(direction));
+    std::vector<double> colors;
+    ParseGradientColorStops(vm, colorsArg, colors);
+    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
+    values.push_back(static_cast<double>(repeating));
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetLinearGradient(nativeNode, values.data(), values.size(),
+        colors.data(), colors.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetLinearGradient(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetLinearGradient(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

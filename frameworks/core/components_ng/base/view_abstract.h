@@ -348,7 +348,7 @@ public:
     static void SetBrightness(FrameNode* frameNode, const Dimension& brightness);
     static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius);
     static void SetHueRotate(FrameNode* frameNode, float hueRotate);
-
+    static void SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient);
 
 private:
     static void AddDragFrameNodeToManager();

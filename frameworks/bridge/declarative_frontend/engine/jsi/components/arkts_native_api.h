@@ -70,6 +70,9 @@ struct ArkUICommonModifierAPI {
     void (*ResetBrightness)(NodeHandle node);
     void (*SetBlur)(NodeHandle node, double value);
     void (*ResetBlur)(NodeHandle node);
+    void (*SetLinearGradient)(NodeHandle node, const double* values, int32_t valuesLength,
+        const double* colors, int32_t colorsLength);
+    void (*ResetLinearGradient)(NodeHandle node);
 };
 
 struct ArkUITextModifierAPI {
