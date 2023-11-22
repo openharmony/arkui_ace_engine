@@ -16,7 +16,6 @@
 
 #define private public
 #define protected public
-
 #include "base/log/log_wrapper.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/test/mock/mock_resource_adapter.h"
@@ -33,10 +32,10 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
 #include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
