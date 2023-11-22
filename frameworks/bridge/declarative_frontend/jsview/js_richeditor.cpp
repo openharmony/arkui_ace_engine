@@ -18,6 +18,8 @@
 #include <optional>
 #include <string>
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -1173,6 +1175,12 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
             JSContainerBase::ParseJsDimensionVp(widthVal, width);
             JSContainerBase::ParseJsDimensionVp(heightVal, height);
             style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), height.ConvertToPx());
+        } else if (sizeVal->IsUndefined()) {
+            std::string resWidthStr;
+            if (JSContainerBase::ParseJsString(lm, resWidthStr)) {
+                Dimension resWidth = Dimension::FromString(resWidthStr);
+                style.leadingMargin->size = NG::SizeF(resWidth.Value(), 0.0);
+            }
         }
     } else if (!lm->IsNull()) {
         // [Dimension]
