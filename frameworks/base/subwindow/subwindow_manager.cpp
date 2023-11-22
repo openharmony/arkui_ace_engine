@@ -200,6 +200,20 @@ void SubwindowManager::ClearMenuNG(int32_t instanceId, bool inWindow, bool showA
     }
 }
 
+void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
+{
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+    if (subwindow) {
+        subwindow->ClearPopupNG();
+    }
+}
+
 void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo)
 {
     auto containerId = Container::CurrentId();
