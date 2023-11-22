@@ -56,7 +56,8 @@ public:
 
     void FireOnShownEvent() const
     {
-        UIObserverHandler::GetInstance().NotifyNavigationStateChange(navDestinationPattern_, NavDestinationState::ON_SHOW);
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+                                                                     NavDestinationState::ON_SHOWN);
         if (onShownEvent_) {
             auto onShownEvent = onShownEvent_;
             onShownEvent();
@@ -70,7 +71,8 @@ public:
 
     void FireOnHiddenEvent() const
     {
-        UIObserverHandler::GetInstance().NotifyNavigationStateChange(navDestinationPattern_, NavDestinationState::ON_HIDDEN);
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+                                                                     NavDestinationState::ON_HIDDEN);
         if (onHiddenEvent_) {
             onHiddenEvent_();
         }
@@ -94,17 +96,18 @@ public:
         return false;
     }
 
-    void SetNavDestinationPattern(const WeakPtr<AceType>& pattern)
+private:
+    WeakPtr<AceType> GetNavDestinationPattern() const
     {
-        navDestinationPattern_ = pattern;
+        auto node = GetFrameNode();
+        CHECK_NULL_RETURN(node, nullptr);
+        return node->GetPattern();
     }
 
-private:
     OnStateChangeEvent onStateChangeEvent_;
     std::function<void()> onShownEvent_;
     std::function<void()> onHiddenEvent_;
     std::function<bool()> onBackPressedEvent_;
-    WeakPtr<AceType> navDestinationPattern_; 
 
     bool isActivated_ = false;
 };

@@ -926,11 +926,12 @@ void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
 
 void JSViewPartialUpdate::JSGetUIContext(const JSCallbackInfo& info)
 {
+    ContainerScope scope(GetInstanceId());
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto frontEnd = container->GetFrontend();
-    CHECK_NULL_VOID(frontEnd);
-    auto context = frontEnd->GetContextValue();
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto context = frontend->GetContextValue();
     auto jsVal = JsConverter::ConvertNapiValueToJsVal(context);
     info.SetReturnValue(jsVal);
 }

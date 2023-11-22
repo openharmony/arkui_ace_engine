@@ -32,8 +32,8 @@ template("napi_observer_static") {
 
     sources = [
       "js_ui_observer.cpp",
-      "ui_observer_listener.cpp",
       "ui_observer.cpp",
+      "ui_observer_listener.cpp",
     ]
 
     deps = []

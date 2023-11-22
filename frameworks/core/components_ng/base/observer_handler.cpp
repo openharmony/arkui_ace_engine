@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "observer_handler.h"
+#include "core/components_ng/base/observer_handler.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-std::string GetNavigationId(const RefPtr<NavDestinationPattern> pattern)
+std::string GetNavigationId(const RefPtr<NavDestinationPattern>& pattern)
 {
     CHECK_NULL_RETURN(pattern, "");
     auto navigationNode = pattern->GetNavigationNode();
@@ -67,7 +67,7 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
     return std::make_shared<NavDestinationInfo>(
         GetNavigationId(pattern),
         pattern->GetName(),
-        pattern->GetIsOnShow() ? NavDestinationState::ON_SHOW : NavDestinationState::ON_HIDDEN);
+        pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN);
 }
 
 void UIObserverHandler::SetHandleNavigationChangeFunc(HandleFunc func)

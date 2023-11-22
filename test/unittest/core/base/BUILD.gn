@@ -76,7 +76,7 @@ ace_unittest("observer_test_ng") {
   module_output = "basic"
   sources = [
     "$ace_root/test/mock/base/mock_mouse_style.cpp",
-    "observer_test_ng.cpp"
+    "observer_test_ng.cpp",
   ]
 }
 
@@ -87,11 +87,11 @@ group("core_base_unittest") {
     ":frame_node_test_ng",
     ":geometry_node_test_ng",
     ":inspector_test_ng",
+    ":observer_test_ng",
     ":ui_node_test_ng",
     ":view_full_update_model_ng_test",
     ":view_partial_update_model_test_ng",
     ":view_stack_processor_test_ng",
-    ":observer_test_ng",
 
     # ":view_abstract_test_ng",
   ]

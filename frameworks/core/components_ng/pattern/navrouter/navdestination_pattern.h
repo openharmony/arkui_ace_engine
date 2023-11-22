@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
@@ -56,9 +57,7 @@ public:
 
     RefPtr<EventHub> CreateEventHub() override
     {
-        auto eventHub = MakeRefPtr<NavDestinationEventHub>();
-        eventHub->SetNavDestinationPattern(WeakClaim(this));
-        return eventHub;
+        return MakeRefPtr<NavDestinationEventHub>();
     }
 
     void OnActive() override;

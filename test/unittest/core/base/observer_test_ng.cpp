@@ -53,11 +53,11 @@ HWTEST_F(ObserverTestNg, ObserverTestNg001, TestSize.Level1)
         V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto pattern = contentNode->GetPattern<NavDestinationPattern>();
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(AceType::WeakClaim(Referenced::RawPtr(pattern)),
-                                                                 NavDestinationState::ON_SHOW);
+                                                                 NavDestinationState::ON_SHOWN);
     ASSERT_EQ(UIObserverHandler::GetInstance().handleFunc_, nullptr);
     auto pattern1 = navigation->GetPattern<NavigationPattern>();
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(AceType::WeakClaim(Referenced::RawPtr(pattern1)),
-                                                                 NavDestinationState::ON_SHOW);
+                                                                 NavDestinationState::ON_SHOWN);
     ASSERT_EQ(UIObserverHandler::GetInstance().handleFunc_, nullptr);
 }
 
@@ -85,6 +85,6 @@ HWTEST_F(ObserverTestNg, ObserverTestNg002, TestSize.Level1)
     info = UIObserverHandler::GetInstance().GetNavigationState(contentNode);
     ASSERT_EQ(info->name, "test_name");
     ASSERT_EQ(info->navigationId, "");
-    ASSERT_EQ(info->state, NavDestinationState::ON_SHOW);
+    ASSERT_EQ(info->state, NavDestinationState::ON_SHOWN);
 }
 }
