@@ -306,19 +306,15 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
         return Localization::GetInstance()->FormatDateTime(dateTime, GetFormat());
     }
     dateTime.week = timeZoneTime->tm_wday;       // 0-6
-    std::string dateTimeFormat = DEFAULT_FORMAT; // the format to get datetime value from the thirdlib
     int32_t weekType = 0;                        // 0:no week, 1:full type week, 2:short type week
     bool is24H = false;                          // false: 12H  true:24H
     int32_t month = 0;                           // 0:no month, 1:M, 2:MM
     int32_t day = 0;                             // 0:no day, 1:d, 2:dd
     bool isMilliSecond = false;                  // false:centisecond true:millisecond
     std::vector<std::string> inputFormatSplitter = ParseInputFormat(is24H, weekType, month, day, isMilliSecond);
-    dateTimeFormat = "yyyy";
-    dateTimeFormat += (month == 1) ? "M" : "MM";
-    dateTimeFormat += (day == 1) ? "d" : "dd";
-    dateTimeFormat += is24H ? "HH" : "hh";
-    dateTimeFormat += "mmss";
-    dateTimeFormat += isMilliSecond ? "SSS" : "SS";
+    // the format to get datetime value from the thirdlib
+    std::string dateTimeFormat = "yyyy" + std::string((month == 1) ? "M" : "MM") + ((day == 1) ? "d" : "dd");
+    dateTimeFormat += std::string(is24H ? "HH" : "hh") + "mmss" + std::string(isMilliSecond ? "SSS" : "SS");
     std::string dateTimeValue = Localization::GetInstance()->FormatDateTime(dateTime, dateTimeFormat);
     std::string tempdateTimeValue = dateTimeValue;
     std::string strAmPm = GetAmPm(tempdateTimeValue);
@@ -332,9 +328,14 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
             GetWeek((bool)(weekType - 1), timeZoneTime->tm_wday);
     }
     std::string outputDateTime = SpliceDateTime(curDateTime, inputFormatSplitter);
-    outputDateTime =
-        ((curDateTime[(int32_t)(TextClockElementIndex::CUR_YEAR_INDEX)] == "1900") || (outputDateTime == ""))
-            ? dateTimeValue : outputDateTime;
+    if ((curDateTime[(int32_t)(TextClockElementIndex::CUR_YEAR_INDEX)] == "1900") || (outputDateTime == "")) {
+        if (isForm_) {
+            std::vector<std::string> formSplitter = { "h", ":", "m" };
+            outputDateTime = SpliceDateTime(curDateTime, formSplitter);
+        } else {
+            outputDateTime = dateTimeValue;
+        }
+    }
     return outputDateTime;
 }
 
