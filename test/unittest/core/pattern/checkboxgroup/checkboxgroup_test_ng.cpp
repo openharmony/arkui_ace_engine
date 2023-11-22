@@ -1694,8 +1694,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest026, TestSize.Level1)
 
 /**
  * @tc.name: CheckBoxGroupPatternTest027
- * @tc.desc: CheckBoxGroup Accessibility PerformAction test Select and ClearSelection.
- * @tc.type: FUNC
+ * @tc.desc: CheckBoxGroup test Select and ClearSelection.
  */
 HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest027, TestSize.Level1)
 {

@@ -1489,8 +1489,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest033, TestSize.Level1)
 
 /**
  * @tc.name: CheckBoxPatternTest034
- * @tc.desc: CheckBox Accessibility PerformAction test Select and ClearSelection.
- * @tc.type: FUNC
+ * @tc.desc: CheckBox test Select and ClearSelection.
  */
 HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest034, TestSize.Level1)
 {

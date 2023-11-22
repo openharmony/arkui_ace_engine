@@ -1248,8 +1248,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0019, TestSize.Level1)
 
 /**
  * @tc.name: TogglePatternTest020
- * @tc.desc: Switch Accessibility PerformAction test Select and ClearSelection.
- * @tc.type: FUNC
+ * @tc.desc: Switch test Select and ClearSelection.
  */
 HWTEST_F(ToggleTestNg, TogglePatternTest020, TestSize.Level1)
 {
