@@ -220,3 +220,38 @@ class ArkLabelFont {
             this.style === another.style);
     }
 }
+
+function ArkDeepCompareArrays(arr1: Array<any>, arr2: Array<any>): boolean {
+    return Array.isArray(arr1)
+        && Array.isArray(arr2)
+        && arr1.length === arr2.length
+        && arr1.every((value, index) => {
+            if (Array.isArray(value) && Array.isArray(arr2[index])) {
+                return ArkDeepCompareArrays(value, arr2[index]);
+            } else {
+                return (value === arr2[index]);
+            }
+        });
+}
+
+class ArkLinearGradient {
+    angle: number | string | undefined;
+    direction: number | undefined;
+    colors: Array<any>;
+    repeating: boolean | undefined;
+
+    constructor(angle: number | string | undefined,
+        direction: number | undefined,
+        colors: Array<any>,
+        repeating: boolean | undefined) {
+        this.angle = angle;
+        this.direction = direction;
+        this.colors = colors;
+        this.repeating = repeating;
+    }
+
+    isEqual(another: ArkLinearGradient): boolean {
+        return ((this.angle === another.angle) && (this.direction === another.direction) &&
+            (ArkDeepCompareArrays(this.colors, another.colors)) && (this.repeating === another.repeating));
+    }
+}

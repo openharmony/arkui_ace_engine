@@ -133,6 +133,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBlur));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlur"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBlur));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLinearGradient"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetLinearGradient));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLinearGradient"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetLinearGradient));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto text = panda::ObjectRef::New(vm);
