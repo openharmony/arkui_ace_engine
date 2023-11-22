@@ -31,6 +31,10 @@
 #include "core/common/container_scope.h"
 #include "test/mock/core/common/mock_container.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
+#include "core/components_ng/pattern/stage/page_transition_effect.h"
+#include "core/components_ng/pattern/stage/page_transition_model_ng.h"
+#include "core/components_ng/pattern/stage/stage_layout_algorithm.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #undef private
 #undef protected
 
@@ -53,9 +57,24 @@ constexpr int32_t CHECK_BOX_ID_THIRD = 6;
 constexpr int32_t CHECK_BOX_ID_FOURTH = 6;
 constexpr int32_t TEST_CONTAINER_ID = 100;
 constexpr int32_t AT_LEAST_TIME = 1;
+const float NOPADDING = 0.0f;
+const float RK356_WIDTH = 720.0f;
+constexpr float RK356_HEIGHT = 1136.0f;
+const float ROW_HEIGHT = 120.0f;
+const SizeF CONTAINER_SIZE { RK356_WIDTH, RK356_HEIGHT };
 int32_t flag = 0;
 std::function<void()> FLAG_FUNC = []() { flag++; };
 } // namespace
+
+RefPtr<LayoutWrapperNode> CreatChildlayoutWrapper()
+{
+    auto firstFrameNode = FrameNode::CreateFrameNode("one", 1, AceType::MakeRefPtr<StagePattern>());
+    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(firstFrameNode, firstGeometryNode, firstFrameNode->GetLayoutProperty());
+    return firstLayoutWrapper;
+}
 
 class StageTestNg : public testing::Test {
 public:
@@ -663,6 +682,47 @@ HWTEST_F(StageTestNg, PagePatternTest005, TestSize.Level1)
      */
     pattern->ClearPageTransitionEffect();
     EXPECT_EQ(pattern->GetTopTransition(), nullptr);
+
+    /**
+     * @tc.steps: step8. add Element to nodeAnimatablePropertyMap_.
+     * @tc.expected: GetAnimatablePropertyFloat seccuess.
+     */
+    auto FRAME_NODE = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<Pattern>());
+    FRAME_NODE->nodeAnimatablePropertyMap_.emplace(
+        "pageTransitionProperty", AceType::MakeRefPtr<NodeAnimatablePropertyBase>());
+    pattern->frameNode_ = FRAME_NODE;
+    pattern->StopPageTransition();
+    EXPECT_TRUE(FRAME_NODE->GetAnimatablePropertyFloat("pageTransitionProperty"));
+
+    /**
+     * @tc.steps: step9. test BeforeCreateLayoutWrapper.
+     */
+    // auto pipeline = AceType::DynamicCast<NG::MockPipelineBase>(PipelineBase::GetCurrentContext());
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_FALSE(pipeline->GetInstallationFree());
+
+    pipeline->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+    pipeline->safeAreaManager_->keyboardSafeAreaEnabled_ = true;
+    pipeline->windowManager_->windowGetModeCallback_ = []() -> WindowMode { return WindowMode::WINDOW_MODE_FLOATING; };
+    pipeline->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    auto inset = pipeline->GetSafeArea();
+    inset.bottom_.start = 0;
+    inset.bottom_.end = 1;
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_FALSE(pipeline->GetInstallationFree());
+
+    pipeline->SetInstallationFree(1);
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(pipeline->GetInstallationFree());
+
+    /**
+     * @tc.steps: step10. coverage AvoidKeyboard.
+     * @tc.expected: true.
+     */
+    pipeline->safeAreaManager_->keyboardSafeAreaEnabled_ = true;
+    bool bResult = pattern->AvoidKeyboard();
+    EXPECT_TRUE(bResult);
 }
 
 /**
@@ -695,5 +755,146 @@ HWTEST_F(StageTestNg, PagePatternTest006, TestSize.Level1)
     animatorInfo->SetAnimator(AceType::MakeRefPtr<Animator>(TEST_ANIMATOR_ID.c_str()));
     pattern.AddJsAnimator(TEST_ANIMATOR_ID, animatorInfo);
     EXPECT_NE(pattern.GetJsAnimator(TEST_ANIMATOR_ID), nullptr);
+}
+/**
+ * @tc.name: PageTransitionModelTest001
+ * @tc.desc: Testing .
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PageTransitionModelTest001, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    stageNode->pattern_ = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    ViewStackProcessor::GetInstance()->SetPageNode(stageNode);
+
+    /**
+     * @tc.steps: step1. Create.
+     * @tc.expected: pageTransitionEffects_ clear;
+     */
+    PageTransitionModelNG pageTransitionModel;
+    pageTransitionModel.Create();
+    EXPECT_EQ(stageNode->GetPattern<PagePattern>()->pageTransitionEffects_.size(), 0);
+
+    pageTransitionModel.Pop();
+
+    /**
+     * @tc.steps: step2. CreateTransition.
+     * @tc.expected: pageTransitionEffects_ add;
+     */
+    PageTransitionOption option;
+    pageTransitionModel.CreateTransition(PageTransitionType::ENTER, option);
+    EXPECT_EQ(stageNode->GetPattern<PagePattern>()->pageTransitionEffects_.size(), 1);
+
+    /**
+     * @tc.steps: step3. SetOpacityEffect.
+     * @tc.expected: set Success;
+     */
+    pageTransitionModel.SetOpacityEffect(0.0);
+    EXPECT_EQ(stageNode->GetPattern<PagePattern>()->GetTopTransition()->opacity_, 0.0);
+
+    pageTransitionModel.SetOpacityEffect(10);
+    EXPECT_EQ(stageNode->GetPattern<PagePattern>()->GetTopTransition()->opacity_, 10);
+
+    /**
+     * @tc.steps: step4. SetScaleEffect.
+     * @tc.expected: set Success;
+     */
+    ScaleOptions scale(5.0, 6, 7, CalcDimension(), CalcDimension());
+    pageTransitionModel.SetScaleEffect(scale);
+    EXPECT_TRUE(stageNode->GetPattern<PagePattern>()->GetTopTransition()->scale_ == scale);
+
+    /**
+     * @tc.steps: step5. SetTranslateEffect.
+     * @tc.expected: set Success;
+     */
+    TranslateOptions transop(5.0, 6, 7);
+    pageTransitionModel.SetTranslateEffect(transop);
+    EXPECT_TRUE(stageNode->GetPattern<PagePattern>()->GetTopTransition()->translate_ == transop);
+
+    /**
+     * @tc.steps: step6. SetSlideEffect.
+     * @tc.expected: set Success;
+     */
+    pageTransitionModel.SetSlideEffect(SlideEffect::NONE);
+    EXPECT_EQ(stageNode->GetPattern<PagePattern>()->GetTopTransition()->slide_, SlideEffect::NONE);
+
+    /**
+     * @tc.steps: step7. SetOnEnter.
+     * @tc.expected: set Success;
+     */
+    int iTemp = 0;
+    auto myLambda = [&iTemp](RouteType type, const float& y) { iTemp++; };
+    pageTransitionModel.SetOnEnter(myLambda);
+    stageNode->GetPattern<PagePattern>()->GetTopTransition()->userCallback_(RouteType::PUSH, 2);
+    EXPECT_EQ(iTemp, 1);
+
+    /**
+     * @tc.steps: step8. SetOnExit.
+     * @tc.expected: set Success;
+     */
+    auto myLambda2 = [&iTemp](RouteType type, const float& y) { iTemp--; };
+    pageTransitionModel.SetOnExit(myLambda2);
+    stageNode->GetPattern<PagePattern>()->GetTopTransition()->userCallback_(RouteType::PUSH, 2);
+    EXPECT_EQ(iTemp, 0);
+}
+/**
+ * @tc.name: StageLayoutAlgorithmTest001
+ * @tc.desc: Testing .
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, StageLayoutAlgorithmTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat a layoutwrapper and SetLayoutAlgorithm for it.
+     */
+    auto rowFrameNode = FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<StagePattern>());
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
+
+    auto rowLayoutPattern = rowFrameNode->GetPattern<StagePattern>();
+    ASSERT_NE(rowLayoutPattern, nullptr);
+    auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(rowLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step2. layout parameter initialization.
+     */
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(RK356_WIDTH, ROW_HEIGHT));
+    PaddingProperty noPadding;
+    noPadding.left = CalcLength(NOPADDING);
+    noPadding.right = CalcLength(NOPADDING);
+    noPadding.top = CalcLength(NOPADDING);
+    noPadding.bottom = CalcLength(NOPADDING);
+
+    /**
+     * @tc.steps: step3. Perform element updates.
+     */
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step4. creat a childLayoutWrapper and add to layoutWrapper.
+     */
+    auto childLayoutWrapper = CreatChildlayoutWrapper();
+    layoutWrapper->AppendChild(childLayoutWrapper);
+
+    /**
+     * @tc.steps: step5. call Measure and Layout.
+     * @tc.expected: Set FrameOffset Success.
+     */
+    StageLayoutAlgorithm stageLayoutAlgorithm;
+    stageLayoutAlgorithm.Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    stageLayoutAlgorithm.Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    bool bEqual =
+        childLayoutWrapper->GetGeometryNode()->GetFrameOffset() ==
+        OffsetF(stageLayoutAlgorithm.childInsets_.left_.Length(), stageLayoutAlgorithm.childInsets_.top_.Length());
+    EXPECT_TRUE(bEqual);
 }
 } // namespace OHOS::Ace::NG
