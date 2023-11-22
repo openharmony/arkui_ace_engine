@@ -259,6 +259,17 @@ struct ArkUIRadioModifierAPI {
     void (*ResetRadioStyle)(NodeHandle node);
 };
 
+struct ArkUIDividerModifierAPI {
+    void (*SetDividerStrokeWidth)(NodeHandle node, double value, int32_t unit);
+    void (*ResetDividerStrokeWidth)(NodeHandle node);
+    void (*SetDividerLineCap)(NodeHandle node, int32_t lineCap);
+    void (*ResetDividerLineCap)(NodeHandle node);
+    void (*SetDividerColor)(NodeHandle node, uint32_t color);
+    void (*ResetDividerColor)(NodeHandle node);
+    void (*SetDividerVertical)(NodeHandle node, bool value);
+    void (*ResetDividerVertical)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -274,6 +285,7 @@ struct ArkUINodeAPI {
     ArkUITextpickerModifierAPI (*GetTextpickerModifier)();
     ArkUIRatingModifierAPI (*GetRatingModifier)();
     ArkUISliderModifierAPI (*GetSliderModifier)();
+    ArkUIDividerModifierAPI (*GetDividerModifier)();
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);

@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rating_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_slider_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_select_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_divider_modifier.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -54,7 +55,8 @@ static struct ArkUINodeAPI impl = {
     GetTimepickerModifier,
     GetTextpickerModifier,
     GetRatingModifier,
-    GetSliderModifier
+    GetSliderModifier,
+    GetDividerModifier,
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI()
