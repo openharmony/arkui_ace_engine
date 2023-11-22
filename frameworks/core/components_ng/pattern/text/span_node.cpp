@@ -143,6 +143,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
             return -1;
         }
         textStyle = themeTextStyle;
+        textStyle->SetHalfLeading(pipelineContext->GetHalfLeading());
         builder->PushStyle(themeTextStyle);
     }
     UpdateTextStyle(builder, textStyle);
