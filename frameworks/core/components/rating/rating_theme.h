@@ -47,33 +47,30 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->starNum_ = themeConstants->GetInt(THEME_RATING_STAR_NUM);
-            theme->ratingScore_ = themeConstants->GetDouble(THEME_RATING_SCORE);
-            theme->ratingMiniScore_ = themeConstants->GetDouble(THEME_RATING_MINI_SCORE);
-            theme->stepSize_ = themeConstants->GetDouble(THEME_RATING_STEPSIZE);
-            theme->paddingVertical_ = themeConstants->GetDimension(THEME_RATING_PADDING_VERTICAL);
-            theme->ratingWidth_ = themeConstants->GetDimension(THEME_RATING_BIG_WIDTH);
-            theme->ratingHeight_ = themeConstants->GetDimension(THEME_RATING_BIG_HEIGHT);
-            theme->ratingMiniWidth_ = themeConstants->GetDimension(THEME_RATING_MINI_WIDTH);
-            theme->ratingMiniHeight_ = themeConstants->GetDimension(THEME_RATING_MINI_HEIGHT);
             theme->foregroundResourceId_ = themeConstants->GetResourceId(THEME_RATING_RESOURCE_ID_BIG_ON);
             theme->secondaryResourceId_ = themeConstants->GetResourceId(THEME_RATING_RESOURCE_ID_BIG_HALF);
             theme->backgroundResourceId_ = themeConstants->GetResourceId(THEME_RATING_RESOURCE_ID_BIG_OFF);
             theme->foregroundMiniResourceId_ = themeConstants->GetResourceId(THEME_RATING_RESOURCE_ID_MINI_ON);
             theme->secondaryMiniResourceId_ = themeConstants->GetResourceId(THEME_RATING_RESOURCE_ID_MINI_HALF);
             theme->backgroundMiniResourceId_ = themeConstants->GetResourceId(THEME_RATING_RESOURCE_ID_MINI_OFF);
-            theme->designedStarAspectRatio_ = themeConstants->GetDouble(THEME_RATING_DESIGNED_STAR_ASPECT_RATIO);
-            theme->focusBorderWidth_ = themeConstants->GetDimension(THEME_RATING_FOCUS_BORDER_WIDTH);
-            theme->hoverColor_ = themeConstants->GetColor(THEME_RATING_HOVER_COLOR);
-            theme->starColorActive_ = themeConstants->GetColor(THEME_RATING_STAR_COLOR_ACTIVE);
-            theme->starColorInactive_ = themeConstants->GetColor(THEME_RATING_STAR_COLOR_INACTIVE);
-            theme->borderRadius_ = themeConstants->GetDimension(THEME_RATING_FOCUS_BORDER_RADIUS);
+
             auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {
                 return theme;
             }
             auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_RATING, nullptr);
             if (pattern) {
+                theme->starNum_ = static_cast<int32_t>(pattern->GetAttr<double>("rating_start_num", 0.0));
+                theme->ratingScore_ = pattern->GetAttr<double>("rating_score", 0.0);
+                theme->ratingMiniScore_ = pattern->GetAttr<double>("rating_mini_score", 0.0);
+                theme->stepSize_ = pattern->GetAttr<double>("rating_step_size", 0.0);
+                theme->paddingVertical_ = pattern->GetAttr<Dimension>("rating_padding_vertical", 0.0_vp);
+                theme->ratingWidth_ = pattern->GetAttr<Dimension>("rating_big_width", 0.0_vp);
+                theme->ratingHeight_ = pattern->GetAttr<Dimension>("rating_big_height", 0.0_vp);
+                theme->ratingMiniWidth_ = pattern->GetAttr<Dimension>("rating_mini_width", 0.0_vp);
+                theme->ratingMiniHeight_ = pattern->GetAttr<Dimension>("rating_mini_height", 0.0_vp);
+                theme->designedStarAspectRatio_ = pattern->GetAttr<double>("rating_designed_start_aspect_ratio", 0.0);
+                theme->focusBorderWidth_ = pattern->GetAttr<Dimension>("rating_focus_border_width", 0.0_vp);
                 theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, STAR_HOVER_COLOR);
                 theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, STAR_PRESS_COLOR);
                 theme->starColorActive_ = pattern->GetAttr<Color>("icon_color_active", Color::RED);
