@@ -209,10 +209,17 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
         titleWrapper->Measure(constraint);
         return;
     }
+    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titlePattern);
+    auto tempTitleOffsetY = titlePattern->GetTempTitleOffsetY();
+    if (tempTitleOffsetY > menuHeight_ || isInitialTitle_) {
+        constraint.maxSize.SetWidth(maxWidth);
+    } else {
+        constraint.maxSize.SetWidth(maxWidth - menuWidth_);
+    }
     // NavigationCustomTitle: Custom title + height
     if (titleBarLayoutProperty->HasTitleHeight()) {
         constraint.parentIdealSize.SetWidth(maxWidth);
-        constraint.maxSize.SetWidth(maxWidth);
         constraint.parentIdealSize.SetHeight(titleBarSize.Height());
         constraint.maxSize.SetHeight(titleBarSize.Height());
         titleWrapper->Measure(constraint);
@@ -230,7 +237,6 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
         // mini mode double title height is 56vp, free/full mode is 82vp
         auto maxTitleHeight = titleMode == NavigationTitleMode::MINI ? SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx() :
             DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx();
-        constraint.maxSize.SetWidth(maxWidth);
         constraint.maxSize.SetHeight(maxTitleHeight - geometryNode->GetFrameSize().Height());
         titleWrapper->Measure(constraint);
         return;
@@ -242,11 +248,9 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         if (isCustomTitle) {
             constraint.parentIdealSize.SetWidth(maxWidth);
-            constraint.maxSize.SetWidth(maxWidth);
             constraint.parentIdealSize.SetHeight(titleBarSize.Height());
             constraint.maxSize.SetHeight(titleBarSize.Height());
         } else {
-            constraint.maxSize.SetWidth(maxWidth);
             constraint.maxSize.SetHeight(titleBarSize.Height());
         }
         titleWrapper->Measure(constraint);
@@ -255,7 +259,6 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     // custom builder
     if (isCustomTitle) {
         constraint.parentIdealSize.SetWidth(maxWidth);
-        constraint.maxSize.SetWidth(maxWidth);
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             constraint.parentIdealSize.SetHeight(titleBarSize.Height());
         } else {
@@ -271,7 +274,6 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
         return;
     }
     // resourceStr title
-    constraint.maxSize.SetWidth(maxWidth);
     constraint.maxSize.SetHeight(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     titleWrapper->Measure(constraint);
 }
