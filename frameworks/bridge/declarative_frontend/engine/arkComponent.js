@@ -348,6 +348,7 @@ const isSymbol = (val) => typeof val === 'symbol';
 const isUndefined = (val) => typeof val === 'undefined';
 const isObject = (val) => typeof val === 'object';
 const isFunction = (val) => typeof val === 'function';
+const isLengthType = (val) => typeof val === 'string' || typeof val === 'number';
 function CheckJSCallbackInfo(value, checklist) {
     var typeVerified = false;
     checklist.forEach(function (infoType) {
@@ -2092,10 +2093,32 @@ class ArkTextComponent extends ArkComponent {
         return this;
     }
     lineHeight(value) {
-        throw new Error("Method not implemented.");
+      if (isLengthType(value)) {
+        let arkValue = value;
+        modifier(this._modifiers, TextLineHeightModifier, arkValue);
+      }
+      else {
+        modifier(this._modifiers, TextLineHeightModifier, undefined);
+      }
+      return this;
     }
     textOverflow(value) {
-        throw new Error("Method not implemented.");
+      if (value === null || value === undefined) {
+        modifier(this._modifiers, TextTextOverflowModifier, undefined);
+      }
+      else if (isObject(value)) {
+        let overflowValue = value.overflow;
+        if (isNumber(overflowValue)) {
+            if (!(overflowValue in CopyOptions)) {
+                overflowValue = TextOverflow.Clip;
+            }
+            modifier(this._modifiers, TextTextOverflowModifier, overflowValue);
+        }
+        else {
+            modifier(this._modifiers, TextTextOverflowModifier, undefined);
+        }
+      }
+      return this;
     }
     fontFamily(value) {
         throw new Error("Method not implemented.");
@@ -2104,7 +2127,24 @@ class ArkTextComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
     decoration(value) {
-        throw new Error("Method not implemented.");
+      let arkDecoration = new ArkDecoration();
+      if (value === null || value === undefined) {
+        modifier(this._modifiers, TextDecorationModifier, arkDecoration);
+      }
+      else if (isObject(value)) {
+        let typeValue = value.type;
+        if (!(typeValue in TextDecorationType)) {
+          arkDecoration.type = TextDecorationType.None;
+        }
+        else {
+          arkDecoration.type = typeValue;
+        }
+        if (value.color !== null && value.color !== undefined) {
+          arkDecoration.color = value.color
+        }
+        modifier(this._modifiers, TextDecorationModifier, arkDecoration);
+      }
+      return this;
     }
     letterSpacing(value) {
         throw new Error("Method not implemented.");
@@ -3572,3 +3612,46 @@ class CheckboxUnselectedColorModifier extends Modifier {
     }
 }
 CheckboxUnselectedColorModifier.identity = Symbol("checkboxUnselectedColor");
+
+class TextLineHeightModifier extends Modifier {
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().text.resetLineHeight(node);
+    }
+    else {
+      GetUINativeModule().text.setLineHeight(node, this.value);
+    }
+  }
+}
+TextLineHeightModifier.identity = Symbol('textLineHeight');
+class TextTextOverflowModifier extends Modifier {
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().text.resetTextOverflow(node);
+    }
+    else {
+      GetUINativeModule().text.setTextOverflow(node, this.value);
+    }
+  }
+}
+TextTextOverflowModifier.identity = Symbol('textTextOverflow');
+class TextDecorationModifier extends Modifier {
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().text.resetDecoration(node);
+    }
+    else {
+      GetUINativeModule().text.setDecoration(node, this.value.type, this.value.color);
+    }
+  }
+}
+TextDecorationModifier.identity = Symbol('textDecoration');
+class ArkDecoration {
+  constructor() {
+    this.type = TextDecorationType.None;
+    this.color = undefined;
+  }
+  isEqual(another) {
+    return (this.type === another.type) && (this.color === another.color);
+  }
+}

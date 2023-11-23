@@ -266,6 +266,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetFontWeight));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetFontWeight));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLineHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetLineHeight));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLineHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetLineHeight));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextOverflow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTextOverflow));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextOverflow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetTextOverflow));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDecoration"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetDecoration));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDecoration"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetDecoration));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 
     auto select = panda::ObjectRef::New(vm);

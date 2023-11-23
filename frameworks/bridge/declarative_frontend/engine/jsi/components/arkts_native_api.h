@@ -133,6 +133,12 @@ struct ArkUITextModifierAPI {
     void (*ResetFontColor)(NodeHandle node);
     void (*SetFontSize)(NodeHandle node, double value, int unit);
     void (*ResetFontSize)(NodeHandle node);
+    void (*SetTextLineHeight)(NodeHandle node, const double number, const int8_t unit);
+    void (*ResetTextLineHeight)(NodeHandle node);
+    void (*SetTextTextOverflow)(NodeHandle node, int32_t value);
+    void (*ResetTextTextOverflow)(NodeHandle node);
+    void (*SetTextDecoration)(NodeHandle node, const int32_t decoration, const uint32_t color, const int32_t style);
+    void (*ResetTextDecoration)(NodeHandle node);
 };
 
 struct ArkUIButtonModifierAPI {
