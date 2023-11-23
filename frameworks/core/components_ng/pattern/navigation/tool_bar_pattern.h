@@ -41,7 +41,7 @@ public:
         return false;
     }
 
-     void OnAttachToFrameNode() override
+    void OnAttachToFrameNode() override
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
