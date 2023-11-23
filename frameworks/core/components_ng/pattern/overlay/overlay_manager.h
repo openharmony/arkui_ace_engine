@@ -115,7 +115,7 @@ public:
     {
         return dialogMap_;
     };
-    void CloseMask ();
+    RefPtr<FrameNode> GetDialog(int32_t dialogId);
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft = false);
@@ -143,8 +143,9 @@ public:
     {
         return subWindowId_;
     }
-    RefPtr<FrameNode> GetMaskNode() {
-        return maskNode_;
+    int32_t GetMaskNodeId()
+    {
+        return maskNodeId_;
     }
     /**  pop overlays (if any) on back press
      *
@@ -349,7 +350,7 @@ private:
     float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;
     int32_t dialogCount_ = 0;
-    RefPtr<FrameNode> maskNode_;
+    int32_t maskNodeId_ = -1;
     int32_t subWindowId_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool hasPixelMap_ { false };

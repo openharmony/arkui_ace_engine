@@ -1634,6 +1634,20 @@ void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const
     ShowActionMenuInner(dialogProperties, button, std::move(callback));
 }
 
+void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogAttr,
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback)
+{
+    DialogProperties dialogProperties = {
+        .title = dialogAttr.title,
+        .autoCancel = true,
+        .isMenu = true,
+        .buttons = buttons,
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
+    };
+    ShowActionMenuInner(dialogProperties, buttons, std::move(callback));
+}
+
 void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
     const std::string& message, std::function<void(int32_t)>&& callback)
 {

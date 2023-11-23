@@ -141,8 +141,7 @@ void DialogPattern::HandleClick(const GestureEvent& info)
             CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
-            CHECK_NULL_VOID(overlayManager->GetMaskNode());
-            if (GetHost()->GetId() == overlayManager->GetMaskNode()->GetId()) {
+            if (GetHost()->GetId() == overlayManager->GetMaskNodeId()) {
                 overlayManager->PopModalDialog();
             }
         }
@@ -171,6 +170,7 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
     }
     if (dialogProperties_.isShowInSubWindow) {
         SubwindowManager::GetInstance()->DeleteHotAreas(overlayManager->GetSubwindowId(), host->GetId());
+        SubwindowManager::GetInstance()->HideDialogSubWindow(overlayManager->GetSubwindowId());
     }
     overlayManager->CloseDialog(host);
     if (dialogProperties_.isShowInSubWindow && dialogProperties_.isModal) {
@@ -178,7 +178,9 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
         CHECK_NULL_VOID(parentPipelineContext);
         auto parentOverlayManager = parentPipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(parentOverlayManager);
-        parentOverlayManager->CloseMask();
+        auto maskNode = parentOverlayManager->GetDialog(parentOverlayManager->GetMaskNodeId());
+        CHECK_NULL_VOID(maskNode);
+        parentOverlayManager->CloseDialog(maskNode);
     }
 }
 

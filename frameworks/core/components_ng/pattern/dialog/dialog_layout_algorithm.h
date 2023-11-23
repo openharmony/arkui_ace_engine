@@ -27,6 +27,7 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 namespace OHOS::Ace::NG {
 enum class TouchingBoundaryType {
@@ -64,7 +65,8 @@ private:
         const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& slefSize);
     bool SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint);
     bool IsDialogTouchingBoundary(OffsetF topLeftPoint, SizeF childSize, SizeF selfSize);
-    void MultipleDialog(const RefPtr<DialogLayoutProperty>& dialogProp, const SizeF& childSize, const SizeF& selfSize);
+    void MultipleDialog(const RefPtr<DialogLayoutProperty>& dialogProp, const SizeF& childSize, const SizeF& selfSize,
+        const RefPtr<OverlayManager> subOverlayManager);
     void ProcessMaskRect(std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog);
 	
     void UpdateTouchRegion();

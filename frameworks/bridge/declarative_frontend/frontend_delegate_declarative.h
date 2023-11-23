@@ -211,6 +211,8 @@ public:
         std::function<void(int32_t, int32_t)>&& callback) override;
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback, std::function<void(bool)>&& onStatusChanged) override;
+    void ShowActionMenu(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+        std::function<void(int32_t, int32_t)>&& callback) override;
     void ShowActionMenuInner(DialogProperties& dialogProperties, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
 
