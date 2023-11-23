@@ -77,49 +77,47 @@ void JSIndexer::ParseIndexerSelectedObject(
 
 void JSIndexer::Create(const JSCallbackInfo& args)
 {
-    if (args.Length() >= 1 && args[0]->IsObject()) {
-        size_t length = 0;
-        int32_t selectedVal = 0;
-        auto param = JsonUtil::ParseJsonString(args[0]->ToString());
-        std::unique_ptr<JsonValue> arrayVal;
-        if (param && !param->IsNull()) {
-            arrayVal = param->GetValue("arrayValue");
-            if (arrayVal && arrayVal->IsArray()) {
-                length = static_cast<uint32_t>(arrayVal->GetArraySize());
-            }
-        }
-        std::vector<std::string> indexerArray;
-        for (size_t i = 0; i < length; i++) {
-            auto value = arrayVal->GetArrayItem(i);
-            if (value) {
-                indexerArray.emplace_back(value->GetString());
-            }
-        }
-
-        JSRef<JSObject> paramObj = JSRef<JSObject>::Cast(args[0]);
-        JSRef<JSVal> selectedProperty = paramObj->GetProperty("selected");
-        if (selectedProperty->IsNumber()) {
-            selectedVal = selectedProperty->ToNumber<int32_t>();
-        }
-        IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
-        if (length <= 0 || !selectedProperty->IsObject()) {
-            return;
-        }
-        JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
-        auto selectedValueProperty = selectedObj->GetProperty("value");
-        if (selectedValueProperty->IsNumber()) {
-            selectedVal = selectedValueProperty->ToNumber<int32_t>();
-        }
-        JSRef<JSVal> changeEventVal = selectedObj->GetProperty("changeEvent");
-        if (!changeEventVal.IsEmpty()) {
-            if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
-                ParseIndexerSelectedObject(args, changeEventVal);
-            }
-            return;
-        }
-
-        args.ReturnSelf();
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        return;
     }
+    size_t length = 0;
+    int32_t selectedVal = 0;
+    std::vector<std::string> indexerArray;
+    JSRef<JSObject> paramObj = JSRef<JSObject>::Cast(args[0]);
+    JSRef<JSVal> arrayVal = paramObj->GetProperty("arrayValue");
+    if (arrayVal->IsArray()) {
+        JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(arrayVal);
+        length = jsArray->Length();
+        for (size_t i = 0; i < length; i++) {
+            auto value = jsArray->GetValueAt(i);
+            if (value->IsString()) {
+                indexerArray.emplace_back(value->ToString());
+            }
+        }
+    }
+
+    JSRef<JSVal> selectedProperty = paramObj->GetProperty("selected");
+    if (selectedProperty->IsNumber()) {
+        selectedVal = selectedProperty->ToNumber<int32_t>();
+    }
+    IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+    if (length <= 0 || !selectedProperty->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
+    auto selectedValueProperty = selectedObj->GetProperty("value");
+    if (selectedValueProperty->IsNumber()) {
+        selectedVal = selectedValueProperty->ToNumber<int32_t>();
+    }
+    JSRef<JSVal> changeEventVal = selectedObj->GetProperty("changeEvent");
+    if (!changeEventVal.IsEmpty()) {
+        if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+            ParseIndexerSelectedObject(args, changeEventVal);
+        }
+        return;
+    }
+
+    args.ReturnSelf();
 }
 
 void JSIndexer::SetSelectedColor(const JSCallbackInfo& args)
