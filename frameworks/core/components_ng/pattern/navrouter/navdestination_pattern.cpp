@@ -154,7 +154,18 @@ void NavDestinationPattern::OnModifyDone()
             navDestinationPattern->SetName(std::to_string(id));
         }
     }
-    MountTitleBar(hostNode);
+    auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
+        titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    } else {
+        titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        MountTitleBar(hostNode);
+    }
 }
 
 bool NavDestinationPattern::GetBackButtonState()
