@@ -133,6 +133,7 @@ public:
         textField_ = textField;
     }
 
+    void ResetDragOption() override;
     void OnColorConfigurationUpdate() override;
 
 private:
@@ -163,6 +164,7 @@ private:
     void OnButtonTouchDown(int32_t childId);
     void OnButtonTouchUp(int32_t childId);
     void HandleButtonMouseEvent(bool isHover, int32_t childId);
+    void ClearButtonStyle(int32_t childId);
 
     void ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) const;
     void ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) const;

@@ -426,6 +426,7 @@ public:
 
     virtual void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) {}
     virtual void FireAndCleanScrollingListener() {}
+    virtual void ResetDragOption() {}
 
     virtual int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
     {

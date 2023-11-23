@@ -734,6 +734,23 @@ void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, f
         option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
 }
 
+void SearchPattern::ResetDragOption()
+{
+    ClearButtonStyle(BUTTON_INDEX);
+    ClearButtonStyle(CANCEL_BUTTON_INDEX);
+}
+
+void SearchPattern::ClearButtonStyle(int32_t childId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childId));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto renderContext = buttonFrameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
+}
+
 void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto focusTask = [weak = WeakClaim(this)]() {

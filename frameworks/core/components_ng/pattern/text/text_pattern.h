@@ -394,6 +394,12 @@ public:
         return textForAI_;
     }
 
+    void ResetDragOption() override
+    {
+        CloseSelectOverlay();
+        ResetSelection();
+    }
+
 protected:
     virtual void HandleOnCopy();
     void InitMouseEvent();
