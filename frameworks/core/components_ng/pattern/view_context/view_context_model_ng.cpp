@@ -17,6 +17,7 @@
 
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void ViewContextModelNG::closeAnimation(const AnimationOption& option, bool needFlush)
@@ -27,9 +28,9 @@ void ViewContextModelNG::closeAnimation(const AnimationOption& option, bool need
     }
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto pipelineContextBase = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContextBase);
-    pipelineContextBase->CloseImplicitAnimation();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->CloseFrontendAnimation();
 }
 
 void ViewContextModelNG::openAnimation(const AnimationOption& option)
@@ -38,8 +39,8 @@ void ViewContextModelNG::openAnimation(const AnimationOption& option)
 
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto pipelineContextBase = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContextBase);
-    pipelineContextBase->OpenImplicitAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->OpenFrontendAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
 }
 } // namespace OHOS::Ace::NG
