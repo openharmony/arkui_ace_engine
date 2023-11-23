@@ -1467,6 +1467,27 @@ void ResetForegroundColor(NodeHandle node)
     ViewAbstract::SetForegroundColor(frameNode, Color());
 }
 
+void SetMotionPath(NodeHandle node, const char* path, float from, float to, bool rotatable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::MotionPathOption motionPathOption;
+    std::string pathString = path;
+    motionPathOption.SetPath(pathString);
+    motionPathOption.SetBegin(from);
+    motionPathOption.SetEnd(to);
+    motionPathOption.SetRotate(rotatable);
+    ViewAbstract::SetMotionPath(frameNode, motionPathOption);
+}
+
+void ResetMotionPath(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::MotionPathOption motionPathOption = MotionPathOption();
+    ViewAbstract::SetMotionPath(frameNode, motionPathOption);
+}
+
 ArkUICommonModifierAPI GetCommonModifier()
 {
     static const ArkUICommonModifierAPI modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
@@ -1490,7 +1511,7 @@ ArkUICommonModifierAPI GetCommonModifier()
         SetRenderGroup, ResetRenderGroup,
         SetRenderFit, ResetRenderFit,
         SetUseEffect, ResetUseEffect,
-        SetForegroundColor, ResetForegroundColor,
+        SetForegroundColor, ResetForegroundColor, SetMotionPath, ResetMotionPath
     };
 
     return modifier;

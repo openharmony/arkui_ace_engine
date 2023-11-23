@@ -770,7 +770,7 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
             if (!nextFocusHub) {
                 nextFocusHub = lastFocusNode->GetNearestNodeByProjectArea(GetChildren(), moveStep);
             }
-            if (!nextFocusHub) {
+            if (!nextFocusHub || nextFocusHub == lastFocusNode) {
                 return false;
             }
             auto ret = TryRequestFocus(nextFocusHub, rect, moveStep);
@@ -782,10 +782,13 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
         auto ret = GoToNextFocusLinear(moveStep, rect);
         return ret;
     }
+    if (!lastWeakFocusNode_.Upgrade()) {
+        return false;
+    }
     WeakPtr<FocusHub> nextFocusHubWeak;
     focusAlgorithm_.getNextFocusNode(moveStep, lastWeakFocusNode_, nextFocusHubWeak);
     auto nextFocusHub = nextFocusHubWeak.Upgrade();
-    if (!nextFocusHub) {
+    if (!nextFocusHub || nextFocusHub == lastWeakFocusNode_.Upgrade()) {
         return false;
     }
     auto ret = TryRequestFocus(nextFocusHub, rect, moveStep);
@@ -1032,10 +1035,20 @@ void FocusHub::OnFocusNode()
         parentFocusHub->SetLastFocusNodeIndex(AceType::Claim(this));
     }
     HandleParentScroll(); // If current focus node has a scroll parent. Handle the scroll event.
-    PaintFocusState();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto rootNode = pipeline ? pipeline->GetRootElement() : nullptr;
+    auto rootFocusHub = rootNode ? rootNode->GetFocusHub() : nullptr;
+    if (rootFocusHub && pipeline->GetIsFocusActive()) {
+        rootFocusHub->ClearAllFocusState();
+        rootFocusHub->PaintAllFocusState();
+    }
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->OnAccessibilityEvent(AccessibilityEventType::FOCUS);
+    CHECK_NULL_VOID(pipeline);
+    if (frameNode->GetFocusType() == FocusType::NODE) {
+        pipeline->SetFocusNode(frameNode);
+    }
 }
 
 void FocusHub::OnBlurNode()
@@ -1054,6 +1067,19 @@ void FocusHub::OnBlurNode()
     }
     if (blurReason_ != BlurReason::FRAME_DESTROY) {
         ClearFocusState();
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto rootNode = pipeline ? pipeline->GetRootElement() : nullptr;
+    auto rootFocusHub = rootNode ? rootNode->GetFocusHub() : nullptr;
+    if (rootFocusHub && pipeline->GetIsFocusActive()) {
+        rootFocusHub->ClearAllFocusState();
+        rootFocusHub->PaintAllFocusState();
+    }
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(pipeline);
+    if (frameNode->GetFocusType() == FocusType::NODE && frameNode == pipeline->GetFocusNode()) {
+        pipeline->SetFocusNode(nullptr);
     }
 }
 

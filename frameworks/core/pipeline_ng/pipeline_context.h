@@ -76,6 +76,23 @@ public:
 
     void SetupSubRootElement();
 
+    bool NeedSoftKeyboard() override;
+
+    void SetFocusNode(RefPtr<FrameNode> node)
+    {
+        focusNode_ = node;
+    }
+
+    RefPtr<FrameNode> GetFocusNode()
+    {
+        return focusNode_;
+    }
+
+    void SetOnWindowFocused(const std::function<void()>& callback) override
+    {
+        focusOnNodeCallback_ = callback;
+    }
+
     const RefPtr<FrameNode>& GetRootElement() const
     {
         return rootNode_;
@@ -455,6 +472,11 @@ public:
 
     void RestoreDefault() override;
 
+    // for frontend animation interface.
+    void OpenFrontendAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+        const std::function<void()>& finishCallback);
+    void CloseFrontendAnimation();
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -594,6 +616,10 @@ private:
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;
+
+    RefPtr<FrameNode> focusNode_;
+    std::function<void()> focusOnNodeCallback_;
+
     std::unique_ptr<MouseEvent> lastMouseEvent_;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;

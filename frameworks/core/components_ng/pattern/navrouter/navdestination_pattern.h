@@ -110,6 +110,7 @@ private:
     std::string name_;
     WeakPtr<UINode> navDestinationNode_;
     bool isOnShow_ = false;
+    void OnAttachToFrameNode() override;
 };
 
 } // namespace OHOS::Ace::NG

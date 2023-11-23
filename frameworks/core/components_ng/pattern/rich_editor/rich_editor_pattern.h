@@ -122,6 +122,11 @@ public:
         return timestamp_;
     }
 
+    bool NeedSoftKeyboard() const override
+    {
+        return true;
+    }
+
     void ResetBeforePaste();
     void ResetAfterPaste();
 
@@ -315,8 +320,10 @@ private:
     {
         auto hasValue = (static_cast<int32_t>(GetWideText().length()) + imageCount_) > 0;
         bool isShowItem = copyOption_ != CopyOptions::None;
-        selectInfo.menuInfo.showCopy = isShowItem && hasValue && textSelector_.IsValid();
-        selectInfo.menuInfo.showCut = isShowItem && hasValue && textSelector_.IsValid();
+        selectInfo.menuInfo.showCopy = isShowItem && hasValue && textSelector_.IsValid() &&
+                                       !textSelector_.StartEqualToDest();
+        selectInfo.menuInfo.showCut = isShowItem && hasValue && textSelector_.IsValid() &&
+                                      !textSelector_.StartEqualToDest();
         selectInfo.menuInfo.showCopyAll = !isCopyAll && hasValue;
         selectInfo.menuInfo.showPaste = hasData;
         selectInfo.menuInfo.menuIsShow = hasValue || hasData;
@@ -331,6 +338,8 @@ private:
     void HandleBlurEvent();
     void HandleFocusEvent();
     void HandleClickEvent(GestureEvent& info);
+    void HandleSingleClickEvent(GestureEvent& info);
+    void HandleDoubleClickEvent(GestureEvent& info);
     bool HandleUserClickEvent(GestureEvent& info);
     bool HandleUserLongPressEvent(GestureEvent& info);
     bool HandleUserGestureEvent(
@@ -347,6 +356,8 @@ private:
     void InitTouchEvent();
     bool SelectOverlayIsOn();
     void HandleLongPress(GestureEvent& info);
+    void HandleDoubleClickOrLongPress(GestureEvent& info);
+    std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
     void MouseRightFocus(const MouseInfo& info);
     void HandleMouseLeftButton(const MouseInfo& info);
@@ -412,6 +423,7 @@ private:
     void SetCaretSpanIndex(int32_t index);
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
     bool IsSelectedBindSelectionMenu();
+
     // add for scroll.
     void UpdateChildrenOffset();
     void MoveFirstHandle(float offset);
@@ -431,6 +443,13 @@ private:
     {
         return true;
     }
+
+    // ai analysis fun
+    bool NeedAiAnalysis(
+        const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);
+    void AdjustCursorPosition(int32_t& pos);
+    void AdjustWordSelection(int32_t& start, int32_t& end);
+    bool IsClickBoundary(const int32_t position);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -490,6 +509,11 @@ private:
     bool scrollable_ = true;
     CancelableCallback<void()> autoScrollTask_;
     OffsetF prevAutoScrollOffset_;
+    // add for ai input analysis
+    bool hasClicked_ = false;
+    CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
+    TimeStamp lastClickTimeStamp_;
+    TimeStamp lastAiPosTimeStamp_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };

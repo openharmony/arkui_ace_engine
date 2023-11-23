@@ -389,4 +389,9 @@ RefPtr<AceType> NavDestinationModelNG::CreateEmpty()
     uiNode->SetRemoveSilently(true);
     return uiNode;
 }
+
+void NavDestinationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, HideTitleBar, hideTitleBar, frameNode);
+}
 } // namespace OHOS::Ace::NG

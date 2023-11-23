@@ -1,8 +1,8 @@
 {
     "files": [
-        "src/ArkComponent.ts",
-        "src/ArkClassDefine.ts",
         "src/ArkColor.ts",
+        "src/ArkClassDefine.ts",
+        "src/ArkComponent.ts",
         "src/ArkButton.ts",
         "src/ArkLoadingProgress.ts",
         "src/ArkRefresh.ts",
@@ -19,8 +19,11 @@
         "src/ArkTextPicker.ts",
         "src/ArkSlider.ts",
         "src/ArkRating.ts",
-        "src/ArkCheckbox.ts"
+        "src/ArkCheckbox.ts",
         "src/ArkDivider.ts",
+        "src/ArkNavDestination.ts",
+        "src/ArkCounter.ts",
+        "src/ArkCheckboxGroup.ts",
     ],
 
     "compilerOptions": {

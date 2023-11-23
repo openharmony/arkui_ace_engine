@@ -117,8 +117,7 @@ Rect RosenRenderSvgPath::GetPaintBounds(const Offset& offset)
 #else
     RSRecordingPath recordingPath;
     GetPath(recordingPath);
-    auto path = recordingPath.GetCmdList()->Playback();
-    auto bounds = path->GetBounds();
+    auto bounds = recordingPath.GetBounds();
     return Rect(bounds.GetLeft(), bounds.GetTop(), bounds.GetWidth(), bounds.GetHeight());
 #endif
 }

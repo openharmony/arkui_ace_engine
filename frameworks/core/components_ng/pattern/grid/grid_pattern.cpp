@@ -573,6 +573,7 @@ void GridPattern::MarkDirtyNodeSelf()
 
 void GridPattern::OnScrollEndCallback()
 {
+    SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
 }
@@ -1557,7 +1558,7 @@ bool GridPattern::IsOutOfBoundary(bool useCurrentDelta)
     float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
     bool outOfEnd = (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) &&
                     LessNotEqual(endPos, gridLayoutInfo_.lastMainSize_);
-    bool scrollable = (gridLayoutInfo_.startIndex_ > 0) ||
+    bool scrollable = GetAlwaysEnabled() || (gridLayoutInfo_.startIndex_ > 0) ||
                       (gridLayoutInfo_.endIndex_ < gridLayoutInfo_.childrenCount_ - 1) ||
                       GreatNotEqual(gridLayoutInfo_.totalHeightOfItemsInView_, gridLayoutInfo_.lastMainSize_);
     return (outOfStart || outOfEnd) && scrollable;

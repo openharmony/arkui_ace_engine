@@ -72,13 +72,11 @@ RefPtr<NG::FrameNode> DataDetectorMgr::CreateUIExtensionMenu(
             onClickMenu(action);
         }
     };
-    auto onDestroy = []() {
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability Destroy");
-    };
+    auto onDestroy = []() { TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability Destroy"); };
     auto onError = [](int32_t code, const std::string& name, const std::string& message) {
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-            "UIExtension Ability Error, code: %{public}d, name: %{public}s, message: %{public}s",
-            code, name.c_str(), message.c_str());
+            "UIExtension Ability Error, code: %{public}d, name: %{public}s, message: %{public}s", code, name.c_str(),
+            message.c_str());
     };
     auto onRelease = [](int32_t code) {
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability Release, code: %{public}d", code);
@@ -91,8 +89,8 @@ RefPtr<NG::FrameNode> DataDetectorMgr::CreateUIExtensionMenu(
     wantWrap->SetWantParam(paramaters);
     auto* stack = NG::ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto uiExtNode = NG::FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<NG::UIExtensionPattern>(); });
+    auto uiExtNode = NG::FrameNode::GetOrCreateFrameNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NG::UIExtensionPattern>(); });
     CHECK_NULL_RETURN(uiExtNode, nullptr);
     uiExtNode->MarkModifyDone();
     auto uiExtPattern = uiExtNode->GetPattern<NG::UIExtensionPattern>();
@@ -122,5 +120,55 @@ bool DataDetectorMgr::ShowUIExtensionMenu(const std::map<std::string, std::strin
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
     return overlayManager->ShowUIExtensionMenu(uiExtNode, safeArea, aiMenuOptions, targetNode);
+}
+
+void DataDetectorMgr::AdjustCursorPosition(
+    int32_t& caretPos, const std::string& content, TimeStamp& lastAiPosTimeStamp, const TimeStamp& lastClickTimeStamp)
+{
+    if (engine_) {
+        int32_t aiPos = GetCursorPosition(content, caretPos);
+        TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "TryGetAiCursorPosition,aiPos is %{public}d", aiPos);
+
+        if (aiPos < 0) {
+            return;
+        }
+        // aiPos should above zero;
+        caretPos = aiPos;
+        // record the ai position time
+        lastAiPosTimeStamp = lastClickTimeStamp;
+    }
+}
+
+void DataDetectorMgr::AdjustWordSelection(int32_t& caretPos, const std::string& content, int32_t& start, int32_t& end)
+{
+    if (engine_) {
+        std::vector<int8_t> ret = GetWordSelection(content, caretPos);
+        start = ret[0];
+        end = ret[1];
+
+        TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "get ai selection:%{public}d--%{public}d", start, end);
+        if (start < 0 || end < 0) {
+            return;
+        }
+        caretPos = start;
+    }
+}
+
+std::vector<int8_t> DataDetectorMgr::GetWordSelection(const std::string& text, int8_t offset)
+{
+    if (engine_) {
+        return engine_->GetWordSelection(text, offset);
+    }
+
+    return std::vector<int8_t> { -1, -1 };
+}
+
+int8_t DataDetectorMgr::GetCursorPosition(const std::string& text, int8_t offset)
+{
+    if (engine_) {
+        return engine_->GetCursorPosition(text, offset);
+    }
+
+    return -1;
 }
 } // namespace OHOS::Ace
