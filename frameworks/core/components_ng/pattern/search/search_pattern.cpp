@@ -161,6 +161,7 @@ void SearchPattern::OnModifyDone()
     auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
     buttonLayoutProperty->UpdateLabel(searchButton_);
+    buttonLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     buttonFrameNode->MarkModifyDone();
 
     auto searchButtonEvent = buttonFrameNode->GetEventHub<ButtonEventHub>();
