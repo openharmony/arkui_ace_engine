@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 
 #include "base/log/dump_log.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -28,6 +29,8 @@ DeclarativeFrontendNG::~DeclarativeFrontendNG() noexcept
 
 void DeclarativeFrontendNG::Destroy()
 {
+    // The call doesn't change the page pop status
+    Recorder::NodeDataCache::Get().OnBeforePagePop(true);
     CHECK_RUN_ON(JS);
     // To guarantee the jsEngine_ and delegate_ released in js thread
     delegate_.Reset();
@@ -557,5 +560,14 @@ void DeclarativeFrontendNG::HotReload()
     auto manager = GetPageRouterManager();
     CHECK_NULL_VOID(manager);
     manager->FlushFrontend();
+}
+
+std::string DeclarativeFrontendNG::GetCurrentPageUrl() const
+{
+    auto pageRouterManager = GetPageRouterManager();
+    if (pageRouterManager) {
+        return pageRouterManager->GetCurrentPageUrl();
+    }
+    return "";
 }
 } // namespace OHOS::Ace

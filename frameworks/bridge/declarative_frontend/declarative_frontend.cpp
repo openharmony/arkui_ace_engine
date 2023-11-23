@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_page.h"
 #include "core/common/container.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
 #include "frameworks/bridge/card_frontend/form_frontend_delegate_declarative.h"
@@ -166,6 +167,8 @@ DeclarativeFrontend::~DeclarativeFrontend() noexcept
 
 void DeclarativeFrontend::Destroy()
 {
+    // The call doesn't change the page pop status
+    Recorder::NodeDataCache::Get().OnBeforePagePop(true);
     CHECK_RUN_ON(JS);
     LOGI("DeclarativeFrontend Destroy begin.");
     // To guarantee the jsEngine_ and delegate_ released in js thread

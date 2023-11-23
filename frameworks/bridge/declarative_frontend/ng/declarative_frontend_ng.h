@@ -186,6 +186,8 @@ public:
     void FlushReload() override;
     void HotReload() override;
 
+    std::string GetCurrentPageUrl() const override;
+
 private:
     void InitializeDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 
