@@ -3761,9 +3761,14 @@ bool TextFieldPattern::OnBackPressed()
     if (SelectOverlayIsOn()) {
         selectController_->UpdateCaretIndex(
             std::max(selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
+        auto selectOverlayProxy = GetSelectOverlayProxy();
+        CHECK_NULL_RETURN(selectOverlayProxy, false);
+        bool closeKeyboard = !selectOverlayProxy->IsMenuShow();
         CloseSelectOverlay();
         StartTwinkling();
-        return true;
+        if (!closeKeyboard) {
+            return true;
+        }
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (!imeShown_ && !isCustomKeyboardAttached_) {
