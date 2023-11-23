@@ -784,9 +784,10 @@ void NavigationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
     navBarNode->SetTitle(customTitle);
     navBarNode->UpdateTitleNodeOperation(ChildNodeOperation::ADD);
     navBarNode->UpdatePrevTitleIsCustom(true);
+    navBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void NavigationModelNG::SetTitleHeight(const Dimension& height)
+void NavigationModelNG::SetTitleHeight(const Dimension& height, bool isValid)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -797,7 +798,14 @@ void NavigationModelNG::SetTitleHeight(const Dimension& height)
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    titleBarLayoutProperty->UpdateTitleHeight(height);
+    if (isValid) {
+        titleBarLayoutProperty->UpdateTitleHeight(height);
+    } else {
+        if (titleBarLayoutProperty->HasTitleHeight()) {
+            return;
+        }
+        titleBarLayoutProperty->UpdateTitleHeight(Dimension(0.0f));
+    }
     SetHideBackButton(true);
 
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
