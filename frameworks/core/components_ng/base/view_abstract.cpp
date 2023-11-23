@@ -1981,6 +1981,50 @@ void ViewAbstract::SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleO
     }
 }
 
+void ViewAbstract::SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectOption& option)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, option, frameNode);
+}
+
+void ViewAbstract::SetLightUpEffect(FrameNode* frameNode, double radio)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LightUpEffect, radio, frameNode);
+}
+
+void ViewAbstract::SetSphericalEffect(FrameNode* frameNode, double radio)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(SphericalEffect, radio, frameNode);
+}
+
+void ViewAbstract::SetRenderGroup(FrameNode* frameNode, bool isRenderGroup)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(RenderGroup, isRenderGroup, frameNode);
+}
+
+void ViewAbstract::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(RenderFit, renderFit, frameNode);
+}
+
+void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffect, useEffect, frameNode);
+}
+
+void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+}
+
+void ViewAbstract::SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorStrategy, strategy, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+}
+
 void ViewAbstract::SetLightPosition(
     const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ)
 {

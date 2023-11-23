@@ -544,6 +544,92 @@ class ClipModifier extends ModifierWithKey<boolean | object> {
     }
 }
 
+class PixelStretchEffectModifier extends Modifier<ArkPixelStretchEffect> {
+    static identity: Symbol = Symbol("pixelStretchEffect");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetPixelStretchEffect(node);
+        }
+        else {
+            GetUINativeModule().common.setPixelStretchEffect(node,
+                this.value.top, this.value.right, this.value.bottom, this.value.left);
+        }
+    }
+}
+
+class LightUpEffectModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("lightUpEffect");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetLightUpEffect(node);
+        }
+        else {
+            GetUINativeModule().common.setLightUpEffect(node, this.value);
+        }
+    }
+}
+
+class SphericalEffectModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("sphericalEffect");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetSphericalEffect(node);
+        }
+        else {
+            GetUINativeModule().common.setSphericalEffect(node, this.value);
+        }
+    }
+}
+
+class RenderGroupModifier extends Modifier<boolean> {
+    static identity: Symbol = Symbol("renderGroup");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetRenderGroup(node);
+        }
+        else {
+            GetUINativeModule().common.setRenderGroup(node, this.value);
+        }
+    }
+}
+
+class RenderFitModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("renderFit");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetRenderFit(node);
+        }
+        else {
+            GetUINativeModule().common.setRenderFit(node, this.value);
+        }
+    }
+}
+
+class UseEffectModifier extends Modifier<boolean> {
+    static identity: Symbol = Symbol("useEffect");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetUseEffect(node);
+        }
+        else {
+            GetUINativeModule().common.setUseEffect(node, this.value);
+        }
+    }
+}
+
+class ForegroundColorModifier extends Modifier<ArkForegroundColor> {
+    static identity: Symbol = Symbol("foregroundColor");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetForegroundColor(node);
+        }
+        else {
+            GetUINativeModule().common.setForegroundColor(node,
+                this.value.color, this.value.strategy);
+        }
+    }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType) => typeof val === 'string'
@@ -1041,7 +1127,23 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     foregroundColor(value: ResourceColor | ColoringStrategy): this {
-        throw new Error("Method not implemented.");
+        let arkForegroundColor = new ArkForegroundColor
+        if (typeof value === "string") {
+            let lowerValue = value.toLowerCase().trim();
+            if (lowerValue === "invert") {
+                arkForegroundColor.strategy = lowerValue;
+                modifier(this._modifiers, ForegroundColorModifier, arkForegroundColor);
+                return this;
+            }
+        }
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            arkForegroundColor.color = arkColor.getColor();
+            modifier(this._modifiers, ForegroundColorModifier, arkForegroundColor);
+        } else {
+            modifier(this._modifiers, ForegroundColorModifier, undefined);
+        }
+        return this;
     }
 
     onClick(event: (event?: ClickEvent) => void): this {
@@ -1216,7 +1318,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     useEffect(value: boolean): this {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, UseEffectModifier, value);
+        return this;
     }
 
     backdropBlur(value: number): this {
@@ -1230,7 +1333,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     renderGroup(value: boolean): this {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, RenderGroupModifier, value);
+        return this;
     }
 
     translate(value: TranslateOptions): this {
@@ -1569,15 +1673,28 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     sphericalEffect(value: number): this {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, SphericalEffectModifier, value);
+        return this;
     }
 
     lightUpEffect(value: number): this {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, LightUpEffectModifier, value);
+        return this;
     }
 
     pixelStretchEffect(options: PixelStretchEffectOptions): this {
-        throw new Error("Method not implemented.");
+        if (isResource(options.top) || isResource(options.right) ||
+            isResource(options.bottom)|| isResource(options.left)) {
+            modifier(this._modifiers, PixelStretchEffectModifier, undefined);
+            return this;
+        }
+        let arkPixelStretchEffect = new ArkPixelStretchEffect
+        arkPixelStretchEffect.top = options.top;
+        arkPixelStretchEffect.right = options.right;
+        arkPixelStretchEffect.bottom = options.bottom;
+        arkPixelStretchEffect.left = options.left;
+        modifier(this._modifiers, PixelStretchEffectModifier, arkPixelStretchEffect);
+        return this;
     }
 
     keyboardShortcut(value: string | FunctionKey, keys: Array<ModifierKey>, action?: () => void): this {
@@ -1609,7 +1726,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     renderFit(fitMode: RenderFit): this {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, RenderFitModifier, fitMode);
+        return this;
     }
 
     attributeModifier(modifier: AttributeModifier<CommonAttribute>): this {

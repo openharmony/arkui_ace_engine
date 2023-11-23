@@ -664,3 +664,36 @@ class ArkRotate implements Equable {
         (this.centerX === another.centerX)  && (this.centerY === another.centerY) && (this.centerZ === another.centerZ) && (this.perspective === another.perspective) ;
     }
 }
+
+class ArkPixelStretchEffect {
+    top: Length | undefined;
+    right: Length | undefined;
+    bottom: Length | undefined;
+    left: Length | undefined;
+
+    constructor() {
+        this.top = undefined;
+        this.right = undefined;
+        this.bottom = undefined;
+        this.left = undefined;
+    }
+
+    isEqual(another: ArkPixelStretchEffect): boolean {
+        return ((this.top === another.top) && (this.right === another.right) &&
+            (this.bottom === another.bottom) && (this.left === another.left));
+    }
+}
+
+class ArkForegroundColor {
+    color: number | string | undefined;
+    strategy: string | undefined;
+
+    constructor() {
+        this.color = undefined;
+        this.strategy = undefined;
+    }
+
+    isEqual(another: ArkForegroundColor): boolean {
+        return ((this.color === another.color) && (this.strategy === another.strategy));
+    }
+}

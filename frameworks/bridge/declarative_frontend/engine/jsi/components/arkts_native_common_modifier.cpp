@@ -1124,6 +1124,168 @@ void ResetGeometryTransition(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
 }
 
+/**
+ * @param values value value
+ * values[0] : left, values[1] : top, values[2] : right, values[3] : bottom
+ * @param units unit value
+ * units[0] : left, units[1] : top, units[2] : right, units[3] : bottom
+ * @param length values length
+ */
+void SetPixelStretchEffect(NodeHandle node, const double* values, const int* units, int32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (length != NUM_4) {
+        return;
+    }
+    auto leftValue = values[NUM_0];
+    auto leftUnit = units[NUM_0];
+    auto topValue = values[NUM_1];
+    auto topUnit = units[NUM_1];
+    auto rightValue = values[NUM_2];
+    auto rightUnit = units[NUM_2];
+    auto bottomValue = values[NUM_3];
+    auto bottomUnit = units[NUM_3];
+    Dimension left(leftValue, static_cast<DimensionUnit>(leftUnit));
+    Dimension top(topValue, static_cast<DimensionUnit>(topUnit));
+    Dimension right(rightValue, static_cast<DimensionUnit>(rightUnit));
+    Dimension bottom(bottomValue, static_cast<DimensionUnit>(bottomUnit));
+    bool illegalInput = false;
+    if (left.Unit() == DimensionUnit::PERCENT || right.Unit() == DimensionUnit::PERCENT ||
+        top.Unit() == DimensionUnit::PERCENT || bottom.Unit() == DimensionUnit::PERCENT) {
+        if ((NearEqual(left.Value(), 0.0) || left.Unit() == DimensionUnit::PERCENT) &&
+            (NearEqual(top.Value(), 0.0) || top.Unit() == DimensionUnit::PERCENT) &&
+            (NearEqual(right.Value(), 0.0) || right.Unit() == DimensionUnit::PERCENT) &&
+            (NearEqual(bottom.Value(), 0.0) || bottom.Unit() == DimensionUnit::PERCENT)) {
+            left.SetUnit(DimensionUnit::PERCENT);
+            top.SetUnit(DimensionUnit::PERCENT);
+            right.SetUnit(DimensionUnit::PERCENT);
+            bottom.SetUnit(DimensionUnit::PERCENT);
+        } else {
+            illegalInput = true;
+        }
+    }
+    PixStretchEffectOption option;
+    if ((left.IsNonNegative() && top.IsNonNegative() && right.IsNonNegative() && bottom.IsNonNegative()) ||
+        (left.IsNonPositive() && top.IsNonPositive() && right.IsNonPositive() && bottom.IsNonPositive())) {
+        option.left = left;
+        option.top = top;
+        option.right = right;
+        option.bottom = bottom;
+    } else {
+        illegalInput = true;
+    }
+    if (illegalInput) {
+        option.ResetValue();
+    }
+    ViewAbstract::SetPixelStretchEffect(frameNode, option);
+}
+
+void ResetPixelStretchEffect(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PixStretchEffectOption option;
+    option.ResetValue();
+    ViewAbstract::SetPixelStretchEffect(frameNode, option);
+}
+
+void SetLightUpEffect(NodeHandle node, double radio)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    radio = std::clamp(radio, 0.0, 1.0);
+    ViewAbstract::SetLightUpEffect(frameNode, radio);
+}
+
+void ResetLightUpEffect(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLightUpEffect(frameNode, 1.0);
+}
+
+void SetSphericalEffect(NodeHandle node, double radio)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    radio = std::clamp(radio, 0.0, 1.0);
+    ViewAbstract::SetSphericalEffect(frameNode, radio);
+}
+
+void ResetSphericalEffect(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetSphericalEffect(frameNode, 1.0);
+}
+
+void SetRenderGroup(NodeHandle node, bool isRenderGroup)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetRenderGroup(frameNode, isRenderGroup);
+}
+
+void ResetRenderGroup(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetRenderGroup(frameNode, false);
+}
+
+void SetRenderFit(NodeHandle node, int32_t renderFitNumber)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto renderFit = RenderFit::TOP_LEFT;
+    if (renderFitNumber >= static_cast<int32_t>(RenderFit::CENTER) &&
+        renderFitNumber <= static_cast<int32_t>(RenderFit::RESIZE_COVER_BOTTOM_RIGHT)) {
+        renderFit = static_cast<RenderFit>(renderFitNumber);
+    }
+    ViewAbstract::SetRenderFit(frameNode, renderFit);
+}
+
+void ResetRenderFit(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetRenderFit(frameNode, RenderFit::TOP_LEFT);
+}
+
+void SetUseEffect(NodeHandle node, bool useEffect)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetUseEffect(frameNode, useEffect);
+}
+
+void ResetUseEffect(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetUseEffect(frameNode, false);
+}
+
+void SetForegroundColor(NodeHandle node, bool isColor, uint32_t color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (isColor) {
+        ViewAbstract::SetForegroundColor(frameNode, Color(color));
+    } else {
+        auto strategy = static_cast<ForegroundColorStrategy>(color);
+        ViewAbstract::SetForegroundColorStrategy(frameNode, strategy);
+    }
+}
+
+void ResetForegroundColor(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetForegroundColor(frameNode, Color());
+}
+
 ArkUICommonModifierAPI GetCommonModifier()
 {
     static const ArkUICommonModifierAPI modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
@@ -1137,7 +1299,15 @@ ArkUICommonModifierAPI GetCommonModifier()
         ResetLinearGradientBlur, SetBackgroundBlurStyle, ResetBackgroundBlurStyle, SetBorder, ResetBorder,
         SetBackgroundImagePosition, ResetBackgroundImagePosition, SetBackgroundImageSize, ResetBackgroundImageSize,
         SetBackgroundImage, ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale, ResetScale, SetRotate,
-        ResetRotate, SetGeometryTransition, ResetGeometryTransition };
+        ResetRotate, SetGeometryTransition, ResetGeometryTransition,
+        SetPixelStretchEffect, ResetPixelStretchEffect,
+        SetLightUpEffect, ResetLightUpEffect,
+        SetSphericalEffect, ResetSphericalEffect,
+        SetRenderGroup, ResetRenderGroup,
+        SetRenderFit, ResetRenderFit,
+        SetUseEffect, ResetUseEffect,
+        SetForegroundColor, ResetForegroundColor,
+    };
 
     return modifier;
 }

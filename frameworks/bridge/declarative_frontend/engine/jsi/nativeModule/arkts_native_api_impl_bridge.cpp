@@ -195,6 +195,34 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetClip));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetClip"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetClip));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPixelStretchEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetPixelStretchEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPixelStretchEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetPixelStretchEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLightUpEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetLightUpEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLightUpEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetLightUpEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSphericalEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetSphericalEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSphericalEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetSphericalEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRenderGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetRenderGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRenderGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetRenderGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRenderFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetRenderFit));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRenderFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetRenderFit));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setUseEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetUseEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetUseEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetUseEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setForegroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetForegroundColor));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetForegroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetForegroundColor));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto text = panda::ObjectRef::New(vm);
