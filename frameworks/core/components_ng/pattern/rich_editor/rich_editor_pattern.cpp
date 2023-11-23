@@ -353,7 +353,6 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
         CloseSelectOverlay();
         ResetSelection();
     }
-
     return spanIndex;
 }
 
@@ -442,7 +441,6 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPa
         ResetSelection();
     }
     SpanNodeFission(spanNode);
-
     return spanIndex;
 }
 
@@ -1341,7 +1339,7 @@ void RichEditorPattern::HandleFocusEvent()
 {
     UseHostToUpdateTextFieldManager();
     StartTwinkling();
-    if (!usingMouseRightButton_) {
+    if (!usingMouseRightButton_ && !isLongPress_) {
         RequestKeyboard(false, true, true);
     }
 }
@@ -1431,6 +1429,16 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     if (isMousePressed_) {
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    isLongPress_ = true;
+    if (!focusHub->IsCurrentFocus()) {
+        CalcCaretInfoByClick(info);
+        focusHub->RequestFocusImmediately();
+        return;
+    }
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -1451,8 +1459,6 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     CloseSelectOverlay();
     selectionMenuOffset_ = info.GetGlobalLocation();
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1460,8 +1466,6 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         eventHub->FireOnSelect(&textSelectInfo);
     }
     SetCaretPosition(std::min(selectEnd, GetTextContentLength()));
-    auto focusHub = host->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
     if (overlayMod_) {
         RequestKeyboard(false, true, true);
@@ -2736,6 +2740,12 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (touchType == TouchType::DOWN) {
     } else if (touchType == TouchType::UP) {
         isMousePressed_ = false;
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    if (isLongPress_) {
+        RequestKeyboard(false, true, true);
+        isLongPress_ = false;
+    }
+#endif
     }
 }
 
