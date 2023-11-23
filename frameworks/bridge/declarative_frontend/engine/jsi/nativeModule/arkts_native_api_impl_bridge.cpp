@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkboxgroup_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_col_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
@@ -527,6 +528,21 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::ResetColor));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "blank"), blank);
     
+    auto gridCol = panda::ObjectRef::New(vm);
+    gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSpan"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), GridColBridge::SetSpan));
+    gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSpan"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), GridColBridge::ResetSpan));
+    gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGridColOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), GridColBridge::SetGridColOffset));
+    gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGridColOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), GridColBridge::ResetGridColOffset));
+    gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOrder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), GridColBridge::SetOrder));
+    gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOrder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), GridColBridge::ResetOrder));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "gridCol"), gridCol);
+
     RegisterButtonAttributes(object, vm);
     RegisterToggleAttributes(object, vm);
     RegisterDividerAttributes(object, vm);

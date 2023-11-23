@@ -24,6 +24,7 @@
         "src/ArkNavDestination.ts",
         "src/ArkCounter.ts",
         "src/ArkCheckboxGroup.ts",
+        "src/ArkGridCol.ts",
     ],
 
     "compilerOptions": {
