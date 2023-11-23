@@ -30,7 +30,7 @@ EventParamsBuilder::EventParamsBuilder()
     params_ = std::make_shared<std::unordered_map<std::string, std::string>>();
 }
 
-EventParamsBuilder& EventParamsBuilder::SetEventType(const EventType eventType)
+EventParamsBuilder& EventParamsBuilder::SetEventType(EventType eventType)
 {
     eventType_ = eventType;
     return *this;
@@ -48,13 +48,13 @@ EventParamsBuilder& EventParamsBuilder::SetType(const std::string& type)
     return *this;
 }
 
-EventParamsBuilder& EventParamsBuilder::SetNavDst(std::string dstName)
+EventParamsBuilder& EventParamsBuilder::SetNavDst(const std::string& dstName)
 {
     params_->emplace(KEY_NAV_DST, dstName);
     return *this;
 }
 
-EventParamsBuilder& EventParamsBuilder::SetPageUrl(std::string pageUrl)
+EventParamsBuilder& EventParamsBuilder::SetPageUrl(const std::string& pageUrl)
 {
     params_->emplace(KEY_PAGE, pageUrl);
     return *this;
@@ -66,14 +66,14 @@ EventParamsBuilder& EventParamsBuilder::SetText(const std::string& value)
     return *this;
 }
 
-EventParamsBuilder& EventParamsBuilder::SetChecked(const bool& value)
+EventParamsBuilder& EventParamsBuilder::SetChecked(bool value)
 {
     std::string strVal = value ? "true" : "false";
     params_->emplace(KEY_CHECKED, strVal);
     return *this;
 }
 
-EventParamsBuilder& EventParamsBuilder::SetIndex(const int& value)
+EventParamsBuilder& EventParamsBuilder::SetIndex(int value)
 {
     params_->emplace(KEY_INDEX, std::to_string(value));
     return *this;

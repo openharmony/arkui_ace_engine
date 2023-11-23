@@ -42,6 +42,9 @@ public:
     void NotifyEvent(EventCategory category, int32_t eventType,
         const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams);
 
+    void NotifyEventSync(EventCategory category, int32_t eventType,
+        const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams);
+
 private:
     EventController() = default;
     void NotifyConfigChange();

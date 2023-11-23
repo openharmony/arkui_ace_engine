@@ -24,8 +24,8 @@
 #include "base/json/json_util.h"
 
 namespace OHOS::Ace::Recorder {
-enum EventCategory : int32_t {
-    CATEGORY_PAGE = 0,
+enum class EventCategory {
+    CATEGORY_PAGE,
     CATEGORY_COMPONENT,
     CATEGORY_EXPOSURE,
 };

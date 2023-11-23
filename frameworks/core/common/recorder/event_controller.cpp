@@ -91,13 +91,19 @@ void EventController::Unregister(const std::shared_ptr<UIEventObserver>& observe
 void EventController::NotifyEvent(EventCategory category, int32_t eventType,
     const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams)
 {
-    BackgroundTaskExecutor::GetInstance().PostTask([this, category, eventType, eventParams]() {
-        std::unique_lock<std::mutex> lock(cacheLock_);
-        for (auto&& client : this->clientList_) {
-            if (client.config.IsEnable() && client.config.IsCategoryEnable(category)) {
-                client.observer->NotifyUIEvent(eventType, *eventParams);
-            }
-        }
+    BackgroundTaskExecutor::GetInstance().PostTask([category, eventType, eventParams]() {
+        EventController::Get().NotifyEventSync(category, eventType, eventParams);
     });
+}
+
+void EventController::NotifyEventSync(EventCategory category, int32_t eventType,
+    const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams)
+{
+    std::unique_lock<std::mutex> lock(cacheLock_);
+    for (auto&& client : clientList_) {
+        if (client.config.IsEnable() && client.config.IsCategoryEnable(category)) {
+            client.observer->NotifyUIEvent(eventType, *eventParams);
+        }
+    }
 }
 } // namespace OHOS::Ace::Recorder

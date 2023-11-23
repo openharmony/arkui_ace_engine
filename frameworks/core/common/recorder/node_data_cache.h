@@ -57,15 +57,15 @@ public:
 
     bool PutString(const std::string& id, const std::string& value);
 
-    bool PutBool(const std::string& id, const bool& value);
+    bool PutBool(const std::string& id, bool value);
 
-    bool PutInt(const std::string& id, const int& value);
+    bool PutInt(const std::string& id, int value);
 
     bool PutStringArray(const std::string& id, const std::vector<std::string>& value);
 
-    bool PutMultiple(const std::string& id, const std::string& name, const bool& value);
+    bool PutMultiple(const std::string& id, const std::string& name, bool value);
 
-    bool PutMultiple(const std::string& id, const std::string& name, const int& index);
+    bool PutMultiple(const std::string& id, const std::string& name, int index);
 
     bool PutMultiple(const std::string& id, const std::string& name, const std::vector<std::string>& value);
 

@@ -111,13 +111,13 @@ bool NodeDataCache::PutString(const std::string& id, const std::string& value)
     return true;
 }
 
-bool NodeDataCache::PutBool(const std::string& id, const bool& value)
+bool NodeDataCache::PutBool(const std::string& id, bool value)
 {
     std::string strVal = value ? "true" : "false";
     return PutString(id, strVal);
 }
 
-bool NodeDataCache::PutInt(const std::string& id, const int& value)
+bool NodeDataCache::PutInt(const std::string& id, int value)
 {
     return PutString(id, std::to_string(value));
 }
@@ -131,7 +131,7 @@ bool NodeDataCache::PutStringArray(const std::string& id, const std::vector<std:
     return PutString(id, jsonArray->ToString());
 }
 
-bool NodeDataCache::PutMultiple(const std::string& id, const std::string& name, const bool& value)
+bool NodeDataCache::PutMultiple(const std::string& id, const std::string& name, bool value)
 {
     auto json = JsonUtil::Create(true);
     json->Put(KEY_TEXT, name.c_str());
@@ -139,7 +139,7 @@ bool NodeDataCache::PutMultiple(const std::string& id, const std::string& name, 
     return PutString(id, json->ToString());
 }
 
-bool NodeDataCache::PutMultiple(const std::string& id, const std::string& name, const int& index)
+bool NodeDataCache::PutMultiple(const std::string& id, const std::string& name, int index)
 {
     auto json = JsonUtil::Create(true);
     json->Put(KEY_TEXT, name.c_str());

@@ -81,21 +81,21 @@ public:
 
     ~EventParamsBuilder() = default;
 
-    EventParamsBuilder& SetEventType(const EventType eventType);
+    EventParamsBuilder& SetEventType(EventType eventType);
 
     EventParamsBuilder& SetId(const std::string& id);
 
     EventParamsBuilder& SetType(const std::string& type);
 
-    EventParamsBuilder& SetNavDst(std::string dstName);
+    EventParamsBuilder& SetNavDst(const std::string& dstName);
 
-    EventParamsBuilder& SetPageUrl(const std::string pageUrl);
+    EventParamsBuilder& SetPageUrl(const std::string& pageUrl);
 
     EventParamsBuilder& SetText(const std::string& value);
 
-    EventParamsBuilder& SetChecked(const bool& value);
+    EventParamsBuilder& SetChecked(bool value);
 
-    EventParamsBuilder& SetIndex(const int& value);
+    EventParamsBuilder& SetIndex(int value);
 
     EventParamsBuilder& SetTextArray(const std::vector<std::string>& value);
 
