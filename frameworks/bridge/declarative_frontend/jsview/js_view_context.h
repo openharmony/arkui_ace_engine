@@ -25,7 +25,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void JSAnimation(const JSCallbackInfo& info);
     static void JSAnimateTo(const JSCallbackInfo& info);
-    static const AnimationOption CreateAnimation(const std::unique_ptr<JsonValue>& animationArgs,
+    static const AnimationOption CreateAnimation(const JSRef<JSObject>& animationArgs,
          const std::function<float(float)>& jsFunc, bool isForm = false);
   
 
