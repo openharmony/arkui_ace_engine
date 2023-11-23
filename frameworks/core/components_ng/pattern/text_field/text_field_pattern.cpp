@@ -1740,7 +1740,6 @@ void TextFieldPattern::OnModifyDone()
         needToRefreshSelectOverlay_ = true;
         UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
             std::clamp(selectController_->GetEndIndex(), 0, textWidth));
-        UpdateCaretPositionWithClamp(selectController_->GetEndIndex());
     }
     if (layoutProperty->GetTypeChangedValue(false)) {
         layoutProperty->ResetTypeChanged();
