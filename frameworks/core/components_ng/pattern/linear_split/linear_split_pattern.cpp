@@ -30,6 +30,7 @@ namespace {
 
 constexpr std::size_t DEFAULT_DRAG_INDEX = -1;
 constexpr std::size_t SPLIT_INDEX_INC_TWO = 2;
+const std::string SPLIT_DRAG_SCENE = "split_drag_scene";
 } // namespace
 
 void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -100,7 +101,9 @@ void LinearSplitPattern::HandlePanStart(const GestureEvent& info)
         childrenDragPos_[dragedSplitIndex_ + 1] += yOffset;
     }
 
-    ConstrainDragRange();
+    if (!ConstrainDragRange()) {
+        UpdateDragFRCSceneInfo(info, SceneStatus::START);
+    }
 }
 
 void LinearSplitPattern::HandlePanStartBeforeAPI10(const GestureEvent& info)
@@ -155,6 +158,8 @@ void LinearSplitPattern::HandlePanStartBeforeAPI10(const GestureEvent& info)
     } else {
         dragSplitOffset_[dragedSplitIndex_] = dragSplitOffset_[dragedSplitIndex_];
     }
+
+    UpdateDragFRCSceneInfo(info, SceneStatus::START);
 }
 
 float LinearSplitPattern::GetMinPosFromIndex(std::size_t index)
@@ -177,16 +182,19 @@ float LinearSplitPattern::GetMaxPosFromIndex(std::size_t index)
     return max;
 }
 
-void LinearSplitPattern::ConstrainDragRange()
+bool LinearSplitPattern::ConstrainDragRange()
 {
     auto min = GetMinPosFromIndex(dragedSplitIndex_);
     auto max = GetMaxPosFromIndex(dragedSplitIndex_);
     auto& offset = childrenDragPos_[dragedSplitIndex_ + 1];
-    if (offset < min) {
+    if (LessOrEqual(offset, min)) {
         offset = min;
-    } else if (offset > max) {
+        return true;
+    } else if (GreatOrEqual(offset, max)) {
         offset = max;
+        return true;
     }
+    return false;
 }
 
 bool LinearSplitPattern::IsStuck()
@@ -267,7 +275,9 @@ void LinearSplitPattern::HandlePanUpdate(const GestureEvent& info)
         preOffset_ = yOffset;
     }
 
-    ConstrainDragRange();
+    if (!ConstrainDragRange()) {
+        UpdateDragFRCSceneInfo(info, SceneStatus::RUNNING);
+    }
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -324,6 +334,8 @@ void LinearSplitPattern::HandlePanUpdateBeforeAPI10(const GestureEvent& info)
         dragSplitOffset_[dragedSplitIndex_] = dragSplitOffset_[dragedSplitIndex_];
     }
 
+    UpdateDragFRCSceneInfo(info, SceneStatus::RUNNING);
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -331,6 +343,10 @@ void LinearSplitPattern::HandlePanUpdateBeforeAPI10(const GestureEvent& info)
 
 void LinearSplitPattern::HandlePanEnd(const GestureEvent& info)
 {
+    if (isDragedMoving_) {
+        UpdateDragFRCSceneInfo(info, SceneStatus::END);
+    }
+
     isDragedMoving_ = false;
     isDraged_ = false;
     dragedSplitIndex_ = DEFAULT_DRAG_INDEX;
@@ -497,6 +513,19 @@ MouseFormat LinearSplitPattern::GetMouseFormatBeforeAPI10()
         }
     }
     return format;
+}
+
+void LinearSplitPattern::UpdateDragFRCSceneInfo(const GestureEvent& info, SceneStatus sceneStatus)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (splitType_ == SplitType::ROW_SPLIT) {
+        host->AddFRCSceneInfo(
+            SPLIT_DRAG_SCENE, fabs(static_cast<float>(info.GetVelocity().GetVelocityX())), sceneStatus);
+    } else {
+        host->AddFRCSceneInfo(
+            SPLIT_DRAG_SCENE, fabs(static_cast<float>(info.GetVelocity().GetVelocityY())), sceneStatus);
+    }
 }
 
 void LinearSplitPattern::OnModifyDone()
