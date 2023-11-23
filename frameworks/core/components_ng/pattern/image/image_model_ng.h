@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
 
 #include "core/components_ng/pattern/image/image_model.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -54,6 +55,7 @@ public:
     void SetOnDrop(OnDragDropFunc&& onDrop) override;
     void SetCopyOption(const CopyOptions& copyOption) override;
     bool UpdateDragItemInfo(DragItemInfo& itemInfo) override;
+    static void SetImageFit(FrameNode* frameNode, ImageFit value);
 };
 
 } // namespace OHOS::Ace::NG

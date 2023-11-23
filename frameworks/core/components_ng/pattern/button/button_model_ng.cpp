@@ -251,4 +251,80 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
     textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
 }
+
+void ButtonModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, fontSize, frameNode);
+}
+
+void ButtonModelNG::SetFontWeight(FrameNode* frameNode, const Ace::FontWeight& fontWeight)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontWeight, fontWeight, frameNode);
+}
+
+void ButtonModelNG::SetFontStyle(FrameNode* frameNode, const Ace::FontStyle& fontStyle)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontStyle, fontStyle, frameNode);
+}
+
+void ButtonModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& fontFamily)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontFamily, fontFamily, frameNode);
+}
+
+void ButtonModelNG::SetFontColor(FrameNode* frameNode, const Color& textColor)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, textColor, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, textColor, frameNode);
+}
+
+void ButtonModelNG::SetType(FrameNode* frameNode, const int value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, static_cast<ButtonType>(value), frameNode);
+}
+
+void ButtonModelNG::SetStateEffect(FrameNode* frameNode, const bool stateEffect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    buttonEventHub->SetStateEffect(stateEffect);
+}
+
+void ButtonModelNG::SetLableStyle(FrameNode* frameNode, const ButtonParameters& buttonParameters)
+{
+    if (buttonParameters.textOverflow.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, TextOverflow, buttonParameters.textOverflow.value(), frameNode);
+    }
+    if (buttonParameters.maxLines.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxLines, buttonParameters.maxLines.value(), frameNode);
+    }
+    if (buttonParameters.minFontSize.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, MinFontSize, buttonParameters.minFontSize.value(), frameNode);
+    }
+    if (buttonParameters.maxFontSize.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, MaxFontSize, buttonParameters.maxFontSize.value(), frameNode);
+    }
+    if (buttonParameters.heightAdaptivePolicy.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, HeightAdaptivePolicy, buttonParameters.heightAdaptivePolicy.value(), frameNode);
+    }
+    if (buttonParameters.fontSize.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, buttonParameters.fontSize.value(), frameNode);
+    }
+    if (buttonParameters.fontWeight.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, FontWeight, buttonParameters.fontWeight.value(), frameNode);
+    }
+    if (buttonParameters.fontFamily.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, FontFamily, buttonParameters.fontFamily.value(), frameNode);
+    }
+    if (buttonParameters.fontStyle.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontStyle, buttonParameters.fontStyle.value(), frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG

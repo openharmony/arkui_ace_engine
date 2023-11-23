@@ -1,10 +1,13 @@
 
 /// <reference path="./import.ts" />
 class ArkRefreshComponent extends ArkComponent implements RefreshAttribute {
-    onStateChange(callback: (state: RefreshStatus) => void): RefreshAttribute {
+    onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
         throw new Error("Method not implemented.");
     }
-    onRefreshing(callback: () => void): RefreshAttribute {
+    onStateChange(callback: (state: RefreshStatus) => void): this {
+        throw new Error("Method not implemented.");
+    }
+    onRefreshing(callback: () => void): this {
         throw new Error("Method not implemented.");
     }
 }

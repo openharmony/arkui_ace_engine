@@ -110,11 +110,6 @@ void SearchLayoutAlgorithm::CancelButtonMeasure(LayoutWrapper* layoutWrapper)
     auto cancelButtonHeight =
         layoutProperty->GetCancelButtonUDSizeValue(Dimension(cancelIconSizeMeasure_.Height())).ConvertToPx() +
         spaceHeight;
-    auto themeHeight = searchTheme->GetHeight().ConvertToPx();
-    auto constraint = layoutProperty->GetLayoutConstraint();
-    auto searchHeight =
-        (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
-    cancelButtonHeight = std::min(cancelButtonHeight, searchHeight - 0.0f);
     CalcSize cancelButtonCalcSize((CalcLength(cancelButtonHeight)), CalcLength(cancelButtonHeight));
     cancelButtonLayoutProperty->UpdateUserDefinedIdealSize(cancelButtonCalcSize);
 

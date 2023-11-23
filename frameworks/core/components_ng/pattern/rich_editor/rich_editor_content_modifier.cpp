@@ -14,16 +14,38 @@
  */
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
 namespace OHOS::Ace::NG {
+RichEditorContentModifier::RichEditorContentModifier(const std::optional<TextStyle>& textStyle,
+    const ParagraphManager* pManager, const WeakPtr<OHOS::Ace::NG::Pattern>& pattern)
+    : TextContentModifier(textStyle), pManager_(pManager), pattern_(pattern)
+{
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(richEditorPattern);
+    richTextRectX_ = AceType::MakeRefPtr<PropertyFloat>(richEditorPattern->GetTextRect().GetX());
+    AttachProperty(richTextRectX_);
+    richTextRectY_ = AceType::MakeRefPtr<PropertyFloat>(richEditorPattern->GetTextRect().GetY());
+    AttachProperty(richTextRectY_);
+}
+
 void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
 {
     CHECK_NULL_VOID(pManager_);
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(richEditorPattern);
+    auto& canvas = drawingContext.canvas;
+    canvas.Save();
+    auto contentRect = richEditorPattern->GetTextContentRect();
+    RSRect clipInnerRect = RSRect(contentRect.GetX(), contentRect.GetY(), contentRect.GetX() + contentRect.Width(),
+        contentRect.GetY() + contentRect.Height());
+    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     auto&& paragraphs = pManager_->GetParagraphs();
-    auto offset = GetPaintOffset();
+    auto offset = richEditorPattern->GetTextRect().GetOffset();
     for (auto&& info : paragraphs) {
         info.paragraph->Paint(drawingContext.canvas, offset.GetX(), offset.GetY());
         offset.AddY(info.paragraph->GetHeight());
     }
+    canvas.Restore();
 }
 } // namespace OHOS::Ace::NG

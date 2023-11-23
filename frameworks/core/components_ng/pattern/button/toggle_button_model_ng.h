@@ -20,6 +20,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ToggleButtonModelNG {
@@ -28,6 +29,8 @@ public:
     static void SetSelectedColor(const Color& selectedColor);
     static void SetBackgroundColor(const Color& backgroundColor);
     static void SetIsOn(bool isOn);
+    static void SetSelectedColor(FrameNode* frameNode, const Color& selectedColor);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& backgroundColor);
 };
 } // namespace OHOS::Ace::NG
 

@@ -250,6 +250,15 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest003, TestSize.Level1)
     graphicsProperty.ToJsonValue(json);
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("color"), "ColoringStrategy.AVERAGE");
     json->Delete(SHADOW_TEST);
+
+    /**
+     * @tc.steps: step3. call ToJsonValue.push propBackShadow colorStrategy_ == ShadowColorStrategy::PRIMARY.
+     * @tc.expected: Return expected results.
+     */
+    shadow.colorStrategy_ = ShadowColorStrategy::PRIMARY;
+    graphicsProperty.propBackShadow = shadow;
+    graphicsProperty.ToJsonValue(json);
+    EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("color"), "ColoringStrategy.PRIMARY");
 }
 
 /**

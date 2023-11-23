@@ -32,6 +32,12 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+struct TextClockFormatElement {
+    char elementKey;
+    int32_t formatElementNum = 0;
+    std::string formatElement = "";
+};
+
 using TimeCallback = std::function<void()>;
 class TextClockPattern : public Pattern {
     DECLARE_ACE_TYPE(TextClockPattern, Pattern);
@@ -91,17 +97,16 @@ private:
     void OnFormVisibleChange(bool visible);
     static void UpdateTextLayoutProperty(
         RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
-    std::vector<std::string> ParseInputFormat(
-        bool& is24H, int32_t& weekType, int32_t& month, int32_t& day, bool& isMilliSecond);
+    void ParseInputFormat(bool& is24H);
     static std::vector<std::string> ParseDateTimeValue(const std::string& strDateTimeValue);
+    void GetDateTimeIndex(const char& element, TextClockFormatElement& tempFormatElement);
     static std::string GetAmPm(const std::string& dateTimeValue);
     static std::string Abstract(const std::string& strSource, const bool& abstractItem);
     static int32_t GetDigitNumber(const std::string& strSource);
     static std::string GetWeek(const bool& isShortType, const int32_t& week);
-    static std::string SpliceDateTime(
-        const std::vector<std::string>& curDateTime, const std::vector<std::string>& inputFormatSplitter);
-    static std::string CheckDateTimeElement(const std::vector<std::string>& curDateTime, const std::string& str,
-        const char& element, const int32_t& elementIndex, const bool& oneElement);
+    std::string SpliceDateTime(const std::vector<std::string>& curDateTime);
+    static std::string CheckDateTimeElement(const std::vector<std::string>& curDateTime, const char& element,
+        const int32_t& elementIndex, const bool& oneElement);
 
     std::string GetFormat() const;
     int32_t GetHoursWest() const;
@@ -116,6 +121,7 @@ private:
     bool isFormVisible_ = true;
     bool isForm_ = false;
     std::string prevTime_;
+    std::map<int32_t, TextClockFormatElement> formatElementMap;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextClockPattern);
 };

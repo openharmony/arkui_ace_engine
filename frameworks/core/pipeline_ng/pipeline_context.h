@@ -245,7 +245,7 @@ public:
     {
         return safeAreaManager_;
     }
-    SafeAreaInsets GetSafeArea() const;
+    virtual SafeAreaInsets GetSafeArea() const;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
@@ -467,6 +467,10 @@ public:
     void SetJSViewActive(bool active, WeakPtr<CustomNode> custom);
 
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
+
+    void SetCursor(int32_t cursorValue) override;
+
+    void RestoreDefault() override;
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,

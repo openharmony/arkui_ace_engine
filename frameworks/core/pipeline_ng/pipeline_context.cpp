@@ -399,6 +399,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 #endif
     ProcessDelayTasks();
     FlushAnimation(nanoTimestamp);
+    bool hasAnimation = window_->FlushAnimation(nanoTimestamp);
+    if (hasAnimation) {
+        RequestFrame();
+    }
     FlushTouchEvents();
     FlushBuild();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
@@ -430,10 +434,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     } while (false);
 #endif
 
-    bool hasAnimation = window_->FlushCustomAnimation(nanoTimestamp);
-    if (hasAnimation) {
-        RequestFrame();
-    }
+    window_->FlushModifier();
     FlushFrameRate();
     FlushMessages();
     if (dragCleanTask_) {
@@ -1168,6 +1169,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
         float keyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
         float positionYWithOffset = positionY - keyboardOffset;
+        if (rootSize.Height() - positionY - height < 0) {
+            height = rootSize.Height() - positionY;
+        }
         float offsetFix = (rootSize.Height() - positionY - height) < keyboardHeight
                                 ? keyboardHeight - (rootSize.Height() - positionY - height)
                                 : keyboardHeight;
@@ -2565,5 +2569,23 @@ void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& no
 void PipelineContext::SetJSViewActive(bool active, WeakPtr<CustomNode> custom)
 {
     taskScheduler_->SetJSViewActive(active, custom);
+}
+
+void PipelineContext::SetCursor(int32_t cursorValue)
+{
+    if (cursorValue >= 0 && cursorValue <= static_cast<int32_t>(MouseFormat::RUNNING)) {
+        cursor_ = static_cast<MouseFormat>(cursorValue);
+        auto mouseStyle = MouseStyle::CreateMouseStyle();
+        CHECK_NULL_VOID(mouseStyle);
+        mouseStyle->ChangePointerStyle(GetWindowId(), cursor_);
+    }
+}
+
+void PipelineContext::RestoreDefault()
+{
+    cursor_ = MouseFormat::DEFAULT;
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    CHECK_NULL_VOID(mouseStyle);
+    mouseStyle->ChangePointerStyle(GetWindowId(), MouseFormat::DEFAULT);
 }
 } // namespace OHOS::Ace::NG

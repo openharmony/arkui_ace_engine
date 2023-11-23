@@ -76,6 +76,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+constexpr Dimension DEFAULT_NAVBAR_WIDTH = 240.0_vp;
 constexpr int32_t TEST_DATA = 10;
 const std::string NAVIGATION_TITLE = "NavigationTestNg";
 const std::string TEST_TAG = "test";
@@ -835,7 +836,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_013, TestSize.Level1)
      * @tc.steps: step2. check pattern->preNavBarWidth_.
      * @tc.expected: preNavBarWidth_ is correct.
      */
-    EXPECT_EQ(pattern->preNavBarWidth_, 360.0);
+    EXPECT_EQ(pattern->preNavBarWidth_, static_cast<float>(DEFAULT_NAVBAR_WIDTH.ConvertToPx()));
     pattern->preNavBarWidth_ = 0;
     pattern->HandleDragUpdate(FLOAT_260);
     EXPECT_EQ(pattern->realNavBarWidth_, 0.0);

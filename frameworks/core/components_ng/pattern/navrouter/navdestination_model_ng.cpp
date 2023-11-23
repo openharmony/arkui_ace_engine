@@ -114,7 +114,7 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     backButtonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
     backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
-    backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS));
+    backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
     backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto renderContext = backButtonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -327,6 +327,7 @@ void NavDestinationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
     navDestinationNode->SetTitle(customTitle);
     navDestinationNode->UpdateTitleNodeOperation(ChildNodeOperation::ADD);
     navDestinationNode->UpdatePrevTitleIsCustom(true);
+    navDestinationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void NavDestinationModelNG::SetTitleHeight(int32_t height)
@@ -339,9 +340,21 @@ void NavDestinationModelNG::SetTitleHeight(int32_t height)
     }
 }
 
-void NavDestinationModelNG::SetTitleHeight(const Dimension& titleHeight)
+void NavDestinationModelNG::SetTitleHeight(const Dimension& titleHeight, bool isValid)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, titleHeight);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    if (isValid) {
+        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, titleHeight);
+    } else {
+        if (navDestinationLayoutProperty->HasTitleBarHeight()) {
+            return;
+        }
+        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, Dimension(0.0f));
+    }
 }
 
 void NavDestinationModelNG::SetOnShown(std::function<void()>&& onShow)

@@ -544,7 +544,7 @@ void Animator::Finish()
     LOGD("animation finish. id: %{public}d", controllerId_);
     if (motion_) {
         // Notify motion with big time to let motion end in final state.
-        motion_->OnTimestampChanged(INT_MAX, 0.0f, false);
+        motion_->OnTimestampChanged(static_cast<float>(INT_MAX), 0.0f, false);
         Stop();
         return;
     }
@@ -576,7 +576,7 @@ void Animator::Cancel()
     }
     if (motion_) {
         // Notify motion with big time to let motion end in final state.
-        motion_->OnTimestampChanged(INT_MAX, 0.0f, false);
+        motion_->OnTimestampChanged(static_cast<float>(INT_MAX), 0.0f, false);
     }
     if (scheduler_ && scheduler_->IsActive()) {
         scheduler_->Stop();

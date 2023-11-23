@@ -1210,6 +1210,12 @@ void RosenRenderContext::OnOpacityUpdate(double opacity)
     RequestNextFrame();
 }
 
+void RosenRenderContext::SetAlphaOffscreen(bool isOffScreen)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetAlphaOffscreen(isOffScreen);
+}
+
 class DrawDragThumbnailCallback : public SurfaceCaptureCallback {
 public:
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
@@ -2303,17 +2309,19 @@ void RosenRenderContext::PaintFocusState(
     CHECK_NULL_VOID(rsNode_);
     auto borderWidthPx = static_cast<float>(paintWidth.ConvertToPx());
     auto frameNode = GetHost();
-    auto paintTask = [paintColor, borderWidthPx, frameNode](const RSRoundRect& rrect, RSCanvas& rsCanvas) mutable {
+    auto paintTask = [paintColor, borderWidthPx, weak = WeakClaim(AceType::RawPtr(frameNode))]
+    (const RSRoundRect& rrect, RSCanvas& rsCanvas) mutable {
         RSPen pen;
         pen.SetAntiAlias(true);
         pen.SetColor(ToRSColor(paintColor));
         pen.SetWidth(borderWidthPx);
         rsCanvas.AttachPen(pen);
-        CHECK_NULL_VOID(frameNode);
-        if (!frameNode->GetCheckboxFlag()) {
+        auto delegatePtr = weak.Upgrade();
+        CHECK_NULL_VOID(delegatePtr);
+        if (!delegatePtr->GetCheckboxFlag()) {
             rsCanvas.DrawRoundRect(rrect);
         } else {
-            auto paintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+            auto paintProperty = delegatePtr->GetPaintProperty<CheckBoxPaintProperty>();
             CHECK_NULL_VOID(paintProperty);
             CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
             if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -2749,7 +2757,8 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
     rsNode_->SetShadowMask(shadow.GetShadowType() == ShadowType::BLUR);
     rsNode_->SetShadowIsFilled(shadow.GetIsFilled());
-    rsNode_->SetShadowColorStrategy(shadow.GetShadowColorStrategy() == ShadowColorStrategy::AVERAGE);
+    rsNode_->SetShadowColorStrategy(shadow.GetShadowColorStrategy() == ShadowColorStrategy::AVERAGE ||
+                                    shadow.GetShadowColorStrategy() == ShadowColorStrategy::PRIMARY);
     if (shadow.GetHardwareAcceleration()) {
         rsNode_->SetShadowElevation(shadow.GetElevation());
     } else {
@@ -3721,7 +3730,17 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
                 auto context = weakThis.Upgrade();
                 CHECK_NULL_VOID(context);
                 ContainerScope scope(id);
-                context->OnTransitionInFinish();
+                auto pipeline = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                auto taskExecutor = pipeline->GetTaskExecutor();
+                CHECK_NULL_VOID(taskExecutor);
+                taskExecutor->PostTask(
+                    [weakThis]() {
+                        auto context = weakThis.Upgrade();
+                        CHECK_NULL_VOID(context);
+                        context->OnTransitionInFinish();
+                    },
+                    TaskExecutor::TaskType::UI);
             },
             false);
     } else {

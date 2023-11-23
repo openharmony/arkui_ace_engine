@@ -180,7 +180,8 @@ public:
     void UpdateCaretInfoByOffset(const Offset& localOffset);
     void UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset);
     void MoveSecondHandleByKeyBoard(int32_t index);
-    void UpdateSelectByOffset(const Offset& localOffset);
+    void UpdateSelectByDoubleClick(const Offset& localOffset);
+    void UpdateSelectByLongPress(const Offset& localOffset);
     void UpdateCaretOffset();
     void UpdateCaretOffset(const OffsetF& offset);
     void UpdateFirstHandleOffset();
@@ -203,6 +204,7 @@ private:
         int32_t extent, CaretMetricsF& caretMetrics, const OffsetF& touchOffset);
     // The cursor needs to fit the line where the touch is located.
     void UpdateCaretRectByPositionNearTouchOffset(int32_t position, const Offset& touchOffset);
+    void UpdateSelectByOffset(const Offset& localOffset);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FirstIndex, int32_t, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SecondIndex, int32_t, PROPERTY_UPDATE_RENDER);
 

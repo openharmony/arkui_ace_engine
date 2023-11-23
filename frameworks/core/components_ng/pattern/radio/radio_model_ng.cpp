@@ -123,4 +123,24 @@ void RadioModelNG::SetHoverEffect(HoverEffectType hoverEffect)
     CHECK_NULL_VOID(pattern);
     pattern->SetShowHoverEffect(hoverEffect != HoverEffectType::NONE);
 }
+
+void RadioModelNG::SetChecked(FrameNode* frameNode, bool isChecked)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, isChecked, frameNode);
+}
+
+void RadioModelNG::SetCheckedBackgroundColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheckedBackgroundColor, color, frameNode);
+}
+
+void RadioModelNG::SetUncheckedBorderColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioUncheckedBorderColor, color, frameNode);
+}
+
+void RadioModelNG::SetIndicatorColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColor, color, frameNode);
+}
 } // namespace OHOS::Ace::NG

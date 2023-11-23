@@ -215,6 +215,7 @@ void UIExtensionPattern::OnConnect()
     host->AddChild(contentNode_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->CreateNodeInRenderThread();
+    surfaceNode->SetForeground(isModal_);
     auto pipeline = PipelineBase::GetCurrentContext();
     auto weak = WeakClaim(this);
     auto pattern = weak.Upgrade();

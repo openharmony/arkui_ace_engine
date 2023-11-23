@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
@@ -51,6 +52,17 @@ struct TextConfig;
 namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
+
+enum class AutoScrollEvent { HANDLE, DRAG, MOUSE, NONE };
+enum class EdgeDetectionStrategy { OUT_BOUNDARY, IN_BOUNDARY, DISABLE };
+struct AutoScrollParam {
+    AutoScrollEvent autoScrollEvent = AutoScrollEvent::NONE;
+    RectF handleRect;
+    bool isFirstHandle = false;
+    float offset = 0.0f;
+    bool showScrollbar = false;
+    Offset eventOffset;
+};
 
 struct SelectionMenuParams {
     RichEditorType type;
@@ -275,6 +287,34 @@ public:
     std::vector<RectF> GetTextBoxes() override;
     bool OnBackPressed() override;
 
+    // Add for Scroll
+    const RectF& GetTextRect() override
+    {
+        return richTextRect_;
+    }
+
+    float GetScrollOffset() const
+    {
+        return scrollOffset_;
+    }
+
+    RefPtr<ScrollBar> GetScrollControllerBar()
+    {
+        return GetScrollBar();
+    }
+
+    bool OnScrollCallback(float offset, int32_t source) override;
+    void OnScrollEndCallback() override;
+    bool IsScrollable() const override
+    {
+        return scrollable_;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
     {
@@ -377,6 +417,26 @@ private:
     void SetCaretSpanIndex(int32_t index);
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
     bool IsSelectedBindSelectionMenu();
+    // add for scroll.
+    void UpdateChildrenOffset();
+    void MoveFirstHandle(float offset);
+    void MoveSecondHandle(float offset);
+    void InitScrollablePattern();
+    bool IsReachedBoundary(float offset);
+    void UpdateScrollBarOffset() override;
+    void CheckScrollable();
+    void UpdateScrollStateAfterLayout(bool shouldDisappear);
+    void ScheduleAutoScroll(AutoScrollParam param);
+    void OnAutoScroll(AutoScrollParam param);
+    void StopAutoScroll();
+    void AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy);
+    float MoveTextRect(float offset);
+    bool MoveCaretToContentRect();
+    bool IsTextArea() const override
+    {
+        return true;
+    }
+
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else
@@ -428,6 +488,13 @@ private:
 
     std::function<void()> customKeyboardBuilder_;
     Offset selectionMenuOffset_;
+    // add for scroll
+    RectF richTextRect_;
+    float scrollOffset_ = 0.0f;
+    bool isFirstCallOnReady_ = false;
+    bool scrollable_ = true;
+    CancelableCallback<void()> autoScrollTask_;
+    OffsetF prevAutoScrollOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };

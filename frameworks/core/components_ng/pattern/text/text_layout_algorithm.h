@@ -89,6 +89,8 @@ protected:
 
     virtual ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const;
 
+    virtual void UpdateParagraphForAISpan(const TextStyle& textStyle, LayoutWrapper* layoutWrapper);
+
 private:
     virtual void ApplyIndent(const TextStyle& textStyle, double width);
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
@@ -122,6 +124,7 @@ private:
     void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle);
     void UpdateParagraph(LayoutWrapper* layoutWrapper);
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) const;
+    virtual OffsetF GetTextRectOffset(LayoutWrapper* layoutWrapper) const;
     bool CreateImageSpanAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool IncludeImageSpan(LayoutWrapper* layoutWrapper);

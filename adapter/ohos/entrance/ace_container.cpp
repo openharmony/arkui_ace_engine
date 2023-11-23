@@ -82,8 +82,8 @@
 
 namespace OHOS::Ace::Platform {
 namespace {
-
-constexpr uint32_t DIRECTION_OR_DPI_KEY = 0b1100;
+constexpr uint32_t DIRECTION_KEY = 0b1000;
+constexpr uint32_t DPI_KEY = 0b0100;
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -935,6 +935,19 @@ bool AceContainer::RunPage(
     return true;
 }
 
+bool AceContainer::RunPage(
+    int32_t instanceId, const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, false);
+    ContainerScope scope(instanceId);
+    auto front = container->GetFrontend();
+    CHECK_NULL_RETURN(front, false);
+    LOGD("RunPage by buffer size:%{public}d", size);
+    front->RunPage(content, params);
+    return true;
+}
+
 bool AceContainer::PushPage(int32_t instanceId, const std::string& content, const std::string& params)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -1780,17 +1793,18 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
             AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
         }
     }
-    if (!parsedConfig.direction.empty() || !parsedConfig.densitydpi.empty()) {
-        configurationChange.DirectionOrDpiUpdate = true;
-        if (!parsedConfig.direction.empty()) {
-            auto resDirection = DeviceOrientation::ORIENTATION_UNDEFINED;
-            if (parsedConfig.direction == "horizontal") {
-                resDirection = DeviceOrientation::LANDSCAPE;
-            } else if (parsedConfig.direction == "vertical") {
-                resDirection = DeviceOrientation::PORTRAIT;
-            }
-            resConfig.SetOrientation(resDirection);
+    if (!parsedConfig.direction.empty()) {
+        configurationChange.directionUpdate = true;
+        auto resDirection = DeviceOrientation::ORIENTATION_UNDEFINED;
+        if (parsedConfig.direction == "horizontal") {
+            resDirection = DeviceOrientation::LANDSCAPE;
+        } else if (parsedConfig.direction == "vertical") {
+            resDirection = DeviceOrientation::PORTRAIT;
         }
+        resConfig.SetOrientation(resDirection);
+    }
+    if (!parsedConfig.densitydpi.empty()) {
+        configurationChange.dpiUpdate = true;
     }
     if (!parsedConfig.themeTag.empty()) {
         if (ParseThemeConfig(parsedConfig.themeTag)) {
@@ -1843,9 +1857,11 @@ void AceContainer::NotifyConfigurationChange(
                     CHECK_NULL_VOID(pipeline);
                     auto themeManager = pipeline->GetThemeManager();
                     CHECK_NULL_VOID(themeManager);
-                    if (configurationChange.DirectionOrDpiUpdate &&
-                        (themeManager->GetResourceLimitKeys() & DIRECTION_OR_DPI_KEY) == 0) {
-                        LOGI("resource limit: will not flush reload by direction or dpi changed");
+                    if (configurationChange.directionUpdate &&
+                        (themeManager->GetResourceLimitKeys() & DIRECTION_KEY) == 0) {
+                        return;
+                    }
+                    if (configurationChange.dpiUpdate && (themeManager->GetResourceLimitKeys() & DPI_KEY) == 0) {
                         return;
                     }
                     pipeline->NotifyConfigurationChange();

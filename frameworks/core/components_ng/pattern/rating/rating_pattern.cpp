@@ -588,8 +588,7 @@ bool RatingPattern::OnKeyEvent(const KeyEvent& event)
 
 void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
-    focusHub->SetFocusable(!IsIndicator());
-    CHECK_NULL_VOID(!IsIndicator());
+    focusHub->SetFocusType(IsIndicator() ? FocusType::DISABLE : FocusType::NODE);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN(pattern, false);

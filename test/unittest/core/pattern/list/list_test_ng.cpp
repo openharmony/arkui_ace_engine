@@ -24,6 +24,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #define private public
 #define protected public
 #include "test/mock/base/mock_task_executor.h"
@@ -6299,6 +6300,54 @@ HWTEST_F(ListTestNg, ListPattern_GetItemRectInGroup001, TestSize.Level1)
      */
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2),
         Rect(0, ITEM_HEIGHT * 2, FILL_LENGTH.Value() * DEVICE_WIDTH, ITEM_HEIGHT * GROUP_LINE_NUMBER)));
+}
+
+/**
+ * @tc.name: ListLayout_SafeArea001
+ * @tc.desc: Test list layout with expandSafeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListLayout_SafeArea001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    Create([](ListModelNG model) {
+        model.SetInitialIndex(1);
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+
+    EXPECT_CALL(*MockPipelineBase::pipeline_, GetSafeArea)
+        .Times(1)
+        .WillOnce(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
+    layoutProperty_->UpdateSafeAreaExpandOpts(
+        { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
+    RunMeasureAndLayout(frameNode_);
+    EXPECT_EQ(pattern_->contentEndOffset_, 100);
+    EXPECT_EQ(frameNode_->geometryNode_->GetFrameSize(), SizeF(480, 800));
+}
+
+/**
+ * @tc.name: ListLayout_SafeArea002
+ * @tc.desc: Test list layout with expandSafeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListLayout_SafeArea002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    Create([](ListModelNG model) {
+        model.SetInitialIndex(1);
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+
+    EXPECT_CALL(*MockPipelineBase::pipeline_, GetSafeArea).Times(0);
+    layoutProperty_->UpdateSafeAreaExpandOpts(
+        { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP });
+    RunMeasureAndLayout(frameNode_);
+    EXPECT_EQ(pattern_->contentEndOffset_, 0);
+    EXPECT_EQ(frameNode_->geometryNode_->GetFrameSize(), SizeF(480, 800));
 }
 
 /**

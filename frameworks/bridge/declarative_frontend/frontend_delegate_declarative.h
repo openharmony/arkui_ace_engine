@@ -83,6 +83,8 @@ public:
     // JSFrontend delegate functions.
     void RunPage(
         const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter = false);
+    void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content,
+        const std::string& params, const std::string& profile);
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const;
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data);
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const;
@@ -309,7 +311,8 @@ public:
         std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap);
 
     void InitializeRouterManager(
-        NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
+        NG::LoadPageCallback&& loadPageCallback, NG::LoadPageByBufferCallback&& loadPageByBufferCallback,
+        NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
         NG::UpdateRootComponentCallback&& updateRootComponentCallback);
 
     const RefPtr<NG::PageRouterManager>& GetPageRouterManager() const

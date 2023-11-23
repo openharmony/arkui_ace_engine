@@ -208,8 +208,8 @@ RefPtr<FocusHub> FocusHub::GetChildMainView()
             continue;
         }
         auto frameName = child->GetFrameName();
-        if (frameName == V2::PAGE_ETS_TAG || frameName == V2::MENU_WRAPPER_ETS_TAG || frameName == V2::DIALOG_ETS_TAG ||
-            frameName == V2::MODAL_PAGE_TAG || frameName == V2::MENU_ETS_TAG || frameName == V2::SHEET_PAGE_TAG) {
+        if (frameName == V2::PAGE_ETS_TAG || frameName == V2::DIALOG_ETS_TAG || frameName == V2::MODAL_PAGE_TAG ||
+            frameName == V2::MENU_ETS_TAG || frameName == V2::SHEET_PAGE_TAG || frameName == V2::POPUP_ETS_TAG) {
             if (!curFocusMainView && child->IsCurrentFocus()) {
                 curFocusMainView = child;
             }
@@ -251,12 +251,12 @@ RefPtr<FocusHub> FocusHub::GetMainViewRootScope()
 {
     auto frameName = GetFrameName();
     int32_t rootScopeDeepth = 0;
-    if (frameName == V2::MENU_WRAPPER_ETS_TAG) {
-        rootScopeDeepth = DEEPTH_OF_MENU_WRAPPER;
-    } else if (frameName == V2::MENU_ETS_TAG) {
+    if (frameName == V2::MENU_ETS_TAG) {
         rootScopeDeepth = DEEPTH_OF_MENU;
     } else if (frameName == V2::DIALOG_ETS_TAG) {
         rootScopeDeepth = DEEPTH_OF_DIALOG;
+    } else if (frameName == V2::POPUP_ETS_TAG) {
+        rootScopeDeepth = DEEPTH_OF_POPUP;
     } else {
         rootScopeDeepth = DEEPTH_OF_PAGE;
     }
@@ -264,6 +264,10 @@ RefPtr<FocusHub> FocusHub::GetMainViewRootScope()
     for (int32_t i = 0; i < rootScopeDeepth; ++i) {
         CHECK_NULL_RETURN(rootScope, nullptr);
         rootScope = rootScope->GetChildren().front();
+    }
+    CHECK_NULL_RETURN(rootScope, nullptr);
+    if (rootScope->GetFocusType() != FocusType::SCOPE) {
+        return rootScope->GetParentFocusHub();
     }
     return rootScope;
 }
@@ -732,13 +736,21 @@ void FocusHub::RequestFocus() const
 
 void FocusHub::RequestFocusWithDefaultFocusFirstly()
 {
-    auto viewRootScope = GetMainViewRootScope();
-    if (GetIsViewRootScopeFocused() && viewRootScope) {
-        viewRootScope->SetFocusDependence(FocusDependence::SELF);
+    RefPtr<FocusHub> viewScope;
+    if (GetFrameName() == V2::MENU_WRAPPER_ETS_TAG) {
+        viewScope = GetChildren().front();
+    } else {
+        viewScope = Claim(this);
+    }
+    if (viewScope && viewScope->GetIsViewRootScopeFocused()) {
+        auto viewRootScope = viewScope->GetMainViewRootScope();
+        if (viewRootScope) {
+            viewRootScope->SetFocusDependence(FocusDependence::SELF);
+        }
     }
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    context->AddDirtyDefaultFocus(GetFrameNode());
+    context->AddDirtyDefaultFocus(viewScope ? viewScope->GetFrameNode() : GetFrameNode());
 }
 
 bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
@@ -1437,6 +1449,10 @@ bool FocusHub::AcceptFocusByRectOfLastFocusFlex(const RectF& rect)
 
         RectF childRect;
         if (!CalculateRect(*it, childRect)) {
+            continue;
+        }
+
+        if (!childRect.IsValid() || NearZero(childRect.Width()) || NearZero(childRect.Height())) {
             continue;
         }
 

@@ -121,6 +121,27 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
     LoadPage(GenerateNextPageId(), info);
 }
 
+void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
+{
+    ACE_SCOPED_TRACE("PageRouterManager::RunPage");
+    CHECK_RUN_ON(JS);
+    RouterPageInfo info;
+    info.content = content;
+
+#if !defined(PREVIEW)
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto instanceId = container->GetInstanceId();
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    ContainerScope scope(instanceId);
+    auto pageRouterManager = AceType::Claim(this);
+    CHECK_NULL_VOID(pageRouterManager);
+    taskExecutor->PostTask(
+        [pageRouterManager, info]() { pageRouterManager->LoadOhmUrl(info); }, TaskExecutor::TaskType::JS);
+#endif
+}
+
 void PageRouterManager::RunPageByNamedRouter(const std::string& name, const std::string& params)
 {
     LOGD("Router start run page by name, pagePath = %{private}s", info.url.c_str());
@@ -889,7 +910,12 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     pageNode->SetHostPageId(pageId);
     pageRouterStack_.emplace_back(pageNode);
 
-    loadJs_(target.path, target.errorCallback);
+    if (target.content && !target.content->empty()) {
+        loadJsByBuffer_(target.content, target.errorCallback);
+    } else {
+        loadJs_(target.path, target.errorCallback);
+    }
+
     auto result = loadNamedRouter_(target.url, target.isNamedRouterMode);
     if (!result) {
         if (!target.isNamedRouterMode) {

@@ -26,7 +26,8 @@
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -53,6 +54,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     MinusPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), idealSize);
+    gridLayoutInfo_.contentEndPadding_ = ScrollableUtils::CheckHeightExpansion(gridLayoutProperty, axis);
+    idealSize.AddHeight(gridLayoutInfo_.contentEndPadding_);
 
     InitialItemsCrossSize(gridLayoutProperty, idealSize, layoutWrapper->GetTotalChildCount());
 
@@ -62,6 +65,10 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!NearEqual(mainSize, gridLayoutInfo_.lastMainSize_)) {
         gridLayoutInfo_.ResetPositionFlags();
         UpdateOffsetOnVirtualKeyboardHeightChange(layoutWrapper, mainSize);
+        // If only the height of the Grid is changed, keep the prevOffset_ and currentOffset_ equal.
+        if (scrollSource_ == SCROLL_FROM_NONE) {
+            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+        }
     }
     FillGridViewportAndMeasureChildren(mainSize, crossSize, layoutWrapper);
 
@@ -397,6 +404,8 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
 // be moved up, so we need to modify [currentOffset_] according to previous position.
 void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
 {
+    // use original size in order to add end spacing
+    mainSize -= gridLayoutInfo_.contentEndPadding_;
     // Step1. Calculate total length of all items with main gap in viewport.
     // [lengthOfItemsInViewport] must be greater than or equal to viewport height
     float lengthOfItemsInViewport = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);

@@ -344,6 +344,8 @@ public:
     static void DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback = nullptr);
     static bool RunPage(
         int32_t instanceId, const std::string& content, const std::string& params, bool isNamedRouter = false);
+    static bool RunPage(
+        int32_t instanceId, const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params);
     static bool PushPage(int32_t instanceId, const std::string& content, const std::string& params);
     static bool OnBackPressed(int32_t instanceId);
     static void OnShow(int32_t instanceId);

@@ -96,6 +96,16 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
         return jsEngine->LoadPageSource(url, errorCallback);
     };
 
+    auto loadPageByBufferCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                        const std::shared_ptr<std::vector<uint8_t>>& content,
+                                        const std::function<void(const std::string&, int32_t)>& errorCallback) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return false;
+        }
+        return jsEngine->LoadPageSource(content, errorCallback);
+    };
+
     auto mediaQueryCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                          const std::string& callbackId, const std::string& args) {
         auto jsEngine = weakEngine.Upgrade();
@@ -228,6 +238,7 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
     };
 
     pageRouterManager->SetLoadJsCallback(std::move(loadPageCallback));
+    pageRouterManager->SetLoadJsByBufferCallback(std::move(loadPageByBufferCallback));
     pageRouterManager->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
     pageRouterManager->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
 
@@ -365,6 +376,20 @@ void DeclarativeFrontendNG::RunPage(const std::string& url, const std::string& p
     // Not use this pageId from backend, manage it in FrontendDelegateDeclarativeNg.
     if (delegate_) {
         delegate_->RunPage(url, params, pageProfile_);
+    }
+}
+
+void DeclarativeFrontendNG::RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
+{
+    auto container = Container::Current();
+    auto isStageModel = container ? container->IsUseStageModel() : false;
+    if (!isStageModel) {
+        LOGE("RunPage by buffer must be run under stage model.");
+        return;
+    }
+
+    if (delegate_) {
+        delegate_->RunPage(content, params, pageProfile_);
     }
 }
 

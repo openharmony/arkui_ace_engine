@@ -73,6 +73,19 @@ public:
     void SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onChange) override;
     void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) override;
 
+    static void SetCanLoop(FrameNode* frameNode, const bool value);
+    static void SetSelected(FrameNode* frameNode, uint32_t value);
+    static void SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values);
+    static void SetHasSelectAttr(FrameNode* frameNode, bool value);
+    static void SetNormalTextStyle(
+        FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
+    static void SetSelectedTextStyle(
+        FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
+    static void SetDisappearTextStyle(
+        FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
+    static void SetDefaultPickerItemHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();
