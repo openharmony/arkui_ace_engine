@@ -190,7 +190,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     selectOverlayProxy_.Reset();
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     selectOverlayProxy_ = restoreSelectOverlayProxy;
-    if (textSelector_.baseOffset != -1 && textSelector_.destinationOffset != -1) {
+    if (textSelector_.baseOffset != -1 && textSelector_.destinationOffset != -1 && SelectOverlayIsOn()) {
         CalculateHandleOffsetAndShowOverlay();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     }
