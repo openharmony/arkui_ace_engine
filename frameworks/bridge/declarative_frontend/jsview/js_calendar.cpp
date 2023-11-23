@@ -138,39 +138,7 @@ void JSCalendar::SetCalendarData(
     }
 #endif
 
-    auto yearValue = obj->GetProperty("year");
-    auto monthValue = obj->GetProperty("month");
-    auto arrayValue = obj->GetProperty("data");
-    auto data = JsonUtil::ParseJsonString(arrayValue->ToString());
-    if (!yearValue->IsNumber() || !monthValue->IsNumber() || !data->IsArray()) {
-        return;
-    }
-    ObtainedMonth obtainedMonth;
-    obtainedMonth.year = yearValue->ToNumber<int32_t>();
-    obtainedMonth.month = monthValue->ToNumber<int32_t>();
-    std::vector<CalendarDay> days;
-    auto child = data->GetChild();
-    while (child && child->IsValid()) {
-        CalendarDay day;
-        day.index = child->GetInt("index");
-        day.lunarMonth = child->GetString("lunarMonth");
-        day.lunarDay = child->GetString("lunarDay");
-        day.dayMark = child->GetString("dayMark");
-        day.dayMarkValue = child->GetString("dayMarkValue");
-        day.month.year = child->GetInt("year");
-        day.month.month = child->GetInt("month");
-        day.day = child->GetInt("day");
-        if (day.day == 1 && obtainedMonth.firstDayIndex == CALENDAR_INVALID) {
-            obtainedMonth.firstDayIndex = day.index;
-        }
-        day.isFirstOfLunar = child->GetBool("isFirstOfLunar");
-        day.hasSchedule = child->GetBool("hasSchedule");
-        day.markLunarDay = child->GetBool("markLunarDay");
-        days.emplace_back(std::move(day));
-        child = child->GetNext();
-    }
-    obtainedMonth.days = days;
-    component->SetCalendarData(obtainedMonth);
+    component->SetCalendarData(GetCalendarData(obj, monthState));
 }
 
 ObtainedMonth JSCalendar::GetCalendarData(const JSRef<JSObject>& obj, MonthState monthState)
@@ -184,33 +152,38 @@ ObtainedMonth JSCalendar::GetCalendarData(const JSRef<JSObject>& obj, MonthState
     auto yearValue = obj->GetProperty("year");
     auto monthValue = obj->GetProperty("month");
     auto arrayValue = obj->GetProperty("data");
-    auto data = JsonUtil::ParseJsonString(arrayValue->ToString());
-    if (!yearValue->IsNumber() || !monthValue->IsNumber() || !data->IsArray()) {
+    if (!yearValue->IsNumber() || !monthValue->IsNumber() || !arrayValue->IsArray()) {
         return ObtainedMonth();
     }
     ObtainedMonth obtainedMonth;
     obtainedMonth.year = yearValue->ToNumber<int32_t>();
     obtainedMonth.month = monthValue->ToNumber<int32_t>();
     std::vector<CalendarDay> days;
-    auto child = data->GetChild();
-    while (child && child->IsValid()) {
+    JSRef<JSArray> dataArray = JSRef<JSArray>::Cast(arrayValue);
+    size_t length = dataArray->Length();
+    for (size_t i = 0; i < length; ++i) {
         CalendarDay day;
-        day.index = child->GetInt("index");
-        day.lunarMonth = child->GetString("lunarMonth");
-        day.lunarDay = child->GetString("lunarDay");
-        day.dayMark = child->GetString("dayMark");
-        day.dayMarkValue = child->GetString("dayMarkValue");
-        day.month.year = child->GetInt("year");
-        day.month.month = child->GetInt("month");
-        day.day = child->GetInt("day");
+        JSRef<JSVal> item = dataArray->GetValueAt(i);
+        if (!item->IsObject()) {
+            days.emplace_back(std::move(day));
+            continue;
+        }
+        JSRef<JSObject> itemObj = JSRef<JSObject>::Cast(item);
+        day.index = itemObj->GetPropertyValue<int32_t>("index", 0);
+        day.lunarMonth = itemObj->GetPropertyValue<std::string>("lunarMonth", "");
+        day.lunarDay = itemObj->GetPropertyValue<std::string>("lunarDay", "");
+        day.dayMark = itemObj->GetPropertyValue<std::string>("dayMark", "");
+        day.dayMarkValue = itemObj->GetPropertyValue<std::string>("dayMarkValue", "");
+        day.month.year = itemObj->GetPropertyValue<int32_t>("year", 0);
+        day.month.month = itemObj->GetPropertyValue<int32_t>("month", 0);
+        day.day = itemObj->GetPropertyValue<int32_t>("day", 0);
         if (day.day == 1 && obtainedMonth.firstDayIndex == CALENDAR_INVALID) {
             obtainedMonth.firstDayIndex = day.index;
         }
-        day.isFirstOfLunar = child->GetBool("isFirstOfLunar");
-        day.hasSchedule = child->GetBool("hasSchedule");
-        day.markLunarDay = child->GetBool("markLunarDay");
+        day.isFirstOfLunar = itemObj->GetPropertyValue<bool>("isFirstOfLunar", false);
+        day.hasSchedule = itemObj->GetPropertyValue<bool>("hasSchedule", false);
+        day.markLunarDay = itemObj->GetPropertyValue<bool>("markLunarDay", false);
         days.emplace_back(std::move(day));
-        child = child->GetNext();
     }
     obtainedMonth.days = days;
     return obtainedMonth;

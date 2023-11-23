@@ -353,31 +353,30 @@ bool JSCustomDialogController::ParseAnimation(
     if (animationValue->IsNull() || !animationValue->IsObject()) {
         return false;
     }
-    auto animationArgs = JsonUtil::ParseJsonString(animationValue->ToString());
-    if (animationArgs->IsNull()) {
-        return false;
-    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(animationValue);
     // If the attribute does not exist, the default value is used.
-    auto duration = animationArgs->GetInt("duration", DEFAULT_ANIMATION_DURATION);
-    auto delay = animationArgs->GetInt("delay", 0);
-    auto iterations = animationArgs->GetInt("iterations", 1);
-    auto tempo = static_cast<float>(animationArgs->GetDouble("tempo", 1.0));
-    auto finishCallbackType = static_cast<FinishCallbackType>(animationArgs->GetInt("finishCallbackType", 0));
+    int32_t duration = obj->GetPropertyValue<int32_t>("duration", DEFAULT_ANIMATION_DURATION);
+    int32_t delay = obj->GetPropertyValue<int32_t>("delay", 0);
+    int32_t iterations = obj->GetPropertyValue<int32_t>("iterations", 1);
+    float tempo = obj->GetPropertyValue<float>("tempo", 1.0);
+    auto finishCallbackType = static_cast<FinishCallbackType>(obj->GetPropertyValue<int32_t>("finishCallbackType", 0));
     if (NonPositive(tempo)) {
         tempo = 1.0f;
     }
-    auto direction = StringToAnimationDirection(animationArgs->GetString("playMode", "normal"));
+    auto direction = StringToAnimationDirection(obj->GetPropertyValue<std::string>("playMode", "normal"));
     RefPtr<Curve> curve;
-    auto curveArgs = animationArgs->GetValue("curve");
+    JSRef<JSVal> curveArgs = obj->GetProperty("curve");
     if (curveArgs->IsString()) {
-        curve = CreateCurve(animationArgs->GetString("curve", "linear"));
+        curve = CreateCurve(obj->GetPropertyValue<std::string>("curve", "linear"));
     } else if (curveArgs->IsObject()) {
-        auto curveString = curveArgs->GetValue("__curveString");
-        if (!curveString) {
+        JSRef<JSObject> curveObj = JSRef<JSObject>::Cast(curveArgs);
+        JSRef<JSVal> curveString = curveObj->GetProperty("__curveString");
+        if (!curveString->IsString()) {
             // Default AnimationOption which is invalid.
             return false;
         }
-        curve = CreateCurve(curveString->GetString());
+        curve = CreateCurve(curveString->ToString());
     } else {
         curve = Curves::EASE_IN_OUT;
     }
@@ -389,7 +388,6 @@ bool JSCustomDialogController::ParseAnimation(
     result.SetCurve(curve);
     result.SetFinishCallbackType(finishCallbackType);
 
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(animationValue);
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {

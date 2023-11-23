@@ -383,9 +383,6 @@ void JSButton::JsPadding(const JSCallbackInfo& info)
 Edge JSButton::GetOldPadding(const JSCallbackInfo& info)
 {
     Edge padding;
-    if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
-        return padding;
-    }
 
     if (info[0]->IsNumber()) {
         CalcDimension edgeValue;
@@ -393,20 +390,17 @@ Edge JSButton::GetOldPadding(const JSCallbackInfo& info)
             padding = Edge(edgeValue);
         }
     } else if (info[0]->IsObject()) {
-        auto object = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!object) {
-            return padding;
-        }
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
         CalcDimension left = CalcDimension(0.0, DimensionUnit::VP);
         CalcDimension top = CalcDimension(0.0, DimensionUnit::VP);
         CalcDimension right = CalcDimension(0.0, DimensionUnit::VP);
         CalcDimension bottom = CalcDimension(0.0, DimensionUnit::VP);
-        if (object->Contains("top") || object->Contains("bottom") || object->Contains("left") ||
-            object->Contains("right")) {
-            ParseJsonDimensionVp(object->GetValue("left"), left);
-            ParseJsonDimensionVp(object->GetValue("top"), top);
-            ParseJsonDimensionVp(object->GetValue("right"), right);
-            ParseJsonDimensionVp(object->GetValue("bottom"), bottom);
+        if (jsObj->HasProperty("top") || jsObj->HasProperty("bottom")
+            || jsObj->HasProperty("left") || jsObj->HasProperty("right")) {
+            ParseJsDimensionVp(jsObj->GetProperty("left"), left);
+            ParseJsDimensionVp(jsObj->GetProperty("top"), top);
+            ParseJsDimensionVp(jsObj->GetProperty("right"), right);
+            ParseJsDimensionVp(jsObj->GetProperty("bottom"), bottom);
         }
         padding = Edge(left, top, right, bottom);
     }
