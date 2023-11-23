@@ -39,6 +39,7 @@ constexpr int32_t CANCEL_IMAGE_INDEX = 2;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t MULTIPLE_2 = 2;
+constexpr float MAX_SEARCH_BUTTON_RATE = 0.4f;
 } // namespace
 
 bool SearchLayoutAlgorithm::IsFixedHeightMode(LayoutWrapper* layoutWrapper)
@@ -245,6 +246,16 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
 
     // searchButton Measure
     auto buttonLayoutConstraint = layoutProperty->CreateChildConstraint();
+    buttonWrapper->Measure(buttonLayoutConstraint);
+
+    // compute searchButton width
+    auto searchWidthMax = (constraint->selfIdealSize.Width().has_value())
+                          ? std::min(constraint->selfIdealSize.Width().value(), constraint->maxSize.Width())
+                          : std::min(constraint->percentReference.Width(), constraint->maxSize.Width());
+    double searchButtonWidth = searchWidthMax * MAX_SEARCH_BUTTON_RATE;
+    double curSearchButtonWidth = buttonGeometryNode->GetFrameSize().Width();
+    searchButtonWidth = std::min(searchButtonWidth, curSearchButtonWidth);
+    buttonLayoutConstraint.selfIdealSize.SetWidth(searchButtonWidth);
     buttonWrapper->Measure(buttonLayoutConstraint);
     searchButtonSizeMeasure_ = buttonGeometryNode->GetFrameSize();
 }

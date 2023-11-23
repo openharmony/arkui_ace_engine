@@ -301,6 +301,9 @@ public:
     {
         return scrollAutoType_;
     }
+
+    bool CheckJumpValid(LayoutWrapper* layoutWrapper);
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);

@@ -557,7 +557,7 @@ void ListItemPattern::DoDeleteAnimation(bool isRightDelete)
     option.SetCurve(Curves::FRICTION);
     option.SetFillMode(FillMode::FORWARDS);
     context->OpenImplicitAnimation(option, option.GetCurve(), nullptr);
-    swiperIndex_ = isRightDelete ? ListItemSwipeIndex::SWIPER_START : ListItemSwipeIndex::SWIPER_END;
+    swiperIndex_ = ListItemSwipeIndex::SWIPER_ACTION;
     float oldOffset = curOffset_;
     curOffset_ = isRightDelete ? itemWidth : -itemWidth;
     FireSwipeActionOffsetChange(oldOffset, curOffset_);
@@ -616,7 +616,8 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     auto startOnDelete = listItemEventHub->GetStartOnDelete();
     auto endOnDelete = listItemEventHub->GetEndOnDelete();
 
-    if (hasStartDeleteArea_ && !HasStartNode() && startOnDelete && GreatOrEqual(curOffset_, startDeleteAreaDistance_)) {
+    if (swiperIndex_ != ListItemSwipeIndex::SWIPER_ACTION && hasStartDeleteArea_ && !HasStartNode() && startOnDelete &&
+        GreatOrEqual(curOffset_, startDeleteAreaDistance_)) {
         DoDeleteAnimation(true);
         startOnDelete();
         return;
@@ -624,7 +625,8 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
     }
 
-    if (hasEndDeleteArea_ && !HasEndNode() && endOnDelete && GreatOrEqual(-curOffset_, endDeleteAreaDistance_)) {
+    if (swiperIndex_ != ListItemSwipeIndex::SWIPER_ACTION && hasEndDeleteArea_ && !HasEndNode() && endOnDelete &&
+        GreatOrEqual(-curOffset_, endDeleteAreaDistance_)) {
         DoDeleteAnimation(false);
         endOnDelete();
         return;
@@ -639,19 +641,21 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
             FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
             return;
         }
-        if (hasStartDeleteArea_ && startOnDelete && GreatOrEqual(curOffset_, width + startDeleteAreaDistance_)) {
+        if (swiperIndex_ != ListItemSwipeIndex::SWIPER_ACTION && hasStartDeleteArea_ && startOnDelete &&
+            GreatOrEqual(curOffset_, width + startDeleteAreaDistance_)) {
             DoDeleteAnimation(true);
             startOnDelete();
             return;
         }
-        if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD &&
-            width > 0 && (curOffset_ > width * threshold || reachRightSpeed)) {
+        if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && width > 0 &&
+            (curOffset_ > width * threshold || reachRightSpeed)) {
             swiperIndex_ = ListItemSwipeIndex::SWIPER_START;
             FireSwipeActionStateChange(SwipeActionState::EXPANDED);
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_START &&
-            (curOffset_ < width * (1 - threshold) || (reachLeftSpeed && curOffset_ < width))) {
+                   (curOffset_ < width * (1 - threshold) || (reachLeftSpeed && curOffset_ < width))) {
             ResetToItemChild();
-        } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_END) {
+        } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_END ||
+                   swiperIndex_ == ListItemSwipeIndex::SWIPER_ACTION) {
             ResetToItemChild();
         }
         end = width * static_cast<int32_t>(swiperIndex_);
@@ -662,19 +666,21 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
             FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
             return;
         }
-        if (hasEndDeleteArea_ && endOnDelete && GreatOrEqual(-curOffset_, width + endDeleteAreaDistance_)) {
+        if (swiperIndex_ != ListItemSwipeIndex::SWIPER_ACTION && hasEndDeleteArea_ && endOnDelete &&
+            GreatOrEqual(-curOffset_, width + endDeleteAreaDistance_)) {
             DoDeleteAnimation(false);
             endOnDelete();
             return;
         }
-        if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD &&
-            width > 0 && (width * threshold < -curOffset_ || reachLeftSpeed)) {
+        if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && width > 0 &&
+            (width * threshold < -curOffset_ || reachLeftSpeed)) {
             swiperIndex_ = ListItemSwipeIndex::SWIPER_END;
             FireSwipeActionStateChange(SwipeActionState::EXPANDED);
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_END &&
-            (-curOffset_ < width * (1 - threshold) || (reachRightSpeed && -curOffset_ < width))) {
+                   (-curOffset_ < width * (1 - threshold) || (reachRightSpeed && -curOffset_ < width))) {
             ResetToItemChild();
-        } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_START) {
+        } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_START ||
+                   swiperIndex_ == ListItemSwipeIndex::SWIPER_ACTION) {
             ResetToItemChild();
         }
         end = width * static_cast<int32_t>(swiperIndex_);

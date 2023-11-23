@@ -2588,4 +2588,44 @@ void PipelineContext::RestoreDefault()
     CHECK_NULL_VOID(mouseStyle);
     mouseStyle->ChangePointerStyle(GetWindowId(), MouseFormat::DEFAULT);
 }
+
+void PipelineContext::OpenFrontendAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
+{
+    // push false to show we already open a animation closure.
+    pendingFrontendAnimation_.push(false);
+
+    // flush ui tasks before open animation closure.
+    if (!isReloading_ && !IsLayouting()) {
+        FlushUITasks();
+    }
+    auto wrapFinishCallback = GetWrappedAnimationCallback(finishCallback);
+    if (IsFormRender()) {
+        SetIsFormAnimation(true);
+        if (!IsFormAnimationFinishCallback()) {
+            SetFormAnimationStartTime(GetMicroTickCount());
+        }
+    }
+    AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback);
+}
+
+void PipelineContext::CloseFrontendAnimation()
+{
+    if (pendingFrontendAnimation_.empty()) {
+        return;
+    }
+
+    if (pendingFrontendAnimation_.top()) {
+        if (!isReloading_ && !IsLayouting()) {
+            FlushUITasks();
+        } else if (IsLayouting()) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION,
+                "IsLayouting, CloseFrontendAnimation has tasks not flushed, maybe some layout animation not generated");
+        }
+    }
+    if (!pendingFrontendAnimation_.empty()) {
+        pendingFrontendAnimation_.pop();
+    }
+    AnimationUtils::CloseImplicitAnimation();
+}
 } // namespace OHOS::Ace::NG

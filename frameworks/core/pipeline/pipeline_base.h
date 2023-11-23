@@ -124,7 +124,7 @@ public:
     void PrepareOpenImplicitAnimation();
 
     void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& finishCallBack = nullptr);
+        const std::function<void()>& finishCallback = nullptr);
 
     void PrepareCloseImplicitAnimation();
 
@@ -1029,6 +1029,8 @@ protected:
         isReloading_ = isReloading;
     }
 
+    std::function<void()> GetWrappedAnimationCallback(const std::function<void()>& finishCallback);
+
     std::list<configChangedCallback> configChangedCallback_;
     std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
 
@@ -1040,6 +1042,7 @@ protected:
     bool isAppWindow_ = true;
     bool installationFree_ = false;
     bool isSubPipeline_ = false;
+    bool isReloading_ = false;
 
     bool isJsPlugin_ = false;
 
@@ -1068,6 +1071,7 @@ protected:
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;
     std::stack<bool> pendingImplicitRender_;
+    std::stack<bool> pendingFrontendAnimation_;
     std::shared_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
@@ -1133,7 +1137,6 @@ private:
     bool isFormAnimationFinishCallback_ = false;
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
-    bool isReloading_ = false;
     bool halfLeading_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);

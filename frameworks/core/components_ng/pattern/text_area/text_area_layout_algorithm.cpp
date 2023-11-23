@@ -116,7 +116,7 @@ void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentHeight += counterSize.Height();
     }
 
-    if (pattern->IsNormalInlineState() && pattern->IsFocus()) {
+    if (pattern->IsNormalInlineState() && pattern->HasFocus()) {
         frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + PARAGRAPH_SAVE_BOUNDARY);
         frameSize.SetHeight(contentHeight + pattern->GetVerticalPaddingAndBorderSum() + PARAGRAPH_SAVE_BOUNDARY);
     } else {

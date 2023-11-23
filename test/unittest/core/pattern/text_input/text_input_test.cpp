@@ -26,7 +26,11 @@
 
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/geometry/dimension.h"
@@ -53,12 +57,9 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 #undef private
 #undef protected
@@ -110,6 +111,8 @@ struct ExpectParagaphParams {
     bool firstCalc = true;
     bool secondCalc = true;
 };
+constexpr float CONTEXT_WIDTH_VALUE = 300.0f;
+constexpr float CONTEXT_HEIGHT_VALUE = 150.0f;
 } // namespace
 
 class TextInputBase : public testing::Test, public TestNG {
@@ -261,6 +264,7 @@ HWTEST_F(TextFiledAttrsTest, LayoutProperty001, TestSize.Level1)
         model.SetBarState(DEFAULT_DISPLAY_MODE);
         model.SetInputStyle(DEFAULT_INPUT_STYLE);
         model.SetShowUnderline(true);
+        model.SetSelectAllValue(true);
     });
 
     /**
@@ -284,6 +288,7 @@ HWTEST_F(TextFiledAttrsTest, LayoutProperty001, TestSize.Level1)
     layoutProperty_->ToJsonValue(json);
     EXPECT_EQ(json->GetString("caretPosition"), "");
     EXPECT_TRUE(json->GetBool("showUnderline"));
+    EXPECT_TRUE(json->GetBool("selectAll"));
 }
 
 /**
@@ -1416,8 +1421,7 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
         TextInputType::EMAIL_ADDRESS, "open_harmony@huawei.comhelloworld", "TextInputType::EMAIL_ADDRESS");
     testItems.emplace_back(
         TextInputType::VISIBLE_PASSWORD, "open_harmony123 password*+#", "TextInputType::VISIBLE_PASSWORD");
-    testItems.emplace_back(
-        TextInputType::NUMBER_PASSWORD, "123456", "TextInputType::NUMBER_PASSWORD");
+    testItems.emplace_back(TextInputType::NUMBER_PASSWORD, "123456", "TextInputType::NUMBER_PASSWORD");
     testItems.emplace_back(
         TextInputType::SCREEN_LOCK_PASSWORD, "open_harmony456 password*+#", "TextInputType::SCREEN_LOCK_PASSWORD");
 
@@ -1962,7 +1966,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward002, TestSize.Level1)
      */
     pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
     RunMeasureAndLayout();
-    
+
     /**
      * @tc.steps: step4. Test update focus forward when focus index = CANCEL.
      */
@@ -2142,5 +2146,204 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward004, TestSize.Level1)
      */
     pattern_->focusIndex_ = FocuseIndex::UNIT;
     EXPECT_TRUE(pattern_->UpdateFocusBackward());
+}
+
+/**
+ * @tc.name: onDraw001
+ * @tc.desc: Verify the onDraw Magnifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Move handle
+     */
+    OffsetF localOffset(1.0f, 1.0f);
+    pattern_->SetLocalOffset(localOffset);
+    RectF handleRect;
+    pattern_->OnHandleMove(handleRect, false);
+
+    /**
+     * @tc.steps: step3. Craete TextFieldOverlayModifier
+     */
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern_, scrollEdgeEffect);
+
+    /**
+     * @tc.steps: step4. Create DrawingContext
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+
+    /**
+     * @tc.steps: step5. Do onDraw(context)
+     */
+    textFieldOverlayModifier->onDraw(context);
+
+    /**
+     * @tc.steps: step6. Test magnifier open or close
+     * @tc.expected: magnifier is open
+     */
+    auto ret = pattern_->GetShowMagnifier();
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.steps: step7. When handle move done
+     */
+    pattern_->OnHandleMoveDone(handleRect, true);
+
+    /**
+     * @tc.steps: step8. Test magnifier open or close
+     * @tc.expected: magnifier is close
+     */
+    ret = pattern_->GetShowMagnifier();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ShowMenu001
+ * @tc.desc: Test close menu after ShowMenu()
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, ShowMenu001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create selectOverlayProxy
+     */
+    pattern_->ProcessOverlay(true, true, true);
+
+    /**
+     * @tc.steps: step3. Do ShowMenu()
+     */
+    pattern_->ShowMenu();
+
+    /**
+     * @tc.steps: step4. Press esc
+     */
+    KeyEvent event;
+    event.code = KeyCode::KEY_ESCAPE;
+    pattern_->OnKeyEvent(event);
+
+    /**
+     * @tc.steps: step5. Test menu open or close
+     * @tc.expected: text menu is close
+     */
+    auto ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step6. Show menu when select all value
+     */
+    pattern_->HandleOnSelectAll(true);
+    pattern_->ShowMenu();
+
+    /**
+     * @tc.steps: step7. Select all value again
+     */
+    pattern_->HandleOnSelectAll(true);
+
+    /**
+     * @tc.steps: step8. Test menu open or close
+     * @tc.expected: text menu is close
+     */
+    ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step9. Get keyEventHandler
+     */
+    auto keyEventHandler = AceType::MakeRefPtr<KeyEventHandler>();
+    keyEventHandler->UpdateWeakPattern(pattern_);
+    ASSERT_NE(keyEventHandler, nullptr);
+
+    /**
+     * @tc.steps: step10. Press shift + F10 to open menu
+     */
+    event.code = KeyCode::KEY_F10;
+    keyEventHandler->HandleShiftPressedEvent(event);
+
+    /**
+     * @tc.steps: step11. Inset value
+     */
+    pattern_->InsertValue("abc");
+
+    /**
+     * @tc.steps: step12. Test menu open or close
+     * @tc.expected: text menu is close
+     */
+    ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SelectAll001
+ * @tc.desc: Test .SelectAll(true)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SelectAll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Set .SelectAll(true)
+     */
+    layoutProperty_->UpdateSelectAllValue(true);
+
+    /**
+     * @tc.steps: step3. Get focus by single click
+     * @tc.expected: Select all value without handles
+     */
+    GestureEvent info;
+    pattern_->HandleSingleClickEvent(info);
+    EXPECT_EQ(pattern_->GetTextSelectController()->GetFirstHandleOffset().GetX(),
+        pattern_->GetTextSelectController()->GetSecondHandleOffset().GetX());
+}
+
+/**
+ * @tc.name: TabGetFocus001
+ * @tc.desc: Test select all value when press tab and get focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TabGetFocus001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Get foucs
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. Get foucs by press tab
+     * @tc.expected: Select all value without handles
+     */
+    KeyEvent event;
+    event.code = KeyCode::KEY_TAB;
+    pattern_->OnKeyEvent(event);
+    EXPECT_EQ(pattern_->GetTextSelectController()->GetFirstHandleOffset().GetX(),
+        pattern_->GetTextSelectController()->GetSecondHandleOffset().GetX());
 }
 } // namespace OHOS::Ace::NG

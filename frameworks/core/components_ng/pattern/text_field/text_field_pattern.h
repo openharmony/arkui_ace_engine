@@ -877,11 +877,6 @@ public:
         return isCustomFont_;
     }
 
-    bool IsFocus()
-    {
-        return HasFocus();
-    }
-
     void SetISCounterIdealHeight(bool IsIdealHeight)
     {
         isCounterIdealheight_ = IsIdealHeight;
@@ -989,6 +984,8 @@ public:
     }
 
     void ShowMenu();
+    bool HasFocus() const;
+    void StopTwinkling();
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 protected:
@@ -997,7 +994,6 @@ protected:
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
-    bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
@@ -1072,7 +1068,6 @@ private:
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
     void StartTwinkling();
-    void StopTwinkling();
     void CheckIfNeedToResetKeyboard();
 
     float PreferredTextHeight(bool isPlaceholder, bool isAlgorithmMeasure = false);

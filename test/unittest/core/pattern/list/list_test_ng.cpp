@@ -2272,6 +2272,8 @@ HWTEST_F(ListTestNg, SwiperItem011, TestSize.Level1)
     /**
      * @tc.steps: step4. move exceed DELETE_AREA_DISTANCE and release
      */
+    auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
+    itemPattern->SwiperReset();
     isDelete = false;
     HandleDragStart(listItemIndex);
     HandleDragUpdate(listItemIndex, DELETE_AREA_DISTANCE + 1);
@@ -2343,6 +2345,8 @@ HWTEST_F(ListTestNg, SwiperItem012, TestSize.Level1)
     /**
      * @tc.steps: step4. move exceed exceedArea and release
      */
+    auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
+    itemPattern->SwiperReset();
     isDelete = false;
     HandleDragStart(listItemIndex);
     HandleDragUpdate(listItemIndex, -(exceedArea + 1));
@@ -2592,6 +2596,8 @@ HWTEST_F(ListTestNg, SwiperItem018, TestSize.Level1)
     /**
      * @tc.steps: step4. move exceed DELETE_AREA_DISTANCE and release
      */
+    auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
+    itemPattern->SwiperReset();
     HandleDragStart(listItemIndex);
     HandleDragUpdate(listItemIndex, DELETE_AREA_DISTANCE + 1);
     HandleDragEnd(listItemIndex);
@@ -2654,6 +2660,8 @@ HWTEST_F(ListTestNg, SwiperItem019, TestSize.Level1)
     /**
      * @tc.steps: step4. move exceed DELETE_AREA_DISTANCE and release
      */
+    auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
+    itemPattern->SwiperReset();
     HandleDragStart(listItemIndex);
     HandleDragUpdate(listItemIndex, -DELETE_AREA_DISTANCE - 1);
     HandleDragEnd(listItemIndex);

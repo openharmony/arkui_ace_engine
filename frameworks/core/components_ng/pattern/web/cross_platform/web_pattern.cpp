@@ -55,18 +55,23 @@ constexpr int32_t DOUBLE_CLICK_NUM = 2;
 constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5;
 constexpr double DEFAULT_DBCLICK_OFFSET = 2.0;
 constexpr double DEFAULT_AXIS_RATIO = -0.06;
+constexpr uint32_t DEFAULT_WEB_DRAW_HEIGHT = 4000;
+const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
+constexpr int32_t SURFACE_QUEUE_SIZE = 8;
 // web feature params
 const std::string VISIBLE_ACTIVE_ENABLE = "persist.web.visible_active_enable";
 const std::string MEMORY_LEVEL_ENABEL = "persist.web.memory_level_enable";
+const std::vector<int32_t> DEFAULT_HEIGHT_GEAR {7998, 7999, 8001, 8002, 8003};
+const std::vector<int32_t> DEFAULT_ORIGN_GEAR {0, 2000, 4000, 6000, 8000};
 
 WebPattern::WebPattern() = default;
 
-WebPattern::WebPattern(std::string webSrc, const RefPtr<WebController>& webController)
-    : webSrc_(std::move(webSrc)), webController_(webController)
+WebPattern::WebPattern(std::string webSrc, const RefPtr<WebController>& webController, WebType type)
+    : webSrc_(std::move(webSrc)), webController_(webController), type_(type)
 {}
 
-WebPattern::WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback)
-    : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback)
+WebPattern::WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback, WebType type)
+    : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), type_(type)
 {}
 
 WebPattern::~WebPattern()
@@ -1261,6 +1266,7 @@ void WebPattern::OnModifyDone()
         observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, PipelineContext::GetCurrentContext());
         CHECK_NULL_VOID(observer_);
         delegate_->SetObserver(observer_);
+        delegate_->SetWebType(type_);
         InitEnhanceSurfaceFlag();
         delegate_->SetNGWebPattern(Claim(this));
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
@@ -1276,7 +1282,15 @@ void WebPattern::OnModifyDone()
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
             renderSurface_->SetRenderContext(host->GetRenderContext());
+            if (type_ == WebType::TEXTURE) {
+                renderSurface_->SetIsTexture(true);
+                renderSurface_->SetPatternType(PATTERN_TYPE_WEB);
+                renderSurface_->SetSurfaceQueueSize(SURFACE_QUEUE_SIZE);
+            } else {
+                renderSurface_->SetIsTexture(false);
+            }
             renderSurface_->InitSurface();
+            renderSurface_->UpdateXComponentConfig();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
         }
 #endif
@@ -1330,6 +1344,13 @@ void WebPattern::OnModifyDone()
     // Initialize events such as keyboard, focus, etc.
     InitEvent();
 
+    // Initialize scrollupdate listener
+    if (type_ == WebType::TEXTURE) {
+        auto task = [this]() {
+            InitScrollUpdateListener();
+        };
+        PostTaskToUI(std::move(task));
+    }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddOnAreaChangeNode(host->GetId());
@@ -1611,6 +1632,11 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
     renderContext->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
 }
 
+void WebPattern::OnRootLayerChanged(int width, int height)
+{
+     // cross platform is not support now;
+}
+
 void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
 {
     // cross platform is not support now;
@@ -1629,5 +1655,48 @@ void WebPattern::UpdateJavaScriptOnDocumentStart()
 void WebPattern::OnOverScrollModeUpdate(int mode)
 {
    // cross platform is not support now;
+}
+
+
+RefPtr<ScrollPattern> WebPattern::SearchParent()
+{
+    // cross platform is not support now;
+    return nullptr;
+}
+
+void WebPattern::InitScrollUpdateListener()
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::UpdateScrollOffset(SizeF frameSize)
+{
+   // cross platform is not support now;
+}
+
+void WebPattern::CalculateHorizontalDrawRect(SizeF frameSize)
+{
+   // cross platform is not support now;
+}
+
+void WebPattern::CalculateVerticalDrawRect(SizeF frameSize)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::PostTaskToUI(const std::function<void()>&& task) const
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    // cross platform is not support now;
+}
+
+RefPtr<NodePaintMethod> WebPattern::CreateNodePaintMethod()
+{
+    // cross platform is not support now;
+    return MakeRefPtr<WebPaintMethod>(RenderSurface::Create());
 }
 } // namespace OHOS::Ace::NG
