@@ -112,6 +112,7 @@ void JSTextTimer::JSBind(BindingTarget globalObj)
     JSClass<JSTextTimer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextTimer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTextTimer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSTextTimer>::StaticMethod("textShadow", &JSTextTimer::SetTextShadow, opt);
     JSClass<JSTextTimer>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -200,6 +201,42 @@ void JSTextTimer::SetTextColor(const JSCallbackInfo& info)
     }
 
     TextTimerModel::GetInstance()->SetTextColor(textColor);
+}
+
+void JSTextTimer::SetTextShadow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsNumber() && !tmpInfo->IsObject() && !tmpInfo->IsArray()) {
+        LOGE("Parse shadow object failed.");
+        return;
+    }
+    if (!tmpInfo->IsArray()) {
+        Shadow shadow;
+        if (!JSViewAbstract::ParseShadowProps(info[0], shadow)) {
+            LOGE("Parse shadow object failed.");
+            return;
+        }
+        std::vector<Shadow> shadows { shadow };
+        TextTimerModel::GetInstance()->SetTextShadow(shadows);
+        return;
+    }
+    JSRef<JSArray> params = JSRef<JSArray>::Cast(tmpInfo);
+    auto shadowLength = params->Length();
+    std::vector<Shadow> shadows(shadowLength);
+    for (size_t i = 0; i < shadowLength; ++i) {
+        auto shadowJsVal = params->GetValueAt(i);
+        Shadow shadow;
+        if (!JSViewAbstract::ParseShadowProps(shadowJsVal, shadow)) {
+            LOGE("Parse shadow object failed.");
+            continue;
+        }
+        shadows[i] = shadow;
+    }
+    TextTimerModel::GetInstance()->SetTextShadow(shadows);
 }
 
 void JSTextTimer::SetFontWeight(const JSCallbackInfo& info)

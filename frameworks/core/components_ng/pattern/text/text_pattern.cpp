@@ -1594,6 +1594,11 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
                     child->UpdateLineHeightWithoutFlushDirty(textLayoutProp->GetLineHeight().value());
                 }
                 break;
+            case PropertyInfo::TEXTSHADOW:
+                if (textLayoutProp->HasTextShadow()) {
+                    child->UpdateTextShadowWithoutFlushDirty(textLayoutProp->GetTextShadow().value());
+                }
+                break;
             default:
                 break;
         }

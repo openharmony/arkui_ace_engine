@@ -277,6 +277,42 @@ void JSSpan::SetLineHeight(const JSCallbackInfo& info)
     SpanModel::GetInstance()->SetLineHeight(value);
 }
 
+void JSSpan::SetTextShadow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsNumber() && !tmpInfo->IsObject() && !tmpInfo->IsArray()) {
+        LOGE("Parse shadow object failed.");
+        return;
+    }
+    if (!tmpInfo->IsArray()) {
+        Shadow shadow;
+        if (!JSViewAbstract::ParseShadowProps(info[0], shadow)) {
+            LOGE("Parse shadow object failed.");
+            return;
+        }
+        std::vector<Shadow> shadows { shadow };
+        SpanModel::GetInstance()->SetTextShadow(shadows);
+        return;
+    }
+    JSRef<JSArray> params = JSRef<JSArray>::Cast(tmpInfo);
+    auto shadowLength = params->Length();
+    std::vector<Shadow> shadows(shadowLength);
+    for (size_t i = 0; i < shadowLength; ++i) {
+        auto shadowJsVal = params->GetValueAt(i);
+        Shadow shadow;
+        if (!JSViewAbstract::ParseShadowProps(shadowJsVal, shadow)) {
+            LOGE("Parse shadow object failed.");
+            continue;
+        }
+        shadows[i] = shadow;
+    }
+    SpanModel::GetInstance()->SetTextShadow(shadows);
+}
+
 void JSSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSpan>::Declare("Span");
@@ -290,6 +326,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::StaticMethod("fontFamily", &JSSpan::SetFontFamily, opt);
     JSClass<JSSpan>::StaticMethod("letterSpacing", &JSSpan::SetLetterSpacing, opt);
     JSClass<JSSpan>::StaticMethod("textCase", &JSSpan::SetTextCase, opt);
+    JSClass<JSSpan>::StaticMethod("textShadow", &JSSpan::SetTextShadow, opt);
     JSClass<JSSpan>::StaticMethod("decoration", &JSSpan::SetDecoration);
     JSClass<JSSpan>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSpan>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

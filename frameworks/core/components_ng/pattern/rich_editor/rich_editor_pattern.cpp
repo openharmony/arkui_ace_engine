@@ -410,6 +410,8 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPa
         spanNode->AddPropertyInfo(PropertyInfo::TEXTDECORATION);
         spanNode->UpdateTextDecorationColor(options.style.value().GetTextDecorationColor());
         spanNode->AddPropertyInfo(PropertyInfo::NONE);
+        spanNode->UpdateTextShadow(options.style.value().GetTextShadows());
+        spanNode->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
     }
     auto spanItem = spanNode->GetSpanItem();
     spanItem->content = options.value;
@@ -850,6 +852,7 @@ void RichEditorPattern::UpdateTextStyle(
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    LOGI("zkc: update span text style");
     if (updateSpanStyle.updateTextColor.has_value()) {
         spanNode->UpdateTextColor(textStyle.GetTextColor());
         spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
@@ -877,6 +880,10 @@ void RichEditorPattern::UpdateTextStyle(
     if (updateSpanStyle.updateTextDecorationColor.has_value()) {
         spanNode->UpdateTextDecorationColor(textStyle.GetTextDecorationColor());
         spanNode->AddPropertyInfo(PropertyInfo::NONE);
+    }
+    if (updateSpanStyle.updateTextShadows.has_value()) {
+        spanNode->UpdateTextShadow(textStyle.GetTextShadows());
+        spanNode->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();

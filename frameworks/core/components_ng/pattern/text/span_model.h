@@ -45,6 +45,7 @@ public:
     virtual void SetTextDecorationStyle(TextDecorationStyle value) = 0;
     virtual void SetTextDecorationColor(const Color& value) = 0;
     virtual void SetTextCase(TextCase value) = 0;
+    virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
     virtual void SetLetterSpacing(const Dimension& value) = 0;
     virtual void SetLineHeight(const Dimension& value) = 0;
     virtual void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) = 0;
