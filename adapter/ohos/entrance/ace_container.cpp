@@ -2151,7 +2151,7 @@ void AceContainer::RegisterStopDragCallback(int32_t pointerId, StopDragCallback&
 }
 
 void AceContainer::SearchElementInfoByAccessibilityIdNG(
-    int32_t elementId, int32_t mode,int32_t baseParent,
+    int32_t elementId, int32_t mode, int32_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(taskExecutor_);

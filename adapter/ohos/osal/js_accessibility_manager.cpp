@@ -985,6 +985,20 @@ void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElement
         AccessibleAction action(ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, "ace");
         nodeInfo.AddAction(action);
     }
+    auto eventHub = node->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    nodeInfo.SetClickable(gestureEventHub->IsAccessibilityClickable());
+    if (gestureEventHub->IsAccessibilityClickable()) {
+        AccessibleAction action(ACCESSIBILITY_ACTION_CLICK, "ace");
+        nodeInfo.AddAction(action);
+    }
+    nodeInfo.SetLongClickable(gestureEventHub->IsAccessibilityLongClickable());
+    if (gestureEventHub->IsAccessibilityLongClickable()) {
+        AccessibleAction action(ACCESSIBILITY_ACTION_LONG_CLICK, "ace");
+        nodeInfo.AddAction(action);
+    }
 }
 
 static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
@@ -1045,12 +1059,6 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
             AccessibleAction action(ConvertAceAction(*it), "ace");
             nodeInfo.AddAction(action);
         }
-    }
-    auto eventHub = node->GetEventHub<NG::EventHub>();
-    if (eventHub) {
-        auto gestureEventHub = eventHub->GetGestureEventHub();
-        nodeInfo.SetClickable(gestureEventHub ? gestureEventHub->IsAccessibilityClickable() : false);
-        nodeInfo.SetLongClickable(gestureEventHub ? gestureEventHub->IsAccessibilityLongClickable() : false);
     }
 }
 
@@ -3541,7 +3549,6 @@ void JsAccessibilityManager::FocusMoveSearchNG(int32_t elementId, int32_t direct
     } else {
         std::list<RefPtr<NG::FrameNode>> nodeList;
         Framework::AddFocusableNode(nodeList, rootNode);
-
         switch (direction) {
             case FocusMoveDirection::FORWARD:
             case FocusMoveDirection::BACKWARD:

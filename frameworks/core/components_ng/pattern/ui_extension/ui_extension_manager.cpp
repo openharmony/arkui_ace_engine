@@ -90,7 +90,7 @@ const RefPtr<FrameNode> UIExtensionManager::GetFocusUiExtensionNode()
 {
     auto uiExtensionFocused = uiExtensionFocused_.Upgrade();
     CHECK_NULL_RETURN(uiExtensionFocused, nullptr);
-    return uiExtensionFocused->GetUiExtensionNode();
+    return uiExtensionFocused->GetHost();
 }
 
 int32_t UIExtensionManager::ApplyExtensionId()
