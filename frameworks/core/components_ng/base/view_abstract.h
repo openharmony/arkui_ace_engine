@@ -349,6 +349,8 @@ public:
     static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius);
     static void SetHueRotate(FrameNode* frameNode, float hueRotate);
     static void SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient);
+    static void SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient);
+    static void SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle);
     static void SetLinearGradientBlur(FrameNode* frameNode, NG::LinearGradientBlurPara blurPara);
     static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);

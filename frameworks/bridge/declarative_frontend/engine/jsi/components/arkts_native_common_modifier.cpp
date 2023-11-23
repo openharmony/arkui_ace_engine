@@ -27,6 +27,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t DEFAULT_BUTTON_COLOR = 0xFF007DFF;
+constexpr float MAX_ANGLE = 360.0f;
 constexpr double PERCENT_100 = 100.0;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -185,6 +186,108 @@ void SetLinearGradientValues(NG::Gradient& gradient, const double* values, int32
         linearGradient->angle = CalcDimension(angleValue, DimensionUnit::PX);
     }
     SetLinearGradientDirectionTo(linearGradient, static_cast<GradientDirection>(directionValue));
+    gradient.SetRepeat(static_cast<bool>(repeating));
+}
+
+float CheckAngle(const float angle)
+{
+    if (LessNotEqual(angle, 0.0f)) {
+        return 0.0f;
+    } else if (GreatNotEqual(angle, MAX_ANGLE)) {
+        return MAX_ANGLE;
+    }
+    return angle;
+}
+
+/**
+ * @param values value value
+ * values[0], values[1], values[2] : centerX Dimension: hasValue, value, unit
+ * values[3], values[4], values[5] : centerY Dimension: hasValue, value, unit
+ * values[6], values[7] : start: hasValue, start degree value
+ * values[8], values[9] : end: hasValue, end degree value
+ * values[10], values[11] : rotation: hasValue, rotation degree value
+ * values[12] : repeating
+ * @param valuesLength values length
+ */
+void SetSweepGradientValues(NG::Gradient& gradient, const double* values, int32_t valuesLength)
+{
+    if ((values == nullptr) || (valuesLength != NUM_13)) {
+        return;
+    }
+    auto centerXHasValue = values[NUM_0];
+    auto centerXValue = values[NUM_1];
+    auto centerXUnit = values[NUM_2];
+    auto centerYHasValue = values[NUM_3];
+    auto centerYValue = values[NUM_4];
+    auto centerYUnit = values[NUM_5];
+    auto startHasValue = values[NUM_6];
+    auto startValue = values[NUM_7];
+    auto endHasValue = values[NUM_8];
+    auto endValue = values[NUM_9];
+    auto rotationHasValue = values[NUM_10];
+    auto rotationValue = values[NUM_11];
+    auto repeating = values[NUM_12];
+    if (static_cast<bool>(centerXHasValue)) {
+        auto unit = static_cast<DimensionUnit>(centerXUnit);
+        auto value = (unit == DimensionUnit::PERCENT) ? (centerXValue * PERCENT_100) : centerXValue;
+        gradient.GetSweepGradient()->centerX = CalcDimension(value, unit);
+    }
+    if (static_cast<bool>(centerYHasValue)) {
+        auto unit = static_cast<DimensionUnit>(centerYUnit);
+        auto value = (unit == DimensionUnit::PERCENT) ? (centerYValue * PERCENT_100) : centerYValue;
+        gradient.GetSweepGradient()->centerY = CalcDimension(value, unit);
+    }
+    if (static_cast<bool>(startHasValue)) {
+        gradient.GetSweepGradient()->startAngle = CalcDimension(CheckAngle(startValue), DimensionUnit::PX);
+    }
+    if (static_cast<bool>(endHasValue)) {
+        gradient.GetSweepGradient()->endAngle = CalcDimension(CheckAngle(endValue), DimensionUnit::PX);
+    }
+    if (static_cast<bool>(rotationHasValue)) {
+        gradient.GetSweepGradient()->rotation = CalcDimension(CheckAngle(rotationValue), DimensionUnit::PX);
+    }
+    gradient.SetRepeat(static_cast<bool>(repeating));
+}
+
+/**
+ * @param values value value
+ * values[0], values[1], values[2] : centerX Dimension: hasValue, value, unit
+ * values[3], values[4], values[5] : centerY Dimension: hasValue, value, unit
+ * values[6], values[7], values[8] : radius: Dimension: hasValue, value, unit
+ * values[9] : repeating
+ * @param valuesLength values length
+ */
+void SetRadialGradientValues(NG::Gradient& gradient, const double* values, int32_t valuesLength)
+{
+    if ((values == nullptr) || (valuesLength != NUM_10)) {
+        return;
+    }
+    auto centerXHasValue = values[NUM_0];
+    auto centerXValue = values[NUM_1];
+    auto centerXUnit = values[NUM_2];
+    auto centerYHasValue = values[NUM_3];
+    auto centerYValue = values[NUM_4];
+    auto centerYUnit = values[NUM_5];
+    auto radiusHasValue = values[NUM_6];
+    auto radiusValue = values[NUM_7];
+    auto radiusUnit = values[NUM_8];
+    auto repeating = values[NUM_9];
+    if (static_cast<bool>(centerXHasValue)) {
+        auto unit = static_cast<DimensionUnit>(centerXUnit);
+        auto value = (unit == DimensionUnit::PERCENT) ? (centerXValue * PERCENT_100) : centerXValue;
+        gradient.GetRadialGradient()->radialCenterX = CalcDimension(value, unit);
+    }
+    if (static_cast<bool>(centerYHasValue)) {
+        auto unit = static_cast<DimensionUnit>(centerYUnit);
+        auto value = (unit == DimensionUnit::PERCENT) ? (centerYValue * PERCENT_100) : centerYValue;
+        gradient.GetRadialGradient()->radialCenterY = CalcDimension(value, unit);
+    }
+    if (static_cast<bool>(radiusHasValue)) {
+        auto unit = static_cast<DimensionUnit>(radiusUnit);
+        auto value = CheckAngle(radiusValue);
+        gradient.GetRadialGradient()->radialVerticalSize = CalcDimension(value, unit);
+        gradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(value, unit);
+    }
     gradient.SetRepeat(static_cast<bool>(repeating));
 }
 
@@ -726,6 +829,84 @@ void ResetLinearGradient(NodeHandle node)
     ViewAbstract::SetLinearGradient(frameNode, gradient);
 }
 
+/**
+ * @param values value value
+ * values[0], values[1], values[2] : centerX Dimension: hasValue, value, unit
+ * values[3], values[4], values[5] : centerY Dimension: hasValue, value, unit
+ * values[6], values[7] : start: hasValue, start degree value
+ * values[8], values[9] : end: hasValue, end degree value
+ * values[10], values[11] : rotation: hasValue, rotation degree value
+ * values[12] : repeating
+ * @param valuesLength values length
+ * @param colors color value
+ * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
+ * colors[3], colors[4], colors[5] : color[1](color, hasDimension, dimension)
+ * ...
+ * @param colorsLength colors length
+ */
+void SetSweepGradient(NodeHandle node, const double* values, int32_t valuesLength,
+    const double* colors, int32_t colorsLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesLength != NUM_13) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
+        LOGE("sweepGradient value error. %{public}d, %{public}d", valuesLength, colorsLength);
+        return;
+    }
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    SetSweepGradientValues(gradient, values, valuesLength);
+    SetGradientColors(gradient, colors, colorsLength);
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+}
+
+void ResetSweepGradient(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+}
+
+/**
+ * @param values value value
+ * values[0], values[1], values[2] : centerX Dimension: hasValue, value, unit
+ * values[3], values[4], values[5] : centerY Dimension: hasValue, value, unit
+ * values[6], values[7], values[8] : radius: Dimension: hasValue, value, unit
+ * values[9] : repeating
+ * @param valuesLength values length
+ * @param colors color value
+ * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
+ * colors[3], colors[4], colors[5] : color[1](color, hasDimension, dimension)
+ * ...
+ * @param colorsLength colors length
+ */
+void SetRadialGradient(NodeHandle node, const double* values, int32_t valuesLength,
+    const double* colors, int32_t colorsLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesLength != NUM_10) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
+        LOGE("radialGradient value error. %{public}d, %{public}d", valuesLength, colorsLength);
+        return;
+    }
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    SetRadialGradientValues(gradient, values, valuesLength);
+    SetGradientColors(gradient, colors, colorsLength);
+    ViewAbstract::SetRadialGradient(frameNode, gradient);
+}
+
+void ResetRadialGradient(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    ViewAbstract::SetRadialGradient(frameNode, gradient);
+}
+
 void SetForegroundBlurStyle(NodeHandle node, int32_t blurStyle, int32_t colorMode,
     int32_t adaptiveColor, double scale)
 {
@@ -1133,7 +1314,10 @@ ArkUICommonModifierAPI GetCommonModifier()
         ResetOpacity, SetAlign, ResetAlign, SetBackdropBlur, ResetBackdropBlur, SetHueRotate, ResetHueRotate, SetInvert,
         ResetInvert, SetSepia, ResetSepia, SetSaturate, ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale,
         ResetGrayscale, SetContrast, ResetContrast, SetBrightness, ResetBrightness, SetBlur, ResetBlur,
-        SetLinearGradient, ResetLinearGradient, SetForegroundBlurStyle, ResetForegroundBlurStyle, SetLinearGradientBlur,
+        SetLinearGradient, ResetLinearGradient,
+        SetSweepGradient, ResetSweepGradient,
+        SetRadialGradient, ResetRadialGradient,
+        SetForegroundBlurStyle, ResetForegroundBlurStyle, SetLinearGradientBlur,
         ResetLinearGradientBlur, SetBackgroundBlurStyle, ResetBackgroundBlurStyle, SetBorder, ResetBorder,
         SetBackgroundImagePosition, ResetBackgroundImagePosition, SetBackgroundImageSize, ResetBackgroundImageSize,
         SetBackgroundImage, ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale, ResetScale, SetRotate,

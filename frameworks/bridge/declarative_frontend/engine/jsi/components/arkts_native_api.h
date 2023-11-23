@@ -73,6 +73,12 @@ struct ArkUICommonModifierAPI {
     void (*SetLinearGradient)(
         NodeHandle node, const double* values, int32_t valuesLength, const double* colors, int32_t colorsLength);
     void (*ResetLinearGradient)(NodeHandle node);
+    void (*SetSweepGradient)(NodeHandle node, const double* values, int32_t valuesLength,
+        const double* colors, int32_t colorsLength);
+    void (*ResetSweepGradient)(NodeHandle node);
+    void (*SetRadialGradient)(NodeHandle node, const double* values, int32_t valuesLength,
+        const double* colors, int32_t colorsLength);
+    void (*ResetRadialGradient)(NodeHandle node);
     void (*SetForegroundBlurStyle)(
         NodeHandle node, int32_t blurStyle, int32_t colorMode, int32_t adaptiveColor, double scale);
     void (*ResetForegroundBlurStyle)(NodeHandle node);

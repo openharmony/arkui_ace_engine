@@ -387,6 +387,34 @@ class LinearGradientModifier extends Modifier<ArkLinearGradient> {
     }
 }
 
+class RadialGradientModifier extends Modifier<ArkRadialGradient> {
+    static identity: Symbol = Symbol("radialGradient");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetRadialGradient(node);
+        }
+        else {
+            GetUINativeModule().common.setRadialGradient(node,
+                this.value.center, this.value.radius, this.value.colors, this.value.repeating);
+        }
+    }
+}
+
+class SweepGradientModifier extends Modifier<ArkSweepGradient> {
+    static identity: Symbol = Symbol("sweepGradient");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetSweepGradient(node);
+        }
+        else {
+            GetUINativeModule().common.setSweepGradient(node,
+                this.value.center,
+                this.value.start, this.value.end, this.value.rotation,
+                this.value.colors, this.value.repeating);
+        }
+    }
+}
+
 class BorderModifier extends Modifier<ArkBorder>{
     static identity: Symbol = Symbol("border");
     applyPeer(node: KNode, reset: boolean): void {
@@ -1486,11 +1514,16 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         colors: Array<any>;
         repeating?: boolean;
     }): this {
-        throw new Error("Method not implemented.");
+        let arkSweepGradient = new ArkSweepGradient(value.center, value.start, value.end, value.rotation,
+            value.colors, value.repeating);
+        modifier(this._modifiers, SweepGradientModifier, arkSweepGradient);
+        return this;
     }
 
     radialGradient(value: { center: Array<any>; radius: number | string; colors: Array<any>; repeating?: boolean }): this {
-        throw new Error("Method not implemented.");
+        let arkRadialGradient = new ArkRadialGradient(value.center, value.radius, value.colors, value.repeating);
+        modifier(this._modifiers, RadialGradientModifier, arkRadialGradient);
+        return this;
     }
 
     motionPath(value: MotionPathOptions): this {

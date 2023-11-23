@@ -147,6 +147,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetLinearGradient));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLinearGradient"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetLinearGradient));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSweepGradient"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetSweepGradient));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSweepGradient"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetSweepGradient));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadialGradient"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetRadialGradient));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadialGradient"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetRadialGradient));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setForegroundBlurStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetForegroundBlurStyle));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetForegroundBlurStyle"),

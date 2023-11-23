@@ -241,6 +241,28 @@ bool ParseJsDoublePair(const EcmaVM* vm, const Local<JSValueRef>& value, double&
     return true;
 }
 
+void ParseGradientCenter(const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<double>& values)
+{
+    bool hasValueX = false;
+    bool hasValueY = false;
+    CalcDimension valueX;
+    CalcDimension valueY;
+    if (value->IsArray(vm)) {
+        auto array = panda::Local<panda::ArrayRef>(value);
+        auto length = array->Length(vm);
+        if (length == NUM_2) {
+            hasValueX = ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_0), valueX);
+            hasValueY = ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_1), valueY);
+        }
+    }
+    values.push_back(static_cast<double>(hasValueX));
+    values.push_back(static_cast<double>(valueX.Value()));
+    values.push_back(static_cast<double>(valueX.Unit()));
+    values.push_back(static_cast<double>(hasValueY));
+    values.push_back(static_cast<double>(valueY.Value()));
+    values.push_back(static_cast<double>(valueY.Unit()));
+}
+
 void ParseBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, double values[], int units[], int size)
 {
     if (size != NUM_8) {
@@ -1266,6 +1288,78 @@ ArkUINativeModuleValue CommonBridge::ResetLinearGradient(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetCommonModifier().ResetLinearGradient(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetSweepGradient(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto centerArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto startArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto endArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto rotationArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto colorsArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    std::vector<double> values;
+    ParseGradientCenter(vm, centerArg, values);
+    ParseGradientAngle(vm, startArg, values);
+    ParseGradientAngle(vm, endArg, values);
+    ParseGradientAngle(vm, rotationArg, values);
+    std::vector<double> colors;
+    ParseGradientColorStops(vm, colorsArg, colors);
+    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
+    values.push_back(static_cast<double>(repeating));
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetSweepGradient(nativeNode, values.data(), values.size(),
+        colors.data(), colors.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetSweepGradient(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetSweepGradient(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetRadialGradient(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto centerArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto radiusArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto colorsArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    std::vector<double> values;
+    ParseGradientCenter(vm, centerArg, values);
+    CalcDimension radius;
+    auto hasRadius = ParseJsDimensionVp(vm, radiusArg, radius);
+    values.push_back(static_cast<double>(hasRadius));
+    values.push_back(static_cast<double>(radius.Value()));
+    values.push_back(static_cast<double>(radius.Unit()));
+    std::vector<double> colors;
+    ParseGradientColorStops(vm, colorsArg, colors);
+    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
+    values.push_back(static_cast<double>(repeating));
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetRadialGradient(nativeNode, values.data(), values.size(),
+        colors.data(), colors.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetRadialGradient(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetRadialGradient(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -256,6 +256,61 @@ class ArkLinearGradient {
     }
 }
 
+class ArkRadialGradient {
+    center: Array<any>;
+    radius: number | string;
+    colors: Array<any>;
+    repeating: boolean | undefined;
+
+    constructor(center: Array<any>,
+        radius: number | string,
+        colors: Array<any>,
+        repeating: boolean | undefined) {
+        this.center = center;
+        this.radius = radius;
+        this.colors = colors;
+        this.repeating = repeating;
+    }
+
+    isEqual(another: ArkRadialGradient): boolean {
+        return ((ArkDeepCompareArrays(this.center, another.center)) &&
+            (this.radius === another.radius) &&
+            (ArkDeepCompareArrays(this.colors, another.colors)) &&
+            (this.repeating === another.repeating));
+    }
+}
+
+class ArkSweepGradient {
+    center: Array<any>;
+    start: number | string | undefined;
+    end: number | string | undefined;
+    rotation: number | string | undefined;
+    colors: Array<any>;
+    repeating: boolean | undefined;
+
+    constructor(center: Array<any>,
+        start: number | string | undefined,
+        end: number | string | undefined,
+        rotation: number | string | undefined,
+        colors: Array<any>,
+        repeating: boolean | undefined) {
+        this.center = center;
+        this.start = start;
+        this.end = end;
+        this.rotation = rotation;
+        this.colors = colors;
+        this.repeating = repeating;
+    }
+
+    isEqual(another: ArkSweepGradient): boolean {
+        return ((ArkDeepCompareArrays(this.center, another.center)) &&
+            (this.start === another.start) && (this.end === another.end) &&
+            (this.rotation === another.rotation) &&
+            (ArkDeepCompareArrays(this.colors, another.colors)) &&
+            (this.repeating === another.repeating));
+    }
+}
+
 class ArkForegroundBlurStyle {
     blurStyle: number | undefined;
     colorMode: number | undefined;
