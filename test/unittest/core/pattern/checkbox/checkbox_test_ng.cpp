@@ -1486,4 +1486,27 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest033, TestSize.Level1)
     ASSERT_NE(checkBoxPaintProperty, nullptr);
     EXPECT_TRUE(checkBoxPaintProperty->GetCheckBoxSelectValue(false));
 }
+
+/**
+ * @tc.name: CheckBoxPatternTest034
+ * @tc.desc: CheckBox test Select and ClearSelection.
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest034, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->lastSelect_ = false;
+    pattern->SetAccessibilityAction();
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<CheckBoxAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(accessibilityProperty->ActActionSelect());
+
+    bool isSelected = true;
+    pattern->lastSelect_ = false;
+    pattern->MarkIsSelected(isSelected);
+    EXPECT_TRUE(accessibilityProperty->ActActionClearSelection());
+}
 } // namespace OHOS::Ace::NG

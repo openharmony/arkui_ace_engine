@@ -1691,4 +1691,30 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest026, TestSize.Level1)
     checkBoxGroupPattern->UpdateModifierParam(parameters);
     EXPECT_FLOAT_EQ(parameters.checkMarkPaintSize, COMPONENT_WIDTH);
 }
+
+/**
+ * @tc.name: CheckBoxGroupPatternTest027
+ * @tc.desc: CheckBoxGroup test Select and ClearSelection.
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest027, TestSize.Level1)
+{
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    checkBoxGroupModelNG.SetSelectAll(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->updateFlag_ = false;
+    pattern->SetAccessibilityAction();
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<CheckBoxGroupAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(accessibilityProperty->ActActionSelect());
+
+    bool isSelected = true;
+    pattern->updateFlag_ = false;
+    pattern->MarkIsSelected(isSelected);
+    EXPECT_TRUE(accessibilityProperty->ActActionClearSelection());
+}
 } // namespace OHOS::Ace::NG
