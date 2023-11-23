@@ -1561,7 +1561,7 @@ bool TextFieldPattern::ProcessAutoFill()
 
 void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
-    selectController_->UpdateSelectByDoubleClick(info.GetLocalLocation());
+    selectController_->UpdateSelectByOffset(info.GetLocalLocation());
     if (IsSelected()) {
         StopTwinkling();
         SetIsSingleHandle(false);
@@ -1972,7 +1972,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     if (isSingleHandle_) {
         CloseSelectOverlay(true);
     }
-    selectController_->UpdateSelectByLongPress(info.GetLocalLocation());
+    selectController_->UpdateSelectByOffset(info.GetLocalLocation());
     if (IsSelected()) {
         StopTwinkling();
     }
