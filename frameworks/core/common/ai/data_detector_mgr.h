@@ -61,6 +61,13 @@ public:
         abilityName_ = abilityName;
     }
 
+    void AdjustCursorPosition(int32_t& caretPos, const std::string& content, TimeStamp& lastAiPosTimeStamp,
+        const TimeStamp& lastClickTimeStamp);
+    void AdjustWordSelection(int32_t& caretPos, const std::string& content, int32_t& start, int32_t& end);
+
+    int8_t GetCursorPosition(const std::string& text, int8_t offset) override;
+    std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset) override;
+
 private:
     DataDetectorMgr();
     ~DataDetectorMgr() = default;

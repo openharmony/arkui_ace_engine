@@ -16,9 +16,12 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
+#include "core/common/ai/data_detector_mgr.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text_field/text_input_ai_checker.h"
 
 namespace OHOS::Ace::NG {
 void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex)
@@ -120,6 +123,7 @@ void TextSelectController::UpdateCaretRectByPositionNearTouchOffset(int32_t posi
 void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
 {
     auto index = ConvertTouchOffsetToPosition(localOffset);
+    AdjustCursorPosition(index, localOffset);
     UpdateCaretIndex(index);
     if (!contentController_->IsEmpty()) {
         UpdateCaretRectByPositionNearTouchOffset(index, localOffset);
@@ -155,11 +159,14 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
     if (pos >= static_cast<int32_t>(paragraph_->GetParagraphText().length())) {
         pos -= 1;
     }
-    if (!paragraph_->GetWordBoundary(pos, start, end)) {
+
+    bool smartSelect = AdjustWordSelection(pos, start, end, localOffset);
+    if (!smartSelect && !paragraph_->GetWordBoundary(pos, start, end)) {
         start = pos;
         end = std::min(static_cast<int32_t>(contentController_->GetWideText().length()),
             pos + GetGraphemeClusterLength(contentController_->GetWideText(), pos, true));
     }
+
     UpdateHandleIndex(start, end);
 }
 
@@ -398,7 +405,7 @@ void TextSelectController::FireSelectEvent()
     if (!onAccessibilityCallback_ || !IsSelected()) {
         return;
     }
-    bool needReport =  !GetFirstIndex().has_value() || !GetSecondIndex().has_value();
+    bool needReport = !GetFirstIndex().has_value() || !GetSecondIndex().has_value();
     if (GetFirstIndex().has_value()) {
         needReport |= GetFirstIndex().value() != firstHandleInfo_.index;
     }
@@ -461,5 +468,89 @@ void TextSelectController::UpdateSelectByLongPress(const Offset& localOffset)
     } else {
         MoveCaretToContentRect(GetCaretIndex());
     }
+}
+
+bool TextSelectController::NeedAIAnalysis(int32_t& index, const CaretUpdateType targetType, const Offset& touchOffset,
+    std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout)
+{
+    if (!InputAIChecker::NeedAIAnalysis(contentController_->GetTextValue(), targetType, timeout)) {
+        return false;
+    }
+    if (IsClickAtBoundary(index, touchOffset) && targetType == CaretUpdateType::PRESSED) {
+        TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "NeedAIAnalysis IsClickAtBoundary is boundary ,return!");
+        return false;
+    }
+    return true;
+}
+
+void TextSelectController::AdjustCursorPosition(int32_t& index, const OHOS::Ace::Offset& touchOffset)
+{
+    auto timeout = GetLastClickTime() - lastAiPosTimeStamp_;
+    if (NeedAIAnalysis(index, CaretUpdateType::PRESSED, touchOffset, timeout)) {
+        // consider to limit the whole string length
+        int32_t startIndex = -1;
+        int32_t subIndex = index;
+        // the subindex match the sub content,we do choose the subtext to ai analysis to avoid the content too large
+        std::string content = contentController_->GetSelectedLimitValue(subIndex, startIndex);
+        DataDetectorMgr::GetInstance().AdjustCursorPosition(subIndex, content, lastAiPosTimeStamp_, GetLastClickTime());
+        index = startIndex + subIndex;
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ai pos, startIndex:%{public}d,subIndex:%{public}d", startIndex, subIndex);
+    }
+}
+
+bool TextSelectController::AdjustWordSelection(
+    int32_t& index, int32_t& start, int32_t& end, const OHOS::Ace::Offset& touchOffset)
+{
+    auto timeout = GetLastClickTime() - lastAiPosTimeStamp_;
+    if (NeedAIAnalysis(index, CaretUpdateType::DOUBLE_CLICK, touchOffset, timeout)) {
+        // consider the limint the whole string length
+        int32_t startIndex = -1;
+        int32_t subIndex = index;
+        // to avoid the content too large
+        std::string content = contentController_->GetSelectedLimitValue(subIndex, startIndex);
+        DataDetectorMgr::GetInstance().AdjustWordSelection(subIndex, content, start, end);
+        TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "after ai ,startIndex:%{public}d-sub:%{public}d", start, end);
+        if (start < 0 || end < 0) {
+            return false;
+        }
+        index = startIndex + subIndex;
+        start = startIndex + start;
+        end = startIndex + end;
+        return true;
+    }
+
+    return false;
+}
+
+bool TextSelectController::IsClickAtBoundary(int32_t index, const OHOS::Ace::Offset& touchOffset)
+{
+    if (InputAIChecker::IsSingleClickAtBoundary(index, contentController_->GetWideText().length())) {
+        return true;
+    }
+
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_RETURN(textField, false);
+    auto textRect = textField->GetTextRect();
+
+    CaretMetricsF caretMetrics;
+    CalcCaretMetricsByPositionNearTouchOffset(
+        index, caretMetrics, OffsetF(static_cast<float>(touchOffset.GetX()), static_cast<float>(touchOffset.GetY())));
+
+    if (InputAIChecker::IsMultiClickAtBoundary(caretMetrics.offset, textRect)) {
+        return true;
+    }
+
+    return false;
+}
+
+const TimeStamp& TextSelectController::GetLastClickTime()
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, lastAiPosTimeStamp_);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_RETURN(textField, lastAiPosTimeStamp_);
+    return textField->GetLastClickTime();
 }
 } // namespace OHOS::Ace::NG

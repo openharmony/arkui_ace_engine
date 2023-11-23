@@ -982,6 +982,10 @@ public:
     bool HasFocus() const;
     void StopTwinkling();
 
+    const TimeStamp& GetLastClickTime()
+    {
+        return lastClickTimeStamp_;
+    }
 #ifdef ENABLE_DRAG_FRAMEWORK
 protected:
     virtual void InitDragEvent();
