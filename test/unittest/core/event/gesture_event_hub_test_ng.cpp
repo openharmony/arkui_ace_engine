@@ -1128,7 +1128,7 @@ HWTEST_F(GestureEventHubTestNg, ResetDragActionForWeb001, TestSize.Level1)
     * @tc.expected: IsReceivedDragGestureInfo_ Equal to false.
     */
     guestureEventHub->ResetDragActionForWeb();
-    ASSERT_EQ(guestureEventHub->isReceivedDragGestureInfo_,false);
+    ASSERT_EQ(guestureEventHub->isReceivedDragGestureInfo_, false);
 }
 
 /**
@@ -1192,6 +1192,6 @@ HWTEST_F(GestureEventHubTestNg, GetHitTestModeStr001, TestSize.Level1)
     * @tc.steps: step1. Calling the GetHitTestModeStr interface
     * @tc.expected: EventHub ->GetHitTestModeStr() is not equal to nullptr
     */
-    EXPECT_TRUE(testModeStr != EventHub->GetHitTestModeStr() );
+    EXPECT_TRUE(testModeStr != EventHub->GetHitTestModeStr());
 }
 } // namespace OHOS::Ace::NG
