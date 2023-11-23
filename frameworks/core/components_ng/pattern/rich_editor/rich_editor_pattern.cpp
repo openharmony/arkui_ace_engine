@@ -1107,6 +1107,7 @@ void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const s
             spanNode->UpdateTextAlign(*style.textAlign);
         }
         if (style.leadingMargin.has_value()) {
+            spanNode->GetSpanItem()->leadingMargin = *style.leadingMargin;
             spanNode->UpdateLeadingMargin(*style.leadingMargin);
         }
     }
@@ -1240,12 +1241,21 @@ bool RichEditorPattern::HandleUserGestureEvent(
     PointF textOffset = { info.GetLocalLocation().GetX() - GetTextRect().GetX(),
         info.GetLocalLocation().GetY() - GetTextRect().GetY() };
     int32_t start = 0;
+    bool isParagraphHead = true;
     for (const auto& item : spans_) {
         if (!item) {
             continue;
         }
         std::vector<RectF> selectedRects = paragraphs_.GetRects(start, item->position);
         start = item->position;
+        if (isParagraphHead && !selectedRects.empty() && item->leadingMargin.has_value()) {
+            auto addWidth = item->leadingMargin.value().size.Width();
+            selectedRects[0].SetLeft(selectedRects[0].GetX() - addWidth);
+            selectedRects[0].SetWidth(selectedRects[0].GetSize().Width() + addWidth);
+            isParagraphHead = false;
+        } else if (!isParagraphHead && item->content.back() == '\n') {
+            isParagraphHead = true;
+        }
         for (auto&& rect : selectedRects) {
             if (!rect.IsInRegion(textOffset)) {
                 continue;
