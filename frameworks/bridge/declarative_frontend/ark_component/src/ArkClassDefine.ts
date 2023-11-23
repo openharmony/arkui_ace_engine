@@ -640,3 +640,24 @@ class ArkForegroundColor {
         return ((this.color === another.color) && (this.strategy === another.strategy));
     }
 }
+
+class ArkGridColColumnOption implements Equable {
+    xs?: number;
+    sm?: number;
+    md?: number;
+    lg?: number;
+    xl?: number;
+    xxl?: number;
+    constructor() {
+        this.xs = 0;
+        this.sm = 0;
+        this.md = 0;
+        this.lg = 0;
+        this.xl = 0;
+        this.xxl = 0;
+    }
+    isEqual(another: ArkGridColColumnOption): boolean {
+        return (this.xs === another.xs) && (this.sm === another.sm) && (this.md === another.md) &&
+		    (this.lg === another.lg) && (this.xl === another.xl) && (this.xxl === another.xxl);
+    }
+}
