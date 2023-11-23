@@ -3646,7 +3646,94 @@ void RosenRenderContext::PaintMouseSelectRect(const RectF& rect, const Color& fi
 void RosenRenderContext::DumpInfo() const
 {
     if (rsNode_) {
+        DumpLog::GetInstance().AddDesc("------------start print rsNode");
         DumpLog::GetInstance().AddDesc(rsNode_->DumpNode(0));
+        auto center = rsNode_->GetStagingProperties().GetPivot();
+        if (!NearEqual(center[0], 0.5) || !NearEqual(center[1], 0.5)) {
+            DumpLog::GetInstance().AddDesc(std::string("Center: x:")
+                                               .append(std::to_string(center[0]))
+                                               .append(" y:")
+                                               .append(std::to_string(center[1])));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetPivotZ())) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("PivotZ:").append(std::to_string(rsNode_->GetStagingProperties().GetPivotZ())));
+        }
+        std::string res = "";
+        if (!NearZero(rsNode_->GetStagingProperties().GetRotation())) {
+            res.append(" Rotation:").append(std::to_string(rsNode_->GetStagingProperties().GetRotation()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetRotationX())) {
+            res.append(" RotationX:").append(std::to_string(rsNode_->GetStagingProperties().GetRotationX()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetRotationY())) {
+            res.append(" RotationY:").append(std::to_string(rsNode_->GetStagingProperties().GetRotationY()));
+        }
+        if (!res.empty()) {
+            DumpLog::GetInstance().AddDesc(res);
+            res.clear();
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetCameraDistance())) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("CameraDistance:")
+                    .append(std::to_string(rsNode_->GetStagingProperties().GetCameraDistance())));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetTranslateZ())) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("TranslateZ:").append(std::to_string(rsNode_->GetStagingProperties().GetTranslateZ())));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetBgImageWidth())) {
+            res.append(" BgImageWidth:").append(std::to_string(rsNode_->GetStagingProperties().GetBgImageWidth()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetBgImageHeight())) {
+            res.append(" BgImageHeight:").append(std::to_string(rsNode_->GetStagingProperties().GetBgImageHeight()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetBgImagePositionX())) {
+            res.append(" BgImagePositionX")
+                .append(std::to_string(rsNode_->GetStagingProperties().GetBgImagePositionX()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetBgImagePositionY())) {
+            res.append(" BgImagePositionY")
+                .append(std::to_string(rsNode_->GetStagingProperties().GetBgImagePositionY()));
+        }
+        if (!res.empty()) {
+            DumpLog::GetInstance().AddDesc(res);
+            res.clear();
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetShadowOffsetX())) {
+            res.append(" ShadowOffsetX:").append(std::to_string(rsNode_->GetStagingProperties().GetShadowOffsetX()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetShadowOffsetY())) {
+            res.append(" ShadowOffsetY:").append(std::to_string(rsNode_->GetStagingProperties().GetShadowOffsetY()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetShadowAlpha())) {
+            res.append(" ShadowAlpha:").append(std::to_string(rsNode_->GetStagingProperties().GetShadowAlpha()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetShadowElevation())) {
+            res.append(" ShadowElevation:")
+                .append(std::to_string(rsNode_->GetStagingProperties().GetShadowElevation()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetShadowRadius())) {
+            res.append(" ShadowRadius:").append(std::to_string(rsNode_->GetStagingProperties().GetShadowRadius()));
+        }
+        if (!res.empty()) {
+            DumpLog::GetInstance().AddDesc(res);
+            res.clear();
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetSpherizeDegree())) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("SpherizeDegree:")
+                    .append(std::to_string(rsNode_->GetStagingProperties().GetSpherizeDegree())));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetLightUpEffectDegree())) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("LightUpEffectDegree:")
+                    .append(std::to_string(rsNode_->GetStagingProperties().GetLightUpEffectDegree())));
+        }
+        if (!NearEqual(rsNode_->GetStagingProperties().GetAlpha(), 1)) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("Alpha:").append(std::to_string(rsNode_->GetStagingProperties().GetAlpha())));
+        }
     }
 }
 
