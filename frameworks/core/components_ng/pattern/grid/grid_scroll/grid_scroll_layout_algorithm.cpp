@@ -875,6 +875,9 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     // reset reachEnd_ if any line at bottom is out of viewport
     // last line make LessNotEqual(mainLength, mainSize) and continue is reach end too
     gridLayoutInfo_.reachEnd_ = gridLayoutInfo_.endIndex_ == layoutWrapper->GetTotalChildCount() - 1;
+    if (!gridLayoutInfo_.reachEnd_) {
+        gridLayoutInfo_.offsetEnd_ = false;
+    }
     return runOutOfRecord;
 }
 
