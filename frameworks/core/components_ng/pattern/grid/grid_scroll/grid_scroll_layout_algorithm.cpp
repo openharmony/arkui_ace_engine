@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -64,6 +65,10 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!NearEqual(mainSize, gridLayoutInfo_.lastMainSize_)) {
         gridLayoutInfo_.ResetPositionFlags();
         UpdateOffsetOnVirtualKeyboardHeightChange(layoutWrapper, mainSize);
+        // If only the height of the Grid is changed, keep the prevOffset_ and currentOffset_ equal.
+        if (scrollSource_ == SCROLL_FROM_NONE) {
+            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+        }
     }
     FillGridViewportAndMeasureChildren(mainSize, crossSize, layoutWrapper);
 
