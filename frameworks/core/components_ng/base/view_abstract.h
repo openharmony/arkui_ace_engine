@@ -363,6 +363,14 @@ public:
     static void SetRotate(FrameNode* frameNode, const NG::Vector5F& value);
     static void SetClipEdge(FrameNode* frameNode, bool isClip);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
+    static void SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectOption& option);
+    static void SetLightUpEffect(FrameNode* frameNode, double radio);
+    static void SetSphericalEffect(FrameNode* frameNode, double radio);
+    static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
+    static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
+    static void SetUseEffect(FrameNode* frameNode, bool useEffect);
+    static void SetForegroundColor(FrameNode* frameNode, const Color& color);
+    static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
 
 private:
     static void AddDragFrameNodeToManager();

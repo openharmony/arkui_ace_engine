@@ -100,6 +100,20 @@ struct ArkUICommonModifierAPI {
     void (*ResetRotate)(NodeHandle node);
     void (*SetGeometryTransition)(NodeHandle node, const char* id);
     void (*ResetGeometryTransition)(NodeHandle node);
+    void (*SetPixelStretchEffect)(NodeHandle node, const double* values, const int* units, int32_t length);
+    void (*ResetPixelStretchEffect)(NodeHandle node);
+    void (*SetLightUpEffect)(NodeHandle node, double radio);
+    void (*ResetLightUpEffect)(NodeHandle node);
+    void (*SetSphericalEffect)(NodeHandle node, double radio);
+    void (*ResetSphericalEffect)(NodeHandle node);
+    void (*SetRenderGroup)(NodeHandle node, bool isRenderGroup);
+    void (*ResetRenderGroup)(NodeHandle node);
+    void (*SetRenderFit)(NodeHandle node, int32_t renderFit);
+    void (*ResetRenderFit)(NodeHandle node);
+    void (*SetUseEffect)(NodeHandle node, bool useEffect);
+    void (*ResetUseEffect)(NodeHandle node);
+    void (*SetForegroundColor)(NodeHandle node, bool isColor, uint32_t color);
+    void (*ResetForegroundColor)(NodeHandle node);
 };
 
 struct ArkUITextModifierAPI {
