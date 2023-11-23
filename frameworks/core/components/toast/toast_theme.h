@@ -44,28 +44,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            // init theme from global data
-            theme->padding_ = Edge(themeConstants->GetDimension(THEME_TOAST_PADDING_HORIZONTAL).Value(),
-                themeConstants->GetDimension(THEME_TOAST_PADDING_VERTICAL).Value(),
-                themeConstants->GetDimension(THEME_TOAST_PADDING_HORIZONTAL).Value(),
-                themeConstants->GetDimension(THEME_TOAST_PADDING_VERTICAL).Value(),
-                themeConstants->GetDimension(THEME_TOAST_PADDING_VERTICAL).Unit());
-            theme->maxWidth_ = themeConstants->GetDimension(THEME_TOAST_CONTENT_MAX_WIDTH);
-            theme->minWidth_ = themeConstants->GetDimension(THEME_TOAST_CONTENT_MIN_WIDTH);
-            theme->minHeight_ = themeConstants->GetDimension(THEME_TOAST_CONTENT_MIN_HEIGHT);
-            theme->backgroundColor_ = themeConstants->GetColor(THEME_TOAST_BACKGROUND_COLOR);
-            theme->textStyle_.SetFontWeight(FontWeight(themeConstants->GetInt(THEME_TOAST_TEXT_TEXT_FONTWEIGHT)));
-            theme->textStyle_.SetTextColor(themeConstants->GetColor(THEME_TOAST_TEXT_COLOR));
-            theme->textStyle_.SetFontSize(themeConstants->GetDimension(THEME_TOAST_TEXT_FONTSIZE));
-            theme->radius_ = Radius(
-                themeConstants->GetDimension(THEME_TOAST_RADIUS), themeConstants->GetDimension(THEME_TOAST_RADIUS));
-            theme->bottom_ = themeConstants->GetDimension(THEME_TOAST_BOTTOM);
-            theme->marging_ = Edge(themeConstants->GetDimension(THEME_TOAST_MARGIN).Value(), 0.0,
-                themeConstants->GetDimension(THEME_TOAST_MARGIN).Value(), 0.0,
-                themeConstants->GetDimension(THEME_TOAST_MARGIN).Unit());
-            theme->minFontSize_ = themeConstants->GetDimension(THEME_TOAST_TEXT_FONTSIZE_MIN);
-            auto textMaxLines = themeConstants->GetInt(THEME_TOAST_TEXT_MAX_LINES);
-            theme->textMaxLines_ = textMaxLines < 0 ? theme->textMaxLines_ : static_cast<uint32_t>(textMaxLines);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -79,6 +57,23 @@ public:
             if (!toastPattern) {
                 return;
             }
+            theme->padding_ = Edge(toastPattern->GetAttr<Dimension>("toast_padding_horizontal", 0.0_vp).Value(),
+                toastPattern->GetAttr<Dimension>("toast_padding_vertical", 0.0_vp).Value(),
+                toastPattern->GetAttr<Dimension>("toast_padding_horizontal", 0.0_vp).Value(),
+                toastPattern->GetAttr<Dimension>("toast_padding_vertical", 0.0_vp).Value(),
+                toastPattern->GetAttr<Dimension>("toast_padding_vertical", 0.0_vp).Unit());
+            theme->maxWidth_ = toastPattern->GetAttr<Dimension>("toast_content_max_width", 0.0_vp);
+            theme->minWidth_ = toastPattern->GetAttr<Dimension>("toast_content_min_width", 0.0_vp);
+            theme->minHeight_ = toastPattern->GetAttr<Dimension>("toast_content_min_height", 0.0_vp);
+            theme->textStyle_.SetFontWeight(
+                FontWeight(static_cast<int32_t>(toastPattern->GetAttr<double>("toast_text_font_weight", 0.0))));
+            theme->bottom_ = toastPattern->GetAttr<Dimension>("toast_bottom", 0.0_vp);
+            theme->marging_ = Edge(toastPattern->GetAttr<Dimension>("toast_margin", 0.0_vp).Value(), 0.0,
+                toastPattern->GetAttr<Dimension>("toast_margin", 0.0_vp).Value(), 0.0,
+                toastPattern->GetAttr<Dimension>("toast_margin", 0.0_vp).Unit());
+            theme->minFontSize_ = toastPattern->GetAttr<Dimension>("toast_text_min_font_size", 0.0_vp);
+            auto textMaxLines = static_cast<int32_t>(toastPattern->GetAttr<double>("toast_text_max_lines", 0.0));
+            theme->textMaxLines_ = textMaxLines < 0 ? theme->textMaxLines_ : static_cast<uint32_t>(textMaxLines);
             theme->textStyle_.SetFontSize(toastPattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_vp));
             theme->textStyle_.SetTextColor(toastPattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
             theme->backgroundColor_ = toastPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
