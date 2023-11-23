@@ -172,6 +172,11 @@ public:
         }
     }
 
+    bool NeedSoftKeyboard() const override
+    {
+        return true;
+    }
+
     void OnModifyDone() override;
     void UpdateSelectionOffset();
     void CalcCaretMetricsByPosition(

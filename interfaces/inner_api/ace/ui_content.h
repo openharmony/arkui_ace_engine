@@ -136,6 +136,14 @@ public:
     virtual uint32_t GetBackgroundColor() = 0;
     virtual void SetBackgroundColor(uint32_t color) = 0;
 
+    // Judge whether window need soft keyboard or not
+    virtual bool NeedSoftKeyboard()
+    {
+        return false;
+    }
+
+    virtual void SetOnWindowFocused(const std::function<void()>& callback) {};
+
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
 
     // Set UIContent callback for custom window animation

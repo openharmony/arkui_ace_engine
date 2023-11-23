@@ -491,6 +491,11 @@ bool NG::PipelineContext::SetIsFocusActive(bool isFocusActive)
     return false;
 }
 
+bool NG::PipelineContext::NeedSoftKeyboard()
+{
+    return false;
+}
+
 void NG::PipelineContext::SetCursor(int32_t cursorValue) {}
 
 void NG::PipelineContext::RestoreDefault() {}

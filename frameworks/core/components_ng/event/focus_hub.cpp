@@ -1036,6 +1036,11 @@ void FocusHub::OnFocusNode()
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->OnAccessibilityEvent(AccessibilityEventType::FOCUS);
+    if (frameNode->GetFocusType() == FocusType::NODE) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetFocusNode(frameNode);
+    }
 }
 
 void FocusHub::OnBlurNode()
@@ -1054,6 +1059,13 @@ void FocusHub::OnBlurNode()
     }
     if (blurReason_ != BlurReason::FRAME_DESTROY) {
         ClearFocusState();
+    }
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (frameNode->GetFocusType() == FocusType::NODE && frameNode == pipeline->GetFocusNode()) {
+        pipeline->SetFocusNode(nullptr);
     }
 }
 

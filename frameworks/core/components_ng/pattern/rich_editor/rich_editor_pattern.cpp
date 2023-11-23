@@ -1331,7 +1331,6 @@ void RichEditorPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 void RichEditorPattern::HandleBlurEvent()
 {
     StopTwinkling();
-    CloseKeyboard(true);
     if (textSelector_.IsValid()) {
         CloseSelectOverlay();
         ResetSelection();

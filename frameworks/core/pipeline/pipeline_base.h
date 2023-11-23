@@ -109,6 +109,10 @@ public:
 
     virtual uint64_t GetTimeFromExternalTimer();
 
+    virtual bool NeedSoftKeyboard() = 0;
+
+    virtual void SetOnWindowFocused(const std::function<void()>& callback) = 0;
+
     bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
         const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr);
 

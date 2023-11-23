@@ -85,6 +85,10 @@ public:
     uint32_t GetBackgroundColor() override;
     void SetBackgroundColor(uint32_t color) override;
 
+    bool NeedSoftKeyboard() override;
+
+    void SetOnWindowFocused(const std::function<void()>& callback) override;
+
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
     // Set UIContent callback for custom window animation
