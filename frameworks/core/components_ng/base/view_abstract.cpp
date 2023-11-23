@@ -1951,6 +1951,16 @@ void ViewAbstract::SetLinearGradient(FrameNode* frameNode, const NG::Gradient& g
     ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradient, gradient, frameNode);
 }
 
+void ViewAbstract::SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradient, frameNode);
+}
+
+void ViewAbstract::SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradient, frameNode);
+}
+
 void ViewAbstract::SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle)
 {
     auto target = frameNode->GetRenderContext();
