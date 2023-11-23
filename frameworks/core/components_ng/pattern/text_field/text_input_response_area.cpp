@@ -92,7 +92,7 @@ void PasswordResponseArea::InitResponseArea()
     }
     auto passwordNode = CreateNode();
     CHECK_NULL_VOID(passwordNode);
-    passwordNode->MountToParent(host, 0);
+    passwordNode->MountToParent(host);
 }
 
 const RefPtr<FrameNode> PasswordResponseArea::GetFrameNode()
@@ -322,8 +322,7 @@ void UnitResponseArea::InitResponseArea()
         return;
     }
     CHECK_NULL_VOID(unitNode_);
-    unitNode_->MountToParent(host, 0);
-    unitNode_.Reset();
+    unitNode_->MountToParent(host);
 }
 
 const RefPtr<FrameNode> UnitResponseArea::GetFrameNode()
