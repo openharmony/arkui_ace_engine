@@ -94,6 +94,8 @@ public:
 
     // UI content life-cycles
     virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
+    virtual void Initialize(
+        OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) = 0;
     virtual void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) = 0;
 
     // UIExtensionAbility initialize for focusWindow ID
