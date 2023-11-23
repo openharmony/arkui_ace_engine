@@ -2151,97 +2151,113 @@ void AceContainer::RegisterStopDragCallback(int32_t pointerId, StopDragCallback&
 }
 
 void AceContainer::SearchElementInfoByAccessibilityIdNG(
-    int32_t instanceId, int32_t elementId, int32_t mode,
-    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+    int32_t elementId, int32_t mode,int32_t baseParent,
+    std::list<Accessibility::AccessibilityElementInfo>& output)
 {
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    if (ngPipeline) {
-        auto frontend = container->GetFrontend();
-        CHECK_NULL_VOID(frontend);
-        auto accessibilityManager = frontend->GetAccessibilityManager();
-        if (accessibilityManager) {
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostSyncTask(
+        [weak = WeakClaim(this), elementId, mode, baseParent, &output]() {
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            auto pipelineContext = container->GetPipelineContext();
+            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(ngPipeline);
+            auto frontend = container->GetFrontend();
+            CHECK_NULL_VOID(frontend);
+            auto accessibilityManager = frontend->GetAccessibilityManager();
+            CHECK_NULL_VOID(accessibilityManager);
             accessibilityManager->SearchElementInfoByAccessibilityIdNG(
                 elementId, mode, output, ngPipeline, baseParent);
-        }
-    }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::SearchElementInfosByTextNG(
-    int32_t instanceId, int32_t elementId, const std::string& text,
-    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+    int32_t elementId, const std::string& text, int32_t baseParent,
+    std::list<Accessibility::AccessibilityElementInfo>& output)
 {
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    if (ngPipeline) {
-        auto frontend = container->GetFrontend();
-        CHECK_NULL_VOID(frontend);
-        auto accessibilityManager = frontend->GetAccessibilityManager();
-        if (accessibilityManager) {
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostSyncTask(
+        [weak = WeakClaim(this), elementId, &text, baseParent, &output]() {
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            auto pipelineContext = container->GetPipelineContext();
+            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(ngPipeline);
+            auto frontend = container->GetFrontend();
+            CHECK_NULL_VOID(frontend);
+            auto accessibilityManager = frontend->GetAccessibilityManager();
+            CHECK_NULL_VOID(accessibilityManager);
             accessibilityManager->SearchElementInfosByTextNG(
                 elementId, text, output, ngPipeline, baseParent);
-        }
-    }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::FindFocusedElementInfoNG(
-    int32_t instanceId, int32_t elementId, int32_t focusType,
-    int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int32_t elementId, int32_t focusType, int32_t baseParent,
+    Accessibility::AccessibilityElementInfo& output)
 {
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    if (ngPipeline) {
-        auto frontend = container->GetFrontend();
-        CHECK_NULL_VOID(frontend);
-        auto accessibilityManager = frontend->GetAccessibilityManager();
-        if (accessibilityManager) {
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostSyncTask(
+        [weak = WeakClaim(this), elementId, focusType, baseParent, &output]() {
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            auto pipelineContext = container->GetPipelineContext();
+            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(ngPipeline);
+            auto frontend = container->GetFrontend();
+            CHECK_NULL_VOID(frontend);
+            auto accessibilityManager = frontend->GetAccessibilityManager();
+            CHECK_NULL_VOID(accessibilityManager);
             accessibilityManager->FindFocusedElementInfoNG(
                 elementId, focusType, output, ngPipeline, baseParent);
-        }
-    }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::FocusMoveSearchNG(
-    int32_t instanceId, int32_t elementId, int32_t direction,
-    int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int32_t elementId, int32_t direction, int32_t baseParent,
+    Accessibility::AccessibilityElementInfo& output)
 {
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    if (ngPipeline) {
-        auto frontend = container->GetFrontend();
-        CHECK_NULL_VOID(frontend);
-        auto accessibilityManager = frontend->GetAccessibilityManager();
-        if (accessibilityManager) {
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostSyncTask(
+        [weak = WeakClaim(this), elementId, direction, baseParent, &output]() {
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            auto pipelineContext = container->GetPipelineContext();
+            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(ngPipeline);
+            auto frontend = container->GetFrontend();
+            CHECK_NULL_VOID(frontend);
+            auto accessibilityManager = frontend->GetAccessibilityManager();
+            CHECK_NULL_VOID(accessibilityManager);
             accessibilityManager->FocusMoveSearchNG(elementId, direction, output, ngPipeline, baseParent);
-        }
-    }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
-bool AceContainer::NotifyExecuteAction(int32_t instanceId, int32_t elementId,
-    const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
+bool AceContainer::NotifyExecuteAction(
+    int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+    int32_t action, int32_t offset)
 {
     bool IsExecuted = false;
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, IsExecuted);
-    auto pipelineContext = container->GetPipelineContext();
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    if (ngPipeline) {
-        auto frontend = container->GetFrontend();
-        CHECK_NULL_RETURN(frontend, IsExecuted);
-        auto accessibilityManager = frontend->GetAccessibilityManager();
-        if (accessibilityManager) {
-            IsExecuted =
-            accessibilityManager->ExecuteExtensionActionNG(elementId, actionArguments, action, ngPipeline, offset);
-        }
-    }
+    CHECK_NULL_RETURN(taskExecutor_, IsExecuted);
+    taskExecutor_->PostSyncTask(
+        [weak = WeakClaim(this), elementId, &actionArguments, action, offset, &IsExecuted]() {
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            auto pipelineContext = container->GetPipelineContext();
+            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(ngPipeline);
+            auto frontend = container->GetFrontend();
+            CHECK_NULL_VOID(frontend);
+            auto accessibilityManager = frontend->GetAccessibilityManager();
+            CHECK_NULL_VOID(accessibilityManager);
+            IsExecuted = accessibilityManager->ExecuteExtensionActionNG(
+                elementId, actionArguments, action, ngPipeline, offset);
+        },
+        TaskExecutor::TaskType::UI);
     return IsExecuted;
 }
 
