@@ -45,6 +45,9 @@ public:
         return placement_;
     }
 
+    bool hierarchicalParameters_ = false;
+    void InitHierarchicalParameters();
+
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition);
     float HorizontalLayout(const SizeF& size, float clickPosition, bool IsSelectMenu = false);

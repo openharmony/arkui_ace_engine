@@ -492,7 +492,12 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                     mainPipeline->FlushPipelineImmediately();
                 }
                 // clear contextMenu then return
-                if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
+                auto pipeline = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                auto theme = pipeline->GetTheme<SelectTheme>();
+                CHECK_NULL_VOID(theme);
+                auto expandDisplay = theme->GetExpandDisplay();
+                if ((menuWrapperPattern && menuWrapperPattern->IsContextMenu()) || expandDisplay) {
                     SubwindowManager::GetInstance()->ClearMenuNG(id);
                     return;
                 }
