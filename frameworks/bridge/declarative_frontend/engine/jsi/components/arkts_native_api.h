@@ -82,6 +82,24 @@ struct ArkUICommonModifierAPI {
     void (*SetBackgroundBlurStyle)(
         NodeHandle node, int32_t blurStyle, int32_t colorMode, int32_t adaptiveColor, double scale);
     void (*ResetBackgroundBlurStyle)(NodeHandle node);
+    void (*SetBorder)(NodeHandle node, double* values, int32_t* units, uint32_t* colorAndStyle, int32_t size);
+    void (*ResetBorder)(NodeHandle node);
+    void (*SetBackgroundImagePosition)(
+        NodeHandle node, const double* values, const int32_t* types, bool isAlign, int size);
+    void (*ResetBackgroundImagePosition)(NodeHandle node);
+    void (*SetBackgroundImageSize)(
+        NodeHandle node, double valueWidth, double valueHeight, int32_t typeWidth, int32_t typeHeight);
+    void (*ResetBackgroundImageSize)(NodeHandle node);
+    void (*SetBackgroundImage)(NodeHandle node, const char* src, int32_t repeatIndex);
+    void (*ResetBackgroundImage)(NodeHandle node);
+    void (*SetTranslate)(NodeHandle node, const double* values, const int* units, int32_t length);
+    void (*ResetTranslate)(NodeHandle node);
+    void (*SetScale)(NodeHandle node, const double* values, int valLength, const int* units, int unitLength);
+    void (*ResetScale)(NodeHandle node);
+    void (*SetRotate)(NodeHandle node, const double* values, int32_t valLength, const int* units, int32_t unitLength);
+    void (*ResetRotate)(NodeHandle node);
+    void (*SetGeometryTransition)(NodeHandle node, const char* id);
+    void (*ResetGeometryTransition)(NodeHandle node);
 };
 
 struct ArkUITextModifierAPI {

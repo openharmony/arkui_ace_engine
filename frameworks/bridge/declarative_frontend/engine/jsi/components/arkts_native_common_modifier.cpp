@@ -18,6 +18,11 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/pipeline/base/element_register.h"
+#include "frameworks/core/components/common/properties/decoration.h"
+#include "frameworks/core/components/declaration/common/declaration.h"
+#include "frameworks/core/image/image_source_info.h"
+#include "frameworks/core/components/common/properties/animation_option.h"
+#include "frameworks/base/geometry/ng/vector.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -42,7 +47,6 @@ constexpr int NUM_15 = 15;
 constexpr int DEFAULT_LENGTH = 4;
 constexpr double ROUND_UNIT = 360.0;
 
-
 BorderStyle ConvertBorderStyle(int32_t value)
 {
     auto style = static_cast<BorderStyle>(value);
@@ -51,6 +55,7 @@ BorderStyle ConvertBorderStyle(int32_t value)
     }
     return style;
 }
+
 Alignment ParseAlignment(int32_t align)
 {
     Alignment alignment = Alignment::CENTER;
@@ -181,6 +186,14 @@ void SetLinearGradientValues(NG::Gradient& gradient, const double* values, int32
     }
     SetLinearGradientDirectionTo(linearGradient, static_cast<GradientDirection>(directionValue));
     gradient.SetRepeat(static_cast<bool>(repeating));
+}
+
+void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, const double valueX, const double valueY,
+    BackgroundImagePosition& bgImgPosition)
+{
+    OHOS::Ace::AnimationOption option;
+    bgImgPosition.SetSizeX(AnimatableDimension(valueX, typeX, option));
+    bgImgPosition.SetSizeY(AnimatableDimension(valueY, typeY, option));
 }
 } // namespace
 
@@ -845,6 +858,272 @@ void ResetBackgroundBlurStyle(NodeHandle node)
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
 
+void SetBorder(NodeHandle node, double* values, int32_t* units, uint32_t* colorAndStyle, int32_t size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (size != NUM_8) {
+        return;
+    }
+    NG::BorderWidthProperty borderWidth;
+    borderWidth.leftDimen = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    borderWidth.rightDimen = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    borderWidth.topDimen = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+    borderWidth.bottomDimen = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
+    borderWidth.multiValued = true;
+    ViewAbstract::SetBorderWidth(frameNode, borderWidth);
+
+    NG::BorderColorProperty borderColors;
+    borderColors.leftColor = Color(colorAndStyle[NUM_0]);
+    borderColors.rightColor = Color(colorAndStyle[NUM_1]);
+    borderColors.topColor = Color(colorAndStyle[NUM_2]);
+    borderColors.bottomColor = Color(colorAndStyle[NUM_3]);
+    borderColors.multiValued = true;
+    ViewAbstract::SetBorderColor(frameNode, borderColors);
+
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(values[NUM_4], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_4]));
+    borderRadius.radiusTopRight = Dimension(values[NUM_5], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_5]));
+    borderRadius.radiusBottomLeft = Dimension(values[NUM_6], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_6]));
+    borderRadius.radiusBottomRight = Dimension(values[NUM_7], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_7]));
+    borderRadius.multiValued = true;
+    ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+
+    NG::BorderStyleProperty borderStyles;
+    borderStyles.styleLeft = ConvertBorderStyle(colorAndStyle[NUM_4]);
+    borderStyles.styleRight = ConvertBorderStyle(colorAndStyle[NUM_5]);
+    borderStyles.styleTop = ConvertBorderStyle(colorAndStyle[NUM_6]);
+    borderStyles.styleBottom = ConvertBorderStyle(colorAndStyle[NUM_7]);
+    borderStyles.multiValued = true;
+    ViewAbstract::SetBorderStyle(frameNode, borderStyles);
+}
+
+void ResetBorder(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension borderWidth;
+    ViewAbstract::SetBorderWidth(borderWidth);
+    ViewAbstract::SetBorderColor(Color::BLACK);
+    ViewAbstract::SetBorderRadius(borderWidth);
+    ViewAbstract::SetBorderStyle(BorderStyle::SOLID);
+}
+
+void SetBackgroundImagePosition(NodeHandle node, const double* values, const int32_t* types, bool isAlign, int size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (size != NUM_2) {
+        return;
+    }
+    BackgroundImagePosition bgImgPosition;
+    double valueX = values[NUM_0];
+    double valueY = values[NUM_1];
+    DimensionUnit typeX = static_cast<OHOS::Ace::DimensionUnit>(types[NUM_0]);
+    DimensionUnit typeY = static_cast<OHOS::Ace::DimensionUnit>(types[NUM_1]);
+    SetBgImgPosition(typeX, typeY, valueX, valueY, bgImgPosition);
+    bgImgPosition.SetIsAlign(isAlign);
+    ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
+}
+
+void ResetBackgroundImagePosition(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BackgroundImagePosition bgImgPosition;
+    SetBgImgPosition(DimensionUnit::PX, DimensionUnit::PX, 0.0, 0.0, bgImgPosition);
+    ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
+}
+
+void SetBackgroundImageSize(NodeHandle node,
+    double valueWidth, double valueHeight, int32_t typeWidth, int32_t typeHeight)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BackgroundImageSize bgImgSize;
+    bgImgSize.SetSizeTypeX(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeWidth));
+    bgImgSize.SetSizeValueX(valueWidth);
+    bgImgSize.SetSizeTypeY(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeHeight));
+    bgImgSize.SetSizeValueY(valueHeight);
+    ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
+}
+
+void ResetBackgroundImageSize(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BackgroundImageSize bgImgSize;
+    bgImgSize.SetSizeTypeX(BackgroundImageSizeType::AUTO);
+    bgImgSize.SetSizeTypeY(BackgroundImageSizeType::AUTO);
+    ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
+}
+
+void SetBackgroundImage(NodeHandle node, const char* src, int32_t repeatIndex)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string srcStr(src);
+    std::string bundle;
+    std::string module;
+    ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { srcStr, bundle, module });
+    auto repeat = static_cast<ImageRepeat>(repeatIndex);
+    if (repeat >= OHOS::Ace::ImageRepeat::NO_REPEAT && repeat <= OHOS::Ace::ImageRepeat::REPEAT) {
+        ViewAbstract::SetBackgroundImageRepeat(repeat);
+    } else {
+        ViewAbstract::SetBackgroundImageRepeat(OHOS::Ace::ImageRepeat::NO_REPEAT);
+    }
+}
+
+void ResetBackgroundImage(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string srcStr;
+    std::string bundle;
+    std::string module;
+    ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { srcStr, bundle, module });
+    ViewAbstract::SetBackgroundImageRepeat(OHOS::Ace::ImageRepeat::NO_REPEAT);
+}
+void SetTranslate(NodeHandle node, const double* values, const int* units, int32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (length != NUM_3) {
+        return;
+    }
+    auto translateX = CalcDimension(0.0);
+    auto translateY = CalcDimension(0.0);
+    auto translateZ = CalcDimension(0.0);
+    translateX = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    translateY = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    translateZ = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+
+    ViewAbstract::SetTranslate(frameNode, TranslateOptions(translateX, translateY, translateZ));
+}
+
+void ResetTranslate(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto x = CalcDimension(0.0);
+    auto y = CalcDimension(0.0);
+    auto z = CalcDimension(0.0);
+    ViewAbstract::SetTranslate(frameNode, TranslateOptions(x, y, z));
+}
+/**
+ * @param values
+ * values[0] : centerX value; values[1] : centerY value;
+ * units[0] : centerY unit; units[1] : centerY unit
+ * values[2]: scaleX;values[3]: scaleY;values[4]: scaleZ
+ * @param length shadows length
+ */
+void SetScale(NodeHandle node, const double* values, int valLength, const int* units, int unitLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (valLength != NUM_5 || unitLength != NUM_2) {
+        return;
+    }
+    auto x = values[NUM_2];
+    auto y = values[NUM_3];
+    // NOT support Z in source code
+    if (x < 0) {
+        x = 1;
+    }
+    if (y < 0) {
+        y = 1;
+    }
+    VectorF scale(x, y);
+    ViewAbstract::SetScale(frameNode, scale);
+
+    auto centerX = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    auto centerY = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    auto centerZ = Dimension(0.0, OHOS::Ace::DimensionUnit::VP);
+
+    DimensionOffset center(centerX, centerY);
+    if (!NearZero(centerZ.Value())) {
+        center.SetZ(centerZ);
+    }
+    ViewAbstract::SetPivot(frameNode, center);
+}
+
+void ResetScale(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    VectorF scale(1.0f, 1.0f);
+    ViewAbstract::SetScale(frameNode, scale);
+
+    DimensionOffset center(0.5_pct, 0.5_pct);
+    auto centerZ = Dimension(0.0, OHOS::Ace::DimensionUnit::VP);
+    if (!NearZero(centerZ.Value())) {
+        center.SetZ(centerZ);
+    }
+    ViewAbstract::SetPivot(frameNode, center);
+}
+
+/**
+ * @param values
+ * values[0] : centerX value; values[1] : centerY value; values[3] : centerZ value
+ * units[0] : centerY unit; units[1] : centerY unit; units[3] : centerZ unit
+ * values[4]: xDirection;values[5]: yDirection;values[6]: zDirection
+ * values[7]: angle;values[8]:perspective
+ * @param length shadows length
+ */
+void SetRotate(NodeHandle node, const double* values, int32_t valLength, const int* units, int32_t unitLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (valLength != NUM_8 || unitLength != NUM_3) {
+        return;
+    }
+    auto centerX = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    auto centerY = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    auto centerZ = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+    auto xDirection = values[NUM_3];
+    auto yDirection = values[NUM_4];
+    auto zDirection = values[NUM_5];
+    auto angle = values[NUM_6];
+    auto perspective = values[NUM_7];
+    ViewAbstract::SetRotate(frameNode, NG::Vector5F(xDirection, yDirection, zDirection, angle, perspective));
+
+    DimensionOffset center(centerX, centerY);
+    if (!NearZero(centerZ.Value())) {
+        center.SetZ(centerZ);
+    }
+    ViewAbstract::SetPivot(frameNode, center);
+}
+
+void ResetRotate(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.0f, 0.0f);
+    ViewAbstract::SetRotate(
+        NG::Vector5F(rotate.xDirection, rotate.yDirection, rotate.zDirection, 0.0, rotate.perspective));
+
+    DimensionOffset center(rotate.centerX, rotate.centerY);
+    if (!NearZero(rotate.centerZ.Value())) {
+        center.SetZ(rotate.centerZ);
+    }
+    ViewAbstract::SetPivot(frameNode, center);
+}
+
+void SetGeometryTransition(NodeHandle node, const char* id)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string idStr(id);
+    ViewAbstract::SetGeometryTransition(frameNode, idStr, false);
+}
+
+void ResetGeometryTransition(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+}
+
 ArkUICommonModifierAPI GetCommonModifier()
 {
     static const ArkUICommonModifierAPI modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
@@ -854,11 +1133,11 @@ ArkUICommonModifierAPI GetCommonModifier()
         ResetOpacity, SetAlign, ResetAlign, SetBackdropBlur, ResetBackdropBlur, SetHueRotate, ResetHueRotate, SetInvert,
         ResetInvert, SetSepia, ResetSepia, SetSaturate, ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale,
         ResetGrayscale, SetContrast, ResetContrast, SetBrightness, ResetBrightness, SetBlur, ResetBlur,
-        SetLinearGradient, ResetLinearGradient,
-        SetForegroundBlurStyle, ResetForegroundBlurStyle,
-        SetLinearGradientBlur, ResetLinearGradientBlur,
-        SetBackgroundBlurStyle, ResetBackgroundBlurStyle,
-    };
+        SetLinearGradient, ResetLinearGradient, SetForegroundBlurStyle, ResetForegroundBlurStyle, SetLinearGradientBlur,
+        ResetLinearGradientBlur, SetBackgroundBlurStyle, ResetBackgroundBlurStyle, SetBorder, ResetBorder,
+        SetBackgroundImagePosition, ResetBackgroundImagePosition, SetBackgroundImageSize, ResetBackgroundImageSize,
+        SetBackgroundImage, ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale, ResetScale, SetRotate,
+        ResetRotate, SetGeometryTransition, ResetGeometryTransition };
 
     return modifier;
 }
