@@ -142,6 +142,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             auto containerId = Container::CurrentId();
             auto taskExecutor = Container::CurrentTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
+            info.SetStopPropagation(true);
             taskExecutor->PostTask(
                 [containerId, builder = builderF, weakTarget, menuParam, info]() mutable {
                     auto targetNode = weakTarget.Upgrade();
@@ -156,7 +157,6 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                         std::function<void()> previewBuildFunc;
                         NG::ViewAbstractModelNG::CreateCustomMenu(
                             builder, targetNode, menuPosition, previewBuildFunc, menuParam);
-                        info.SetStopPropagation(true);
                     }
                 },
                 TaskExecutor::TaskType::PLATFORM);
