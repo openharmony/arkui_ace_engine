@@ -406,7 +406,8 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
     if (scrollEffect_ && scrollEffect_->IsFadeEffect() && (source == SCROLL_FROM_UPDATE ||
         source == SCROLL_FROM_ANIMATION)) {    // handle edge effect
         if ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset))) {
-            scrollEffect_->HandleOverScroll(GetAxis(), -offset, size);
+            auto isScrollFromUpdate = source == SCROLL_FROM_UPDATE;
+            scrollEffect_->HandleOverScroll(GetAxis(), -offset, size, isScrollFromUpdate);
         }
     }
     if (!(scrollEffect_ && scrollEffect_->IsSpringEffect() && (source == SCROLL_FROM_UPDATE ||
