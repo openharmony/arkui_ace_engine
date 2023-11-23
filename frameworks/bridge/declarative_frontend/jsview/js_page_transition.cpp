@@ -91,22 +91,16 @@ void JSPageTransition::Translate(const JSCallbackInfo& info)
 {
     LOGD("JSPageTransitionTranslate");
     if (info.Length() > 0 && info[0]->IsObject()) {
-        auto args = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!args || args->IsNull()) {
-            LOGE("JSTransition Translate failed json value is nullptr or json object is null");
-            return;
-        }
-
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
         NG::TranslateOptions option;
-
         CalcDimension length;
-        if (JSViewAbstract::ParseJsonDimensionVp(args->GetValue("x"), length)) {
+        if (JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("x"), length)) {
             option.x = length;
         }
-        if (JSViewAbstract::ParseJsonDimensionVp(args->GetValue("y"), length)) {
+        if (JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("y"), length)) {
             option.y = length;
         }
-        if (JSViewAbstract::ParseJsonDimensionVp(args->GetValue("z"), length)) {
+        if (JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("z"), length)) {
             option.z = length;
         }
         PageTransitionModel::GetInstance()->SetTranslateEffect(option);
@@ -117,30 +111,25 @@ void JSPageTransition::Scale(const JSCallbackInfo& info)
 {
     LOGD("JSPageTransition::Scale");
     if (info.Length() > 0 && info[0]->IsObject()) {
-        auto args = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!args || args->IsNull()) {
-            LOGE("JSTransition Scale failed, json value is nullptr or json object is null");
-            return;
-        }
-
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
         // default: x, y, z (1.0, 1.0, 1.0)
         double scaleX = 1.0;
         double scaleY = 1.0;
         double scaleZ = 1.0;
-        JSViewAbstract::ParseJsonDouble(args->GetValue("x"), scaleX);
-        JSViewAbstract::ParseJsonDouble(args->GetValue("y"), scaleY);
-        JSViewAbstract::ParseJsonDouble(args->GetValue("z"), scaleZ);
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("x"), scaleX);
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("y"), scaleY);
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("z"), scaleZ);
         // default centerX, centerY 50% 50%;
         CalcDimension centerX = 0.5_pct;
         CalcDimension centerY = 0.5_pct;
 
         // if specify centerX
         CalcDimension length;
-        if (JSViewAbstract::ParseJsonDimensionVp(args->GetValue("centerX"), length)) {
+        if (JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("centerX"), length)) {
             centerX = length;
         }
         // if specify centerY
-        if (JSViewAbstract::ParseJsonDimensionVp(args->GetValue("centerY"), length)) {
+        if (JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("centerY"), length)) {
             centerY = length;
         }
         NG::ScaleOptions option(
@@ -220,39 +209,42 @@ void JSPageTransition::Pop()
     PageTransitionModel::GetInstance()->Pop();
 }
 
-PageTransitionOption JSPageTransition::ParseTransitionOption(const std::unique_ptr<JsonValue>& transitionArgs)
+PageTransitionOption JSPageTransition::ParseTransitionOption(const JSRef<JSVal>& transitionArgs)
 {
     PageTransitionOption option;
     const int32_t defaultDuration = 1000;
     option.duration = defaultDuration;
     option.curve = Curves::LINEAR;
-    if (transitionArgs && !transitionArgs->IsNull()) {
-        option.duration = transitionArgs->GetInt("duration", defaultDuration);
-        if (option.duration < 0) {
-            option.duration = defaultDuration;
-        }
-        option.delay = transitionArgs->GetInt("delay", 0);
-        auto routeTypeTmp = transitionArgs->GetInt("type", static_cast<int32_t>(RouteType::NONE));
-        if (routeTypeTmp >= static_cast<int32_t>(RouteType::NONE) &&
-            routeTypeTmp <= static_cast<int32_t>(RouteType::POP)) {
-            option.routeType = static_cast<RouteType>(routeTypeTmp);
-        } else {
-            LOGW("CreateTransition RouteType out of range");
-        }
+    if (!transitionArgs->IsObject()) {
+        return option;
+    }
 
-        auto curveArgs = transitionArgs->GetValue("curve");
-        RefPtr<Curve> curve;
-        if (curveArgs->IsString()) {
-            curve = CreateCurve(curveArgs->GetString(), false);
-        } else if (curveArgs->IsObject()) {
-            auto curveString = curveArgs->GetValue("__curveString");
-            if (curveString) {
-                curve = CreateCurve(curveString->GetString(), false);
-            }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(transitionArgs);
+    option.duration = jsObj->GetPropertyValue<int32_t>("duration", defaultDuration);
+    if (option.duration < 0) {
+        option.duration = defaultDuration;
+    }
+    option.delay = jsObj->GetPropertyValue<int32_t>("delay", 0);
+    auto routeTypeTmp = jsObj->GetPropertyValue<int32_t>("type", static_cast<int32_t>(RouteType::NONE));
+    if (routeTypeTmp >= static_cast<int32_t>(RouteType::NONE) &&
+        routeTypeTmp <= static_cast<int32_t>(RouteType::POP)) {
+        option.routeType = static_cast<RouteType>(routeTypeTmp);
+    } else {
+        LOGW("CreateTransition RouteType out of range");
+    }
+
+    JSRef<JSVal> curveArgs = jsObj->GetProperty("curve");
+    RefPtr<Curve> curve;
+    if (curveArgs->IsString()) {
+        curve = CreateCurve(curveArgs->ToString(), false);
+    } else if (curveArgs->IsObject()) {
+        JSRef<JSVal> curveString = JSRef<JSObject>::Cast(curveArgs)->GetProperty("__curveString");
+        if (curveString->IsString()) {
+            curve = CreateCurve(curveString->ToString(), false);
         }
-        if (curve) {
-            option.curve = curve;
-        }
+    }
+    if (curve) {
+        option.curve = curve;
     }
     return option;
 }
@@ -261,8 +253,7 @@ void JSPageTransitionEnter::Create(const JSCallbackInfo& info)
 {
     LOGD("JSPageTransitionEnter::Create");
     if (info.Length() > 0 && info[0]->IsObject()) {
-        auto transitionArgs = JsonUtil::ParseJsonString(info[0]->ToString());
-        auto option = ParseTransitionOption(transitionArgs);
+        auto option = ParseTransitionOption(info[0]);
         PageTransitionModel::GetInstance()->CreateTransition(PageTransitionType::ENTER, option);
     }
 }
@@ -271,8 +262,7 @@ void JSPageTransitionExit::Create(const JSCallbackInfo& info)
 {
     LOGD("JSPageTransitionExit::Create");
     if (info.Length() > 0 && info[0]->IsObject()) {
-        auto transitionArgs = JsonUtil::ParseJsonString(info[0]->ToString());
-        auto option = ParseTransitionOption(transitionArgs);
+        auto option = ParseTransitionOption(info[0]);
         PageTransitionModel::GetInstance()->CreateTransition(PageTransitionType::EXIT, option);
     }
 }
