@@ -516,6 +516,35 @@ void ListLayoutAlgorithm::UpdateSnapCenterContentOffset(LayoutWrapper* layoutWra
     }
 }
 
+bool ListLayoutAlgorithm::CheckJumpValid(LayoutWrapper* layoutWrapper)
+{
+    if (jumpIndex_.value() == LAST_ITEM) {
+        jumpIndex_ = totalItemCount_ - 1;
+    } else if ((jumpIndex_.value() < 0) || (jumpIndex_.value() >= totalItemCount_)) {
+        return false;
+    }
+    if (jumpIndex_ && jumpIndexInGroup_) {
+        auto groupWrapper = layoutWrapper->GetOrCreateChildByIndex(jumpIndex_.value());
+        CHECK_NULL_RETURN(groupWrapper, false);
+        if (groupWrapper->GetHostTag() != V2::LIST_ITEM_GROUP_ETS_TAG) {
+            return false;
+        }
+        auto groupNode = groupWrapper->GetHostNode();
+        CHECK_NULL_RETURN(groupNode, false);
+        auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+        CHECK_NULL_RETURN(groupPattern, false);
+
+        auto groupItemCount = groupWrapper->GetTotalChildCount() - groupPattern->GetItemStartIndex();
+
+        if (jumpIndexInGroup_.value() == LAST_ITEM) {
+            jumpIndex_ = groupItemCount - 1;
+        } else if ((jumpIndexInGroup_.value() < 0) || (jumpIndexInGroup_.value() >= groupItemCount)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
 {
     int32_t startIndex = 0;
@@ -525,14 +554,14 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     float startPos = 0.0f;
     float endPos = 0.0f;
     if (jumpIndex_) {
-        if (jumpIndex_.value() == LAST_ITEM) {
-            jumpIndex_ = totalItemCount_ - 1;
-        } else if ((jumpIndex_.value() < 0) || (jumpIndex_.value() >= totalItemCount_)) {
+        if (!CheckJumpValid(layoutWrapper)) {
             jumpIndex_.reset();
+            jumpIndexInGroup_.reset();
+        } else {
+            if (jumpIndex_ && jumpIndexInGroup_) {
+                ClearAllItemPosition(layoutWrapper);
+            }
         }
-    }
-    if (jumpIndex_ && jumpIndexInGroup_) {
-        ClearAllItemPosition(layoutWrapper);
     }
     if (targetIndex_) {
         if (targetIndex_.value() == LAST_ITEM) {
