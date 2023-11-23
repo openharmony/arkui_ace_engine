@@ -4080,11 +4080,13 @@ void RichEditorPattern::AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF
     if (strategy == EdgeDetectionStrategy::IN_BOUNDARY) {
         float edgeThreshold = 0.0f;
         CalcCursorOffsetByPosition(GetCaretPosition(), edgeThreshold, true);
-        if (GreatNotEqual(offset.GetY(), contentRect.GetY() + contentRect.Height() - edgeThreshold)) {
-            param.offset = offset.GetY() - contentRect.GetY() - contentRect.Height();
+        float topEdgeThreshold = edgeThreshold + contentRect.GetY();
+        float bottomThreshold = contentRect.Bottom() - edgeThreshold;
+        if (GreatNotEqual(offset.GetY(), bottomThreshold)) {
+            param.offset = bottomThreshold - offset.GetY();
             ScheduleAutoScroll(param);
-        } else if (LessNotEqual(offset.GetY(), contentRect.GetY() + edgeThreshold)) {
-            param.offset = offset.GetY() - contentRect.GetY();
+        } else if (LessNotEqual(offset.GetY(), topEdgeThreshold)) {
+            param.offset = topEdgeThreshold - offset.GetY();
             ScheduleAutoScroll(param);
         } else {
             StopAutoScroll();
