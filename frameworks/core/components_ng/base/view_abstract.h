@@ -426,6 +426,12 @@ public:
     static void SetObscured(FrameNode* frameNode, const std::vector< ObscuredReasons>& reasons);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);
+    static void SetEnabled(FrameNode* frameNode, bool enabled);
+    static void SetDraggable(FrameNode* frameNode, bool draggable);
+    static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
+    static void SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue);
+    static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
+        const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 
 private:
     static void AddDragFrameNodeToManager();

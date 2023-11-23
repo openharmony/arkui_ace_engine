@@ -42,7 +42,7 @@ interface Equable {
     isEqual(value: Equable): boolean;
 }
 
-class Modifier<T extends number | string | boolean | Equable | Resource> {
+class Modifier<T extends number | string | boolean | Equable | Resource | object> {
     stageValue?: T;
     value?: T;
     constructor(value: T) {
@@ -1133,6 +1133,77 @@ class LayoutWeightModifier extends Modifier<number | string> {
   }
 }
 
+class EnabledModifier extends Modifier<boolean> {
+    static identity: Symbol = Symbol("enabled");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetEnabled(node);
+
+        } else {
+            GetUINativeModule().common.setEnabled(node, this.value);
+        }
+    }
+}
+
+class DraggableModifier extends Modifier<boolean> {
+    static identity: Symbol = Symbol("draggable");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetDraggable(node);
+        }
+        else {
+            GetUINativeModule().common.setDraggable(node, this.value);
+        }
+    }
+}
+
+class AccessibilityGroupModifier extends Modifier<boolean> {
+    static identity: Symbol = Symbol("accessibilityGroup");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetAccessibilityGroup(node);
+        }
+        else {
+            GetUINativeModule().common.setAccessibilityGroup(node, this.value);
+        }
+    }
+}
+
+class HoverEffectModifier extends Modifier<HoverEffect> {
+    static identity: Symbol = Symbol("hoverEffect");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetHoverEffect(node);
+        }
+        else {
+            GetUINativeModule().common.setHoverEffect(node, this.value);
+        }
+    }
+}
+
+class ClickEffectModifier extends Modifier<ArkClickEffect> {
+    static identity: Symbol = Symbol("clickEffect");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetClickEffect(node);
+        }
+        else {
+            GetUINativeModule().common.setClickEffect(node, this.value.level, this.value.scale);
+        }
+    }
+}
+
+class KeyBoardShortCutModifier extends Modifier<ArkKeyBoardShortCut> {
+    static identity: Symbol = Symbol("keyboardShortcut");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetKeyBoardShortCut(node);
+        }else {
+            GetUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys);
+        }
+    }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType) => typeof val === 'string'
@@ -1766,7 +1837,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     hoverEffect(value: HoverEffect): this {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, HoverEffectModifier, value);
+        return this;
     }
 
     onMouse(event: (event?: MouseEvent) => void): this {
@@ -2219,7 +2291,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
     enabled(value: boolean): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === "boolean") {
+            modifier(this._modifiers, EnabledModifier, value);
+        } else {
+            modifier(this._modifiers, EnabledModifier, undefined);
+        }
+        return this;
     }
 
     useSizeType(value: {
@@ -2312,7 +2389,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
     clickEffect(value: ClickEffect | null): this {
-        throw new Error("Method not implemented.");
+        let arkClickEffect = new ArkClickEffect();
+        arkClickEffect.level = 0;
+        arkClickEffect.scale = 0.9;
+        if (value) {
+            arkClickEffect.level = value.level;
+            arkClickEffect.scale = value.scale;
+        }
+        modifier(this._modifiers, ClickEffectModifier, arkClickEffect);
+        return this;
     }
 
     onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this {
@@ -2347,7 +2432,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     draggable(value: boolean): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === "boolean") {
+            modifier(this._modifiers, DraggableModifier, value);
+        } else {
+            modifier(this._modifiers, DraggableModifier, undefined);
+
+        }
+        return this;
     }
 
     overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number } }): this {
@@ -2520,11 +2611,25 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     keyboardShortcut(value: string | FunctionKey, keys: Array<ModifierKey>, action?: () => void): this {
-        throw new Error("Method not implemented.");
+        let keyboardShortCut = new ArkKeyBoardShortCut();
+        keyboardShortCut.value = value;
+        keyboardShortCut.keys = keys;
+        if (action) {
+            throw new Error("Method not implemented.");
+        } else {
+            modifier(this._modifiers, KeyBoardShortCutModifier, keyboardShortCut);
+            return this;
+        }
     }
 
     accessibilityGroup(value: boolean): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === "boolean") {
+            modifier(this._modifiers, AccessibilityGroupModifier, value);
+        } else {
+            modifier(this._modifiers, AccessibilityGroupModifier, undefined);
+
+        }
+        return this;
     }
 
     accessibilityText(value: string): this {

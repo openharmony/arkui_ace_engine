@@ -1199,3 +1199,34 @@ class ArkEdgeAlign {
         return (this.alignType === another.alignType && this.offset === another.offset);
     }
 }
+
+class ArkClickEffect implements Equable {
+    level: number | undefined;
+    scale: number | undefined;
+
+    constructor() {
+        this.level = undefined;
+        this.scale = undefined;
+    }
+
+    isEqual(another) {
+        return (this.level === another.level) && (this.scale === another.scale);
+    }
+}
+
+class ArkKeyBoardShortCut {
+    value: string | number;
+    keys: Array<ModifierKey>;
+    action: () => void | undefined;
+
+    constructor() {
+        this.value = undefined;
+        this.keys = undefined;
+        this.action = undefined;
+    }
+
+    isEqual(another: ArkKeyBoardShortCut): boolean {
+        return (this.value === another.value) && (this.keys === another.keys) &&
+            (this.action === another.action);
+    }
+}

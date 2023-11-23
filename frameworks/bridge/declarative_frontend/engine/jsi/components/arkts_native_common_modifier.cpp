@@ -2326,6 +2326,100 @@ void ResetMouseResponseRegion(NodeHandle node)
     region.emplace_back(dimenRect);
     ViewAbstract::SetMouseResponseRegion(frameNode, region);
 }
+
+void SetEnabled(NodeHandle node, bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetEnabled(frameNode, value);
+}
+
+void ResetEnabled(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetEnabled(frameNode, true);
+}
+
+void SetDraggable(NodeHandle node, bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDraggable(frameNode, value);
+}
+
+void ResetDraggable(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDraggable(frameNode, false);
+}
+
+void SetAccessibilityGroup(NodeHandle node, bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityGroup(frameNode, value);
+}
+
+void ResetAccessibilityGroup(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityGroup(frameNode, false);
+}
+
+void SetHoverEffect(NodeHandle node, int32_t hoverEffectValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::HoverEffectType hoverEffect = OHOS::Ace::HoverEffectType::AUTO;
+    hoverEffect = static_cast<OHOS::Ace::HoverEffectType>(hoverEffectValue);
+    ViewAbstract::SetHoverEffect(frameNode, hoverEffect);
+}
+
+void ResetHoverEffect(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetHoverEffect(frameNode, OHOS::Ace::HoverEffectType::AUTO);
+}
+
+void SetClickEffect(NodeHandle node, const int32_t levelValue, float scaleValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::ClickEffectLevel level = OHOS::Ace::ClickEffectLevel::UNDEFINED;
+    level = static_cast<OHOS::Ace::ClickEffectLevel>(levelValue);
+    ViewAbstract::SetClickEffectLevel(frameNode, level, scaleValue);
+}
+
+void ResetClickEffect(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetClickEffectLevel(frameNode, OHOS::Ace::ClickEffectLevel::UNDEFINED, 0.9f);
+}
+
+void SetKeyBoardShortCut(NodeHandle node, const char* value, const int32_t* keysIntArray, int32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = value;
+    std::vector<OHOS::Ace::ModifierKey> keysVector(length);
+    keysVector.clear();
+    for (int32_t i = 0; i < length; i++) {
+        keysVector.emplace_back(static_cast<OHOS::Ace::ModifierKey>(keysIntArray[i]));
+    }
+    ViewAbstractModelNG::SetKeyboardShortcut(frameNode, valueStr, keysVector, nullptr);
+}
+
+void ResetKeyBoardShortCut(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetKeyboardShortcut(frameNode, "", std::vector<OHOS::Ace::ModifierKey>(), nullptr);
+}
 ArkUICommonModifierAPI GetCommonModifier()
 {
     static const ArkUICommonModifierAPI modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
@@ -2362,7 +2456,9 @@ ArkUICommonModifierAPI GetCommonModifier()
         SetFlexBasis, ResetFlexBasis, SetAlignRules, ResetAlignRules,
         SetAccessibilityDescription, ResetAccessibilityDescription, SetId, ResetId, SetKey, ResetKey, SetRestoreId,
         ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured, ResetObscured, SetResponseRegion, ResetResponseRegion,
-        SetMouseResponseRegion, ResetMouseResponseRegion };
+        SetMouseResponseRegion, ResetMouseResponseRegion, SetEnabled, ResetEnabled,
+        SetDraggable, ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect,
+        SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut};
 
     return modifier;
 }

@@ -538,6 +538,54 @@ bool ParseJsAlignRule(const EcmaVM* vm, const Local<JSValueRef> &arg, std::strin
     }
     return false;
 }
+
+std::string ParseFunctionKeyName(OHOS::Ace::FunctionKey functionkey)
+{
+    switch (functionkey) {
+        case OHOS::Ace::FunctionKey::ESC:
+            return "ESC";
+            break;
+        case OHOS::Ace::FunctionKey::F1:
+            return "F1";
+            break;
+        case OHOS::Ace::FunctionKey::F2:
+            return "F2";
+            break;
+        case OHOS::Ace::FunctionKey::F3:
+            return "F3";
+            break;
+        case OHOS::Ace::FunctionKey::F4:
+            return "F4";
+            break;
+        case OHOS::Ace::FunctionKey::F5:
+            return "F5";
+            break;
+        case OHOS::Ace::FunctionKey::F6:
+            return "F6";
+            break;
+        case OHOS::Ace::FunctionKey::F7:
+            return "F7";
+            break;
+        case OHOS::Ace::FunctionKey::F8:
+            return "F8";
+            break;
+        case OHOS::Ace::FunctionKey::F9:
+            return "F9";
+            break;
+        case OHOS::Ace::FunctionKey::F10:
+            return "F10";
+            break;
+        case OHOS::Ace::FunctionKey::F11:
+            return "F11";
+            break;
+        case OHOS::Ace::FunctionKey::F12:
+            return "F12";
+            break;
+        default:
+            return "";
+            break;
+    }
+}
 } // namespace
 
 ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
@@ -3257,6 +3305,196 @@ ArkUINativeModuleValue CommonBridge::ResetMouseResponseRegion(ArkUIRuntimeCallIn
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetCommonModifier().ResetMouseResponseRegion(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetEnabled(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    bool boolValue = secondArg->ToBoolean(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetEnabled(nativeNode, boolValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetEnabled(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetEnabled(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetDraggable(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    bool boolValue = secondArg->ToBoolean(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetDraggable(nativeNode, boolValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetDraggable(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetDraggable(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetAccessibilityGroup(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    bool boolValue = secondArg->ToBoolean(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetAccessibilityGroup(nativeNode, boolValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetAccessibilityGroup(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetAccessibilityGroup(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetHoverEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+
+    if (secondArg->IsUndefined() || !secondArg->IsNumber()) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetHoverEffect(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t intValue = secondArg->Int32Value(vm);
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetHoverEffect(nativeNode, intValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetHoverEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetHoverEffect(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetClickEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> levelArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> scaleArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    if (levelArg->IsUndefined() && scaleArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetClickEffect(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t clickEffectLevelValue = 0;
+    if (levelArg->IsNumber()) {
+        clickEffectLevelValue = levelArg->Int32Value(vm);
+        if (clickEffectLevelValue < static_cast<int32_t>(OHOS::Ace::ClickEffectLevel::LIGHT) ||
+            clickEffectLevelValue > static_cast<int32_t>(OHOS::Ace::ClickEffectLevel::HEAVY)) {
+            clickEffectLevelValue = 0;
+        }
+    }
+    float scaleNumberValue = 0.9f;
+    if (!scaleArg->IsNumber()) {
+        if ((OHOS::Ace::ClickEffectLevel)clickEffectLevelValue == OHOS::Ace::ClickEffectLevel::MIDDLE ||
+            (OHOS::Ace::ClickEffectLevel)clickEffectLevelValue == OHOS::Ace::ClickEffectLevel::HEAVY) {
+            scaleNumberValue = 0.95f;
+        }
+    } else {
+        scaleNumberValue = scaleArg->ToNumber(vm)->Value();
+        if (LessNotEqual(scaleNumberValue, 0.0) || GreatNotEqual(scaleNumberValue, 1.0)) {
+            if ((OHOS::Ace::ClickEffectLevel)clickEffectLevelValue == OHOS::Ace::ClickEffectLevel::MIDDLE ||
+                (OHOS::Ace::ClickEffectLevel)clickEffectLevelValue == OHOS::Ace::ClickEffectLevel::HEAVY) {
+                scaleNumberValue = 0.95f;
+            } else {
+                scaleNumberValue = 0.9f;
+            }
+        }
+    }
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetClickEffect(nativeNode, clickEffectLevelValue,
+        scaleNumberValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetClickEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetClickEffect(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetKeyBoardShortCut(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> keysArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if ((!valueArg->IsString() && !valueArg->IsNumber()) || !keysArg->IsArray(vm)) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetKeyBoardShortCut(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::string stringValue;
+    if (valueArg->IsNumber()) {
+        OHOS::Ace::FunctionKey functionkey = static_cast<OHOS::Ace::FunctionKey>(valueArg->Int32Value(vm));
+        stringValue = ParseFunctionKeyName(functionkey);
+    } else {
+        stringValue = valueArg->ToString(vm)->ToString();
+    }
+    Local<panda::ArrayRef> keysArray = static_cast<Local<panda::ArrayRef>>(keysArg);
+    auto arrLength = keysArray->Length(vm);
+    if (arrLength > NUM_10) {
+        arrLength = NUM_10;
+    }
+    int32_t* keysIntArray = new int32_t[arrLength];
+    for (size_t i = 0; i < arrLength; i++) {
+        Local<JSValueRef> objValue = keysArray->GetValueAt(vm, keysArg, i);
+        keysIntArray[i] = objValue->Int32Value(vm);
+    }
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetKeyBoardShortCut(
+        nativeNode, stringValue.c_str(), keysIntArray, arrLength);
+    delete[] keysIntArray;
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetKeyBoardShortCut(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetKeyBoardShortCut(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
