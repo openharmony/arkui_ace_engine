@@ -17,6 +17,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_blank_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_button_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_common_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_counter_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_span_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_toggle_modifier.h"
@@ -46,6 +47,7 @@ NodeHandle GetFrameNodeById(int nodeId)
 static struct ArkUINodeAPI impl = {
     GetFrameNodeById,
     GetCommonModifier,
+    GetCounterModifier,
     GetTextModifier,
     GetButtonModifier,
     GetToggleModifier,
