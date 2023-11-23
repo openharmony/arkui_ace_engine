@@ -40,7 +40,6 @@ void CounterModelNG::Create()
     CHECK_NULL_VOID(counterTheme);
     counterNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetWidth()), CalcLength(counterTheme->GetHeight())));
-    counterNode->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     counterNode->GetRenderContext()->SetClipToFrame(true);
     counterNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::CENTER);
 
@@ -94,7 +93,6 @@ RefPtr<FrameNode> CounterModelNG::CreateButtonChild(
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(symbol);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(Color::BLACK);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(TextAlign::CENTER);
     textNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetControlWidth()), CalcLength(counterTheme->GetHeight())));
