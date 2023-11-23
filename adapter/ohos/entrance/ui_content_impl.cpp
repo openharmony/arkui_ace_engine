@@ -2095,33 +2095,43 @@ void UIContentImpl::SearchElementInfoByAccessibilityId(
     int32_t elementId, int32_t mode,
     int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
-    Platform::AceContainer::SearchElementInfoByAccessibilityIdNG(instanceId_, elementId, mode, baseParent, output);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->SearchElementInfoByAccessibilityIdNG(elementId, mode, baseParent, output);
 }
 
 void UIContentImpl::SearchElementInfosByText(
     int32_t elementId, const std::string& text, int32_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
-    Platform::AceContainer::SearchElementInfosByTextNG(instanceId_, elementId, text, baseParent, output);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->SearchElementInfosByTextNG(elementId, text, baseParent, output);
 }
 
 void UIContentImpl::FindFocusedElementInfo(
     int32_t elementId, int32_t focusType,
     int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
-    Platform::AceContainer::FindFocusedElementInfoNG(instanceId_, elementId, focusType, baseParent, output);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->FindFocusedElementInfoNG(elementId, focusType, baseParent, output);
 }
 
 void UIContentImpl::FocusMoveSearch(
     int32_t elementId, int32_t direction,
     int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
-    Platform::AceContainer::FocusMoveSearchNG(instanceId_, elementId, direction, baseParent, output);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->FocusMoveSearchNG(elementId, direction, baseParent, output);
 }
 
 bool UIContentImpl::NotifyExecuteAction(
     int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
 {
-    return Platform::AceContainer::NotifyExecuteAction(instanceId_, elementId, actionArguments, action, offset);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    return container->NotifyExecuteAction(elementId, actionArguments, action, offset);
 }
 } // namespace OHOS::Ace

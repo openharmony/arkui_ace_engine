@@ -985,6 +985,20 @@ void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElement
         AccessibleAction action(ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, "ace");
         nodeInfo.AddAction(action);
     }
+    auto eventHub = node->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    nodeInfo.SetClickable(gestureEventHub->IsAccessibilityClickable());
+    if (gestureEventHub->IsAccessibilityClickable()) {
+        AccessibleAction action(ACCESSIBILITY_ACTION_CLICK, "ace");
+        nodeInfo.AddAction(action);
+    }
+    nodeInfo.SetLongClickable(gestureEventHub->IsAccessibilityLongClickable());
+    if (gestureEventHub->IsAccessibilityLongClickable()) {
+        AccessibleAction action(ACCESSIBILITY_ACTION_LONG_CLICK, "ace");
+        nodeInfo.AddAction(action);
+    }
 }
 
 static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
@@ -1174,7 +1188,6 @@ void UpdateAccessibilityElementInfo(
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
     }
-
     nodeInfo.SetWindowId(commonProperty.windowId);
     nodeInfo.SetPageId(node->GetPageId());
     nodeInfo.SetPagePath(commonProperty.pagePath);
@@ -2165,6 +2178,10 @@ static void DumpAccessibilityElementInfosTreeNG(
             accessibilityInfo.GetRectInScreen().GetRightBottomYScreenPostion() -
             accessibilityInfo.GetRectInScreen().GetLeftTopYScreenPostion()));
         DumpLog::GetInstance().AddDesc("visible: " + std::to_string(accessibilityInfo.IsVisible()));
+        DumpLog::GetInstance().AddDesc(
+            "clickable: " + std::to_string(accessibilityInfo.IsClickable()));
+        DumpLog::GetInstance().AddDesc("longclickable: " +
+            std::to_string(accessibilityInfo.IsLongClickable()));
         DumpLog::GetInstance().AddDesc("checkable: " + std::to_string(accessibilityInfo.IsCheckable()));
         DumpLog::GetInstance().AddDesc("scrollable: " + std::to_string(accessibilityInfo.IsScrollable()));
         DumpLog::GetInstance().AddDesc("checked: " + std::to_string(accessibilityInfo.IsCheckable()));
@@ -3007,18 +3024,8 @@ bool JsAccessibilityManager::ExecuteExtensionActionNG(int32_t elementId,
     const std::map<std::string, std::string>& actionArguments, int32_t action, const RefPtr<PipelineBase>& context,
     int32_t uiExtensionOffset)
 {
-    bool isExecuted = false;
-    auto pipeline = context_.Upgrade();
-    CHECK_NULL_RETURN(pipeline, isExecuted);
-    pipeline->GetTaskExecutor()->PostSyncTask(
-        [weak = WeakClaim(this), elementId, actionArguments, action, context, uiExtensionOffset, &isExecuted]() {
-            auto jsAccessibilityManager = weak.Upgrade();
-            CHECK_NULL_VOID(jsAccessibilityManager);
-            isExecuted = jsAccessibilityManager->ExecuteActionNG(
-                elementId, actionArguments, static_cast<ActionType>(action), context, uiExtensionOffset);
-        },
-        TaskExecutor::TaskType::UI);
-    return isExecuted;
+    return ExecuteActionNG(
+        elementId, actionArguments, static_cast<ActionType>(action), context, uiExtensionOffset);
 }
 
 bool JsAccessibilityManager::ExecuteActionNG(int32_t elementId,
@@ -3542,7 +3549,6 @@ void JsAccessibilityManager::FocusMoveSearchNG(int32_t elementId, int32_t direct
     } else {
         std::list<RefPtr<NG::FrameNode>> nodeList;
         Framework::AddFocusableNode(nodeList, rootNode);
-
         switch (direction) {
             case FocusMoveDirection::FORWARD:
             case FocusMoveDirection::BACKWARD:
