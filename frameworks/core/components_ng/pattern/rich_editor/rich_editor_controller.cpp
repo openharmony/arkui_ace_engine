@@ -25,21 +25,22 @@ void RichEditorController::SetPattern(const WeakPtr<RichEditorPattern>& pattern)
 int32_t RichEditorController::AddImageSpan(const ImageSpanOptions& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
-    int32_t spanIndex = 0;
-    if (richEditorPattern) {
-        spanIndex = richEditorPattern->AddImageSpan(options);
-    }
-    return spanIndex;
+    CHECK_NULL_RETURN(richEditorPattern, 0);
+    return richEditorPattern->AddImageSpan(options);
 }
 
 int32_t RichEditorController::AddTextSpan(const TextSpanOptions& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
-    int32_t spanIndex = 0;
-    if (richEditorPattern) {
-        spanIndex = richEditorPattern->AddTextSpan(options);
-    }
-    return spanIndex;
+    CHECK_NULL_RETURN(richEditorPattern, 0);
+    return richEditorPattern->AddTextSpan(options);
+}
+
+int32_t RichEditorController::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options)
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, 0);
+    return richEditorPattern->AddPlaceholderSpan(customNode, options);
 }
 
 int32_t RichEditorController::GetCaretOffset()

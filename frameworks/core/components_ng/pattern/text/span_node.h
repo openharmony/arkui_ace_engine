@@ -155,7 +155,7 @@ public:
     GestureEventFunc onLongPress;
     [[deprecated]] std::list<RefPtr<SpanItem>> children;
     std::map<int32_t, AISpan> aiSpanMap;
-    int32_t placeHolderIndex = -1;
+    int32_t placeholderIndex = -1;
     // when paragraph ends with a \n, it causes the paragraph height to gain an extra line
     // to have normal spacing between paragraphs, remove \n from every paragraph except the last one.
     bool needRemoveNewLine = false;
@@ -199,24 +199,11 @@ public:
         onLongPress = std::move(onLongPress_);
     }
     std::string GetSpanContent();
+
 private:
     std::optional<TextStyle> textStyle_;
 };
 
-struct ImageSpanItem : public SpanItem {
-    DECLARE_ACE_TYPE(ImageSpanItem, SpanItem);
-
-public:
-    ImageSpanItem() = default;
-    ~ImageSpanItem() override = default;
-    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder, double width,
-        double height, VerticalAlign verticalAlign) override;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
-
-    TextStyle textStyle;
-
-    ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
-};
 
 enum class PropertyInfo {
     FONTSIZE = 0,
@@ -336,13 +323,90 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(SpanNode);
 };
 
+struct PlaceholderSpanItem : public SpanItem {
+    DECLARE_ACE_TYPE(PlaceholderSpanItem, SpanItem);
+
+public:
+    int32_t placeholderSpanNodeId = -1;
+    TextStyle textStyle;
+    PlaceholderSpanItem() = default;
+    ~PlaceholderSpanItem() override = default;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
+    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder, double width,
+        double height, VerticalAlign verticalAlign) override;
+    ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanItem);
+};
+
+class PlaceholderSpanPattern : public Pattern {
+    DECLARE_ACE_TYPE(PlaceholderSpanPattern, Pattern);
+
+public:
+    PlaceholderSpanPattern() = default;
+    ~PlaceholderSpanPattern() override = default;
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+};
+
+class ACE_EXPORT PlaceholderSpanNode : public FrameNode {
+    DECLARE_ACE_TYPE(PlaceholderSpanNode, FrameNode);
+
+public:
+    static RefPtr<PlaceholderSpanNode> GetOrCreateSpanNode(
+        const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+    {
+        auto frameNode = GetFrameNode(tag, nodeId);
+        CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<PlaceholderSpanNode>(frameNode));
+        auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
+        auto placeholderSpanNode = AceType::MakeRefPtr<PlaceholderSpanNode>(tag, nodeId, pattern);
+        placeholderSpanNode->InitializePatternAndContext();
+        ElementRegister::GetInstance()->AddUINode(placeholderSpanNode);
+        return placeholderSpanNode;
+    }
+
+    PlaceholderSpanNode(const std::string& tag, int32_t nodeId) : FrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>())
+    {}
+    PlaceholderSpanNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+        : FrameNode(tag, nodeId, pattern)
+    {}
+    ~PlaceholderSpanNode() override = default;
+
+    const RefPtr<PlaceholderSpanItem>& GetSpanItem() const
+    {
+        return placeholderSpanItem_;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+private:
+    RefPtr<PlaceholderSpanItem> placeholderSpanItem_ = MakeRefPtr<PlaceholderSpanItem>();
+
+    ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanNode);
+};
+
+struct ImageSpanItem : public PlaceholderSpanItem {
+    DECLARE_ACE_TYPE(ImageSpanItem, PlaceholderSpanItem);
+
+public:
+    ImageSpanItem() = default;
+    ~ImageSpanItem() override = default;
+    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder, double width,
+        double height, VerticalAlign verticalAlign) override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
+    ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
+};
+
 class ACE_EXPORT ImageSpanNode : public FrameNode {
     DECLARE_ACE_TYPE(ImageSpanNode, FrameNode);
 
 public:
-    static RefPtr<ImageSpanNode> GetOrCreateSpanNode(const std::string& tag,
-                                                     int32_t nodeId,
-                                                     const std::function<RefPtr<Pattern>(void)>& patternCreator)
+    static RefPtr<ImageSpanNode> GetOrCreateSpanNode(
+        const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
     {
         auto frameNode = GetFrameNode(tag, nodeId);
         CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<ImageSpanNode>(frameNode));
@@ -354,12 +418,10 @@ public:
     }
 
     ImageSpanNode(const std::string& tag, int32_t nodeId) : FrameNode(tag, nodeId, AceType::MakeRefPtr<ImagePattern>())
-    {
-    }
+    {}
     ImageSpanNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : FrameNode(tag, nodeId, pattern)
-    {
-    }
+    {}
     ~ImageSpanNode() override = default;
 
     const RefPtr<ImageSpanItem>& GetSpanItem() const

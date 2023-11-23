@@ -178,6 +178,7 @@ public:
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
+    int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
     RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     void SetSelection(int32_t start, int32_t end);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;

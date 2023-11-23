@@ -57,6 +57,8 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
             OffsetF caretOffsetUp = richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight);
             overlayMod->SetCaretOffsetAndHeight(caretOffsetUp, caretHeight);
             richEditorPattern->ResetLastClickOffset();
+        } else {
+            overlayMod->SetCaretOffsetAndHeight(caretOffsetDown, caretHeight);
         }
     } else {
         auto rect = richEditorPattern->GetTextContentRect();
