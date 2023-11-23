@@ -1972,7 +1972,6 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     auto focusHub = GetFocusHub();
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
-        return;
     }
     if (isSingleHandle_) {
         CloseSelectOverlay(true);
@@ -5046,7 +5045,10 @@ void TextFieldPattern::UpdateSelectController()
 bool TextFieldPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex)
 {
     auto touchDownIndex = selectController_->ConvertTouchOffsetToPosition(offset);
-    return lastCaretIndex == touchDownIndex && HasFocus();
+    if (!selectController_->CaretAtLast()) {
+        return lastCaretIndex == touchDownIndex && HasFocus();
+    }
+    return selectController_->GetCaretRect().IsInRegion(PointF(offset.GetX(), offset.GetY()));
 }
 
 bool TextFieldPattern::IsSingleHandle() const
