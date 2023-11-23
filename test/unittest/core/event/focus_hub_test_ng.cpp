@@ -3125,7 +3125,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0083, TestSize.Level1)
  * @tc.desc: Test the function LostFocusToViewRoot.
  * @tc.type: FUNC
  */
-HWTEST_F(FocusHubTestNg, LostFocusToViewRoot001., TestSize.Level1)
+HWTEST_F(FocusHubTestNg, LostFocusToViewRoot001, TestSize.Level1)
 {
     /**
      * @tc.steps1: create focusHub and construct allNodes.
@@ -3145,7 +3145,7 @@ HWTEST_F(FocusHubTestNg, LostFocusToViewRoot001., TestSize.Level1)
  * @tc.desc: Test the function SetEnabledScope and SetEnabledScope.
  * @tc.type: FUNC
  */
-HWTEST_F(FocusHubTestNg, SetEnabledScope001., TestSize.Level1)
+HWTEST_F(FocusHubTestNg, SetEnabledScope001, TestSize.Level1)
 {
     /**
      * @tc.steps1: create focusHub and construct allNodes.
