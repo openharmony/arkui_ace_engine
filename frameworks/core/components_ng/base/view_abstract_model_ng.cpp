@@ -75,7 +75,7 @@ void ViewAbstractModelNG::BindMenu(
         auto pattern = menuNode->GetPattern<MenuWrapperPattern>();
         if (!pattern->GetShow() && menuParam.isShow) {
             overlayManager->ShowMenu(targetId, menuParam.positionOffset, menuNode);
-        } else if (pattern->GetShow() && !menuParam.isShow) {
+        } else if (pattern->GetShow() && menuParam.setShow && !menuParam.isShow) {
             overlayManager->HideMenu(menuNode, targetId, false);
         }
     } else if (menuParam.isShow) {
