@@ -19,7 +19,6 @@
 #include <cstdint>
 
 typedef void* NodeHandle;
-
 struct ArkUICommonModifierAPI {
     void (*SetBackgroundColor)(NodeHandle node, uint32_t color);
     void (*ResetBackgroundColor)(NodeHandle node);
@@ -121,7 +120,6 @@ struct ArkUICommonModifierAPI {
     void (*SetForegroundColor)(NodeHandle node, bool isColor, uint32_t color);
     void (*ResetForegroundColor)(NodeHandle node);
 };
-
 struct ArkUITextModifierAPI {
     void (*SetFontWeight)(NodeHandle node, const char* weight);
     void (*ResetFontWeight)(NodeHandle node);
@@ -174,6 +172,20 @@ struct ArkUICounterModifierAPI {
     void (*ReSetEnableDec)(NodeHandle node);
 };
 
+struct ArkUICheckboxGroupModifierAPI {
+    void (*SetGroupSelectedColor)(NodeHandle node, uint32_t color);
+    void (*ResetGroupSelectedColor)(NodeHandle node);
+    void (*SetGroupUnSelectedColor)(NodeHandle node, uint32_t color);
+    void (*ResetGroupUnSelectedColor)(NodeHandle node);
+    void (*SetGroupSelectAll)(NodeHandle node, bool isSelected);
+    void (*ResetGroupSelectAll)(NodeHandle node);
+    void (*SetCheckboxGroupWidth)(NodeHandle node, double value, int unit);
+    void (*ResetCheckboxGroupWidth)(NodeHandle node);
+    void (*SetCheckboxGroupHeight)(NodeHandle node, double value, int unit);
+    void (*ResetCheckboxGroupHeight)(NodeHandle node);
+    void (*SetGroupMark)(NodeHandle node, uint32_t color, double sizeValue, double widthValue);
+    void (*ResetGroupMark)(NodeHandle node);
+};
 struct ArkUIImageSpanModifierAPI {
     void (*SetImageSpanVerticalAlign)(NodeHandle node, int32_t value);
     void (*ResetImageSpanVerticalAlign)(NodeHandle node);
@@ -323,6 +335,7 @@ struct ArkUIDividerModifierAPI {
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
+    ArkUICheckboxGroupModifierAPI (*GetCheckboxGroupModifier)();
     ArkUICounterModifierAPI (*GetCounterModifier)();
     ArkUITextModifierAPI (*GetTextModifier)();
     ArkUIButtonModifierAPI (*GetButtonModifier)();
