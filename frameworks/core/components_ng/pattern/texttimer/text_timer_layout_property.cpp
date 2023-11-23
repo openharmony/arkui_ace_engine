@@ -79,6 +79,5 @@ void TextTimerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) cons
     // Determines if there are multiple textShadows
     auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
     json->Put("textShadow", jsonShadow);
-
 }
 } // namespace OHOS::Ace::NG

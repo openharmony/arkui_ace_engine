@@ -107,6 +107,8 @@ private:
     bool IsDrawable(const JSRef<JSVal>& jsValue);
     void ParseTextDecoration(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
+    void ParseTextShadow(
+        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
 
     static JSRef<JSVal> CreateJSSpansInfo(const RichEditorSelection& info);
     static JSRef<JSVal> CreateJSParagraphsInfo(const std::vector<ParagraphInfo>& info);

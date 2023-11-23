@@ -734,7 +734,12 @@ void JSRichEditorController::ParseJsTextStyle(
         style.SetFontFamilies(family);
     }
     ParseTextDecoration(styleObject, style, updateSpanStyle);
+    ParseTextShadow(styleObject, style, updateSpanStyle);
+}
 
+void JSRichEditorController::ParseTextShadow(
+    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
+{
     auto shadowObject = styleObject->GetProperty("textShadow");
     if (!shadowObject->IsNull()) {
         if (!shadowObject->IsArray()) {
@@ -761,7 +766,6 @@ void JSRichEditorController::ParseJsTextStyle(
         }
     }
 }
-
 void JSRichEditorController::ParseTextDecoration(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
