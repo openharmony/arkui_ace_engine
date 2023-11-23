@@ -144,6 +144,7 @@ private:
     RefPtr<FrameNode> BuildSubTitle(const DialogProperties& dialogProperties);
     void ParseButtonFontColorAndBgColor(
         const ButtonInfo& params, std::string& textColor, std::optional<Color>& bgColor);
+    void SetButtonTextOpacity(const RefPtr<FrameNode>& textNode, bool enabled);
     void SetButtonEnabled(const RefPtr<FrameNode>& buttonNode, bool enabled);
     RefPtr<FrameNode> BuildTitle(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> BuildContent(const DialogProperties& dialogProperties);

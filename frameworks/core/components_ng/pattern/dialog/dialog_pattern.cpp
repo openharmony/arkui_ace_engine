@@ -88,6 +88,7 @@ constexpr Dimension DIALOG_SUBTITLE_PADDING_LEFT = 24.0_vp;
 constexpr Dimension DIALOG_SUBTITLE_PADDING_RIGHT = 24.0_vp;
 constexpr Dimension DIALOG_TWO_TITLE_ZERO_SPACE = 0.0_vp;
 constexpr Dimension DIALOG_TWO_TITLE_SPACE = 16.0_vp;
+constexpr float BUTTON_TEXT_OPACITY = 0.6f; // [Button Component Defect]
 } // namespace
 
 void DialogPattern::OnModifyDone()
@@ -515,6 +516,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     // append text inside button
     auto textNode = CreateButtonText(params.text, textColor);
     CHECK_NULL_RETURN(textNode, nullptr);
+    SetButtonTextOpacity(textNode, params.enabled);
     textNode->MountToParent(buttonNode);
     textNode->MarkModifyDone();
 
@@ -921,6 +923,16 @@ void DialogPattern::OnColorConfigurationUpdate()
     }
     OnModifyDone();
     host->MarkDirtyNode();
+}
+
+void DialogPattern::SetButtonTextOpacity(const RefPtr<FrameNode>& textNode, bool enabled)
+{
+    auto textNodeRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textNodeRenderContext);
+    // [Button Component Defect] Button text color is no set while disabled status.
+    if (!enabled) {
+        textNodeRenderContext->UpdateOpacity(BUTTON_TEXT_OPACITY);
+    }
 }
 
 void DialogPattern::SetButtonEnabled(const RefPtr<FrameNode>& buttonNode, bool enabled)
