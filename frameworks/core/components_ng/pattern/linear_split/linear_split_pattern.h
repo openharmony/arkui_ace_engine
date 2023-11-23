@@ -20,7 +20,6 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_split/linear_split_layout_algorithm.h"
@@ -80,13 +79,12 @@ private:
     MouseFormat GetMouseFormat();
     MouseFormat GetMouseFormatBeforeAPI10();
     void GetdragedSplitIndexOrIsMoving(const Point& point);
-    bool ConstrainDragRange();
+    void ConstrainDragRange();
     bool IsStuck();
     bool ReachStart();
     bool ReachEnd();
     float GetMinPosFromIndex(std::size_t index);
     float GetMaxPosFromIndex(std::size_t index);
-    void UpdateDragFRCSceneInfo(const GestureEvent& info, SceneStatus sceneStatus);
 
     std::vector<OffsetF> childrenOffset_;
     float splitLength_ = 0.0f;
