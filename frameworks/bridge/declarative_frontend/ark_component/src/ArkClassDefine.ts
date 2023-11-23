@@ -641,6 +641,25 @@ class ArkForegroundColor {
     }
 }
 
+class ArkMotionPath implements Equable {
+    path: string;
+    from: number | undefined;
+    to: number | undefined;
+    rotatable: boolean | undefined;
+
+    constructor() {
+        this.path = undefined;
+        this.from = undefined;
+        this.to = undefined;
+        this.rotatable = undefined;
+    }
+
+    isEqual(another: ArkMotionPath): boolean {
+        return (this.path === another.path) && (this.from === another.from) && (this.to === another.to)
+            && (this.rotatable === another.rotatable);
+    }
+}
+
 class ArkGridColColumnOption implements Equable {
     xs?: number;
     sm?: number;

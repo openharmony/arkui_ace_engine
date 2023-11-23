@@ -119,6 +119,8 @@ struct ArkUICommonModifierAPI {
     void (*ResetUseEffect)(NodeHandle node);
     void (*SetForegroundColor)(NodeHandle node, bool isColor, uint32_t color);
     void (*ResetForegroundColor)(NodeHandle node);
+    void (*SetMotionPath)(NodeHandle node, const char* path, float from, float to, bool rotatable);
+    void (*ResetMotionPath)(NodeHandle node);
 };
 struct ArkUITextModifierAPI {
     void (*SetFontWeight)(NodeHandle node, const char* weight);
