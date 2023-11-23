@@ -58,13 +58,13 @@ var TextAlign;
   TextAlign[TextAlign["JUSTIFY"] = 3] = "JUSTIFY";
 })(TextAlign || (TextAlign = {}));
 
-var TextDataDetectType;
-(function (TextDataDetectType) {
-  TextDataDetectType[TextDataDetectType["PHONE_NUMBER"] = 0] = "PHONE_NUMBER";
-  TextDataDetectType[TextDataDetectType["URL"] = 1] = "URL";
-  TextDataDetectType[TextDataDetectType["EMAIL"] = 2] = "EMAIL";
-  TextDataDetectType[TextDataDetectType["ADDRESS"] = 3] = "ADDRESS";
-})(TextDataDetectType || (TextDataDetectType = {}));
+var TextDataDetectorType;
+(function (TextDataDetectorType) {
+  TextDataDetectorType[TextDataDetectorType["PHONE_NUMBER"] = 0] = "PHONE_NUMBER";
+  TextDataDetectorType[TextDataDetectorType["URL"] = 1] = "URL";
+  TextDataDetectorType[TextDataDetectorType["EMAIL"] = 2] = "EMAIL";
+  TextDataDetectorType[TextDataDetectorType["ADDRESS"] = 3] = "ADDRESS";
+})(TextDataDetectorType || (TextDataDetectorType = {}));
 
 var DataPanelType;
 (function (DataPanelType) {
