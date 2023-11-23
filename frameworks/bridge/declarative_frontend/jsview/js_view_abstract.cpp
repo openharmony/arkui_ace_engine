@@ -132,8 +132,8 @@ const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALI
 const std::string SHEET_HEIGHT_MEDIUM = "medium";
 const std::string SHEET_HEIGHT_LARGE = "large";
 const std::string SHEET_HEIGHT_AUTO = "auto";
-const std::string BLOOM_RADIUI_SYS_RES_NAME = "ohos_id_point_light_bloom_radius";
-const std::string BLOOM_COLOR_SYS_RES_NAME = "ohos_id_point_light_bloom_color";
+const std::string BLOOM_RADIUI_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_radius";
+const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
