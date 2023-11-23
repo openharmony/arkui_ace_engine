@@ -315,8 +315,10 @@ private:
     {
         auto hasValue = (static_cast<int32_t>(GetWideText().length()) + imageCount_) > 0;
         bool isShowItem = copyOption_ != CopyOptions::None;
-        selectInfo.menuInfo.showCopy = isShowItem && hasValue && textSelector_.IsValid();
-        selectInfo.menuInfo.showCut = isShowItem && hasValue && textSelector_.IsValid();
+        selectInfo.menuInfo.showCopy = isShowItem && hasValue && textSelector_.IsValid() &&
+                                       !textSelector_.StartEqualToDest();
+        selectInfo.menuInfo.showCut = isShowItem && hasValue && textSelector_.IsValid() &&
+                                      !textSelector_.StartEqualToDest();
         selectInfo.menuInfo.showCopyAll = !isCopyAll && hasValue;
         selectInfo.menuInfo.showPaste = hasData;
         selectInfo.menuInfo.menuIsShow = hasValue || hasData;
