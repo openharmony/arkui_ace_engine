@@ -46,6 +46,7 @@ template("ace_ohos_standard_source_set") {
 
       # innerkits impl
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
+      "$ace_root/adapter/ohos/entrance/ui_event_impl.cpp",
       "$ace_root/adapter/ohos/entrance/utils.cpp",
       "$flutter_root/engine/flutter/shell/common/thread_host.cc",
 
