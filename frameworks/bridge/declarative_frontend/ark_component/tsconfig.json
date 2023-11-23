@@ -19,8 +19,9 @@
         "src/ArkTextPicker.ts",
         "src/ArkSlider.ts",
         "src/ArkRating.ts",
-        "src/ArkCheckbox.ts"
+        "src/ArkCheckbox.ts",
         "src/ArkDivider.ts",
+        "src/ArkNavDestination.ts"
     ],
 
     "compilerOptions": {

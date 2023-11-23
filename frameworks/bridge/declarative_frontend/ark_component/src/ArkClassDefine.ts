@@ -193,7 +193,7 @@ class ArkLabelStyle {
         this.minFontSize = undefined;
         this.maxFontSize = undefined;
         this.heightAdaptivePolicy = undefined;
-        this.font = undefined;
+        this.font = new ArkLabelFont();
     }
 
     isEqual(another: ArkLabelStyle): boolean {
@@ -204,10 +204,10 @@ class ArkLabelStyle {
 }
 
 class ArkLabelFont {
-    size: number | string | undefined| Resource;
-    weight: string | undefined;
-    family: string | undefined;
-    style:  number | undefined;
+    size: number | string | undefined | Resource;
+    weight: FontWeight | number | string | undefined;
+    family: string | undefined | Resource;
+    style:  FontStyle | number  | undefined;
     constructor() {
         this.size = undefined;
         this.weight = undefined;
@@ -216,8 +216,8 @@ class ArkLabelFont {
     }
 
     isEqual(another: ArkLabelFont): boolean {
-        return (this.size === another.size && this.weight === another.weight 
-            && this.family === another.family && this.style === another.style);
+        return (this.size === another.size && this.weight === another.weight && this.family === another.family &&
+            this.style === another.style);
     }
 }
 
