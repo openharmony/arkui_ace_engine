@@ -33,7 +33,7 @@ public:
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
     virtual void SetTitleHeight(int32_t height) = 0;
-    virtual void SetTitleHeight(const Dimension& titleHeight) = 0;
+    virtual void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) = 0;
     virtual void SetOnShown(std::function<void()>&& onShow) = 0;
     virtual void SetOnHidden(std::function<void()>&& onHidden) = 0;
     virtual void SetOnBackPressed(std::function<bool()>&& onBackPressed) = 0;

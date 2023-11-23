@@ -43,6 +43,11 @@ public:
         return false;
     }
 
+    bool NeedSoftKeyboard() const override
+    {
+        return true;
+    }
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<SearchLayoutProperty>();

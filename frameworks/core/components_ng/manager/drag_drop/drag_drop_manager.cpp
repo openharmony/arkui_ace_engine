@@ -552,9 +552,8 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     auto useCustomAnimation = event->IsUseCustomAnimation();
     auto windowId = container->GetWindowId();
     pipeline->SetDragCleanTask([dragResult, useCustomAnimation, isMouseDragged = isMouseDragged_, windowId]() {
-        InteractionInterface::GetInstance()->SetDragWindowVisible(
-            isMouseDragged ? !isMouseDragged : !useCustomAnimation);
-        DragDropRet dragDropRet { dragResult, isMouseDragged ? isMouseDragged : useCustomAnimation, windowId };
+        InteractionInterface::GetInstance()->SetDragWindowVisible(!useCustomAnimation);
+        DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId };
         InteractionInterface::GetInstance()->StopDrag(dragDropRet);
     });
     RefPtr<NotifyDragEvent> notifyEvent = AceType::MakeRefPtr<NotifyDragEvent>();

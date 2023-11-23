@@ -349,6 +349,31 @@ public:
     static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius);
     static void SetHueRotate(FrameNode* frameNode, float hueRotate);
     static void SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient);
+    static void SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient);
+    static void SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient);
+    static void SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle);
+    static void SetLinearGradientBlur(FrameNode* frameNode, NG::LinearGradientBlurPara blurPara);
+    static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
+    static void SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition);
+    static void SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize);
+    static void SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src);
+    static void SetBackgroundImageRepeat(FrameNode* frameNode, const ImageRepeat& imageRepeat);
+    static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
+    static void SetScale(FrameNode* frameNode, const NG::VectorF& value);
+    static void SetPivot(FrameNode* frameNode, const DimensionOffset& value);
+    static void SetGeometryTransition(FrameNode* frameNode, const std::string& id, bool followWithoutTransition);
+    static void SetRotate(FrameNode* frameNode, const NG::Vector5F& value);
+    static void SetClipEdge(FrameNode* frameNode, bool isClip);
+    static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
+    static void SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectOption& option);
+    static void SetLightUpEffect(FrameNode* frameNode, double radio);
+    static void SetSphericalEffect(FrameNode* frameNode, double radio);
+    static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
+    static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
+    static void SetUseEffect(FrameNode* frameNode, bool useEffect);
+    static void SetForegroundColor(FrameNode* frameNode, const Color& color);
+    static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
+    static void SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath);
 
 private:
     static void AddDragFrameNodeToManager();

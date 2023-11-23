@@ -69,6 +69,7 @@ public:
     void CloseMenu() override;
     void ClearMenu() override;
     void ClearMenuNG(bool inWindow, bool showAnimation = false) override;
+    void ClearPopupNG() override;
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc) override;
     void HideSubWindowNG() override;
     bool GetShown() override
@@ -77,6 +78,8 @@ public:
     }
 
     void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) override;
+    void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId) override;
+    void DeleteHotAreas(int32_t overlayId) override;
     void ClearToast() override;
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
         const NG::ToastShowMode& showMode) override;
@@ -174,6 +177,7 @@ private:
     int32_t targetId_ = -1;
     bool isToastWindow_ = false;
     int32_t popupTargetId_ = -1;
+    bool haveDialog_;
     bool isShowed_ = false;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
 };

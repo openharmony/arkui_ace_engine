@@ -476,8 +476,6 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
     listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
-    listLayoutAlgorithm->SetContentStartOffset(contentStartOffset_);
-    listLayoutAlgorithm->SetContentEndOffset(contentEndOffset_);
     if (IsOutOfBoundary(false) && GetScrollSource() != SCROLL_FROM_AXIS) {
         listLayoutAlgorithm->SetOverScrollFeature();
     }

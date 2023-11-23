@@ -776,7 +776,6 @@ void TextFieldPattern::HandleBlurEvent()
     needToRequestKeyboardInner_ = false;
     isFocusedBeforeClick_ = false;
     StopTwinkling();
-    CloseKeyboard(true);
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
     auto cleanNodeResponseArea = DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
@@ -1452,6 +1451,13 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     if (!focusHub->IsFocusable()) {
         return;
     }
+    if (!HasFocus()) {
+        if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
+            CloseSelectOverlay(true);
+            StopTwinkling();
+            return;
+        }
+    }
     TimeStamp clickTimeStamp = info.GetTimeStamp();
     std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout = clickTimeStamp - lastClickTimeStamp_;
     lastClickTimeStamp_ = info.GetTimeStamp();
@@ -1477,15 +1483,6 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    auto hasFocus = HasFocus();
-    auto focusHub = GetFocusHub();
-    if (!hasFocus) {
-        if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
-            CloseSelectOverlay(true);
-            StopTwinkling();
-            return;
-        }
-    }
     auto lastCaretIndex = selectController_->GetCaretIndex();
     selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
     StartTwinkling();
@@ -1508,7 +1505,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     // emulate clicking bottom of the textField
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     auto isSelectAll = layoutProperty->GetSelectAllValueValue(false);
-    if (isSelectAll && !contentController_->IsEmpty() && !hasFocus) {
+    if (isSelectAll && !contentController_->IsEmpty() && !HasFocus()) {
         HandleOnSelectAll(true);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1743,7 +1740,6 @@ void TextFieldPattern::OnModifyDone()
         needToRefreshSelectOverlay_ = true;
         UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
             std::clamp(selectController_->GetEndIndex(), 0, textWidth));
-        UpdateCaretPositionWithClamp(selectController_->GetEndIndex());
     }
     if (layoutProperty->GetTypeChangedValue(false)) {
         layoutProperty->ResetTypeChanged();
@@ -1805,9 +1801,6 @@ void TextFieldPattern::OnModifyDone()
     }
     if (HasFocus() && IsNormalInlineState()) {
         preInputStyle_ == InputStyle::DEFAULT ? ApplyInlineStates(true) : ApplyInlineStates(false);
-    }
-    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
-        ApplyUnderlineStates();
     }
     if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT) {
         if (IsTextArea() && isTextInput_) {
@@ -1975,7 +1968,6 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     auto focusHub = GetFocusHub();
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
-        return;
     }
     if (isSingleHandle_) {
         CloseSelectOverlay(true);
@@ -2617,7 +2609,8 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         CHECK_NULL_RETURN(optionalTextConfig.has_value(), false);
         MiscServices::TextConfig textConfig = optionalTextConfig.value();
         TAG_LOGI(
-            AceLogTag::ACE_TEXT_FIELD, "RequestKeyboard set calling window id is : %{public}u", textConfig.windowId);
+            AceLogTag::ACE_TEXT_FIELD, "RequestKeyboard set calling window id:%{public}u"
+            "inputType: %{public}d", textConfig.windowId, textConfig.inputAttribute.inputPattern);
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
 #else
         if (!HasConnection()) {
@@ -3761,9 +3754,14 @@ bool TextFieldPattern::OnBackPressed()
     if (SelectOverlayIsOn()) {
         selectController_->UpdateCaretIndex(
             std::max(selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
+        auto selectOverlayProxy = GetSelectOverlayProxy();
+        CHECK_NULL_RETURN(selectOverlayProxy, false);
+        bool closeKeyboard = !selectOverlayProxy->IsMenuShow();
         CloseSelectOverlay();
         StartTwinkling();
-        return true;
+        if (!closeKeyboard) {
+            return true;
+        }
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (!imeShown_ && !isCustomKeyboardAttached_) {
@@ -5043,7 +5041,10 @@ void TextFieldPattern::UpdateSelectController()
 bool TextFieldPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex)
 {
     auto touchDownIndex = selectController_->ConvertTouchOffsetToPosition(offset);
-    return lastCaretIndex == touchDownIndex && HasFocus();
+    if (!selectController_->CaretAtLast()) {
+        return lastCaretIndex == touchDownIndex && HasFocus();
+    }
+    return selectController_->GetCaretRect().IsInRegion(PointF(offset.GetX(), offset.GetY()));
 }
 
 bool TextFieldPattern::IsSingleHandle() const
@@ -5055,6 +5056,9 @@ void TextFieldPattern::OnAttachToFrameNode()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+        ApplyUnderlineStates();
+    }
     layoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
     auto onTextSelectorChange = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();

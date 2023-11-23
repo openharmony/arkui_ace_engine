@@ -134,19 +134,21 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
     SkSamplingOptions option;
     SkRect dst { dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom() };
 
+    CHECK_NULL_VOID(pixelMap_);
     auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
     recordingCanvas->DrawPixelMapRect(pixelMap, dst, option, &paint);
 #endif
 #else
 #ifdef ENABLE_ROSEN_BACKEND
-    auto recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
+    auto recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     RSBrush brush;
     RSSamplingOptions options;
     RSRect dst = RSRect(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom());
 
     auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    RSRect src = RSRect(0, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
     recordingCanvas.AttachBrush(brush);
-    LOGE("Drawing is not supported, DrawPixelMapRect is not define");
+    recordingCanvas.DrawPixelMapRect(pixelMap, src, dst, options);
     recordingCanvas.DetachBrush();
 #endif
 #endif

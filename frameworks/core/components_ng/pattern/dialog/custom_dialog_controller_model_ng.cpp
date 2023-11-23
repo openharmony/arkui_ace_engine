@@ -19,7 +19,6 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/task_executor.h"
 #include "core/common/container_scope.h"
-
 namespace OHOS::Ace::NG {
 void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProperties,
     std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
@@ -52,14 +51,23 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     auto task = [currentId, dialogProperties, &dialogs, func = std::move(buildFunc),
                     weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() mutable {
         ContainerScope scope(currentId);
-        WeakPtr<NG::FrameNode> dialog;
+        RefPtr<NG::FrameNode> dialog;
+        auto overlayManager = weakOverlayManager.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
         if (dialogProperties.isShowInSubWindow) {
             dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
+            if (dialogProperties.isModal) {
+                DialogProperties Maskarg;
+                Maskarg.isMask = true;
+                Maskarg.autoCancel = dialogProperties.autoCancel;
+                Maskarg.maskColor = dialogProperties.maskColor;
+                auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
+                CHECK_NULL_VOID(mask);
+            }
         } else {
-            auto overlayManager = weakOverlayManager.Upgrade();
-            CHECK_NULL_VOID(overlayManager);
             dialog = overlayManager->ShowDialog(dialogProperties, std::move(func), false);
         }
+        CHECK_NULL_VOID(dialog);
         dialogs.emplace_back(dialog);
     };
     executor->PostTask(task, TaskExecutor::TaskType::UI);
@@ -83,10 +91,10 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    
     auto executor = context->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
-    auto task = [&dialogs, weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() mutable {
+    auto task = [&dialogs, dialogProperties,
+                    weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() mutable {
         auto overlayManager = weakOverlayManager.Upgrade();
         CHECK_NULL_VOID(overlayManager);
         RefPtr<NG::FrameNode> dialog;
@@ -101,8 +109,21 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
         if (dialogs.empty()) {
             return;
         }
-        if (!dialog) {
-            return;
+        CHECK_NULL_VOID(dialog);
+        if (dialogProperties.isShowInSubWindow) {
+            auto containerId = Container::CurrentId();
+            RefPtr<PipelineContext> parentContext;
+            auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+            auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+            CHECK_NULL_VOID(parentContainer);
+            parentContext = AccessibilityManager::DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
+            CHECK_NULL_VOID(parentContext);
+            auto parentoverlay = parentContext->GetOverlayManager();
+            CHECK_NULL_VOID(parentoverlay);
+            SubwindowManager::GetInstance()->DeleteHotAreas(parentoverlay->GetSubwindowId(), dialog->GetId());
+            if (dialogProperties.isModal) {
+                parentoverlay->CloseMask();
+            }
         }
         overlayManager->CloseDialog(dialog);
         dialogs.pop_back();

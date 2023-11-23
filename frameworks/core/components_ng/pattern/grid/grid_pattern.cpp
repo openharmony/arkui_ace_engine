@@ -73,10 +73,12 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
         auto result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
         result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
+        result->SetScrollSource(GetScrollSource());
         return result;
     } else {
         auto result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
         result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
+        result->SetScrollSource(GetScrollSource());
         return result;
     }
 }
@@ -306,7 +308,7 @@ void GridPattern::CheckRestartSpring()
     edgeEffect->ProcessScrollOver(0);
 }
 
-float GridPattern::GetMainGap()
+float GridPattern::GetMainGap() const
 {
     float mainGap = 0.0;
     auto host = GetHost();
@@ -571,6 +573,7 @@ void GridPattern::MarkDirtyNodeSelf()
 
 void GridPattern::OnScrollEndCallback()
 {
+    SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
 }
@@ -1555,10 +1558,22 @@ bool GridPattern::IsOutOfBoundary(bool useCurrentDelta)
     float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
     bool outOfEnd = (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) &&
                     LessNotEqual(endPos, gridLayoutInfo_.lastMainSize_);
-    bool scrollable = (gridLayoutInfo_.startIndex_ > 0) ||
+    bool scrollable = GetAlwaysEnabled() || (gridLayoutInfo_.startIndex_ > 0) ||
                       (gridLayoutInfo_.endIndex_ < gridLayoutInfo_.childrenCount_ - 1) ||
                       GreatNotEqual(gridLayoutInfo_.totalHeightOfItemsInView_, gridLayoutInfo_.lastMainSize_);
     return (outOfStart || outOfEnd) && scrollable;
+}
+
+float GridPattern::GetEndOffset()
+{
+    float contentHeight = gridLayoutInfo_.lastMainSize_ - gridLayoutInfo_.contentEndPadding_;
+    float mainGap = GetMainGap();
+    if (GetAlwaysEnabled() &&
+        GreatNotEqual(contentHeight, gridLayoutInfo_.GetTotalLineHeight(mainGap))) {
+        return gridLayoutInfo_.GetTotalLineHeight(mainGap) -
+                gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+    }
+    return contentHeight - gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
 }
 
 void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
@@ -1571,23 +1586,13 @@ void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto grid = weak.Upgrade();
         CHECK_NULL_RETURN(grid, 0.0);
-        if (grid->GetAlwaysEnabled() &&
-            GreatNotEqual(grid->GetMainContentSize(), grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()))) {
-            return grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()) -
-                   grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
-        }
-        return grid->GetMainContentSize() - grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
+        return grid->GetEndOffset();
     });
     scrollEffect->SetTrailingCallback([]() -> double { return 0.0; });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto grid = weak.Upgrade();
         CHECK_NULL_RETURN(grid, 0.0);
-        if (grid->GetAlwaysEnabled() &&
-            GreatNotEqual(grid->GetMainContentSize(), grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()))) {
-            return grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()) -
-                   grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
-        }
-        return grid->GetMainContentSize() - grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
+        return grid->GetEndOffset();
     });
     scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
 }

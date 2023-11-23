@@ -294,6 +294,15 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     auto oldIndex = GetLoopIndex(oldIndex_);
     if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != TotalCount()) {
         oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
+        if (HasIndicatorNode()) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto indicatorNode = DynamicCast<FrameNode>(
+                host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
+            if (indicatorNode && indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+                indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
+        }
     }
     if (userSetCurrentIndex < 0 || userSetCurrentIndex >= TotalCount()) {
         currentIndex_ = 0;
@@ -2690,7 +2699,7 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
                 return;
             }
             if (!swiper->IsLoop() &&
-                swiper->GetLoopIndex(swiper->currentIndex_ + 1) > (childrenSize - displayCount)) {
+                swiper->GetLoopIndex(swiper->currentIndex_) + 1 > (childrenSize - displayCount)) {
                 return;
             }
             swiper->targetIndex_ = swiper->currentIndex_ + 1;

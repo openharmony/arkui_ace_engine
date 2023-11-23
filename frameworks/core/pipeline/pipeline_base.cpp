@@ -465,12 +465,18 @@ void PipelineBase::ForceLayoutForImplicitAnimation()
     if (!pendingImplicitLayout_.empty()) {
         pendingImplicitLayout_.top() = true;
     }
+    if (!pendingFrontendAnimation_.empty()) {
+        pendingFrontendAnimation_.top() = true;
+    }
 }
 
 void PipelineBase::ForceRenderForImplicitAnimation()
 {
     if (!pendingImplicitRender_.empty()) {
         pendingImplicitRender_.top() = true;
+    }
+    if (!pendingFrontendAnimation_.empty()) {
+        pendingFrontendAnimation_.top() = true;
     }
 }
 
@@ -486,6 +492,40 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
     return CloseImplicitAnimation();
 }
 
+std::function<void()> PipelineBase::GetWrappedAnimationCallback(const std::function<void()>& finishCallback)
+{
+    auto wrapFinishCallback = [weak = AceType::WeakClaim(this), finishCallback]() {
+        auto context = weak.Upgrade();
+        if (!context) {
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(
+            [finishCallback, weak]() {
+                auto context = weak.Upgrade();
+                CHECK_NULL_VOID(context);
+                if (!finishCallback) {
+                    if (context->IsFormRender()) {
+                        TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
+                        context->SetIsFormAnimation(false);
+                    }
+                    return;
+                }
+                if (context->IsFormRender()) {
+                    TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
+                    context->SetFormAnimationFinishCallback(true);
+                    finishCallback();
+                    context->FlushBuild();
+                    context->SetFormAnimationFinishCallback(false);
+                    context->SetIsFormAnimation(false);
+                    return;
+                }
+                finishCallback();
+            },
+            TaskExecutor::TaskType::UI);
+    };
+    return wrapFinishCallback;
+}
+
 void PipelineBase::PrepareOpenImplicitAnimation()
 {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -494,7 +534,7 @@ void PipelineBase::PrepareOpenImplicitAnimation()
     pendingImplicitRender_.push(false);
 
     // flush ui tasks before open implicit animation
-    if (!isReloading_ && !IsLayouting()) {
+    if (!IsLayouting()) {
         FlushUITasks();
     }
 #endif
@@ -510,7 +550,7 @@ void PipelineBase::PrepareCloseImplicitAnimation()
     // layout or render the views immediately to animate all related views, if layout or render updates are pending in
     // the animation closure
     if (pendingImplicitLayout_.top() || pendingImplicitRender_.top()) {
-        if (!isReloading_ && !IsLayouting()) {
+        if (!IsLayouting()) {
             FlushUITasks();
         } else if (IsLayouting()) {
             LOGW("IsLayouting, prepareCloseImplicitAnimation has tasks not flushed");
@@ -530,36 +570,7 @@ void PipelineBase::OpenImplicitAnimation(
 {
 #ifdef ENABLE_ROSEN_BACKEND
     PrepareOpenImplicitAnimation();
-
-    auto wrapFinishCallback = [weak = AceType::WeakClaim(this), finishCallback]() {
-        auto context = weak.Upgrade();
-        if (!context) {
-            return;
-        }
-        context->GetTaskExecutor()->PostTask(
-            [finishCallback, weak]() {
-                auto context = weak.Upgrade();
-                CHECK_NULL_VOID(context);
-                if (!finishCallback) {
-                    if (context->IsFormRender()) {
-                        TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
-                        context->SetIsFormAnimation(false);
-                    }
-                    return;
-                }
-                if (context->IsFormRender()) {
-                    TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation]  Form animation is finish.");
-                    context->SetFormAnimationFinishCallback(true);
-                    finishCallback();
-                    context->FlushBuild();
-                    context->SetFormAnimationFinishCallback(false);
-                    context->SetIsFormAnimation(false);
-                    return;
-                }
-                finishCallback();
-            },
-            TaskExecutor::TaskType::UI);
-    };
+    auto wrapFinishCallback = GetWrappedAnimationCallback(finishCallback);
     if (IsFormRender()) {
         SetIsFormAnimation(true);
         if (!IsFormAnimationFinishCallback()) {

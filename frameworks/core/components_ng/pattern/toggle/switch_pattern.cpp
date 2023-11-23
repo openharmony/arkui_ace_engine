@@ -71,23 +71,57 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 void SwitchPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    UpdateSwitchLayoutProperty();
+    UpdateSwitchPaintProperty();
+    InitClickEvent();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    InitPanEvent(gestureHub);
+    InitTouchEvent();
+    InitMouseEvent();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
+    SetAccessibilityAction();
+}
+
+void SwitchPattern::UpdateSwitchPaintProperty()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(switchPaintProperty);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (!isOn_.has_value()) {
+        isOn_ = switchPaintProperty->GetIsOnValue(false);
+    }
+    auto isOn = switchPaintProperty->GetIsOnValue(false);
+    if (isOn != isOn_.value_or(false)) {
+        isOn_ = isOn;
+        OnChange();
+    }
+}
+
+void SwitchPattern::UpdateSwitchLayoutProperty()
+{
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
-    auto layoutProperty = host->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
     MarginProperty margin;
     margin.left = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
     margin.right = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
     margin.top = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
     margin.bottom = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto& setMargin = layoutProperty->GetMarginProperty();
     if (setMargin) {
         if (setMargin->left.has_value()) {
@@ -112,26 +146,6 @@ void SwitchPattern::OnModifyDone()
     } else {
         layoutProperty->UpdateAlignment(Alignment::CENTER);
     }
-    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
-    CHECK_NULL_VOID(switchPaintProperty);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    if (!isOn_.has_value()) {
-        isOn_ = switchPaintProperty->GetIsOnValue(false);
-    }
-    auto isOn = switchPaintProperty->GetIsOnValue(false);
-    if (isOn != isOn_.value_or(false)) {
-        isOn_ = isOn;
-        OnChange();
-    }
-    InitClickEvent();
-    InitPanEvent(gestureHub);
-    InitTouchEvent();
-    InitMouseEvent();
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    InitOnKeyEvent(focusHub);
-    SetAccessibilityAction();
 }
 
 void SwitchPattern::SetAccessibilityAction()
@@ -143,7 +157,7 @@ void SwitchPattern::SetAccessibilityAction()
     accessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->UpdateSelectStatus(false);
+        pattern->UpdateSelectStatus(true);
     });
 
     accessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {

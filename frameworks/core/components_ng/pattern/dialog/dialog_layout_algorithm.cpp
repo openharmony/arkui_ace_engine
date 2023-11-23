@@ -23,6 +23,8 @@
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/placement.h"
@@ -37,6 +39,7 @@
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/constants.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -49,6 +52,9 @@ constexpr double DIALOG_HEIGHT_RATIO = 0.8;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
 constexpr Dimension listPaddingHeight = 48.0_vp;
+constexpr Dimension FULLSCREEN = 100.0_pct;
+constexpr Dimension MULTIPLE_DIALOG_OFFSET_X = 48.0_vp;
+constexpr Dimension MULTIPLE_DIALOG_OFFSET_Y = 48.0_vp;
 } // namespace
 
 void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -275,13 +281,45 @@ double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
     return info->GetWidth(std::min(deviceColumns, parentColumns));
 }
 
+void DialogLayoutAlgorithm::ProcessMaskRect(std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog)
+{
+    auto dialogContext = dialog->GetRenderContext();
+    CHECK_NULL_VOID(dialogContext);
+    auto hub = dialog->GetEventHub<DialogEventHub>();
+    auto width = maskRect->GetWidth();
+    auto height = maskRect->GetHeight();
+    auto offset = maskRect->GetOffset();
+    if (width.IsNegative()) {
+        width = FULLSCREEN;
+    }
+    if (height.IsNegative()) {
+        height = FULLSCREEN;
+    }
+    auto rootWidth = PipelineContext::GetCurrentRootWidth();
+    auto rootHeight = PipelineContext::GetCurrentRootHeight();
+    RectF rect = RectF(offset.GetX().ConvertToPxWithSize(rootWidth), offset.GetY().ConvertToPxWithSize(rootHeight),
+        width.ConvertToPxWithSize(rootWidth), height.ConvertToPxWithSize(rootHeight));
+    dialogContext->ClipWithRect(rect);
+    dialogContext->UpdateClipEdge(true);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    std::vector<DimensionRect> mouseResponseRegion;
+    mouseResponseRegion.emplace_back(width, height, offset);
+    gestureHub->SetMouseResponseRegion(mouseResponseRegion);
+    gestureHub->SetResponseRegion(mouseResponseRegion);
+}
+
 void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    subWindowId_ = SubwindowManager::GetInstance()->GetDialogSubWindowId();
     CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto dialogProp = DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(dialogProp);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
     dialogOffset_ = dialogProp->GetDialogOffset().value_or(DimensionOffset());
     alignment_ = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
     auto selfSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
@@ -291,15 +329,82 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto child = children.front();
     auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+    if (dialogTheme->GetMultipleDialogDisplay() != "stack" && !dialogProp->GetIsModal().value_or(true) &&
+        dialogProp->GetShowInSubWindowValue(false)) {
+        MultipleDialog(dialogProp, childSize, selfSize);
+    }
+    dialogOffset_ = dialogProp->GetDialogOffset().value_or(DimensionOffset());
+    alignment_ = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
     topLeftPoint_ = ComputeChildPosition(childSize, dialogProp, selfSize);
+    if (!dialogProp->GetIsModal().value_or(true) ||
+        (dialogProp->GetIsModal().value_or(true) && dialogProp->GetShowInSubWindowValue(false))) {
+        ProcessMaskRect(
+            DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_)),
+            frameNode);
+    }
     UpdateTouchRegion();
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
     child->Layout();
     if (dialogProp->GetShowInSubWindowValue(false)) {
         std::vector<Rect> rects;
-        auto rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
+        auto rect = Rect(topLeftPoint_.GetX(), topLeftPoint_.GetY(), childSize.Width(), childSize.Height());
         rects.emplace_back(rect);
-        SubwindowManager::GetInstance()->SetHotAreas(rects, frameNode->GetId());
+        SubwindowManager::GetInstance()->SetDialogHotAreas(rects, frameNode->GetId(), subWindowId_);
+    }
+}
+
+bool DialogLayoutAlgorithm::IsDialogTouchingBoundary(OffsetF topLeftPoint, SizeF childSize, SizeF selfSize)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto safeAreaInsets = pipelineContext->GetSafeArea();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    float bottomSecurity = static_cast<float>(PORTRAIT_BOTTOM_SECURITY.ConvertToPx());
+    auto height = safeAreaInsets.bottom_.start == 0 ? selfSize.Height() - bottomSecurity : safeAreaInsets.bottom_.start;
+    auto width = selfSize.Width();
+    if (topLeftPoint.GetY() + childSize.Height() >= height) {
+        touchingBoundaryFlag_ = TouchingBoundaryType::TouchBottomBoundary;
+    } else if (topLeftPoint.GetX() + childSize.Width() >= width) {
+        touchingBoundaryFlag_ = TouchingBoundaryType::TouchRightBoundary;
+    } else {
+        return false;
+    }
+    return true;
+}
+
+void DialogLayoutAlgorithm::MultipleDialog(
+    const RefPtr<DialogLayoutProperty>& dialogProp, const SizeF& childSize, const SizeF& selfSize)
+{
+    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(subWindowId_);
+    CHECK_NULL_VOID(subWindow);
+    auto subOverlayManager = subWindow->GetOverlayManager();
+    CHECK_NULL_VOID(subOverlayManager);
+    std::map<int32_t, RefPtr<FrameNode>> DialogMap(
+        subOverlayManager->GetDialogMap().begin(), subOverlayManager->GetDialogMap().end());
+    int dialogMapSize = static_cast<int>(DialogMap.size());
+    if (dialogMapSize > 1) {
+        auto it = DialogMap.begin();
+        for (int i = 1; i < dialogMapSize - 1; i++) {
+            it++;
+        }
+        auto predialogProp = DynamicCast<DialogLayoutProperty>(it->second->GetLayoutProperty());
+        auto firstdialogProp = DynamicCast<DialogLayoutProperty>(DialogMap.begin()->second->GetLayoutProperty());
+        dialogProp->UpdateDialogOffset(predialogProp->GetDialogOffset().value_or(DimensionOffset()) +
+                                       DimensionOffset(MULTIPLE_DIALOG_OFFSET_X, MULTIPLE_DIALOG_OFFSET_Y));
+        dialogOffset_ = dialogProp->GetDialogOffset().value_or(DimensionOffset());
+        alignment_ = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
+        topLeftPoint_ = ComputeChildPosition(childSize, dialogProp, selfSize);
+        if (IsDialogTouchingBoundary(topLeftPoint_, childSize, selfSize)) {
+            if (touchingBoundaryFlag_ == TouchingBoundaryType::TouchBottomBoundary) {
+                dialogProp->UpdateDialogOffset(
+                    DimensionOffset(predialogProp->GetDialogOffset().value_or(DimensionOffset()).GetX(),
+                        firstdialogProp->GetDialogOffset().value_or(DimensionOffset()).GetY()));
+                touchingBoundaryFlag_ = TouchingBoundaryType::NotTouchBoundary;
+            } else if (touchingBoundaryFlag_ == TouchingBoundaryType::TouchRightBoundary) {
+                dialogProp->UpdateDialogOffset(firstdialogProp->GetDialogOffset().value_or(DimensionOffset()));
+                touchingBoundaryFlag_ = TouchingBoundaryType::NotTouchBoundary;
+            }
+        }
     }
 }
 

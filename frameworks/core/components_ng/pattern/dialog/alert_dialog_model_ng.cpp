@@ -50,16 +50,27 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
                 container = AceEngine::Get().GetContainer(currentId);
             }
             ContainerScope scope(currentId);
-
+            RefPtr<NG::FrameNode> dialog;
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
             auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
             CHECK_NULL_VOID(context);
             auto overlayManager = context->GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
-
-            auto dialog = overlayManager->ShowDialog(arg, nullptr, false);
-            CHECK_NULL_VOID(dialog);
+            if (arg.isShowInSubWindow) {
+                dialog = SubwindowManager::GetInstance()->ShowDialogNG(arg, nullptr);
+                CHECK_NULL_VOID(dialog);
+                if (arg.isModal) {
+                    DialogProperties Maskarg;
+                    Maskarg.isMask = true;
+                    Maskarg.autoCancel = arg.autoCancel;
+                    auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
+                    CHECK_NULL_VOID(mask);
+                }
+            } else {
+                dialog = overlayManager->ShowDialog(arg, nullptr, false);
+                CHECK_NULL_VOID(dialog);
+            }
             auto hub = dialog->GetEventHub<NG::DialogEventHub>();
             hub->SetOnCancel(arg.onCancel);
         },

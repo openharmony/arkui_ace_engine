@@ -1844,6 +1844,29 @@ HWTEST_F(MenuTestNg, PerformActionTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PerformActionTest003
+ * @tc.desc: MenuItem Accessibility PerformAction test Select and ClearSelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, PerformActionTest003, TestSize.Level1)
+{
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    MenuItemModelNG MneuItemModelInstance;
+    MneuItemModelInstance.Create(itemOption);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto menuItemAccessibilityProperty = frameNode->GetAccessibilityProperty<MenuItemAccessibilityProperty>();
+    ASSERT_NE(menuItemAccessibilityProperty, nullptr);
+    bool isSelected = true;
+    menuItemPattern->isSelected_ = false;
+    menuItemPattern->MarkIsSelected(isSelected);
+    EXPECT_TRUE(menuItemAccessibilityProperty->ActActionSelect());
+}
+
+/**
  * @tc.name: MenuAccessibilityEventTestNg001
  * @tc.desc: Test Click Event for Option of Menu.
  */

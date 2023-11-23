@@ -277,7 +277,7 @@ public:
         taskExecutor->PostTask(
             [instanceId = instanceId_] {
                 SubwindowManager::GetInstance()->ClearMenu();
-                SubwindowManager::GetInstance()->HidePopupNG(-1, instanceId);
+                SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
             },
             TaskExecutor::TaskType::UI);
     }
@@ -365,6 +365,22 @@ void UIContentImpl::InitializeInner(
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
     InitializeInner(window, url, storage, false);
+}
+
+void UIContentImpl::Initialize(
+    OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage)
+{
+    CommonInitialize(window, "", storage);
+    if (content) {
+        LOGI("Initialize by buffer, size:%{public}zu", content->size());
+        // run page.
+        Platform::AceContainer::RunPage(instanceId_, content, "");
+    } else {
+        LOGE("Initialize failed, buffer is null");
+    }
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
 void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
@@ -1589,6 +1605,24 @@ void UIContentImpl::UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode)
         TaskExecutor::TaskType::UI);
 }
 
+bool UIContentImpl::NeedSoftKeyboard()
+{
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->NeedSoftKeyboard();
+}
+
+void UIContentImpl::SetOnWindowFocused(const std::function<void()>& callback)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetOnWindowFocused(callback);
+}
+
 void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize)
 {
     LOGI("HideWindowTitleButton hideSplit: %{public}d, hideMaximize: %{public}d, hideMinimize: %{public}d", hideSplit,
@@ -1863,7 +1897,7 @@ void UIContentImpl::SetResourcePaths(const std::vector<std::string>& resourcesPa
             CHECK_NULL_VOID(themeManager);
 
             if (resourcesPaths.empty() && assetRootPath.empty()) {
-                 return;
+                return;
             }
 
             if (!assetRootPath.empty()) {
@@ -2091,4 +2125,3 @@ bool UIContentImpl::NotifyExecuteAction(
     return Platform::AceContainer::NotifyExecuteAction(instanceId_, elementId, actionArguments, action, offset);
 }
 } // namespace OHOS::Ace
-

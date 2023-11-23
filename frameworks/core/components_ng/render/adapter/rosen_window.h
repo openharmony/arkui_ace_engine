@@ -71,9 +71,14 @@ public:
 
     void SetTaskRunner(RefPtr<TaskExecutor> taskExecutor, int32_t id);
 
-    bool FlushCustomAnimation(uint64_t timeStamp) override
+    bool FlushAnimation(uint64_t timeStamp) override
     {
-        return rsUIDirector_->RunningCustomAnimation(timeStamp);
+        return rsUIDirector_->FlushAnimation(timeStamp);
+    }
+
+    void FlushModifier() override
+    {
+        rsUIDirector_->FlushModifier();
     }
 
     void OnShow() override;

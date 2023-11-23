@@ -51,6 +51,7 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
             }
             case ToggleType::SWITCH: {
                 CreateSwitch(nodeId);
+                SetSwitchSelected(childFrameNode, isOn);
                 ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
                 break;
             }
@@ -147,8 +148,13 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
     }
 }
 
-void ToggleModelNG::SetSwitchSelected(const RefPtr<FrameNode>& childFrameNode, bool isOn)
+void ToggleModelNG::SetSwitchSelected(RefPtr<FrameNode>& childFrameNode, bool isOn)
 {
+    if (!childFrameNode) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        childFrameNode = frameNode;
+    }
     auto childPattern = childFrameNode->GetPattern<SwitchPattern>();
     CHECK_NULL_VOID(childPattern);
     childPattern->SetSelect(isOn);

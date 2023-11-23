@@ -1103,6 +1103,7 @@ void UpdateWebAccessibilityElementInfo(const NWeb::NWebAccessibilityNodeInfo& no
     nodeInfo.SetFocused(node.focused);
     nodeInfo.SetAccessibilityFocus(node.accessibilityFocus);
     nodeInfo.SetVisible(node.visible);
+    nodeInfo.SetClickable(node.clickable);
     if (node.visible) {
         auto left = node.rectX + commonProperty.windowLeft;
         auto top = node.rectY + commonProperty.windowTop;

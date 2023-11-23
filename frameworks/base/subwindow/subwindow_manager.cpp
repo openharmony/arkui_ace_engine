@@ -105,7 +105,19 @@ void SubwindowManager::AddSubwindow(int32_t instanceId, RefPtr<Subwindow> subwin
         return;
     }
 }
-
+void SubwindowManager::DeleteHotAreas(int32_t instanceId, int32_t overlayid)
+{
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+    if (subwindow) {
+        subwindow->DeleteHotAreas(overlayid);
+    }
+}
 void SubwindowManager::RemoveSubwindow(int32_t instanceId)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Remove subwindow of this instance %{public}d", instanceId);
@@ -123,6 +135,17 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId)
     } else {
         return nullptr;
     }
+}
+
+int32_t SubwindowManager::GetDialogSubwindowInstanceId(int32_t SubwindowId)
+{
+    std::lock_guard<std::mutex> lock(subwindowMutex_);
+    for (auto it = subwindowMap_.begin(); it != subwindowMap_.end(); it++) {
+        if (it->second->GetSubwindowId() == SubwindowId) {
+            return it->first;
+        }
+    }
+    return 0;
 }
 
 void SubwindowManager::SetCurrentSubwindowName(const std::string& currentSubwindowName)
@@ -197,6 +220,20 @@ void SubwindowManager::ClearMenuNG(int32_t instanceId, bool inWindow, bool showA
     }
     if (subwindow) {
         subwindow->ClearMenuNG(inWindow, showAnimation);
+    }
+}
+
+void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
+{
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+    if (subwindow) {
+        subwindow->ClearPopupNG();
     }
 }
 
@@ -322,7 +359,19 @@ void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overl
         subwindow->SetHotAreas(rects, overlayId);
     }
 }
-
+void SubwindowManager::SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId)
+{
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+    if (subwindow) {
+        subwindow->SetDialogHotAreas(rects, overlayId);
+    }
+}
 RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     const DialogProperties& dialogProps, std::function<void()>&& buildFunc)
 {
@@ -331,6 +380,7 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     if (!subwindow) {
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Subwindow is null, add a new one.");
         subwindow = Subwindow::CreateSubwindow(containerId);
+        CHECK_NULL_RETURN(subwindow, nullptr);
         subwindow->InitContainer();
         AddSubwindow(containerId, subwindow);
     }

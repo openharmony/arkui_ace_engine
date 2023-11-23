@@ -214,8 +214,8 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
         caretRect.SetLeft(textRectRightBoundary - caretRect.Width());
     }
 
-    canvas.DrawRect(RSRect(caretRect.GetX(), caretRect.GetY(),
-        caretRect.GetX() + static_cast<float>(cursorWidth_->Get()), caretRect.GetY() + caretRect.Height()));
+    canvas.DrawRect(RSRect(caretRect.GetX() - (static_cast<float>(cursorWidth_->Get()) / 2), caretRect.GetY(),
+        caretRect.GetX() + (static_cast<float>(cursorWidth_->Get()) / 2), caretRect.GetY() + caretRect.Height()));
     canvas.DetachBrush();
     canvas.Restore();
 }

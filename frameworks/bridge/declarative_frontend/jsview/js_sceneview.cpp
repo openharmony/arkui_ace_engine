@@ -348,24 +348,22 @@ void JSSceneView::JsAddCube(const JSCallbackInfo& info)
     }
 
     LOGD("JSAddCube() info[0]: %s", info[0]->ToString().c_str());
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-        return;
-    }
-
-    auto name = argsPtrItem->GetString("name");
-    auto width = argsPtrItem->GetDouble("width", 0.0);
-    auto height = argsPtrItem->GetDouble("height", 0.0);
-    auto depth = argsPtrItem->GetDouble("depth", 0.0);
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    auto name = jsObj->GetPropertyValue<std::string>("name", "");
+    auto width = jsObj->GetPropertyValue<double>("width", 0.0);
+    auto height = jsObj->GetPropertyValue<double>("height", 0.0);
+    auto depth = jsObj->GetPropertyValue<double>("depth", 0.0);
 
     OHOS::Render3D::Vec3 position(0.0f, 0.0f, 0.0f);
-    if (argsPtrItem->Contains("position")) {
+    if (jsObj->HasProperty("position")) {
         LOGD("Cube position");
-        auto positionArgs = argsPtrItem->GetObject("position");
-        position.SetX(positionArgs->GetDouble("x", 0.0));
-        position.SetY(positionArgs->GetDouble("y", 0.0));
-        position.SetZ(positionArgs->GetDouble("z", 0.0));
+        JSRef<JSVal> positionArgs = jsObj->GetProperty("position");
+        if (positionArgs->IsObject()) {
+            JSRef<JSObject> posObj = JSRef<JSObject>::Cast(positionArgs);
+            position.SetX(posObj->GetPropertyValue<double>("x", 0.0));
+            position.SetY(posObj->GetPropertyValue<double>("y", 0.0));
+            position.SetZ(posObj->GetPropertyValue<double>("z", 0.0));
+        }
     }
 
     LOGD("JSAddCube(%s, %.2f, %.2f, %.2f)", name.c_str(), width, height, depth);
@@ -382,24 +380,22 @@ void JSSceneView::JsAddSphere(const JSCallbackInfo& info)
     }
 
     LOGD("JSAddSphere() info[0]: %s", info[0]->ToString().c_str());
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-        return;
-    }
-
-    auto name = argsPtrItem->GetString("name");
-    auto radius = argsPtrItem->GetDouble("radius", 0.0);
-    auto rings = argsPtrItem->GetInt("rings", 0);
-    auto sectors = argsPtrItem->GetInt("sectors", 0);
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    auto name = jsObj->GetPropertyValue<std::string>("name", "");
+    auto radius = jsObj->GetPropertyValue<double>("radius", 0.0);
+    auto rings = jsObj->GetPropertyValue<int32_t>("rings", 0);
+    auto sectors = jsObj->GetPropertyValue<int32_t>("sectors", 0);
 
     OHOS::Render3D::Vec3 position(0.0f, 0.0f, 0.0f);
-    if (argsPtrItem->Contains("position")) {
+    if (jsObj->HasProperty("position")) {
         LOGD("Cube position");
-        auto positionArgs = argsPtrItem->GetObject("position");
-        position.SetX(positionArgs->GetDouble("x", 0.0));
-        position.SetY(positionArgs->GetDouble("y", 0.0));
-        position.SetZ(positionArgs->GetDouble("z", 0.0));
+        JSRef<JSVal> positionArgs = jsObj->GetProperty("position");
+        if (positionArgs->IsObject()) {
+            JSRef<JSObject> posObj = JSRef<JSObject>::Cast(positionArgs);
+            position.SetX(posObj->GetPropertyValue<double>("x", 0.0));
+            position.SetY(posObj->GetPropertyValue<double>("y", 0.0));
+            position.SetZ(posObj->GetPropertyValue<double>("z", 0.0));
+        }
     }
 
     LOGD("JSAddSphere(%s, %.2f, %d, %d)", name.c_str(), radius, rings, sectors);
@@ -416,24 +412,22 @@ void JSSceneView::JsAddCone(const JSCallbackInfo& info)
     }
 
     LOGD("JSAddCone() info[0]: %s", info[0]->ToString().c_str());
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-        return;
-    }
-
-    auto name = argsPtrItem->GetString("name");
-    auto radius = argsPtrItem->GetDouble("radius", 0.0);
-    auto length = argsPtrItem->GetInt("length", 0);
-    auto sectors = argsPtrItem->GetInt("sectors", 0);
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    auto name = jsObj->GetPropertyValue<std::string>("name", "");
+    auto radius = jsObj->GetPropertyValue<double>("radius", 0.0);
+    auto length = jsObj->GetPropertyValue<int32_t>("length", 0);
+    auto sectors = jsObj->GetPropertyValue<int32_t>("sectors", 0);
 
     OHOS::Render3D::Vec3 position(0.0f, 0.0f, 0.0f);
-    if (argsPtrItem->Contains("position")) {
+    if (jsObj->HasProperty("position")) {
         LOGD("Cube position");
-        auto positionArgs = argsPtrItem->GetObject("position");
-        position.SetX(positionArgs->GetDouble("x", 0.0));
-        position.SetY(positionArgs->GetDouble("y", 0.0));
-        position.SetZ(positionArgs->GetDouble("z", 0.0));
+        JSRef<JSVal> positionArgs = jsObj->GetProperty("position");
+        if (positionArgs->IsObject()) {
+            JSRef<JSObject> posObj = JSRef<JSObject>::Cast(positionArgs);
+            position.SetX(posObj->GetPropertyValue<double>("x", 0.0));
+            position.SetY(posObj->GetPropertyValue<double>("y", 0.0));
+            position.SetZ(posObj->GetPropertyValue<double>("z", 0.0));
+        }
     }
 
     LOGD("JSAddCone(%s, %.2f, %d, %d)", name.c_str(), radius, length, sectors);

@@ -1,5 +1,8 @@
 /// <reference path="./import.ts" />
 class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
+  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
+    throw new Error("Method not implemented.");
+  }
   type (value: ButtonType): ButtonAttribute {
     if (typeof value === "number") {
       modifier(this._modifiers, ButtonTypeModifier, value);
@@ -58,9 +61,21 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     }
     return this;
   }
-  labelStyle(value: ArkLabelStyle): ButtonAttribute {
+  labelStyle(value: LabelStyle): ButtonAttribute {
     if (typeof value === "object") {
-      modifier(this._modifiers, ButtonLabelStyleModifier, value);
+      let data = new ArkLabelStyle();
+      data.heightAdaptivePolicy = value.heightAdaptivePolicy;
+      data.maxFontSize = value.maxFontSize;
+      data.maxLines = value.maxLines;
+      data.minFontSize = value.minFontSize;
+      data.overflow = value.overflow;
+      if (typeof value.font === "object") {
+        data.font.family = value.font.family;
+        data.font.size = value.font.size;
+        data.font.style = value.font.style;
+        data.font.weight = value.font.weight;
+      }
+      modifier(this._modifiers, ButtonLabelStyleModifier, data);
     } else {
       modifier(this._modifiers, ButtonLabelStyleModifier, undefined);
     }
@@ -74,7 +89,7 @@ class ButtonStateEffectModifier extends Modifier<boolean> {
       GetUINativeModule().button.resetStateEffect(node);
     }
     else {
-      GetUINativeModule().button.setStateEffecte(node, this.value);
+      GetUINativeModule().button.setStateEffect(node, this.value);
     }
   }
 }
