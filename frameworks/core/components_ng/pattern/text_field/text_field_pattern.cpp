@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -1491,7 +1492,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     CloseSelectOverlay(true);
 
     if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex) && info.GetSourceDevice() != SourceType::MOUSE) {
-        ProcessOverlay(true, true);
+        ProcessOverlay(true, true, true, true);
     } else if (!contentController_->IsEmpty() && info.GetSourceDevice() != SourceType::MOUSE) {
         if (GetNakedCharPosition() >= 0) {
             DelayProcessOverlay(true, true, false);
@@ -1998,7 +1999,7 @@ void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
         std::clamp(pos, 0, static_cast<int32_t>(contentController_->GetWideText().length())));
 }
 
-void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool isShowMenu)
+void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool isShowMenu, bool isHiddenHandle)
 {
     selectController_->CalculateHandleOffset();
     ShowSelectOverlayParams showOverlayParams = {
@@ -2013,6 +2014,20 @@ void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool is
         showOverlayParams.firstHandle = selectController_->GetFirstHandleRect();
         showOverlayParams.secondHandle = selectController_->GetSecondHandleRect();
         ShowSelectOverlay(showOverlayParams);
+    }
+    if (isHiddenHandle) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto selectManager = context->GetSelectOverlayManager();
+        CHECK_NULL_VOID(selectManager);
+        auto selectOverlayItem = selectManager->GetSelectOverlayItem();
+        auto selectOverlay = selectOverlayItem.Upgrade();
+        CHECK_NULL_VOID(selectOverlay);
+        auto pattern = selectOverlay->GetPattern<SelectOverlayPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->StartHiddenHandleTask(false);
     }
 }
 

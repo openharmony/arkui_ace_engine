@@ -1036,7 +1036,8 @@ private:
 
     void CursorMoveOnClick(const Offset& offset);
 
-    void ProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
+    void ProcessOverlay(
+        bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true, bool isHiddenHandle = false);
     void DelayProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
     SelectHandleInfo GetSelectHandleInfo(OffsetF info);
     void UpdateSelectOverlaySecondHandle(bool needLayout = false);
