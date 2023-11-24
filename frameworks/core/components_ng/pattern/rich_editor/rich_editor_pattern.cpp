@@ -2274,6 +2274,7 @@ void RichEditorPattern::DeleteBackward(int32_t length)
     }
     if (length == spans_.back()->position) {
         ResetFirstNodeStyle();
+        textForDisplay_.clear();
     }
     info.SetOffset(caretPosition_ - 1);
     info.SetLength(length);
