@@ -2068,3 +2068,9 @@ var OptionWidthMode;
   OptionWidthMode["FIT_CONTENT"] = "fit_content";
   OptionWidthMode["FIT_TRIGGER"] = "fit_trigger";
 })(OptionWidthMode || (OptionWidthMode = {}));
+
+var DragPreviewMode;
+(function (DragPreviewMode) {
+  DragPreviewMode["AUTO"] = 1;
+  DragPreviewMode["DISABLE_SCALE"] = 2;
+})(DragPreviewMode || (DragPreviewMode = {}));
