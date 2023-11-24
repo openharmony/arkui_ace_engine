@@ -14,7 +14,7 @@
  */
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
 
-#include "foundation/graphic/graphic_2d/interfaces/inner_api/surface/surface_utils.h"
+#include "surface_utils.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 
 #include "base/memory/referenced.h"
@@ -43,6 +43,11 @@ RosenRenderSurface::~RosenRenderSurface()
         if (nativeWindow_) {
             DestoryNativeWindow(nativeWindow_);
             nativeWindow_ = nullptr;
+        }
+        while (!availableBuffers_.empty()) {
+            auto bufferNode = availableBuffers_.front();
+            bufferNode.reset();
+            availableBuffers_.pop();
         }
         CHECK_NULL_VOID(producerSurface_);
         auto* surfaceUtils = SurfaceUtils::GetInstance();
