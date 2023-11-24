@@ -459,7 +459,7 @@ void SvgBaseDeclaration::Inherit(const RefPtr<Declaration>& parent)
             attrs.opacity = 1.0; // default opacity is 1.0
         }
     }
-    attrs.fillState.Inherit(svgDeclaration->GetFillState());
+    attrs.fillState.Inherit(svgDeclaration->GetFillState(), svgDeclaration->GetOpacity());
     attrs.strokeState.Inherit(svgDeclaration->GetStrokeState());
     attrs.textStyle.Inherit(svgDeclaration->GetSvgTextStyle());
     attrs.clipState.Inherit(svgDeclaration->GetClipState());
