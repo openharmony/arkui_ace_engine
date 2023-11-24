@@ -852,7 +852,6 @@ void RichEditorPattern::UpdateTextStyle(
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    LOGI("zkc: update span text style");
     if (updateSpanStyle.updateTextColor.has_value()) {
         spanNode->UpdateTextColor(textStyle.GetTextColor());
         spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);

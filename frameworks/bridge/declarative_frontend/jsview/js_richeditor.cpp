@@ -741,29 +741,17 @@ void JSRichEditorController::ParseTextShadow(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
     auto shadowObject = styleObject->GetProperty("textShadow");
-    if (!shadowObject->IsNull()) {
-        Shadow shadow;
-        if (!shadowObject->IsArray() && JSViewAbstract::ParseShadowProps(shadowObject, shadow)) {
-            std::vector<Shadow> shadows { shadow };
-            updateSpanStyle.updateTextShadows = shadows;
-            style.SetTextShadows(shadows);
-            return;
-        }
-        JSRef<JSArray> params = JSRef<JSArray>::Cast(shadowObject);
-        auto shadowLength = params->Length();
-        std::vector<Shadow> shadows(shadowLength);
-        for (size_t i = 0; i < shadowLength; ++i) {
-            auto shadowJsVal = params->GetValueAt(i);
-            Shadow shadow;
-            if (!JSViewAbstract::ParseShadowProps(shadowJsVal, shadow)) {
-                continue;
-            }
-            shadows[i] = shadow;
-        }
+    if (shadowObject->IsNull()) {
+        return;
+    }
+    std::vector<Shadow> shadows;
+    parseTextShadowFromShadowObject(shadowObject, shadows);
+    if (!shadows.empty()) {
         updateSpanStyle.updateTextShadows = shadows;
         style.SetTextShadows(shadows);
     }
 }
+
 void JSRichEditorController::ParseTextDecoration(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {

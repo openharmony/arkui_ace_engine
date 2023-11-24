@@ -260,37 +260,13 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
 void JSTextClock::SetTextShadow(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
-    auto tmpInfo = info[0];
-    if (!tmpInfo->IsNumber() && !tmpInfo->IsObject() && !tmpInfo->IsArray()) {
-        LOGE("Parse shadow object failed.");
-        return;
-    }
-    if (!tmpInfo->IsArray()) {
-        Shadow shadow;
-        if (!JSViewAbstract::ParseShadowProps(info[0], shadow)) {
-            LOGE("Parse shadow object failed.");
-            return;
-        }
-        std::vector<Shadow> shadows { shadow };
+    std::vector<Shadow> shadows;
+    parseTextShadowFromShadowObject(info[0], shadows);
+    if (!shadows.empty()) {
         TextClockModel::GetInstance()->SetTextShadow(shadows);
-        return;
     }
-    JSRef<JSArray> params = JSRef<JSArray>::Cast(tmpInfo);
-    auto shadowLength = params->Length();
-    std::vector<Shadow> shadows(shadowLength);
-    for (size_t i = 0; i < shadowLength; ++i) {
-        auto shadowJsVal = params->GetValueAt(i);
-        Shadow shadow;
-        if (!JSViewAbstract::ParseShadowProps(shadowJsVal, shadow)) {
-            LOGE("Parse shadow object failed.");
-            continue;
-        }
-        shadows[i] = shadow;
-    }
-    TextClockModel::GetInstance()->SetTextShadow(shadows);
 }
 
 void JSTextClock::SetFontFeature(const JSCallbackInfo& info)

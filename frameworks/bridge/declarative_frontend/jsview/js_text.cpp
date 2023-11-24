@@ -186,31 +186,14 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
 
 void JSText::SetTextShadow(const JSCallbackInfo& info)
 {
-    auto tmpInfo = info[0];
-    if (!tmpInfo->IsNumber() && !tmpInfo->IsObject() && !tmpInfo->IsArray()) {
+    if (info.Length() < 1) {
         return;
     }
-    if (!tmpInfo->IsArray()) {
-        Shadow shadow;
-        if (!JSViewAbstract::ParseShadowProps(info[0], shadow)) {
-            return;
-        }
-        std::vector<Shadow> shadows { shadow };
+    std::vector<Shadow> shadows;
+    parseTextShadowFromShadowObject(info[0], shadows);
+    if (!shadows.empty()) {
         TextModel::GetInstance()->SetTextShadow(shadows);
-        return;
     }
-    JSRef<JSArray> params = JSRef<JSArray>::Cast(tmpInfo);
-    auto shadowLength = params->Length();
-    std::vector<Shadow> shadows(shadowLength);
-    for (size_t i = 0; i < shadowLength; ++i) {
-        auto shadowJsVal = params->GetValueAt(i);
-        Shadow shadow;
-        if (!JSViewAbstract::ParseShadowProps(shadowJsVal, shadow)) {
-            continue;
-        }
-        shadows[i] = shadow;
-    }
-    TextModel::GetInstance()->SetTextShadow(shadows);
 }
 
 void JSText::SetTextOverflow(const JSCallbackInfo& info)

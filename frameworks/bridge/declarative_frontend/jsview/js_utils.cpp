@@ -155,6 +155,30 @@ bool IsDisableEventVersion()
     return Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
 }
 
+void parseTextShadowFromShadowObject(const JSRef<JsVal>& shadowObject, std::vector<Shadow>& shadows){
+    if (!shadowObject->IsNumber() && !shadowObject->IsObject() && !shadowObject->IsArray()) {
+        return;
+    }
+    if (!shadowObject->IsArray()) {
+        Shadow shadow;
+        if (!JSViewAbstract::ParseShadowProps(info[0], shadow)) {
+            return;
+        }
+        shadows.push_back(shadow);
+        return;
+    }
+    JSRef<JSArray> params = JSRef<JSArray>::Cast(shadowObject);
+    auto shadowLength = params->Length();
+    for (size_t i = 0; i < shadowLength; ++i) {
+        auto shadowJsVal = params->GetValueAt(i);
+        Shadow shadow;
+        if (!JSViewAbstract::ParseShadowProps(shadowJsVal, shadow)) {
+            continue;
+        }
+        shadows.push_back(shadow);
+    }
+}
+
 #ifdef PIXEL_MAP_SUPPORTED
 JSRef<JSVal> ConvertPixmap(const RefPtr<PixelMap>& pixelMap)
 {
