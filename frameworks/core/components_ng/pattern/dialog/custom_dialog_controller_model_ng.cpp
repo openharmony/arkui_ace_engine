@@ -110,6 +110,8 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
             return;
         }
         CHECK_NULL_VOID(dialog);
+        overlayManager->CloseDialog(dialog);
+        dialogs.pop_back();
         if (dialogProperties.isShowInSubWindow) {
             auto containerId = Container::CurrentId();
             RefPtr<PipelineContext> parentContext;
@@ -125,8 +127,6 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
                 parentoverlay->CloseMask();
             }
         }
-        overlayManager->CloseDialog(dialog);
-        dialogs.pop_back();
     };
     executor->PostTask(task, TaskExecutor::TaskType::UI);
 }
