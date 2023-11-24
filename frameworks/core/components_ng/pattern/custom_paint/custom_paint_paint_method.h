@@ -417,7 +417,8 @@ protected:
     virtual void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint) = 0;
 #else
     virtual RSCanvas* GetRawPtrOfRSCanvas() = 0;
-    virtual void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas) = 0;
+    virtual void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
+        const RSBrush* brush, const RSPen* pen) = 0;
 #endif
     virtual OffsetF GetContentOffset(PaintWrapper* paintWrapper) const
     {

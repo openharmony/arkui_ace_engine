@@ -231,20 +231,21 @@ void CanvasPaintMethod::DrawImage(
 #else
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
     if (globalState_.HasGlobalAlpha()) {
-        imageBrush_.setAlphaf(globalState_.GetAlpha());
+        imageBrush_.setAlphaF(globalState_.GetAlpha());
     }
 
     const auto rsCanvas = rsCanvas_.get();
-    if (HasImageShadow()) {
-        RSRect rsRect = RSRect(
-            canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+    if (HasShadow()) {
+        double shadowWidth = (canvasImage.flag == 0) ? static_cast<double>(image->width()) : canvasImage.dWidth;
+        double shadowHeight = (canvasImage.flag == 0) ? static_cast<double>(image->height()) : canvasImage.dHeight;
+        RSRect rsRect = RSRect(canvasImage.dx, canvasImage.dy,
+            shadowWidth + canvasImage.dx, shadowHeight + canvasImage.dy);
         RSPath path;
         path.AddRect(rsRect);
-        PaintShadow(path, *imageShadow_, rsCanvas);
+        PaintShadow(path, shadow_, rsCanvas, &imageBrush_, nullptr);
     }
 
     RSRect bounds = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-    rosen::SaveLayerOps layerOps(&bounds, &imageBrush_);
     switch (canvasImage.flag) {
         case 0: {
             if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
@@ -252,7 +253,9 @@ void CanvasPaintMethod::DrawImage(
                 rsCanvas_->DrawImage(*image, canvasImage.dx, canvasImage.dy, sampleOptions_);
                 rsCanvas_->DetachBrush();
             } else {
-                InitPaintBlend(imageBrush_);
+                RSBrush compositeOperationpBrush;
+                InitPaintBlend(compositeOperationpBrush);
+                rosen::SaveLayerOps layerOps(&bounds, &compositeOperationpBrush);
                 rsCanvas_->SaveLayer(layerOps);
                 rsCanvas_->AttachBrush(imageBrush_);
                 rsCanvas_->DrawImage(*image, canvasImage.dx, canvasImage.dy, sampleOptions_);
@@ -264,13 +267,14 @@ void CanvasPaintMethod::DrawImage(
         case 1: {
             RSRect rect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
                 canvasImage.dHeight + canvasImage.dy);
-
             if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
                 rsCanvas_->AttachBrush(imageBrush_);
                 rsCanvas_->DrawImageRect(*image, rect, sampleOptions_);
                 rsCanvas_->DetachBrush();
             } else {
-                InitPaintBlend(imageBrush_);
+                RSBrush compositeOperationpBrush;
+                InitPaintBlend(compositeOperationpBrush);
+                rosen::SaveLayerOps layerOps(&bounds, &compositeOperationpBrush);
                 rsCanvas_->SaveLayer(layerOps);
                 rsCanvas_->AttachBrush(imageBrush_);
                 rsCanvas_->DrawImageRect(*image, rect, sampleOptions_);
@@ -287,10 +291,13 @@ void CanvasPaintMethod::DrawImage(
 
             if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
                 rsCanvas_->AttachBrush(imageBrush_);
-                rsCanvas_->DrawImageRect(*image, srcRect, dstRect, sampleOptions_);
+                rsCanvas_->DrawImageRect(*image, srcRect, dstRect, sampleOptions_,
+                    RSSrcRectConstraint::STRICT_SRC_RECT_CONSTRAINT);
                 rsCanvas_->DetachBrush();
             } else {
-                InitPaintBlend(imageBrush_);
+                RSBrush compositeOperationpBrush;
+                InitPaintBlend(compositeOperationpBrush);
+                rosen::SaveLayerOps layerOps(&bounds, &compositeOperationpBrush);
                 rsCanvas_->SaveLayer(layerOps);
                 rsCanvas_->AttachBrush(imageBrush_);
                 rsCanvas_->DrawImageRect(*image, srcRect, dstRect, sampleOptions_);
@@ -305,9 +312,9 @@ void CanvasPaintMethod::DrawImage(
 #endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
 {
-#ifndef USE_ROSEN_DRAWING
     InitImagePaint(imagePaint_, sampleOptions_);
 
     SkPaint compositeOperationpPaint;
@@ -357,13 +364,80 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
         skCanvas_->restore();
     }
-#endif
 }
+#else
+void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
+{
+    InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
+    RSBrush compositeOperationpBrush;
+    InitPaintBlend(compositeOperationpBrush);
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        RSRect rec = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
+        RSSaveLayerOps layerOps(&rec, &compositeOperationpBrush);
+        rsCanvas_->SaveLayer(layerOps);
+    }
 
+    if (globalState_.HasGlobalAlpha()) {
+        imageBrush_.SetAlphaF(globalState_.GetAlpha());
+    }
+
+    const auto rsCanvas = rsCanvas_.get();
+    CHECK_NULL_VOID(rsCanvas);
+    if (HasShadow()) {
+        RSRect rec = RSRect(canvasImage.dx, canvasImage.dy,
+            canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
+        RSPath path;
+        path.AddRect(rsRect);
+        PaintShadow(path, shadow_, rsCanvas, &imageBrush_, nullptr);
+    }
+    auto recordingCanvas = static_cast<RSRecordingCanvas*>(rsCanvas.get());
+    CHECK_NULL_VOID(recordingCanvas);
+    const std::shared_ptr<Media::PixelMap> tempPixelMap = pixelMap->GetPixelMapSharedPtr();
+    CHECK_NULL_VOID(tempPixelMap);
+    switch (canvasImage.flag) {
+        case 0: {
+            RSRect srcRect = RSRect(0, 0, tempPixelMap->GetWidth(), tempPixelMap->GetHeight());
+            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dx + tempPixelMap->GetWidth(), canvasImage.dy + tempPixelMap->GetHeight());
+            recordingCanvas->AttachBrush(imageBrush_);
+            recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect, sampleOptions_);
+            recordingCanvas->DetachBrush();
+            break;
+        }
+        case 1: {
+            RSRect srcRect = RSRect(0, 0, tempPixelMap->GetWidth(), tempPixelMap->GetHeight());
+            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
+            recordingCanvas->AttachBrush(imageBrush_);
+            recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect, sampleOptions_);
+            recordingCanvas->DetachBrush();
+            break;
+        }
+        case 2: {
+            RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy,
+                canvasImage.sx + canvasImage.sWidth, canvasImage.sy + canvasImage.sHeight);
+            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
+            recordingCanvas->AttachBrush(imageBrush_);
+            recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect,
+                sampleOptions_, RSSrcRectConstraint::STRICT_SRC_RECT_CONSTRAINT);
+            recordingCanvas->DetachBrush();
+            break;
+        }
+        default:
+            break;
+    }
+
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        rsCanvas_->Restore();
+    }
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void CanvasPaintMethod::DrawPixelMapWithoutGlobalState(
     const RefPtr<PixelMap>& pixelMap, const Ace::CanvasImage& canvasImage)
 {
-#ifndef USE_ROSEN_DRAWING
     InitImagePaint(imagePaint_, sampleOptions_);
 
     const auto skCanvas = skCanvas_.get();
@@ -391,9 +465,52 @@ void CanvasPaintMethod::DrawPixelMapWithoutGlobalState(
         default:
             break;
     }
-#endif
 }
-
+#else
+void CanvasPaintMethod::DrawPixelMapWithoutGlobalState(
+    const RefPtr<PixelMap>& pixelMap, const Ace::CanvasImage& canvasImage)
+{
+    InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
+    CHECK_NULL_VOID(rsCanvas_);
+    auto recordingCanvas = static_cast<RSRecordingCanvas*>(rsCanvas_.get());
+    CHECK_NULL_VOID(recordingCanvas);
+    const std::shared_ptr<Media::PixelMap> tempPixelMap = pixelMap->GetPixelMapSharedPtr();
+    CHECK_NULL_VOID(tempPixelMap);
+    switch (canvasImage.flag) {
+        case 0: {
+            RSRect srcRect = RSRect(0, 0, tempPixelMap->GetWidth(), tempPixelMap->GetHeight());
+            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dx + tempPixelMap->GetWidth(), canvasImage.dy + tempPixelMap->GetHeight());
+            recordingCanvas->AttachBrush(imageBrush_);
+            recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect, sampleOptions_);
+            recordingCanvas->DetachBrush();
+            break;
+        }
+        case 1: {
+            RSRect srcRect = RSRect(0, 0, tempPixelMap->GetWidth(), tempPixelMap->GetHeight());
+            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
+            recordingCanvas->AttachBrush(imageBrush_);
+            recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect, sampleOptions_);
+            recordingCanvas->DetachBrush();
+            break;
+        }
+        case 2: {
+            RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy,
+                canvasImage.sx + canvasImage.sWidth, canvasImage.sy + canvasImage.sHeight);
+            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
+            recordingCanvas->AttachBrush(imageBrush_);
+            recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect,
+                sampleOptions_, RSSrcRectConstraint::STRICT_SRC_RECT_CONSTRAINT);
+            recordingCanvas->DetachBrush();
+            break;
+        }
+        default:
+            break;
+    }
+}
+#endif
 void CanvasPaintMethod::CloseImageBitmap(const std::string& src)
 {
     CHECK_NULL_VOID(imageCache_);
@@ -1072,10 +1189,11 @@ void CanvasPaintMethod::PaintShadow(const SkPath& path, const Shadow& shadow, Sk
 #endif
 }
 #else
-void CanvasPaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas)
+void CanvasPaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
+    const RSBrush* brush, const RSPen* pen);
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    RosenDecorationPainter::PaintShadow(path, shadow, canvas);
+    RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
 #endif
 }
 #endif

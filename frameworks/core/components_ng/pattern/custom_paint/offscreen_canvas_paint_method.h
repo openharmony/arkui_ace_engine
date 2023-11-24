@@ -86,7 +86,8 @@ private:
         return skCanvas_.get();
     }
 #else
-    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas) override;
+    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
+        const RSBrush* brush = nullptr, const RSPen* pen = nullptr) override;
     void Path2DRect(const OffsetF& offset, const PathArgs& args) override;
     RSCanvas* GetRawPtrOfRSCanvas() override
     {

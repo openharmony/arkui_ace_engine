@@ -200,19 +200,18 @@ void OffscreenCanvasPaintMethod::DrawImage(
         RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
         rsCanvas_->SaveLayer(slo);
     }
-
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
-    if (HasImageShadow()) {
+    if (globalState_.HasGlobalAlpha()) {
+        imageBrush_.SetAlphaF(globalState_.GetAlpha());
+    }
+    if (HasShadow()) {
         RSRect rsRect = RSRect(
             canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
         RSPath path;
         path.AddRect(rsRect);
-        RosenDecorationPainter::PaintShadow(path, *imageShadow_, rsCanvas);
+        RosenDecorationPainter::PaintShadow(path, shadow_, rsCanvas, &imageBrush_, nullptr);
     }
 
-    if (globalState_.HasGlobalAlpha()) {
-        imageBrush_.SetAlphaF(globalState_.GetAlpha());
-    }
     switch (canvasImage.flag) {
         case 0:
             rsCanvas->DrawImage(*image, canvasImage.dx, canvasImage.dy, RSSamplingOptions());
@@ -231,7 +230,8 @@ void OffscreenCanvasPaintMethod::DrawImage(
             RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
                 canvasImage.sHeight + canvasImage.sy);
             rsCanvas->AttachBrush(imageBrush_);
-            rsCanvas->DrawImageRect(*image, srcRect, dstRect, sampleOptions_);
+            rsCanvas->DrawImageRect(*image, srcRect, dstRect, sampleOptions_,
+                RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
             rsCanvas->DetachBrush();
             break;
         }
@@ -967,9 +967,10 @@ void OffscreenCanvasPaintMethod::PaintShadow(
     RosenDecorationPainter::PaintShadow(path, shadow, canvas, paint);
 }
 #else
-void OffscreenCanvasPaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas)
+void OffscreenCanvasPaintMethod::PaintShadow(const RSPath& path,
+    const Shadow& shadow, RSCanvas* canvas, const RSBrush* brush, const RSPen* pen)
 {
-    RosenDecorationPainter::PaintShadow(path, shadow, canvas);
+    RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
 }
 #endif
 
