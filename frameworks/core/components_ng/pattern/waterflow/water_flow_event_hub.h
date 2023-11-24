@@ -16,48 +16,27 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_EVENT_HUB_H
 
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 
 namespace OHOS::Ace::NG {
-class WaterFlowEventHub : public EventHub {
-    DECLARE_ACE_TYPE(WaterFlowEventHub, EventHub)
+using ScrollIndexFunc = std::function<void(int32_t, int32_t)>;
+
+class WaterFlowEventHub : public ScrollableEventHub {
+    DECLARE_ACE_TYPE(WaterFlowEventHub, ScrollableEventHub)
 
 public:
-    void SetOnReachStart(OnReachEvent&& onReachStart)
+    void SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)
     {
-        onReachStartEvent_ = std::move(onReachStart);
+        onScrollIndexEvent_ = std::move(onScrollIndex);
     }
 
-    const OnReachEvent& GetOnReachStart() const
+    const ScrollIndexFunc& GetOnScrollIndex() const
     {
-        return onReachStartEvent_;
-    }
-
-    void SetOnReachEnd(OnReachEvent&& onReachEnd)
-    {
-        onReachEndEvent_ = std::move(onReachEnd);
-    }
-
-    const OnReachEvent& GetOnReachEnd() const
-    {
-        return onReachEndEvent_;
-    }
-
-    void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin)
-    {
-        onScrollFrameBeginEvent_ = std::move(onScrollFrameBegin);
-    }
-
-    const OnScrollFrameBeginEvent& GetOnScrollFrameBegin() const
-    {
-        return onScrollFrameBeginEvent_;
+        return onScrollIndexEvent_;
     }
 
 private:
-    OnReachEvent onReachStartEvent_;
-    OnReachEvent onReachEndEvent_;
-    OnScrollFrameBeginEvent onScrollFrameBeginEvent_;
+    ScrollIndexFunc onScrollIndexEvent_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_EVENT_HUB_H
