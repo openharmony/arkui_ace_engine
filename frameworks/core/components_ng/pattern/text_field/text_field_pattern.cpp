@@ -2354,7 +2354,6 @@ void TextFieldPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(textFieldTheme);
     if (isHover) {
         pipeline->SetMouseStyleHoldNode(frameId);
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
     } else {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(frameId);
@@ -2416,6 +2415,22 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     info.SetStopPropagation(true);
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        if (isOnHover_ && !scrollBar->IsHover() && !scrollBar->IsPressed()) {
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
+        } else {
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+            return;
+        }
+    } else {
+        if (isOnHover_) {
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
+        } else {
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+            return;
+        }
+    }
     ChangeMouseState(info.GetLocalLocation(), pipeline, frameId);
 
     isUsingMouse_ = true;
