@@ -742,28 +742,26 @@ void JSRichEditorController::ParseTextShadow(
 {
     auto shadowObject = styleObject->GetProperty("textShadow");
     if (!shadowObject->IsNull()) {
-        if (!shadowObject->IsArray()) {
+        if (!shadowObject->IsArray() && JSViewAbstract::ParseShadowProps(shadowObject, shadow)) {
             Shadow shadow;
-            if (JSViewAbstract::ParseShadowProps(shadowObject, shadow)) {
-                std::vector<Shadow> shadows { shadow };
-                updateSpanStyle.updateTextShadows = shadows;
-                style.SetTextShadows(shadows);
-            }
-        } else {
-            JSRef<JSArray> params = JSRef<JSArray>::Cast(shadowObject);
-            auto shadowLength = params->Length();
-            std::vector<Shadow> shadows(shadowLength);
-            for (size_t i = 0; i < shadowLength; ++i) {
-                auto shadowJsVal = params->GetValueAt(i);
-                Shadow shadow;
-                if (!JSViewAbstract::ParseShadowProps(shadowJsVal, shadow)) {
-                    continue;
-                }
-                shadows[i] = shadow;
-            }
+            std::vector<Shadow> shadows { shadow };
             updateSpanStyle.updateTextShadows = shadows;
             style.SetTextShadows(shadows);
+            return;
+        } 
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(shadowObject);
+        auto shadowLength = params->Length();
+        std::vector<Shadow> shadows(shadowLength);
+        for (size_t i = 0; i < shadowLength; ++i) {
+            auto shadowJsVal = params->GetValueAt(i);
+            Shadow shadow;
+            if (!JSViewAbstract::ParseShadowProps(shadowJsVal, shadow)) {
+                continue;
+            }
+            shadows[i] = shadow;
         }
+        updateSpanStyle.updateTextShadows = shadows;
+        style.SetTextShadows(shadows);
     }
 }
 void JSRichEditorController::ParseTextDecoration(
