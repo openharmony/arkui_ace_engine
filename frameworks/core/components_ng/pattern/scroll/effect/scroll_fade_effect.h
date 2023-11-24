@@ -38,7 +38,7 @@ public:
     void InitialEdgeEffect() override;
     double CalculateOverScroll(double oldPosition, bool isReachMax) override;
     void Paint(RSCanvas& canvas, const SizeF& viewPort, const OffsetF& offset) override;
-    void HandleOverScroll(Axis axis, float overScroll, const SizeF& viewPort) override;
+    void HandleOverScroll(Axis axis, float overScroll, const SizeF& viewPort, bool isScrollFromUpdate = false) override;
     void SetHandleOverScrollCallback(const HandleOverScrollCallback& callback) override;
 
 private:
