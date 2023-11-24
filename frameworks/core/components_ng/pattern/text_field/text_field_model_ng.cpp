@@ -132,9 +132,6 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
     CHECK_NULL_RETURN(focusHub, nullptr);
     focusHub->SetFocusType(FocusType::NODE);
     focusHub->SetFocusStyleType(FocusStyleType::CUSTOM_REGION);
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    pipeline->SetIsFocusActive(true);
     return pattern->GetTextFieldController();
 };
 

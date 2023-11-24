@@ -47,6 +47,7 @@ constexpr int NUM_14 = 14;
 constexpr int NUM_15 = 15;
 constexpr int DEFAULT_LENGTH = 4;
 constexpr double ROUND_UNIT = 360.0;
+constexpr int32_t DEFAULT_DISPLAY_PRIORITY = 0;
 
 BorderStyle ConvertBorderStyle(int32_t value)
 {
@@ -1563,6 +1564,21 @@ void ResetDefaultFocus(NodeHandle node)
     ViewAbstract::SetDefaultFocus(frameNode, defaultFocus);
 }
 
+void SetDisplayPriority(NodeHandle node, double value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDisplayIndex(frameNode, static_cast<int32_t>(value));
+}
+
+void ResetDisplayPriority(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDisplayIndex(frameNode, DEFAULT_DISPLAY_PRIORITY);
+}
+
+
 ArkUICommonModifierAPI GetCommonModifier()
 {
     static const ArkUICommonModifierAPI modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
@@ -1586,7 +1602,8 @@ ArkUICommonModifierAPI GetCommonModifier()
         SetUseEffect, ResetUseEffect,
         SetForegroundColor, ResetForegroundColor, SetMotionPath, ResetMotionPath,
         SetGroupDefaultFocus, ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable,
-        ResetFocusable, SetTouchable, ResetTouchable, SetDefaultFocus, ResetDefaultFocus };
+        ResetFocusable, SetTouchable, ResetTouchable, SetDefaultFocus, ResetDefaultFocus,
+        SetDisplayPriority, ResetDisplayPriority, };
 
     return modifier;
 }

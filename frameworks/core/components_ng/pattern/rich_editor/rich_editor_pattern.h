@@ -444,6 +444,7 @@ private:
     {
         return true;
     }
+    void ProcessInnerPadding();
 
     // ai analysis fun
     bool NeedAiAnalysis(

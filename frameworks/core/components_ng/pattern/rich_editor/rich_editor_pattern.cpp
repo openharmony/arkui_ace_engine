@@ -152,6 +152,7 @@ void RichEditorPattern::OnModifyDone()
     InitLongPressEvent(gestureEventHub);
     InitTouchEvent();
     HandleEnabled();
+    ProcessInnerPadding();
     InitScrollablePattern();
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (host->IsDraggable()) {
@@ -3951,6 +3952,34 @@ void RichEditorPattern::InitScrollablePattern()
         auto offsetX = paddingProperty->left.has_value() ? paddingProperty->left->GetDimension().ConvertToPx() : 0.0f;
         richTextRect_.SetOffset(OffsetF(offsetX, offsetY));
     }
+}
+
+void RichEditorPattern::ProcessInnerPadding()
+{
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(theme);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto themePadding = theme->GetPadding();
+    auto& paddingProp = layoutProperty->GetPaddingProperty();
+    auto left = !paddingProp ? CalcLength(themePadding.Left()).GetDimension()
+                             : paddingProp->left.value_or(CalcLength(themePadding.Left())).GetDimension();
+    auto top = !paddingProp ? CalcLength(themePadding.Top()).GetDimension()
+                            : paddingProp->top.value_or(CalcLength(themePadding.Top())).GetDimension();
+    auto bottom = !paddingProp ? CalcLength(themePadding.Bottom()).GetDimension()
+                               : paddingProp->bottom.value_or(CalcLength(themePadding.Bottom())).GetDimension();
+    auto right = !paddingProp ? CalcLength(themePadding.Right()).GetDimension()
+                              : paddingProp->right.value_or(CalcLength(themePadding.Right())).GetDimension();
+    PaddingProperty paddings;
+    paddings.top = NG::CalcLength(top);
+    paddings.bottom = NG::CalcLength(bottom);
+    paddings.left = NG::CalcLength(left);
+    paddings.right = NG::CalcLength(right);
+    layoutProperty->UpdatePadding(paddings);
 }
 
 void RichEditorPattern::UpdateScrollStateAfterLayout(bool shouldDisappear)

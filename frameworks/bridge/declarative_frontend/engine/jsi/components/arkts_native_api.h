@@ -72,11 +72,11 @@ struct ArkUICommonModifierAPI {
     void (*SetLinearGradient)(
         NodeHandle node, const double* values, int32_t valuesLength, const double* colors, int32_t colorsLength);
     void (*ResetLinearGradient)(NodeHandle node);
-    void (*SetSweepGradient)(NodeHandle node, const double* values, int32_t valuesLength,
-        const double* colors, int32_t colorsLength);
+    void (*SetSweepGradient)(
+        NodeHandle node, const double* values, int32_t valuesLength, const double* colors, int32_t colorsLength);
     void (*ResetSweepGradient)(NodeHandle node);
-    void (*SetRadialGradient)(NodeHandle node, const double* values, int32_t valuesLength,
-        const double* colors, int32_t colorsLength);
+    void (*SetRadialGradient)(
+        NodeHandle node, const double* values, int32_t valuesLength, const double* colors, int32_t colorsLength);
     void (*ResetRadialGradient)(NodeHandle node);
     void (*SetForegroundBlurStyle)(
         NodeHandle node, int32_t blurStyle, int32_t colorMode, int32_t adaptiveColor, double scale);
@@ -131,6 +131,8 @@ struct ArkUICommonModifierAPI {
     void (*ResetTouchable)(NodeHandle node);
     void (*SetDefaultFocus)(NodeHandle node, bool defaultFocus);
     void (*ResetDefaultFocus)(NodeHandle node);
+    void (*SetDisplayPriority)(NodeHandle node, double value);
+    void (*ResetDisplayPriority)(NodeHandle node);
 };
 struct ArkUITextModifierAPI {
     void (*SetFontWeight)(NodeHandle node, const char* weight);
@@ -253,7 +255,7 @@ struct ArkUICheckboxModifierAPI {
     void (*SetCheckboxWidth)(NodeHandle node, double widthVal, int widthUnit);
     void (*SetCheckboxHeight)(NodeHandle node, double heightVal, int heightUnit);
     void (*SetMark)(NodeHandle node, uint32_t color, double sizeValue, double widthValue);
-    
+
     void (*ResetSelect)(NodeHandle node);
     void (*ResetSelectedColor)(NodeHandle node);
     void (*ResetUnSelectedColor)(NodeHandle node);
@@ -306,10 +308,9 @@ struct ArkUIRatingModifierAPI {
 struct ArkUISliderModifierAPI {
     void (*SetShowTips)(NodeHandle node, bool isShow, const char* value);
     void (*ResetShowTips)(NodeHandle node);
-    void (*SetSliderStepSize)(NodeHandle node,  float value, int unit);
+    void (*SetSliderStepSize)(NodeHandle node, float value, int unit);
     void (*ResetSliderStepSize)(NodeHandle node);
-    void (*SetBlockSize)(
-        NodeHandle node, float widthVal, int widthUnit, float heightVal, int heightUnit);
+    void (*SetBlockSize)(NodeHandle node, float widthVal, int widthUnit, float heightVal, int heightUnit);
     void (*ResetBlockSize)(NodeHandle node);
     void (*SetTrackBorderRadius)(NodeHandle node, float value, int unit);
     void (*ResetTrackBorderRadius)(NodeHandle node);
@@ -334,8 +335,8 @@ struct ArkUISliderModifierAPI {
 struct ArkUIRadioModifierAPI {
     void (*SetRadioChecked)(NodeHandle node, bool isCheck);
     void (*ResetRadioChecked)(NodeHandle node);
-    void (*SetRadioStyle)(NodeHandle node,
-        uint32_t checkedBackgroundColor, uint32_t uncheckedBorderColor, uint32_t indicatorColor);
+    void (*SetRadioStyle)(
+        NodeHandle node, uint32_t checkedBackgroundColor, uint32_t uncheckedBorderColor, uint32_t indicatorColor);
     void (*ResetRadioStyle)(NodeHandle node);
 };
 
@@ -351,11 +352,11 @@ struct ArkUIDividerModifierAPI {
 };
 
 struct ArkUIGridColModifierAPI {
-    void (*SetSpan)(NodeHandle node, int32_t *containerSizeArray, int32_t size);
+    void (*SetSpan)(NodeHandle node, int32_t* containerSizeArray, int32_t size);
     void (*ResetSpan)(NodeHandle node);
-    void (*SetGridColOffset)(NodeHandle node, int32_t *containerSizeArray, int32_t size);
+    void (*SetGridColOffset)(NodeHandle node, int32_t* containerSizeArray, int32_t size);
     void (*ResetGridColOffset)(NodeHandle node);
-    void (*SetOrder)(NodeHandle node, int32_t *containerSizeArray, int32_t size);
+    void (*SetOrder)(NodeHandle node, int32_t* containerSizeArray, int32_t size);
     void (*ResetOrder)(NodeHandle node);
 };
 
@@ -371,6 +372,11 @@ struct ArkUIPanelModifierAPI {
 struct ArkUITextAreaModifierAPI {
     void (*SetTextAreaMaxLines)(NodeHandle node, uint32_t maxLine);
     void (*ResetTextAreaMaxLines)(NodeHandle node);
+};
+
+struct ArkUINavigationModifierAPI {
+    void (*SetHideToolBar)(NodeHandle node, bool hide);
+    void (*ResetHideToolBar)(NodeHandle node);
 };
 
 struct ArkUINodeAPI {
@@ -391,12 +397,11 @@ struct ArkUINodeAPI {
     ArkUIRatingModifierAPI (*GetRatingModifier)();
     ArkUISliderModifierAPI (*GetSliderModifier)();
     ArkUIDividerModifierAPI (*GetDividerModifier)();
-    ArkUINavDestinationModifierAPI(*GetNavDestinationModifier)();
+    ArkUINavDestinationModifierAPI (*GetNavDestinationModifier)();
     ArkUIGridColModifierAPI (*GetGridColModifier)();
     ArkUIPanelModifierAPI (*GetPanelModifier)();
     ArkUITextAreaModifierAPI (*GetTextAreaModifier)();
+    ArkUINavigationModifierAPI (*GetNavigationModifier)();
 };
-
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
-
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H
