@@ -3794,6 +3794,7 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end)
         }
     }
     SetCaretPosition(textSelector_.GetTextEnd());
+    MoveCaretToContentRect();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
