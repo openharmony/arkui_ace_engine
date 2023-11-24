@@ -264,7 +264,7 @@ void JSTextClock::SetTextShadow(const JSCallbackInfo& info)
         return;
     }
     std::vector<Shadow> shadows;
-    parseTextShadowFromShadowObject(info[0], shadows);
+    ParseTextShadowFromShadowObject(info[0], shadows);
     if (!shadows.empty()) {
         TextClockModel::GetInstance()->SetTextShadow(shadows);
     }
