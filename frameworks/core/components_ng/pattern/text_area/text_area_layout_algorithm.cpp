@@ -111,7 +111,7 @@ void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     // Add children height;
     auto counterNodeLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    if (counterNodeLayoutWrapper) {
+    if (counterNodeLayoutWrapper && pattern->IsNormalInlineState()) {
         auto counterSize = counterNodeLayoutWrapper->GetGeometryNode()->GetFrameSize();
         contentHeight += counterSize.Height();
     }
