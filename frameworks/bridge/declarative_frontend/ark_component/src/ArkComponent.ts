@@ -695,6 +695,42 @@ class FocusOnTouchModifier extends Modifier <boolean> {
     }
 }
 
+class DefaultFocusModifier extends Modifier<boolean>{
+    static identity: Symbol = Symbol("defaultFocus");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetDefaultFocus(node);
+        }
+        else {
+            GetUINativeModule().common.setDefaultFocus(node, this.value);
+        }
+    }
+}
+
+class FocusableModifier extends Modifier<boolean>{
+    static identity: Symbol = Symbol("focusable");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetFocusable(node);
+        }
+        else {
+            GetUINativeModule().common.setFocusable(node, this.value);
+        }
+    }
+}
+
+class TouchableModifier extends Modifier<boolean>{
+    static identity: Symbol = Symbol("touchable");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetTouchable(node);
+        }
+        else {
+            GetUINativeModule().common.setTouchable(node, this.value);
+        }
+    }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType) => typeof val === 'string'
@@ -841,7 +877,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     touchable(value: boolean): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === 'boolean') {
+            modifier(this._modifiers, TouchableModifier, value);
+        } else {
+            modifier(this._modifiers, TouchableModifier, undefined);
+        }
+        return this;
     }
 
     hitTestBehavior(value: HitTestMode): this {
@@ -1236,7 +1277,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     focusable(value: boolean): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === 'boolean') {
+            modifier(this._modifiers, FocusableModifier, value);
+        } else {
+            modifier(this._modifiers, FocusableModifier, undefined);
+        }
+        return this;
     }
 
     onFocus(event: () => void): this {
@@ -1252,7 +1298,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     defaultFocus(value: boolean): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === 'boolean') {
+            modifier(this._modifiers, DefaultFocusModifier, value);
+        } else {
+            modifier(this._modifiers, DefaultFocusModifier, undefined);
+        }
+        return this;
     }
 
     groupDefaultFocus(value: boolean): this {

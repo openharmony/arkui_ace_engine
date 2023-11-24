@@ -1518,6 +1518,51 @@ void ResetFocusOnTouch(NodeHandle node)
     bool focusOnTouch = false;
     ViewAbstract::SetFocusOnTouch(frameNode, focusOnTouch);
 }
+void SetFocusable(NodeHandle node, bool focusable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetFocusable(frameNode, focusable);
+}
+
+void ResetFocusable(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool focusable = false;
+    ViewAbstract::SetFocusable(frameNode, focusable);
+}
+
+void SetTouchable(NodeHandle node, bool touchable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetTouchable(frameNode, touchable);
+}
+
+void ResetTouchable(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool touchable = true;
+    ViewAbstract::SetTouchable(frameNode, touchable);
+}
+
+void SetDefaultFocus(NodeHandle node, bool defaultFocus)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDefaultFocus(frameNode, defaultFocus);
+}
+
+void ResetDefaultFocus(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool defaultFocus = false;
+    ViewAbstract::SetDefaultFocus(frameNode, defaultFocus);
+}
+
 ArkUICommonModifierAPI GetCommonModifier()
 {
     static const ArkUICommonModifierAPI modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
@@ -1540,8 +1585,8 @@ ArkUICommonModifierAPI GetCommonModifier()
         SetRenderFit, ResetRenderFit,
         SetUseEffect, ResetUseEffect,
         SetForegroundColor, ResetForegroundColor, SetMotionPath, ResetMotionPath,
-        SetGroupDefaultFocus, ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch
-    };
+        SetGroupDefaultFocus, ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable,
+        ResetFocusable, SetTouchable, ResetTouchable, SetDefaultFocus, ResetDefaultFocus };
 
     return modifier;
 }

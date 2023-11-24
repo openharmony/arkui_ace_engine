@@ -2087,4 +2087,28 @@ void ViewAbstract::SetGroupDefaultFocus(FrameNode* frameNode, bool isSet)
     CHECK_NULL_VOID(focusHub);
     focusHub->SetIsDefaultGroupFocus(isSet);
 }
+
+void ViewAbstract::SetFocusable(FrameNode* frameNode, bool focusable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(focusable);
+}
+
+void ViewAbstract::SetTouchable(FrameNode* frameNode, bool touchable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetTouchable(touchable);
+}
+
+void ViewAbstract::SetDefaultFocus(FrameNode* frameNode, bool isSet)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetIsDefaultFocus(isSet);
+}
 } // namespace OHOS::Ace::NG
