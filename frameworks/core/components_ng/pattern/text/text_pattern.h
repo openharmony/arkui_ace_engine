@@ -449,7 +449,6 @@ protected:
     std::vector<RectF> dragBoxes_;
 
     // properties for AI
-    bool hasChildren_ = false;
     bool textDetectEnable_ = false;
     bool aiDetectInitialized_ = false;
     bool aiDetectTypesChanged_ = false;

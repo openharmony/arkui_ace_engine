@@ -298,7 +298,7 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     for (auto kv : pattern->GetAISpanMap()) {
         auto aiSpan = kv.second;
         if (aiSpan.start <= preEnd) {
-            LOGD("Error prediction");
+            TAG_LOGI(AceLogTag::ACE_TEXT, "Error prediction");
             continue;
         }
         if (preEnd < aiSpan.start) {
