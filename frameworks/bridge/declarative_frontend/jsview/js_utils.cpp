@@ -155,13 +155,13 @@ bool IsDisableEventVersion()
     return Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
 }
 
-void parseTextShadowFromShadowObject(const JSRef<JsVal>& shadowObject, std::vector<Shadow>& shadows){
+void parseTextShadowFromShadowObject(const JSRef<JSVal>& shadowObject, std::vector<Shadow>& shadows){
     if (!shadowObject->IsNumber() && !shadowObject->IsObject() && !shadowObject->IsArray()) {
         return;
     }
     if (!shadowObject->IsArray()) {
         Shadow shadow;
-        if (!JSViewAbstract::ParseShadowProps(info[0], shadow)) {
+        if (!JSViewAbstract::ParseShadowProps(shadowObject, shadow)) {
             return;
         }
         shadows.push_back(shadow);
