@@ -1407,4 +1407,16 @@ void NavigationModelNG::SetMenuCount(int32_t menuCount)
 {
     return;
 }
+
+void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    navBarLayoutProperty->UpdateHideToolBar(hideToolBar);
+}
 } // namespace OHOS::Ace::NG

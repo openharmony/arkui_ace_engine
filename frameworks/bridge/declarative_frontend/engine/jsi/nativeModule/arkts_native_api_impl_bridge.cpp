@@ -13,24 +13,25 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blank_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkbox_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkboxgroup_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_col_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_panel_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_radio_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rating_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_slider_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rating_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_slider_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkbox_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeById(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -275,7 +276,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDec"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetEnableDec));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "counter"), counter);
-    
+
     auto checkboxgroup = panda::ObjectRef::New(vm);
     checkboxgroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGroupSelectColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxGroupBridge::SetGroupSelectedColor));
@@ -418,7 +419,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "radio"), radio);
-    
+
     auto checkbox = panda::ObjectRef::New(vm);
     checkbox->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMark"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxBridge::SetMark));
@@ -445,7 +446,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     checkbox->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxBridge::ResetCheckboxHeight));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "checkbox"), checkbox);
-    
+
     auto textpicker = panda::ObjectRef::New(vm);
     textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCanLoop"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextpickerBridge::SetCanLoop));
@@ -495,7 +496,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     timepicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TimepickerBridge::ResetTimepickerBackgroundColor));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "timepicker"), timepicker);
-    
+
     auto rating = panda::ObjectRef::New(vm);
     rating->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStars"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RatingBridge::SetStars));
@@ -510,7 +511,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     rating->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStarStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RatingBridge::ResetStarStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "rating"), rating);
-    
+
     auto slider = panda::ObjectRef::New(vm);
     slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowTips"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetShowTips));
@@ -579,25 +580,26 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::ResetColor));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "blank"), blank);
-    
+
     auto gridCol = panda::ObjectRef::New(vm);
     gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSpan"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), GridColBridge::SetSpan));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::SetSpan));
     gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSpan"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), GridColBridge::ResetSpan));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::ResetSpan));
     gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGridColOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), GridColBridge::SetGridColOffset));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::SetGridColOffset));
     gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGridColOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), GridColBridge::ResetGridColOffset));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::ResetGridColOffset));
     gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOrder"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), GridColBridge::SetOrder));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::SetOrder));
     gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOrder"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), GridColBridge::ResetOrder));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::ResetOrder));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "gridCol"), gridCol);
 
     RegisterButtonAttributes(object, vm);
     RegisterToggleAttributes(object, vm);
     RegisterDividerAttributes(object, vm);
+    RegisterNavigationAttributes(object, vm);
 
     return object;
 }
@@ -674,5 +676,15 @@ void ArkUINativeModule::RegisterDividerAttributes(Local<panda::ObjectRef> object
     divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVertical"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::ResetVertical));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "divider"), divider);
+}
+
+void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto navigation = panda::ObjectRef::New(vm);
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHideToolBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetHideToolBar));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideToolBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetHideToolBar));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigation"), navigation);
 }
 } // namespace OHOS::Ace::NG
