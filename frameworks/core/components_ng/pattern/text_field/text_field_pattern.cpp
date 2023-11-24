@@ -2305,10 +2305,7 @@ void TextFieldPattern::OnHandleClosed(bool closedByGlobalEvent)
 {
     SelectOverlayClient::OnHandleClosed(closedByGlobalEvent);
     if (closedByGlobalEvent) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        selectController_->UpdateCaretIndex(selectController_->GetSecondHandleIndex());
-        StartTwinkling();
+        UpdateSelectMenuVisibility(false);
     }
 }
 
