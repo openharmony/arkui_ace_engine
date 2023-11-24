@@ -188,6 +188,9 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
 
 bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (config.skipMeasure || dirty->SkipMeasureContent()) {
+        return false;
+    }
     frameRect_ = dirty->GetGeometryNode()->GetFrameRect();
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
@@ -3830,7 +3833,13 @@ RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()
         contentMod_ = MakeRefPtr<RichEditorContentModifier>(textStyle_, &paragraphs_, WeakClaim(this));
     }
     if (!overlayMod_) {
-        CreateScrollBarOverlayModifier();
+        auto scrollBar = GetScrollBar();
+        if (scrollBar) {
+            auto scrollBarModifier = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+            scrollBarModifier->SetRect(scrollBar->GetActiveRect());
+            scrollBarModifier->SetPositionMode(scrollBar->GetPositionMode());
+            SetScrollBarOverlayModifier(scrollBarModifier);
+        }
         SetEdgeEffect(EdgeEffect::FADE);
         overlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>(
             WeakClaim(this), GetScrollBarOverlayModifier(), GetScrollEdgeEffect());
@@ -3979,7 +3988,9 @@ void RichEditorPattern::UpdateScrollStateAfterLayout(bool shouldDisappear)
     }
     StopScrollable();
     CheckScrollable();
-    UpdateScrollBarOffset();
+    if (overlayMod_) {
+        UpdateScrollBarOffset();
+    }
     if (!GetScrollBar()) {
         return;
     }
@@ -4092,7 +4103,9 @@ void RichEditorPattern::UpdateScrollBarOffset()
         return;
     }
     Size size(frameRect_.Width(), frameRect_.Height());
-    UpdateScrollBarRegion(contentRect_.GetY() - richTextRect_.GetY(), richTextRect_.Height(), size, Offset(0.0, 0.0));
+    auto verticalGap = frameRect_.Height() - contentRect_.Height();
+    UpdateScrollBarRegion(contentRect_.GetY() - richTextRect_.GetY(), richTextRect_.Height() + verticalGap,
+        size, Offset(0.0, 0.0));
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
