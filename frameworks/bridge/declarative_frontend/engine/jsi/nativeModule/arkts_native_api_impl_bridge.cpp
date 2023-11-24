@@ -310,6 +310,34 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityDescription));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityDescription"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityDescription));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetId));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetId));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setKey"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetKey));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetKey"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetKey));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRestoreId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetRestoreId));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRestoreId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetRestoreId));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabIndex"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetTabIndex));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabIndex"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetTabIndex));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setObscured"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetObscured));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObscured"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetObscured));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetResponseRegion));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetResponseRegion));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMouseResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetMouseResponseRegion));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMouseResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetMouseResponseRegion));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto counter = panda::ObjectRef::New(vm);

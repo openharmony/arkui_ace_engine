@@ -171,6 +171,20 @@ struct ArkUICommonModifierAPI {
     void (*ResetAccessibilityLevel)(NodeHandle node);
     void (*SetAccessibilityDescription)(NodeHandle node, const char* value);
     void (*ResetAccessibilityDescription)(NodeHandle node);
+    void (*SetId)(NodeHandle node, const char* id);
+    void (*ResetId)(NodeHandle node);
+    void (*SetKey)(NodeHandle node, const char* key);
+    void (*ResetKey)(NodeHandle node);
+    void (*SetRestoreId)(NodeHandle node, uint32_t id);
+    void (*ResetRestoreId)(NodeHandle node);
+    void (*SetTabIndex)(NodeHandle node, int32_t index);
+    void (*ResetTabIndex)(NodeHandle node);
+    void (*SetObscured)(NodeHandle node, const int32_t* reasons, int32_t length);
+    void (*ResetObscured)(NodeHandle node);
+    void (*SetResponseRegion)(NodeHandle node, const double* values, int32_t length);
+    void (*ResetResponseRegion)(NodeHandle node);
+    void (*SetMouseResponseRegion)(NodeHandle node, const double* values, int32_t length);
+    void (*ResetMouseResponseRegion)(NodeHandle node);
 };
 
 struct ArkUITextModifierAPI {

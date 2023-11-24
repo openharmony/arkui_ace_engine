@@ -909,6 +909,91 @@ class DisplayPriorityModifier extends Modifier<number> {
     }
   }
 }
+
+class IDModifier extends Modifier<string> {
+    static identity: Symbol = Symbol("id");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetID(node);
+        }
+        else {
+            GetUINativeModule().common.setID(node, this.value);
+        }
+    }
+}
+
+class KeyModifier extends Modifier<string> {
+    static identity: Symbol = Symbol("key");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetKey(node);
+        }
+        else {
+            GetUINativeModule().common.setKey(node, this.value);
+        }
+    }
+}
+
+class RestoreIdModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("restoreId");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetRestoreId(node);
+        }
+        else {
+            GetUINativeModule().common.setRestoreId(node, this.value);
+        }
+    }
+}
+
+class TabIndexModifier extends Modifier<number> {
+    static identity: Symbol = Symbol("tabIndex");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetTabIndex(node);
+        }
+        else {
+            GetUINativeModule().common.setTabIndex(node, this.value);
+        }
+    }
+}
+
+class ObscuredModifier extends Modifier<ArkObscured> {
+    static identity: Symbol = Symbol("obscured");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetObscured(node);
+        }
+        else {
+            GetUINativeModule().common.setObscured(node, this.value.reasons);
+        }
+    }
+}
+
+class MouseResponseRegionModifier extends Modifier<ArkResponseRegion> {
+    static identity = Symbol("mouseResponseRegion");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetMouseResponseRegion(node);
+        }
+        else {
+            GetUINativeModule().common.setMouseResponseRegion(node, this.value.responseRegion);
+        }
+    }
+}
+
+class ResponseRegionModifier extends Modifier<ArkResponseRegion> {
+    static identity = Symbol("responseRegion");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetResponseRegion(node);
+        }
+        else {
+            GetUINativeModule().common.setResponseRegion(node, this.value.responseRegion);
+        }
+    }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType) => typeof val === 'string'
@@ -1041,11 +1126,23 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     responseRegion(value: Array<Rectangle> | Rectangle): this {
-        throw new Error("Method not implemented.");
+        let arkResponseRegion = new ArkResponseRegion();
+        if (arkResponseRegion.parseRegionValue(value)) {
+            modifier(this._modifiers, ResponseRegionModifier, arkResponseRegion);
+        } else {
+            modifier(this._modifiers, ResponseRegionModifier, undefined);
+        }
+        return this;
     }
 
     mouseResponseRegion(value: Array<Rectangle> | Rectangle): this {
-        throw new Error("Method not implemented.");
+        let arkMouseResponseRegion = new ArkResponseRegion();
+        if (arkMouseResponseRegion.parseRegionValue(value)) {
+            modifier(this._modifiers, MouseResponseRegionModifier, arkMouseResponseRegion);
+        } else {
+            modifier(this._modifiers, MouseResponseRegionModifier, undefined);
+        }
+        return this;
     }
 
     size(value: SizeOptions): this {
@@ -1482,7 +1579,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     tabIndex(index: number): this {
-        throw new Error("Method not implemented.");
+        if (typeof index !== "number") {
+            modifier(this._modifiers, TabIndexModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, TabIndexModifier, index);
+        }
+        return this;
     }
 
     defaultFocus(value: boolean): this {
@@ -1990,11 +2093,21 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     key(value: string): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === "string") {
+            modifier(this._modifiers, IDModifier, value);
+        } else {
+            modifier(this._modifiers, IDModifier, undefined);
+        }
+        return this;		
     }
 
     id(value: string): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === "string") {
+            modifier(this._modifiers, KeyModifier, value);
+        } else {
+            modifier(this._modifiers, KeyModifier, undefined);
+        }
+        return this;		
     }
 
     geometryTransition(id: string): this {
@@ -2039,7 +2152,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     restoreId(value: number): this {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "number") {
+            modifier(this._modifiers, RestoreIdModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, RestoreIdModifier, value);
+        }
+        return this;
     }
 
     onVisibleAreaChange(ratios: Array<number>, event: (isVisible: boolean, currentRatio: number) => void): this {
@@ -2110,7 +2229,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     obscured(reasons: Array<ObscuredReasons>): this {
-        throw new Error("Method not implemented.");
+        let arkObscured = new ArkObscured();
+        if (arkObscured.parseReasonsArray(reasons)) {
+            modifier(this._modifiers, ObscuredModifier, arkObscured);
+        } else {
+            modifier(this._modifiers, ObscuredModifier, undefined);
+        }
+        return this;
     }
 
     reuseId(id: string): this {

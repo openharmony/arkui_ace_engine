@@ -2277,4 +2277,50 @@ void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::set<std::string
     CHECK_NULL_VOID(frameNode);
     frameNode->SetAllowDrop(allowDrop);
 }
+
+void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::string& inspectorId)
+{
+    if (frameNode) {
+        frameNode->UpdateInspectorId(inspectorId);
+    }
+}
+
+void ViewAbstract::SetRestoreId(FrameNode* frameNode, int32_t restoreId)
+{
+    if (frameNode) {
+        frameNode->SetRestoreId(restoreId);
+    }
+}
+
+void ViewAbstract::SetTabIndex(FrameNode* frameNode, int32_t index)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetTabIndex(index);
+}
+
+void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector< ObscuredReasons>& reasons)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->MarkResponseRegion(true);
+    gestureHub->SetResponseRegion(responseRegion);
+}
+
+void ViewAbstract::SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->MarkResponseRegion(true);
+    gestureHub->SetMouseResponseRegion(mouseResponseRegion);
+}
 } // namespace OHOS::Ace::NG
