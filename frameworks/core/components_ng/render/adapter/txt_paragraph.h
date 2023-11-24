@@ -93,7 +93,7 @@ private:
     void CreateBuilder();
     inline size_t GetParagraphLength() const
     {
-        return text_.length() + placeHolderIndex_ + 1;
+        return text_.length() + placeholderIndex_ + 1;
     }
     float MakeEmptyOffsetX();
 
@@ -108,7 +108,7 @@ private:
     std::shared_ptr<RSFontCollection> fontCollection_;
 #endif
     std::u16string text_;
-    int32_t placeHolderIndex_ = -1;
+    int32_t placeholderIndex_ = -1;
     TextAlign textAlign_;
     static uint32_t destructCount;
 

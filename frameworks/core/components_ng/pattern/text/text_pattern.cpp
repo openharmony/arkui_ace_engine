@@ -1378,7 +1378,7 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
             continue;
         }
         auto spanNode = DynamicCast<SpanNode>(current);
-        if (spanNode) {
+        if (spanNode && current->GetTag() != V2::PLACEHOLDER_SPAN_ETS_TAG) {
             spanNode->CleanSpanItemChildren();
             UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
@@ -1387,10 +1387,13 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
             if (spanNode->GetSpanItem()->onClick) {
                 isSpanHasClick = true;
             }
-        } else if (current->GetTag() == V2::IMAGE_ETS_TAG) {
+        } else if (current->GetTag() == V2::IMAGE_ETS_TAG || current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             imageCount_++;
             AddChildSpanItem(current);
             textForAI_.append("\n");
+        }
+        if (current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+            continue;
         }
         const auto& nextChildren = current->GetChildren();
         for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
@@ -1494,6 +1497,13 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
             spans_.emplace_back(MakeRefPtr<ImageSpanItem>());
             spans_.back()->imageNodeId = imageNode->GetId();
             return;
+        }
+    } else if (child->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        auto placeholderSpanNode = DynamicCast<PlaceholderSpanNode>(child);
+        if (placeholderSpanNode) {
+            auto placeholderSpan = placeholderSpanNode->GetSpanItem();
+            placeholderSpan->placeholderSpanNodeId = placeholderSpanNode->GetId();
+            spans_.emplace_back(placeholderSpan);
         }
     }
 }

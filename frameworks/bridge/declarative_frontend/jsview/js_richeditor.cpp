@@ -37,6 +37,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/richeditor_model_impl.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
@@ -1040,6 +1041,57 @@ void JSRichEditorController::DeleteSpans(const JSCallbackInfo& args)
     controller->DeleteSpans(options);
 }
 
+void JSRichEditorController::AddPlaceholderSpan(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1) {
+        return;
+    }
+    auto customVal = args[0];
+    if (!customVal->IsFunction() && !customVal->IsObject()) {
+        return;
+    }
+    JSRef<JSVal> funcValue;
+    auto customObject = JSRef<JSObject>::Cast(customVal);
+    auto builder = customObject->GetProperty("builder");
+    // if failed to get builder, parse function directly
+    if (builder->IsEmpty() || builder->IsNull() || !builder->IsFunction()) {
+        funcValue = customVal;
+    } else {
+        funcValue = builder;
+    }
+    SpanOptionBase options;
+    {
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(funcValue));
+        CHECK_NULL_VOID(builderFunc);
+        ViewStackModel::GetInstance()->NewScope();
+        builderFunc->Execute();
+        auto customNode = AceType::DynamicCast<NG::UINode>(ViewStackModel::GetInstance()->Finish());
+        auto controller = controllerWeak_.Upgrade();
+        int32_t spanIndex = 0;
+        if (controller) {
+            ParseOptions(args, options);
+            spanIndex = controller->AddPlaceholderSpan(customNode, options);
+        }
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
+    }
+}
+
+void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOptionBase& placeholderSpan)
+{
+    if (args.Length() < 2) {
+        return;
+    }
+    if (!args[1]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> placeholderOptionObject = JSRef<JSObject>::Cast(args[1]);
+    JSRef<JSVal> offset = placeholderOptionObject->GetProperty("offset");
+    int32_t placeholderOffset = 0;
+    if (!offset->IsNull() && JSContainerBase::ParseJsInt32(offset, placeholderOffset)) {
+        placeholderSpan.offset = placeholderOffset >= 0 ? placeholderOffset : Infinity<int32_t>();
+    }
+}
+
 void JSRichEditorController::CloseSelectionMenu()
 {
     auto controller = controllerWeak_.Upgrade();
@@ -1069,6 +1121,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::Declare("RichEditorController");
     JSClass<JSRichEditorController>::CustomMethod("addImageSpan", &JSRichEditorController::AddImageSpan);
     JSClass<JSRichEditorController>::CustomMethod("addTextSpan", &JSRichEditorController::AddTextSpan);
+    JSClass<JSRichEditorController>::CustomMethod("addBuilderSpan", &JSRichEditorController::AddPlaceholderSpan);
     JSClass<JSRichEditorController>::CustomMethod("setCaretOffset", &JSRichEditorController::SetCaretOffset);
     JSClass<JSRichEditorController>::CustomMethod("getCaretOffset", &JSRichEditorController::GetCaretOffset);
     JSClass<JSRichEditorController>::CustomMethod("updateSpanStyle", &JSRichEditorController::UpdateSpanStyle);

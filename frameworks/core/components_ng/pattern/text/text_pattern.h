@@ -286,17 +286,17 @@ public:
     virtual std::function<void(Offset)> GetThumbnailCallback();
 #endif
 
-    void InitSpanImageLayout(const std::vector<int32_t>& placeHolderIndex,
+    void InitSpanImageLayout(const std::vector<int32_t>& placeholderIndex,
         const std::vector<RectF>& rectsForPlaceholders, OffsetF contentOffset) override
     {
-        placeHolderIndex_ = placeHolderIndex;
+        placeholderIndex_ = placeholderIndex;
         imageOffset_ = contentOffset;
         rectsForPlaceholders_ = rectsForPlaceholders;
     }
 
     const std::vector<int32_t>& GetPlaceHolderIndex()
     {
-        return placeHolderIndex_;
+        return placeholderIndex_;
     }
 
     const std::vector<RectF>& GetRectsForPlaceholders()
@@ -492,7 +492,7 @@ private:
 
     RefPtr<Paragraph> paragraph_;
     std::vector<MenuOptionsParam> menuOptionItems_;
-    std::vector<int32_t> placeHolderIndex_;
+    std::vector<int32_t> placeholderIndex_;
     std::vector<RectF> rectsForPlaceholders_;
     OffsetF imageOffset_;
 
