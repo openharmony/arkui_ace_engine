@@ -671,6 +671,30 @@ class MotionPathModifier extends Modifier<ArkMotionPath> {
     }
 }
 
+class GroupDefaultFocusModifier extends Modifier <boolean> {
+    static identity: Symbol = Symbol("groupDefaultFocus");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetGroupDefaultFocus(node);
+        }
+        else {
+            GetUINativeModule().common.setGroupDefaultFocus(node, this.value);
+        }
+    }
+}
+
+class FocusOnTouchModifier extends Modifier <boolean> {
+    static identity: Symbol = Symbol("focusOnTouch");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetFocusOnTouch(node);
+        }
+        else {
+            GetUINativeModule().common.setFocusOnTouch(node, this.value);
+        }
+    }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType) => typeof val === 'string'
@@ -1232,11 +1256,21 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     groupDefaultFocus(value: boolean): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === "boolean") {
+            modifier(this._modifiers, GroupDefaultFocusModifier, value);
+        } else {
+            modifier(this._modifiers, GroupDefaultFocusModifier, undefined);
+        }
+        return this;	
     }
 
     focusOnTouch(value: boolean): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === "boolean") {
+            modifier(this._modifiers, FocusOnTouchModifier, value);
+        } else {
+            modifier(this._modifiers, FocusOnTouchModifier, undefined);
+        }
+        return this;	
     }
 
     animation(value: AnimateParam): this {

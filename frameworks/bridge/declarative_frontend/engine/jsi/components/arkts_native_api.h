@@ -121,6 +121,10 @@ struct ArkUICommonModifierAPI {
     void (*ResetForegroundColor)(NodeHandle node);
     void (*SetMotionPath)(NodeHandle node, const char* path, float from, float to, bool rotatable);
     void (*ResetMotionPath)(NodeHandle node);
+    void (*SetGroupDefaultFocus)(NodeHandle node, bool groupDefaultFocus);
+    void (*ResetGroupDefaultFocus)(NodeHandle node);
+    void (*SetFocusOnTouch)(NodeHandle node, bool focusOnTouch);
+    void (*ResetFocusOnTouch)(NodeHandle node);
 };
 struct ArkUITextModifierAPI {
     void (*SetFontWeight)(NodeHandle node, const char* weight);

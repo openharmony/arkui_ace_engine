@@ -585,6 +585,7 @@ void ResetOpacity(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetOpacity(frameNode, 1.0f);
 }
+
 void SetAlign(NodeHandle node, int32_t align)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1488,6 +1489,35 @@ void ResetMotionPath(NodeHandle node)
     ViewAbstract::SetMotionPath(frameNode, motionPathOption);
 }
 
+void SetGroupDefaultFocus(NodeHandle node, bool groupDefaultFocus)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetGroupDefaultFocus(frameNode, groupDefaultFocus);
+}
+
+void ResetGroupDefaultFocus(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool groupDefaultFocus = false;
+    ViewAbstract::SetGroupDefaultFocus(frameNode, groupDefaultFocus);
+}
+
+void SetFocusOnTouch(NodeHandle node, bool focusOnTouch)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetFocusOnTouch(frameNode, focusOnTouch);
+}
+
+void ResetFocusOnTouch(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool focusOnTouch = false;
+    ViewAbstract::SetFocusOnTouch(frameNode, focusOnTouch);
+}
 ArkUICommonModifierAPI GetCommonModifier()
 {
     static const ArkUICommonModifierAPI modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
@@ -1497,10 +1527,8 @@ ArkUICommonModifierAPI GetCommonModifier()
         ResetOpacity, SetAlign, ResetAlign, SetBackdropBlur, ResetBackdropBlur, SetHueRotate, ResetHueRotate, SetInvert,
         ResetInvert, SetSepia, ResetSepia, SetSaturate, ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale,
         ResetGrayscale, SetContrast, ResetContrast, SetBrightness, ResetBrightness, SetBlur, ResetBlur,
-        SetLinearGradient, ResetLinearGradient,
-        SetSweepGradient, ResetSweepGradient,
-        SetRadialGradient, ResetRadialGradient,
-        SetForegroundBlurStyle, ResetForegroundBlurStyle, SetLinearGradientBlur,
+        SetLinearGradient, ResetLinearGradient, SetSweepGradient, ResetSweepGradient, SetRadialGradient,
+        ResetRadialGradient, SetForegroundBlurStyle, ResetForegroundBlurStyle, SetLinearGradientBlur,
         ResetLinearGradientBlur, SetBackgroundBlurStyle, ResetBackgroundBlurStyle, SetBorder, ResetBorder,
         SetBackgroundImagePosition, ResetBackgroundImagePosition, SetBackgroundImageSize, ResetBackgroundImageSize,
         SetBackgroundImage, ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale, ResetScale, SetRotate,
@@ -1511,7 +1539,8 @@ ArkUICommonModifierAPI GetCommonModifier()
         SetRenderGroup, ResetRenderGroup,
         SetRenderFit, ResetRenderFit,
         SetUseEffect, ResetUseEffect,
-        SetForegroundColor, ResetForegroundColor, SetMotionPath, ResetMotionPath
+        SetForegroundColor, ResetForegroundColor, SetMotionPath, ResetMotionPath,
+        SetGroupDefaultFocus, ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch
     };
 
     return modifier;

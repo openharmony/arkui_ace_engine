@@ -374,6 +374,8 @@ public:
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);
     static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
     static void SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath);
+    static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
+    static void SetGroupDefaultFocus(FrameNode* frameNode, bool isSet);
 
 private:
     static void AddDragFrameNodeToManager();
