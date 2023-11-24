@@ -566,7 +566,7 @@ bool SelectOverlayPattern::IsSingleHandle()
     return info_->isSingleHandle;
 }
 
-void SelectOverlayPattern::StartHiddenHandleTask()
+void SelectOverlayPattern::StartHiddenHandleTask(bool isDelay)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -580,7 +580,11 @@ void SelectOverlayPattern::StartHiddenHandleTask()
         CHECK_NULL_VOID(client);
         client->HiddenHandle();
     });
-    taskExecutor->PostDelayedTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, HIDDEN_HANDLE_TIMER_MS);
+    if (isDelay) {
+        taskExecutor->PostDelayedTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, HIDDEN_HANDLE_TIMER_MS);
+    } else {
+        taskExecutor->PostTask(hiddenHandleTask_, TaskExecutor::TaskType::UI);
+    }
 }
 
 void SelectOverlayPattern::HiddenHandle()
