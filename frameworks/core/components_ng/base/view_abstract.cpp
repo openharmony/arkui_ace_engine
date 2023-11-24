@@ -2111,4 +2111,11 @@ void ViewAbstract::SetDefaultFocus(FrameNode* frameNode, bool isSet)
     CHECK_NULL_VOID(focusHub);
     focusHub->SetIsDefaultFocus(isSet);
 }
+
+
+void ViewAbstract::SetDisplayIndex(FrameNode* frameNode, int32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, DisplayIndex, value, frameNode);
+}
 } // namespace OHOS::Ace::NG

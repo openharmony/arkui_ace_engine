@@ -379,6 +379,7 @@ public:
     static void SetFocusable(FrameNode* frameNode, bool focusable);
     static void SetTouchable(FrameNode* frameNode, bool touchable);
     static void SetDefaultFocus(FrameNode* frameNode, bool isSet);
+    static void SetDisplayIndex(FrameNode* frameNode, int32_t value);
     
 private:
     static void AddDragFrameNodeToManager();
