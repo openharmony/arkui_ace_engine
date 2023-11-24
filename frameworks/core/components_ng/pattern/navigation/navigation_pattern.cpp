@@ -737,21 +737,22 @@ void NavigationPattern::OnColorConfigurationUpdate()
 
     for (size_t i = 0; i != navDestinationNodes.size(); ++i) {
         const auto& childNode = navDestinationNodes[i];
-        auto newNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(childNode.second));
-	    CHECK_NULL_VOID(newNavDestination);
-	    auto destinationTitleBarNode = DynamicCast<TitleBarNode>(newNavDestination->GetTitleBarNode());
-	    CHECK_NULL_VOID(destinationTitleBarNode);
-	    auto backButtonNode = DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
-	    CHECK_NULL_VOID(backButtonNode);
-	    auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
-	    CHECK_NULL_VOID(buttonPattern);
-	    buttonPattern->SetSkipColorConfigurationUpdate();
-	    auto renderContext = backButtonNode->GetRenderContext();
-	    CHECK_NULL_VOID(renderContext);
-	    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-	    backButtonNode->MarkModifyDone();
-	    backButtonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-	}
+        auto newNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(childNode.second));
+        CHECK_NULL_VOID(newNavDestination);
+        auto destinationTitleBarNode = DynamicCast<TitleBarNode>(newNavDestination->GetTitleBarNode());
+        CHECK_NULL_VOID(destinationTitleBarNode);
+        auto backButtonNode = DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
+        CHECK_NULL_VOID(backButtonNode);
+        auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
+        CHECK_NULL_VOID(buttonPattern);
+        buttonPattern->SetSkipColorConfigurationUpdate();
+        auto renderContext = backButtonNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        backButtonNode->MarkModifyDone();
+        backButtonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 } // namespace OHOS::Ace::NG
