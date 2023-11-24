@@ -3309,6 +3309,38 @@ TextInputAction TextFieldPattern::GetDefaultTextInputAction()
     return defaultTextInputAction;
 }
 
+std::string TextFieldPattern::GetInputFilterWithInputType()
+{
+    std::string inputFilter = GetInputFilter();
+    if (!inputFilter.empty()) {
+        return inputFilter;
+    }
+
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    auto textInputType = layoutProperty->GetTextInputType();
+    if (textInputType.has_value()) {
+        switch (textInputType.value()) {
+            case TextInputType::NUMBER: {
+                inputFilter = "[0-9]";
+                break;
+            }
+            case TextInputType::PHONE: {
+                inputFilter = "[\\d\\-\\+\\*\\#]+";
+                break;
+            }
+            case TextInputType::EMAIL_ADDRESS: {
+                inputFilter = "[A-Za-z0-9_.\\@]";
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+    return inputFilter;
+}
+
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
     auto tmpHost = GetHost();
@@ -3342,7 +3374,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             TextInputConfiguration config;
             config.type = keyboard_;
             config.action = GetTextInputActionValue(GetDefaultTextInputAction());
-            config.inputFilter = GetInputFilter();
+            config.inputFilter = GetInputFilterWithInputType();
             config.maxLength = GetMaxLength();
             if (keyboard_ == TextInputType::VISIBLE_PASSWORD) {
                 config.obscureText = textObscured_;

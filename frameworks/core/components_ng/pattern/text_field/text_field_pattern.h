@@ -272,6 +272,7 @@ public:
     void UpdateCaretOffsetByEvent();
 
     TextInputAction GetDefaultTextInputAction();
+    std::string GetInputFilterWithInputType();
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     bool CloseKeyboard(bool forceClose) override;
 
