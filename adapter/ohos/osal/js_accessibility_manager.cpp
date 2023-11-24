@@ -2813,7 +2813,7 @@ void JsAccessibilityManager::FindFocusedExtensionElementInfoNG(const SearchParam
     CHECK_NULL_VOID(uiExtensionManager);
     auto elementIdPair = uiExtensionManager->UnWrapExtensionAbilityId(searchParam.uiExtensionOffset,
         searchParam.nodeId);
-    auto uiExtensionNode = FindNodeFromRootByExtensionId(root, elementIdPair.first);
+    auto uiExtensionNode = uiExtensionManager->GetFocusUiExtensionNode();
     CHECK_NULL_VOID(uiExtensionNode);
     SearchParameter transferSearchParam {elementIdPair.second, "",
         searchParam.mode, searchParam.uiExtensionOffset};
@@ -3585,7 +3585,7 @@ void JsAccessibilityManager::FocusExtensionElementMoveSearchNG(const SearchParam
     CHECK_NULL_VOID(uiExtensionManager);
     auto elementIdPair =
         uiExtensionManager->UnWrapExtensionAbilityId(searchParam.uiExtensionOffset, searchParam.nodeId);
-    outputExtensionNode = FindNodeFromRootByExtensionId(root, elementIdPair.first);
+    outputExtensionNode = uiExtensionManager->GetFocusUiExtensionNode();
     CHECK_NULL_VOID(outputExtensionNode);
     SearchParameter transferSearchParam {elementIdPair.second, "",
         searchParam.mode, searchParam.uiExtensionOffset};
