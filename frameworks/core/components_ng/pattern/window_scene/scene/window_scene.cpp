@@ -45,6 +45,8 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         self->OnBoundsChanged(bounds);
     };
     CHECK_NULL_VOID(IsMainWindow());
+    CHECK_NULL_VOID(session_);
+    session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
         LOGI("RSSurfaceNode buffer available callback");
@@ -115,23 +117,6 @@ void WindowScene::RegisterFocusCallback()
     };
     CHECK_NULL_VOID(session_);
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
-}
-
-void WindowScene::UpdateSession(const sptr<Rosen::Session>& session)
-{
-    CHECK_NULL_VOID(session_);
-    CHECK_NULL_VOID(session);
-    CHECK_NULL_VOID(session_ != session);
-
-    LOGI("session %{public}d changes to %{public}d", session_->GetPersistentId(), session->GetPersistentId());
-    session_ = session;
-    auto surfaceNode = session_->GetSurfaceNode();
-    CHECK_NULL_VOID(surfaceNode);
-
-    CHECK_NULL_VOID(contentNode_);
-    auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
-    CHECK_NULL_VOID(context);
-    context->SetRSNode(surfaceNode);
 }
 
 void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
@@ -211,6 +196,7 @@ void WindowScene::OnActivation()
             self->startingNode_.Reset();
             self->contentNode_.Reset();
             self->snapshotNode_.Reset();
+            self->session_->SetNeedSnapshot(true);
             self->OnAttachToFrameNode();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             return;
@@ -222,6 +208,7 @@ void WindowScene::OnActivation()
             CHECK_NULL_VOID(host);
             host->RemoveChild(self->snapshotNode_);
             self->snapshotNode_.Reset();
+            self->session_->SetNeedSnapshot(true);
             self->CreateStartingNode();
             host->AddChild(self->startingNode_);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -285,6 +272,7 @@ void WindowScene::OnForeground()
         CHECK_NULL_VOID(host);
         host->RemoveChild(self->snapshotNode_);
         self->snapshotNode_.Reset();
+        self->session_->SetNeedSnapshot(true);
         host->AddChild(self->contentNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
