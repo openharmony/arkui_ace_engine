@@ -80,6 +80,7 @@ int32_t callBack2 = 0;
 int32_t callBack3 = 0;
 const std::string INIT_VALUE_1 = "hello1";
 const std::string INIT_VALUE_2 = "hello2";
+const std::string INIT_VALUE_3 = "hello world! hello world! hello world!";
 const std::string TEST_INSERT_VALUE = "s";
 const std::string TEST_INSERT_LINE_SEP = "\n";
 const std::string EXCEPT_VALUE = "h\n";
@@ -2380,6 +2381,7 @@ HWTEST_F(RichEditorTestNg, HandleMouseLeftButton002, TestSize.Level1)
         callBack3 = 3;
         return;
     };
+    richEditorPattern->mouseStatus_ = MouseStatus::MOVE;
     for (int32_t i = 0; i < selectType.size(); i++) {
         richEditorPattern->selectedType_ = selectType[i];
         auto key = std::make_pair(selectType[i], RichEditorResponseType::SELECTED_BY_MOUSE);
@@ -2395,19 +2397,25 @@ HWTEST_F(RichEditorTestNg, HandleMouseLeftButton002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSelection001
- * @tc.desc: test SetSelection
+ * @tc.name: Selection001
+ * @tc.desc: test SetSelection and GetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorTestNg, SetSelection001, TestSize.Level1)
+HWTEST_F(RichEditorTestNg, Selection001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     AddSpan(INIT_VALUE_1);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
     richEditorPattern->SetSelection(0, 1);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
+    auto richEditorSelection = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection.selection[0], 0);
+    EXPECT_EQ(richEditorSelection.selection[1], 0);
+
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     focusHub->RequestFocusImmediately();
@@ -2415,34 +2423,115 @@ HWTEST_F(RichEditorTestNg, SetSelection001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
     EXPECT_EQ(richEditorPattern->caretPosition_, 1);
+    auto richEditorSelection2 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection2.selection[0], 0);
+    EXPECT_EQ(richEditorSelection2.selection[1], 1);
+
     richEditorPattern->SetSelection(3, 1);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
     EXPECT_EQ(richEditorPattern->caretPosition_, 1);
+    auto richEditorSelection3 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection3.selection[0], 0);
+    EXPECT_EQ(richEditorSelection3.selection[1], 0);
+
     richEditorPattern->SetSelection(-1, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 6);
     EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    auto richEditorSelection4 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection4.selection[0], 0);
+    EXPECT_EQ(richEditorSelection4.selection[1], 6);
+
     richEditorPattern->SetSelection(0, 10);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 6);
     EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    auto richEditorSelection5 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection5.selection[0], 0);
+    EXPECT_EQ(richEditorSelection5.selection[1], 6);
+
     richEditorPattern->SetSelection(-2, 3);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 3);
     EXPECT_EQ(richEditorPattern->caretPosition_, 3);
+    auto richEditorSelection6 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection6.selection[0], 0);
+    EXPECT_EQ(richEditorSelection6.selection[1], 3);
+
     richEditorPattern->SetSelection(-2, 8);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 6);
     EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    auto richEditorSelection7 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection7.selection[0], 0);
+    EXPECT_EQ(richEditorSelection7.selection[1], 6);
+
     richEditorPattern->SetSelection(-2, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+    auto richEditorSelection8 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection8.selection[0], 0);
+    EXPECT_EQ(richEditorSelection8.selection[1], 0);
+
     richEditorPattern->SetSelection(1, 3);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 3);
     EXPECT_EQ(richEditorPattern->caretPosition_, 3);
+    auto richEditorSelection9 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection9.selection[0], 1);
+    EXPECT_EQ(richEditorSelection9.selection[1], 3);
+}
+
+/**
+ * @tc.name: SetSelection002
+ * @tc.desc: test SetSelection and GetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, Selection002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    AddSpan(INIT_VALUE_1);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->SetSelection(0, 1);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    /**
+     * @tc.step: step1. Empty text calls the setSelection interface.
+     * @tc.expected: The interface exits normally, but it does not take effect
+     */
+    ClearSpan();
+    richEditorPattern->SetSelection(1, 3);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+    auto richEditorSelection = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection.selection[0], 0);
+    EXPECT_EQ(richEditorSelection.selection[1], 0);
+    /**
+     * @tc.step: step2. Extra-long text scenes.
+     * @tc.expected: A portion of the selected text is not displayed, but the selection range can be updated
+     * successfully
+     */
+    AddSpan(INIT_VALUE_3);
+    SizeF sizeF(10.0f, 10.0f);
+    richEditorNode_->GetGeometryNode()->SetContentSize(sizeF);
+    richEditorPattern->SetSelection(15, 30);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 15);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 30);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 30);
+    auto richEditorSelection2 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection2.selection[0], 15);
+    EXPECT_EQ(richEditorSelection2.selection[1], 30);
+    auto resultObject = richEditorSelection2.resultObjects.front();
+    EXPECT_EQ(resultObject.valueString, INIT_VALUE_3);
+    EXPECT_EQ(resultObject.offsetInSpan[0], 15);
+    EXPECT_EQ(resultObject.offsetInSpan[1], 30);
 }
 
 /**
