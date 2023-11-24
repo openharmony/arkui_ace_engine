@@ -735,7 +735,8 @@ void NavigationPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(pattern);
     const auto& navDestinationNodes = pattern->GetAllNavDestinationNodes();
 
-    for (size_t i = 0; i != navDestinationNodes.size(); ++i) {
+    size_t size = navDestinationNodes.size();
+    for (size_t i = 0; i < size; i++) {
         const auto& childNode = navDestinationNodes[i];
         auto newNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(childNode.second));
