@@ -130,6 +130,7 @@ private:
     void OnModifyDone() override;
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
+    void OnFirstFrame() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     RefPtr<Curve> GetCurve() const;

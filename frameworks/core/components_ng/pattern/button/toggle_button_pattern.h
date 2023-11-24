@@ -67,6 +67,7 @@ private:
     void OnAttachToFrameNode() override;
     void InitParameters();
     void OnModifyDone() override;
+    void OnFirstFrame() override;
     void HandleEnabled();
     void InitClickEvent();
     void InitButtonAndText();

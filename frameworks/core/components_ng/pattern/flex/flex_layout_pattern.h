@@ -151,6 +151,11 @@ public:
         return layoutProperty->GetSpaceValue(Dimension()).ToString();
     }
 
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
+
 private:
     bool isWrap_ = false;
     bool isDialogStretch_ = false;

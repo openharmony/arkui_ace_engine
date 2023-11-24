@@ -41,6 +41,7 @@
 #include "core/common/ime/text_input_formatter.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -1907,6 +1908,22 @@ void TextFieldPattern::OnModifyDone()
     preInputStyle_ = inputStyle;
 }
 
+void TextFieldPattern::OnFirstFrame()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (!inspectorId.empty()) {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        bool isPwdType = layoutProperty ? layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) ==
+                                              TextInputType::VISIBLE_PASSWORD
+                                        : false;
+        if (!isPwdType) {
+            Recorder::NodeDataCache::Get().PutString(inspectorId, textEditingValue_.text);
+        }
+    }
+}
+
 void TextFieldPattern::CalculateDefaultCursor()
 {
     auto tmpHost = GetHost();
@@ -3567,6 +3584,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         auto focusHub = host->GetOrCreateFocusHub();
         focusHub->LostFocus();
         eventHub->FireOnSubmit(static_cast<int32_t>(action));
+        RecordSubmitEvent();
         return;
     }
 
@@ -3577,8 +3595,28 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         return;
     }
     eventHub->FireOnSubmit(static_cast<int32_t>(action));
+    RecordSubmitEvent();
     CloseKeyboard(forceCloseKeyboard);
     FocusHub::LostFocusToViewRoot();
+}
+
+void TextFieldPattern::RecordSubmitEvent() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    bool isPwdType = layoutProperty ? layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) ==
+                                          TextInputType::VISIBLE_PASSWORD
+                                    : false;
+    Recorder::EventParamsBuilder builder;
+    builder.SetId(inspectorId)
+        .SetType(host->GetTag())
+        .SetEventType(Recorder::EventType::SEARCH_SUBMIT);
+    if (!isPwdType) {
+        builder.SetText(textEditingValue_.text);
+    }
+    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
 void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)

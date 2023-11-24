@@ -51,6 +51,7 @@
 #include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
+#include "adapter/ohos/entrance/ui_event_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/page_url_checker_ohos.h"
 #include "adapter/ohos/osal/pixel_map_ohos.h"
@@ -70,6 +71,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/image/image_file_cache.h"
 #ifdef FORM_SUPPORTED
@@ -134,18 +136,21 @@ private:
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtime)
 {
     LOGI("Ace lib loaded, CreateUIContent.");
+    Recorder::Init();
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
 }
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateFormContent(void* context, void* runtime, bool isCard)
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "Ace lib loaded, CreateFormUIContent.");
+    Recorder::Init();
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime, isCard);
 }
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateSubWindowUIContent(void* ability)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Ace lib loaded, Create SubWindowUIContent.");
+    Recorder::Init();
     return new UIContentImpl(reinterpret_cast<OHOS::AppExecFwk::Ability*>(ability));
 }
 
@@ -1445,12 +1450,20 @@ void UIContentImpl::Foreground()
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetForegroundCalled(true);
+
+    CHECK_NULL_VOID(window_);
+    std::string windowName = window_->GetWindowName();
+    Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, true);
 }
 
 void UIContentImpl::Background()
 {
     LOGI("UIContentImpl: window background");
     Platform::AceContainer::OnHide(instanceId_);
+
+    CHECK_NULL_VOID(window_);
+    std::string windowName = window_->GetWindowName();
+    Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, false);
 }
 
 void UIContentImpl::ReloadForm(const std::string& url)

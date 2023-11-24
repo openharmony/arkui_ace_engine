@@ -20,6 +20,9 @@
 #include <memory>
 
 #include "base/memory/ace_type.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 
@@ -90,6 +93,18 @@ public:
             std::for_each(
                 changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& event) { (*event)(index); });
         }
+
+        Recorder::EventParamsBuilder builder;
+        auto host = GetFrameNode();
+        if (host) {
+            auto id = host->GetInspectorIdValue("");
+            builder.SetId(id).SetType(host->GetHostTag());
+            if (!id.empty()) {
+                Recorder::NodeDataCache::Get().PutInt(id, index);
+            }
+        }
+        builder.SetIndex(index);
+        Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
 
     void FireIndicatorChangeEvent(int32_t index) const

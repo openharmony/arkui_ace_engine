@@ -17,6 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
@@ -43,6 +46,17 @@ public:
         if (changeEvent_) {
             changeEvent_(check);
         }
+        Recorder::EventParamsBuilder builder;
+        auto host = GetFrameNode();
+        if (host) {
+            auto id = host->GetInspectorIdValue("");
+            builder.SetId(id).SetType(host->GetHostTag());
+            if (!id.empty()) {
+                Recorder::NodeDataCache::Get().PutMultiple(id, value_, check);
+            }
+        }
+        builder.SetChecked(check).SetText(value_);
+        Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
 
     const std::string& GetValue()

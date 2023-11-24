@@ -235,7 +235,7 @@ void NavigationPattern::CheckTopNavPathChange(
                 auto eventHub = preTopNavDestination->GetEventHub<NavDestinationEventHub>();
                 CHECK_NULL_VOID(eventHub);
                 NotifyPageHide(preTopNavPath->first);
-                eventHub->FireOnHiddenEvent();
+                eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
                 navDestinationPattern->SetIsOnShow(false);
                 // The navigations in NavDestination should be fired the hidden event
                 NavigationPattern::FireNavigationStateChange(preTopNavDestination, false);
@@ -333,14 +333,15 @@ RefPtr<UINode> NavigationPattern::FireNavDestinationStateChange(bool show)
 
     if (show) {
         NotifyPageShow(topNavPath->first);
-        eventHub->FireOnShownEvent();
+        auto param = navigationStack_->GetRouteParam();
+        eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
         navDestinationPattern->SetIsOnShow(true);
         // The change from hiding to showing of top page means the navigation return to screen,
         // so add window state callback again.
         pipeline->AddWindowStateChangedCallback(id);
     } else {
         NotifyPageHide(topNavPath->first);
-        eventHub->FireOnHiddenEvent();
+        eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
         navDestinationPattern->SetIsOnShow(false);
         // The change from showing to hiding of top page means the navigation leaves from screen,
         // so remove window state callback.
@@ -889,7 +890,7 @@ void NavigationPattern::OnWindowHide()
     auto eventHub = curTopNavDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     NotifyPageHide(curTopNavPath->first);
-    eventHub->FireOnHiddenEvent();
+    eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
     navDestinationPattern->SetIsOnShow(false);
 }
 
@@ -906,7 +907,7 @@ void NavigationPattern::OnWindowShow()
     CHECK_NULL_VOID(!(navDestinationPattern->GetIsOnShow()));
     auto eventHub = curTopNavDestination->GetEventHub<NavDestinationEventHub>();
     NotifyPageShow(curTopNavPath->first);
-    eventHub->FireOnShownEvent();
+    eventHub->FireOnShownEvent(navDestinationPattern->GetName(), navigationStack_->GetRouteParam());
     navDestinationPattern->SetIsOnShow(true);
 }
 } // namespace OHOS::Ace::NG

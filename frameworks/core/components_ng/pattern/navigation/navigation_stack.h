@@ -115,6 +115,10 @@ public:
     virtual RefPtr<UINode> CreateNodeByIndex(int32_t index);
     virtual RefPtr<UINode> CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo);
     int32_t FindIndex(const std::string& name, const RefPtr<UINode>& navDestinationNode, bool isNavPathList);
+    virtual std::string GetRouteParam() const
+    {
+        return "";
+    }
 
 private:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);

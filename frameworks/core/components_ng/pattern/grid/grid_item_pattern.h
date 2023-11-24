@@ -130,6 +130,12 @@ public:
 
 protected:
     void OnModifyDone() override;
+
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
+
 private:
     void SetAccessibilityAction();
     void OnAttachToFrameNode() override;

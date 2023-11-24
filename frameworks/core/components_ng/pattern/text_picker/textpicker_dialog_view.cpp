@@ -19,6 +19,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -460,6 +461,9 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(
         auto textPickerEventHub = pickerPattern->GetEventHub<TextPickerEventHub>();
         CHECK_NULL_VOID(textPickerEventHub);
         textPickerEventHub->FireDialogAcceptEvent(str);
+        Recorder::EventParamsBuilder builder;
+        builder.SetType(dateNode->GetTag()).SetEventType(Recorder::EventType::DIALOG_ACCEPT).SetText(str);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     };
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
     buttonConfirmNode->MarkModifyDone();
@@ -491,6 +495,13 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(
     auto eventCancelHub = buttonCancelNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
     eventCancelHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
+    auto recordEvent = [](GestureEvent& info) {
+        Recorder::EventParamsBuilder builder;
+        builder.SetType("TextPickerDialog").SetEventType(Recorder::EventType::DIALOG_CANCEL);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    };
+    auto recordEventPtr = AceType::MakeRefPtr<ClickEvent>(std::move(recordEvent));
+    eventCancelHub->AddClickEvent(recordEventPtr);
 
     auto buttonCancelEventHub = buttonCancelNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonCancelEventHub, nullptr);

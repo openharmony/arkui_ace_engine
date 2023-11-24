@@ -21,6 +21,8 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -175,6 +177,34 @@ void MenuItemPattern::OnModifyDone()
     host->GetRenderContext()->SetClipToBounds(true);
 }
 
+void MenuItemPattern::OnFirstFrame()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (inspectorId.empty()) {
+        return;
+    }
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+    auto content = itemProperty->GetContent().value_or("");
+    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, content, isSelected_);
+}
+
+void MenuItemPattern::RecordChangeEvent() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+    auto content = itemProperty->GetContent().value_or("");
+    Recorder::EventParamsBuilder builder;
+    builder.SetId(inspectorId).SetType(host->GetTag()).SetChecked(isSelected_).SetText(content);
+    Recorder::EventRecorder::Get().OnChange(std::move(builder));
+    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, content, isSelected_);
+}
+
 RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()
 {
     auto host = GetHost();
@@ -318,6 +348,7 @@ void MenuItemPattern::RegisterOnClick()
         if (onChange) {
             LOGI("trigger onChange");
             onChange(pattern->IsSelected());
+            pattern->RecordChangeEvent();
         }
         host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
 
@@ -749,6 +780,7 @@ void MenuItemPattern::SetAccessibilityAction()
         }
         if (onChange) {
             onChange(pattern->IsSelected());
+            pattern->RecordChangeEvent();
         }
         auto context = host->GetRenderContext();
         CHECK_NULL_VOID(context);

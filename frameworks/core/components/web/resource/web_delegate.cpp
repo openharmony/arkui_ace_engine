@@ -3895,6 +3895,17 @@ void WebDelegate::CallIsPagePathInvalid(const bool& isPageInvalid)
     CallResRegisterMethod(isPagePathInvalidMethod_, param, nullptr);
 }
 
+void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::string& param) const
+{
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    Recorder::EventParamsBuilder builder;
+    builder.SetId(host->GetInspectorIdValue("")).SetType(host->GetHostTag()).SetEventType(eventType).SetText(param);
+    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+}
+
 void WebDelegate::OnPageStarted(const std::string& param)
 {
     auto context = context_.Upgrade();
@@ -3915,6 +3926,7 @@ void WebDelegate::OnPageStarted(const std::string& param)
             if (onPageStartedV2) {
                 onPageStartedV2(std::make_shared<LoadWebPageStartEvent>(param));
             }
+            delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_BEGIN, param);
         },
         TaskExecutor::TaskType::JS);
 }
@@ -3938,6 +3950,7 @@ void WebDelegate::OnPageFinished(const std::string& param)
             if (onPageFinishedV2) {
                 onPageFinishedV2(std::make_shared<LoadWebPageFinishEvent>(param));
             }
+            delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_END, param);
         },
         TaskExecutor::TaskType::JS);
 }

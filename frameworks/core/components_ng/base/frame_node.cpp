@@ -2884,13 +2884,33 @@ void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     isActive_ = false;
 }
 
-void FrameNode::OnInspectorIdUpdate(const std::string& /*unused*/)
+void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
+    RecordExposureIfNeed(id);
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     if (parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+}
+
+void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
+{
+    if (exposureProcessor_) {
+        return;
+    }
+    exposureProcessor_ = MakeRefPtr<Recorder::ExposureProcessor>(inspectorId);
+    if (!exposureProcessor_->IsNeedRecord()) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(RawPtr(exposureProcessor_))](bool visible, double ratio) {
+        auto processor = weak.Upgrade();
+        CHECK_NULL_VOID(processor);
+        processor->OnVisibleChange(visible);
+    };
+    pipeline->AddVisibleAreaChangeNode(Claim(this), exposureProcessor_->GetRatio(), callback, false);
 }
 
 void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId)

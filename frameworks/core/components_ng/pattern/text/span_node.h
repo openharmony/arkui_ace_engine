@@ -149,6 +149,7 @@ public:
     // position of last char + 1
     int32_t position = -1;
     int32_t imageNodeId = -1;
+    std::string inspectId;
     std::string content;
     std::unique_ptr<FontStyle> fontStyle = std::make_unique<FontStyle>();
     std::unique_ptr<TextLineStyle> textLineStyle = std::make_unique<TextLineStyle>();
@@ -256,6 +257,11 @@ public:
     void UpdateOnClickEvent(GestureEventFunc&& onClick)
     {
         spanItem_->onClick = std::move(onClick);
+    }
+
+    void OnInspectorIdUpdate(const std::string& inspectorId) override
+    {
+        spanItem_->inspectId = inspectorId;
     }
 
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);

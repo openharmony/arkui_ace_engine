@@ -48,6 +48,11 @@ public:
     {
         return { FocusType::SCOPE, true };
     }
+
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
 };
 } // namespace OHOS::Ace::NG
 

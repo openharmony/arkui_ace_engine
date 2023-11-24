@@ -30,6 +30,7 @@
 #include "bridge/common/dom/dom_type.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/theme/icon_theme.h"
@@ -161,9 +162,11 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
     auto hub = host->GetEventHub<DialogEventHub>();
     if (buttonIdx != -1) {
         hub->FireSuccessEvent(buttonIdx);
+        RecordEvent(buttonIdx);
     } else {
         // trigger onCancel callback
         hub->FireCancelEvent();
+        RecordEvent(buttonIdx);
     }
     if (dialogProperties_.isShowInSubWindow) {
         SubwindowManager::GetInstance()->DeleteHotAreas(overlayManager->GetSubwindowId(), host->GetId());
@@ -179,6 +182,26 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
         CHECK_NULL_VOID(maskNode);
         parentOverlayManager->CloseDialog(maskNode);
     }
+}
+
+void DialogPattern::RecordEvent(int32_t btnIndex) const
+{
+    std::string btnText;
+    if (btnIndex >= 0 && (size_t) btnIndex < dialogProperties_.buttons.size()) {
+        btnText = dialogProperties_.buttons.at(btnIndex).text;
+    }
+    Recorder::EventType eventType;
+    if (btnIndex == -1) {
+        eventType = Recorder::EventType::DIALOG_CANCEL;
+    } else {
+        eventType = Recorder::EventType::DIALOG_ACTION;
+    }
+    Recorder::EventParamsBuilder builder;
+    builder.SetEventType(eventType)
+        .SetText(btnText)
+        .SetExtra(Recorder::KEY_TITLE, title_)
+        .SetExtra(Recorder::KEY_SUB_TITLE, subtitle_);
+    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
 // set render context properties of content frame
@@ -733,6 +756,18 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
     auto hub = itemRow->GetOrCreateGestureEventHub();
     if (item.action) {
         hub->AddClickEvent(item.action);
+        auto recordEvent = [weak = WeakClaim(this), title = item.title](GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            Recorder::EventParamsBuilder builder;
+            builder.SetEventType(Recorder::EventType::DIALOG_SELECT)
+                .SetText(title)
+                .SetExtra(Recorder::KEY_TITLE, pattern->title_)
+                .SetExtra(Recorder::KEY_SUB_TITLE, pattern->subtitle_);
+            Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+        };
+        auto recordEventPtr = MakeRefPtr<ClickEvent>(std::move(recordEvent));
+        hub->AddClickEvent(recordEventPtr);
     }
 
     // close dialog when clicked

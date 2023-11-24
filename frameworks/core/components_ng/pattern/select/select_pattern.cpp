@@ -24,6 +24,8 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/animation/curves.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/select/select_theme.h"
@@ -79,6 +81,17 @@ void SelectPattern::OnModifyDone()
     if (!eventHub->IsEnabled()) {
         SetDisabledStyle();
     }
+}
+
+void SelectPattern::OnFirstFrame()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (inspectorId.empty()) {
+        return;
+    }
+    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, selectValue_, selected_);
 }
 
 void SelectPattern::ShowSelectMenu()
@@ -150,7 +163,7 @@ void SelectPattern::RegisterOnClick()
         CHECK_NULL_VOID(pattern);
 
         auto selected = pattern->GetSelected();
-        if (selected > -1 && selected < pattern->GetOptions().size()) {
+        if (selected > -1 && selected < static_cast<int32_t>(pattern->GetOptions().size())) {
             pattern->UpdateSelectedProps(selected);
         }
         pattern->ShowSelectMenu();
@@ -278,6 +291,14 @@ void SelectPattern::CreateSelectedCallback()
             auto newSelected = pattern->options_[index]->GetPattern<OptionPattern>();
             CHECK_NULL_VOID(newSelected);
             onSelect(index, newSelected->GetText());
+
+            auto inspectorId = host->GetInspectorId().value_or("");
+            Recorder::EventParamsBuilder builder;
+            builder.SetId(inspectorId).SetType(host->GetTag()).SetIndex(index).SetText(newSelected->GetText());
+            Recorder::EventRecorder::Get().OnChange(std::move(builder));
+            if (!inspectorId.empty()) {
+                Recorder::NodeDataCache::Get().PutMultiple(inspectorId, newSelected->GetText(), index);
+            }
         }
     };
     for (auto&& option : options_) {
@@ -446,6 +467,7 @@ void SelectPattern::SetValue(const std::string& value)
     auto modifier = pattern->GetContentModifier();
     CHECK_NULL_VOID(modifier);
     modifier->ContentChange();
+    selectValue_ = value;
 }
 
 void SelectPattern::SetFontSize(const Dimension& value)
@@ -746,6 +768,7 @@ void SelectPattern::UpdateText(int32_t index)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    selectValue_ = newSelected->GetText();
 }
 
 void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme)

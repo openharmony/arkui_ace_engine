@@ -23,6 +23,7 @@
 #include "core/animation/curve.h"
 #include "core/animation/curves.h"
 #include "core/common/container.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
@@ -194,6 +195,16 @@ void SwitchPattern::MarkIsSelected(bool isSelected)
     } else {
         eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
         host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+    }
+}
+
+void SwitchPattern::OnFirstFrame()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (!inspectorId.empty()) {
+        Recorder::NodeDataCache::Get().PutBool(inspectorId, isOn_.value_or(false));
     }
 }
 

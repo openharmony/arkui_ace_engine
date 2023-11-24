@@ -232,7 +232,13 @@ public:
     }
 
 protected:
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
+
     void OnModifyDone() override;
+    void OnFirstFrame() override;
     void OnAttachToFrameNode() override;
     void InitTouchEvent();
     void InitHoverEvent();

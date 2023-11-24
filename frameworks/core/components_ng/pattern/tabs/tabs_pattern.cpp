@@ -20,6 +20,8 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
@@ -59,7 +61,8 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
 
-    ChangeEvent changeEvent([tabBarNode, tabBarPattern, jsEvent = std::move(event)](int32_t index) {
+    ChangeEvent changeEvent([weak = WeakClaim(this), tabBarNode, tabBarPattern, jsEvent = std::move(event)](
+                                int32_t index) {
         auto tabsNode = AceType::DynamicCast<TabsNode>(tabBarNode->GetParent());
         CHECK_NULL_VOID(tabsNode);
         auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
@@ -94,6 +97,17 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         if (jsEvent) {
             TabContentChangeEvent eventInfo(index);
             jsEvent(&eventInfo);
+
+            auto inspectorId = tabsNode->GetInspectorId().value_or("");
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto tabBarText = pattern->GetTabBarTextByIndex(index);
+            Recorder::EventParamsBuilder builder;
+            builder.SetId(inspectorId).SetType(tabsNode->GetTag()).SetIndex(index).SetText(tabBarText);
+            Recorder::EventRecorder::Get().OnChange(std::move(builder));
+            if (!inspectorId.empty()) {
+                Recorder::NodeDataCache::Get().PutMultiple(inspectorId, tabBarText, index);
+            }
         }
     });
 
@@ -105,6 +119,19 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         CHECK_NULL_VOID(eventHub);
         eventHub->AddOnChangeEvent(onChangeEvent_);
     }
+}
+
+std::string TabsPattern::GetTabBarTextByIndex(int32_t index) const
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_RETURN(tabsNode, "");
+    auto tabBar = tabsNode->GetTabBar();
+    CHECK_NULL_RETURN(tabBar, "");
+    auto tabBarItem = tabBar->GetChildAtIndex(index);
+    CHECK_NULL_RETURN(tabBarItem, "");
+    auto node = AceType::DynamicCast<FrameNode>(tabBarItem);
+    CHECK_NULL_RETURN(node, "");
+    return node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
 }
 
 void TabsPattern::SetOnTabBarClickEvent(std::function<void(const BaseEventInfo*)>&& event)
@@ -174,6 +201,21 @@ void TabsPattern::OnModifyDone()
     }
     SetOnChangeEvent(nullptr);
     OnUpdateShowDivider();
+}
+
+void TabsPattern::OnFirstFrame()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (inspectorId.empty()) {
+        return;
+    }
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto index = property->GetIndexValue(0);
+    auto tabBarText = GetTabBarTextByIndex(index);
+    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, tabBarText, index);
 }
 
 void TabsPattern::SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)>&& event)

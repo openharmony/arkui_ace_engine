@@ -198,6 +198,11 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     Rect GetItemRect(int32_t index) const override;
 
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
+
 private:
     float GetEndOffset();
     float GetMainGap() const;

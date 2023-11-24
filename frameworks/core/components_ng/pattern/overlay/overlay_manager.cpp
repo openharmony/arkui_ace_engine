@@ -33,6 +33,7 @@
 #include "core/common/container.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/modal_ui_extension.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -1317,6 +1318,13 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     dialogCount_++;
     // set close button disable
     SetContainerButtonEnable(false);
+    Recorder::EventParamsBuilder builder;
+    builder
+        .SetType("Dialog")
+        .SetEventType(Recorder::EventType::DIALOG_SHOW)
+        .SetExtra(Recorder::KEY_TITLE, dialogProps.title)
+        .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
+    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     return dialog;
 }
 
@@ -1353,6 +1361,11 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
         TextPickerDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
+    Recorder::EventParamsBuilder builder;
+    builder
+        .SetType("TextPickerDialog")
+        .SetEventType(Recorder::EventType::DIALOG_SHOW);
+    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
 void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,

@@ -20,6 +20,8 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
@@ -353,6 +355,18 @@ void RatingPattern::FireChangeEvent() const
     std::stringstream ss;
     ss << std::setprecision(2) << ratingRenderProperty->GetRatingScoreValue();
     ratingEventHub->FireChangeEvent(ss.str());
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    Recorder::EventParamsBuilder builder;
+    auto score = ss.str();
+    builder.SetId(inspectorId).SetType(host->GetTag()).SetText(score);
+    Recorder::EventRecorder::Get().OnChange(std::move(builder));
+    if (inspectorId.empty()) {
+        return;
+    }
+    Recorder::NodeDataCache::Get().PutString(inspectorId, score);
 }
 
 void RatingPattern::HandleDragEnd()

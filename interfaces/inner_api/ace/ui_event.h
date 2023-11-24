@@ -13,19 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_EVENT_OBSERVER_H
-#define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_EVENT_OBSERVER_H
+#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_EVENT_H
+#define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_EVENT_H
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 
 #include "macros.h"
+#include "ui_event_observer.h"
 
 namespace OHOS::Ace {
-class ACE_FORCE_EXPORT UIEventObserver {
+class ACE_FORCE_EXPORT UIEvent {
 public:
-    virtual ~UIEventObserver() = default;
-    virtual void NotifyUIEvent(int32_t eventType, const std::unordered_map<std::string, std::string>& eventParams) = 0;
+    static void RegisterUIEventObserver(const std::string& config, const std::shared_ptr<UIEventObserver>& observer);
+
+    static void UnregisterUIEventObserver(const std::shared_ptr<UIEventObserver>& observer);
+
+    static void GetNodeProperty(
+        const std::string& pageUrl, const std::unordered_map<std::string, std::string>& nodeProperties);
+
+    static void GetSimplifiedInspectorTree(std::string& tree);
 };
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_EVENT_OBSERVER_H
+#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_EVENT_H

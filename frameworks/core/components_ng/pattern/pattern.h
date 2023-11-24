@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -150,6 +151,16 @@ public:
 
     virtual void OnModifyDone()
     {
+        FrameNode::PostTask(
+            [weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->OnFirstFrame();
+            },
+            TaskExecutor::TaskType::UI);
+        if (IsNeedInitClickEventRecorder()) {
+            InitClickEventRecorder();
+        }
         auto frameNode = frameNode_.Upgrade();
         auto children = frameNode->GetChildren();
         if (children.empty()) {
@@ -215,6 +226,8 @@ public:
             }
         }
     }
+
+    virtual void OnFirstFrame() {}
 
     virtual void OnMountToParentDone() {}
 
@@ -453,11 +466,70 @@ public:
         return -1;
     }
 
+    GestureEventFunc GetLongPressEventRecorder()
+    {
+        auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto inspectorId = host->GetInspectorId().value_or("");
+            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
+            if (inspectorId.empty() && text.empty()) {
+                return;
+            }
+
+            Recorder::EventParamsBuilder builder;
+            builder.SetId(inspectorId).SetType(host->GetTag()).SetEventType(Recorder::LONG_PRESS).SetText(text);
+            Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+        };
+        return longPressCallback;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
 
+    virtual bool IsNeedInitClickEventRecorder() const
+    {
+        return false;
+    }
+
+    void InitClickEventRecorder()
+    {
+        if (clickCallback_) {
+            return;
+        }
+
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto gesture = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gesture);
+        if (!gesture->IsClickable()) {
+            return;
+        }
+
+        auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto inspectorId = host->GetInspectorId().value_or("");
+            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
+            if (inspectorId.empty() && text.empty()) {
+                return;
+            }
+
+            Recorder::EventParamsBuilder builder;
+            builder.SetId(inspectorId).SetType(host->GetTag()).SetText(text);
+            Recorder::EventRecorder::Get().OnClick(std::move(builder));
+        };
+        clickCallback_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+        gesture->AddClickEvent(clickCallback_);
+    }
+
     WeakPtr<FrameNode> frameNode_;
+    RefPtr<ClickEvent> clickCallback_;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(Pattern);
