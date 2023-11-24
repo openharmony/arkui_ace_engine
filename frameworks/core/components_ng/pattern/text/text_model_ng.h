@@ -71,6 +71,11 @@ public:
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
     static void SetTextColor(FrameNode* frameNode, const Color& value);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetTextOverflow(FrameNode* frameNode, TextOverflow value);
+    static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
+    static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
+    static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
 };
 } // namespace OHOS::Ace::NG
 

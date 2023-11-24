@@ -488,6 +488,17 @@ class ArkBlockSize {
     }
 }
 
+class ArkDecoration {
+  type: number;
+  color?: string | number | undefined;
+  constructor() {
+    this.type = TextDecorationType.None;
+    this.color = undefined;
+  }
+  isEqual(another: ArkDecoration): boolean {
+    return (this.type === another.type) && (this.color === another.color);
+  }
+}
 class ArkBorder implements Equable {
     arkWidth: ArkBorderWidth
     arkColor: ArkBorderColor

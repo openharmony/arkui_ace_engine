@@ -741,6 +741,7 @@ const isSymbol = (val: basicType) => typeof val === 'symbol'
 const isUndefined = (val: basicType) => typeof val === 'undefined'
 const isObject = (val: basicType) => typeof val === 'object'
 const isFunction = (val: basicType) => typeof val === 'function'
+const isLengthType = (val: any) => typeof val === 'string' || typeof val === 'number'
 
 function CheckJSCallbackInfo(value: any, checklist: any[]) {
     var typeVerified = false;
