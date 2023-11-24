@@ -316,11 +316,17 @@ void ResetBackgroundColor(NodeHandle node)
     ViewAbstract::SetBackgroundColor(frameNode, Color(DEFAULT_BUTTON_COLOR));
 }
 
-void SetWidth(NodeHandle node, double value, int unit)
+void SetWidth(NodeHandle node, double value, int unit, const char* calcVlaue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetWidth(frameNode, CalcLength(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    if (unitEnum == DimensionUnit::CALC) {
+        ViewAbstract::SetWidth(
+            frameNode, CalcLength(CalcLength(std::string(calcVlaue))));
+    } else {
+        ViewAbstract::SetWidth(frameNode, CalcLength(value, unitEnum));
+    }
 }
 
 void ResetWidth(NodeHandle node)
@@ -329,17 +335,23 @@ void ResetWidth(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ClearWidthOrHeight(frameNode, true);
 }
-void SetHeight(NodeHandle node, double value, int unit)
+void SetHeight(NodeHandle node, double value, int unit, const char* calcVlaue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetHeight(frameNode, CalcLength(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    if (unitEnum == DimensionUnit::CALC) {
+        ViewAbstract::SetHeight(
+            frameNode, CalcLength(CalcLength(std::string(calcVlaue))));
+    } else {
+        ViewAbstract::SetHeight(frameNode, CalcLength(value, unitEnum));
+    }
 }
 void ResetHeight(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ClearWidthOrHeight(frameNode, true);
+    ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 /**
  * @param values radius values

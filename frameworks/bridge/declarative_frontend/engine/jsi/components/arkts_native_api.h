@@ -28,9 +28,9 @@ typedef void* NodeHandle;
 struct ArkUICommonModifierAPI {
     void (*SetBackgroundColor)(NodeHandle node, uint32_t color);
     void (*ResetBackgroundColor)(NodeHandle node);
-    void (*SetWidth)(NodeHandle node, double value, int unit);
+    void (*SetWidth)(NodeHandle node, double value, int unit, const char* calcVlaue);
     void (*ResetWidth)(NodeHandle node);
-    void (*SetHeight)(NodeHandle node, double value, int unit);
+    void (*SetHeight)(NodeHandle node, double value, int unit, const char* calcVlaue);
     void (*ResetHeight)(NodeHandle node);
     void (*SetBorderRadius)(NodeHandle node, const double *values, const int *units, int32_t length);
     void (*ResetBorderRadius)(NodeHandle node);
