@@ -50,7 +50,7 @@ public:
 
     void SetSource(const std::string& src);
 
-    void SetSurfaceId(int64_t id);
+    void SetSurfaceId(int64_t id, bool isTexture);
 
     uint32_t GetWidth() const
     {

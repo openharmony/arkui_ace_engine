@@ -25,6 +25,9 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
+#include "core/common/ace_view.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/button/button_declaration.h"
@@ -306,7 +309,42 @@ void VideoPattern::RegisterMediaPlayerEvent()
 
     mediaPlayer_->RegisterMediaPlayerEvent(
         positionUpdatedEvent, stateChangedEvent, errorEvent, resolutionChangeEvent, startRenderFrameEvent);
+
+#ifdef VIDEO_TEXTURE_SUPPORTED
+    auto&& textureRefreshEvent = [videoPattern, uiTaskExecutor](int32_t instanceId, int64_t textureId) {
+        uiTaskExecutor.PostSyncTask([&videoPattern, instanceId, textureId] {
+            auto video = videoPattern.Upgrade();
+            CHECK_NULL_VOID(video);
+            void* nativeWindow = video->GetNativeWindow(instanceId, textureId);
+            if (!nativeWindow) {
+                LOGE("the native window is nullptr.");
+                return;
+            }
+            video->OnTextureRefresh(nativeWindow);
+        });
+    };
+    mediaPlayer_->RegisterTextureEvent(textureRefreshEvent);
+#endif
 }
+
+#ifdef VIDEO_TEXTURE_SUPPORTED
+void* VideoPattern::GetNativeWindow(int32_t instanceId, int64_t textureId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, nullptr);
+    auto nativeView = static_cast<AceView*>(container->GetView());
+    CHECK_NULL_RETURN(nativeView, nullptr);
+    return const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+}
+
+void VideoPattern::OnTextureRefresh(void* surface)
+{
+    CHECK_NULL_VOID(surface);
+    auto renderContextForMediaPlayer = renderContextForMediaPlayerWeakPtr_.Upgrade();
+    CHECK_NULL_VOID(renderContextForMediaPlayer);
+    renderContextForMediaPlayer->MarkNewFrameAvailable(surface);
+}
+#endif
 
 void VideoPattern::PrintPlayerStatus(PlaybackStatus status)
 {
@@ -669,12 +707,24 @@ void VideoPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(renderContext);
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface" };
     renderContextForMediaPlayer_->InitContext(false, param);
+
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        RegisterRenderContextCallBack();
+    }
+
+    renderContext->UpdateBackgroundColor(Color::BLACK);
+    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
+    renderContext->SetClipToBounds(true);
+}
+
+void VideoPattern::RegisterRenderContextCallBack()
+{
+#ifndef VIDEO_TEXTURE_SUPPORTED
     auto isFullScreen = IsFullScreen();
-    if (SystemProperties::GetExtSurfaceEnabled() && !isFullScreen) {
+    if (!isFullScreen) {
         auto OnAreaChangedCallBack = [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
             auto videoPattern = weak.Upgrade();
             CHECK_NULL_VOID(videoPattern);
-
             auto host = videoPattern->GetHost();
             CHECK_NULL_VOID(host);
             auto geometryNode = host->GetGeometryNode();
@@ -683,11 +733,9 @@ void VideoPattern::OnAttachToFrameNode()
             auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
             auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
-
             Rect rect = Rect(x + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
                 y + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
                 videoFrameSize.Height());
-
             if (videoPattern->renderSurface_) {
                 if (videoPattern->renderSurface_->SetExtSurfaceBoundsSync(rect.Left(),
                     rect.Top(), rect.Width(), rect.Height())) {
@@ -697,9 +745,27 @@ void VideoPattern::OnAttachToFrameNode()
         };
         renderContextForMediaPlayer_->SetSurfaceChangedCallBack(OnAreaChangedCallBack);
     }
-    renderContext->UpdateBackgroundColor(Color::BLACK);
-    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
-    renderContext->SetClipToBounds(true);
+#else
+    renderSurfaceWeakPtr_ = renderSurface_;
+    renderContextForMediaPlayerWeakPtr_ = renderContextForMediaPlayer_;
+    auto OnAttachCallBack = [weak = WeakClaim(this)](int64_t textureId, bool isAttach) mutable {
+        LOGI("OnAttachCallBack.");
+        auto videoPattern = weak.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
+            renderSurface->AttachToGLContext(textureId, isAttach);
+        }
+    };
+    renderContextForMediaPlayer_->AddAttachCallBack(OnAttachCallBack);
+    auto OnUpdateCallBack = [weak = WeakClaim(this)](std::vector<float>& matrix) mutable {
+        auto videoPattern = weak.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
+            renderSurface->UpdateTextureImage(matrix);
+        }
+    };
+    renderContextForMediaPlayer_->AddUpdateCallBack(OnUpdateCallBack);
+#endif
 }
 
 void VideoPattern::OnModifyDone()
@@ -911,8 +977,12 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
 void VideoPattern::OnAreaChangedInner()
 {
+#ifndef VIDEO_TEXTURE_SUPPORTED
     auto isFullScreen = IsFullScreen();
     if (SystemProperties::GetExtSurfaceEnabled() && isFullScreen) {
+#else
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+#endif
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto geometryNode = host->GetGeometryNode();
