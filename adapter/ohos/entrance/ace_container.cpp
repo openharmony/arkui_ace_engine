@@ -1524,6 +1524,15 @@ bool AceContainer::IsLauncherContainer()
     return info ? info->isLauncherApp : false;
 }
 
+bool AceContainer::IsTransparentBg() const
+{
+    CHECK_NULL_RETURN(pipelineContext_, true);
+    Color bgColor = pipelineContext_->GetAppBgColor();
+    std::string bgOpacity = bgColor.ColorToString().substr(0, 3);
+    std::string transparentOpacity = "#00";
+    return bgColor == Color::TRANSPARENT || bgOpacity == transparentOpacity;
+}
+
 void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -1822,9 +1831,6 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     auto front = GetFrontend();
     CHECK_NULL_VOID(front);
     front->OnConfigurationUpdated(configuration);
-    if (!IsTransparentForm()) {
-        pipelineContext_->SetAppBgColor(themeManager->GetBackgroundColor());
-    }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
 #endif
@@ -1863,6 +1869,9 @@ void AceContainer::NotifyConfigurationChange(
                     }
                     if (configurationChange.dpiUpdate && (themeManager->GetResourceLimitKeys() & DPI_KEY) == 0) {
                         return;
+                    }
+                    if (configurationChange.colorModeUpdate && !container->IsTransparentBg()) {
+                        pipeline->SetAppBgColor(themeManager->GetBackgroundColor());
                     }
                     pipeline->NotifyConfigurationChange();
                     pipeline->FlushReload(configurationChange);

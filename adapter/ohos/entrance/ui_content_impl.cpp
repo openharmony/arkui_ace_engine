@@ -1870,7 +1870,6 @@ void UIContentImpl::SetFormBackgroundColor(const std::string& color)
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetAppBgColor(bgColor);
-            container->SetIsTransparentForm(bgColor == Color::TRANSPARENT);
         },
         TaskExecutor::TaskType::UI);
 }
