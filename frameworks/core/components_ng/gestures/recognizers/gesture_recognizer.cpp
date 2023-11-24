@@ -203,4 +203,14 @@ void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
         TransGestureDisposal(recognizer->GetGestureDisposal()));
 }
 
+bool NGGestureRecognizer::SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
+{
+    if (!gestureGroup_.Invalid() && !gestureGroup.Invalid()) {
+        return false;
+    }
+
+    gestureGroup_ = gestureGroup;
+    return true;
+}
+
 } // namespace OHOS::Ace::NG
