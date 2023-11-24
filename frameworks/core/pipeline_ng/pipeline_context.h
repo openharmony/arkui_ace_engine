@@ -466,6 +466,17 @@ public:
 
     void SetJSViewActive(bool active, WeakPtr<CustomNode> custom);
 
+    void UpdateCurrentActiveNode(const WeakPtr<FrameNode>& node) override
+    {
+        activeNode_ = std::move(node);
+    }
+
+    const WeakPtr<FrameNode>& GetCurrentActiveNode() const
+    {
+        return activeNode_;
+    }
+
+    std::string GetCurrentExtraInfo() override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
 
     void SetCursor(int32_t cursorValue) override;
@@ -616,6 +627,7 @@ private:
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;
+    WeakPtr<FrameNode> activeNode_;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;

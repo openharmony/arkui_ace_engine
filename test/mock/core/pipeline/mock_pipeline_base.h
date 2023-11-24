@@ -106,6 +106,7 @@ public:
     MOCK_CONST_METHOD0(GetSafeArea, SafeAreaInsets());
     MOCK_METHOD0(NotifyConfigurationChange, void());
     MOCK_CONST_METHOD0(GetTaskExecutor, RefPtr<TaskExecutor>());
+    MOCK_METHOD0(GetCurrentExtraInfo, std::string());
     MOCK_METHOD1(SetIsFocusActive, bool(bool isFocusActive));
     MOCK_METHOD0(NeedSoftKeyboard, bool());
     MOCK_METHOD1(SetCursor, void(int32_t cursorValue));

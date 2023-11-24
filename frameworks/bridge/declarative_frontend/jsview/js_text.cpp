@@ -451,11 +451,16 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
         if (!info[0]->IsFunction()) {
             return;
         }
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](const BaseEventInfo* info) {
+        auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = frameNode]
+            (const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             ACE_SCORING_EVENT("Text.onClick");
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
             func->Execute(*clickInfo);
         };
         TextModel::GetInstance()->SetOnClick(std::move(onClick));

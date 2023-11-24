@@ -731,6 +731,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         info.placeChildrenFunc = std::move(placeChildren);
     }
 
+    JSRef<JSObject> jsViewExtraInfo = jsViewObject_->GetProperty("extraInfo_");
+    if (!jsViewExtraInfo->IsUndefined()) {
+        JSRef<JSVal> jsPage = jsViewExtraInfo->GetProperty("page");
+        JSRef<JSVal> jsLine = jsViewExtraInfo->GetProperty("line");
+        info.extraInfo = {.page = jsPage->ToString(), .line = jsLine->ToNumber<int32_t>()};
+    }
+
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(info));
 #ifdef PREVIEW
     auto uiNode = AceType::DynamicCast<NG::UINode>(node);

@@ -978,6 +978,9 @@ public:
         return onFocus_;
     }
 
+    virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
+
+    virtual std::string GetCurrentExtraInfo() { return ""; }
     virtual void UpdateTitleInTargetPos(bool isShow = true, int32_t height = 0) {}
 
     virtual void SetCursor(int32_t cursorValue)

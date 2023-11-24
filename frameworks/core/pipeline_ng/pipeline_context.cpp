@@ -2571,6 +2571,12 @@ void PipelineContext::SetJSViewActive(bool active, WeakPtr<CustomNode> custom)
     taskScheduler_->SetJSViewActive(active, custom);
 }
 
+std::string PipelineContext::GetCurrentExtraInfo()
+{
+    auto node = activeNode_.Upgrade();
+    return node ? node->GetCurrentCustomNodeInfo() : std::string();
+}
+
 void PipelineContext::SetCursor(int32_t cursorValue)
 {
     if (cursorValue >= 0 && cursorValue <= static_cast<int32_t>(MouseFormat::RUNNING)) {

@@ -181,8 +181,26 @@ public:
         return jsViewName_;
     }
 
+    void SetExtraInfo(const ExtraInfo extraInfo)
+    {
+        extraInfo_ = std::move(extraInfo);
+    }
+
+    const ExtraInfo& GetExtraInfo() const
+    {
+        return extraInfo_;
+    }
+
+    bool HasExtraInfo() {
+        if (!extraInfo_.page.empty()) {
+            return true;
+        }
+        return false;
+    }
+
 protected:
     std::string jsViewName_;
+    ExtraInfo extraInfo_;
 
 private:
     std::function<void()> updateFunc_;

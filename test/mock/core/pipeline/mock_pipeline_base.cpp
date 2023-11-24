@@ -501,4 +501,9 @@ void NG::PipelineContext::SetCursor(int32_t cursorValue) {}
 void NG::PipelineContext::RestoreDefault() {}
 
 void HandleSubwindow(bool isShow) {}
+
+std::string NG::PipelineContext::GetCurrentExtraInfo()
+{
+    return std::string();
+}
 } // namespace OHOS::Ace
