@@ -455,6 +455,11 @@ bool SystemProperties::GetImageFrameworkEnabled()
     return system::GetBoolParameter("persist.ace.image.framework.enabled", true);
 }
 
+bool SystemProperties::GetDebugPixelMapSaveEnabled()
+{
+    return system::GetBoolParameter("persist.ace.save.pixelmap.enabled", false);
+}
+
 ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 {
     static bool isUseMemoryMonitor = IsUseMemoryMonitor();

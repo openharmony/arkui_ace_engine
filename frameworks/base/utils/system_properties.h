@@ -219,6 +219,8 @@ public:
 
     static bool GetImageFrameworkEnabled();
 
+    static bool GetDebugPixelMapSaveEnabled();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;
