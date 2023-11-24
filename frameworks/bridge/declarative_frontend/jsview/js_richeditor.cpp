@@ -748,7 +748,7 @@ void JSRichEditorController::ParseTextShadow(
             updateSpanStyle.updateTextShadows = shadows;
             style.SetTextShadows(shadows);
             return;
-        } 
+        }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(shadowObject);
         auto shadowLength = params->Length();
         std::vector<Shadow> shadows(shadowLength);
