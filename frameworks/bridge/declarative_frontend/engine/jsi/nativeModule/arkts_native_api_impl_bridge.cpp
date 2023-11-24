@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_col_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_panel_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_area_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_radio_bridge.h"
@@ -590,6 +591,13 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOrder"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), GridColBridge::ResetOrder));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "gridCol"), gridCol);
+
+    auto textArea = panda::ObjectRef::New(vm);
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxLines"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextAreaBridge::SetMaxLines));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLines"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextAreaBridge::ResetMaxLines));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
 
     RegisterButtonAttributes(object, vm);
     RegisterToggleAttributes(object, vm);

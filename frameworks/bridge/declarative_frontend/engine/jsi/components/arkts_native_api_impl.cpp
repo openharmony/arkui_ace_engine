@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_col_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_span_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_panel_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_area_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_toggle_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_radio_modifier.h"
@@ -70,6 +71,7 @@ static struct ArkUINodeAPI impl = {
     GetNavDestinationModifier,
     GetGridColModifier,
     GetPanelModifier,
+    GetTextAreaModifier,
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI()

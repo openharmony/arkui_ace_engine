@@ -88,6 +88,7 @@ public:
     void SetCancelIconColor(const Color& iconColor) override;
     void SetSelectAllValue(bool isSetSelectAllValue) override;
 
+    static void SetMaxViewLines(FrameNode* frameNode, uint32_t value);
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);
