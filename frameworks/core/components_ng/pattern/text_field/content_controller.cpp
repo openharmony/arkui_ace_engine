@@ -44,8 +44,15 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
         content_.find('@') != std::string::npos && value.find('@') != std::string::npos &&
         GetSelectedValue(startIndex, endIndex).find('@') == std::string::npos) {
         tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [](char c) { return c == '@'; }), tmp.end());
-        return tmp;
     }
+    auto wideText = GetWideText();
+    auto wideTmp = StringUtils::ToWstring(tmp);
+    auto maxLength = static_cast<uint32_t>(textField->GetMaxLength());
+    auto curLength = static_cast<uint32_t>(wideText.length());
+    auto addLength = static_cast<uint32_t>(wideTmp.length());
+    auto delLength = static_cast<uint32_t>(std::abs(endIndex - startIndex));
+    addLength = std::min(addLength, maxLength - curLength + delLength);
+    tmp = StringUtils::ToString(wideTmp.substr(0, addLength));
     return tmp;
 }
 
