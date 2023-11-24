@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -2888,6 +2889,55 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg063, TestSize.Level1)
      */
     context_->CloseFrontendAnimation();
     EXPECT_EQ(context_->pendingFrontendAnimation_.size(), 0);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg064
+ * @tc.desc: Test the function UpdateTitleInTargetPos.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    ASSERT_NE(context_->rootNode_, nullptr);
+    auto containerNode = AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front());
+    ASSERT_NE(containerNode, nullptr);
+    auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(frameNode_, nullptr);
+    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildren().back());
+    ASSERT_NE(floatingTitleNode, nullptr);
+    auto floatingGeometryNode = floatingTitleNode->geometryNode_;
+    ASSERT_NE(floatingGeometryNode, nullptr);
+    auto floatingLayoutProperty = floatingTitleNode->GetLayoutProperty();
+    ASSERT_NE(floatingLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps2: Call the function UpdateTitleInTargetPos with isShow = true.
+     * @tc.expected: Floating title should be visible.
+     */
+    context_->UpdateTitleInTargetPos(true, 0);
+    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps3: Call the function UpdateTitleInTargetPos with isShow = false.
+     * @tc.expected: Floating title should be gone.
+     */
+    context_->UpdateTitleInTargetPos(false, 0);
+    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::GONE);
+
+    /**
+     * @tc.steps4: Call the function UpdateTitleInTargetPos with target position.
+     * @tc.expected: Floating title should be visible in target position.
+     */
+    context_->UpdateTitleInTargetPos(true, 20);
+    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
+    EXPECT_EQ(floatingGeometryNode->GetFrameRect().Top(), 20);
 }
 }
 } // namespace OHOS::Ace::NG
