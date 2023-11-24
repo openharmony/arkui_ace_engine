@@ -357,8 +357,10 @@ bool JSCustomDialogController::ParseAnimation(
     auto iterations = animationArgs->GetInt("iterations", 1);
     auto tempo = static_cast<float>(animationArgs->GetDouble("tempo", 1.0));
     auto finishCallbackType = static_cast<FinishCallbackType>(animationArgs->GetInt("finishCallbackType", 0));
-    if (NonPositive(tempo)) {
+    if (tempo < 0) {
         tempo = 1.0f;
+    } else if (tempo == 0) {
+        tempo = 1000.0f;
     }
     auto direction = StringToAnimationDirection(animationArgs->GetString("playMode", "normal"));
     RefPtr<Curve> curve;
