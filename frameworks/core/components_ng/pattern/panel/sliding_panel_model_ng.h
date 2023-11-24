@@ -43,6 +43,10 @@ public:
     void SetBorder(const BorderStyle& borderStyle, const Dimension& borderWidth) override;
     void SetModeChangeEvent(ChangeEvent&& modeChangeEvent) override;
 
+    static void SetShowCloseIcon(FrameNode* frameNode, bool showCloseIcon);
+    static void SetHasDragBar(FrameNode* frameNode, bool hasDragBar);
+    static void SetIsShow(FrameNode* frameNode, bool isShow);
+
 private:
     static RefPtr<SlidingPanelNode> GetOrCreateSlidingPanelNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
