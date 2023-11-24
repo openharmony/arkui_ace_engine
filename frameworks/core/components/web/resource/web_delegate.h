@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#include "nweb_accessibility_node_info.h"
 #include "surface_delegate.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "nweb_handler.h"
@@ -553,6 +554,7 @@ public:
     bool OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
+    void OnAccessibilityEvent(int32_t accessibilityId, AccessibilityEventType eventType);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
     void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler);
@@ -642,6 +644,14 @@ public:
     void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
+    void ExecuteAction(int32_t accessibilityId, AceAction action);
+    bool GetFocusedAccessibilityNodeInfo(
+        int32_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
+    bool GetAccessibilityNodeInfoById(int32_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
+    bool GetAccessibilityNodeInfoByFocusMove(
+        int32_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
+    void SetAccessibilityState(bool state);
+    void UpdateAccessibilityState(bool state);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -803,6 +813,7 @@ private:
     uint32_t delayTime_ = 500;
     float lowerFrameRateVisibleRatio_ = 0.1;
     std::optional<ScriptItems> scriptItems_;
+    bool accessibilityState_ = false;
 #endif
 };
 

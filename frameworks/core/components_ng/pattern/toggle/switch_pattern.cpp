@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_DURATION = 200;
+const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 } // namespace
 void SwitchPattern::OnAttachToFrameNode()
 {
@@ -70,23 +71,57 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 void SwitchPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    UpdateSwitchLayoutProperty();
+    UpdateSwitchPaintProperty();
+    InitClickEvent();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    InitPanEvent(gestureHub);
+    InitTouchEvent();
+    InitMouseEvent();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
+    SetAccessibilityAction();
+}
+
+void SwitchPattern::UpdateSwitchPaintProperty()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(switchPaintProperty);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (!isOn_.has_value()) {
+        isOn_ = switchPaintProperty->GetIsOnValue(false);
+    }
+    auto isOn = switchPaintProperty->GetIsOnValue(false);
+    if (isOn != isOn_.value_or(false)) {
+        isOn_ = isOn;
+        OnChange();
+    }
+}
+
+void SwitchPattern::UpdateSwitchLayoutProperty()
+{
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
-    auto layoutProperty = host->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
     MarginProperty margin;
     margin.left = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
     margin.right = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
     margin.top = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
     margin.bottom = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto& setMargin = layoutProperty->GetMarginProperty();
     if (setMargin) {
         if (setMargin->left.has_value()) {
@@ -111,25 +146,55 @@ void SwitchPattern::OnModifyDone()
     } else {
         layoutProperty->UpdateAlignment(Alignment::CENTER);
     }
-    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
-    CHECK_NULL_VOID(switchPaintProperty);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    if (!isOn_.has_value()) {
-        isOn_ = switchPaintProperty->GetIsOnValue(false);
+}
+
+void SwitchPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateSelectStatus(true);
+    });
+
+    accessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateSelectStatus(false);
+    });
+}
+
+void SwitchPattern::UpdateSelectStatus(bool isSelected)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    MarkIsSelected(isSelected);
+    context->OnMouseSelectUpdate(isSelected, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+}
+
+void SwitchPattern::MarkIsSelected(bool isSelected)
+{
+    if (isOn_ == isSelected) {
+        return;
     }
-    auto isOn = switchPaintProperty->GetIsOnValue(false);
-    if (isOn != isOn_.value_or(false)) {
-        isOn_ = isOn;
-        OnChange();
+    isOn_ = isSelected;
+    auto eventHub = GetEventHub<SwitchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->UpdateChangeEvent(isSelected);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isSelected) {
+        eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
+        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+    } else {
+        eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
+        host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     }
-    InitClickEvent();
-    InitPanEvent(gestureHub);
-    InitTouchEvent();
-    InitMouseEvent();
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    InitOnKeyEvent(focusHub);
 }
 
 RefPtr<Curve> SwitchPattern::GetCurve() const

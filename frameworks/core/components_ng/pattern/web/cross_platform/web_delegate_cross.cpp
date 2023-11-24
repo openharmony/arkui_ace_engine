@@ -1035,4 +1035,9 @@ void WebDelegateCross::SetBoundsOrResize(const Size& drawSize, const Offset& off
     std::string param = paramStream.str();
     CallResRegisterMethod(updateLayoutMethod_, param, nullptr);
 }
+
+void WebDelegateCross::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    // cross platform is not support now;
+}
 }

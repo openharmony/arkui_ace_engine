@@ -12,14 +12,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
-
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_blank_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_button_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_checkbox_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_checkboxgroup_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_common_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_counter_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_col_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_span_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_toggle_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_radio_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_textpicker_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_timepicker_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rating_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_slider_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_select_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_divider_modifier.h"
+#include "core/components/common/layout/constants.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_nav_destination_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components/common/layout/constants.h"
-#include "base/memory/ace_type.h"
+#include "core/pipeline/base/element_register.h"
+
 
 using namespace OHOS::Ace::NG;
 
@@ -32,6 +51,23 @@ NodeHandle GetFrameNodeById(int nodeId)
 static struct ArkUINodeAPI impl = {
     GetFrameNodeById,
     GetCommonModifier,
+    GetCheckboxGroupModifier,
+    GetCounterModifier,
+    GetTextModifier,
+    GetButtonModifier,
+    GetToggleModifier,
+    GetImageSpanModifier,
+    GetBlankModifier,
+    GetSelectModifier,
+    GetRadioModifier,
+    GetCheckboxModifier,
+    GetTimepickerModifier,
+    GetTextpickerModifier,
+    GetRatingModifier,
+    GetSliderModifier,
+    GetDividerModifier,
+    GetNavDestinationModifier,
+    GetGridColModifier,
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI()

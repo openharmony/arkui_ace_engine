@@ -497,11 +497,18 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto property = GetPaintProperty<RatingRenderProperty>();
-    CHECK_NULL_VOID(property);
     const auto& content = host->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto singleStarHeight = content->GetRect().Height();
+    auto property = GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto paddingLeft = 0.0f;
+    auto paddingTop = 0.0f;
+    const auto& padding = property->GetPaddingProperty();
+    if (padding) {
+        paddingLeft = padding->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+        paddingTop = padding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+    }
     auto ratingScore = focusRatingScore_;
     auto wholeStarNum = fmax(ceil(ratingScore) - 1, 0.0);
 
@@ -511,8 +518,8 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(ratingTheme);
     auto radius = ratingTheme->GetFocusBorderRadius();
 
-    paintRect.SetRect(
-        RectF(static_cast<float>(wholeStarNum) * singleStarWidth_, 0.0f, singleStarWidth_, singleStarHeight));
+    paintRect.SetRect(RectF(static_cast<float>(wholeStarNum) * singleStarWidth_ + paddingLeft, paddingTop,
+        singleStarWidth_, singleStarHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
         static_cast<RSScalar>(radius.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
@@ -581,8 +588,7 @@ bool RatingPattern::OnKeyEvent(const KeyEvent& event)
 
 void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
-    focusHub->SetFocusable(!IsIndicator());
-    CHECK_NULL_VOID(!IsIndicator());
+    focusHub->SetFocusType(IsIndicator() ? FocusType::DISABLE : FocusType::NODE);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
@@ -821,7 +827,6 @@ void RatingPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(true);
 }
 
 void RatingPattern::MarkDirtyNode(const PropertyChangeFlag& flag)

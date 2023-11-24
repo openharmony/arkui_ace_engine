@@ -25,6 +25,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+}
+
 void CheckBoxGroupPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -76,6 +80,57 @@ void CheckBoxGroupPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
+    SetAccessibilityAction();
+}
+
+void CheckBoxGroupPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateSelectStatus(true);
+    });
+
+    accessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateSelectStatus(false);
+    });
+}
+
+void CheckBoxGroupPattern::UpdateSelectStatus(bool isSelected)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    MarkIsSelected(isSelected);
+    context->OnMouseSelectUpdate(isSelected, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+}
+
+void CheckBoxGroupPattern::MarkIsSelected(bool isSelected)
+{
+    if (updateFlag_ == isSelected) {
+        return;
+    }
+    updateFlag_ = isSelected;
+    auto eventHub = GetEventHub<CheckBoxGroupEventHub>();
+    std::vector<std::string> vec;
+    CheckboxGroupResult groupResult(vec, int(isSelected));
+    eventHub->UpdateChangeEvent(&groupResult);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isSelected) {
+        eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
+        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+    } else {
+        eventHub->ResetCurrentUIState(UI_STATE_SELECTED);
+        host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+    }
 }
 
 void CheckBoxGroupPattern::InitClickEvent()

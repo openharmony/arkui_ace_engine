@@ -712,9 +712,6 @@ void SliderPattern::HandleHoverEvent(bool isHover)
     hotFlag_ = isHover;
     mouseHoverFlag_ = mouseHoverFlag_ && isHover;
     if (!mouseHoverFlag_) {
-        if (!isFocusActive_) {
-            bubbleFlag_ = false;
-        }
         axisFlag_ = false;
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -732,7 +729,7 @@ void SliderPattern::HandleMouseEvent(const MouseInfo& info)
         }
     }
     // when mouse hovers over slider, distinguish between hover block and Wheel operation.
-    if (!mouseHoverFlag_ && !axisFlag_ && !isFocusActive_) {
+    if (!mouseHoverFlag_ && !axisFlag_ && !isFocusActive_ && !mousePressedFlag_) {
         bubbleFlag_ = false;
     }
 
@@ -1154,7 +1151,11 @@ void SliderPattern::OnIsFocusActiveUpdate(bool isFocusActive)
 void SliderPattern::AddIsFocusActiveUpdateEvent()
 {
     if (!isFocusActiveUpdateEvent_) {
-        isFocusActiveUpdateEvent_ = std::bind(&SliderPattern::OnIsFocusActiveUpdate, this, std::placeholders::_1);
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
     }
 
     auto pipline = PipelineContext::GetCurrentContext();
@@ -1167,5 +1168,10 @@ void SliderPattern::RemoveIsFocusActiveUpdateEvent()
     auto pipline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipline);
     pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    RemoveIsFocusActiveUpdateEvent();
 }
 } // namespace OHOS::Ace::NG

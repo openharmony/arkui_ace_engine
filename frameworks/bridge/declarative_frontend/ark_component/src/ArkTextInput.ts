@@ -1,121 +1,140 @@
-//@ts-nocheck
+
+/// <reference path="./import.ts" />
 class ArkTextInputComponent extends ArkComponent implements TextInputAttribute {
-    type(value: InputType): TextInputAttribute {
+    cancelButton(value: { style?: CancelButtonStyle; icon?: IconOptions; }): this {
         throw new Error("Method not implemented.");
     }
-    placeholderColor(value: ResourceColor): TextInputAttribute {
+    onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
         throw new Error("Method not implemented.");
     }
-    placeholderFont(value?: any): TextInputAttribute {
+    selectAll(value: boolean): this {
         throw new Error("Method not implemented.");
     }
-    enterKeyType(value: EnterKeyType): TextInputAttribute {
+    enableAutoFill(value: boolean): this {
         throw new Error("Method not implemented.");
     }
-    caretColor(value: ResourceColor): TextInputAttribute {
+    passwordRules(value: string): this {
         throw new Error("Method not implemented.");
     }
-    onEditChanged(callback: (isEditing: boolean) => void): TextInputAttribute {
+    showCounter(value: boolean): this {
         throw new Error("Method not implemented.");
     }
-    onEditChange(callback: (isEditing: boolean) => void): TextInputAttribute {
+    type(value: InputType): this {
         throw new Error("Method not implemented.");
     }
-    onSubmit(callback: (enterKey: EnterKeyType) => void): TextInputAttribute {
+    placeholderColor(value: ResourceColor): this {
         throw new Error("Method not implemented.");
     }
-    onChange(callback: (value: string) => void): TextInputAttribute {
+    placeholderFont(value?: any): this {
         throw new Error("Method not implemented.");
     }
-    onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): TextInputAttribute {
+    enterKeyType(value: EnterKeyType): this {
         throw new Error("Method not implemented.");
     }
-    onContentScroll(callback: (totalOffsetX: number, totalOffsetY: number) => void): TextInputAttribute {
+    caretColor(value: ResourceColor): this {
         throw new Error("Method not implemented.");
     }
-    maxLength(value: number): TextInputAttribute {
+    onEditChanged(callback: (isEditing: boolean) => void): this {
         throw new Error("Method not implemented.");
     }
-    fontColor(value: ResourceColor): TextInputAttribute {
+    onEditChange(callback: (isEditing: boolean) => void): this {
         throw new Error("Method not implemented.");
     }
-    fontSize(value: Length): TextInputAttribute {
+    onSubmit(callback: (enterKey: EnterKeyType) => void): this {
         throw new Error("Method not implemented.");
     }
-    fontStyle(value: FontStyle): TextInputAttribute {
+    onChange(callback: (value: string) => void): this {
         throw new Error("Method not implemented.");
     }
-    fontWeight(value: any): TextInputAttribute {
+    onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): this {
         throw new Error("Method not implemented.");
     }
-    fontFamily(value: ResourceStr): TextInputAttribute {
+    onContentScroll(callback: (totalOffsetX: number, totalOffsetY: number) => void): this {
         throw new Error("Method not implemented.");
     }
-    inputFilter(value: ResourceStr, error?: ((value: string) => void) | undefined): TextInputAttribute {
+    maxLength(value: number): this {
         throw new Error("Method not implemented.");
     }
-    onCopy(callback: (value: string) => void): TextInputAttribute {
+    fontColor(value: ResourceColor): this {
         throw new Error("Method not implemented.");
     }
-    onCut(callback: (value: string) => void): TextInputAttribute {
+    fontSize(value: Length): this {
         throw new Error("Method not implemented.");
     }
-    onPaste(callback: (value: string) => void): TextInputAttribute {
+    fontStyle(value: FontStyle): this {
         throw new Error("Method not implemented.");
     }
-    copyOption(value: CopyOptions): TextInputAttribute {
+    fontWeight(value: any): this {
         throw new Error("Method not implemented.");
     }
-    showPasswordIcon(value: boolean): TextInputAttribute {
+    fontFamily(value: ResourceStr): this {
         throw new Error("Method not implemented.");
     }
-    textAlign(value: TextAlign): TextInputAttribute {
+    inputFilter(value: ResourceStr, error?: ((value: string) => void) | undefined): this {
         throw new Error("Method not implemented.");
     }
-    style(value: any): TextInputAttribute {
+    onCopy(callback: (value: string) => void): this {
         throw new Error("Method not implemented.");
     }
-    caretStyle(value: CaretStyle): TextInputAttribute {
+    onCut(callback: (value: string) => void): this {
         throw new Error("Method not implemented.");
     }
-    selectedBackgroundColor(value: ResourceColor): TextInputAttribute {
+    onPaste(callback: (value: string) => void): this {
         throw new Error("Method not implemented.");
     }
-    caretPosition(value: number): TextInputAttribute {
+    copyOption(value: CopyOptions): this {
         throw new Error("Method not implemented.");
     }
-    enableKeyboardOnFocus(value: boolean): TextInputAttribute {
+    showPasswordIcon(value: boolean): this {
         throw new Error("Method not implemented.");
     }
-    passwordIcon(value: PasswordIcon): TextInputAttribute {
+    textAlign(value: TextAlign): this {
         throw new Error("Method not implemented.");
     }
-    showError(value?: string | undefined): TextInputAttribute {
+    style(value: any): this {
         throw new Error("Method not implemented.");
     }
-    showUnit(value: CustomBuilder): TextInputAttribute {
+    caretStyle(value: CaretStyle): this {
         throw new Error("Method not implemented.");
     }
-    showUnderline(value: boolean): TextInputAttribute {
+    selectedBackgroundColor(value: ResourceColor): this {
         throw new Error("Method not implemented.");
     }
-    selectionMenuHidden(value: boolean): TextInputAttribute {
+    caretPosition(value: number): this {
         throw new Error("Method not implemented.");
     }
-    barState(value: BarState): TextInputAttribute {
+    enableKeyboardOnFocus(value: boolean): this {
         throw new Error("Method not implemented.");
     }
-    maxLines(value: number): TextInputAttribute {
+    passwordIcon(value: PasswordIcon): this {
         throw new Error("Method not implemented.");
     }
-    customKeyboard(value: CustomBuilder): TextInputAttribute {
+    showError(value?: string | undefined): this {
+        throw new Error("Method not implemented.");
+    }
+    showUnit(value: CustomBuilder): this {
+        throw new Error("Method not implemented.");
+    }
+    showUnderline(value: boolean): this {
+        throw new Error("Method not implemented.");
+    }
+    selectionMenuHidden(value: boolean): this {
+        throw new Error("Method not implemented.");
+    }
+    barState(value: BarState): this {
+        throw new Error("Method not implemented.");
+    }
+    maxLines(value: number): this {
+        throw new Error("Method not implemented.");
+    }
+    customKeyboard(value: CustomBuilder): this {
         throw new Error("Method not implemented.");
     }
 }
-
+// @ts-ignore
 globalThis.TextInput.attributeModifier = function(modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
     var component = this.createOrGetNode(elmtId, () =>
     {
         return new ArkTextInputComponent(nativeNode);

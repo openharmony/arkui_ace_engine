@@ -13,6 +13,18 @@
         "src/ArkTextArea.ts",
         "src/ArkTextInput.ts",
         "src/ArkToggle.ts",
+        "src/ArkSelect.ts",
+        "src/ArkRadio.ts",
+        "src/ArkTimePicker.ts",
+        "src/ArkTextPicker.ts",
+        "src/ArkSlider.ts",
+        "src/ArkRating.ts",
+        "src/ArkCheckbox.ts",
+        "src/ArkDivider.ts",
+        "src/ArkNavDestination.ts",
+        "src/ArkCounter.ts",
+        "src/ArkCheckboxGroup.ts",
+        "src/ArkGridCol.ts",
     ],
 
     "compilerOptions": {

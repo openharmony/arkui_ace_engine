@@ -145,34 +145,33 @@ bool CheckIfSetFormAnimationDuration(const RefPtr<PipelineBase>& pipelineContext
 } // namespace
 
 const AnimationOption JSViewContext::CreateAnimation(
-    const std::unique_ptr<JsonValue>& animationArgs, const std::function<float(float)>& jsFunc, bool isForm)
+    const JSRef<JSObject>& animationArgs, const std::function<float(float)>& jsFunc, bool isForm)
 {
     AnimationOption option = AnimationOption();
-    if (!animationArgs) {
-        return option;
-    }
     // If the attribute does not exist, the default value is used.
-    auto duration = animationArgs->GetInt("duration", DEFAULT_DURATION);
-    auto delay = animationArgs->GetInt("delay", 0);
-    auto iterations = animationArgs->GetInt("iterations", 1);
-    auto tempo = animationArgs->GetDouble("tempo", 1.0);
+    auto duration = animationArgs->GetPropertyValue<int32_t>("duration", DEFAULT_DURATION);
+    auto delay = animationArgs->GetPropertyValue<int32_t>("delay", 0);
+    auto iterations = animationArgs->GetPropertyValue<int32_t>("iterations", 1);
+    auto tempo = animationArgs->GetPropertyValue<double>("tempo", 1.0);
     if (SystemProperties::GetRosenBackendEnabled() && NearZero(tempo)) {
         // set duration to 0 to disable animation.
         duration = 0;
     }
-    auto direction = StringToAnimationDirection(animationArgs->GetString("playMode", "normal"));
-    auto finishCallbackType = static_cast<FinishCallbackType>(animationArgs->GetInt("finishCallbackType", 0));
+    auto direction = StringToAnimationDirection(animationArgs->GetPropertyValue<std::string>("playMode", "normal"));
+    auto finishCallbackType = static_cast<FinishCallbackType>(
+        animationArgs->GetPropertyValue<int32_t>("finishCallbackType", 0));
     RefPtr<Curve> curve;
-    auto curveArgs = animationArgs->GetValue("curve");
+    auto curveArgs = animationArgs->GetProperty("curve");
     if (curveArgs->IsString()) {
-        curve = CreateCurve(animationArgs->GetString("curve", DOM_ANIMATION_TIMING_FUNCTION_EASE_IN_OUT));
+        curve = CreateCurve(animationArgs->GetPropertyValue<std::string>("curve",
+            DOM_ANIMATION_TIMING_FUNCTION_EASE_IN_OUT));
     } else if (curveArgs->IsObject()) {
-        auto curveString = curveArgs->GetValue("__curveString");
-        if (!curveString) {
+        JSRef<JSVal> curveString = JSRef<JSObject>::Cast(curveArgs)->GetProperty("__curveString");
+        if (!curveString->IsString()) {
             // Default AnimationOption which is invalid.
             return option;
         }
-        auto aniTimFunc = curveString->GetString();
+        auto aniTimFunc = curveString->ToString();
 
         std::string customFuncName(DOM_ANIMATION_TIMING_FUNCTION_CUSTOM);
         if (aniTimFunc == customFuncName) {
@@ -271,13 +270,8 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
             func->Execute();
         };
     }
-    auto animationArgs = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (animationArgs->IsNull()) {
-        ViewContextModel::GetInstance()->closeAnimation(option, false);
-        return;
-    }
 
-    option = CreateAnimation(animationArgs, ParseCallBackFunction(obj), pipelineContextBase->IsFormRender());
+    option = CreateAnimation(obj, ParseCallBackFunction(obj), pipelineContextBase->IsFormRender());
     if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
         option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase))) {
         option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase));
@@ -342,13 +336,8 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         };
     }
 
-    auto animationArgs = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (animationArgs->IsNull()) {
-        return;
-    }
-
     AnimationOption option =
-        CreateAnimation(animationArgs, ParseCallBackFunction(obj), pipelineContext->IsFormRender());
+        CreateAnimation(obj, ParseCallBackFunction(obj), pipelineContext->IsFormRender());
     *traceStreamPtr << "AnimateTo, Options"
                     << " duration:" << option.GetDuration()
                     << ",iteration:" << option.GetIteration()

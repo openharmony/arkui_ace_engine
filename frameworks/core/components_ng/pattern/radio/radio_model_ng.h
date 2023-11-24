@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODEL_NG_H
 
 #include "core/components_ng/pattern/radio/radio_model.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -33,6 +34,12 @@ public:
     void SetIndicatorColor(const Color& color) override;
     void SetOnChangeEvent(ChangeEvent&& onChangeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
+    void SetHoverEffect(HoverEffectType hoverEffect) override;
+
+    static void SetChecked(FrameNode* frameNode, bool isChecked);
+    static void SetCheckedBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void SetUncheckedBorderColor(FrameNode* frameNode, const Color& color);
+    static void SetIndicatorColor(FrameNode* frameNode, const Color& color);
 };
 } // namespace OHOS::Ace::NG
 

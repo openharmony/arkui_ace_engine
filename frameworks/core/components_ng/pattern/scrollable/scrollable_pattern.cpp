@@ -118,7 +118,7 @@ bool ScrollablePattern::ProcessNavBarReactOnUpdate(float offset)
     auto dragOffsetY = firstGeometryNode->GetFrameOffset().GetY();
     navBarPattern_->OnCoordScrollUpdate(offset, dragOffsetY);
     DraggedDownScrollEndProcess();
-    if (minTitle) {
+    if (minTitle &&  Negative(offset)) {
         return scrollEffect_ && scrollEffect_->IsNoneEffect();
     }
     return scrollEffect_ && scrollEffect_->IsSpringEffect();
@@ -1145,10 +1145,9 @@ void ScrollablePattern::LimitMouseEndOffset()
 {
     float limitedMainOffset = -1.0f;
     float limitedCrossOffset = -1.0f;
-    auto host = GetHost();
-    auto hostSize = host->GetGeometryNode()->GetFrameSize();
-    auto mainSize = hostSize.MainSize(axis_);
-    auto crossSize = hostSize.CrossSize(axis_);
+    auto hostSize = GetHostFrameSize();
+    auto mainSize = hostSize->MainSize(axis_);
+    auto crossSize = hostSize->CrossSize(axis_);
     auto mainOffset = mouseEndOffset_.GetMainOffset(axis_);
     auto crossOffset = mouseEndOffset_.GetCrossOffset(axis_);
     if (LessNotEqual(mainOffset, 0.0f)) {
@@ -1181,8 +1180,7 @@ bool ScrollablePattern::ProcessAssociatedScroll(double offset, int32_t source)
         } else if ((source == SCROLL_FROM_UPDATE) || (source == SCROLL_FROM_ANIMATION) ||
                    (source == SCROLL_FROM_ANIMATION_SPRING)) {
             if (IsAtTop()) {
-                auto host = GetHost();
-                return navBarPattern_->UpdateAssociatedScrollOffset(offset, host);
+                return navBarPattern_->UpdateAssociatedScrollOffset(offset);
             }
         }
     }
@@ -1424,8 +1422,11 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity)
 {
     if ((velocity > 0 && !IsAtTop()) || (velocity < 0 && !IsAtBottom())) {
         // trigger scroll animation if edge not reached
-        scrollableEvent_->GetScrollable()->StartScrollAnimation(0.0f, velocity);
-        return true;
+        if (scrollableEvent_ && scrollableEvent_->GetScrollable()) {
+            scrollableEvent_->GetScrollable()->StartScrollAnimation(0.0f, velocity);
+            return true;
+        }
+        return false;
     }
     return HandleOverScroll(velocity);
 }

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 
+#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -22,6 +23,9 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Dimension RESERVE_BOTTOM_HEIGHT = 24.0_vp; 
+}
 const RefPtr<KeyEventHandler>& TextFieldManagerNG::GetKeyEventHandler()
 {
     if (!keyEventHandler_) {
@@ -104,5 +108,10 @@ void TextFieldManagerNG::ScrollTextFieldToSafeArea()
     auto bottomInset = pipeline->GetSafeArea().bottom_.Combine(keyboardInset);
     CHECK_NULL_VOID(bottomInset.IsValid());
     ScrollToSafeAreaHelper(bottomInset);
+}
+
+void TextFieldManagerNG::SetHeight(float height)
+{
+    height_ = height + RESERVE_BOTTOM_HEIGHT.ConvertToPx();
 }
 } // namespace OHOS::Ace::NG

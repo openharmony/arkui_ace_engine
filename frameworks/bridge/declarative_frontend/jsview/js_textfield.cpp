@@ -189,6 +189,10 @@ void JSTextField::SetType(const JSCallbackInfo& info)
         LOGI("SetType create error, info is non-valid");
         return;
     }
+    if (info[0]->IsUndefined()) {
+        TextFieldModel::GetInstance()->SetType(TextInputType::UNSPECIFIED);
+        return;
+    }
     if (!info[0]->IsNumber()) {
         LOGI("The inputType is not number");
         return;
@@ -379,6 +383,11 @@ void JSTextField::SetSelectedBackgroundColor(const JSCallbackInfo& info)
         CHECK_NULL_VOID(theme);
         selectedColor = theme->GetSelectedColor();
     }
+    // Alpha = 255 means opaque
+    if (selectedColor.GetAlpha() == 255) {
+        // Default setting of 20% opacity
+        selectedColor = selectedColor.ChangeOpacity(0.2);
+    }
     TextFieldModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
 }
 
@@ -557,6 +566,9 @@ void JSTextField::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         LOGW("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    if (info[0]->IsString() && info[0]->ToString().empty()) {
         return;
     }
     if (info[0]->IsString() && info[0]->ToString() == "auto") {

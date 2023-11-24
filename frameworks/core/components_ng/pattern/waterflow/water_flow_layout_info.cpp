@@ -41,7 +41,13 @@ void WaterFlowLayoutInfo::UpdateStartIndex()
     int32_t tempStartIndex = -1;
     for (const auto& crossItems : waterFlowItems_) {
         for (const auto& iter : crossItems.second) {
-            if (GreatNotEqual(iter.second.first + iter.second.second + currentOffset_, 0.0f)) {
+            if (GreatOrEqual(iter.second.first + iter.second.second + currentOffset_, 0.0f)) {
+                tempStartIndex = tempStartIndex != -1 ? std::min(tempStartIndex, iter.first) : iter.first;
+                break;
+            }
+            // FlowItem that have not been loaded at the beginning of each cross need to be selected as startIndex_ for
+            // the ClearCache later.
+            if (NearZero(iter.second.first + iter.second.second) && NearZero(currentOffset_)) {
                 tempStartIndex = tempStartIndex != -1 ? std::min(tempStartIndex, iter.first) : iter.first;
                 break;
             }
@@ -136,7 +142,7 @@ bool WaterFlowLayoutInfo::IsAllCrossReachend(float mainSize) const
 FlowItemIndex WaterFlowLayoutInfo::GetCrossIndexForNextItem() const
 {
     FlowItemIndex position = { 0, -1 };
-    auto minHeight = 0.0f;
+    auto minHeight = -1.0f;
     auto crossSize = static_cast<int32_t>(waterFlowItems_.size());
     for (int32_t i = 0; i < crossSize; ++i) {
         const auto& crossItems = waterFlowItems_.at(i);
@@ -147,7 +153,7 @@ FlowItemIndex WaterFlowLayoutInfo::GetCrossIndexForNextItem() const
         }
         auto lastItem = crossItems.rbegin();
         auto lastOffset = lastItem->second.first + lastItem->second.second;
-        if (NearEqual(minHeight, 0.0f)) {
+        if (NearEqual(minHeight, -1.0f)) {
             minHeight = lastOffset;
             position.crossIndex = i;
             position.lastItemIndex = lastItem->first;

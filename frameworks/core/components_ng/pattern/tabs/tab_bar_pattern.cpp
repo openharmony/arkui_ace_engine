@@ -29,6 +29,8 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
+#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
+#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
@@ -498,6 +500,7 @@ void TabBarPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
+    SetDefaultAnimationDuration();
     InitClick(gestureHub);
     InitTurnPageRateEvent();
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
@@ -517,8 +520,6 @@ void TabBarPattern::OnModifyDone()
     SetAccessibilityAction();
     UpdateSubTabBoard();
     needSetCentered_ = true;
-    FocusIndexChange(layoutProperty->GetIndicatorValue(0));
-    focusIndicator_ = layoutProperty->GetIndicatorValue(0);
 
     CHECK_NULL_VOID(swiperController_);
     auto removeEventCallback = [weak = WeakClaim(this)]() {
@@ -596,7 +597,6 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (isTouchingSwiper_ && layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
         ApplyTurnPageRateToIndicator(turnPageRate_);
     }
-    PaintFocusState();
     return false;
 }
 
@@ -1944,19 +1944,27 @@ void TabBarPattern::InitTurnPageRateEvent()
         }
     };
     swiperController_->SetTurnPageRateCallback(std::move(turnPageRateCallback));
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
-    CHECK_NULL_VOID(tabsNode);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetAnimationEndEvent([weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
-        auto pattern = weak.Upgrade();
-        if (pattern && (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f))) {
-            pattern->isTouchingSwiper_ = false;
-        }
-    });
+
+    if (!animationEndEvent_) {
+        AnimationEndEvent animationEndEvent =
+            [weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
+                auto pattern = weak.Upgrade();
+                if (pattern && (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f))) {
+                    pattern->isTouchingSwiper_ = false;
+                }
+            };
+        animationEndEvent_ = std::make_shared<AnimationEndEvent>(std::move(animationEndEvent));
+
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+        CHECK_NULL_VOID(tabsNode);
+        auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+        CHECK_NULL_VOID(swiperNode);
+        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->AddAnimationEndEvent(animationEndEvent_);
+    }
 }
 
 float TabBarPattern::GetLeftPadding() const
@@ -1969,6 +1977,27 @@ float TabBarPattern::GetLeftPadding() const
         return 0.0f;
     }
     return geometryNode->GetPadding()->left.value_or(0.0f);
+}
+
+void TabBarPattern::SetDefaultAnimationDuration()
+{
+    if (animationDuration_.has_value() || Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    SetAnimationDuration(static_cast<int32_t>(tabTheme->GetTabContentAnimationDuration()));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_VOID(swiperPaintProperty);
+    swiperPaintProperty->UpdateDuration(static_cast<int32_t>(tabTheme->GetTabContentAnimationDuration()));
 }
 
 void TabBarPattern::DumpAdvanceInfo()
@@ -1990,12 +2019,8 @@ void TabBarPattern::DumpAdvanceInfo()
                    : DumpLog::GetInstance().AddDesc("changeByClick:false");
     needSetCentered_ ? DumpLog::GetInstance().AddDesc("needSetCentered:true")
                      : DumpLog::GetInstance().AddDesc("needSetCentered:false");
-    DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(currentOffset_));
     DumpLog::GetInstance().AddDesc("childrenMainSize:" + std::to_string(childrenMainSize_));
     DumpLog::GetInstance().AddDesc("indicator:" + std::to_string(indicator_));
-    DumpLog::GetInstance().AddDesc("focusIndicator:" + std::to_string(focusIndicator_));
-    DumpLog::GetInstance().AddDesc("currentIndicatorOffset:" + std::to_string(currentIndicatorOffset_));
-    DumpLog::GetInstance().AddDesc("turnPageRate:" + std::to_string(turnPageRate_));
     DumpLog::GetInstance().AddDesc("swiperStartIndex:" + std::to_string(swiperStartIndex_));
     DumpLog::GetInstance().AddDesc("scrollMargin:" + std::to_string(scrollMargin_));
     std::string regionString = std::string("region:");

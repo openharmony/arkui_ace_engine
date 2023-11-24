@@ -489,6 +489,7 @@ public:
     }
 
     std::string GetCurrentCustomNodeInfo();
+    static int32_t GenerateAccessibilityId();
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()

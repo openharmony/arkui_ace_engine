@@ -31,7 +31,14 @@ class ACE_EXPORT RotationGesture : public Gesture {
     DECLARE_ACE_TYPE(RotationGesture, Gesture);
 
 public:
-    RotationGesture() = default;
+    RotationGesture()
+    {
+        if (gestureInfo_) {
+            gestureInfo_->SetType(GestureTypeName::ROTATION_GESTURE);
+        } else {
+            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::ROTATION_GESTURE);
+        }
+    }
     RotationGesture(int32_t fingers, double angle);
     ~RotationGesture() override = default;
 

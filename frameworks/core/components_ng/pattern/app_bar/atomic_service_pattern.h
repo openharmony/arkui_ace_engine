@@ -16,11 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H
 
+#include "core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 namespace OHOS::Ace::NG {
 class AtomicServicePattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(AtomicServicePattern, LinearLayoutPattern);
+
 public:
     AtomicServicePattern() : LinearLayoutPattern(true) {};
     ~AtomicServicePattern() override = default;
@@ -28,6 +30,10 @@ public:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
     void OnLanguageConfigurationUpdate() override;
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<AtomicServiceLayoutAlgorithm>();
+    }
 
     ACE_DISALLOW_COPY_AND_MOVE(AtomicServicePattern);
 };

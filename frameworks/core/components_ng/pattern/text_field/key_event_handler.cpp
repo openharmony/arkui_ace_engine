@@ -42,6 +42,8 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
                 pattern->PerformAction(pattern->GetTextInputActionValue(TextInputAction::DONE), false);
                 return true;
             }
+        } else if (keyEvent.code == KeyCode::KEY_TAB) {
+            return HandleTabEvent(keyEvent);
         } else if (HandleShiftPressedEvent(keyEvent)) {
             return true;
         } else if (keyEvent.IsDirectionalKey() || keyEvent.code == KeyCode::KEY_MOVE_HOME ||
@@ -259,4 +261,15 @@ bool KeyEventHandler::HandleShiftPressedEvent(const KeyEvent& event)
     return true;
 }
 
+bool KeyEventHandler::HandleTabEvent(const KeyEvent& keyEvent)
+{
+    auto pattern = DynamicCast<TextFieldPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_RETURN(pattern, false);
+    if (keyEvent.IsShiftWith(KeyCode::KEY_TAB)) {
+        return pattern->UpdateFocusBackward();
+    } else if (keyEvent.code == KeyCode::KEY_TAB) {
+        return pattern->UpdateFocusForward();
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

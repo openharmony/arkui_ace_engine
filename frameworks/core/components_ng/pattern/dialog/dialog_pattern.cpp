@@ -25,8 +25,10 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "bridge/common/dom/dom_type.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/alignment.h"
@@ -86,7 +88,6 @@ constexpr Dimension DIALOG_SUBTITLE_PADDING_LEFT = 24.0_vp;
 constexpr Dimension DIALOG_SUBTITLE_PADDING_RIGHT = 24.0_vp;
 constexpr Dimension DIALOG_TWO_TITLE_ZERO_SPACE = 0.0_vp;
 constexpr Dimension DIALOG_TWO_TITLE_SPACE = 16.0_vp;
-constexpr float BUTTON_TEXT_OPACITY = 0.6f; // [Button Component Defect]
 } // namespace
 
 void DialogPattern::OnModifyDone()
@@ -136,6 +137,14 @@ void DialogPattern::HandleClick(const GestureEvent& info)
         if (!contentRect.IsInRegion(
                 PointF(clickPosition.GetX() - globalOffset.GetX(), clickPosition.GetY() - globalOffset.GetY()))) {
             PopDialog(-1);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            CHECK_NULL_VOID(overlayManager->GetMaskNode());
+            if (GetHost()->GetId() == overlayManager->GetMaskNode()->GetId()) {
+                overlayManager->PopModalDialog();
+            }
         }
     }
 }
@@ -160,8 +169,17 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
         // trigger onCancel callback
         hub->FireCancelEvent();
     }
-
+    if (dialogProperties_.isShowInSubWindow) {
+        SubwindowManager::GetInstance()->DeleteHotAreas(overlayManager->GetSubwindowId(), host->GetId());
+    }
     overlayManager->CloseDialog(host);
+    if (dialogProperties_.isShowInSubWindow && dialogProperties_.isModal) {
+        auto parentPipelineContext = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_VOID(parentPipelineContext);
+        auto parentOverlayManager = parentPipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(parentOverlayManager);
+        parentOverlayManager->CloseMask();
+    }
 }
 
 // set render context properties of content frame
@@ -497,7 +515,6 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     // append text inside button
     auto textNode = CreateButtonText(params.text, textColor);
     CHECK_NULL_RETURN(textNode, nullptr);
-    SetButtonTextOpacity(textNode, params.enabled);
     textNode->MountToParent(buttonNode);
     textNode->MarkModifyDone();
 
@@ -667,6 +684,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, nullptr);
     textProps->UpdateContent(text);
+    textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateMaxLines(1);
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     Dimension buttonTextSize =
@@ -903,16 +921,6 @@ void DialogPattern::OnColorConfigurationUpdate()
     }
     OnModifyDone();
     host->MarkDirtyNode();
-}
-
-void DialogPattern::SetButtonTextOpacity(const RefPtr<FrameNode>& textNode, bool enabled)
-{
-    auto textNodeRenderContext = textNode->GetRenderContext();
-    CHECK_NULL_VOID(textNodeRenderContext);
-    // [Button Component Defect] Button text color is no set while disabled status.
-    if (!enabled) {
-        textNodeRenderContext->UpdateOpacity(BUTTON_TEXT_OPACITY);
-    }
 }
 
 void DialogPattern::SetButtonEnabled(const RefPtr<FrameNode>& buttonNode, bool enabled)

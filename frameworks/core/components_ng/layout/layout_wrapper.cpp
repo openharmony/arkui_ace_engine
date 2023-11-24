@@ -161,8 +161,26 @@ void LayoutWrapper::ExpandSafeArea()
     }
     // restore to local offset
     frame -= parentGlobalOffset;
+    auto diff = geometryNode->GetFrameOffset() - frame.GetOffset();
+    if (!diff.NonOffset()) {
+        // children's position should remain the same.
+        AdjustChildren(diff);
+    }
     geometryNode->SetFrameOffset(frame.GetOffset());
     geometryNode->SetFrameSize(frame.GetSize());
+}
+
+void LayoutWrapper::AdjustChildren(const OffsetF& offset)
+{
+    for (const auto& childUI : GetHostNode()->GetChildren()) {
+        auto child = DynamicCast<FrameNode>(childUI);
+        if (!child || child->GetLayoutProperty()->GetSafeAreaExpandOpts()) {
+            continue;
+        }
+        auto childGeo = child->GetGeometryNode();
+        childGeo->SetFrameOffset(childGeo->GetFrameOffset() + offset);
+        child->ForceSyncGeometryNode();
+    }
 }
 
 void LayoutWrapper::ExpandIntoKeyboard()

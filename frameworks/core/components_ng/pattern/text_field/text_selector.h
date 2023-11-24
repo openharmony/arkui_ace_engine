@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <string>
+#include <functional>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"

@@ -87,7 +87,9 @@
 #endif
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/common/dom/dom_badge.h"
+#if defined(CAMERA_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
 #include "frameworks/bridge/common/dom/dom_camera.h"
+#endif
 #include "frameworks/bridge/common/dom/dom_menu.h"
 #include "frameworks/bridge/common/dom/dom_navigation_menu.h"
 #include "frameworks/bridge/common/dom/dom_option.h"
@@ -103,7 +105,9 @@
 #include "frameworks/bridge/common/dom/dom_tabs.h"
 #include "frameworks/bridge/common/dom/dom_tool_bar.h"
 #include "frameworks/bridge/common/dom/dom_tool_bar_item.h"
+#if defined(PLAYER_FRAMEWORK_EXISTS)
 #include "frameworks/bridge/common/dom/dom_video.h"
+#endif
 #if !defined(PREVIEW)
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/common/dom/dom_web.h"
@@ -146,9 +150,9 @@ DOMDocument::~DOMDocument()
 RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nodeId, int32_t itemIndex)
 {
     LOGD("DOMDocument:created new DOMNode %{public}s, id %{public}d, itemIndex %{public}d", tag.c_str(), nodeId,
-         itemIndex);
+        itemIndex);
 
-    static const LinearMapNode<RefPtr<DOMNode>(*)(NodeId, const std::string&, int32_t)> domNodeCreators[] = {
+    static const LinearMapNode<RefPtr<DOMNode> (*)(NodeId, const std::string&, int32_t)> domNodeCreators[] = {
         { DOM_NODE_TAG_ANIMATE, &DOMNodeCreator<DOMSvgAnimate> },
         { DOM_NODE_TAG_ANIMATE_MOTION, &DOMNodeCreator<DOMSvgAnimateMotion> },
         { DOM_NODE_TAG_ANIMATE_TRANSFORM, &DOMNodeCreator<DOMSvgAnimateTransform> },
@@ -156,7 +160,9 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_BUTTON, &DOMNodeCreator<DOMButton> },
         { DOM_NODE_TAG_CALENDAR, &DOMNodeCreator<DomCalendar> },
 #ifndef WEARABLE_PRODUCT
+#if defined(CAMERA_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
         { DOM_NODE_TAG_CAMERA, &DOMNodeCreator<DOMCamera> },
+#endif
 #endif
         { DOM_NODE_TAG_CANVAS, &DOMNodeCreator<DOMCanvas> },
         { DOM_NODE_TAG_CHART, &DOMNodeCreator<DOMChart> },
@@ -247,7 +253,9 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_TSPAN, &DOMNodeCreator<DOMSvgTspan> },
         { DOM_NODE_TAG_USE, &DOMNodeCreator<DOMSvgUse> },
 #ifndef WEARABLE_PRODUCT
+#if defined(PLAYER_FRAMEWORK_EXISTS)
         { DOM_NODE_TAG_VIDEO, &DOMNodeCreator<DOMVideo> },
+#endif
 #ifdef WEB_SUPPORTED
         { DOM_NODE_TAG_WEB, &DOMNodeCreator<DOMWeb> },
 #endif
@@ -257,7 +265,7 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
 #endif
     };
 #ifndef WEARABLE_PRODUCT
-    static const LinearMapNode<RefPtr<DOMNode>(*)(NodeId, const std::string&, int32_t)> phoneNodeCreators[] = {
+    static const LinearMapNode<RefPtr<DOMNode> (*)(NodeId, const std::string&, int32_t)> phoneNodeCreators[] = {
         { DOM_NODE_TAG_PIECE, &DOMNodeCreator<DOMPiece> },
     };
 #endif

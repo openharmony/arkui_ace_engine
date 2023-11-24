@@ -56,6 +56,7 @@ public:
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
     void RunPage(const std::string& url, const std::string& params) override;
+    void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content,  const std::string& params) override;
     
     void RunPageByNamedRouter(const std::string& name) override;
 

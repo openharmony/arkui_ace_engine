@@ -31,8 +31,11 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/base/element_register.h"
+#include "frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "frameworks/core/pipeline/base/element.h"
 #undef private
 #undef protected
@@ -1077,7 +1080,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
     PopupInfo info = overlayManager->GetPopupInfo(targetNode->GetId());
     info.isCurrentOnShow = true;
     info.popupId = 1;
-    overlayManager->UpdatePopupNode(targetNode->GetId(), info);
+    overlayManager->ShowPopup(targetNode->GetId(), info);
 
     /**
      * @tc.steps: step3. Call BindPopup many times.

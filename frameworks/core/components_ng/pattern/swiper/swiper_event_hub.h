@@ -62,9 +62,9 @@ public:
         animationStartEvent_ = std::move(animationStartEvent);
     }
 
-    void SetAnimationEndEvent(AnimationEndEvent&& animationEndEvent)
+    void AddAnimationEndEvent(const AnimationEndEventPtr& animationEndEvent)
     {
-        animationEndEvent_ = std::move(animationEndEvent);
+        animationEndEvents_.emplace_back(animationEndEvent);
     }
 
     void SetGestureSwipeEvent(GestureSwipeEvent&& gestureSwipeEvent)
@@ -113,8 +113,9 @@ public:
 
     void FireAnimationEndEvent(int32_t index, const AnimationCallbackInfo& info) const
     {
-        if (animationEndEvent_) {
-            animationEndEvent_(index, info);
+        if (!animationEndEvents_.empty()) {
+            std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
+                [index, info](const AnimationEndEventPtr& event) { (*event)(index, info); });
         }
     }
 
@@ -133,7 +134,7 @@ private:
     ChangeDoneEvent changeDoneEvent_;
     ChangeIndicatorEvent changeIndicatorEvent_;
     AnimationStartEvent animationStartEvent_;
-    AnimationEndEvent animationEndEvent_;
+    std::list<AnimationEndEventPtr> animationEndEvents_;
     GestureSwipeEvent gestureSwipeEvent_;
 };
 

@@ -226,6 +226,7 @@ void JSFlexImpl::JSBind(BindingTarget globalObj)
     JSClass<JSFlexImpl>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSFlexImpl>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSFlexImpl>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSFlexImpl>::StaticMethod("pointLight", &JSViewAbstract::JsPointLight, opt);
     JSClass<JSFlexImpl>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

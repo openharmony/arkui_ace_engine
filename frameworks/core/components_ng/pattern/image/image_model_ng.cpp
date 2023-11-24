@@ -73,9 +73,9 @@ void ImageModelNG::Create(
     }
 }
 
-void ImageModelNG::SetAlt(const std::string& src)
+void ImageModelNG::SetAlt(const ImageSourceInfo& src)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, ImageSourceInfo(src));
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, src);
 }
 
 void ImageModelNG::SetBorder(const Border& border) {}
@@ -226,5 +226,10 @@ bool ImageModelNG::UpdateDragItemInfo(DragItemInfo& itemInfo)
     return false;
 }
 
+void ImageModelNG::SetImageFit(FrameNode* frameNode, ImageFit value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageFit, value, frameNode);
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

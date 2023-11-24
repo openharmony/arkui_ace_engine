@@ -12102,6 +12102,451 @@ HWTEST_F(GesturesTestNg, GestureAccessibilityEventTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TriggerGestureJudgeCallbackTest001
+ * @tc.desc: Test Recognizer function: TriggerGestureJudgeCallbackTest001
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, TriggerGestureJudgeCallbackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Recognizer、TargetComponent.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<LongPressRecognizer> longPressRecognizerPtr = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
+        FINGER_NUMBER, false);
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizerPtr = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+    RefPtr<PinchRecognizer> pinchRecognizerPtr = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
+        PINCH_GESTURE_DISTANCE);
+    RefPtr<RotationRecognizer> rotationRecognizerPtr =
+        AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;};
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    /**
+     * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
+     * @tc.expected: step2. result equals CONTINUE.
+     */
+    auto result = clickRecognizerPtr->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+
+    result = longPressRecognizerPtr->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+
+    result = panRecognizerPtr->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+
+    result = pinchRecognizerPtr->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+
+    result = rotationRecognizerPtr->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+
+    result = swipeRecognizerPtr->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+    /**
+     * @tc.steps: step3. targetComponent_ is not null, call TriggerGestureJudgeCallback function and compare result.
+     * @tc.expected: step3. result equals PREVENT.
+     */
+    clickRecognizerPtr->targetComponent_ = targetComponent;
+    EXPECT_EQ(clickRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+
+    longPressRecognizerPtr->targetComponent_ = targetComponent;
+    EXPECT_EQ(longPressRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+
+    panRecognizerPtr->targetComponent_ = targetComponent;
+    EXPECT_EQ(panRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+
+    pinchRecognizerPtr->targetComponent_ = targetComponent;
+    EXPECT_EQ(pinchRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+
+    rotationRecognizerPtr->targetComponent_ = targetComponent;
+    EXPECT_EQ(rotationRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+
+    swipeRecognizerPtr->targetComponent_ = targetComponent;
+    EXPECT_EQ(swipeRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+}
+
+/**
+ * @tc.name: RotationRecognizerPtrHandleTouchUpEventTest001
+ * @tc.desc: Test RotationRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RotationRecognizerPtrHandleTouchUpEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and set Recognizer、TargetComponent.
+     */
+    RefPtr<RotationRecognizer> rotationRecognizerPtr =
+        AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;};
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    TouchEvent touchEvent;
+    touchEvent.tiltX.emplace(1.0f);
+    touchEvent.tiltY.emplace(1.0f);
+    DimensionRect area;
+    DimensionOffset origin;
+    EventTarget target = {"", "", area, origin};
+    rotationRecognizerPtr->targetComponent_ = targetComponent;
+    /**
+     * @tc.steps: step2. test the function who calls TriggerGestureJudgeCallback.
+     * @tc.expected: step2. result equals REJECT.
+     */
+    rotationRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    rotationRecognizerPtr->recognizerTarget_ = std::make_optional(target);
+    rotationRecognizerPtr->currentFingers_ = 2;
+    rotationRecognizerPtr->fingers_ = 2;
+    rotationRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    rotationRecognizerPtr->activeFingers_.push_back(1);
+    rotationRecognizerPtr->angle_ = 0;
+    rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizerPtr->disposal_, GestureDisposal::REJECT);
+}
+/**
+ * @tc.name: SwipeRecognizerPtrHandleTouchUpEventTest001
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SwipeRecognizerPtrHandleTouchUpEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and set Recognizer、TargetComponent.
+     */
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    DimensionRect area;
+    DimensionOffset origin;
+    EventTarget target = {"", "", area, origin};
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;};
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    TouchEvent touchEvent;
+    AxisEvent axisEvent;
+    touchEvent.tiltX.emplace(1.0f);
+    touchEvent.tiltY.emplace(1.0f);
+    swipeRecognizerPtr->targetComponent_ = targetComponent;
+    /**
+     * @tc.steps: step2. test the function who calls TriggerGestureJudgeCallback.
+     * @tc.expected: step2. result equals REJECT.
+     */
+    swipeRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    swipeRecognizerPtr->speed_ = -1;
+    swipeRecognizerPtr->fingers_ = 1;
+    swipeRecognizerPtr->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizerPtr->disposal_, GestureDisposal::REJECT);
+
+    swipeRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    swipeRecognizerPtr->recognizerTarget_ = std::make_optional(target);
+    swipeRecognizerPtr->deviceType_ = SourceType::MOUSE;
+    swipeRecognizerPtr->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizerPtr->disposal_, GestureDisposal::REJECT);
+}
+
+/**
+ * @tc.name: ClickRecognizerHandleTouchUpEvent001
+ * @tc.desc: Test ClickRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, ClickRecognizerHandleTouchUpEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and set Recognizer、TargetComponent.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    DimensionRect area;
+    DimensionOffset origin;
+    EventTarget target = {"", "", area, origin};
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;};
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    TouchEvent touchEvent;
+    touchEvent.tiltX.emplace(1.0f);
+    touchEvent.tiltY.emplace(1.0f);
+    clickRecognizerPtr->targetComponent_ = targetComponent;
+    /**
+     * @tc.steps: step2. test the function who calls TriggerGestureJudgeCallback.
+     * @tc.expected: step2. result equals REJECT.
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    clickRecognizerPtr->currentTouchPointsNum_ = 1;
+    clickRecognizerPtr->equalsToFingers_ = true;
+    clickRecognizerPtr->useCatchMode_ = true;
+    clickRecognizerPtr->tappedCount_ = -1;
+    clickRecognizerPtr->count_ = 0;
+    clickRecognizerPtr->SetIsSystemGesture(false);
+    clickRecognizerPtr->gestureInfo_->SetTag("test");
+    clickRecognizerPtr->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizerPtr->disposal_, GestureDisposal::REJECT);
+}
+
+/**
+ * @tc.name: PinchRecognizerPtrHandleTouchMoveEventTest002
+ * @tc.desc: Test PinchRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PinchRecognizerPtrHandleTouchMoveEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and set Recognizer、TargetComponent.
+     */
+    RefPtr<PinchRecognizer> pinchRecognizerPtr = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
+        PINCH_GESTURE_DISTANCE);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    DimensionRect area;
+    DimensionOffset origin;
+    EventTarget target = {"", "", area, origin};
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;};
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    TouchEvent touchEvent;
+    AxisEvent axisEvent;
+    touchEvent.tiltX.emplace(1.0f);
+    touchEvent.tiltY.emplace(1.0f);
+    pinchRecognizerPtr->targetComponent_ = targetComponent;
+    /**
+     * @tc.steps: step2. test the function who calls TriggerGestureJudgeCallback.
+     * @tc.expected: step2. result equals REJECT.
+     */
+    pinchRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    pinchRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->fingers_ = 1;
+    pinchRecognizerPtr->distance_ = -1;
+    pinchRecognizerPtr->initialDev_ = 1;
+    pinchRecognizerPtr->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->disposal_, GestureDisposal::REJECT);
+
+    pinchRecognizerPtr->recognizerTarget_ = std::make_optional(target);
+    axisEvent.pinchAxisScale = 1.0;
+    pinchRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    pinchRecognizerPtr->isPinchEnd_ = false;
+    pinchRecognizerPtr->HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(pinchRecognizerPtr->disposal_, GestureDisposal::REJECT);
+}
+
+/**
+ * @tc.name: LongPressRecognizerHandleOverdueDeadlineTest002
+ * @tc.desc: Test LongPressRecognizer function: HandleOverdueDeadline
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, LongPressRecognizerHandleOverdueDeadlineTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Recognizer、TargetComponent.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizerPtr = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
+        FINGER_NUMBER, false);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;};
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    PanDirection panDirection;
+    DimensionRect area;
+    DimensionOffset origin;
+    EventTarget target = {"", "", area, origin};
+    longPressRecognizerPtr->recognizerTarget_ = std::make_optional(target);
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    longPressRecognizerPtr->targetComponent_ = targetComponent;
+    longPressRecognizerPtr->targetComponent_->node_ = frameNode;
+    TouchEvent touchEvent;
+    touchEvent.tiltX.emplace(1.0f);
+    touchEvent.tiltY.emplace(1.0f);
+    longPressRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    /**
+     * @tc.steps: step2. call HandleOverdueDeadline function and compare result.
+     * @tc.steps: case1: gestureInfo_ is nullptr
+     * @tc.expected: step2. result equals REJECT.
+     */
+    longPressRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    longPressRecognizerPtr->HandleOverdueDeadline(true);
+    EXPECT_EQ(longPressRecognizerPtr->disposal_, GestureDisposal::REJECT);
+
+    /**
+     * @tc.steps: step2. call HandleOverdueDeadline function and compare result.
+     * @tc.steps: case2: gestureInfo_ is not nullptr, gestureInfo_->type_ = DRAG
+     *                   isDragUserReject_ = true
+     * @tc.expected: step2. result equals REJECT.
+     */
+    longPressRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    longPressRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    longPressRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
+    guestureEventHub->dragEventActuator_ = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(guestureEventHub)), panDirection, 1, 50.0f);
+    guestureEventHub->dragEventActuator_->isDragUserReject_ = true;
+    longPressRecognizerPtr->HandleOverdueDeadline(true);
+    EXPECT_EQ(longPressRecognizerPtr->disposal_, GestureDisposal::REJECT);
+
+    /**
+     * @tc.steps: step2. call HandleOverdueDeadline function and compare result.
+     * @tc.steps: case3: gestureInfo_ is not nullptr, gestureInfo_->type_ = DRAG
+     *                   isDragUserReject_ = false
+     * @tc.expected: step2. isDragUserReject_ = true.
+     */
+    longPressRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    guestureEventHub->dragEventActuator_->isDragUserReject_ = false;
+    longPressRecognizerPtr->HandleOverdueDeadline(true);
+    EXPECT_TRUE(guestureEventHub->dragEventActuator_->isDragUserReject_);
+}
+
+/**
+ * @tc.name: PanPressRecognizerHandleTouchMoveEventTest001
+ * @tc.desc: Test PanPressRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PanPressRecognizerHandleTouchMoveEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and set Recognizer、TargetComponent.
+     */
+
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizerPtr = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;};
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    PanDirection panDirection;
+    DimensionRect area;
+    DimensionOffset origin;
+    EventTarget target = {"", "", area, origin};
+    panRecognizerPtr->recognizerTarget_ = std::make_optional(target);
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    panRecognizerPtr->targetComponent_ = targetComponent;
+    panRecognizerPtr->targetComponent_->node_ = frameNode;
+    TouchEvent touchEvent;
+    touchEvent.tiltX.emplace(1.0f);
+    touchEvent.tiltY.emplace(1.0f);
+    panRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    panRecognizerPtr->direction_.type = PanDirection::ALL;
+    panRecognizerPtr->isFlushTouchEventsEnd_ = true;
+    panRecognizerPtr->averageDistance_ = Offset(0, -1);
+    panRecognizerPtr->distance_ = 0;
+    panRecognizerPtr->currentFingers_ = 1;
+    panRecognizerPtr->fingers_ = 1;
+
+    /**
+     * @tc.steps: step2. call HandleOverdueDeadline function and compare result.
+     * @tc.steps: case1: gestureInfo_ is nullptr touchEvent
+     * @tc.expected: step2. result equals REJECT.
+     */
+    panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    panRecognizerPtr->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(panRecognizerPtr->disposal_, GestureDisposal::REJECT);
+
+    /**
+     * @tc.steps: step2. call HandleOverdueDeadline function and compare result.
+     * @tc.steps: case2: gestureInfo_ is not nullptr, gestureInfo_->type_ = DRAG
+     *                   isDragUserReject_ = true touchEvent
+     * @tc.expected: step2. result equals REJECT.
+     */
+    panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    panRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    panRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
+    guestureEventHub->dragEventActuator_ = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(guestureEventHub)), panDirection, 1, 50.0f);
+    guestureEventHub->dragEventActuator_->isDragUserReject_ = true;
+    panRecognizerPtr->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(panRecognizerPtr->disposal_, GestureDisposal::REJECT);
+
+    /**
+     * @tc.steps: step2. call HandleOverdueDeadline function and compare result.
+     * @tc.steps: case3: gestureInfo_ is not nullptr, gestureInfo_->type_ = DRAG
+     *                   isDragUserReject_ = false touchEvent
+     * @tc.expected: step2. isDragUserReject_ = true.
+     */
+    panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    guestureEventHub->dragEventActuator_->isDragUserReject_ = false;
+    panRecognizerPtr->HandleTouchMoveEvent(touchEvent);
+    EXPECT_TRUE(guestureEventHub->dragEventActuator_->isDragUserReject_);
+}
+
+/**
+ * @tc.name: PanPressRecognizerHandleTouchMoveEventTest002
+ * @tc.desc: Test PanPressRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PanPressRecognizerHandleTouchMoveEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and set Recognizer、TargetComponent.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizerPtr = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;};
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    PanDirection panDirection;
+    DimensionRect area;
+    DimensionOffset origin;
+    EventTarget target = {"", "", area, origin};
+    panRecognizerPtr->recognizerTarget_ = std::make_optional(target);
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    panRecognizerPtr->targetComponent_ = targetComponent;
+    panRecognizerPtr->targetComponent_->node_ = frameNode;
+    TouchEvent touchEvent;
+    touchEvent.tiltX.emplace(1.0f);
+    touchEvent.tiltY.emplace(1.0f);
+    AxisEvent axisEvent;
+    panRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    panRecognizerPtr->direction_.type = PanDirection::ALL;
+    panRecognizerPtr->isFlushTouchEventsEnd_ = true;
+    panRecognizerPtr->averageDistance_ = Offset(0, -1);
+    panRecognizerPtr->distance_ = 0;
+    panRecognizerPtr->currentFingers_ = 1;
+    panRecognizerPtr->fingers_ = 1;
+
+    /**
+     * @tc.steps: step2. call HandleOverdueDeadline function and compare result.
+     * @tc.steps: case1: gestureInfo_ is nullptr axisEvent
+     * @tc.expected: step2. result equals REJECT.
+     */
+    panRecognizerPtr->inputEventType_ = InputEventType::AXIS;
+    panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    panRecognizerPtr->HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(panRecognizerPtr->disposal_, GestureDisposal::REJECT);
+
+    /**
+     * @tc.steps: step2. call HandleOverdueDeadline function and compare result.
+     * @tc.steps: case2: gestureInfo_ is not nullptr, gestureInfo_->type_ = DRAG
+     *                   isDragUserReject_ = true axisEvent
+     * @tc.expected: step2. result equals REJECT.
+     */
+    panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    panRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    panRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
+    guestureEventHub->dragEventActuator_ = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(guestureEventHub)), panDirection, 1, 50.0f);
+    guestureEventHub->dragEventActuator_->isDragUserReject_ = true;
+    panRecognizerPtr->HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(panRecognizerPtr->disposal_, GestureDisposal::REJECT);
+
+    /**
+     * @tc.steps: step2. call HandleOverdueDeadline function and compare result.
+     * @tc.steps: case3: gestureInfo_ is not nullptr, gestureInfo_->type_ = DRAG
+     *                   isDragUserReject_ = false axisEvent
+     * @tc.expected: step2. isDragUserReject_ = true.
+     */
+    panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    guestureEventHub->dragEventActuator_->isDragUserReject_ = false;
+    panRecognizerPtr->HandleTouchMoveEvent(axisEvent);
+    EXPECT_TRUE(guestureEventHub->dragEventActuator_->isDragUserReject_);
+}
+/**
  * @tc.name: TransformTest001
  * @tc.desc: Test Transform in Default Condition
  */

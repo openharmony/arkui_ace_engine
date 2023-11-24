@@ -29,6 +29,11 @@ RotationGesture::RotationGesture(int32_t fingers, double angle): Gesture(fingers
     } else {
         angle_ = angle;
     }
+    if (gestureInfo_) {
+        gestureInfo_->SetType(GestureTypeName::ROTATION_GESTURE);
+    } else {
+        gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::ROTATION_GESTURE);
+    }
 }
 RefPtr<NGGestureRecognizer> RotationGesture::CreateRecognizer()
 {
@@ -51,6 +56,7 @@ RefPtr<NGGestureRecognizer> RotationGesture::CreateRecognizer()
 
     rotationRecognizer->SetPriority(priority_);
     rotationRecognizer->SetPriorityMask(gestureMask_);
+    rotationRecognizer->SetGestureInfo(gestureInfo_);
     return rotationRecognizer;
 }
 

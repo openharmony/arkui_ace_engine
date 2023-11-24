@@ -69,7 +69,12 @@
 using namespace testing;
 using namespace testing::ext;
 
-namespace OHOS::Ace::NG {
+namespace OHOS::Ace {
+bool SystemProperties::changeTitleStyleEnabled_ = false;
+int32_t SystemProperties::devicePhysicalWidth_ = 0;
+int32_t SystemProperties::devicePhysicalHeight_ = 0;
+
+namespace NG {
 namespace {
 constexpr int32_t DEFAULT_INSTANCE_ID = 0;
 constexpr int32_t DEFAULT_INT0 = 0;
@@ -96,6 +101,7 @@ const std::string TEST_TAG("test");
 const std::string ACCESS_TAG("-accessibility");
 const std::string TEST_FORM_INFO("test_info");
 const int64_t RENDER_EVENT_ID = 10;
+constexpr int32_t EXCEPTIONAL_CURSOR = 99;
 } // namespace
 
 class PipelineContextTestNg : public testing::Test {
@@ -146,10 +152,11 @@ void PipelineContextTestNg::SetUpTestSuite()
     EXPECT_CALL(*window, OnHide()).Times(AnyNumber());
     EXPECT_CALL(*window, RecordFrameTime(_, _)).Times(AnyNumber());
     EXPECT_CALL(*window, OnShow()).Times(AnyNumber());
-    EXPECT_CALL(*window, FlushCustomAnimation(NANO_TIME_STAMP))
+    EXPECT_CALL(*window, FlushAnimation(NANO_TIME_STAMP))
         .Times(AtLeast(1))
         .WillOnce(testing::Return(true))
         .WillRepeatedly(testing::Return(false));
+    EXPECT_CALL(*window, FlushModifier()).Times(AtLeast(1));
     EXPECT_CALL(*window, SetRootFrameNode(_)).Times(AnyNumber());
     context_ = AceType::MakeRefPtr<PipelineContext>(
         window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
@@ -2234,6 +2241,39 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UITaskSchedulerTestNg002
+ * @tc.desc: Test FlushAfterLayoutTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg006, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Call FlushAfterLayoutTask.
+     */
+    taskScheduler.FlushAfterLayoutTask();
+
+    /**
+     * @tc.steps3: Call AddAfterLayoutTask.
+     * @tc.expected: afterLayoutTasks_ in the taskScheduler size is 2.
+     */
+    taskScheduler.AddPersistAfterLayoutTask([]() {});
+    taskScheduler.AddPersistAfterLayoutTask(nullptr);
+    EXPECT_EQ(taskScheduler.persistAfterLayoutTasks_.size(), 2);
+
+    /**
+     * @tc.steps4: Call FlushTask.
+     * @tc.expected: afterLayoutTasks_ in the taskScheduler size is 0.
+     */
+    taskScheduler.FlushTask();
+    EXPECT_EQ(taskScheduler.afterLayoutTasks_.size(), 2);
+}
+
+/**
  * @tc.name: PipelineContextTestNg043
  * @tc.desc: Test SetCloseButtonStatus function.
  * @tc.type: FUNC
@@ -2782,5 +2822,72 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg061, TestSize.Level1)
     containerPattern->isFocus_ = true;
     containerPattern->OnWindowForceUnfocused();
     EXPECT_TRUE(containerPattern->isFocus_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg062
+ * @tc.desc: Test the function SetCursor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg062, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
+    
+    /**
+     * @tc.steps2: set cursor with an exceptional value.
+     * @tc.expected: context_->cursor_ is MouseFormat::DEFAULT.
+     */
+    context_->SetCursor(EXCEPTIONAL_CURSOR);
+    ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
+
+    /**
+     * @tc.steps3: set cursor with a normal value.
+     * @tc.expected: context_->cursor_ is correct value.
+     */
+    context_->SetCursor(static_cast<int32_t>(MouseFormat::EAST));
+    ASSERT_EQ(context_->cursor_, MouseFormat::EAST);
+
+    /**
+     * @tc.steps4: restore mouse style.
+     * @tc.expected: context_->cursor_ is MouseFormat::DEFAULT.
+     */
+    context_->RestoreDefault();
+    ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg063
+ * @tc.desc: Test the function OpenFrontendAnimation and CloseFrontendAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg063, TestSize.Level1)
+{
+    decltype(context_->pendingFrontendAnimation_) temp;
+    std::swap(context_->pendingFrontendAnimation_, temp);
+    /**
+     * @tc.steps1: Call CloseFrontAnimation directly.
+     * @tc.expected: No animation is generated. The pending flag stack is empty.
+     */
+    context_->CloseFrontendAnimation();
+    EXPECT_EQ(context_->pendingFrontendAnimation_.size(), 0);
+    /**
+     * @tc.steps2: Call OpenFrontendAnimation.
+     * @tc.expected: A pending flag is pushed to the stack.
+     */
+    AnimationOption option(Curves::EASE, 1000);
+    context_->OpenFrontendAnimation(option, option.GetCurve(), nullptr);
+    EXPECT_EQ(context_->pendingFrontendAnimation_.size(), 1);
+    /**
+     * @tc.steps3: Call CloseFrontendAnimation after OpenFrontendAnimation.
+     * @tc.expected: The pending flag is out of stack.
+     */
+    context_->CloseFrontendAnimation();
+    EXPECT_EQ(context_->pendingFrontendAnimation_.size(), 0);
+}
 }
 } // namespace OHOS::Ace::NG

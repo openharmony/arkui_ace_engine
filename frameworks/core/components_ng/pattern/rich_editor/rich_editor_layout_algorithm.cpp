@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/render/paragraph.h"
@@ -66,6 +67,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
 
     SizeF res;
     int32_t lastPlaceHolderIndex = 0;
+    float textHeight = 0.0f;
     for (auto&& group : spans_) {
         // layout each paragraph
         SetSpans(group);
@@ -81,6 +83,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         if (!paragraph) {
             continue;
         }
+        textHeight += paragraph->GetHeight();
         auto firstSpan = *group.begin();
         pManager_->AddParagraph({ .paragraph = paragraph,
             .start = firstSpan->position - StringUtils::ToWstring(firstSpan->content).length(),
@@ -96,7 +99,14 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     if (!res.IsPositive()) {
         return std::nullopt;
     }
-    return res;
+    richTextRect_.SetSize(SizeF(res.Width(), textHeight));
+    auto contentHeight = res.Height();
+    if (contentConstraint.selfIdealSize.Height().has_value()) {
+        contentHeight = std::min(contentHeight, contentConstraint.selfIdealSize.Height().value());
+    } else {
+        contentHeight = std::min(contentHeight, contentConstraint.maxSize.Height());
+    }
+    return SizeF(res.Width(), contentHeight);
 }
 
 void RichEditorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -123,6 +133,17 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     SetSpans(allSpans);
     TextLayoutAlgorithm::Layout(layoutWrapper);
+}
+
+OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
+{
+    auto contentOffset = TextLayoutAlgorithm::GetContentOffset(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, contentOffset);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, contentOffset);
+    richTextRect_.SetOffset(OffsetF(contentOffset.GetX(), pattern->GetTextRect().GetY()));
+    return richTextRect_.GetOffset();
 }
 
 void RichEditorLayoutAlgorithm::GetPlaceholderRects(std::vector<RectF>& rects)

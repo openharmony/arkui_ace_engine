@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -472,6 +472,148 @@ HWTEST_F(WebPatternTestNg, UpdateJavaScriptOnDocumentStart010, TestSize.Level1)
     webPattern->JavaScriptOnDocumentStart(scriptItems);
     webPattern->UpdateJavaScriptOnDocumentStart();
     EXPECT_FALSE(webPattern->scriptItems_);
+#endif
+}
+
+/**
+ * @tc.name: OnModifyDone011
+ * @tc.desc: OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnModifyDone011, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    EXPECT_NE(webPattern->webAccessibilityNode_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: GetFocusedAccessibilityNode012
+ * @tc.desc: GetFocusedAccessibilityNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, GetFocusedAccessibilityNode012, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    int32_t accessibilityId = 1;
+    bool isAccessibilityFocus = true;
+    auto ret = webPattern->GetFocusedAccessibilityNode(accessibilityId, isAccessibilityFocus);
+    EXPECT_EQ(ret, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: GetAccessibilityNodeById013
+ * @tc.desc: GetAccessibilityNodeById.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, GetAccessibilityNodeById013, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    int32_t accessibilityId = 1;
+    auto ret = webPattern->GetAccessibilityNodeById(accessibilityId);
+    EXPECT_EQ(ret, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: GetAccessibilityNodeByFocusMove014
+ * @tc.desc: GetAccessibilityNodeByFocusMove.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, GetAccessibilityNodeByFocusMove014, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    int32_t accessibilityId = 1;
+    int32_t direction = 1;
+    auto ret = webPattern->GetAccessibilityNodeByFocusMove(accessibilityId, direction);
+    EXPECT_EQ(ret, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: ExecuteAction015
+ * @tc.desc: ExecuteAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, ExecuteAction015, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    int32_t accessibilityId = 1;
+    webPattern->ExecuteAction(accessibilityId, AceAction::ACTION_CLICK);
+#endif
+}
+
+/**
+ * @tc.name: SetAccessibilityState014
+ * @tc.desc: SetAccessibilityState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, SetAccessibilityState014, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->SetAccessibilityState(true);
 #endif
 }
 } // namespace OHOS::Ace::NG

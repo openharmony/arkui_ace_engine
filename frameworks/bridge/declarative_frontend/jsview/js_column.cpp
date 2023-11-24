@@ -136,6 +136,7 @@ void JSColumn::JSBind(BindingTarget globalObj)
     JSClass<JSColumn>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSColumn>::StaticMethod("onPan", &JSInteractableView::JsOnPan);
     JSClass<JSColumn>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSColumn>::StaticMethod("pointLight", &JSViewAbstract::JsPointLight, opt);
     JSClass<JSColumn>::InheritAndBind<JSContainerBase>(globalObj);
 
     JSClass<HorizontalAlignDeclaration>::Declare("HorizontalAlignDeclaration");

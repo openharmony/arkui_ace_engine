@@ -18,6 +18,8 @@
 #include <optional>
 #include <string>
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -536,10 +538,10 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
     CHECK_NULL_VOID(builderFunc);
 
     // responseType
-    ResponseType responseType = ResponseType::LONG_PRESS;
+    RichEditorResponseType responseType = RichEditorResponseType::LONG_PRESS;
     if (info.Length() >= 3 && info[2]->IsNumber()) {
         auto response = info[2]->ToNumber<int32_t>();
-        responseType = static_cast<ResponseType>(response);
+        responseType = static_cast<RichEditorResponseType>(response);
     }
     std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -676,12 +678,16 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
     } else {
         imageStyle.objectFit = ImageFit::COVER;
     }
-    auto marginAttr = imageAttribute->GetProperty("margin");
-    imageStyle.marginProp = ParseMarginAttr(marginAttr);
-    updateSpanStyle_.marginProp = imageStyle.marginProp;
-    auto borderRadiusAttr = imageAttribute->GetProperty("borderRadius");
-    imageStyle.borderRadius = ParseBorderRadiusAttr(borderRadiusAttr);
-    updateSpanStyle_.borderRadius = imageStyle.borderRadius;
+    auto layoutStyleObj = imageAttribute->GetProperty("layoutStyle");
+    auto layoutStyleObject = JSRef<JSObject>::Cast(layoutStyleObj);
+    if (!layoutStyleObject->IsUndefined()) {
+        auto marginAttr = layoutStyleObject->GetProperty("margin");
+        imageStyle.marginProp = ParseMarginAttr(marginAttr);
+        updateSpanStyle_.marginProp = imageStyle.marginProp;
+        auto borderRadiusAttr = layoutStyleObject->GetProperty("borderRadius");
+        imageStyle.borderRadius = ParseBorderRadiusAttr(borderRadiusAttr);
+        updateSpanStyle_.borderRadius = imageStyle.borderRadius;
+    }
     return imageStyle;
 }
 
@@ -1041,6 +1047,23 @@ void JSRichEditorController::CloseSelectionMenu()
     controller->CloseSelectionMenu();
 }
 
+void JSRichEditorController::SetSelection(int32_t selectionStart, int32_t selectionEnd)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->SetSelection(selectionStart, selectionEnd);
+    }
+}
+
+void JSRichEditorController::GetSelection(const JSCallbackInfo& args)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        RichEditorSelection value = controller->GetSelectionSpansInfo();
+        args.SetReturnValue(JSRichEditor::CreateJSSelection(value));
+    }
+}
+
 void JSRichEditorController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditorController>::Declare("RichEditorController");
@@ -1056,6 +1079,8 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("getSpans", &JSRichEditorController::GetSpansInfo);
     JSClass<JSRichEditorController>::CustomMethod("getParagraphs", &JSRichEditorController::GetParagraphsInfo);
     JSClass<JSRichEditorController>::CustomMethod("deleteSpans", &JSRichEditorController::DeleteSpans);
+    JSClass<JSRichEditorController>::Method("setSelection", &JSRichEditorController::SetSelection);
+    JSClass<JSRichEditorController>::CustomMethod("getSelection", &JSRichEditorController::GetSelection);
     JSClass<JSRichEditorController>::Method("closeSelectionMenu", &JSRichEditorController::CloseSelectionMenu);
     JSClass<JSRichEditorController>::Bind(
         globalObj, JSRichEditorController::Constructor, JSRichEditorController::Destructor);
@@ -1150,6 +1175,12 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
             JSContainerBase::ParseJsDimensionVp(widthVal, width);
             JSContainerBase::ParseJsDimensionVp(heightVal, height);
             style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), height.ConvertToPx());
+        } else if (sizeVal->IsUndefined()) {
+            std::string resWidthStr;
+            if (JSContainerBase::ParseJsString(lm, resWidthStr)) {
+                Dimension resWidth = Dimension::FromString(resWidthStr);
+                style.leadingMargin->size = NG::SizeF(resWidth.Value(), 0.0);
+            }
         }
     } else if (!lm->IsNull()) {
         // [Dimension]
@@ -1260,8 +1291,7 @@ JSRef<JSObject> JSRichEditorController::CreateTypingStyleResult(const struct Upd
         decorationObj->SetProperty<int32_t>("type", static_cast<int32_t>(typingStyle.updateTextDecoration.value()));
     }
     if (typingStyle.updateTextDecorationColor.has_value()) {
-        decorationObj->SetProperty<std::string>(
-            "color", typingStyle.updateTextDecorationColor.value().ColorToString());
+        decorationObj->SetProperty<std::string>("color", typingStyle.updateTextDecorationColor.value().ColorToString());
     }
     if (typingStyle.updateTextDecoration.has_value() || typingStyle.updateTextDecorationColor.has_value()) {
         tyingStyleObj->SetPropertyObject("decoration", decorationObj);

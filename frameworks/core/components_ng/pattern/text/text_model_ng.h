@@ -65,6 +65,12 @@ public:
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetDraggable(bool draggable) override;
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
+
+    static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
+    static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
+    static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
+    static void SetTextColor(FrameNode* frameNode, const Color& value);
+    static void SetFontSize(FrameNode* frameNode, const Dimension& value);
 };
 } // namespace OHOS::Ace::NG
 

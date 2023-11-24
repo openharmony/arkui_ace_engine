@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,15 @@ void RadioModelNG::Create(const std::optional<std::string>& value, const std::op
 
 void RadioModelNG::SetChecked(bool isChecked)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelected(isChecked);
+    auto eventHub = frameNode->GetEventHub<RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isChecked);
+
     ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, isChecked);
 }
 
@@ -103,5 +112,35 @@ void RadioModelNG::SetResponseRegion(const std::vector<DimensionRect>& responseR
     auto pattern = frameNode->GetPattern<RadioPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetIsUserSetResponseRegion(true);
+}
+
+void RadioModelNG::SetHoverEffect(HoverEffectType hoverEffect)
+{
+    NG::ViewAbstract::SetHoverEffect(hoverEffect);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetShowHoverEffect(hoverEffect != HoverEffectType::NONE);
+}
+
+void RadioModelNG::SetChecked(FrameNode* frameNode, bool isChecked)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, isChecked, frameNode);
+}
+
+void RadioModelNG::SetCheckedBackgroundColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheckedBackgroundColor, color, frameNode);
+}
+
+void RadioModelNG::SetUncheckedBorderColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioUncheckedBorderColor, color, frameNode);
+}
+
+void RadioModelNG::SetIndicatorColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColor, color, frameNode);
 }
 } // namespace OHOS::Ace::NG

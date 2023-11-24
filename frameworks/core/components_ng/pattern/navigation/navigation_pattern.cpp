@@ -124,6 +124,8 @@ void NavigationPattern::OnAttachToFrameNode()
     if (theme && theme->GetNavBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
+    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
+    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
 void NavigationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -271,16 +273,22 @@ void NavigationPattern::CheckTopNavPathChange(
         focusHub->RequestFocus();
     }
     // animation need to run after layout task
-    context->AddAfterLayoutTask([preTopNavDestination, newTopNavDestination, isPopPage,
-                                    weakNavigationPattern = WeakClaim(this), this]() {
-        auto navigationPattern = weakNavigationPattern.Upgrade();
-        CHECK_NULL_VOID(navigationPattern);
-        if (navigationMode_ == NavigationMode::STACK) {
+    if (navigationMode_ == NavigationMode::STACK) {
+        context->AddAfterLayoutTask([preTopNavDestination, newTopNavDestination, isPopPage,
+                                    weakNavigationPattern = WeakClaim(this)]() {
+            auto navigationPattern = weakNavigationPattern.Upgrade();
+            CHECK_NULL_VOID(navigationPattern);
             navigationPattern->DoStackModeTransitionAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
-        } else {
+        });
+    }
+    if (navigationMode_ == NavigationMode::SPLIT) {
+        context->AddAfterLayoutTask([preTopNavDestination, newTopNavDestination, isPopPage,
+                                        weakNavigationPattern = WeakClaim(this)]() {
+            auto navigationPattern = weakNavigationPattern.Upgrade();
+            CHECK_NULL_VOID(navigationPattern);
             navigationPattern->DoSplitModeTransitionAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
-        }
-    });
+        });
+    }
     hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -555,16 +563,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     // considering backButton visibility
                     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
                         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
-                    if (navigationStack->Size() == 1 &&
-                        (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
-                            navigationLayoutProperty->GetHideNavBar().value_or(false))) {
-                        // cases that backButton of navDestination is gone when there's only one child and
-                        // 1. In SPLIT mode, it's the first level page
-                        // 2. In STACK mode, the navBar is hidden
-                        navigationGroupNode->SetBackButtonVisible(curTopNavDestination, false);
-                    } else {
-                        navigationGroupNode->SetBackButtonVisible(curTopNavDestination, true);
-                    }
                     pattern->UpdateContextRect(curTopNavDestination, navigationGroupNode);
                 }
                 // considering navBar visibility
@@ -574,7 +572,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 CHECK_NULL_VOID(navBarLayoutProperty);
                 if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
                     (pattern->GetNavigationMode() == NavigationMode::STACK &&
-                        navigationGroupNode->GetNeedSetInvisible())) {
+                        (navigationGroupNode->GetNeedSetInvisible() || navigationStack->Size() >= 1))) {
                     navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
                 } else {
                     navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
@@ -601,10 +599,6 @@ void NavigationPattern::UpdateContextRect(
     CHECK_NULL_VOID(navBarNode);
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     CHECK_NULL_VOID(navigationPattern);
-    auto size = curDestination->GetGeometryNode()->GetFrameSize();
-    curDestination->GetRenderContext()->ClipWithRRect(
-        RectF(0.0f, 0.0f, size.Width(), size.Height()), RadiusF(EdgeF(0.0f, 0.0f)));
-    curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
 
     if (navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
         curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);

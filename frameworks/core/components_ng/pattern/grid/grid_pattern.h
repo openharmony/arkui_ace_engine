@@ -201,7 +201,8 @@ public:
     Rect GetItemRect(int32_t index) const override;
 
 private:
-    float GetMainGap();
+    float GetEndOffset();
+    float GetMainGap() const;
     float GetAllDelta();
     void CheckRestartSpring();
     void CheckScrollable();

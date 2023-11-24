@@ -65,6 +65,14 @@ public:
         return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
     }
 
+    AssertionResult IsEqual(const OffsetF& actual, const OffsetF& expected)
+    {
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
+    }
+
     AssertionResult IsEqual(const Rect& actual, const Rect& expected)
     {
         if (NearEqual(actual, expected)) {
@@ -129,6 +137,11 @@ public:
     const RectF& GetChildRect(const RefPtr<FrameNode>& frameNode, int32_t index)
     {
         return GetChildFrameNode(frameNode, index)->GetGeometryNode()->GetFrameRect();
+    }
+
+    const OffsetF& GetChildOffset(const RefPtr<FrameNode>& frameNode, int32_t index)
+    {
+        return GetChildFrameNode(frameNode, index)->GetGeometryNode()->GetFrameOffset();
     }
 };
 } // namespace OHOS::Ace::NG

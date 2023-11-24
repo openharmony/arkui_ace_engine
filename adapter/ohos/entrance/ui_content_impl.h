@@ -48,6 +48,8 @@ public:
 
     // UI content lifeCycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
+    void Initialize(OHOS::Rosen::Window* window,
+        const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override;
     void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
@@ -77,15 +79,23 @@ public:
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
     void ProcessFormVisibleChange(bool isVisible) override;
+    void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
 
     // Window color
     uint32_t GetBackgroundColor() override;
     void SetBackgroundColor(uint32_t color) override;
 
+    bool NeedSoftKeyboard() override;
+
+    void SetOnWindowFocused(const std::function<void()>& callback) override;
+
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
     // Set UIContent callback for custom window animation
     void SetNextFrameLayoutCallback(std::function<void()>&& callback) override;
+
+    // Set UIContent callback after layout finish
+    void SetFrameLayoutFinishCallback(std::function<void()>&& callback) override;
 
     // Receive memory level notification
     void NotifyMemoryLevel(int32_t level) override;

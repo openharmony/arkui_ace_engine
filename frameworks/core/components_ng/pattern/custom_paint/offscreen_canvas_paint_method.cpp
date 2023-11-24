@@ -460,19 +460,20 @@ void OffscreenCanvasPaintMethod::GetImageData(const std::shared_ptr<Ace::ImageDa
     CHECK_NULL_VOID(rawData);
     subBitmap.readPixels(imageInfo, rawData, dirtyWidth * imageInfo.bytesPerPixel(), dx, dy);
 #else
-// Drawing: need be adapted further
-    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
-    auto srcRect =
-        RSRect(scaledLeft, scaledTop, dirtyWidth * viewScale + scaledLeft, dirtyHeight * viewScale + scaledTop);
-    auto dstRect = RSRect(0.0, 0.0, dirtyWidth, dirtyHeight);
-    RSBitmap tempCache;
-    tempCache.Build(dirtyWidth * viewScale, dirtyHeight * viewScale, format);
-    RSCanvas tempCanvas;
-    tempCanvas.Bind(tempCache);
-    RSImage rsImage;
-    rsImage.BuildFromBitmap(bitmap_);
-    tempCanvas.DrawImageRect(
-        rsImage, srcRect, dstRect, RSSamplingOptions(), RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+    RSBitmap subBitmap;
+    auto rect = RSRect(scaledLeft, scaledTop,
+        dirtyWidth * viewScale + scaledLeft, dirtyHeight * viewScale + scaledTop);
+    bool ret = bitmap_.ExtractSubSet(subBitmap, rect);
+    if (!ret) {
+        return;
+    }
+    auto pixelMap = imageData->pixelMap;
+    CHECK_NULL_VOID(pixelMap);
+    auto* rawData = pixelMap->GetWritablePixels();
+    CHECK_NULL_VOID(rawData);
+    RSImageInfo imageInfo = RSImageInfo(dirtyWidth * viewScale, dirtyHeight * viewScale,
+        RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_OPAQUE);
+    subBitmap.ReadPixels(imageInfo, rawData, dirtyWidth * imageInfo.GetBytesPerPixel(), dx, dy);
 #endif
 }
 
@@ -899,7 +900,11 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
     }
 }
 #else
+#ifndef USE_GRAPHIC_TEXT_GINE
 void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::TextStyle& txtStyle, bool hasShadow)
+#else
+void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow)
+#endif
 {
     using namespace Constants;
     if (!isStroke) {
@@ -919,13 +924,13 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
         if (globalState_.HasGlobalAlpha()) {
             if (txtStyle.has_foreground_brush) {
                 txtStyle.foreground_brush.SetColor(fillState_.GetColor().GetValue());
-                txtStyle.foreground_brush.SetAlphaf(globalState_.GetAlpha()); // set alpha after color
+                txtStyle.foreground_brush.SetAlphaF(globalState_.GetAlpha()); // set alpha after color
             } else {
                 RSBrush brush;
                 RSSamplingOptions options;
                 InitImagePaint(nullptr, &brush, options);
                 brush.SetColor(fillState_.GetColor().GetValue());
-                brush.SetAlphaf(globalState_.GetAlpha()); // set alpha after color
+                brush.SetAlphaF(globalState_.GetAlpha()); // set alpha after color
                 txtStyle.foreground_brush = brush;
                 txtStyle.has_foreground_brush = true;
             }

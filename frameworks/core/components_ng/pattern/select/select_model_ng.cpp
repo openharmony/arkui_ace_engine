@@ -38,6 +38,10 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), std::nullopt));
 }
+
+static constexpr Dimension SELECT_MARGIN_VP = 4.0_vp;
+static constexpr Dimension SELECT_MIN_SPACE = 8.0_vp;
+static constexpr Dimension SELECT_HORIZONTAL_GAP = 24.0_vp;
 } // namespace
 
 void SelectModelNG::Create(const std::vector<SelectParam>& params)
@@ -51,10 +55,23 @@ void SelectModelNG::Create(const std::vector<SelectParam>& params)
 
     SetSelectDefaultSize(select);
     auto pattern = select->GetPattern<SelectPattern>();
+    
+    CHECK_NULL_VOID(pattern);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pattern->SetSelectDefaultTheme();
+    
+    NG::PaddingProperty paddings;
+    paddings.top = std::nullopt;
+    paddings.bottom = std::nullopt;
+    paddings.left = NG::CalcLength(SELECT_MARGIN_VP);
+    paddings.right = NG::CalcLength(SELECT_MARGIN_VP);
+    ViewAbstract::SetPadding(paddings);
+    
     pattern->BuildChild();
     // create menu node
     if (!pattern->GetMenuNode()) {
-        auto menuWrapper = MenuView::Create(params, nodeId);
+        auto menuWrapper = MenuView::Create(params, nodeId, V2::SELECT_ETS_TAG);
         pattern->SetMenuNode(menuWrapper);
         pattern->InitSelected();
     } else {
@@ -231,7 +248,20 @@ void SelectModelNG::SetWidth(Dimension& value)
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
-    ViewAbstract::SetWidth(NG::CalcLength(value));
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    
+    double minWidth = 2 * pattern->GetFontSize().ConvertToVp() + SELECT_HORIZONTAL_GAP.ConvertToVp() +
+        theme->GetSpinnerWidth().ConvertToVp() + SELECT_MIN_SPACE.ConvertToVp();
+    if (value.ConvertToVp() < minWidth) {
+        pattern->SetSpace(SELECT_MIN_SPACE);
+    } else {
+        ViewAbstract::SetWidth(NG::CalcLength(value));
+    }
 }
 
 void SelectModelNG::SetHeight(Dimension& value)
@@ -255,7 +285,8 @@ void SelectModelNG::SetSize(Dimension& width, Dimension& height)
     ViewAbstract::SetHeight(NG::CalcLength(height));
 }
 
-void SelectModelNG::SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+void SelectModelNG::SetPaddings(
+    const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
     const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right)
 {
     NG::PaddingProperty paddings;
@@ -409,5 +440,182 @@ void SelectModelNG::SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent)
     auto hub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SelectEventHub>();
     CHECK_NULL_VOID(hub);
     hub->SetValueChangeEvent(std::move(valueChangeEvent));
+}
+
+void SelectModelNG::SetOptionWidth(const Dimension& value)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionWidth(value);
+}
+
+void SelectModelNG::SetOptionHeight(const Dimension& value)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionHeight(value);
+}
+
+void SelectModelNG::SetOptionWidthFitTrigger(bool isFitTrigger)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionWidthFitTrigger(isFitTrigger);
+}
+
+void SelectModelNG::SetArrowPosition(FrameNode* frameNode, const ArrowPosition value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetArrowPosition(value);
+}
+
+void SelectModelNG::SetSpace(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSpace(value);
+}
+void SelectModelNG::SetMenuAlign(FrameNode* frameNode, const MenuAlign& menuAlign)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuAlign(menuAlign);
+}
+void SelectModelNG::SetValue(FrameNode* frameNode, const std::string& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetValue(value);
+}
+void SelectModelNG::SetSelected(FrameNode* frameNode, int32_t idx)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelected(idx);
+}
+void SelectModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFontSize(value);
+}
+void SelectModelNG::SetFontWeight(FrameNode* frameNode, const FontWeight& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFontWeight(value);
+}
+void SelectModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFontFamily(value);
+}
+void SelectModelNG::SetItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetItalicFontStyle(value);
+}
+void SelectModelNG::SetFontColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFontColor(color);
+}
+void SelectModelNG::SetSelectedOptionBgColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionBgColor(color);
+}
+void SelectModelNG::SetOptionFontSize(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionFontSize(value);
+}
+void SelectModelNG::SetOptionFontWeight(FrameNode* frameNode, const FontWeight& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionFontWeight(value);
+}
+void SelectModelNG::SetOptionFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionFontFamily(value);
+}
+void SelectModelNG::SetOptionItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionItalicFontStyle(value);
+}
+void SelectModelNG::SetOptionBgColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionBgColor(color);
+}
+void SelectModelNG::SetSelectedOptionFontColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionFontColor(color);
+}
+void SelectModelNG::SetSelectedOptionFontSize(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionFontSize(value);
+}
+void SelectModelNG::SetSelectedOptionFontWeight(FrameNode* frameNode, const FontWeight& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionFontWeight(value);
+}
+void SelectModelNG::SetSelectedOptionFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionFontFamily(value);
+}
+void SelectModelNG::SetSelectedOptionItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionItalicFontStyle(value);
+}
+void SelectModelNG::SetOptionFontColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<SelectPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionFontColor(color);
 }
 } // namespace OHOS::Ace::NG

@@ -52,28 +52,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->color_ = themeConstants->GetColor(THEME_SWIPER_INDICATOR_NORMAL_COLOR);
-            theme->selectedColor_ = themeConstants->GetColor(THEME_SWIPER_INDICATOR_SELECTED_COLOR);
-            theme->size_ = themeConstants->GetDimension(THEME_SWIPER_INDICATOR_SIZE);
-            theme->selectedSize_ = themeConstants->GetDimension(THEME_SWIPER_INDICATOR_SELECTED_SIZE);
-            theme->isHasMask_ = themeConstants->GetInt(THEME_SWIPER_INDICATOR_MASK);
-            theme->indicatorPointPadding_ = themeConstants->GetDimension(THEME_SWIPER_INDICATOR_POINT_PADDING);
-            theme->digitalIndicatorTextStyle_.SetFontSize(
-                themeConstants->GetDimension(THEME_SWIPER_DIGITAL_INDICATOR_FONT_SIZE));
-            theme->digitalIndicatorTextStyle_.SetTextColor(
-                themeConstants->GetColor(THEME_SWIPER_DIGITAL_INDICATOR_TEXT_COLOR));
-            theme->startEndPadding_ = themeConstants->GetDimension(THEME_SWIPER_INDICATOR_START_END_PADDING);
-            theme->pressPadding_ = themeConstants->GetDimension(THEME_SWIPER_INDICATOR_PRESS_PADDING);
-            theme->pressPointPadding_ = themeConstants->GetDimension(THEME_SWIPER_INDICATOR_PRESS_POINT_PADDING);
-            theme->pressSize_ = themeConstants->GetDimension(THEME_SWIPER_INDICATOR_PRESS_SIZE);
-            theme->hoverSize_ = themeConstants->GetDimension(THEME_SWIPER_INDICATOR_HOVER_SIZE);
-            theme->hotZoneSize_ = themeConstants->GetDimension(THEME_SWIPER_INDICATOR_HOTZONE_SIZE);
-            theme->hotZoneColor_ = themeConstants->GetColor(THEME_SWIPER_INDICATOR_HOTZONE_COLOR);
-            theme->hotZoneSize_ = themeConstants->GetDimension(THEME_SWIPER_INDICATOR_HOTZONE_SIZE);
-            theme->indicatorTextFocusColor_ = themeConstants->GetColor(THEME_SWIPER_DIGITAL_INDICATOR_FOCUS_TEXT_COLOR);
-            theme->isIndicatorDisabled_ = themeConstants->GetInt(THEME_SWIPER_INDICATOR_DISABLED);
-            theme->animationCurve_ = AnimationCurve(themeConstants->GetInt(THEME_SWIPER_ANIMATION_CURVE));
-            theme->animationOpacity_ = themeConstants->GetInt(THEME_SWIPER_ANIMATION_OPACITY);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -88,6 +66,24 @@ public:
                 LOGW("find pattern of swiper fail");
                 return;
             }
+            theme->size_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_size", 0.0_vp);
+            theme->selectedSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_selected_size", 0.0_vp);
+            theme->isHasMask_ = static_cast<bool>(swiperPattern->GetAttr<double>("swiper_indicator_mask", 0.0));
+            theme->indicatorPointPadding_ =
+                swiperPattern->GetAttr<Dimension>("swiper_indicator_point_padding", 0.0_vp);
+            theme->startEndPadding_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_start_end_padding", 0.0_vp);
+            theme->pressPadding_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_press_padding", 0.0_vp);
+            theme->pressPointPadding_ =
+                swiperPattern->GetAttr<Dimension>("swiper_indicator_press_point_padding", 0.0_vp);
+            theme->pressSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_press_size", 0.0_vp);
+            theme->hoverSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_hover_size", 0.0_vp);
+            theme->hotZoneSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_hotzone_size", 0.0_vp);
+            theme->isIndicatorDisabled_ =
+                static_cast<bool>(swiperPattern->GetAttr<double>("swiper_indicator_disabled", 0.0));
+            theme->animationCurve_ =
+                AnimationCurve(static_cast<int32_t>(swiperPattern->GetAttr<double>("swiper_animation_curve", 0.0)));
+            theme->animationOpacity_ =
+                static_cast<bool>(swiperPattern->GetAttr<double>("swiper_animation_opacity", 0.0));
             theme->color_ = swiperPattern->GetAttr<Color>("indicator_color", Color::TRANSPARENT);
             theme->hotZoneColor_ = swiperPattern->GetAttr<Color>("indicator_hotzone_color", Color::TRANSPARENT);
             theme->indicatorTextFocusColor_ =

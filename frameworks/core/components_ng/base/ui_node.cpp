@@ -931,4 +931,8 @@ std::string UINode::GetCurrentCustomNodeInfo()
     return extraInfo;
 }
 
+int32_t UINode::GenerateAccessibilityId()
+{
+    return currentAccessibilityId_++;
+}
 } // namespace OHOS::Ace::NG

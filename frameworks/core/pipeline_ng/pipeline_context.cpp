@@ -55,6 +55,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -118,6 +119,21 @@ RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
     auto pipeline = PipelineBase::GetMainPipelineContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     return DynamicCast<PipelineContext>(pipeline);
+}
+
+bool PipelineContext::NeedSoftKeyboard()
+{
+    auto focusNode = GetFocusNode();
+    if (!focusNode) {
+        return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Focus node id is: %{public}d, tag is %{public}s",
+        focusNode->GetId(), focusNode->GetTag().c_str());
+    auto pattern = focusNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    bool isNeed = pattern->NeedSoftKeyboard();
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "need soft keyboard: %{public}d", isNeed);
+    return isNeed;
 }
 
 float PipelineContext::GetCurrentRootWidth()
@@ -383,6 +399,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 #endif
     ProcessDelayTasks();
     FlushAnimation(nanoTimestamp);
+    bool hasAnimation = window_->FlushAnimation(nanoTimestamp);
+    if (hasAnimation) {
+        RequestFrame();
+    }
     FlushTouchEvents();
     FlushBuild();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
@@ -398,6 +418,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 
     taskScheduler_->StartRecordFrameInfo(GetCurrentFrameInfo(recvTime, nanoTimestamp));
     taskScheduler_->FlushTask();
+    // flush correct rect again
+    taskScheduler_->FlushPersistAfterLayoutTask();
     taskScheduler_->FinishRecordFrameInfo();
     FlushAnimationClosure();
     TryCallNextFrameLayoutCallback();
@@ -412,10 +434,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     } while (false);
 #endif
 
-    bool hasAnimation = window_->FlushCustomAnimation(nanoTimestamp);
-    if (hasAnimation) {
-        RequestFrame();
-    }
+    window_->FlushModifier();
     FlushFrameRate();
     FlushMessages();
     if (dragCleanTask_) {
@@ -598,6 +617,8 @@ void PipelineContext::FlushBuild()
     FlushDirtyNodeUpdate();
     isRebuildFinished_ = true;
     FlushBuildFinishCallbacks();
+    // need notify after flush dirty node
+    taskScheduler_->FlushPersistAfterLayoutTask();
 }
 
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation)
@@ -673,6 +694,7 @@ void PipelineContext::SetupRootElement()
     auto container = Container::Current();
     if (container && atomicService) {
         auto appBar = Referenced::MakeRefPtr<AppBarView>(atomicService);
+        appBar->iniBehavior();
         container->SetAppBar(appBar);
     }
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
@@ -1147,6 +1169,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
         float keyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
         float positionYWithOffset = positionY - keyboardOffset;
+        if (rootSize.Height() - positionY - height < 0) {
+            height = rootSize.Height() - positionY;
+        }
         float offsetFix = (rootSize.Height() - positionY - height) < keyboardHeight
                                 ? keyboardHeight - (rootSize.Height() - positionY - height)
                                 : keyboardHeight;
@@ -2040,6 +2065,9 @@ void PipelineContext::WindowFocus(bool isFocus)
                 curMainView->HandleFocusOnMainView();
             }
         }
+        if (focusOnNodeCallback_) {
+            focusOnNodeCallback_();
+        }
     }
     FlushWindowFocusChangedCallback(isFocus);
 }
@@ -2080,6 +2108,19 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     } else {
         callback();
     }
+}
+
+void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->UpdateTitleInTargetPos(isShow, height);
 }
 
 void PipelineContext::SetContainerWindow(bool isShow)
@@ -2360,6 +2401,9 @@ void PipelineContext::OnIdle(int64_t deadline)
     ACE_SCOPED_TRACE("OnIdle, targettime:%" PRId64 "", deadline);
     taskScheduler_->FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
     canUseLongPredictTask_ = false;
+    if (GetSysTimestamp() < deadline) {
+        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc();
+    }
 }
 
 void PipelineContext::Finish(bool /* autoFinish */) const
@@ -2373,6 +2417,11 @@ void PipelineContext::Finish(bool /* autoFinish */) const
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
 {
     taskScheduler_->AddAfterLayoutTask(std::move(task));
+}
+
+void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
+{
+    taskScheduler_->AddPersistAfterLayoutTask(std::move(task));
 }
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
@@ -2526,5 +2575,63 @@ std::string PipelineContext::GetCurrentExtraInfo()
 {
     auto node = activeNode_.Upgrade();
     return node ? node->GetCurrentCustomNodeInfo() : std::string();
+}
+
+void PipelineContext::SetCursor(int32_t cursorValue)
+{
+    if (cursorValue >= 0 && cursorValue <= static_cast<int32_t>(MouseFormat::RUNNING)) {
+        cursor_ = static_cast<MouseFormat>(cursorValue);
+        auto mouseStyle = MouseStyle::CreateMouseStyle();
+        CHECK_NULL_VOID(mouseStyle);
+        mouseStyle->ChangePointerStyle(GetWindowId(), cursor_);
+    }
+}
+
+void PipelineContext::RestoreDefault()
+{
+    cursor_ = MouseFormat::DEFAULT;
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    CHECK_NULL_VOID(mouseStyle);
+    mouseStyle->ChangePointerStyle(GetWindowId(), MouseFormat::DEFAULT);
+}
+
+void PipelineContext::OpenFrontendAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
+{
+    // push false to show we already open a animation closure.
+    pendingFrontendAnimation_.push(false);
+
+    // flush ui tasks before open animation closure.
+    if (!isReloading_ && !IsLayouting()) {
+        FlushUITasks();
+    }
+    auto wrapFinishCallback = GetWrappedAnimationCallback(finishCallback);
+    if (IsFormRender()) {
+        SetIsFormAnimation(true);
+        if (!IsFormAnimationFinishCallback()) {
+            SetFormAnimationStartTime(GetMicroTickCount());
+        }
+    }
+    AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback);
+}
+
+void PipelineContext::CloseFrontendAnimation()
+{
+    if (pendingFrontendAnimation_.empty()) {
+        return;
+    }
+
+    if (pendingFrontendAnimation_.top()) {
+        if (!isReloading_ && !IsLayouting()) {
+            FlushUITasks();
+        } else if (IsLayouting()) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION,
+                "IsLayouting, CloseFrontendAnimation has tasks not flushed, maybe some layout animation not generated");
+        }
+    }
+    if (!pendingFrontendAnimation_.empty()) {
+        pendingFrontendAnimation_.pop();
+    }
+    AnimationUtils::CloseImplicitAnimation();
 }
 } // namespace OHOS::Ace::NG

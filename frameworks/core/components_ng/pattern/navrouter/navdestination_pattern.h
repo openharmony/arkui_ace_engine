@@ -103,11 +103,14 @@ public:
         return isOnShow_;
     }
 
+    bool GetBackButtonState();
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
     WeakPtr<UINode> navDestinationNode_;
     bool isOnShow_ = false;
+    void OnAttachToFrameNode() override;
 };
 
 } // namespace OHOS::Ace::NG

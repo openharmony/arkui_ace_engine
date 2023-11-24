@@ -105,6 +105,12 @@ public:
         return isOn_.value_or(false);
     }
 
+    void MarkIsSelected(bool isSelected);
+    void SetSelect(bool select)
+    {
+        isOn_ = select;
+    }
+
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
     {
         isUserSetResponseRegion_ = isUserSetResponseRegion;
@@ -122,6 +128,8 @@ public:
 
 private:
     void OnModifyDone() override;
+    void SetAccessibilityAction();
+    void UpdateSelectStatus(bool isSelected);
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     RefPtr<Curve> GetCurve() const;
@@ -152,6 +160,8 @@ private:
     void OnClick();
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
+    void UpdateSwitchPaintProperty();
+    void UpdateSwitchLayoutProperty();
 
     RefPtr<PanEvent> panEvent_;
 

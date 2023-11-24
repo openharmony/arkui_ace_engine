@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
 
 #include "core/components_ng/pattern/image/image_model.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -27,7 +28,7 @@ class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
     void Create(const std::string& src, RefPtr<PixelMap>& pixMap, const std::string& bundleName,
         const std::string& moduleName) override;
-    void SetAlt(const std::string& src) override;
+    void SetAlt(const ImageSourceInfo& src) override;
     void SetBorder(const Border& border) override;
     void SetBackBorder() override;
     void SetBlur(double blur) override;
@@ -54,6 +55,7 @@ public:
     void SetOnDrop(OnDragDropFunc&& onDrop) override;
     void SetCopyOption(const CopyOptions& copyOption) override;
     bool UpdateDragItemInfo(DragItemInfo& itemInfo) override;
+    static void SetImageFit(FrameNode* frameNode, ImageFit value);
 };
 
 } // namespace OHOS::Ace::NG

@@ -126,6 +126,8 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
         if (shadow.GetShadowColorStrategy() == ShadowColorStrategy::AVERAGE) {
             jsonShadow->Put("color", "ColoringStrategy.AVERAGE");
+        } else if (shadow.GetShadowColorStrategy() == ShadowColorStrategy::PRIMARY) {
+            jsonShadow->Put("color", "ColoringStrategy.PRIMARY");
         } else {
             jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
         }
@@ -291,5 +293,22 @@ void BorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     propBorderRadius.value_or(BorderRadiusProperty()).ToJsonValue(json, jsonBorder);
 
     json->Put("border", jsonBorder->ToString().c_str());
+}
+
+void PointLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto jsonLightIntensity = JsonUtil::Create(true);
+    jsonLightIntensity->Put("lightIntensity", propLightIntensity.has_value() ? propLightIntensity.value() : 0.0);
+    json->Put("pointLight", jsonLightIntensity);
+
+    if (propLightPosition.has_value()) {
+        auto jsonLightPosition = JsonUtil::Create(true);
+        jsonLightPosition->Put("x", propLightPosition->x.ToString().c_str());
+        jsonLightPosition->Put("y", propLightPosition->y.ToString().c_str());
+        jsonLightPosition->Put("z", propLightPosition->z.ToString().c_str());
+        json->Put("LightPosition", jsonLightPosition);
+    } else {
+        json->Put("LightPosition", JsonUtil::Create(true));
+    }
 }
 } // namespace OHOS::Ace::NG

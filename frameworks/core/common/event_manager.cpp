@@ -947,8 +947,6 @@ bool EventManager::IsSameKeyboardShortcutNode(const std::string& value, uint8_t 
         }
         auto keyboardShortcuts = eventHub->GetKeyboardShortcut();
         for (auto& keyboardShortcut : keyboardShortcuts) {
-            LOGI("IsSameKeyboardShortcutNode keys = %{public}d value = %{public}s", keyboardShortcut.keys,
-                keyboardShortcut.value.c_str());
             if (keyboardShortcut.value.find(value) != std::string::npos && keyboardShortcut.keys == keys) {
                 return true;
             }

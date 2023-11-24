@@ -51,6 +51,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const AAFwk::Want& want, const Moda
         V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
+    pattern->SetModalFlag(true);
     pattern->UpdateWant(want);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, frameNode);

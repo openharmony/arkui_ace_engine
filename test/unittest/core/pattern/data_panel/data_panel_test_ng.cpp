@@ -1279,6 +1279,10 @@ HWTEST_F(DataPanelTestNg, DataPanelOnDrawTest001, TestSize.Level1)
      * @tc.expected: call onDraw and result is expected.
      */
     Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
 
     dataPanelModifier.onDraw(context);

@@ -33,6 +33,8 @@ namespace OHOS::Ace::NG {
 
 using LoadPageCallback = std::function<bool(const std::string&,
     const std::function<void(const std::string&, int32_t)>&)>;
+using LoadPageByBufferCallback = std::function<bool(
+    const std::shared_ptr<std::vector<uint8_t>>& content,  const std::function<void(const std::string&, int32_t)>&)>;
 using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId)>;
 using LoadNamedRouterCallback = std::function<bool(const std::string&, bool isTriggeredByJs)>;
 using UpdateRootComponentCallback = std::function<bool()>;
@@ -49,6 +51,7 @@ struct RouterPageInfo {
     std::function<void(const std::string&, int32_t)> errorCallback;
     std::string path;
     bool isNamedRouterMode = false;
+    std::shared_ptr<std::vector<uint8_t>> content;
 };
 
 class PageRouterManager : public AceType {
@@ -58,6 +61,7 @@ public:
     ~PageRouterManager() override = default;
 
     void RunPage(const std::string& url, const std::string& params);
+    void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params);
     void RunPageByNamedRouter(const std::string& name, const std::string& params);
     void RunCard(const std::string& url, const std::string& params, int64_t cardId);
 
@@ -69,6 +73,11 @@ public:
     void SetLoadJsCallback(LoadPageCallback&& callback)
     {
         loadJs_ = std::move(callback);
+    }
+
+    void SetLoadJsByBufferCallback(LoadPageByBufferCallback&& callback)
+    {
+        loadJsByBuffer_ = std::move(callback);
     }
 
     void SetLoadCardCallback(const LoadCardCallback& callback)
@@ -181,6 +190,7 @@ private:
 
     bool inRouterOpt_ = false;
     LoadPageCallback loadJs_;
+    LoadPageByBufferCallback loadJsByBuffer_;
     LoadCardCallback loadCard_;
     LoadNamedRouterCallback loadNamedRouter_;
     UpdateRootComponentCallback updateRootComponent_;

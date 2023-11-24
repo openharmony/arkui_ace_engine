@@ -148,7 +148,7 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
     }
 }
 
-bool FocusHub::RequestFocusImmediately()
+bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
 {
     auto context = NG::PipelineContext::GetCurrentContext();
     if (context && context->GetIsFocusingByTab()) {
@@ -162,6 +162,10 @@ bool FocusHub::RequestFocusImmediately()
     }
 
     if (!IsFocusableWholePath()) {
+        return false;
+    }
+
+    if (isJudgeRootTree && !IsOnRootTree()) {
         return false;
     }
 
@@ -204,8 +208,8 @@ RefPtr<FocusHub> FocusHub::GetChildMainView()
             continue;
         }
         auto frameName = child->GetFrameName();
-        if (frameName == V2::PAGE_ETS_TAG || frameName == V2::MENU_WRAPPER_ETS_TAG || frameName == V2::DIALOG_ETS_TAG ||
-            frameName == V2::MODAL_PAGE_TAG || frameName == V2::MENU_ETS_TAG || frameName == V2::SHEET_PAGE_TAG) {
+        if (frameName == V2::PAGE_ETS_TAG || frameName == V2::DIALOG_ETS_TAG || frameName == V2::MODAL_PAGE_TAG ||
+            frameName == V2::MENU_ETS_TAG || frameName == V2::SHEET_PAGE_TAG || frameName == V2::POPUP_ETS_TAG) {
             if (!curFocusMainView && child->IsCurrentFocus()) {
                 curFocusMainView = child;
             }
@@ -247,12 +251,12 @@ RefPtr<FocusHub> FocusHub::GetMainViewRootScope()
 {
     auto frameName = GetFrameName();
     int32_t rootScopeDeepth = 0;
-    if (frameName == V2::MENU_WRAPPER_ETS_TAG) {
-        rootScopeDeepth = DEEPTH_OF_MENU_WRAPPER;
-    } else if (frameName == V2::MENU_ETS_TAG) {
+    if (frameName == V2::MENU_ETS_TAG) {
         rootScopeDeepth = DEEPTH_OF_MENU;
     } else if (frameName == V2::DIALOG_ETS_TAG) {
         rootScopeDeepth = DEEPTH_OF_DIALOG;
+    } else if (frameName == V2::POPUP_ETS_TAG) {
+        rootScopeDeepth = DEEPTH_OF_POPUP;
     } else {
         rootScopeDeepth = DEEPTH_OF_PAGE;
     }
@@ -260,6 +264,10 @@ RefPtr<FocusHub> FocusHub::GetMainViewRootScope()
     for (int32_t i = 0; i < rootScopeDeepth; ++i) {
         CHECK_NULL_RETURN(rootScope, nullptr);
         rootScope = rootScope->GetChildren().front();
+    }
+    CHECK_NULL_RETURN(rootScope, nullptr);
+    if (rootScope->GetFocusType() != FocusType::SCOPE) {
+        return rootScope->GetParentFocusHub();
     }
     return rootScope;
 }
@@ -728,13 +736,21 @@ void FocusHub::RequestFocus() const
 
 void FocusHub::RequestFocusWithDefaultFocusFirstly()
 {
-    auto viewRootScope = GetMainViewRootScope();
-    if (GetIsViewRootScopeFocused() && viewRootScope) {
-        viewRootScope->SetFocusDependence(FocusDependence::SELF);
+    RefPtr<FocusHub> viewScope;
+    if (GetFrameName() == V2::MENU_WRAPPER_ETS_TAG) {
+        viewScope = GetChildren().front();
+    } else {
+        viewScope = Claim(this);
+    }
+    if (viewScope && viewScope->GetIsViewRootScopeFocused()) {
+        auto viewRootScope = viewScope->GetMainViewRootScope();
+        if (viewRootScope) {
+            viewRootScope->SetFocusDependence(FocusDependence::SELF);
+        }
     }
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    context->AddDirtyDefaultFocus(GetFrameNode());
+    context->AddDirtyDefaultFocus(viewScope ? viewScope->GetFrameNode() : GetFrameNode());
 }
 
 bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
@@ -754,7 +770,7 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
             if (!nextFocusHub) {
                 nextFocusHub = lastFocusNode->GetNearestNodeByProjectArea(GetChildren(), moveStep);
             }
-            if (!nextFocusHub) {
+            if (!nextFocusHub || nextFocusHub == lastFocusNode) {
                 return false;
             }
             auto ret = TryRequestFocus(nextFocusHub, rect, moveStep);
@@ -766,10 +782,13 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
         auto ret = GoToNextFocusLinear(moveStep, rect);
         return ret;
     }
+    if (!lastWeakFocusNode_.Upgrade()) {
+        return false;
+    }
     WeakPtr<FocusHub> nextFocusHubWeak;
     focusAlgorithm_.getNextFocusNode(moveStep, lastWeakFocusNode_, nextFocusHubWeak);
     auto nextFocusHub = nextFocusHubWeak.Upgrade();
-    if (!nextFocusHub) {
+    if (!nextFocusHub || nextFocusHub == lastWeakFocusNode_.Upgrade()) {
         return false;
     }
     auto ret = TryRequestFocus(nextFocusHub, rect, moveStep);
@@ -1016,10 +1035,20 @@ void FocusHub::OnFocusNode()
         parentFocusHub->SetLastFocusNodeIndex(AceType::Claim(this));
     }
     HandleParentScroll(); // If current focus node has a scroll parent. Handle the scroll event.
-    PaintFocusState();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto rootNode = pipeline ? pipeline->GetRootElement() : nullptr;
+    auto rootFocusHub = rootNode ? rootNode->GetFocusHub() : nullptr;
+    if (rootFocusHub && pipeline->GetIsFocusActive()) {
+        rootFocusHub->ClearAllFocusState();
+        rootFocusHub->PaintAllFocusState();
+    }
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->OnAccessibilityEvent(AccessibilityEventType::FOCUS);
+    CHECK_NULL_VOID(pipeline);
+    if (frameNode->GetFocusType() == FocusType::NODE) {
+        pipeline->SetFocusNode(frameNode);
+    }
 }
 
 void FocusHub::OnBlurNode()
@@ -1038,6 +1067,19 @@ void FocusHub::OnBlurNode()
     }
     if (blurReason_ != BlurReason::FRAME_DESTROY) {
         ClearFocusState();
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto rootNode = pipeline ? pipeline->GetRootElement() : nullptr;
+    auto rootFocusHub = rootNode ? rootNode->GetFocusHub() : nullptr;
+    if (rootFocusHub && pipeline->GetIsFocusActive()) {
+        rootFocusHub->ClearAllFocusState();
+        rootFocusHub->PaintAllFocusState();
+    }
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(pipeline);
+    if (frameNode->GetFocusType() == FocusType::NODE && frameNode == pipeline->GetFocusNode()) {
+        pipeline->SetFocusNode(nullptr);
     }
 }
 
@@ -1424,6 +1466,10 @@ bool FocusHub::AcceptFocusByRectOfLastFocusFlex(const RectF& rect)
             continue;
         }
 
+        if (!childRect.IsValid() || NearZero(childRect.Width()) || NearZero(childRect.Height())) {
+            continue;
+        }
+
         OffsetF vec = childRect.Center() - rect.Center();
         double val = (vec.GetX() * vec.GetX()) + (vec.GetY() * vec.GetY());
         if (minVal > val) {
@@ -1493,6 +1539,19 @@ bool FocusHub::IsFocusableWholePath()
         parent = parent->GetParentFocusHub();
     }
     return IsFocusable();
+}
+
+bool FocusHub::IsOnRootTree()
+{
+    auto parent = GetParentFocusHub();
+    while (parent) {
+        auto parentName = parent->GetFrameName();
+        if (parentName == V2::ROOT_ETS_TAG) {
+            return true;
+        }
+        parent = parent->GetParentFocusHub();
+    }
+    return false;
 }
 
 void FocusHub::CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes)

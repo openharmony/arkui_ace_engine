@@ -84,6 +84,14 @@ public:
         json->Put("showErrorText", propShowErrorText_.value_or(false));
         json->Put("showCounter", propShowCounter_.value_or(false));
         json->Put("showUnderline", propShowUnderline_.value_or(false));
+        auto jsonCancelButton = JsonUtil::Create(true);
+        jsonCancelButton->Put("style", static_cast<int32_t>(propCleanNodeStyle_.value_or(CleanNodeStyle::INPUT)));
+        auto jsonIconOptions = JsonUtil::Create(true);
+        jsonIconOptions->Put("size", propIconSize_.value_or(Dimension()).ToString().c_str());
+        jsonIconOptions->Put("src", propIconSrc_.value_or("").c_str());
+        jsonIconOptions->Put("color", propIconColor_.value_or(Color()).ColorToString().c_str());
+        jsonCancelButton->Put("icon", jsonIconOptions->ToString().c_str());
+        json->Put("cancelButton", jsonCancelButton->ToString().c_str());
         json->Put("selectAll", propSelectAllValue_.value_or(false));
     }
 

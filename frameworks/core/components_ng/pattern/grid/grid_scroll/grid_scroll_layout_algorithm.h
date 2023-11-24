@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -41,6 +42,11 @@ public:
     void SetCanOverScroll(bool canOverScroll)
     {
         canOverScroll_ = canOverScroll;
+    }
+
+    void SetScrollSource(int32_t scrollSource)
+    {
+        scrollSource_ = scrollSource;
     }
 
 protected:
@@ -138,6 +144,7 @@ private:
     // Map structure: [index, crossPosition], store cross position of each item.
     std::map<int32_t, float> itemsCrossPosition_;
     bool canOverScroll_ = false;
+    int32_t scrollSource_ = SCROLL_FROM_NONE;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };

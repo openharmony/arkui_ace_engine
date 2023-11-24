@@ -15,27 +15,38 @@
 
 #include "adapter/preview/osal/task/task_runner_adapter_impl.h"
 
-#include "jsapp/rich/external/EventHandler.h"
+#include "adapter/preview/entrance/ace_preview_helper.h"
 
 namespace OHOS::Ace {
 void TaskRunnerAdapterImpl::PostTask(std::function<void()> task, const std::string& caller)
 {
-    OHOS::AppExecFwk::EventHandler::PostTask(std::move(task));
+    auto postTask = OHOS::Ace::Platform::AcePreviewHelper::GetInstance()->GetCallbackOfPostTask();
+    if (postTask) {
+        postTask(std::move(task), 0);
+    }
 }
 
 void TaskRunnerAdapterImpl::PostTaskForTime(std::function<void()> task, uint32_t targetTime, const std::string& caller)
 {
-    OHOS::AppExecFwk::EventHandler::PostTask(std::move(task), targetTime);
+    auto postTask = OHOS::Ace::Platform::AcePreviewHelper::GetInstance()->GetCallbackOfPostTask();
+    if (postTask) {
+        postTask(std::move(task), targetTime);
+    }
 }
 
 void TaskRunnerAdapterImpl::PostDelayedTask(std::function<void()> task, uint32_t delay, const std::string& caller)
 {
-    OHOS::AppExecFwk::EventHandler::PostTask(std::move(task), delay);
+    auto postTask = OHOS::Ace::Platform::AcePreviewHelper::GetInstance()->GetCallbackOfPostTask();
+    if (postTask) {
+        postTask(std::move(task), delay);
+    }
 }
 
 bool TaskRunnerAdapterImpl::RunsTasksOnCurrentThread()
 {
-    return OHOS::AppExecFwk::EventHandler::IsCurrentRunnerThread();
+    auto isCurrentRunnerThread =
+        OHOS::Ace::Platform::AcePreviewHelper::GetInstance()->GetCallbackOfIsCurrentRunnerThread();
+    return isCurrentRunnerThread && isCurrentRunnerThread();
 }
 
 void TaskRunnerAdapterImpl::Initialize(bool useCurrentEventRunner, const std::string& name) {}

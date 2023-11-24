@@ -24,7 +24,12 @@ void FormManagerDelegate::Stop() {}
 
 void FormManagerDelegate::UnregisterEvent() {}
 
+#if OHOS_STANDARD_SYSTEM
+void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info,
+    const AppExecFwk::FormInfo& formInfo) {}
+#else
 void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info) {}
+#endif
 
 std::string FormManagerDelegate::ConvertRequestInfo(const RequestFormInfo& info) const
 {
@@ -82,4 +87,12 @@ void FormManagerDelegate::ReleaseRenderer() {}
 void FormManagerDelegate::OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos) {}
 
 void FormManagerDelegate::SetVisibleChange(bool isVisible) {}
+
+#if OHOS_STANDARD_SYSTEM
+bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::string& moduleName,
+    const std::string& cardName, AppExecFwk::FormInfo& formInfo)
+{
+    return true;
+}
+#endif
 } // namespace OHOS::Ace

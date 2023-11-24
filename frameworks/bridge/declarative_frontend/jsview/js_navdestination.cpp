@@ -123,6 +123,7 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
                 }
             }
             if (!isValid || titleHeight.Value() < 0) {
+                NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight, false);
                 return;
             }
             NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);

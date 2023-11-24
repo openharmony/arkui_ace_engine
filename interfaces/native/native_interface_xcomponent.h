@@ -38,7 +38,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <vector>
 
 #include "native_xcomponent_key_event.h"
 

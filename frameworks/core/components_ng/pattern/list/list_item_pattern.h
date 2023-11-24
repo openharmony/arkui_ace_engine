@@ -34,6 +34,7 @@ enum class ListItemSwipeIndex {
     SWIPER_END = -1,
     ITEM_CHILD = 0,
     SWIPER_START = 1,
+    SWIPER_ACTION = 2,
 };
 
 class ACE_EXPORT ListItemPattern : public Pattern {
@@ -153,16 +154,6 @@ public:
         }
     }
 
-    void SetUseStartDefaultDeleteAnimation(bool useStartDefaultDeleteAnimation)
-    {
-        useStartDefaultDeleteAnimation_ = useStartDefaultDeleteAnimation;
-    }
-
-    void SetUseEndDefaultDeleteAnimation(bool useEndDefaultDeleteAnimation)
-    {
-        useEndDefaultDeleteAnimation_ = useEndDefaultDeleteAnimation;
-    }
-
     int32_t GetIndexInList() const
     {
         return indexInList_;
@@ -229,9 +220,12 @@ private:
     void ResetToItemChild()
     {
         swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
+        FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
+    }
+    void ResetNodeSize()
+    {
         startNodeSize_ = 0.0f;
         endNodeSize_ = 0.0f;
-        FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
     }
 
     RefPtr<ShallowBuilder> shallowBuilder_;
@@ -257,8 +251,6 @@ private:
     bool hasEndDeleteArea_ = false;
     bool inStartDeleteArea_ = false;
     bool inEndDeleteArea_ = false;
-    bool useStartDefaultDeleteAnimation_ = false;
-    bool useEndDefaultDeleteAnimation_ = false;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<Animator> springController_;

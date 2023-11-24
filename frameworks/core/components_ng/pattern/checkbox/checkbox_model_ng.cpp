@@ -44,6 +44,15 @@ void CheckBoxModelNG::Create(
 
 void CheckBoxModelNG::SetSelect(bool isSelected)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetLastSelect(isSelected);
+    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
+
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isSelected);
 }
 
@@ -118,5 +127,45 @@ void CheckBoxModelNG::SetResponseRegion(const std::vector<DimensionRect>& respon
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetIsUserSetResponseRegion(true);
+}
+
+void CheckBoxModelNG::SetSelect(FrameNode* frameNode, bool isSelected)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isSelected, frameNode);
+}
+
+void CheckBoxModelNG::SetSelectedColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColor, color, frameNode);
+}
+
+void CheckBoxModelNG::SetUnSelectedColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, color, frameNode);
+}
+
+void CheckBoxModelNG::SetCheckMarkColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkColor, color, frameNode);
+}
+
+void CheckBoxModelNG::SetCheckMarkSize(FrameNode* frameNode, const Dimension& size)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkSize, size, frameNode);
+}
+
+void CheckBoxModelNG::SetCheckMarkWidth(FrameNode* frameNode, const Dimension& width)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkWidth, width, frameNode);
+}
+
+void CheckBoxModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
+{
+    NG::ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
+}
+
+void CheckBoxModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
+{
+    NG::ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
 }
 } // namespace OHOS::Ace::NG

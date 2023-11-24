@@ -38,8 +38,7 @@ void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, V2::
         return ViewStackProcessor::GetInstance()->Finish();
     };
     ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::LIST_ITEM_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::LIST_ITEM_ETS_TAG, nodeId,
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = listItemStyle]() {
             return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, itemStyle);
         });
@@ -54,7 +53,7 @@ void ListItemModelNG::Create()
         []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
     stack->Push(frameNode);
 }
-
+// use SetDeleteArea to update builder function
 void ListItemModelNG::SetSwiperAction(std::function<void()>&& startAction, std::function<void()>&& endAction,
     OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect)
 {
@@ -62,27 +61,7 @@ void ListItemModelNG::SetSwiperAction(std::function<void()>&& startAction, std::
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
-    RefPtr<NG::UINode> startNode;
-    if (startAction) {
-        NG::ScopedViewStackProcessor builderViewStackProcessor;
-        startAction();
-        startNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    }
-    if (startNode) {
-        pattern->SetStartNode(startNode);
-    }
-    RefPtr<NG::UINode> endNode;
-    if (endAction) {
-        NG::ScopedViewStackProcessor builderViewStackProcessor;
-        endAction();
-        endNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    }
-    if (endNode) {
-        pattern->SetEndNode(endNode);
-    }
-    if (onOffsetChangeFunc) {
-        pattern->SetOffsetChangeCallBack(std::move(onOffsetChangeFunc));
-    }
+    pattern->SetOffsetChangeCallBack(std::move(onOffsetChangeFunc));
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect);
 }
 
@@ -135,8 +114,8 @@ void ListItemModelNG::SetSelectCallback(OnSelectFunc&& selectCallback)
     eventHub->SetOnSelect(std::move(selectCallback));
 }
 
-void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, bool useDefaultDeleteAnimation,
-    OnDeleteEvent&& onDelete, OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, OnDeleteEvent&& onDelete,
+    OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
     OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -152,12 +131,9 @@ void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, bool 
             builderAction();
             startNode = NG::ViewStackProcessor::GetInstance()->Finish();
         }
-        if (startNode) {
-            pattern->SetStartNode(startNode);
-        }
+        pattern->SetStartNode(startNode);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea),
             std::move(onExitDeleteArea), std::move(onStateChange), isStartArea);
-        pattern->SetUseStartDefaultDeleteAnimation(useDefaultDeleteAnimation);
         ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length);
     } else {
         RefPtr<NG::UINode> endNode;
@@ -166,12 +142,9 @@ void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, bool 
             builderAction();
             endNode = NG::ViewStackProcessor::GetInstance()->Finish();
         }
-        if (endNode) {
-            pattern->SetEndNode(endNode);
-        }
+        pattern->SetEndNode(endNode);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea),
             std::move(onExitDeleteArea), std::move(onStateChange), isStartArea);
-        pattern->SetUseEndDefaultDeleteAnimation(useDefaultDeleteAnimation);
         ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length);
     }
 }
@@ -185,31 +158,15 @@ void ListItemModelNG::InstallSwiperCallBack(RefPtr<ListItemEventHub> eventHub,
 {
     CHECK_NULL_VOID(eventHub);
     if (isStartArea) {
-        if (onDelete) {
-            eventHub->SetStartOnDelete(std::move(onDelete));
-        }
-        if (onEnterDeleteArea) {
-            eventHub->SetOnEnterStartDeleteArea(std::move(onEnterDeleteArea));
-        }
-        if (onExitDeleteArea) {
-            eventHub->SetOnExitStartDeleteArea(std::move(onExitDeleteArea));
-        }
-        if (onStateChange) {
-            eventHub->SetStartOnStateChange(std::move(onStateChange));
-        }
+        eventHub->SetStartOnDelete(std::move(onDelete));
+        eventHub->SetOnEnterStartDeleteArea(std::move(onEnterDeleteArea));
+        eventHub->SetOnExitStartDeleteArea(std::move(onExitDeleteArea));
+        eventHub->SetStartOnStateChange(std::move(onStateChange));
     } else {
-        if (onDelete) {
-            eventHub->SetEndOnDelete(std::move(onDelete));
-        }
-        if (onEnterDeleteArea) {
-            eventHub->SetOnEnterEndDeleteArea(std::move(onEnterDeleteArea));
-        }
-        if (onExitDeleteArea) {
-            eventHub->SetOnExitEndDeleteArea(std::move(onExitDeleteArea));
-        }
-        if (onStateChange) {
-            eventHub->SetEndOnStateChange(std::move(onStateChange));
-        }
+        eventHub->SetEndOnDelete(std::move(onDelete));
+        eventHub->SetOnEnterEndDeleteArea(std::move(onEnterDeleteArea));
+        eventHub->SetOnExitEndDeleteArea(std::move(onExitDeleteArea));
+        eventHub->SetEndOnStateChange(std::move(onStateChange));
     }
 }
 } // namespace OHOS::Ace::NG

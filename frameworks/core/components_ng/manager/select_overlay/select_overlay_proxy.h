@@ -66,6 +66,7 @@ public:
     bool IsSingleHandleMenuShow();
     bool IsHandleShow();
     bool IsSingleHandle();
+    SelectOverlayInfo GetSelectOverlayMangerInfo();
 
 private:
     int32_t selectOverlayId_ = 0;

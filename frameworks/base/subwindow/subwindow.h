@@ -49,6 +49,7 @@ public:
     virtual void CloseMenu() = 0;
     virtual void ClearMenu() {};
     virtual void ClearMenuNG(bool inWindow = true, bool showAnimation = false) = 0;
+    virtual void ClearPopupNG() = 0;
     virtual RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc) = 0;
     virtual void HideSubWindowNG() = 0;
@@ -57,7 +58,9 @@ public:
 
     // Add interface for hot regions
     virtual void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
-
+    virtual void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
+    virtual void DeleteHotAreas(int32_t overlayId) {};
+	
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;
 

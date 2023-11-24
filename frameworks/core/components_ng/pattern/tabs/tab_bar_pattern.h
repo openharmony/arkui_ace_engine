@@ -26,6 +26,7 @@
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/tabs/tab_bar_accessibility_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
@@ -386,6 +387,7 @@ private:
     void InitTurnPageRateEvent();
     void GetIndicatorStyle(IndicatorStyle& indicatorStyle);
     float GetLeftPadding() const;
+    void SetDefaultAnimationDuration();
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -394,6 +396,7 @@ private:
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<SwiperController> swiperController_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
+    AnimationEndEventPtr animationEndEvent_;
 
     float currentOffset_ = 0.0f;
     float childrenMainSize_ = 0.0f;

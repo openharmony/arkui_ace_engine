@@ -34,6 +34,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -45,6 +46,7 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
+#include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -436,21 +438,33 @@ void FrameNode::InitializePatternAndContext()
 
 void FrameNode::DumpCommonInfo()
 {
-    DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
+    auto transInfo = renderContext_->GetTrans();
+    if (!geometryNode_->GetFrameRect().ToString().compare(renderContext_->GetPaintRectWithTransform().ToString())) {
+        DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
+    }
+    // transInfo is a one-dimensional expansion of the affine transformation matrix
+    if (!transInfo.empty()) {
+        if (!(NearEqual(transInfo[0], 1) && NearEqual(transInfo[0], 1))) {
+            DumpLog::GetInstance().AddDesc(std::string("scale: ").append(
+                std::to_string(transInfo[0]).append(",").append(std::to_string(transInfo[1]))));
+        }
+        if (!(NearZero(transInfo[6]) && NearZero(transInfo[7]))) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("translate: ")
+                    .append(std::to_string(transInfo[6]).append(",").append(std::to_string(transInfo[7]))));
+        }
+        if (!(NearZero(transInfo[8]))) {
+            DumpLog::GetInstance().AddDesc(std::string("degree: ").append(std::to_string(transInfo[8])));
+        }
+    }
     if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
         DumpLog::GetInstance().AddDesc(
             std::string("BackgroundColor: ").append(renderContext_->GetBackgroundColor()->ColorToString()));
     }
-    if (renderContext_ && renderContext_->GetBorder() && renderContext_->GetBorder()->GetBorderRadius().has_value()) {
-        DumpLog::GetInstance().AddDesc(
-            std::string("BorderRadius: ").append(renderContext_->GetBorder()->GetBorderRadius()->ToString().c_str()));
-    }
-
-    DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
-                                       .append(geometryNode_->GetParentLayoutConstraint().has_value()
-                                                   ? geometryNode_->GetParentLayoutConstraint().value().ToString()
-                                                   : "NA"));
-    if (NearZero(GetOffsetRelativeToWindow().GetY()) && NearZero(GetOffsetRelativeToWindow().GetX())) {
+    if (geometryNode_->GetParentLayoutConstraint().has_value())
+        DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
+                                           .append(geometryNode_->GetParentLayoutConstraint().value().ToString()));
+    if (!(NearZero(GetOffsetRelativeToWindow().GetY()) && NearZero(GetOffsetRelativeToWindow().GetX()))) {
         DumpLog::GetInstance().AddDesc(std::string("top: ")
                                            .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
                                            .append(" left: ")
@@ -485,13 +499,15 @@ void FrameNode::DumpCommonInfo()
     if (!propInspectorId_->empty()) {
         DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
     }
-    DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
-                                       .append(layoutProperty_->GetContentLayoutConstraint().has_value()
-                                                   ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
-                                                   : "NA"));
+    if (layoutProperty_->GetPaddingProperty() || layoutProperty_->GetBorderWidthProperty() ||
+        layoutProperty_->GetMarginProperty() || layoutProperty_->GetCalcLayoutConstraint()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("ContentConstraint: ")
+                .append(layoutProperty_->GetContentLayoutConstraint().has_value()
+                            ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
+                            : "NA"));
+    }
     DumpOverlayInfo();
-    DumpLog::GetInstance().AddDesc(
-        std::string("PaintRect: ").append(renderContext_->GetPaintRectWithTransform().ToString()));
     if (frameProxy_->Dump().compare("totalCount is 0") != 0) {
         DumpLog::GetInstance().AddDesc(std::string("FrameProxy: ").append(frameProxy_->Dump().c_str()));
     }
@@ -727,8 +743,13 @@ void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configuration
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (configurationChange.DirectionOrDpiUpdate) {
-        pattern_->OnDirectionOrDpiConfigurationUpdate();
+    if (configurationChange.directionUpdate) {
+        pattern_->OnDirectionConfigurationUpdate();
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    if (configurationChange.dpiUpdate) {
+        pattern_->OnDpiConfigurationUpdate();
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -743,6 +764,9 @@ void FrameNode::OnVisibleChange(bool isVisible)
 
 void FrameNode::OnDetachFromMainTree(bool recursive)
 {
+    if (auto focusHub = GetFocusHub()) {
+        focusHub->RemoveSelf();
+    }
     eventHub_->FireOnDisappear();
     renderContext_->OnNodeDisappear(recursive);
 }
@@ -1578,6 +1602,16 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
+    auto targetComponent = MakeRefPtr<TargetComponent>();
+    targetComponent->SetNode(WeakClaim(this));
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    if (gestureHub) {
+        auto callback = gestureHub->GetOnGestureJudgeBeginCallback();
+        if (callback) {
+            targetComponent->SetOnGestureJudgeBegin(std::move(callback));
+        }
+    }
+
     if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("%{public}s is inActive, need't do touch test", GetTag().c_str());
@@ -1695,8 +1729,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             if (gestureHub) {
                 TouchTestResult finalResult;
                 const auto coordinateOffset = globalPoint - localPoint - localTransformOffset;
-                preventBubbling = gestureHub->ProcessTouchTestHit(
-                    coordinateOffset, touchRestrict, newComingTargets, finalResult, touchId, localPoint);
+                preventBubbling = gestureHub->ProcessTouchTestHit(coordinateOffset, touchRestrict, newComingTargets,
+                    finalResult, touchId, localPoint, targetComponent);
                 newComingTargets.swap(finalResult);
             }
         } else if (touchRestrict.hitTestType == SourceType::MOUSE) {
@@ -2159,10 +2193,7 @@ bool FrameNode::OnRemoveFromParent(bool allowTransition)
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, false);
     if (!allowTransition || RemoveImmediately()) {
-        // directly remove, reset focusHub, parent and depth
-        if (auto focusHub = GetFocusHub()) {
-            focusHub->RemoveSelf();
-        }
+        // directly remove, reset parent and depth
         ResetParent();
         return true;
     }
@@ -2423,8 +2454,9 @@ void FrameNode::GetPercentSensitive()
 
 void FrameNode::UpdatePercentSensitive()
 {
-    auto res = layoutProperty_->UpdatePercentSensitive(
-        layoutAlgorithm_->GetPercentHeight(), layoutAlgorithm_->GetPercentWidth());
+    bool percentHeight = layoutAlgorithm_ ? layoutAlgorithm_->GetPercentHeight() : true;
+    bool percentWidth = layoutAlgorithm_ ? layoutAlgorithm_->GetPercentWidth() : true;
+    auto res = layoutProperty_->UpdatePercentSensitive(percentHeight, percentWidth);
     if (res.first) {
         auto parent = GetAncestorNodeOfFrame();
         if (parent && parent->layoutAlgorithm_) {

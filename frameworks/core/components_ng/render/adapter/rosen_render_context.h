@@ -151,6 +151,8 @@ public:
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) override;
     void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
+    void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
+    void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
     void ResetBackBlurStyle() override;
@@ -257,7 +259,7 @@ public:
 
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnOpacityUpdate(double opacity) override;
-
+    void SetAlphaOffscreen(bool isOffScreen) override;
     void MarkContentChanged(bool isChanged) override;
     void MarkDrivenRender(bool flag) override;
     void MarkDrivenRenderItemIndex(int32_t index) override;
@@ -339,7 +341,13 @@ private:
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
 
+    void OnLightPositionUpdate(const TranslateOptions& position) override;
+    void OnLightIntensityUpdate(const float lightIntensity) override;
+    void OnLightIlluminatedUpdate(const uint32_t lightIlluminated) override;
+    void OnBloomUpdate(const float bloomIntensity) override;
+
     void OnUseEffectUpdate(bool useEffect) override;
+    void OnUseShadowBatchingUpdate(bool useShadowBatching) override;
     void OnFreezeUpdate(bool isFreezed) override;
     void OnRenderGroupUpdate(bool isRenderGroup) override;
     void OnSuggestedRenderGroupUpdate(bool isRenderGroup) override;

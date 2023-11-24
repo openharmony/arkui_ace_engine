@@ -86,7 +86,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             });
         return;
     }
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "NA");
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     pagePattern->TriggerPageTransition(
         transitionType, [weak = WeakPtr<FrameNode>(page), instanceId = Container::CurrentId()]() {
             ContainerScope scope(instanceId);

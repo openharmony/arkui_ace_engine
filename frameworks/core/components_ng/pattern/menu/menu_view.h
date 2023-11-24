@@ -39,7 +39,8 @@ public:
         const RefPtr<UINode>& previewCustomNode = nullptr);
 
     // create select's popup menu
-    static RefPtr<FrameNode> Create(const std::vector<SelectParam>& params, int32_t targetId);
+    static RefPtr<FrameNode> Create(
+        const std::vector<SelectParam>& params, int32_t targetId, const std::string& targetTag);
 
 private:
     static void UpdateMenuPaintProperty(

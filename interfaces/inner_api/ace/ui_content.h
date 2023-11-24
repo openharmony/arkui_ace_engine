@@ -95,6 +95,8 @@ public:
 
     // UI content life-cycles
     virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
+    virtual void Initialize(
+        OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) = 0;
     virtual void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) = 0;
 
     // UIExtensionAbility initialize for focusWindow ID
@@ -128,9 +130,20 @@ public:
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
     virtual void ProcessFormVisibleChange(bool isVisible) {};
 
+    // only vaild in ContainerModalPatternEnhance
+    virtual void UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;
+
     // Window color
     virtual uint32_t GetBackgroundColor() = 0;
     virtual void SetBackgroundColor(uint32_t color) = 0;
+
+    // Judge whether window need soft keyboard or not
+    virtual bool NeedSoftKeyboard()
+    {
+        return false;
+    }
+
+    virtual void SetOnWindowFocused(const std::function<void()>& callback) {};
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
 
@@ -251,6 +264,12 @@ public:
         return false;
     }
 #endif
+
+    /**
+     * @description: Set UIContent callback after layout finish.
+     * @param callback callback func.
+     */
+    virtual void SetFrameLayoutFinishCallback(std::function<void()>&& callback) {};
 };
 
 } // namespace OHOS::Ace

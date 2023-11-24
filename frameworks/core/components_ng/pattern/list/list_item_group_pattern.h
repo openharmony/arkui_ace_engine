@@ -33,6 +33,7 @@ struct ListItemGroupPaintInfo {
     int32_t lanes = 1;
     float spaceWidth = 0.0f;
     float laneGutter = 0.0f;
+    int32_t totalItemCount = 0;
 };
 
 class ACE_EXPORT ListItemGroupPattern : public Pattern {
@@ -137,6 +138,21 @@ public:
         return (itemTotalCount_ - 1);
     }
 
+    int32_t GetTotalItemCount() const
+    {
+        return itemTotalCount_;
+    }
+
+    bool IsDisplayStart() const
+    {
+        return itemDisplayStartIndex_ == 0;
+    }
+
+    int32_t IsDisplayEnd() const
+    {
+        return itemTotalCount_ == 0 || itemDisplayEndIndex_ == (itemTotalCount_ - 1);
+    }
+
     int32_t GetLanesInGroup() const
     {
         return lanes_;
@@ -145,6 +161,16 @@ public:
     V2::ListItemGroupStyle GetListItemGroupStyle()
     {
         return listItemGroupStyle_;
+    }
+
+    float GetHeaderMainSize() const
+    {
+        return headerMainSize_;
+    }
+
+    float GetFooterMainSize() const
+    {
+        return footerMainSize_;
     }
 
 private:
@@ -163,6 +189,8 @@ private:
     int32_t itemTotalCount_ = -1;
     int32_t itemDisplayEndIndex_ = -1;
     int32_t itemDisplayStartIndex_ = -1;
+    float_t headerMainSize_ = 0.0f;
+    float_t footerMainSize_ = 0.0f;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;

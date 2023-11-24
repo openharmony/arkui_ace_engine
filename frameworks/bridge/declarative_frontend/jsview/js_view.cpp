@@ -685,9 +685,9 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .nodeUpdateFunc = std::move(nodeUpdateFunc),
         .recycleCustomNodeFunc = recycleCustomNode,
         .setActiveFunc = std::move(setActiveFunc),
+        .onDumpInfoFunc = std::move(onDumpInfoFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout() ||
                               jsViewFunction_->HasMeasureSize() || jsViewFunction_->HasPlaceChildren(),
-        .onDumpInfoFunc = std::move(onDumpInfoFunc),
         .isStatic = IsStatic(),
         .jsViewName = GetJSViewName() };
 

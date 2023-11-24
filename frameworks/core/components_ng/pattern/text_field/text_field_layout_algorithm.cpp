@@ -91,7 +91,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
     CHECK_NULL_RETURN(pattern, std::nullopt);
 
     float contentWidth = 0.0f;
-    if (pattern->IsFocus()) {
+    if (pattern->HasFocus()) {
         auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2;
         paragraph_->Layout(
             contentConstraint.maxSize.Width() - static_cast<float>(safeBoundary) - PARAGRAPH_SAVE_BOUNDARY);
@@ -107,7 +107,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
     textRect_.SetSize(SizeF(GetVisualTextWidth(), paragraph_->GetHeight()));
 
     auto inlineIdealHieght = contentConstraint.maxSize.Height();
-    if (pattern->IsFocus() && paragraph_->GetLineCount() != 0) {
+    if (pattern->HasFocus() && paragraph_->GetLineCount() != 0) {
         pattern->SetSingleLineHeight(paragraph_->GetHeight() / paragraph_->GetLineCount());
         // The maximum height of the inline mode defaults to a maximum of three rows.
         inlineIdealHieght =
@@ -376,23 +376,17 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
-        bool isCustomFont = false;
         for (const auto& familyName : fontFamilies) {
-            bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
-            if (customFont) {
-                isCustomFont = true;
-            }
+            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
         }
         fontManager->AddVariationNodeNG(frameNode);
-        if (isCustomFont) {
-            auto pattern = frameNode->GetPattern<TextFieldPattern>();
-            CHECK_NULL_VOID(pattern);
-            pattern->SetIsCustomFont(true);
-            auto modifier = DynamicCast<TextFieldContentModifier>(pattern->GetContentModifier());
-            CHECK_NULL_VOID(modifier);
-            modifier->SetIsCustomFont(true);
-        }
     }
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsCustomFont(true);
+    auto modifier = DynamicCast<TextFieldContentModifier>(pattern->GetContentModifier());
+    CHECK_NULL_VOID(modifier);
+    modifier->SetIsCustomFont(true);
 }
 
 ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const

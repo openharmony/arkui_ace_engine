@@ -243,6 +243,7 @@ void RadioModifier::PaintRadio(
 
 void RadioModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const
 {
+    CHECK_NULL_VOID(showHoverEffect_);
     float outCircleRadius = contentSize.Width() / CALC_RADIUS;
     float centerX = outCircleRadius + offset.GetX();
     float centerY = outCircleRadius + offset.GetY();
