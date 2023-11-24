@@ -691,3 +691,22 @@ class ArkGridColColumnOption implements Equable {
 		    (this.lg === another.lg) && (this.xl === another.xl) && (this.xxl === another.xxl);
     }
 }
+class ArkPadding implements Equable {
+  top: string | number | undefined;
+  right: string | number | undefined;
+  bottom: string | number | undefined;
+  left: string | number | undefined;
+  constructor() {
+    this.top = undefined;
+    this.right = undefined;
+    this.bottom = undefined;
+    this.left = undefined;
+  }
+  isEqual(another: ArkPadding) {
+    return (this.top === another.top &&
+      this.right === another.right &&
+      this.bottom === another.bottom &&
+      this.left === another.left);
+  }
+}
+ 

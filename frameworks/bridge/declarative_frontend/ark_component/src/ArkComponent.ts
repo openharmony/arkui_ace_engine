@@ -11,6 +11,23 @@ function isResource(variable: any): variable is Resource {
     return (variable as Resource)?.bundleName!== undefined;
   }
 
+const SAFE_AREA_TYPE_NONE = 0;
+const SAFE_AREA_TYPE_SYSTEM = 1;
+const SAFE_AREA_TYPE_CUTOUT = 2;
+const SAFE_AREA_TYPE_KEYBOARD = 4;
+const SAFE_AREA_TYPE_ALL = 7;
+
+const SAFE_AREA_EDGE_NONE = 0;
+const SAFE_AREA_EDGE_TOP = 1;
+const SAFE_AREA_EDGE_BOTTOM = 2;
+const SAFE_AREA_EDGE_START = 4;
+const SAFE_AREA_EDGE_END = 8;
+const SAFE_AREA_EDGE_ALL = 15;
+
+const SAFE_AREA_TYPE_LIMIT = 3;
+const SAFE_AREA_EDGE_LIMIT = 4;
+const DIRECTION_RANGE = 3;
+
 type KNode = number | null
 
 interface Equable {
@@ -694,7 +711,27 @@ class FocusOnTouchModifier extends Modifier <boolean> {
         }
     }
 }
+class OffsetModifier extends Modifier<ArkPosition> {
+  static identity: Symbol = Symbol('offset');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetOffset(node);
+    } else {
+      GetUINativeModule().common.setOffset(node, this.value.x, this.value.y);
+    }
+  }
+}
 
+class MarkAnchorModifier extends Modifier<ArkPosition> {
+  static identity: Symbol = Symbol('markAnchor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetMarkAnchor(node);
+    } else {
+      GetUINativeModule().common.setMarkAnchor(node, this.value.x, this.value.y);
+    }
+  }
+}
 class DefaultFocusModifier extends Modifier<boolean>{
     static identity: Symbol = Symbol("defaultFocus");
     applyPeer(node: KNode, reset: boolean): void {
@@ -731,6 +768,42 @@ class TouchableModifier extends Modifier<boolean>{
     }
 }
 
+class MarginModifier extends Modifier<ArkPadding> {
+  static identity: Symbol = Symbol('margin');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetMargin(node);
+    } else {
+      GetUINativeModule().common.setMargin(node, this.value.top,
+        this.value.right, this.value.bottom, this.value.left);
+    }
+
+  }
+}
+
+class PaddingModifier extends Modifier<ArkPadding> {
+  static identity: Symbol = Symbol('padding');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetPadding(node);
+    } else {
+      GetUINativeModule().common.setPadding(node, this.value.top,
+        this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+}
+
+class VisibilityModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('visibility');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetVisibility(node);
+    } else {
+      GetUINativeModule().common.setVisibility(node, this.value!);
+    }
+  }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType) => typeof val === 'string'
@@ -742,6 +815,7 @@ const isUndefined = (val: basicType) => typeof val === 'undefined'
 const isObject = (val: basicType) => typeof val === 'object'
 const isFunction = (val: basicType) => typeof val === 'function'
 const isLengthType = (val: any) => typeof val === 'string' || typeof val === 'number'
+const lessThenFunction = (val1: number, val2: number) => (val1 - val2) < 0.001
 
 function CheckJSCallbackInfo(value: any, checklist: any[]) {
     var typeVerified = false;
@@ -899,13 +973,63 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         throw new Error("Method not implemented.");
     }
 
-    padding(value: Padding | Length): this {
-        throw new Error("Method not implemented.");
+  padding(value: Padding | Length): this {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value)) {
+        arkValue.top = <string | number>value;
+        arkValue.right = <string | number>value;
+        arkValue.bottom = <string | number>value;
+        arkValue.left = <string | number>value;
+      } else {
+        if ((<Padding>value).top && isLengthType((<Padding>value).top)) {
+          arkValue.top = <string | number>(<Padding>value).top;
+        }
+        if ((<Padding>value).right && isLengthType((<Padding>value).right)) {
+          arkValue.right = <string | number>(<Padding>value).right;
+        }
+        if ((<Padding>value).bottom && isLengthType((<Padding>value).bottom)) {
+          arkValue.bottom = <string | number>(<Padding>value).bottom;
+        }
+        if ((<Padding>value).left && isLengthType((<Padding>value).left)) {
+          arkValue.left = <string | number>(<Padding>value).left;
+        }
+      }
+      modifier(this._modifiers, PaddingModifier, arkValue);
+    } else {
+      modifier(this._modifiers, PaddingModifier, undefined);
     }
+    return this;
+  }
 
-    margin(value: Margin | Length): this {
-        throw new Error("Method not implemented.");
+  margin(value: Margin | Length): this {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (!isNaN(Number(value)) && isLengthType(value)) {
+        arkValue.top = <string | number>value;
+        arkValue.right = <string | number>value;
+        arkValue.bottom = <string | number>value;
+        arkValue.left = <string | number>value;
+      } else {
+        if ((<Padding>value).top && isLengthType((<Padding>value).top)) {
+          arkValue.top = <string | number>(<Padding>value).top;
+        }
+        if ((<Padding>value).right && isLengthType((<Padding>value).right)) {
+          arkValue.right = <string | number>(<Padding>value).right;
+        }
+        if ((<Padding>value).bottom && isLengthType((<Padding>value).bottom)) {
+          arkValue.bottom = <string | number>(<Padding>value).bottom;
+        }
+        if ((<Padding>value).left && isLengthType((<Padding>value).left)) {
+          arkValue.left = <string | number>(<Padding>value).left;
+        }
+      }
+      modifier(this._modifiers, MarginModifier, arkValue);
+    } else {
+      modifier(this._modifiers, MarginModifier, undefined);
     }
+    return this;
+  }
 
     background(builder: CustomBuilder, options?: { align?: Alignment }): this {
         throw new Error("Method not implemented.");
@@ -1560,9 +1684,14 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         throw new Error("Method not implemented.");
     }
 
-    visibility(value: Visibility): this {
-        throw new Error("Method not implemented.");
+  visibility(value: Visibility): this {
+    if (isNaN(value)) {
+      modifier(this._modifiers, VisibilityModifier, undefined);
+    } else {
+      modifier(this._modifiers, VisibilityModifier, value);
     }
+    return this;
+  }
 
     flexGrow(value: number): this {
         throw new Error("Method not implemented.");
@@ -1629,13 +1758,37 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         return this;
     }
 
-    markAnchor(value: Position): this {
-        throw new Error("Method not implemented.");
+  markAnchor(value: Position): this {
+    let arkValue = new ArkPosition();
+    if (!value || (!isLengthType(value.x) && !isLengthType(value.y))) {
+      modifier(this._modifiers, MarkAnchorModifier, undefined);
+      return this;
     }
+    if (value.x && isLengthType(value.x)) {
+      arkValue.x = value?.x;
+    }
+    if (value.y && isLengthType(value.y)) {
+      arkValue.y = value?.y;
+    }
+    modifier(this._modifiers, MarkAnchorModifier, arkValue);
+    return this;
+  }
 
-    offset(value: Position): this {
-        throw new Error("Method not implemented.");
+  offset(value: Position): this {
+    let arkValue = new ArkPosition();
+    if (!value || (!isLengthType(value.x) && !isLengthType(value.y))) {
+      modifier(this._modifiers, OffsetModifier, undefined);
+      return this;
     }
+    if (value.x && isLengthType(value.x)) {
+      arkValue.x = value?.x;
+    }
+    if (value.y && isLengthType(value.y)) {
+      arkValue.y = value?.y;
+    }
+    modifier(this._modifiers, OffsetModifier, arkValue);
+    return this;
+  }
 
     enabled(value: boolean): this {
         throw new Error("Method not implemented.");

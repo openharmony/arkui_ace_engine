@@ -18,6 +18,12 @@
 
 #include <cstdint>
 
+typedef void *NodeHandle;
+struct StringAndDouble {
+    double value;
+    const char *valueStr;
+};
+
 typedef void* NodeHandle;
 struct ArkUICommonModifierAPI {
     void (*SetBackgroundColor)(NodeHandle node, uint32_t color);
@@ -26,20 +32,20 @@ struct ArkUICommonModifierAPI {
     void (*ResetWidth)(NodeHandle node);
     void (*SetHeight)(NodeHandle node, double value, int unit);
     void (*ResetHeight)(NodeHandle node);
-    void (*SetBorderRadius)(NodeHandle node, const double* values, const int* units, int32_t length);
+    void (*SetBorderRadius)(NodeHandle node, const double *values, const int *units, int32_t length);
     void (*ResetBorderRadius)(NodeHandle node);
-    void (*SetBorderWidth)(NodeHandle node, const double* values, const int* units, int32_t length);
+    void (*SetBorderWidth)(NodeHandle node, const double *values, const int *units, int32_t length);
     void (*ResetBorderWidth)(NodeHandle node);
-    void (*SetTransform)(NodeHandle node, const float* matrix, int32_t length);
+    void (*SetTransform)(NodeHandle node, const float *matrix, int32_t length);
     void (*ResetTransform)(NodeHandle node);
-    void (*SetBorderColor)(NodeHandle node, const uint32_t& leftColorInt, const uint32_t& rightColorInt,
-        const uint32_t& topColorInt, const uint32_t& bottomColorInt);
+    void (*SetBorderColor)(NodeHandle node, const uint32_t &leftColorInt, const uint32_t &rightColorInt,
+        const uint32_t &topColorInt, const uint32_t &bottomColorInt);
     void (*ResetBorderColor)(NodeHandle node);
     void (*SetPosition)(NodeHandle node, double xValue, int xUnit, double yValue, int yUnit);
     void (*ResetPosition)(NodeHandle node);
-    void (*SetBorderStyle)(NodeHandle node, const int32_t* styles, int32_t length);
+    void (*SetBorderStyle)(NodeHandle node, const int32_t *styles, int32_t length);
     void (*ResetBorderStyle)(NodeHandle node);
-    void (*SetBackShadow)(NodeHandle node, const double* shadows, int32_t length);
+    void (*SetBackShadow)(NodeHandle node, const double *shadows, int32_t length);
     void (*ResetBackShadow)(NodeHandle node);
     void (*SetHitTestBehavior)(NodeHandle node, uint32_t value);
     void (*ResetHitTestBehavior)(NodeHandle node);
@@ -81,11 +87,11 @@ struct ArkUICommonModifierAPI {
     void (*SetForegroundBlurStyle)(
         NodeHandle node, int32_t blurStyle, int32_t colorMode, int32_t adaptiveColor, double scale);
     void (*ResetForegroundBlurStyle)(NodeHandle node);
-    void (*SetLinearGradientBlur)(
-        NodeHandle node, double blurRadius, const double* stops, int32_t stopsLength, int32_t directionValue);
+    void (*SetLinearGradientBlur)(NodeHandle node, double blurRadius, const double *stops, int32_t stopsLength,
+        int32_t directionValue);
     void (*ResetLinearGradientBlur)(NodeHandle node);
-    void (*SetBackgroundBlurStyle)(
-        NodeHandle node, int32_t blurStyle, int32_t colorMode, int32_t adaptiveColor, double scale);
+    void (*SetBackgroundBlurStyle)(NodeHandle node, int32_t blurStyle, int32_t colorMode, int32_t adaptiveColor,
+        double scale);
     void (*ResetBackgroundBlurStyle)(NodeHandle node);
     void (*SetBorder)(NodeHandle node, double* values, int32_t* units, uint32_t* colorAndStyle, int32_t size);
     void (*ResetBorder)(NodeHandle node);
@@ -132,8 +138,21 @@ struct ArkUICommonModifierAPI {
     void (*SetDefaultFocus)(NodeHandle node, bool defaultFocus);
     void (*ResetDefaultFocus)(NodeHandle node);
     void (*SetDisplayPriority)(NodeHandle node, double value);
-    void (*ResetDisplayPriority)(NodeHandle node);
+    void (*ResetDisplayPriority)(NodeHandle node);     
+    void (*SetOffset)(NodeHandle node, const double *number, const int8_t *unit);
+    void (*ResetOffset)(NodeHandle node);
+    void (*SetPadding)(NodeHandle node, const struct StringAndDouble *top, const struct StringAndDouble *right,
+        const struct StringAndDouble *bottom, const struct StringAndDouble *left);
+    void (*ResetPadding)(NodeHandle node);
+    void (*SetMargin)(NodeHandle node, const struct StringAndDouble *top, const struct StringAndDouble *right,
+        const struct StringAndDouble *bottom, const struct StringAndDouble *left);
+    void (*ResetMargin)(NodeHandle node);
+    void (*SetMarkAnchor)(NodeHandle node, double xValue, int32_t xUnit, double yValue, int32_t yUnit);
+    void (*ResetMarkAnchor)(NodeHandle node);
+    void (*SetVisibility)(NodeHandle node, int32_t value);
+    void (*ResetVisibility)(NodeHandle node);
 };
+
 struct ArkUITextModifierAPI {
     void (*SetFontWeight)(NodeHandle node, const char* weight);
     void (*ResetFontWeight)(NodeHandle node);
@@ -162,14 +181,14 @@ struct ArkUIButtonModifierAPI {
     void (*ResetButtonFontColor)(NodeHandle node);
     void (*SetButtonFontSize)(NodeHandle node, double fontSizeValue, int fontSizeUnit);
     void (*ResetButtonFontSize)(NodeHandle node);
-    void (*SetButtonFontWeight)(NodeHandle node, const char* fontWeight);
+    void (*SetButtonFontWeight)(NodeHandle node, const char *fontWeight);
     void (*ResetButtonFontWeight)(NodeHandle node);
     void (*SetButtonFontStyle)(NodeHandle node, int32_t fontStyle);
     void (*ResetButtonFontStyle)(NodeHandle node);
-    void (*SetButtonFontFamily)(NodeHandle node, const char* fontFamily);
+    void (*SetButtonFontFamily)(NodeHandle node, const char *fontFamily);
     void (*ResetButtonFontFamily)(NodeHandle node);
-    void (*SetButtonLabelStyle)(NodeHandle node, const char* fontFamily, const double* valueArray,
-        const double* dimensionValueArray, const int* dimensionUnitArray);
+    void (*SetButtonLabelStyle)(NodeHandle node, const char *fontFamily, const double *valueArray,
+        const double *dimensionValueArray, const int *dimensionUnitArray);
     void (*ResetButtonLabelStyle)(NodeHandle node);
 };
 
