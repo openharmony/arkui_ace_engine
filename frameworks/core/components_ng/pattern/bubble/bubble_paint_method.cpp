@@ -74,6 +74,7 @@ void BubblePaintMethod::PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper)
     canvas.Save();
     RSBrush brush;
     brush.SetColor(maskColor.GetValue());
+    brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     canvas.DrawRect(RSRect(0.0, 0.0, layoutSize.Width(), layoutSize.Height()));
     canvas.DetachBrush();
@@ -237,7 +238,6 @@ void BubblePaintMethod::PaintDefaultBubble(RSCanvas& canvas)
     PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
     canvas.Restore();
     canvas.DrawRoundRect(rect);
-    canvas.ClipRoundRect(rect, RSClipOp::INTERSECT);
 }
 
 RSRoundRect BubblePaintMethod::MakeRRect()
@@ -264,7 +264,6 @@ void BubblePaintMethod::PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* pai
     canvas.ClipPath(path_, RSClipOp::DIFFERENCE, true);
     PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
     canvas.Restore();
-    canvas.ClipPath(path_, RSClipOp::INTERSECT, true);
     canvas.DrawPath(path_);
 }
 
