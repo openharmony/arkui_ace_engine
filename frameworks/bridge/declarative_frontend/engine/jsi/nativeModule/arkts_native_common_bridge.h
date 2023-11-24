@@ -125,6 +125,8 @@ public:
     static ArkUINativeModuleValue ResetTouchable(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDefaultFocus(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetDefaultFocus(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetDisplayPriority(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetDisplayPriority(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 
