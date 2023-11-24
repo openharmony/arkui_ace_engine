@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
@@ -105,10 +106,18 @@ public:
 
     bool GetBackButtonState();
 
+    RefPtr<UINode> GetNavigationNode()
+    {
+        return navigationNode_.Upgrade();
+    }
+
+    void OnAttachToMainTree() override;
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
     WeakPtr<UINode> navDestinationNode_;
+    WeakPtr<UINode> navigationNode_;
     bool isOnShow_ = false;
     void OnAttachToFrameNode() override;
 };

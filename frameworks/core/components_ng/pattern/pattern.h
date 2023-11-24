@@ -379,6 +379,8 @@ public:
     virtual void OnRecycle() {}
     virtual void OnReuse() {}
 
+    virtual void OnAttachToMainTree() {}
+
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
     virtual void OnAreaChangedInner() {}
