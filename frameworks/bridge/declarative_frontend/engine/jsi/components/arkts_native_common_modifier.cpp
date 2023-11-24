@@ -505,10 +505,10 @@ void SetBorderStyle(NodeHandle node, const int32_t *styles, int32_t length)
     }
     if (length == NUM_4) {
         NG::BorderStyleProperty borderStyles;
-        borderStyles.styleLeft = ConvertBorderStyle(styles[NUM_0]);
+        borderStyles.styleLeft = ConvertBorderStyle(styles[NUM_3]);
         borderStyles.styleRight = ConvertBorderStyle(styles[NUM_1]);
-        borderStyles.styleTop = ConvertBorderStyle(styles[NUM_2]);
-        borderStyles.styleBottom = ConvertBorderStyle(styles[NUM_3]);
+        borderStyles.styleTop = ConvertBorderStyle(styles[NUM_0]);
+        borderStyles.styleBottom = ConvertBorderStyle(styles[NUM_2]);
         borderStyles.multiValued = true;
         ViewAbstract::SetBorderStyle(frameNode, borderStyles);
     }
@@ -532,6 +532,11 @@ void SetBackShadow(NodeHandle node, const double *shadows, int32_t length)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (length == NUM_1) {
+        auto shadowStyle = static_cast<ShadowStyle>(shadows[NUM_0]);
+        auto shadow = Shadow::CreateShadow(shadowStyle);
+        ViewAbstract::SetBackShadow(frameNode, shadow);
+    }
     if (length != NUM_7) {
         return;
     }

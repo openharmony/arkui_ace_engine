@@ -43,6 +43,10 @@ class Modifier<T extends number | string | boolean | Equable | Resource> {
 
     applyStage(node: KNode): boolean {
         if (this.stageValue === this.value) {
+            if(this.value === undefined)
+            {                
+                this.applyPeer(node, true);                
+            }
             delete this.stageValue;
             return;
         }

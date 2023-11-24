@@ -27,7 +27,6 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -54,16 +53,7 @@ constexpr int SIZE_OF_EIGHT = 8;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
 
-uint32_t ColorAlphaAdapt(uint32_t origin)
-{
-    uint32_t result = origin;
-    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
-        result = origin | COLOR_ALPHA_VALUE;
-    }
-    return result;
-}
-
-bool ParseJsDimensionVp(const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension &result)
+bool ParseJsDimensionVp(const EcmaVM *vm, const Local<JSValueRef>& value, CalcDimension& result)
 {
     if (value->IsNumber()) {
         result = CalcDimension(value->ToNumber(vm)->Value(), DimensionUnit::VP);
@@ -80,7 +70,7 @@ bool ParseJsDimensionVp(const EcmaVM *vm, const Local<JSValueRef> &value, CalcDi
 bool ParseJsColor(const EcmaVM *vm, const Local<JSValueRef> &value, Color &result)
 {
     if (value->IsNumber()) {
-        result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
+        result = Color(value->Uint32Value(vm));
         return true;
     }
     if (value->IsString()) {
@@ -872,12 +862,7 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
     auto nativeNode = firstArg->ToNativePointer(vm)->Value();
     int32_t shadowStyle = 0;
     if (ParseJsInteger(vm, styleArg, shadowStyle)) {
-        auto style = static_cast<ShadowStyle>(shadowStyle);
-        auto shadow = Shadow::CreateShadow(style);
-        double shadows[] = { shadow.GetBlurRadius(), shadow.GetSpreadRadius(), shadow.GetOffset().GetX(),
-                             shadow.GetOffset().GetY(), static_cast<double>(shadow.GetShadowType()),
-                             static_cast<double>(shadow.GetColor().GetValue()),
-                             static_cast<double>(shadow.GetIsFilled()) };
+        double shadows[] = { shadowStyle };
         GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackShadow(nativeNode, shadows,
             (sizeof(shadows) / sizeof(shadows[NUM_0])));
         return panda::JSValueRef::Undefined(vm);
