@@ -176,9 +176,8 @@ void ContainerModelTestNg::Mouse(Offset moveOffset)
 
 void ContainerModelTestNg::ClickBtn(int32_t index)
 {
-    auto column = frameNode_->GetChildAtIndex(0);
-    auto container_modal_title = column->GetChildAtIndex(0);
-    auto btn = AceType::DynamicCast<FrameNode>(container_modal_title->GetChildAtIndex(index));
+    auto container_modal_control_buttons = frameNode_->GetChildAtIndex(2);
+    auto btn = AceType::DynamicCast<FrameNode>(container_modal_control_buttons->GetChildAtIndex(index));
     auto eventHub = btn->GetOrCreateGestureEventHub();
     eventHub->clickEventActuator_ =
         AceType::MakeRefPtr<ClickEventActuator>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
@@ -192,9 +191,8 @@ void ContainerModelTestNg::ClickBtn(int32_t index)
 
 OnHoverEventFunc ContainerModelTestNg::GetHovertEvent(int32_t index)
 {
-    auto column = frameNode_->GetChildAtIndex(0);
-    auto container_modal_title = column->GetChildAtIndex(0);
-    auto btn = AceType::DynamicCast<FrameNode>(container_modal_title->GetChildAtIndex(index));
+    auto container_modal_control_buttons = frameNode_->GetChildAtIndex(2);
+    auto btn = AceType::DynamicCast<FrameNode>(container_modal_control_buttons->GetChildAtIndex(index));
     auto inputHub = btn->GetOrCreateInputEventHub();
     auto inputEvents = inputHub->hoverEventActuator_->inputEvents_;
     return inputEvents.front()->GetOnHoverEventFunc();
@@ -202,9 +200,8 @@ OnHoverEventFunc ContainerModelTestNg::GetHovertEvent(int32_t index)
 
 OnMouseEventFunc ContainerModelTestNg::GetMouseEvent(int32_t index)
 {
-    auto column = frameNode_->GetChildAtIndex(0);
-    auto container_modal_title = column->GetChildAtIndex(0);
-    auto btn = AceType::DynamicCast<FrameNode>(container_modal_title->GetChildAtIndex(index));
+    auto container_modal_control_buttons = frameNode_->GetChildAtIndex(2);
+    auto btn = AceType::DynamicCast<FrameNode>(container_modal_control_buttons->GetChildAtIndex(index));
     auto inputHub = btn->GetOrCreateInputEventHub();
     auto inputEvents = inputHub->mouseEventActuator_->inputEvents_;
     return inputEvents.front()->GetOnMouseEventFunc();
@@ -221,33 +218,38 @@ HWTEST_F(ContainerModelTestNg, Test001, TestSize.Level1)
      * The structure of container_modal is designed as follows :
      * |--container_modal(stack)
      *   |--column
-     *      |--container_modal_title(row)
-     *          |--icon(image), label(text), [leftSplit, maxRecover, minimize, close](button)
+     *      |--container_modal_custom_title(row)
+     *          |--custom_node(js)
      *      |--stack
      *          |--container_modal_content(stage)
      *              |--page
      *          |--dialog(when show)
-     *   |--container_modal_floating_title(row)
-     *          |--icon(image), label(text), [leftSplit, maxRecover, minimize, close](button)
+     *   |--container_modal_custom_floating_title(row)
+     *          |--custom_node(js)
+     *   |--container_modal_control_buttons(row)
+     *          |--[leftSplit, maxRecover, minimize, close](button)
      */
     CreateContainerModal();
 
     EXPECT_EQ(frameNode_->GetTag(), "ContainerModal");
-    EXPECT_EQ(frameNode_->GetChildren().size(), 2);
+    EXPECT_EQ(frameNode_->GetChildren().size(), 3);
     auto column = frameNode_->GetChildAtIndex(0);
     EXPECT_EQ(column->GetTag(), V2::COLUMN_ETS_TAG);
     EXPECT_EQ(column->GetChildren().size(), 2);
-    auto container_modal_title = column->GetChildAtIndex(0);
-    EXPECT_EQ(container_modal_title->GetTag(), V2::ROW_ETS_TAG);
-    EXPECT_EQ(container_modal_title->GetChildren().size(), 6);
+    auto container_modal_custom_title = column->GetChildAtIndex(0);
+    EXPECT_EQ(container_modal_custom_title->GetTag(), V2::ROW_ETS_TAG);
+    EXPECT_EQ(container_modal_custom_title->GetChildren().size(), 1);
     auto stack = column->GetChildAtIndex(1);
     EXPECT_EQ(stack->GetTag(), V2::STACK_ETS_TAG);
     EXPECT_EQ(stack->GetChildren().size(), 1);
     auto container_modal_content = stack->GetChildAtIndex(0);
     EXPECT_EQ(container_modal_content->GetTag(), "content");
-    auto container_modal_floating_title = frameNode_->GetChildAtIndex(1);
-    EXPECT_EQ(container_modal_floating_title->GetTag(), V2::ROW_ETS_TAG);
-    EXPECT_EQ(container_modal_title->GetChildren().size(), 6);
+    auto container_modal_custom_floating_title = frameNode_->GetChildAtIndex(1);
+    EXPECT_EQ(container_modal_custom_floating_title->GetTag(), V2::ROW_ETS_TAG);
+    EXPECT_EQ(container_modal_custom_floating_title->GetChildren().size(), 1);
+    auto container_modal_control_buttons = frameNode_->GetChildAtIndex(2);
+    EXPECT_EQ(container_modal_control_buttons->GetTag(), V2::ROW_ETS_TAG);
+    EXPECT_EQ(container_modal_control_buttons->GetChildren().size(), 4);
 }
 
 /**
@@ -288,16 +290,11 @@ HWTEST_F(ContainerModelTestNg, Test002, TestSize.Level1)
     auto pipeline = MockPipelineBase::GetCurrent();
     pipeline->windowManager_ = windowManager;
     CreateContainerModal();
-    auto column = frameNode_->GetChildAtIndex(0);
-    auto container_modal_title = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
-    auto eventHub = container_modal_title->GetOrCreateGestureEventHub();
-    GestureEvent info;
-    auto panEvents = eventHub->panEventActuator_->panEvents_;
-    panEvents.front()->GetActionStartEventFunc()(info);
+    pattern_->ShowTitle(true, true);
+    ClickBtn(0);
+    ClickBtn(1);
     ClickBtn(2);
     ClickBtn(3);
-    ClickBtn(4);
-    ClickBtn(5);
     EXPECT_FALSE(isWindowStartMove);
     EXPECT_FALSE(iswindowSplitPrimary);
     EXPECT_FALSE(iswindowRecover);
@@ -313,12 +310,13 @@ HWTEST_F(ContainerModelTestNg, Test002, TestSize.Level1)
     windowManager->SetCurrentWindowMaximizeMode(maximizeMode);
     windowMode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
     CreateContainerModal();
-    column = frameNode_->GetChildAtIndex(0);
-    container_modal_title = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
-    eventHub = container_modal_title->GetOrCreateGestureEventHub();
-    panEvents = eventHub->panEventActuator_->panEvents_;
+    pattern_->ShowTitle(true, true);
+    auto container_modal_control_buttons = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(2));
+    auto eventHub = container_modal_control_buttons->GetOrCreateGestureEventHub();
+    auto panEvents = eventHub->panEventActuator_->panEvents_;
+    GestureEvent info;
     panEvents.front()->GetActionStartEventFunc()(info);
-    ClickBtn(3);
+    ClickBtn(1);
     EXPECT_TRUE(isWindowStartMove);
     EXPECT_FALSE(windowMaximize);
 }
@@ -331,17 +329,17 @@ HWTEST_F(ContainerModelTestNg, Test002, TestSize.Level1)
 HWTEST_F(ContainerModelTestNg, Test003, TestSize.Level1)
 {
     CreateContainerModal();
-    GetHovertEvent(2)(true);
+    GetHovertEvent(0)(true);
     MouseInfo mouseInfo;
     mouseInfo.SetAction(MouseAction::PRESS);
     mouseInfo.SetLocalLocation(Offset(0, 0));
-    GetMouseEvent(2)(mouseInfo);
+    GetMouseEvent(0)(mouseInfo);
     mouseInfo.SetAction(MouseAction::MOVE);
-    GetMouseEvent(2)(mouseInfo);
+    GetMouseEvent(0)(mouseInfo);
 
-    GetHovertEvent(2)(false);
+    GetHovertEvent(0)(false);
     mouseInfo.SetAction(MouseAction::MOVE);
-    GetMouseEvent(2)(mouseInfo);
+    GetMouseEvent(0)(mouseInfo);
     SUCCEED();
 }
 
@@ -359,7 +357,7 @@ HWTEST_F(ContainerModelTestNg, Test004, TestSize.Level1)
      * @tc.expected: Do nothing
      */
     pattern_->ShowTitle(true, false);
-    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildren().back());
+    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(1));
     auto floatingLayoutProperty = floatingTitleNode->GetLayoutProperty();
     Touch(Offset::Zero(), Offset::Zero(), Offset::Zero());
     EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::GONE);

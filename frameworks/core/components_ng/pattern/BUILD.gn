@@ -70,6 +70,7 @@ build_component_ng("pattern_ng") {
     "common_view/common_view_model_ng.cpp",
     "container_modal/container_modal_accessibility_property.cpp",
     "container_modal/container_modal_pattern.cpp",
+    "container_modal/container_modal_utils.cpp",
     "container_modal/container_modal_view.cpp",
     "container_modal/enhance/container_modal_pattern_enhance.cpp",
     "container_modal/enhance/container_modal_view_enhance.cpp",
@@ -82,6 +83,7 @@ build_component_ng("pattern_ng") {
     "custom/custom_node_base.cpp",
     "custom/custom_node_layout_algorithm.cpp",
     "custom/custom_node_pattern.cpp",
+    "custom/custom_title_node.cpp",
     "custom_paint/canvas_model_ng.cpp",
     "custom_paint/canvas_paint_method.cpp",
     "custom_paint/custom_paint_layout_algorithm.cpp",
@@ -482,6 +484,8 @@ build_component_ng("pattern_ng") {
     "waterflow/water_flow_pattern.cpp",
   ]
 
+  deps = [ "container_modal/interfaces:customtitle" ]
+
   if (defined(vendor_configs.ace_engine_advanced)) {
     sources += vendor_configs.ace_engine_advanced_pattern
   }
@@ -489,6 +493,6 @@ build_component_ng("pattern_ng") {
   if (is_ohos_standard_system) {
     external_deps = [ "graphic_2d:librender_service_client" ]
   } else if (is_arkui_x) {
-    deps = [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
+    deps += [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
   }
 }

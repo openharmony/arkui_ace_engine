@@ -393,6 +393,8 @@ public:
         return changeTitleStyleEnabled_;
     }
 
+    static std::string GetCustomTitleFilePath();
+
     static bool GetFlutterDecouplingEnabled()
     {
         return flutterDecouplingEnabled_;

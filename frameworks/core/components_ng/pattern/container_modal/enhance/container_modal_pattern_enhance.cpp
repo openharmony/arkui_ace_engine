@@ -14,35 +14,32 @@
  */
 
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
+
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/common/container.h"
+
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr int32_t TITLE_LABEL_INDEX = 1;
-    constexpr int32_t MAX_RECOVER_BUTTON_INDEX = 3;
-    constexpr int32_t MINIMIZE_BUTTON_INDEX = 4;
-    constexpr int32_t CLOSE_BUTTON_INDEX = 5;
-    constexpr double UNFOCUS_ALPHA = 0.4;
-    constexpr double FOCUS_ALPHA = 1.0;
-    constexpr int32_t TITLE_POPUP_DURATION = 200;
+constexpr int32_t MAX_RECOVER_BUTTON_INDEX = 0;
+constexpr int32_t MINIMIZE_BUTTON_INDEX = 1;
+constexpr int32_t CLOSE_BUTTON_INDEX = 2;
+constexpr double UNFOCUS_ALPHA = 0.4;
+constexpr double FOCUS_ALPHA = 1.0;
+constexpr int32_t TITLE_POPUP_DURATION = 200;
 } // namespace
 
 RefPtr<UINode> ContainerModalPatternEnhance::GetTitleItemByIndex(
-    const RefPtr<FrameNode>& titleNode, int32_t originIndex)
+    const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
 {
-    if (originIndex > TITLE_LABEL_INDEX) {
-        return titleNode->GetChildAtIndex(originIndex - 1);
-    } else {
-        return titleNode->GetChildAtIndex(originIndex);
-    }
+    return controlButtonsNode->GetChildAtIndex(originIndex);
 }
 
 void ContainerModalPatternEnhance::OnWindowFocused()
@@ -69,37 +66,51 @@ void ContainerModalPatternEnhance::OnWindowForceUnfocused()
     }
 }
 
-void ContainerModalPatternEnhance::ChangeTitle(const RefPtr<FrameNode>& titleNode, bool isFocus)
+void ContainerModalPatternEnhance::ChangeCustomTitle(bool isFocus)
 {
-    CHECK_NULL_VOID(titleNode);
-    // update title label
-    auto titleLabel = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, TITLE_LABEL_INDEX));
-    auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateTextColor(isFocus ? TITLE_TEXT_COLOR : TITLE_TEXT_COLOR_LOST_FOCUS);
-    titleLabel->MarkModifyDone();
-    titleLabel->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    // update custom title label
+    auto containerNode = GetHost();
+    CHECK_NULL_VOID(containerNode);
+    auto columnNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
+    CHECK_NULL_VOID(columnNode);
+    auto rowNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+    CHECK_NULL_VOID(rowNode);
+    auto customTitleNode = AceType::DynamicCast<CustomTitleNode>(rowNode->GetChildren().front());
+    CHECK_NULL_VOID(customTitleNode);
+    isFocus ? customTitleNode->FireOnWindowFocusedCallback() : customTitleNode->FireOnWindowUnfocusedCallback();
+}
+
+void ContainerModalPatternEnhance::ChangeControlButtons(bool isFocus)
+{
+    auto containerNode = GetHost();
+    CHECK_NULL_VOID(containerNode);
+    auto controlButtonsNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
+    CHECK_NULL_VOID(controlButtonsNode);
 
     // update maximize button
-    auto maximizeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, MAX_RECOVER_BUTTON_INDEX));
+    auto maximizeButton =
+        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
     auto pipeline = PipelineContext::GetCurrentContext();
     auto windowManager = pipeline->GetWindowManager();
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
-    InternalResource::ResourceId maxId = mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ?
-        InternalResource::ResourceId::IC_WINDOW_RESTORES : InternalResource::ResourceId::IC_WINDOW_MAX;
-
+    InternalResource::ResourceId maxId =
+        (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN)
+            ? InternalResource::ResourceId::IC_WINDOW_RESTORES
+            : InternalResource::ResourceId::IC_WINDOW_MAX;
     ChangeTitleButtonIcon(maximizeButton, maxId, isFocus);
+
     // update minimize button
-    auto minimizeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, MINIMIZE_BUTTON_INDEX));
+    auto minimizeButton =
+        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
     ChangeTitleButtonIcon(minimizeButton, InternalResource::ResourceId::IC_WINDOW_MIN, isFocus);
 
     // update close button
-    auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, CLOSE_BUTTON_INDEX));
+    auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
     ChangeTitleButtonIcon(closeButton, InternalResource::ResourceId::IC_WINDOW_CLOSE, isFocus);
 }
 
-void ContainerModalPatternEnhance::ChangeFloatingTitle(const RefPtr<FrameNode>& floatingNode, bool isFocus)
+void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
 {
-    CHECK_NULL_VOID(floatingNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
@@ -110,27 +121,15 @@ void ContainerModalPatternEnhance::ChangeFloatingTitle(const RefPtr<FrameNode>& 
         windowManager->SetCurrentWindowMaximizeMode(MaximizeMode::MODE_RECOVER);
     }
 
-    // update title label
-    auto titleLabel = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingNode, TITLE_LABEL_INDEX));
-    auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateTextColor(isFocus ? TITLE_TEXT_COLOR : TITLE_TEXT_COLOR_LOST_FOCUS);
-    titleLabel->MarkModifyDone();
-    titleLabel->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-
-    // update maxRecover button
-    auto maxRecoverIcon = windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN
-                                     ? InternalResource::ResourceId::IC_WINDOW_RESTORES
-                                     : InternalResource::ResourceId::IC_WINDOW_MAX;
-    auto maxRecover = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingNode, MAX_RECOVER_BUTTON_INDEX));
-    ChangeTitleButtonIcon(maxRecover, maxRecoverIcon, isFocus);
-
-    // update minimize button
-    auto minimizeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingNode, MINIMIZE_BUTTON_INDEX));
-    ChangeTitleButtonIcon(minimizeButton, InternalResource::ResourceId::IC_WINDOW_MIN, isFocus);
-
-    // update close button
-    auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingNode, CLOSE_BUTTON_INDEX));
-    ChangeTitleButtonIcon(closeButton, InternalResource::ResourceId::IC_WINDOW_CLOSE, isFocus);
+    // update floating custom title label
+    auto containerNode = GetHost();
+    CHECK_NULL_VOID(containerNode);
+    auto floatingNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildAtIndex(1));
+    CHECK_NULL_VOID(floatingNode);
+    auto customFloatingTitleNode = AceType::DynamicCast<CustomTitleNode>(floatingNode->GetChildren().front());
+    CHECK_NULL_VOID(customFloatingTitleNode);
+    isFocus ? customFloatingTitleNode->FireOnWindowFocusedCallback()
+            : customFloatingTitleNode->FireOnWindowUnfocusedCallback();
 }
 
 void ContainerModalPatternEnhance::ChangeTitleButtonIcon(
@@ -144,40 +143,28 @@ void ContainerModalPatternEnhance::ChangeTitleButtonIcon(
 
 void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
 {
-    LOGD("hideBtn hideSplit:%{public}d hideMaximize:%{public}d hideMinimize:%{public}d ", hideSplit,
-        hideMaximize, hideMinimize);
+    LOGD("hideBtn hideSplit:%{public}d hideMaximize:%{public}d hideMinimize:%{public}d ", hideSplit, hideMaximize,
+        hideMinimize);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front()->GetChildren().front());
-    CHECK_NULL_VOID(titleNode);
-    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());
-    CHECK_NULL_VOID(floatingTitleNode);
+    auto controlButtonsNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());
+    CHECK_NULL_VOID(controlButtonsNode);
     ContainerModalViewEnhance::SetEnableSplit(!hideSplit);
 
     if (hideMaximize) {
-        auto maximizeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, MAX_RECOVER_BUTTON_INDEX));
+        auto maximizeBtn =
+            AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
         CHECK_NULL_VOID(maximizeBtn);
         maximizeBtn->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
         maximizeBtn->MarkDirtyNode();
-
-        auto floatingMaximizeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingTitleNode,
-            MAX_RECOVER_BUTTON_INDEX));
-        CHECK_NULL_VOID(floatingMaximizeBtn);
-        floatingMaximizeBtn->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-        floatingMaximizeBtn->MarkDirtyNode();
     }
-    
+
     if (hideMinimize) {
-        auto minimizeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, MINIMIZE_BUTTON_INDEX));
+        auto minimizeBtn =
+            AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
         CHECK_NULL_VOID(minimizeBtn);
         minimizeBtn->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
         minimizeBtn->MarkDirtyNode();
-
-        auto floatingMinimizeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingTitleNode,
-            MINIMIZE_BUTTON_INDEX));
-        CHECK_NULL_VOID(floatingMinimizeBtn);
-        floatingMinimizeBtn->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-        floatingMinimizeBtn->MarkDirtyNode();
     }
 }
 
@@ -185,8 +172,10 @@ bool ContainerModalPatternEnhance::CanHideFloatingTitle()
 {
     auto containerNode = GetHost();
     CHECK_NULL_RETURN(containerNode, true);
-    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
-    auto maximizeBtn = GetTitleItemByIndex(floatingTitleNode, MAX_RECOVER_BUTTON_INDEX);
+    auto controlButtonsNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
+    CHECK_NULL_RETURN(controlButtonsNode, true);
+    auto maximizeBtn = GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX);
+    CHECK_NULL_RETURN(maximizeBtn, true);
     auto subwindowManager = SubwindowManager::GetInstance();
     CHECK_NULL_RETURN(subwindowManager, true);
     auto subwindow = subwindowManager->GetSubwindow(Container::CurrentId());
@@ -205,12 +194,19 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
 {
     auto containerNode = GetHost();
     CHECK_NULL_VOID(containerNode);
-    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
+    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildAtIndex(1));
     CHECK_NULL_VOID(floatingTitleNode);
     auto floatingLayoutProperty = floatingTitleNode->GetLayoutProperty();
     CHECK_NULL_VOID(floatingLayoutProperty);
-    auto context = floatingTitleNode->GetRenderContext();
-    CHECK_NULL_VOID(context);
+    auto floatingContext = floatingTitleNode->GetRenderContext();
+    CHECK_NULL_VOID(floatingContext);
+
+    auto controlButtonsNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
+    CHECK_NULL_VOID(controlButtonsNode);
+    auto controlButtonsLayoutProperty = controlButtonsNode->GetLayoutProperty();
+    CHECK_NULL_VOID(controlButtonsLayoutProperty);
+    auto buttonsContext = controlButtonsNode->GetRenderContext();
+    CHECK_NULL_VOID(buttonsContext);
 
     auto titlePopupDistance = CONTAINER_TITLE_HEIGHT.ConvertToPx();
     AnimationOption option;
@@ -218,27 +214,31 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
     option.SetCurve(Curves::EASE_IN_OUT);
 
     if (isShow && this->CanShowFloatingTitle()) {
-        context->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
+        floatingContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
         floatingLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        AnimationUtils::Animate(option, [context, height]() {
-            context->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
+        AnimationUtils::Animate(option, [floatingContext, height]() {
+            floatingContext->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
+        });
+        buttonsContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
+        floatingLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        AnimationUtils::Animate(option, [buttonsContext, height]() {
+            buttonsContext->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
         });
     }
 
     if (!isShow && this->CanHideFloatingTitle()) {
         AnimationUtils::Animate(
             option,
-            [context, titlePopupDistance]() {
-                context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
+            [floatingContext, buttonsContext, titlePopupDistance]() {
+                floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
+                buttonsContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
             },
             [floatingLayoutProperty, id = Container::CurrentId()]() {
                 ContainerScope scope(id);
                 auto taskExecutor = Container::CurrentTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
                 taskExecutor->PostTask(
-                    [floatingLayoutProperty]() {
-                        floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
-                    },
+                    [floatingLayoutProperty]() { floatingLayoutProperty->UpdateVisibility(VisibleType::GONE); },
                     TaskExecutor::TaskType::UI);
             });
     }

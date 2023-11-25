@@ -22,7 +22,7 @@
 #include "base/log/ace_trace.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/custom/custom_title_node.h"
 
 using namespace testing;
 using namespace testing::ext;

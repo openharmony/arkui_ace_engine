@@ -43,6 +43,7 @@ constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
+constexpr char CUSTOM_TITLE_KEY[] = "persist.sys.arkui.customtitle";
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int DEFAULT_THRESHOLD_JANK = 15;
@@ -480,5 +481,10 @@ bool SystemProperties::GetResourceDecoupling()
 int32_t SystemProperties::GetJankFrameThreshold()
 {
     return system::GetIntParameter<int>("persist.sys.arkui.perf.threshold", DEFAULT_THRESHOLD_JANK);
+}
+
+std::string SystemProperties::GetCustomTitleFilePath()
+{
+    return system::GetParameter(CUSTOM_TITLE_KEY, "");
 }
 } // namespace OHOS::Ace

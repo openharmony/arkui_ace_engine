@@ -229,4 +229,9 @@ int32_t SystemProperties::GetJankFrameThreshold()
 {
     return 0;
 }
+
+std::string SystemProperties::GetCustomTitleFilePath()
+{
+    return UNDEFINED_PARAM;
+}
 } // namespace OHOS::Ace
