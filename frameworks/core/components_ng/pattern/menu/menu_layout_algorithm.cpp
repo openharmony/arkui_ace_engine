@@ -451,7 +451,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu());
+        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
     }
     Initialize(layoutWrapper);
 
@@ -1200,8 +1200,13 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto menuOriginOffset = menuPosition - (previewOffset_ - previewOriginOffset_) +
                                 FixMenuOriginOffset(beforeAnimationScale, afterAnimationScale);
         menuPattern->SetOriginOffset(menuOriginOffset);
-        auto menuEndOffset =
-            menuPosition - (previewOffset_ - previewOriginOffset_) + FixMenuOriginOffset(1.0f, afterAnimationScale);
+        auto previewScale = 1.0f;
+        if (menuPattern->GetPreviewMode() == MenuPreviewMode::IMAGE &&
+            !NearEqual(menuPattern->GetTargetSize().Width(), previewSize_.Width())) {
+            previewScale = menuPattern->GetTargetSize().Width() / previewSize_.Width();
+        }
+        auto menuEndOffset = menuPosition -
+            (previewOffset_ - previewOriginOffset_) + FixMenuOriginOffset(previewScale, afterAnimationScale);
         menuPattern->SetEndOffset(menuEndOffset);
         menuPattern->SetHasLaid(true);
     }
@@ -1620,13 +1625,16 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
 
-void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu)
+void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu,
+    const RefPtr<MenuPattern>& menuPattern)
 {
+    CHECK_NULL_VOID(menuPattern);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
     auto geometryNode = targetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     targetSize_ = geometryNode->GetFrameSize();
+    menuPattern->SetTargetSize(targetSize_);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
 
