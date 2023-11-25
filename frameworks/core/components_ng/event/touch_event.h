@@ -98,6 +98,7 @@ public:
 
 private:
     bool TriggerTouchCallBack(const TouchEvent& changedPoint);
+    bool ShouldResponse() override;
 
     std::list<RefPtr<TouchEventImpl>> touchEvents_;
     RefPtr<TouchEventImpl> userCallback_;

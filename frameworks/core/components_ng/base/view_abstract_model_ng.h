@@ -801,6 +801,11 @@ public:
         ViewAbstract::SetTouchable(touchable);
     }
 
+    void SetMonopolizeEvents(bool monopolizeEvents) override
+    {
+        ViewAbstract::SetMonopolizeEvents(monopolizeEvents);
+    }
+
     void SetFocusable(bool focusable) override
     {
         ViewAbstract::SetFocusable(focusable);

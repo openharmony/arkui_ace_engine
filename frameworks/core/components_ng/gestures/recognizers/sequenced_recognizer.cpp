@@ -42,7 +42,7 @@ void SequencedRecognizer::OnAccepted()
     if (iter != recognizers_.end()) {
         auto activeRecognizer = *iter;
         if (activeRecognizer) {
-            activeRecognizer->OnAccepted();
+            activeRecognizer->AboutToAccept();
             UpdateCurrentIndex();
         }
     }
@@ -77,7 +77,7 @@ void SequencedRecognizer::OnPending()
         auto activeRecognizer = *iter;
         CHECK_NULL_VOID(activeRecognizer);
         if (activeRecognizer->GetGestureDisposal() == GestureDisposal::ACCEPT) {
-            activeRecognizer->OnAccepted();
+            activeRecognizer->AboutToAccept();
             UpdateCurrentIndex();
         }
         if (activeRecognizer->GetGestureDisposal() == GestureDisposal::PENDING) {
@@ -163,7 +163,7 @@ void SequencedRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
         } else {
             if (refereeState_ == RefereeState::PENDING) {
                 UpdateCurrentIndex();
-                recognizer->OnAccepted();
+                recognizer->AboutToAccept();
             } else {
                 GroupAdjudicate(AceType::Claim(this), GestureDisposal::PENDING);
             }

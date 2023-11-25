@@ -825,6 +825,13 @@ void ViewAbstract::SetTouchable(bool touchable)
     gestureHub->SetTouchable(touchable);
 }
 
+void ViewAbstract::SetMonopolizeEvents(bool monopolizeEvents)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetMonopolizeEvents(monopolizeEvents);
+}
+
 void ViewAbstract::SetHitTestMode(HitTestMode hitTestMode)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
