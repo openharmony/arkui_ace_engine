@@ -186,12 +186,29 @@ public:
 
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
+    void UpdateAreaTextColor();
+    void UltralimitShake();
     void DeleteBackward(int32_t length) override;
     void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
+
+    WeakPtr<LayoutWrapper> GetCounterNode()
+    {
+        return counterTextNode_;
+    }
+
+    bool GetCounterState() const
+    {
+        return counterChange_;
+    }
+
+    void SetCounterState(bool counterChange)
+    {
+        counterChange_ = counterChange;
+    }
 
     float GetTextOrPlaceHolderFontSize();
 
@@ -1190,6 +1207,9 @@ private:
     bool needToRequestKeyboardOnFocus_ = false;
     bool isTransparent_ = false;
     bool contChange_ = false;
+    bool counterChange_ = false;
+    WeakPtr<LayoutWrapper> counterTextNode_;
+    bool hasCounterMargin_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
