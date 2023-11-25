@@ -40,7 +40,6 @@ public:
     OffsetF GetCaretOffset() const;
     void onDraw(DrawingContext& drawingContext) override;
     void UpdateScrollBar(PaintWrapper* paintWrapper);
-
 private:
     void PaintCaret(DrawingContext& drawingContext) const;
     void PaintScrollBar(DrawingContext& context);

@@ -19,6 +19,8 @@
 #include <stack>
 #include <string>
 
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
@@ -904,21 +906,46 @@ void TextPattern::HandlePanEnd(const GestureEvent& info)
 #ifdef ENABLE_DRAG_FRAMEWORK
 DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, {});
-
+    auto weakPtr = WeakClaim(this);
     DragDropInfo itemInfo;
+    auto pattern = weakPtr.Upgrade();
+    auto host = pattern->GetHost();
+    auto hub = host->GetEventHub<EventHub>();
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, itemInfo);
+    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    pattern->status_ = Status::DRAGGING;
+    pattern->contentMod_->ChangeDragStatus();
+    pattern->showSelect_ = false;
+    auto start = textSelector_.GetTextStart();
+    pattern->recoverStart_ = start;
+    auto end = textSelector_.GetTextEnd();
+    pattern->recoverEnd_ = end;
+    auto beforeStr = GetSelectedText(0, start);
     auto selectedStr = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+    auto afterStr = GetSelectedText(end, GetWideText().length());
+    pattern->dragContents_ = {beforeStr, selectedStr, afterStr};
+
     itemInfo.extraInfo = selectedStr;
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
-
-    AceEngineExt::GetInstance().DragStartExt();
+    host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                        : PROPERTY_UPDATE_MEASURE);
 
     CloseSelectOverlay();
     ResetSelection();
     return itemInfo;
+}
+
+void TextPattern::OnDragMove(const RefPtr<Ace::DragEvent>& event)
+{
+    auto weakPtr = WeakClaim(this);
+    auto pattern = weakPtr.Upgrade();
+    if (pattern->status_ == Status::DRAGGING) {
+        CloseSelectOverlay();
+        pattern->showSelect_ = false;
+    }
 }
 
 void TextPattern::InitDragEvent()
@@ -945,6 +972,34 @@ void TextPattern::InitDragEvent()
     if (!eventHub->HasOnDragStart()) {
         eventHub->SetOnDragStart(std::move(onDragStart));
     }
+    auto onDragMove = [weakPtr = WeakClaim(this)](
+                           const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)  {
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnDragMove(event);
+    };
+    eventHub->SetOnDragMove(std::move(onDragMove));
+
+    auto onDragEnd = [weakPtr = WeakClaim(this), id = Container::CurrentId()](
+                         const RefPtr<OHOS::Ace::DragEvent>& event) {
+        ContainerScope scope(id);
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern  onDragEnd result: %{public}d dragStatus: %{public}d",
+            event->GetResult(), pattern->dragStatus_);
+        if (pattern->status_ == Status::DRAGGING) {
+            pattern->status_ = Status::NONE;
+            pattern->MarkContentChange();
+            pattern->contentMod_->ChangeDragStatus();
+            pattern->showSelect_ = true;
+            pattern->textSelector_.Update(pattern->GetRecoverStart(), pattern->GetRecoverEnd());
+            auto host = pattern->GetHost();
+            auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+            pattern->ShowSelectOverlay(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle, false);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    };
+    eventHub->SetOnDragEnd(std::move(onDragEnd));
 }
 
 std::function<void(Offset)> TextPattern::GetThumbnailCallback()

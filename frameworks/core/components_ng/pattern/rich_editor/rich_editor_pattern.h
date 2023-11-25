@@ -85,6 +85,7 @@ class RichEditorPattern : public TextPattern, public TextInputClient {
 public:
     RichEditorPattern();
     ~RichEditorPattern() override;
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<RichEditorEventHub>();
@@ -466,7 +467,6 @@ private:
     bool imeAttached_ = false;
     bool imeShown_ = false;
 #endif
-
     bool isTextChange_ = false;
     bool caretVisible_ = false;
     bool isRichEditorInit_ = false;
