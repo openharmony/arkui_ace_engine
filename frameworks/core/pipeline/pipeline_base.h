@@ -105,6 +105,8 @@ public:
 
     static RefPtr<ThemeManager> CurrentThemeManager();
 
+    static void SetCallBackNode(const WeakPtr<NG::FrameNode>& node);
+
     virtual void SetupRootElement() = 0;
 
     virtual uint64_t GetTimeFromExternalTimer();

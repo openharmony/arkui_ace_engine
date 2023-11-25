@@ -220,10 +220,13 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
             return;
         }
         auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](const BaseEventInfo* info) {
+        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = targetNode](
+                           const BaseEventInfo* info) {
             const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onClick");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
         };
         SpanModel::GetInstance()->SetOnClick(std::move(onClick));
@@ -235,8 +238,9 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
         CHECK_NULL_VOID(inspector);
         auto impl = inspector->GetInspectorFunctionImpl();
         RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto clickFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](
-                             const BaseEventInfo* info) {
+        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto clickFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl,
+                             node = targetNode](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             LOGD("About to call onclick method on js");
             const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
@@ -245,6 +249,7 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
                 impl->UpdateEventInfo(newInfo);
             }
             ACE_SCORING_EVENT("Span.onClick");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(newInfo);
         };
         SpanModel::GetInstance()->SetOnClick(std::move(clickFunc));

@@ -24,6 +24,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/declaration/texttimer/texttimer_declaration.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 
@@ -252,10 +253,12 @@ void JSTextTimer::OnTimer(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         const std::string& utc, const std::string& elapsedTime) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("TextTimer.onTimer");
+        PipelineContext::SetCallBackNode(node);
         JSRef<JSVal> newJSVal[2];
         newJSVal[0] = JSRef<JSVal>::Make(ToJSValue(utc));
         newJSVal[1] = JSRef<JSVal>::Make(ToJSValue(elapsedTime));

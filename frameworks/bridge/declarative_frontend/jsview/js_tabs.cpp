@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/tabs_model_impl.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 
 namespace OHOS::Ace {
@@ -70,7 +71,8 @@ void JSTabs::SetOnChange(const JSCallbackInfo& info)
 
     auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
-    auto onChange = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler)](
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler), node = targetNode](
                         const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
@@ -79,6 +81,7 @@ void JSTabs::SetOnChange(const JSCallbackInfo& info)
             return;
         }
         ACE_SCORING_EVENT("Tabs.onChange");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(*tabsInfo);
     };
     TabsModel::GetInstance()->SetOnChange(std::move(onChange));
@@ -92,8 +95,9 @@ void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
 
     auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
-    auto onTabBarClick = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler)](
-                             const BaseEventInfo* info) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onTabBarClick = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler),
+                             node = targetNode](const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
@@ -101,6 +105,7 @@ void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
             return;
         }
         ACE_SCORING_EVENT("Tabs.onTabBarClick");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(*tabsInfo);
     };
     TabsModel::GetInstance()->SetOnTabBarClick(std::move(onTabBarClick));
@@ -160,7 +165,8 @@ void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& change
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto onChangeEvent = [executionContext = info.GetExecutionContext(), func = std::move(jsFunc)](
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChangeEvent = [executionContext = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                              const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
@@ -169,6 +175,7 @@ void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& change
             return;
         }
         ACE_SCORING_EVENT("Tabs.onChangeEvent");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(tabsInfo->GetIndex()));
         func->ExecuteJS(1, &newJSVal);
     };
