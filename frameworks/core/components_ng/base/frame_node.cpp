@@ -1815,6 +1815,13 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
     return responseRegionList;
 }
 
+std::vector<RectF> FrameNode::GetResponseRegionListForRecognizer(int32_t sourceType)
+{
+    auto paintRect = renderContext_->GetPaintRectWithoutTransform();
+    auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
+    return responseRegionList;
+}
+
 bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const
 {
     for (const auto& rect : responseRegionList) {
@@ -2640,7 +2647,7 @@ void FrameNode::SyncGeometryNode()
         contentOffsetChange = geometryNode_->GetContentOffset() != oldGeometryNode_->GetContentOffset();
         oldGeometryNode_.Reset();
     }
-    
+
     // update border.
     if (layoutProperty_->GetBorderWidthProperty()) {
         if (!renderContext_->HasBorderColor()) {

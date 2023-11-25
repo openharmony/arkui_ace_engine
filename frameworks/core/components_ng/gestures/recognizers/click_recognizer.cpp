@@ -43,6 +43,23 @@ constexpr int32_t DEFAULT_LONGPRESS_DURATION = 800000000;
 
 } // namespace
 
+void ClickRecognizer::IsPointInRegion(const TouchEvent& event)
+{
+    PointF localPoint(event.x, event.y);
+    auto frameNode = GetAttachedNode();
+    if (!frameNode.Invalid()) {
+        NGGestureRecognizer::Transform(localPoint, frameNode);
+        auto host = frameNode.Upgrade();
+        auto renderContext = host->GetRenderContext();
+        auto paintRect = renderContext->GetPaintRectWithoutTransform();
+        localPoint = localPoint + paintRect.GetOffset();
+        if (!host->InResponseRegionList(localPoint, responseRegionBuffer_)) {
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "This MOVE/UP event is out of region, try to reject click gesture");
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
+    }
+}
+
 ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count) : MultiFingersRecognizer(fingers), count_(count)
 {
     if (fingers_ > MAX_TAP_FINGERS || fingers_ < DEFAULT_TAP_FINGERS) {
@@ -132,7 +149,15 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         event.id, equalsToFingers_, currentTouchPointsNum_);
     // The last recognition sequence has been completed, reset the timer.
     if (tappedCount_ > 0 && currentTouchPointsNum_ == 0) {
+        responseRegionBuffer_.clear();
         tapDeadlineTimer_.Cancel();
+    }
+    if (currentTouchPointsNum_ == 0) {
+        auto frameNode = GetAttachedNode();
+        if (!frameNode.Invalid()) {
+            auto host = frameNode.Upgrade();
+            responseRegionBuffer_ = host->GetResponseRegionListForRecognizer(static_cast<int32_t>(event.sourceType));
+        }
     }
     ++currentTouchPointsNum_;
     touchPoints_[event.id] = event;
@@ -167,9 +192,13 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
     InitGlobalValue(event.sourceType);
+    IsPointInRegion(event);
     touchPoints_[event.id] = event;
     UpdateFingerListInfo();
     --currentTouchPointsNum_;
+    if (currentTouchPointsNum_ == 0) {
+        responseRegionBuffer_.clear();
+    }
     // Check whether multi-finger taps are completed in count_ times
     if (equalsToFingers_ && (currentTouchPointsNum_ == 0)) {
         // Turn off the multi-finger lift deadline timer
@@ -215,11 +244,15 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         return;
     }
     InitGlobalValue(event.sourceType);
-    Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
-    if (offset.GetDistance() > MAX_THRESHOLD) {
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "This gesture is out of offset, try to reject it");
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline && pipeline->IsFormRender()) {
+        Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
+        if (offset.GetDistance() > MAX_THRESHOLD) {
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "This gesture is out of offset, try to reject it");
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
     }
+    IsPointInRegion(event);
     UpdateFingerListInfo();
 }
 
