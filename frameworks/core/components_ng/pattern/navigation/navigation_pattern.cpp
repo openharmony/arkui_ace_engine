@@ -19,6 +19,7 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
@@ -726,4 +727,33 @@ void NavigationPattern::OnWindowShow()
     eventHub->FireOnShownEvent();
     navDestinationPattern->SetIsOnShow(true);
 }
+
+void NavigationPattern::OnColorConfigurationUpdate()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    auto pattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    const auto& navDestinationNodes = pattern->GetAllNavDestinationNodes();
+
+    size_t size = navDestinationNodes.size();
+    for (size_t i = 0; i < size; i++) {
+        const auto& childNode = navDestinationNodes[i];
+        auto newNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(childNode.second));
+        CHECK_NULL_VOID(newNavDestination);
+        auto destinationTitleBarNode = DynamicCast<TitleBarNode>(newNavDestination->GetTitleBarNode());
+        CHECK_NULL_VOID(destinationTitleBarNode);
+        auto backButtonNode = DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
+        CHECK_NULL_VOID(backButtonNode);
+        auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
+        CHECK_NULL_VOID(buttonPattern);
+        buttonPattern->SetSkipColorConfigurationUpdate();
+        auto renderContext = backButtonNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        backButtonNode->MarkModifyDone();
+        backButtonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
 } // namespace OHOS::Ace::NG
