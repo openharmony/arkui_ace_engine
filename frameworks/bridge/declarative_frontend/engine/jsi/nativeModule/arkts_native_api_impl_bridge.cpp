@@ -264,6 +264,26 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDisplayPriority));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDisplayPriority"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetDisplayPriority));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::SetOffset));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::ResetOffset));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::SetPadding));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::ResetPadding));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMargin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::SetMargin));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMargin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::ResetMargin));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarkAnchor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::SetMarkAnchor));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMarkAnchor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::ResetMarkAnchor));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVisibility"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::SetVisibility));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVisibility"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::ResetVisibility));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto counter = panda::ObjectRef::New(vm);
