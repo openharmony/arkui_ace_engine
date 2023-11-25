@@ -387,6 +387,16 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     return subwindow->ShowDialogNG(dialogProps, std::move(buildFunc));
 }
 
+void SubwindowManager::HideDialogSubWindow(int32_t instanceId)
+{
+    auto subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    CHECK_NULL_VOID(subwindow);
+    auto overlay = subwindow->GetOverlayManager();
+    if (overlay->GetDialogMap().size() == 0) {
+        subwindow->HideSubWindowNG();
+    }
+}
+
 void SubwindowManager::AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow)
 {
     if (!subwindow) {
