@@ -167,102 +167,94 @@ void ScrollBar::SetRectTrickRegion(
         return;
     }
     double activeSize = barRegionSize_ * mainSize / estimatedHeight - outBoundary_;
-    if (!NearEqual(mainSize, estimatedHeight)) {
-        if (!NearZero(outBoundary_)) {
-            activeSize = std::max(
-                std::max(activeSize, NormalizeToPx(minHeight_) - outBoundary_), NormalizeToPx(minDynamicHeight_));
+    
+    if (!NearZero(outBoundary_)) {
+        activeSize = std::max(
+            std::max(activeSize, NormalizeToPx(minHeight_) - outBoundary_), NormalizeToPx(minDynamicHeight_));
+    } else {
+        activeSize = std::max(activeSize, NormalizeToPx(minHeight_));
+    }
+    double normalWidth = NormalizeToPx(normalWidth_);
+    if (LessOrEqual(activeSize, normalWidth)) {
+        if (GreatNotEqual(normalWidth, mainSize)) {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+            CHECK_NULL_VOID(theme);
+            normalWidth_ = theme->GetNormalWidth();
+            normalWidth = NormalizeToPx(normalWidth_);
         } else {
-            activeSize = std::max(activeSize, NormalizeToPx(minHeight_));
+            activeSize = normalWidth;
         }
-        double normalWidth = NormalizeToPx(normalWidth_);
-        if (LessOrEqual(activeSize, normalWidth)) {
-            if (GreatNotEqual(normalWidth, mainSize)) {
-                auto pipelineContext = PipelineContext::GetCurrentContext();
-                CHECK_NULL_VOID(pipelineContext);
-                auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-                CHECK_NULL_VOID(theme);
-                normalWidth_ = theme->GetNormalWidth();
-                normalWidth = NormalizeToPx(normalWidth_);
-            } else {
-                activeSize = normalWidth;
-            }
+    }
+    double lastMainOffset =
+        std::max(positionMode_ == PositionMode::BOTTOM ? lastOffset.GetX() : lastOffset.GetY(), 0.0);
+    offsetScale_ = NearEqual(mainSize, estimatedHeight) ? 0.0 : (barRegionSize_ - activeSize) / (estimatedHeight - mainSize);
+    // Avoid crossing the top or bottom boundary.
+    double activeMainOffset = std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize)
+                                + NormalizeToPx(startReservedHeight_);
+    bool canUseAnimation = !isOutOfBoundary_ && !positionModeUpdate_;
+    double inactiveSize = 0.0;
+    double inactiveMainOffset = 0.0;
+    scrollableOffset_ = activeMainOffset;
+    if (positionMode_ == PositionMode::LEFT) {
+        inactiveSize = activeRect_.Height();
+        inactiveMainOffset = activeRect_.Top();
+        activeRect_ = Rect(-NormalizeToPx(position_), activeMainOffset, normalWidth, activeSize) + offset;
+        if (isUserNormalWidth_) {
+            touchRegion_ = activeRect_;
+            hoverRegion_ = activeRect_;
+        } else {
+            touchRegion_ = activeRect_ + Size(NormalizeToPx(touchWidth_), 0);
+            hoverRegion_ = activeRect_ + Size(NormalizeToPx(hoverWidth_), 0);
         }
-        double lastMainOffset =
-            std::max(positionMode_ == PositionMode::BOTTOM ? lastOffset.GetX() : lastOffset.GetY(), 0.0);
-        offsetScale_ = (barRegionSize_ - activeSize) / (estimatedHeight - mainSize);
-        // Avoid crossing the top or bottom boundary.
-        double activeMainOffset = std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize)
-                                  + NormalizeToPx(startReservedHeight_);
-        bool canUseAnimation = !isOutOfBoundary_ && !positionModeUpdate_;
-        double inactiveSize = 0.0;
-        double inactiveMainOffset = 0.0;
-        scrollableOffset_ = activeMainOffset;
-        if (positionMode_ == PositionMode::LEFT) {
-            inactiveSize = activeRect_.Height();
-            inactiveMainOffset = activeRect_.Top();
-            activeRect_ = Rect(-NormalizeToPx(position_), activeMainOffset, normalWidth, activeSize) + offset;
-            if (isUserNormalWidth_) {
-                touchRegion_ = activeRect_;
-                hoverRegion_ = activeRect_;
-            } else {
-                touchRegion_ = activeRect_ + Size(NormalizeToPx(touchWidth_), 0);
-                hoverRegion_ = activeRect_ + Size(NormalizeToPx(hoverWidth_), 0);
-            }
-        } else if (positionMode_ == PositionMode::RIGHT) {
-            inactiveSize = activeRect_.Height();
-            inactiveMainOffset = activeRect_.Top();
-            double x = size.Width() - normalWidth - NormalizeToPx(padding_.Right()) + NormalizeToPx(position_);
-            activeRect_ = Rect(x, activeMainOffset, normalWidth, activeSize) + offset;
-            // Update the hot region
-            if (isUserNormalWidth_) {
-                touchRegion_ = activeRect_;
-                hoverRegion_ = activeRect_;
-            } else {
-                touchRegion_ =
-                    activeRect_ -
-                    Offset(NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Right()),
-                        0.0) +
-                    Size(NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_), 0);
-                hoverRegion_ =
-                    activeRect_ -
-                    Offset(NormalizeToPx(hoverWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Right()),
-                        0.0) +
-                    Size(NormalizeToPx(hoverWidth_) - NormalizeToPx(normalWidth_), 0);
-            }
-        } else if (positionMode_ == PositionMode::BOTTOM) {
-            inactiveSize = activeRect_.Width();
-            inactiveMainOffset = activeRect_.Left();
-            auto positionY = size.Height() - normalWidth - NormalizeToPx(padding_.Bottom()) + NormalizeToPx(position_);
-            activeRect_ = Rect(activeMainOffset, positionY, activeSize, normalWidth) + offset;
-            if (isUserNormalWidth_) {
-                touchRegion_ = activeRect_;
-                hoverRegion_ = activeRect_;
-            } else {
-                auto hotRegionOffset = Offset(
-                    0.0, NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Bottom()));
-                auto hotRegionSize = Size(0, NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_));
-                touchRegion_ = activeRect_ - hotRegionOffset + hotRegionSize;
+    } else if (positionMode_ == PositionMode::RIGHT) {
+        inactiveSize = activeRect_.Height();
+        inactiveMainOffset = activeRect_.Top();
+        double x = size.Width() - normalWidth - NormalizeToPx(padding_.Right()) + NormalizeToPx(position_);
+        activeRect_ = Rect(x, activeMainOffset, normalWidth, activeSize) + offset;
+        // Update the hot region
+        if (isUserNormalWidth_) {
+            touchRegion_ = activeRect_;
+            hoverRegion_ = activeRect_;
+        } else {
+            touchRegion_ =
+                activeRect_ -
+                Offset(NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Right()),
+                    0.0) +
+                Size(NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_), 0);
+            hoverRegion_ =
+                activeRect_ -
+                Offset(NormalizeToPx(hoverWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Right()),
+                    0.0) +
+                Size(NormalizeToPx(hoverWidth_) - NormalizeToPx(normalWidth_), 0);
+        }
+    } else if (positionMode_ == PositionMode::BOTTOM) {
+        inactiveSize = activeRect_.Width();
+        inactiveMainOffset = activeRect_.Left();
+        auto positionY = size.Height() - normalWidth - NormalizeToPx(padding_.Bottom()) + NormalizeToPx(position_);
+        activeRect_ = Rect(activeMainOffset, positionY, activeSize, normalWidth) + offset;
+        if (isUserNormalWidth_) {
+            touchRegion_ = activeRect_;
+            hoverRegion_ = activeRect_;
+        } else {
+            auto hotRegionOffset = Offset(
+                0.0, NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Bottom()));
+            auto hotRegionSize = Size(0, NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_));
+            touchRegion_ = activeRect_ - hotRegionOffset + hotRegionSize;
 
-                auto hoverRegionOffset = Offset(
-                    0.0, NormalizeToPx(hoverWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Bottom()));
-                auto hoverRegionSize = Size(0, NormalizeToPx(hoverWidth_) - NormalizeToPx(normalWidth_));
-                hoverRegion_ = activeRect_ - hoverRegionOffset + hoverRegionSize;
-            }
+            auto hoverRegionOffset = Offset(
+                0.0, NormalizeToPx(hoverWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Bottom()));
+            auto hoverRegionSize = Size(0, NormalizeToPx(hoverWidth_) - NormalizeToPx(normalWidth_));
+            hoverRegion_ = activeRect_ - hoverRegionOffset + hoverRegionSize;
         }
-        // If the scrollBar length changes, start the adaptation animation
-        if (!NearZero(inactiveSize) && !NearEqual(activeSize, inactiveSize, BAR_ADAPT_EPSLION) && canUseAnimation &&
-            !Negative(inactiveMainOffset) && !normalWidthUpdate_) {
-            PlayScrollBarAdaptAnimation();
-        } else {
-            needAdaptAnimation_ = false;
-        }
+    }
+    // If the scrollBar length changes, start the adaptation animation
+    if (!NearZero(inactiveSize) && !NearEqual(activeSize, inactiveSize, BAR_ADAPT_EPSLION) && canUseAnimation &&
+        !Negative(inactiveMainOffset) && !normalWidthUpdate_) {
+        PlayScrollBarAdaptAnimation();
     } else {
         needAdaptAnimation_ = false;
-        if (positionMode_ == PositionMode::BOTTOM) {
-            activeRect_.SetHeight(NormalizeToPx(normalWidth_));
-        } else {
-            activeRect_.SetWidth(NormalizeToPx(normalWidth_));
-        }
     }
 }
 
