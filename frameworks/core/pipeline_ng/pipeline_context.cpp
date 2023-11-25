@@ -1375,6 +1375,11 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             "type=%{public}d", scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type);
     }
     eventManager_->SetInstanceId(GetInstanceId());
+    if (scalePoint.type != TouchType::MOVE) {
+        if (historyPointsById_.find(scalePoint.id) != historyPointsById_.end()) {
+            historyPointsById_.erase(scalePoint.id);
+        }
+    }
     if (scalePoint.type == TouchType::DOWN) {
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false);
@@ -1419,9 +1424,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 
     if (scalePoint.type == TouchType::UP) {
         lastTouchTime_ = GetTimeFromExternalTimer();
-        if (historyPointsById_.find(scalePoint.id) != historyPointsById_.end()) {
-            historyPointsById_.erase(scalePoint.id);
-        }
     }
 
     std::optional<TouchEvent> lastMoveEvent;
