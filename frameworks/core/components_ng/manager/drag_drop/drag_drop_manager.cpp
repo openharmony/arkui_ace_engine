@@ -391,15 +391,22 @@ void DragDropManager::NotifyDragRegisterFrameNode(std::unordered_map<int32_t, We
     }
 }
 
+void DragDropManager::NotifyDragFrameNode(
+    const Point& point, const DragEventType& dragEventType, const DragRet& dragRet)
+{
+    RefPtr<NotifyDragEvent> notifyEvent = AceType::MakeRefPtr<NotifyDragEvent>();
+    UpdateNotifyDragEvent(notifyEvent, point, dragEventType);
+    notifyEvent->SetResult(dragRet);
+    NotifyDragRegisterFrameNode(nodesForDragNotify_, dragEventType, notifyEvent);
+}
+
 void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode)
 {
     dragDropState_ = DragDropMgrState::DRAGGING;
+    NotifyDragFrameNode(point, DragEventType::START);
     CHECK_NULL_VOID(frameNode);
     preTargetFrameNode_ = frameNode;
     draggedFrameNode_ = preTargetFrameNode_;
-    RefPtr<NotifyDragEvent> notifyEvent = AceType::MakeRefPtr<NotifyDragEvent>();
-    UpdateNotifyDragEvent(notifyEvent, point, DragEventType::START);
-    NotifyDragRegisterFrameNode(nodesForDragNotify_, DragEventType::START, notifyEvent);
 }
 
 void DragDropManager::PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode)
@@ -489,10 +496,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
         InteractionInterface::GetInstance()->SetDragWindowVisible(false);
         DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, container->GetWindowId() };
         InteractionInterface::GetInstance()->StopDrag(dragDropRet);
-        RefPtr<NotifyDragEvent> notifyEvent = AceType::MakeRefPtr<NotifyDragEvent>();
-        UpdateNotifyDragEvent(notifyEvent, point, DragEventType::DROP);
-        notifyEvent->SetResult(DragRet::DRAG_CANCEL);
-        NotifyDragRegisterFrameNode(nodesForDragNotify_, DragEventType::DROP, notifyEvent);
+        NotifyDragFrameNode(point, DragEventType::DROP, DragRet::DRAG_CANCEL);
         summaryMap_.clear();
         parentHitNodes_.clear();
         ClearVelocityInfo();
@@ -521,10 +525,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
         }
         DragDropRet dragDropRet { DragRet::DRAG_FAIL, isMouseDragged_, container->GetWindowId() };
         InteractionInterface::GetInstance()->StopDrag(dragDropRet);
-        RefPtr<NotifyDragEvent> notifyEvent = AceType::MakeRefPtr<NotifyDragEvent>();
-        UpdateNotifyDragEvent(notifyEvent, point, DragEventType::DROP);
-        notifyEvent->SetResult(DragRet::DRAG_FAIL);
-        NotifyDragRegisterFrameNode(nodesForDragNotify_, DragEventType::DROP, notifyEvent);
+        NotifyDragFrameNode(point, DragEventType::DROP, DragRet::DRAG_FAIL);
         summaryMap_.clear();
         parentHitNodes_.clear();
         return;
@@ -556,10 +557,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
         DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId };
         InteractionInterface::GetInstance()->StopDrag(dragDropRet);
     });
-    RefPtr<NotifyDragEvent> notifyEvent = AceType::MakeRefPtr<NotifyDragEvent>();
-    UpdateNotifyDragEvent(notifyEvent, point, DragEventType::DROP);
-    notifyEvent->SetResult(event->GetResult());
-    NotifyDragRegisterFrameNode(nodesForDragNotify_, DragEventType::DROP, notifyEvent);
+    NotifyDragFrameNode(point, DragEventType::DROP, event->GetResult());
     dragFrameNode->MarkDirtyNode();
     summaryMap_.clear();
     parentHitNodes_.clear();
@@ -1076,12 +1074,7 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
             shadowOffsetData.height);
         event->SetPreviewRect(previewRect_);
     } else {
-        previewRect_ = Rect(
-            shadowOffsetData.offsetX,
-            shadowOffsetData.offsetY,
-            shadowOffsetData.width,
-            shadowOffsetData.height);
-        event->SetPreviewRect(previewRect_);
+        event->SetPreviewRect(previewRect_ + Offset(point.GetX(), point.GetY()));
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 }
