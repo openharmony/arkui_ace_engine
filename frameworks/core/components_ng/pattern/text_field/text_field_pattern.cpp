@@ -791,7 +791,7 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_ESCAPE) {
         CloseSelectOverlay(true);
     }
-    if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_) {
+    if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
         isFocusedBeforeClick_ = false;
         HandleOnSelectAll(true);
     }
@@ -2620,9 +2620,10 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         auto optionalTextConfig = GetMiscTextConfig();
         CHECK_NULL_RETURN(optionalTextConfig.has_value(), false);
         MiscServices::TextConfig textConfig = optionalTextConfig.value();
-        TAG_LOGI(
-            AceLogTag::ACE_TEXT_FIELD, "RequestKeyboard set calling window id:%{public}u"
-            "inputType: %{public}d", textConfig.windowId, textConfig.inputAttribute.inputPattern);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+            "RequestKeyboard set calling window id:%{public}u"
+            "inputType: %{public}d",
+            textConfig.windowId, textConfig.inputAttribute.inputPattern);
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
 #else
         if (!HasConnection()) {
@@ -2684,8 +2685,7 @@ AceAutoFillType TextFieldPattern::ConvertToAceAutoFillType(TextInputType type)
     static std::unordered_map<TextInputType, AceAutoFillType> convertMap = {
         { TextInputType::VISIBLE_PASSWORD, AceAutoFillType::ACE_PASSWORD },
         { TextInputType::USER_NAME, AceAutoFillType::ACE_USER_NAME },
-        { TextInputType::NEW_PASSWORD, AceAutoFillType::ACE_NEW_PASSWORD }
-    };
+        { TextInputType::NEW_PASSWORD, AceAutoFillType::ACE_NEW_PASSWORD } };
     if (convertMap.find(type) != convertMap.end()) {
         return convertMap[type];
     }
