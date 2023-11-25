@@ -117,7 +117,8 @@ void ImageAnimatorPattern::UpdateShowingImageInfo(const RefPtr<FrameNode>& image
 {
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(images_[index].src));
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(
+        images_[index].src, images_[index].bundleName, images_[index].moduleName));
     MarginProperty margin;
     if (!fixedSize_) {
         margin.left = CalcLength(images_[index].left);
@@ -149,7 +150,8 @@ void ImageAnimatorPattern::UpdateCacheImageInfo(CacheImageStruct& cacheImage, in
         imageLayoutProperty->HasImageSourceInfo() ? imageLayoutProperty->GetImageSourceInfoValue().GetSrc() : "";
     if (preSrc != images_[index].src) {
         // need to cache newImage
-        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(images_[index].src));
+        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(
+            images_[index].src, images_[index].bundleName, images_[index].moduleName));
         cacheImage.index = index;
         cacheImage.isLoaded = false;
     }
