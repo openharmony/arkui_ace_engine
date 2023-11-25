@@ -22,7 +22,7 @@
 #include "hilog/log.h"
 
 #ifdef ACE_INSTANCE_LOG
-#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #endif
 
 extern "C" {
@@ -151,13 +151,11 @@ void LogWrapper::PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const
 #endif
 }
 
+#ifdef ACE_INSTANCE_LOG
 int32_t LogWrapper::GetId()
 {
-#ifdef ACE_INSTANCE_LOG
-    return Container::CurrentId();
-#else
-    return 0;
-#endif
+    return ContainerScope::CurrentId();
 }
+#endif
 
 } // namespace OHOS::Ace

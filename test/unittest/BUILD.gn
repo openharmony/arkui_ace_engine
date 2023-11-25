@@ -82,6 +82,7 @@ ohos_source_set("ace_unittest_log") {
   sources = [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
   external_deps = [ "hilog:libhilog" ]
   configs = [ ":ace_unittest_config" ]
+  configs += [ "$ace_root:ace_test_config" ]
 }
 
 # ace unittest trace
