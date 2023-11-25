@@ -403,4 +403,11 @@ void ViewAbstractModelNG::SetAccessibilityImportance(const std::string& importan
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->SetAccessibilityLevel(importance);
 }
+
+void ViewAbstractModelNG::SetAccessibilityText(FrameNode* frameNode, const std::string& text)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityText(text);
+}
 } // namespace OHOS::Ace::NG

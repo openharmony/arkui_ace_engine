@@ -23,6 +23,7 @@
 #include "frameworks/core/image/image_source_info.h"
 #include "frameworks/core/components/common/properties/animation_option.h"
 #include "frameworks/base/geometry/ng/vector.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1714,6 +1715,43 @@ void ResetVisibility(NodeHandle node)
     ViewAbstract::SetVisibility(frameNode, DEFAULT_VISIBILITY);
 }
 
+void SetAccessibilityText(NodeHandle node, const char* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = value;
+    ViewAbstractModelNG::SetAccessibilityText(frameNode, valueStr);
+}
+
+void ResetAccessibilityText(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityText(frameNode, "");
+}
+
+void SetAllowDrop(NodeHandle node, char** allowDropCharArray, int32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::set<std::string> allowDropSet;
+    allowDropSet.clear();
+    std::string allowDropStr;
+    for (size_t i = 0; i < length; i++) {
+        allowDropStr = allowDropCharArray[i];
+        allowDropSet.insert(allowDropStr);
+    }
+    ViewAbstract::SetAllowDrop(frameNode, allowDropSet);
+}
+
+void ResetAllowDrop(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::set<std::string> allowDrop;
+    ViewAbstract::SetAllowDrop(frameNode, allowDrop);
+}
+
 ArkUICommonModifierAPI GetCommonModifier()
 {
     static const ArkUICommonModifierAPI modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
@@ -1740,7 +1778,8 @@ ArkUICommonModifierAPI GetCommonModifier()
         ResetFocusable, SetTouchable, ResetTouchable, SetDefaultFocus, ResetDefaultFocus,
         SetDisplayPriority, ResetDisplayPriority, SetOffset, ResetOffset,
         SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
-        SetVisibility, ResetVisibility };
+        SetVisibility, ResetVisibility, SetAccessibilityText, ResetAccessibilityText,
+        SetAllowDrop, ResetAllowDrop };
 
     return modifier;
 }

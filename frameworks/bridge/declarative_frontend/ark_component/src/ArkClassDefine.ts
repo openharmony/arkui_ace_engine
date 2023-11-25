@@ -709,4 +709,16 @@ class ArkPadding implements Equable {
       this.left === another.left);
   }
 }
+
+class ArkAllowDrop {
+    allowDropArray: Array<UniformDataType>;
+
+    constructor() {
+        this.allowDropArray = undefined;
+    }
+
+    isEqual(another: ArkAllowDrop): boolean {
+        return this.allowDropArray === another.allowDropArray;
+    }
+}
  
