@@ -42,6 +42,24 @@ std::string GetDeclaration(const std::optional<Color>& color, const std::optiona
         V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID)).c_str());
     return jsonSpanDeclaration->ToString();
 }
+inline std::unique_ptr<JsonValue> ConvertShadowToJson(const Shadow& shadow)
+{
+    auto jsonShadow = JsonUtil::Create(true);
+    jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
+    jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
+    jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
+    jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
+    jsonShadow->Put("type", std::to_string(static_cast<int32_t>(shadow.GetShadowType())).c_str());
+    return jsonShadow;
+}
+std::unique_ptr<JsonValue> ConvertShadowsToJson(const std::vector<Shadow>& shadows)
+{
+    auto jsonShadows = JsonUtil::CreateArray(true);
+    for (const auto& shadow : shadows) {
+        jsonShadows->Put(ConvertShadowToJson(shadow));
+    }
+    return jsonShadows;
+}
 } // namespace
 
 std::string SpanItem::GetFont() const
@@ -70,6 +88,11 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str());
         json->Put("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str());
         json->Put("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str());
+
+        auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
+        // Determines if there are multiple textShadows
+        auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
+        json->Put("textShadow", jsonShadow);
     }
     if (textLineStyle) {
         json->Put("lineHeight", textLineStyle->GetLineHeight().value_or(Dimension()).ToString().c_str());

@@ -70,6 +70,11 @@ void TextTimerModelNG::SetTextColor(const Color& value)
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
+void TextTimerModelNG::SetTextShadow(const std::vector<Shadow>& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, value);
+}
+
 void TextTimerModelNG::SetItalicFontStyle(Ace::FontStyle value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, ItalicFontStyle, value);
