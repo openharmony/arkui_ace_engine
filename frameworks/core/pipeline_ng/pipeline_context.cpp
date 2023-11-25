@@ -80,7 +80,7 @@
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
-constexpr uint64_t INTERPOLATION_THRESHOLD = 300 * 1000 * 1000; // 300ms
+constexpr uint64_t INTERPOLATION_THRESHOLD = 100 * 1000 * 1000; // 100ms
 constexpr int32_t INDEX_X = 0;
 constexpr int32_t INDEX_Y = 1;
 constexpr int32_t INDEX_TIME = 2;
