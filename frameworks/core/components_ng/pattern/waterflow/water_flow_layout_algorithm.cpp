@@ -176,6 +176,7 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     auto childFrameOffset = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    layoutInfo_.UpdateStartIndex();
     for (const auto& mainPositions : layoutInfo_.waterFlowItems_) {
         for (const auto& item : mainPositions.second) {
             if (item.first < layoutInfo_.startIndex_ || item.first > layoutInfo_.endIndex_) {
@@ -334,7 +335,6 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
                 -(layoutInfo_.waterFlowItems_[position.crossIndex][currentIndex].first) + layoutInfo_.restoreOffset_;
             // restoreOffSet only be used once
             layoutInfo_.restoreOffset_ = 0.0f;
-            layoutInfo_.UpdateStartIndex();
             layoutInfo_.jumpIndex_ = -1;
             layoutInfo_.itemStart_ = false;
         }
