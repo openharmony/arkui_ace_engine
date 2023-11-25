@@ -2666,6 +2666,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
     if (info.Length() > PARAMETER_LENGTH_FIRST) {
         if (info[0]->IsBoolean()) {
             menuParam.isShow = info[0]->ToBoolean();
+            menuParam.setShow = true;
             builderIndex = 1;
             if (info.Length() > PARAMETER_LENGTH_SECOND) {
                 ParseBindOptionParam(info, menuParam, builderIndex + 1);
@@ -2676,6 +2677,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             auto isShowObj = callbackObj->GetProperty("value");
             if (isShowObj->IsBoolean()) {
                 menuParam.isShow = isShowObj->ToBoolean();
+                menuParam.setShow = true;
                 builderIndex = 1;
                 if (info.Length() > PARAMETER_LENGTH_SECOND) {
                     ParseBindOptionParam(info, menuParam, builderIndex + 1);
@@ -2683,7 +2685,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             } else {
                 builderIndex = 0;
                 ParseBindOptionParam(info, menuParam, builderIndex + 1);
-            }            
+            }
         }
     }
 
