@@ -177,6 +177,8 @@ public:
     static void ReportEventComplete(DataBase& data);
     static void ReportEventJankFrame(DataBase& data);
     static void ReportJankFrameApp(JankInfo& info);
+    static void ReportDoubleClickTitle(int32_t stateChange);
+    static void ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);
