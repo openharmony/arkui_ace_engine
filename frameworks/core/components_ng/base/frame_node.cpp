@@ -503,9 +503,8 @@ void FrameNode::DumpCommonInfo()
         layoutProperty_->GetMarginProperty() || layoutProperty_->GetCalcLayoutConstraint()) {
         DumpLog::GetInstance().AddDesc(
             std::string("ContentConstraint: ")
-                .append(layoutProperty_->GetContentLayoutConstraint().has_value()
-                            ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
-                            : "NA"));
+                .append(layoutProperty_->GetContentLayoutConstraint().has_value() ?
+                            layoutProperty_->GetContentLayoutConstraint().value().ToString() : "NA"));
     }
     DumpOverlayInfo();
     if (frameProxy_->Dump().compare("totalCount is 0") != 0) {
@@ -1944,6 +1943,12 @@ std::pair<float, float> FrameNode::ContextPositionConvertToPX(
         ConvertToPx(context->GetPositionProperty()->GetPosition()->GetY(), scaleProperty, percentReference.Height())
             .value_or(0.0);
     return position;
+}
+
+void FrameNode::OnPixelRoundFinish(const SizeF& pixelGridRoundSize)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->OnPixelRoundFinish(pixelGridRoundSize);
 }
 
 void FrameNode::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)

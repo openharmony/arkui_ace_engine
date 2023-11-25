@@ -380,6 +380,7 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     auto paintRect = AdjustPaintRect();
 
     if (needRoundToPixelGrid) {
@@ -387,6 +388,7 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
         paintRect.SetRect(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
     }
     SyncGeometryProperties(paintRect);
+    host->OnPixelRoundFinish(geometryNode->GetPixelGridRoundSize());
 }
 
 void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
@@ -3657,9 +3659,7 @@ void RosenRenderContext::DumpInfo() const
         auto center = rsNode_->GetStagingProperties().GetPivot();
         if (!NearEqual(center[0], 0.5) || !NearEqual(center[1], 0.5)) {
             DumpLog::GetInstance().AddDesc(std::string("Center: x:")
-                                               .append(std::to_string(center[0]))
-                                               .append(" y:")
-                                               .append(std::to_string(center[1])));
+                .append(std::to_string(center[0])).append(" y:").append(std::to_string(center[1])));
         }
         if (!NearZero(rsNode_->GetStagingProperties().GetPivotZ())) {
             DumpLog::GetInstance().AddDesc(
