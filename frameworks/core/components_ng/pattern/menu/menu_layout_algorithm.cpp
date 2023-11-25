@@ -1214,7 +1214,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(geometryNode);
         auto size = geometryNode->GetMarginFrameSize();
         bool didNeedArrow = GetIfNeedArrow(layoutWrapper, size);
-        if (menuPattern->IsSelectMenu()) {
+        if (menuPattern->IsSelectMenu() || menuPattern->IsSelectOverlayCustomMenu()) {
             ComputeMenuPositionByAlignType(menuProp, size);
             auto offset = ComputeMenuPositionByOffset(menuProp, geometryNode);
             position_ += offset;
