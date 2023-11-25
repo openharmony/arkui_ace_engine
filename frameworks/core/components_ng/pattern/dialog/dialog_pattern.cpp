@@ -171,6 +171,7 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
     }
     if (dialogProperties_.isShowInSubWindow) {
         SubwindowManager::GetInstance()->DeleteHotAreas(overlayManager->GetSubwindowId(), host->GetId());
+        SubwindowManager::GetInstance()->HideDialogSubWindow(overlayManager->GetSubwindowId());
     }
     overlayManager->CloseDialog(host);
     if (dialogProperties_.isShowInSubWindow && dialogProperties_.isModal) {
