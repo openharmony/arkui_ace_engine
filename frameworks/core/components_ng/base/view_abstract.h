@@ -228,6 +228,7 @@ public:
     static void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDrop);
 
     static void SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragEvent> &)> &&onDragEnd);
+    static void SetMonopolizeEvents(bool monopolizeEvents);
 
     // flex properties
     static void SetAlignSelf(FlexAlign value);

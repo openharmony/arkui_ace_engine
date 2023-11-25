@@ -1531,6 +1531,12 @@ bool FrameNode::GetTouchable() const
     return gestureHub ? gestureHub->GetTouchable() : true;
 }
 
+bool FrameNode::GetMonopolizeEvents() const
+{
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    return gestureHub ? gestureHub->GetMonopolizeEvents() : false;
+}
+
 bool FrameNode::IsResponseRegion() const
 {
     auto renderContext = GetRenderContext();
@@ -2640,7 +2646,7 @@ void FrameNode::SyncGeometryNode()
         contentOffsetChange = geometryNode_->GetContentOffset() != oldGeometryNode_->GetContentOffset();
         oldGeometryNode_.Reset();
     }
-    
+
     // update border.
     if (layoutProperty_->GetBorderWidthProperty()) {
         if (!renderContext_->HasBorderColor()) {
@@ -2883,6 +2889,7 @@ void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId)
         .parentNodeId = parentId,
         .tag = GetTag(),
         .comId = propInspectorId_.value_or(""),
+        .monopolizeEvents = GetMonopolizeEvents(),
         .isHit = isHit,
         .hitTestMode = static_cast<int32_t>(GetHitTestMode())
     };

@@ -612,6 +612,7 @@ public:
         int32_t offset, Accessibility::AccessibilityElementInfo& output);
     bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset);
+    bool GetMonopolizeEvents() const;
 
 private:
     void MarkNeedRender(bool isRenderBoundary);

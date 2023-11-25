@@ -248,6 +248,7 @@ public:
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
     virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
+    virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;
 
     // obscured
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;

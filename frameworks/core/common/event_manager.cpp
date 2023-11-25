@@ -92,6 +92,9 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     refereeNG_->CheckSourceTypeChange(touchPoint.sourceType);
     if (refereeNG_->QueryAllDone(touchPoint.id)) {
         refereeNG_->CleanGestureScope(touchPoint.id);
+        if (touchTestResults_.empty() && refereeNG_->QueryAllDone()) {
+            responseCtrl_->Reset();
+        }
     }
     if (frameNode->HaveSecurityComponent()) {
         std::vector<NG::RectF> rect;
@@ -126,6 +129,9 @@ void EventManager::TouchTest(
     }
     ACE_FUNCTION_TRACE();
     CHECK_NULL_VOID(frameNode);
+    if (axisTouchTestResults_.empty() && refereeNG_->QueryAllDone()) {
+        responseCtrl_->Reset();
+    }
     // collect
     const NG::PointF point { event.x, event.y };
     if (frameNode->HaveSecurityComponent()) {
@@ -326,7 +332,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         }
         // add gesture snapshot to dump
         for (const auto& target : iter->second) {
-            AddGestureSnapshot(point.id, target);
+            AddGestureSnapshot(point.id, 0, target);
         }
     }
 
@@ -1261,6 +1267,7 @@ EventManager::EventManager()
     LOGD("EventManger Constructor.");
     refereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
     referee_ = AceType::MakeRefPtr<GestureReferee>();
+    responseCtrl_ = AceType::MakeRefPtr<NG::ResponseCtrl>();
 
     auto callback = [weak = WeakClaim(this)](size_t touchId) -> bool {
         auto eventManager = weak.Upgrade();
@@ -1319,7 +1326,7 @@ void EventManager::DumpEvent() const
     }
 }
 
-void EventManager::AddGestureSnapshot(int32_t finger, const RefPtr<TouchEventTarget>& target)
+void EventManager::AddGestureSnapshot(int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target)
 {
     if (!target) {
         return;
@@ -1329,13 +1336,14 @@ void EventManager::AddGestureSnapshot(int32_t finger, const RefPtr<TouchEventTar
     if (frameNode) {
         info->nodeId = frameNode->GetId();
     }
+    info->depth = depth;
     eventTree_.AddGestureSnapshot(finger, std::move(info));
 
     // add child gesture if target is group
     auto group = AceType::DynamicCast<NG::RecognizerGroup>(target);
     if (group) {
         for (const auto& child : group->GetGroupRecognizer()) {
-            AddGestureSnapshot(finger, child);
+            AddGestureSnapshot(finger, depth + 1, child);
         }
     }
 }
