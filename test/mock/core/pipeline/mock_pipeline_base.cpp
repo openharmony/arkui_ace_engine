@@ -341,6 +341,7 @@ bool PipelineContext::IsEnableKeyBoardAvoidMode()
 }
 void PipelineContext::SetIgnoreViewSafeArea(bool value) {};
 void PipelineContext::SetIsLayoutFullScreen(bool value) {};
+void PipelineContext::SetIsNeedAvoidWindow(bool value) {};
 
 SafeAreaInsets PipelineContext::GetSafeArea() const
 {
