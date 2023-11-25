@@ -109,7 +109,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());
     textFieldContentModifier_->SetShowErrorState(
         layoutProperty->GetShowErrorTextValue(false) &&
-        paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE);
+        !textFieldPattern->IsNormalInlineState());
     textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(""));
     textFieldContentModifier_->SetShowUnderlineState(layoutProperty->GetShowUnderlineValue(false));
     auto pipeline = frameNode->GetContext();

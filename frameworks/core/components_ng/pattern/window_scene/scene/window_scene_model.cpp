@@ -45,12 +45,10 @@ void WindowSceneModel::Create(int32_t persistentId)
 
     auto stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::WINDOW_SCENE_ETS_TAG, nodeId);
     auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
         [sceneSession]() { return AceType::MakeRefPtr<WindowScene>(sceneSession); });
     stack->Push(windowNode);
-
-    auto windowScene = windowNode->GetPattern<WindowScene>();
-    windowScene->UpdateSession(sceneSession);
 
     if (windowNode->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
         windowNode->SetHitTestMode(HitTestMode::HTMBLOCK);

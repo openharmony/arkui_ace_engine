@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "base/test/mock/mock_asset_manager.h"
-#include "core/common/flutter/flutter_task_executor.h"
+#include "core/common/task_executor_impl.h"
 #include "core/common/test/mock/mock_resource_register.h"
 #define private public
 #define protected public
@@ -49,7 +49,7 @@ RefPtr<PipelineContext> PluginFrontendDelegateTest::GetPipelineContext(const Ref
 {
     auto platformWindow = PlatformWindow::Create(nullptr);
     auto window = std::make_unique<Window>(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     taskExecutor->InitJsThread(false);
     auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
@@ -303,7 +303,7 @@ HWTEST_F(PluginFrontendDelegateTest, GetMinPlatformVersionTest001, TestSize.Leve
     /**
      * @tc.steps: step1. Build a PluginFrontendDelegate.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     RefPtr<Framework::PluginFrontendDelegate> delegate =
         PluginFrontendDelegateTest::GetPluginFrontendDelegate(taskExecutor);
     EXPECT_TRUE(delegate != nullptr);
@@ -324,7 +324,7 @@ HWTEST_F(PluginFrontendDelegateTest, AttachPipelineContextTest001, TestSize.Leve
     /**
      * @tc.steps: step1. Build a PluginFrontendDelegate.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     RefPtr<Framework::PluginFrontendDelegate> delegate =
         PluginFrontendDelegateTest::GetPluginFrontendDelegate(taskExecutor);
     EXPECT_TRUE(delegate != nullptr);
@@ -348,7 +348,7 @@ HWTEST_F(PluginFrontendDelegateTest, GetUiTask001, TestSize.Level1)
     /**
      * @tc.steps: step1. Build a PluginFrontendDelegate.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     RefPtr<Framework::PluginFrontendDelegate> delegate =
         PluginFrontendDelegateTest::GetPluginFrontendDelegate(taskExecutor);
     EXPECT_TRUE(delegate != nullptr);
@@ -372,7 +372,7 @@ HWTEST_F(PluginFrontendDelegateTest, GetAnimationJsTask001, TestSize.Level1)
     /**
      * @tc.steps: step1. Build a PluginFrontendDelegate.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     RefPtr<Framework::PluginFrontendDelegate> delegate =
         PluginFrontendDelegateTest::GetPluginFrontendDelegate(taskExecutor);
     EXPECT_TRUE(delegate != nullptr);
@@ -393,7 +393,7 @@ HWTEST_F(PluginFrontendDelegateTest, Initialize001, TestSize.Level1)
     /**
      * @tc.steps: step1. Build a PluginFrontendDelegate.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     RefPtr<Framework::PluginFrontendDelegate> delegate =
         PluginFrontendDelegateTest::GetPluginFrontendDelegate(taskExecutor);
     EXPECT_TRUE(delegate != nullptr);
@@ -416,7 +416,7 @@ HWTEST_F(PluginFrontendDelegateTest, GetRunningPageId002, TestSize.Level1)
     /**
      * @tc.steps: step1. Build a PluginFrontendDelegate.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     RefPtr<Framework::PluginFrontendDelegate> delegate =
         PluginFrontendDelegateTest::GetPluginFrontendDelegate(taskExecutor);
     EXPECT_TRUE(delegate != nullptr);

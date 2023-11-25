@@ -55,14 +55,14 @@ struct OptionParam {
     std::function<void()> action;
 
     OptionParam() = default;
-    OptionParam(const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
+    OptionParam(const std::string &valueParam, const std::string &iconParam, const std::function<void()> &actionParam)
         : value(valueParam), icon(iconParam), enabled(true), action(actionParam)
     {}
-    OptionParam(const std::string& valueParam, const std::string& iconParam, bool enabledParam,
-        const std::function<void()>& actionParam)
+    OptionParam(const std::string &valueParam, const std::string &iconParam, bool enabledParam,
+        const std::function<void()> &actionParam)
         : value(valueParam), icon(iconParam), enabled(enabledParam), action(actionParam)
     {}
-    OptionParam(const std::string& valueParam, const std::function<void()>& actionParam)
+    OptionParam(const std::string &valueParam, const std::function<void()> &actionParam)
         : value(valueParam), icon(""), enabled(true), action(actionParam)
     {}
 
@@ -87,13 +87,13 @@ struct MenuParam {
 
 class ACE_FORCE_EXPORT ViewAbstract {
 public:
-    static void SetWidth(const CalcLength& width);
-    static void SetHeight(const CalcLength& height);
+    static void SetWidth(const CalcLength &width);
+    static void SetHeight(const CalcLength &height);
     static void ClearWidthOrHeight(bool isWidth);
-    static void SetMinWidth(const CalcLength& minWidth);
-    static void SetMinHeight(const CalcLength& minHeight);
-    static void SetMaxWidth(const CalcLength& maxWidth);
-    static void SetMaxHeight(const CalcLength& maxHeight);
+    static void SetMinWidth(const CalcLength &minWidth);
+    static void SetMinHeight(const CalcLength &minHeight);
+    static void SetMaxWidth(const CalcLength &maxWidth);
+    static void SetMaxHeight(const CalcLength &maxHeight);
     static void ResetMinSize(bool resetWidth);
     static void ResetMaxSize(bool resetWidth);
 
@@ -102,77 +102,77 @@ public:
     static void SetLayoutWeight(int32_t value);
     static void SetLayoutDirection(TextDirection value);
 
-    static void SetBackgroundColor(const Color& color);
-    static void SetBackgroundImage(const ImageSourceInfo& src);
-    static void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat);
-    static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
-    static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
-    static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle);
-    static void SetBackgroundEffect(const EffectOption& effectOption);
-    static void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle);
+    static void SetBackgroundColor(const Color &color);
+    static void SetBackgroundImage(const ImageSourceInfo &src);
+    static void SetBackgroundImageRepeat(const ImageRepeat &imageRepeat);
+    static void SetBackgroundImageSize(const BackgroundImageSize &bgImgSize);
+    static void SetBackgroundImagePosition(const BackgroundImagePosition &bgImgPosition);
+    static void SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle);
+    static void SetBackgroundEffect(const EffectOption &effectOption);
+    static void SetForegroundBlurStyle(const BlurStyleOption &fgBlurStyle);
     static void SetSphericalEffect(double radio);
-    static void SetPixelStretchEffect(PixStretchEffectOption& option);
+    static void SetPixelStretchEffect(PixStretchEffectOption &option);
     static void SetLightUpEffect(double radio);
-    static void SetPadding(const CalcLength& value);
-    static void SetPadding(const PaddingProperty& value);
-    static void SetMargin(const CalcLength& value);
-    static void SetMargin(const PaddingProperty& value);
-    static void SetBorderRadius(const BorderRadiusProperty& value);
-    static void SetBorderRadius(const Dimension& value);
-    static void SetBorderColor(const Color& value);
-    static void SetBorderColor(const BorderColorProperty& value);
-    static void SetBorderWidth(const Dimension& value);
-    static void SetBorderWidth(const BorderWidthProperty& value);
-    static void SetBorderStyle(const BorderStyle& value);
-    static void SetBorderStyle(const BorderStyleProperty& value);
+    static void SetPadding(const CalcLength &value);
+    static void SetPadding(const PaddingProperty &value);
+    static void SetMargin(const CalcLength &value);
+    static void SetMargin(const PaddingProperty &value);
+    static void SetBorderRadius(const BorderRadiusProperty &value);
+    static void SetBorderRadius(const Dimension &value);
+    static void SetBorderColor(const Color &value);
+    static void SetBorderColor(const BorderColorProperty &value);
+    static void SetBorderWidth(const Dimension &value);
+    static void SetBorderWidth(const BorderWidthProperty &value);
+    static void SetBorderStyle(const BorderStyle &value);
+    static void SetBorderStyle(const BorderStyleProperty &value);
     static void SetOpacity(double opacity);
-    static void SetAllowDrop(const std::set<std::string>& allowDrop);
+    static void SetAllowDrop(const std::set<std::string> &allowDrop);
 
-    static void SetBorderImage(const RefPtr<BorderImage>& borderImage);
-    static void SetBorderImageSource(const std::string& bdImageSrc);
+    static void SetBorderImage(const RefPtr<BorderImage> &borderImage);
+    static void SetBorderImageSource(const std::string &bdImageSrc);
     static void SetHasBorderImageSlice(bool tag);
     static void SetHasBorderImageWidth(bool tag);
     static void SetHasBorderImageOutset(bool tag);
     static void SetHasBorderImageRepeat(bool tag);
-    static void SetBorderImageGradient(const NG::Gradient& gradient);
+    static void SetBorderImageGradient(const NG::Gradient &gradient);
 
     // customBackground
-    static void SetBackgroundAlign(const Alignment& align);
+    static void SetBackgroundAlign(const Alignment &align);
 
     // decoration
-    static void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption);
+    static void SetBackdropBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara);
     static void SetDynamicLightUp(float rate, float lightUpDegree);
-    static void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption);
-    static void SetBackShadow(const Shadow& shadow);
+    static void SetFrontBlur(const Dimension &radius, const BlurOption &blurOption);
+    static void SetBackShadow(const Shadow &shadow);
     static void SetBlendMode(BlendMode blendMode);
 
     // graphics
-    static void SetBrightness(const Dimension& value);
-    static void SetGrayScale(const Dimension& value);
-    static void SetContrast(const Dimension& value);
-    static void SetSaturate(const Dimension& value);
-    static void SetSepia(const Dimension& value);
-    static void SetInvert(const InvertVariant& value);
+    static void SetBrightness(const Dimension &value);
+    static void SetGrayScale(const Dimension &value);
+    static void SetContrast(const Dimension &value);
+    static void SetSaturate(const Dimension &value);
+    static void SetSepia(const Dimension &value);
+    static void SetInvert(const InvertVariant &value);
     static void SetHueRotate(float value);
-    static void SetColorBlend(const Color& value);
+    static void SetColorBlend(const Color &value);
 
     // gradient
-    static void SetLinearGradient(const NG::Gradient& gradient);
-    static void SetSweepGradient(const NG::Gradient& gradient);
-    static void SetRadialGradient(const NG::Gradient& gradient);
+    static void SetLinearGradient(const NG::Gradient &gradient);
+    static void SetSweepGradient(const NG::Gradient &gradient);
+    static void SetRadialGradient(const NG::Gradient &gradient);
 
     // layout
     static void SetAlign(Alignment alignment);
-    static void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules);
+    static void SetAlignRules(const std::map<AlignDirection, AlignRule> &alignRules);
     static void SetVisibility(VisibleType visible);
-    static void SetGrid(
-        std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED);
+    static void SetGrid(std::optional<int32_t> span, std::optional<int32_t> offset,
+        GridSizeType type = GridSizeType::UNDEFINED);
 
     // position
-    static void SetPosition(const OffsetT<Dimension>& value);
-    static void SetOffset(const OffsetT<Dimension>& value);
-    static void MarkAnchor(const OffsetT<Dimension>& value);
+    static void SetPosition(const OffsetT<Dimension> &value);
+    static void SetOffset(const OffsetT<Dimension> &value);
+    static void MarkAnchor(const OffsetT<Dimension> &value);
 
     // render position
     static void SetZIndex(int32_t value);
@@ -182,97 +182,96 @@ public:
     static void SetRenderFit(RenderFit renderFit);
 
     // transform
-    static void SetScale(const NG::VectorF& value);
-    static void SetPivot(const DimensionOffset& value);
-    static void SetTranslate(const NG::TranslateOptions& value);
-    static void SetRotate(const NG::Vector5F& value);
+    static void SetScale(const NG::VectorF &value);
+    static void SetPivot(const DimensionOffset &value);
+    static void SetTranslate(const NG::TranslateOptions &value);
+    static void SetRotate(const NG::Vector5F &value);
 
-    static void SetTransformMatrix(const Matrix4& matrix);
+    static void SetTransformMatrix(const Matrix4 &matrix);
 
     // event
-    static void SetOnClick(GestureEventFunc&& clickEventFunc);
-    static void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
-    static void SetOnTouch(TouchEventFunc&& touchEventFunc);
-    static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
-    static void SetOnHover(OnHoverFunc&& onHoverEventFunc);
+    static void SetOnClick(GestureEventFunc &&clickEventFunc);
+    static void SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc);
+    static void SetOnTouch(TouchEventFunc &&touchEventFunc);
+    static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
+    static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
     static void SetHoverEffectAuto(HoverEffectType hoverEffect);
     static void SetEnabled(bool enabled);
     static void SetFocusable(bool focusable);
-    static void SetOnFocus(OnFocusFunc&& onFocusCallback);
-    static void SetOnBlur(OnBlurFunc&& onBlurCallback);
-    static void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback);
+    static void SetOnFocus(OnFocusFunc &&onFocusCallback);
+    static void SetOnBlur(OnBlurFunc &&onBlurCallback);
+    static void SetOnKeyEvent(OnKeyCallbackFunc &&onKeyCallback);
     static void SetTabIndex(int32_t index);
     static void SetFocusOnTouch(bool isSet);
     static void SetDefaultFocus(bool isSet);
     static void SetGroupDefaultFocus(bool isSet);
-    static void SetOnAppear(std::function<void()>&& onAppear);
-    static void SetOnDisappear(std::function<void()>&& onDisappear);
-    static void SetOnAreaChanged(
-        std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&&
-            onAreaChanged);
-    static void SetOnVisibleChange(
-        std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList);
-    static void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
-    static void SetMouseResponseRegion(const std::vector<DimensionRect>& mouseResponseRegion);
+    static void SetOnAppear(std::function<void()> &&onAppear);
+    static void SetOnDisappear(std::function<void()> &&onDisappear);
+    static void SetOnAreaChanged(std::function<void(const RectF &oldRect, const OffsetF &oldOrigin, const RectF &rect,
+        const OffsetF &origin)> &&onAreaChanged);
+    static void SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
+        const std::vector<double> &ratioList);
+    static void SetResponseRegion(const std::vector<DimensionRect> &responseRegion);
+    static void SetMouseResponseRegion(const std::vector<DimensionRect> &mouseResponseRegion);
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
     static void SetDraggable(bool draggable);
     static void SetOnDragStart(
-        std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart);
+        std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragStart);
     static void SetOnDragEnter(
-        std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragEnter);
+        std::function<void(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragEnter);
     static void SetOnDragLeave(
-        std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave);
+        std::function<void(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragLeave);
     static void SetOnDragMove(
-        std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragMove);
-    static void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDrop);
+        std::function<void(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragMove);
+    static void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDrop);
 
-    static void SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd);
+    static void SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragEvent> &)> &&onDragEnd);
 
     // flex properties
     static void SetAlignSelf(FlexAlign value);
     static void SetFlexShrink(float value);
     static void ResetFlexShrink();
     static void SetFlexGrow(float value);
-    static void SetFlexBasis(const Dimension& value);
+    static void SetFlexBasis(const Dimension &value);
     static void SetDisplayIndex(int32_t value);
-    static void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
-        std::function<void()>&& onKeyboardShortcutAction);
+    static void SetKeyboardShortcut(const std::string &value, const std::vector<ModifierKey> &keys,
+        std::function<void()> &&onKeyboardShortcutAction);
     // obscured
-    static void SetObscured(const std::vector<ObscuredReasons>& reasons);
+    static void SetObscured(const std::vector<ObscuredReasons> &reasons);
 
     // Bind properties
-    static void BindPopup(
-        const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
-    static void BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode,
-        const NG::OffsetF& offset, const MenuParam& menuParam);
-    static void BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
-        const NG::OffsetF& offset, const MenuParam& menuParam, const RefPtr<UINode>& previewCustomNode = nullptr);
-    static void ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool isContextMenu = false);
+    static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
+        const RefPtr<UINode> &customNode);
+    static void BindMenuWithItems(std::vector<OptionParam> &&params, const RefPtr<FrameNode> &targetNode,
+        const NG::OffsetF &offset, const MenuParam &menuParam);
+    static void BindMenuWithCustomNode(const RefPtr<UINode> &customNode, const RefPtr<FrameNode> &targetNode,
+        const NG::OffsetF &offset, const MenuParam &menuParam, const RefPtr<UINode> &previewCustomNode = nullptr);
+    static void ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool isContextMenu = false);
     // inspector
-    static void SetInspectorId(const std::string& inspectorId);
+    static void SetInspectorId(const std::string &inspectorId);
     // restore
     static void SetRestoreId(int32_t restoreId);
     // inspector debugLine
-    static void SetDebugLine(const std::string& line);
+    static void SetDebugLine(const std::string &line);
     // transition
-    static void SetTransition(const TransitionOptions& options);
-    static void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect);
+    static void SetTransition(const TransitionOptions &options);
+    static void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect> &effect);
     // sharedTransition
-    static void SetSharedTransition(const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
+    static void SetSharedTransition(const std::string &shareId, const std::shared_ptr<SharedTransitionOption> &option);
     // geometryTransition
-    static void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false);
+    static void SetGeometryTransition(const std::string &id, bool followWithoutTransition = false);
     // clip and mask
-    static void SetClipShape(const RefPtr<BasicShape>& basicShape);
+    static void SetClipShape(const RefPtr<BasicShape> &basicShape);
     static void SetClipEdge(bool isClip);
-    static void SetMask(const RefPtr<BasicShape>& basicShape);
+    static void SetMask(const RefPtr<BasicShape> &basicShape);
     // overlay
-    static void SetOverlay(const NG::OverlayOptions& overlay);
+    static void SetOverlay(const NG::OverlayOptions &overlay);
     // motionPath
-    static void SetMotionPath(const MotionPathOption& motionPath);
+    static void SetMotionPath(const MotionPathOption &motionPath);
     // progress mask
-    static void SetProgressMask(const RefPtr<ProgressMaskProperty>& progress);
+    static void SetProgressMask(const RefPtr<ProgressMaskProperty> &progress);
 
     static void Pop();
 
@@ -376,7 +375,17 @@ public:
     static void SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath);
     static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
     static void SetGroupDefaultFocus(FrameNode* frameNode, bool isSet);
-
+    static void SetFocusable(FrameNode* frameNode, bool focusable);
+    static void SetTouchable(FrameNode* frameNode, bool touchable);
+    static void SetDefaultFocus(FrameNode* frameNode, bool isSet);
+    static void SetDisplayIndex(FrameNode* frameNode, int32_t value);
+    static void SetOffset(FrameNode *frameNode, const OffsetT<Dimension> &value);
+    static void MarkAnchor(FrameNode *frameNode, const OffsetT<Dimension> &value);
+    static void SetVisibility(FrameNode *frameNode, VisibleType visible);
+    static void SetMargin(FrameNode *frameNode, const CalcLength &value);
+    static void SetMargin(FrameNode *frameNode, const PaddingProperty &value);
+    static void SetPadding(FrameNode *frameNode, const CalcLength &value);
+    static void SetPadding(FrameNode *frameNode, const PaddingProperty &value);
 private:
     static void AddDragFrameNodeToManager();
 };

@@ -105,7 +105,6 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), 0.0f, baselineOffset);
 
     baselineOffset_ = static_cast<float>(baselineOffset);
-
     auto heightFinal = static_cast<float>(height + std::fabs(baselineOffset));
     if (contentConstraint.selfIdealSize.Height().has_value()) {
         heightFinal = std::min(
@@ -227,7 +226,34 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             }
             auto width = geometryNode->GetMarginFrameSize().Width();
             auto height = geometryNode->GetMarginFrameSize().Height();
-            child->placeHolderIndex = child->UpdateParagraph(frameNode, paragraph_, width, height, verticalAlign);
+            child->placeholderIndex = child->UpdateParagraph(frameNode, paragraph_, width, height, verticalAlign);
+            child->content = " ";
+            child->position = spanTextLength + 1;
+            spanTextLength += 1;
+            iterItems++;
+        } else if (AceType::InstanceOf<PlaceholderSpanItem>(child)) {
+            auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(child);
+            if (!placeholderSpanItem) {
+                continue;
+            }
+            int32_t targetId = placeholderSpanItem->placeholderSpanNodeId;
+            auto iterItems = children.begin();
+            // find the Corresponding ImageNode for every ImageSpanItem
+            while (iterItems != children.end() && (*iterItems) && (*iterItems)->GetHostNode()->GetId() != targetId) {
+                iterItems++;
+            }
+            if (iterItems == children.end() || !(*iterItems)) {
+                continue;
+            }
+            (*iterItems)->Measure(layoutConstrain);
+            auto geometryNode = (*iterItems)->GetGeometryNode();
+            if (!geometryNode) {
+                iterItems++;
+                continue;
+            }
+            auto width = geometryNode->GetMarginFrameSize().Width();
+            auto height = geometryNode->GetMarginFrameSize().Height();
+            child->placeholderIndex = child->UpdateParagraph(frameNode, paragraph_, width, height, VerticalAlign::NONE);
             child->content = " ";
             child->position = spanTextLength + 1;
             spanTextLength += 1;
@@ -272,7 +298,7 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     for (auto kv : pattern->GetAISpanMap()) {
         auto aiSpan = kv.second;
         if (aiSpan.start <= preEnd) {
-            LOGD("Error prediction");
+            TAG_LOGI(AceLogTag::ACE_TEXT, "Error prediction");
             continue;
         }
         if (preEnd < aiSpan.start) {
@@ -360,17 +386,16 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto contentOffset = GetContentOffset(layoutWrapper);
-    std::vector<int32_t> placeHolderIndex;
+    std::vector<int32_t> placeholderIndex;
     for (const auto& child : spanItemChildren_) {
         if (!child) {
             continue;
         }
-        auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
-        if (imageSpanItem) {
-            placeHolderIndex.emplace_back(child->placeHolderIndex);
+        if (AceType::InstanceOf<ImageSpanItem>(child) || AceType::InstanceOf<PlaceholderSpanItem>(child)) {
+            placeholderIndex.emplace_back(child->placeholderIndex);
         }
     }
-    if (spanItemChildren_.empty() || placeHolderIndex.empty()) {
+    if (spanItemChildren_.empty() || placeholderIndex.empty()) {
         return;
     }
 
@@ -384,7 +409,8 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             ++index;
             continue;
         }
-        if (index >= placeHolderIndex.size() || index >= rectsForPlaceholders.size()) {
+        if (index >= placeholderIndex.size() ||
+            (index >= rectsForPlaceholders.size() && child->GetHostTag() != V2::PLACEHOLDER_SPAN_ETS_TAG)) {
             return;
         }
         auto rect = rectsForPlaceholders.at(index);
@@ -405,7 +431,7 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->InitSpanImageLayout(placeHolderIndex, rectsForPlaceholders, contentOffset);
+    pattern->InitSpanImageLayout(placeholderIndex, rectsForPlaceholders, contentOffset);
 #endif
 }
 
@@ -792,21 +818,25 @@ bool TextLayoutAlgorithm::IncludeImageSpan(LayoutWrapper* layoutWrapper)
     return (!layoutWrapper->GetAllChildrenWithBuild().empty());
 }
 
-void TextLayoutAlgorithm::GetSpanAndImageSpanList(
-    std::list<RefPtr<SpanItem>>& spanList, std::map<int32_t, std::pair<RectF, RefPtr<ImageSpanItem>>>& imageSpanList)
+void TextLayoutAlgorithm::GetSpanAndImageSpanList(std::list<RefPtr<SpanItem>>& spanList,
+    std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList)
 {
     std::vector<RectF> rectsForPlaceholders;
     paragraph_->GetRectsForPlaceholders(rectsForPlaceholders);
-
     for (const auto& child : spanItemChildren_) {
         if (!child) {
             continue;
         }
         auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
         if (imageSpanItem) {
-            int32_t index = child->placeHolderIndex;
+            int32_t index = child->placeholderIndex;
             if (index >= 0 && index < static_cast<int32_t>(rectsForPlaceholders.size())) {
-                imageSpanList.emplace(index, std::make_pair(rectsForPlaceholders.at(index), imageSpanItem));
+                placeholderSpanList.emplace(index, std::make_pair(rectsForPlaceholders.at(index), imageSpanItem));
+            }
+        } else if (auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(child); placeholderSpanItem) {
+            int32_t index = child->placeholderIndex;
+            if (index >= 0 && index < static_cast<int32_t>(rectsForPlaceholders.size())) {
+                placeholderSpanList.emplace(index, std::make_pair(rectsForPlaceholders.at(index), placeholderSpanItem));
             }
         } else {
             spanList.emplace_back(child);
@@ -868,25 +898,25 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
 }
 
 void TextLayoutAlgorithm::SetImageSpanTextStyleByLines(const TextStyle& textStyle,
-    std::map<int32_t, std::pair<RectF, RefPtr<ImageSpanItem>>>& imageSpanList,
+    std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList,
     std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    auto imageSpanItem = imageSpanList.begin();
+    auto placeholderItem = placeholderSpanList.begin();
     for (auto spanItem = spanContentLines.begin(); spanItem != spanContentLines.end(); spanItem++) {
-        for (; imageSpanItem != imageSpanList.end();) {
-            auto imageSpan = imageSpanItem->second.second;
-            if (!imageSpan) {
+        for (; placeholderItem != placeholderSpanList.end();) {
+            auto placeholder = placeholderItem->second.second;
+            if (!placeholder) {
                 continue;
             }
-            imageSpan->textStyle = textStyle;
+            placeholder->textStyle = textStyle;
 
-            auto offset = imageSpanItem->second.first.GetOffset();
-            auto imageSpanItemRect = imageSpanItem->second.first;
-            imageSpanItemRect.SetOffset(OffsetF(spanItem->second.first.GetOffset().GetX(), offset.GetY()));
-            bool isIntersectWith = spanItem->second.first.IsIntersectWith(imageSpanItemRect);
+            auto offset = placeholderItem->second.first.GetOffset();
+            auto placeholderItemRect = placeholderItem->second.first;
+            placeholderItemRect.SetOffset(OffsetF(spanItem->second.first.GetOffset().GetX(), offset.GetY()));
+            bool isIntersectWith = spanItem->second.first.IsIntersectWith(placeholderItemRect);
             if (!isIntersectWith) {
                 break;
             }
@@ -905,8 +935,8 @@ void TextLayoutAlgorithm::SetImageSpanTextStyleByLines(const TextStyle& textStyl
                         child->fontStyle, child->textLineStyle, pipelineContext->GetTheme<TextTheme>());
                 }
             }
-            imageSpan->textStyle = spanTextStyle;
-            imageSpanItem++;
+            placeholder->textStyle = spanTextStyle;
+            placeholderItem++;
         }
     }
 }
@@ -916,15 +946,15 @@ void TextLayoutAlgorithm::SetImageSpanTextStyle(const TextStyle& textStyle)
     CHECK_NULL_VOID(paragraph_);
 
     std::list<RefPtr<SpanItem>> spanList;
-    std::map<int32_t, std::pair<RectF, RefPtr<ImageSpanItem>>> imageSpanList;
-    GetSpanAndImageSpanList(spanList, imageSpanList);
+    std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>> placeholderList;
+    GetSpanAndImageSpanList(spanList, placeholderList);
 
     // split text content by lines
     std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>> spanContentLines;
     SplitSpanContentByLines(textStyle, spanList, spanContentLines);
 
     // set imagespan textstyle
-    SetImageSpanTextStyleByLines(textStyle, imageSpanList, spanContentLines);
+    SetImageSpanTextStyleByLines(textStyle, placeholderList, spanContentLines);
 }
 
 bool TextLayoutAlgorithm::CreateImageSpanAndLayout(const TextStyle& textStyle, const std::string& content,

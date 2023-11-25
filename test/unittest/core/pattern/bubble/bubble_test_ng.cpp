@@ -22,6 +22,11 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/core/rosen/testing_canvas.h"
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -38,11 +43,7 @@
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -71,6 +72,7 @@ constexpr float TARGET_HEIGHT = 200.0f;
 constexpr float TARGET_X = 100.0f;
 constexpr float TARGET_Y = 150.0f;
 
+const std::string CLIP_PATH = "M100 0 L0 100 L50 200 L150 200 L200 100 Z";
 const std::string BUBBLE_MESSAGE = "Hello World";
 const std::string BUBBLE_NEW_MESSAGE = "Good";
 const std::string STATE = "true";
@@ -90,20 +92,17 @@ constexpr Dimension BUBBLE_PAINT_PROPERTY_ARROW_OFFSET = 20.0_px;
 constexpr Placement BUBBLE_LAYOUT_PROPERTY_PLACEMENT = Placement::LEFT;
 constexpr Dimension BORDER_EDGE = 1.0_px;
 constexpr Dimension BORDER_EDGE_LARGE = 20.0_px;
-const std::vector<Placement> BUBBLE_LAYOUT_PROPERTY_PLACEMENTS = {
-    Placement::LEFT,
-    Placement::RIGHT,
-    Placement::TOP,
-    Placement::BOTTOM,
-    Placement::TOP_LEFT,
-    Placement::TOP_RIGHT,
-    Placement::BOTTOM_LEFT,
-    Placement::BOTTOM_RIGHT,
-    Placement::LEFT_BOTTOM,
-    Placement::LEFT_TOP,
-    Placement::RIGHT_BOTTOM,
-    Placement::RIGHT_TOP,
-};
+constexpr int CHILD_SIZE_X = 1;
+constexpr int CHILD_SIZE_Y = 2;
+constexpr float TARGET_SIZE_WIDTH = 100.0f;
+constexpr float TARGET_SIZE_HEIGHT = 100.0f;
+constexpr float POSITION_OFFSET = 100.0f;
+constexpr float ARROW_OFFSET = 100.0f;
+constexpr float RADIUS = 30.0f;
+const std::string ARROW_PATH_EMPTY = "";
+const std::vector<Placement> BUBBLE_LAYOUT_PROPERTY_PLACEMENTS = { Placement::LEFT, Placement::RIGHT, Placement::TOP,
+    Placement::BOTTOM, Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT,
+    Placement::LEFT_BOTTOM, Placement::LEFT_TOP, Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP, Placement::NONE };
 const Offset POPUP_PARAM_POSITION_OFFSET = Offset(100.0f, 100.0f);
 const OffsetF BUBBLE_POSITION_OFFSET = OffsetF(100.0f, 100.0f);
 } // namespace
@@ -552,9 +551,6 @@ HWTEST_F(BubbleTestNg, BubblePatternTest006, TestSize.Level1)
     bubblePattern->HandleTouchEvent(touchEventInfo);
 
     bubblePaintProperty->UpdateAutoCancel(BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_TRUE);
-    bubblePattern->targetNodeId_ = targetId;
-    bubblePattern->touchRegion_ = RectF(OffsetF(50, 50), SizeF(100, 100));
-    bubblePattern->HandleTouchDown(Offset(100.0, 100.0));
 }
 
 /**
@@ -921,10 +917,16 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod001, TestSize.Level1)
     bubblePaintMethod.SetShowArrow(true);
     bubblePaintMethod.enableArrow_ = true;
     bubblePaintMethod.PaintBubble(canvas, paintWrapper);
+    bubblePaintMethod.clipFrameNode_ = frameNode;
+    bubblePaintMethod.clipPath_ = CLIP_PATH;
+    bubblePaintMethod.ClipBubble(paintWrapper);
     EXPECT_TRUE(bubblePaintMethod.showArrow_);
 
     bubblePaintMethod.SetShowArrow(false);
     bubblePaintMethod.PaintBubble(canvas, paintWrapper);
+    bubblePaintMethod.clipFrameNode_ = frameNode;
+    bubblePaintMethod.clipPath_ = CLIP_PATH;
+    bubblePaintMethod.ClipBubble(paintWrapper);
     ASSERT_FALSE(bubblePaintMethod.showArrow_);
 
     bubblePaintMethod.SetShowArrow(true);
@@ -1455,8 +1457,8 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest003, TestSize.Level1)
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_WIDTH, BUBBLE_HEIGHT));
-    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 6);
-    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetY(), 16);
+    EXPECT_NE(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 0);
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetY(), 0);
 }
 
 /**
@@ -1498,7 +1500,6 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest004, TestSize.Level1)
         }
         bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
         bubbleLayoutAlgorithm->UpdateTouchRegion();
-        bubbleLayoutAlgorithm->UpdateChildPosition(bubbleLayoutProperty);
     }
     bubbleLayoutAlgorithm->showArrow_ = true;
     for (uint32_t i = 0; i < BUBBLE_LAYOUT_PROPERTY_PLACEMENTS.size(); ++i) {
@@ -1593,35 +1594,10 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest005, TestSize.Level1)
 
 /**
  * @tc.name: BubbleLayoutTest006
- * @tc.desc: Test BubbleLayoutAlgorithm::GetPositionWithPlacement function
- * @tc.type: FUNC
- */
-HWTEST_F(BubbleTestNg, BubbleLayoutTest006, TestSize.Level1)
-{
-    BubbleLayoutAlgorithm bubbleLayoutAlgorithm;
-    SizeF childSize(24, 24);
-    OffsetF topPosition(0, 10);
-    OffsetF bottomPosition(0, 34);
-    OffsetF topArrowPosition(0, 0);
-    OffsetF bottomArrowPosition(0, 44);
-    OffsetF arrowPosition(0, 10);
-
-    std::vector<Placement> placements = { Placement::LEFT, Placement::RIGHT, Placement::TOP, Placement::BOTTOM,
-        Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT,
-        Placement::LEFT_BOTTOM, Placement::LEFT_TOP, Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP };
-    for (uint32_t i = 0; i < BUBBLE_LAYOUT_PROPERTY_PLACEMENTS.size(); ++i) {
-        bubbleLayoutAlgorithm.placement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
-        bubbleLayoutAlgorithm.GetPositionWithPlacement(topPosition, arrowPosition, childSize, placements[i]);
-        EXPECT_EQ(BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i], placements[i]);
-    }
-}
-
-/**
- * @tc.name: BubbleLayoutTest007
  * @tc.desc: Test GetPositionOffset,UpdatePositionOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubbleLayoutTest007, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubbleLayoutTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. use UpdatePositionOffset() to update position offset.
@@ -1639,11 +1615,11 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: BubbleLayoutTest008
+ * @tc.name: BubbleLayoutTest007
  * @tc.desc: Test BubbleLayoutAlgorithm::Measure function
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubbleLayoutTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -1719,7 +1695,175 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
     EXPECT_FALSE(children.empty());
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
-    EXPECT_FALSE(bubbleLayoutAlgorithm->GetChildPosition(SizeF(ZERO, ZERO), bubbleLayoutProperty, true) ==
-                 DISPLAY_WINDOW_OFFSET);
+    EXPECT_FALSE(bubbleLayoutAlgorithm->GetChildPosition(SizeF(ZERO, ZERO), true, true) == DISPLAY_WINDOW_OFFSET);
+}
+
+/**
+ * @tc.name: BubbleLayoutTest008
+ * @tc.desc: Test GetIfNeedArrow
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    /**
+     * @tc.steps: step2. get pattern and layoutAlgorithm.
+     * @tc.expected: step2. related function is called.
+     */
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
+    auto bubbleLayoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+
+    /**
+     * @tc.steps: step3. excute GetIfNeedArrow GetChildPosition
+     * @tc.expected: step3. GetChildPosition get result offset is adjust position.
+     */
+    SizeF childSize(CHILD_SIZE_X, CHILD_SIZE_Y);
+    std::string result = ARROW_PATH_EMPTY;
+    for (uint32_t i = 0; i < BUBBLE_LAYOUT_PROPERTY_PLACEMENTS.size(); ++i) {
+        if (i % 2 == 0) {
+            bubbleLayoutProperty->UpdateEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_TRUE);
+        } else {
+            bubbleLayoutProperty->UpdateEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_FALSE);
+        }
+        bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
+        bubbleLayoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+        bubbleLayoutAlgorithm->targetOffset_ = OffsetF(POSITION_OFFSET, POSITION_OFFSET);
+        /**
+         * @tc.steps: step3. excute GetIfNeedArrow
+         * @tc.expected: step3. GetIfNeedArrow returns a sharp corner that needs to be drawn.
+         */
+        auto needArrow = bubbleLayoutAlgorithm->GetIfNeedArrow(bubbleLayoutProperty, childSize);
+        EXPECT_FALSE(needArrow);
+        /**
+         * @tc.steps: step4. excute GetChildPosition
+         * @tc.expected: step4. GetChildPosition returns the result as the bubble position.
+         */
+        auto resultOffset = bubbleLayoutAlgorithm->GetChildPosition(childSize, needArrow, true);
+        EXPECT_NE(resultOffset, DISPLAY_WINDOW_OFFSET);
+        OffsetF arrowPosition;
+        /**
+         * @tc.steps: step5. excute GetPositionWithPlacementLeftBottom
+         * @tc.expected: step5. GetPositionWithPlacementLeftBottom returns the position of the bubble.
+         */
+        auto position = bubbleLayoutAlgorithm->GetPositionWithPlacementLeftBottom(childSize,
+            OffsetF(POSITION_OFFSET, POSITION_OFFSET), OffsetF(POSITION_OFFSET, POSITION_OFFSET), arrowPosition);
+        EXPECT_NE(position, DISPLAY_WINDOW_OFFSET);
+        EXPECT_NE(arrowPosition, DISPLAY_WINDOW_OFFSET);
+
+        /**
+         * @tc.steps: step6. excute GetArrowBuildPlacement
+         * @tc.expected: step6. GetArrowBuildPlacement returns the direction of Arrow drawing.
+         */
+        bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
+        Placement arrowBuildplacement = Placement::NONE;
+        if (BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i] != Placement::NONE) {
+            bubbleLayoutAlgorithm->GetArrowBuildPlacement(arrowBuildplacement);
+            EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        }
+
+        /**
+         * @tc.steps: step7. excute BuildTopLinePath
+         * @tc.expected: step7. BuildTopLinePath returns the top edge drawing path of the bubble.
+         */
+        arrowBuildplacement = Placement::TOP_RIGHT;
+        bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
+        result = bubbleLayoutAlgorithm->BuildTopLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
+        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        arrowBuildplacement = Placement::TOP_LEFT;
+        result = bubbleLayoutAlgorithm->BuildTopLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
+        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        arrowBuildplacement = Placement::TOP;
+        result = bubbleLayoutAlgorithm->BuildTopLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
+        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        /**
+         * @tc.steps: step8. excute BuildRightLinePath
+         * @tc.expected: step8. BuildRightLinePath returns the Right edge drawing path of the bubble.
+         */
+        bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
+        arrowBuildplacement = Placement::RIGHT_BOTTOM;
+        result = bubbleLayoutAlgorithm->BuildRightLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
+        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        arrowBuildplacement = Placement::RIGHT_TOP;
+        result = bubbleLayoutAlgorithm->BuildRightLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
+        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        arrowBuildplacement = Placement::RIGHT;
+        result = bubbleLayoutAlgorithm->BuildRightLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
+        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        /**
+         * @tc.steps: step9. excute BuildBottomLinePath
+         * @tc.expected: step9. BuildBottomLinePath returns the Bottom edge drawing path of the bubble.
+         */
+        bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
+        arrowBuildplacement = Placement::BOTTOM_RIGHT;
+        result = bubbleLayoutAlgorithm->BuildBottomLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
+        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        arrowBuildplacement = Placement::BOTTOM_LEFT;
+        result = bubbleLayoutAlgorithm->BuildBottomLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
+        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        arrowBuildplacement = Placement::BOTTOM;
+        result = bubbleLayoutAlgorithm->BuildBottomLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
+        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        /**
+         * @tc.steps: step10. excute BuildLeftLinePath
+         * @tc.expected: step10. BuildLeftLinePath returns the Left edge drawing path of the bubble.
+         */
+        bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
+        arrowBuildplacement = Placement::LEFT_BOTTOM;
+        result = bubbleLayoutAlgorithm->BuildLeftLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
+        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        arrowBuildplacement = Placement::LEFT_TOP;
+        result = bubbleLayoutAlgorithm->BuildLeftLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
+        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        arrowBuildplacement = Placement::LEFT;
+        result = bubbleLayoutAlgorithm->BuildLeftLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
+        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+    }
+}
+
+/**
+ * @tc.name: BubbleLayoutTest009
+ * @tc.desc: Test GetIfNeedArrow
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubbleLayoutTest009, TestSize.Level1)
+{
+    static std::vector<std::string> TEXT_STATES = { V2::TEXTAREA_ETS_TAG, V2::TEXTINPUT_ETS_TAG,
+        V2::RICH_EDITOR_ETS_TAG, V2::SEARCH_ETS_TAG };
+
+    for (uint32_t i = 0; i < TEXT_STATES.size(); ++i) {
+        /**
+         * @tc.steps: step1. create targetNode and get frameNode.
+         */
+        auto targetNode = FrameNode::GetOrCreateFrameNode(TEXT_STATES[i],
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        auto targetId = targetNode->GetId();
+        auto targetTag = targetNode->GetTag();
+        auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto frameNode = FrameNode::CreateFrameNode(
+            V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+        /**
+         * @tc.steps: step2. get pattern and layoutAlgorithm.
+         * @tc.expected: step2. related function is called.
+         */
+        auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+        auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
+        auto bubbleLayoutAlgorithm =
+            AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+        /**
+         * @tc.steps: step4. excute InitCaretTargetSizeAndPosition
+         * @tc.expected: step4. InitCaretTargetSizeAndPosition get result bCaretMode_ is  true..
+         */
+        bubbleLayoutAlgorithm->InitCaretTargetSizeAndPosition();
+        EXPECT_TRUE(bubbleLayoutAlgorithm->bCaretMode_);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -130,6 +130,10 @@ public:
         const std::function<void(float, float, float, float)>& callback) {}
     virtual void RemoveSurfaceChangedCallBack() {}
 
+    virtual void MarkNewFrameAvailable(void* nativeWindow) {}
+    virtual void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) {}
+    virtual void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) {}
+
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
 

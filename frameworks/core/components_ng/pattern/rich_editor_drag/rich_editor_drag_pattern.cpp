@@ -56,7 +56,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     auto dragNode = CreateDragNode(hostNode);
     auto dragPattern = dragNode->GetPattern<RichEditorDragPattern>();
     auto richEditor = hostNode->GetPattern<RichEditorPattern>();
-    auto placeHolderIndex = richEditor->GetPlaceHolderIndex();
+    auto placeholderIndex = richEditor->GetPlaceHolderIndex();
     auto rectsForPlaceholders = richEditor->GetRectsForPlaceholders();
 
     size_t index = 0;
@@ -64,7 +64,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     std::list<RefPtr<FrameNode>> realImageChildren;
     auto boxes = hostPattern->GetTextBoxes();
     for (const auto& child : imageChildren) {
-        auto imageIndex = placeHolderIndex[index];
+        auto imageIndex = placeholderIndex[index];
         auto rect = rectsForPlaceholders.at(imageIndex);
 
         for (const auto& box : boxes) {

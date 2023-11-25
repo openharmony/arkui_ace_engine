@@ -66,6 +66,7 @@
 #include "core/common/platform_window.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
@@ -183,14 +184,26 @@ AceContainer::~AceContainer()
 
 void AceContainer::InitializeTask()
 {
-    auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    flutterTaskExecutor->InitPlatformThread(useCurrentEventRunner_);
-    taskExecutor_ = flutterTaskExecutor;
-    // No need to create JS Thread for DECLARATIVE_JS
-    if (type_ == FrontendType::DECLARATIVE_JS) {
-        GetSettings().useUIAsJSThread = true;
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        auto taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>();
+        taskExecutorImpl->InitPlatformThread(useCurrentEventRunner_);
+        taskExecutor_ = taskExecutorImpl;
+        // No need to create JS Thread for DECLARATIVE_JS
+        if (type_ == FrontendType::DECLARATIVE_JS) {
+            GetSettings().useUIAsJSThread = true;
+        } else {
+            taskExecutorImpl->InitJsThread();
+        }
     } else {
-        flutterTaskExecutor->InitJsThread();
+        auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+        flutterTaskExecutor->InitPlatformThread(useCurrentEventRunner_);
+        taskExecutor_ = flutterTaskExecutor;
+        // No need to create JS Thread for DECLARATIVE_JS
+        if (type_ == FrontendType::DECLARATIVE_JS) {
+            GetSettings().useUIAsJSThread = true;
+        } else {
+            flutterTaskExecutor->InitJsThread();
+        }
     }
 }
 
@@ -795,10 +808,11 @@ void AceContainer::InitializeCallback()
 
     if (!isFormRender_) {
         auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
-                                       int32_t x, int32_t y, const DragEventAction& action) {
+                                        const PointerEvent& pointerEvent, const DragEventAction& action) {
             ContainerScope scope(id);
             context->GetTaskExecutor()->PostTask(
-                [context, x, y, action]() { context->OnDragEvent(x, y, action); }, TaskExecutor::TaskType::UI);
+                [context, pointerEvent, action]() { context->OnDragEvent(pointerEvent, action); },
+                TaskExecutor::TaskType::UI);
         };
         aceView_->RegisterDragEventCallback(dragEventCallback);
     }
@@ -1291,25 +1305,48 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
-    auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
-    if (!isSubContainer_) {
-        auto* aceView = static_cast<AceViewOhos*>(aceView_);
-        ACE_DCHECK(aceView != nullptr);
-        flutterTaskExecutor->InitOtherThreads(aceView->GetThreadModel());
-    }
-    ContainerScope scope(instanceId);
-    if (type_ == FrontendType::DECLARATIVE_JS) {
-        // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
-        flutterTaskExecutor->InitJsThread(false);
-        InitializeFrontend();
-        auto front = GetFrontend();
-        if (front) {
-            front->UpdateState(Frontend::State::ON_CREATE);
-            front->SetJsMessageDispatcher(AceType::Claim(this));
-            front->SetAssetManager(assetManager_);
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        auto taskExecutorImpl = AceType::DynamicCast<TaskExecutorImpl>(taskExecutor_);
+        if (!isSubContainer_) {
+            auto* aceView = static_cast<AceViewOhos*>(aceView_);
+            ACE_DCHECK(aceView != nullptr);
+            taskExecutorImpl->InitOtherThreads(aceView->GetThreadModelImpl());
         }
-    } else if (type_ != FrontendType::JS_CARD) {
-        aceView_->SetCreateTime(createTime_);
+        ContainerScope scope(instanceId);
+        if (type_ == FrontendType::DECLARATIVE_JS) {
+            // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
+            taskExecutorImpl->InitJsThread(false);
+            InitializeFrontend();
+            auto front = GetFrontend();
+            if (front) {
+                front->UpdateState(Frontend::State::ON_CREATE);
+                front->SetJsMessageDispatcher(AceType::Claim(this));
+                front->SetAssetManager(assetManager_);
+            }
+        } else if (type_ != FrontendType::JS_CARD) {
+            aceView_->SetCreateTime(createTime_);
+        }
+    } else {
+        auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
+        if (!isSubContainer_) {
+            auto* aceView = static_cast<AceViewOhos*>(aceView_);
+            ACE_DCHECK(aceView != nullptr);
+            flutterTaskExecutor->InitOtherThreads(aceView->GetThreadModel());
+        }
+        ContainerScope scope(instanceId);
+        if (type_ == FrontendType::DECLARATIVE_JS) {
+            // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
+            flutterTaskExecutor->InitJsThread(false);
+            InitializeFrontend();
+            auto front = GetFrontend();
+            if (front) {
+                front->UpdateState(Frontend::State::ON_CREATE);
+                front->SetJsMessageDispatcher(AceType::Claim(this));
+                front->SetAssetManager(assetManager_);
+            }
+        } else if (type_ != FrontendType::JS_CARD) {
+            aceView_->SetCreateTime(createTime_);
+        }
     }
     resRegister_ = aceView_->GetPlatformResRegister();
 #ifndef NG_BUILD
@@ -1524,6 +1561,15 @@ bool AceContainer::IsLauncherContainer()
     return info ? info->isLauncherApp : false;
 }
 
+bool AceContainer::IsTransparentBg() const
+{
+    CHECK_NULL_RETURN(pipelineContext_, true);
+    Color bgColor = pipelineContext_->GetAppBgColor();
+    std::string bgOpacity = bgColor.ColorToString().substr(0, 3);
+    std::string transparentOpacity = "#00";
+    return bgColor == Color::TRANSPARENT || bgOpacity == transparentOpacity;
+}
+
 void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -1602,7 +1648,11 @@ void AceContainer::InitializeSubContainer(int32_t parentContainerId)
     auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
     CHECK_NULL_VOID(parentContainer);
     auto taskExec = parentContainer->GetTaskExecutor();
-    taskExecutor_ = AceType::DynamicCast<FlutterTaskExecutor>(std::move(taskExec));
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        taskExecutor_ = AceType::DynamicCast<TaskExecutorImpl>(std::move(taskExec));
+    } else {
+        taskExecutor_ = AceType::DynamicCast<FlutterTaskExecutor>(std::move(taskExec));
+    }
     auto parentSettings = parentContainer->GetSettings();
     GetSettings().useUIAsJSThread = parentSettings.useUIAsJSThread;
     GetSettings().usePlatformAsUIThread = parentSettings.usePlatformAsUIThread;
@@ -1822,9 +1872,6 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     auto front = GetFrontend();
     CHECK_NULL_VOID(front);
     front->OnConfigurationUpdated(configuration);
-    if (!IsTransparentForm()) {
-        pipelineContext_->SetAppBgColor(themeManager->GetBackgroundColor());
-    }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
 #endif
@@ -1863,6 +1910,9 @@ void AceContainer::NotifyConfigurationChange(
                     }
                     if (configurationChange.dpiUpdate && (themeManager->GetResourceLimitKeys() & DPI_KEY) == 0) {
                         return;
+                    }
+                    if (configurationChange.colorModeUpdate && !container->IsTransparentBg()) {
+                        pipeline->SetAppBgColor(themeManager->GetBackgroundColor());
                     }
                     pipeline->NotifyConfigurationChange();
                     pipeline->FlushReload(configurationChange);
@@ -2276,5 +2326,4 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 #endif
     });
 }
-
 } // namespace OHOS::Ace::Platform

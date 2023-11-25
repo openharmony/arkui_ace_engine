@@ -26,6 +26,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -103,7 +104,7 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapp
     // update dragBar state
     auto sheetLayoutProperty = DynamicCast<SheetPresentationProperty>(dirty->GetLayoutProperty());
     CHECK_NULL_RETURN(sheetLayoutProperty, false);
-    auto showDragIndicator = sheetLayoutProperty->GetSheetStyleValue().showDragBar.value_or(true);
+    auto showDragIndicator = sheetLayoutProperty->GetSheetStyleValue(NG::SheetStyle()).showDragBar.value_or(true);
     auto host = GetHost();
     auto sheetDragBar = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_RETURN(sheetDragBar, false);
@@ -208,7 +209,7 @@ void SheetPresentationPattern::InitialLayoutProps()
     auto largeHeight = sheetHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight_;
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(NG::SheetStyle());
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
             height_ = sheetHeight_ / half;
@@ -265,6 +266,7 @@ void SheetPresentationPattern::AvoidSafeArea()
             ScrollTo(heightUp);
         }
     } else {
+        // offset: translate endpoint, calculated from top
         renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
     }
 }

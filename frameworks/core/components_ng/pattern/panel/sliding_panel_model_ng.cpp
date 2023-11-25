@@ -221,4 +221,19 @@ void SlidingPanelModelNG::SetModeChangeEvent(ChangeEvent&& modeChangeEvent)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetModeChangeEvent(std::move(modeChangeEvent));
 }
+
+void SlidingPanelModelNG::SetShowCloseIcon(FrameNode* frameNode, bool showCloseIcon)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, ShowCloseIcon, showCloseIcon, frameNode);
+}
+
+void SlidingPanelModelNG::SetHasDragBar(FrameNode* frameNode, bool hasDragBar)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HasDragBar, hasDragBar, frameNode);
+}
+
+void SlidingPanelModelNG::SetIsShow(FrameNode* frameNode, bool isShow)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow, frameNode);
+}
 } // namespace OHOS::Ace::NG

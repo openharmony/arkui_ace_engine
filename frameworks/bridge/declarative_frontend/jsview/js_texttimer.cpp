@@ -19,6 +19,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/text_timer_model_impl.h"
 #include "core/components/common/layout/constants.h"
@@ -112,6 +113,7 @@ void JSTextTimer::JSBind(BindingTarget globalObj)
     JSClass<JSTextTimer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextTimer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTextTimer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSTextTimer>::StaticMethod("textShadow", &JSTextTimer::SetTextShadow, opt);
     JSClass<JSTextTimer>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -200,6 +202,18 @@ void JSTextTimer::SetTextColor(const JSCallbackInfo& info)
     }
 
     TextTimerModel::GetInstance()->SetTextColor(textColor);
+}
+
+void JSTextTimer::SetTextShadow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    std::vector<Shadow> shadows;
+    ParseTextShadowFromShadowObject(info[0], shadows);
+    if (!shadows.empty()) {
+        TextTimerModel::GetInstance()->SetTextShadow(shadows);
+    }
 }
 
 void JSTextTimer::SetFontWeight(const JSCallbackInfo& info)

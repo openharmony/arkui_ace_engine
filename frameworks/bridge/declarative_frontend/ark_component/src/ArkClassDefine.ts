@@ -488,6 +488,17 @@ class ArkBlockSize {
     }
 }
 
+class ArkDecoration {
+  type: number;
+  color?: string | number | undefined;
+  constructor() {
+    this.type = TextDecorationType.None;
+    this.color = undefined;
+  }
+  isEqual(another: ArkDecoration): boolean {
+    return (this.type === another.type) && (this.color === another.color);
+  }
+}
 class ArkBorder implements Equable {
     arkWidth: ArkBorderWidth
     arkColor: ArkBorderColor
@@ -680,3 +691,22 @@ class ArkGridColColumnOption implements Equable {
 		    (this.lg === another.lg) && (this.xl === another.xl) && (this.xxl === another.xxl);
     }
 }
+class ArkPadding implements Equable {
+  top: string | number | undefined;
+  right: string | number | undefined;
+  bottom: string | number | undefined;
+  left: string | number | undefined;
+  constructor() {
+    this.top = undefined;
+    this.right = undefined;
+    this.bottom = undefined;
+    this.left = undefined;
+  }
+  isEqual(another: ArkPadding) {
+    return (this.top === another.top &&
+      this.right === another.right &&
+      this.bottom === another.bottom &&
+      this.left === another.left);
+  }
+}
+ 

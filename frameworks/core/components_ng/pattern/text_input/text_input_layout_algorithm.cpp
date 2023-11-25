@@ -124,11 +124,13 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     bool updateFrameSize = false;
     if (responseArea) {
         updateFrameSize = true;
-        childWidth += responseArea->Measure(layoutWrapper, 0).Width();
+        auto childIndex = frameNode->GetChildIndex(responseArea->GetFrameNode());
+        childWidth += responseArea->Measure(layoutWrapper, childIndex).Width();
     }
     if (cleanNodeResponseArea) {
         updateFrameSize = true;
-        childWidth += cleanNodeResponseArea->Measure(layoutWrapper, layoutWrapper->GetTotalChildCount() - 1).Width();
+        auto childIndex = frameNode->GetChildIndex(cleanNodeResponseArea->GetFrameNode());
+        childWidth += cleanNodeResponseArea->Measure(layoutWrapper, childIndex).Width();
     }
     if (updateFrameSize) {
         if (LessOrEqual(contentWidth + childWidth, textFieldContentConstraint.maxSize.Width())) {
@@ -205,10 +207,17 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
     float unitNodeWidth = 0.0f;
     if (responseArea) {
-        responseArea->Layout(layoutWrapper, 0, unitNodeWidth);
+        auto childIndex = frameNode->GetChildIndex(responseArea->GetFrameNode());
+        responseArea->Layout(layoutWrapper, childIndex, unitNodeWidth);
     }
     if (cleanNodeResponseArea) {
-        cleanNodeResponseArea->Layout(layoutWrapper, frameNode->GetChildren().size() - 1, unitNodeWidth);
+        auto childIndex = frameNode->GetChildIndex(cleanNodeResponseArea->GetFrameNode());
+        cleanNodeResponseArea->Layout(layoutWrapper, childIndex, unitNodeWidth);
+        // CounterNode Layout.
+        auto isInlineStyle = pattern->IsNormalInlineState();
+        if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength() && !isInlineStyle) {
+            TextFieldLayoutAlgorithm::CounterLayout(layoutWrapper);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

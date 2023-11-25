@@ -319,11 +319,17 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
             break;
         }
         case ContextType::HARDWARE_SURFACE: {
+#ifndef VIDEO_TEXTURE_SUPPORTED
             Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or("") };
             auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
             if (surfaceNode) {
                 surfaceNode->SetHardwareEnabled(true);
             }
+#else
+            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or("") };
+            auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig,
+                RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
+#endif
             rsNode_ = surfaceNode;
             break;
         }
@@ -374,6 +380,7 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     auto paintRect = AdjustPaintRect();
 
     if (needRoundToPixelGrid) {
@@ -381,6 +388,7 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
         paintRect.SetRect(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
     }
     SyncGeometryProperties(paintRect);
+    host->OnPixelRoundFinish(geometryNode->GetPixelGridRoundSize());
 }
 
 void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
@@ -3651,9 +3659,7 @@ void RosenRenderContext::DumpInfo() const
         auto center = rsNode_->GetStagingProperties().GetPivot();
         if (!NearEqual(center[0], 0.5) || !NearEqual(center[1], 0.5)) {
             DumpLog::GetInstance().AddDesc(std::string("Center: x:")
-                                               .append(std::to_string(center[0]))
-                                               .append(" y:")
-                                               .append(std::to_string(center[1])));
+                .append(std::to_string(center[0])).append(" y:").append(std::to_string(center[1])));
         }
         if (!NearZero(rsNode_->GetStagingProperties().GetPivotZ())) {
             DumpLog::GetInstance().AddDesc(
@@ -4161,6 +4167,43 @@ void RosenRenderContext::SetContentRectToFrame(RectF rect)
         rect.SetSize(size);
     }
     rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+}
+
+void RosenRenderContext::MarkNewFrameAvailable(void* nativeWindow)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+#if defined(ANDROID_PLATFORM)
+    rsSurfaceNode->MarkUiFrameAvailable(true);
+#endif
+#if defined(IOS_PLATFORM)
+    RSSurfaceExtConfig config = {
+        .type = RSSurfaceExtType::SURFACE_TEXTURE,
+        .additionalData = nativeWindow,
+    };
+    rsSurfaceNode->SetSurfaceTexture(config);
+#endif
+}
+
+void RosenRenderContext::AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback)
+{
+    CHECK_NULL_VOID(rsNode_);
+#if defined(ANDROID_PLATFORM)
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetSurfaceTextureAttachCallBack(attachCallback);
+#endif
+}
+
+void RosenRenderContext::AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback)
+{
+    CHECK_NULL_VOID(rsNode_);
+#if defined(ANDROID_PLATFORM)
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetSurfaceTextureUpdateCallBack(updateCallback);
+#endif
 }
 
 } // namespace OHOS::Ace::NG

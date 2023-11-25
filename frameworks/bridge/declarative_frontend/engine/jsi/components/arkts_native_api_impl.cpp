@@ -20,25 +20,26 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_checkboxgroup_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_common_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_counter_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_divider_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_col_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_span_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_nav_destination_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_navigation_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_panel_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_area_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_toggle_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_radio_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rating_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_select_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_slider_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_textpicker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_timepicker_modifier.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rating_modifier.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_slider_modifier.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_select_modifier.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_divider_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rich_editor_modifier.h"
 #include "core/components/common/layout/constants.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_nav_destination_modifier.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components/common/layout/constants.h"
 #include "core/pipeline/base/element_register.h"
-
 
 using namespace OHOS::Ace::NG;
 
@@ -68,6 +69,10 @@ static struct ArkUINodeAPI impl = {
     GetDividerModifier,
     GetNavDestinationModifier,
     GetGridColModifier,
+    GetPanelModifier,
+    GetTextAreaModifier,
+    GetNavigationModifier,
+    GetRichEditorModifier
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI()

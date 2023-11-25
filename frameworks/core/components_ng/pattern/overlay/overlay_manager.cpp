@@ -134,9 +134,18 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
     AnimationOption scaleOption;
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
     scaleOption.SetCurve(motion);
-    AnimationUtils::Animate(scaleOption, [previewRenderContext, previewPosition]() {
+    float previewScale = 1.0f;
+    if (menuPattern->GetPreviewMode() == MenuPreviewMode::IMAGE) {
+        auto previewGeometryNode = previewChild->GetGeometryNode();
+        CHECK_NULL_VOID(previewGeometryNode);
+        auto preivewSize = previewGeometryNode->GetFrameSize();
+        if (!NearEqual(menuPattern->GetTargetSize().Width(), preivewSize.Width())) {
+            previewScale = menuPattern->GetTargetSize().Width() / preivewSize.Width();
+        }
+    }
+    AnimationUtils::Animate(scaleOption, [previewRenderContext, previewPosition, previewScale]() {
         if (previewRenderContext) {
-            previewRenderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
+            previewRenderContext->UpdateTransformScale(VectorF(previewScale, previewScale));
             previewRenderContext->UpdatePosition(
                 OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
         }
@@ -492,7 +501,12 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                     mainPipeline->FlushPipelineImmediately();
                 }
                 // clear contextMenu then return
-                if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
+                auto pipeline = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                auto theme = pipeline->GetTheme<SelectTheme>();
+                CHECK_NULL_VOID(theme);
+                auto expandDisplay = theme->GetExpandDisplay();
+                if ((menuWrapperPattern && menuWrapperPattern->IsContextMenu()) || expandDisplay) {
                     SubwindowManager::GetInstance()->ClearMenuNG(id);
                     return;
                 }
@@ -781,6 +795,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
 
             auto popupPattern = popupNode->GetPattern<BubblePattern>();
             CHECK_NULL_VOID(popupPattern);
+            popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
             popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
             rootNode->RemoveChild(popupNode);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -815,7 +830,7 @@ void OverlayManager::HidePopupWithoutAnimation(int32_t targetId, const PopupInfo
     popupMap_[targetId].isCurrentOnShow = false;
     auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(pattern);
-
+    pattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto rootChildren = rootNode->GetChildren();
@@ -1436,6 +1451,17 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         CHECK_NULL_RETURN(overlay, false);
         // close dialog with animation
         auto pattern = overlay->GetPattern();
+        if (InstanceOf<ToastPattern>(pattern)) {
+            // still have nodes on root expect stage and toast node.
+            if (overlay->GetChildren().size() > 2) {
+                // If the current node is a toast, the last second overlay's node should be processed.
+                overlay = DynamicCast<FrameNode>(rootNode->GetChildAtIndex(rootNode->GetChildren().size() - 2));
+                CHECK_NULL_RETURN(overlay, false);
+                pattern = overlay->GetPattern();
+            } else {
+                return false;
+            }
+        }
         if (InstanceOf<DialogPattern>(pattern)) {
             return RemoveDialog(overlay, isBackPressed, isPageRouter);
         }
@@ -1445,9 +1471,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         if (InstanceOf<MenuWrapperPattern>(pattern)) {
             return RemoveMenu(overlay);
         }
-        if (InstanceOf<ToastPattern>(pattern)) {
-            return false;
-        }
+
         // remove navDestination in navigation first
         do {
             auto pipeline = PipelineContext::GetCurrentContext();
@@ -2813,14 +2837,13 @@ void OverlayManager::CloseModalUIExtension(int32_t sessionId)
     BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, -(sessionId));
 }
 
-RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(
-    const RefPtr<FrameNode>& uiExtNode, const std::vector<std::string>& aiMenuOptions)
+RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
+    const RefPtr<NG::FrameNode>& targetNode, const std::vector<std::string>& aiMenuOptions)
 {
     CHECK_NULL_RETURN(uiExtNode, nullptr);
+    CHECK_NULL_RETURN(targetNode, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto targetNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_RETURN(targetNode, nullptr);
     MenuParam menuParam;
     menuParam.type = MenuType::MENU;
     auto menuWrapperNode =
@@ -2855,7 +2878,7 @@ SizeF OverlayManager::CaculateMenuSize(
     CHECK_NULL_RETURN(textTheme, SizeF());
     TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
     std::string textContent = "";
-    for (auto option : aiMenuOptions) {
+    for (const auto& option : aiMenuOptions) {
         if (option.length() > textContent.length()) {
             textContent = option;
         }
@@ -2899,7 +2922,7 @@ bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode,
     const std::vector<std::string>& aiMenuOptions, const RefPtr<NG::FrameNode>& targetNode)
 {
     CHECK_NULL_RETURN(uiExtNode, false);
-    auto menuNode = BindUIExtensionToMenu(uiExtNode, aiMenuOptions);
+    auto menuNode = BindUIExtensionToMenu(uiExtNode, targetNode, aiMenuOptions);
     CHECK_NULL_RETURN(menuNode, false);
     auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(menuLayoutProperty, false);

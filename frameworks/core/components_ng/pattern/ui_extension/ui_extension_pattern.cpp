@@ -26,6 +26,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
+#include "base/geometry/offset.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -619,6 +620,33 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
         UpdateTextFieldManager({ rectToWindow.GetOffset().GetX(), mouseOffsetToWindow.GetY() },
             rectToWindow.Height() - mouseOffsetToFrameNode.GetY());
     }
+    DispatchPointerEvent(pointerEvent);
+}
+
+void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
+{
+    const auto pointerEvent = info.rawPointerEvent;
+    CHECK_NULL_VOID(pointerEvent);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selfGlobalOffset = host->GetTransformRelativeOffset();
+    auto scale = host->GetTransformScale();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto window = static_cast<RosenWindow*>(pipeline->GetWindow());
+    CHECK_NULL_VOID(window);
+    auto rsWindow = window->GetRSWindow();
+    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
+    if (rsWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
+        Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
+    } else {
+        Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
+    }
+    Offset touchOffsetToWindow {info.windowX, info.windowY};
+    Offset touchOffsetToFrameNode {info.displayX, info.displayY};
+    auto rectToWindow = host->GetTransformRectRelativeToWindow();
+    UpdateTextFieldManager(
+        { rectToWindow.GetOffset().GetX(), rectToWindow.GetOffset().GetY() }, rectToWindow.Height());
     DispatchPointerEvent(pointerEvent);
 }
 

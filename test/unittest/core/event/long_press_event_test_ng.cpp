@@ -35,6 +35,7 @@ constexpr double GESTURE_EVENT_PROPERTY_VALUE = 10.0;
 const TouchRestrict LONG_PRESS_TOUCH_RESTRICT = { TouchRestrict::CLICK };
 constexpr uint32_t LONG_PRESS_TEST_RESULT_SIZE = 0;
 constexpr uint32_t LONG_PRESS_TEST_RESULT_SIZE_1 = 1;
+constexpr uint32_t LONG_PRESS_TEST_RESULT_SIZE_2 = 2;
 constexpr float WIDTH = 400.0f;
 constexpr float HEIGHT = 400.0f;
 const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
@@ -163,6 +164,13 @@ HWTEST_F(LongPressEventTestNg, LongPressEventActuatorTest002, TestSize.Level1)
         COORDINATE_OFFSET, LONG_PRESS_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
     EXPECT_EQ(longPressEventActuator->longPressRecognizer_->GetCoordinateOffset(), Offset(WIDTH, HEIGHT));
     EXPECT_EQ(result.size(), LONG_PRESS_TEST_RESULT_SIZE_1);
+
+    // coverage longPressRecognizer_ is true
+    longPressEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, LONG_PRESS_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
+    EXPECT_EQ(longPressEventActuator->longPressRecognizer_->GetCoordinateOffset(), Offset(WIDTH, HEIGHT));
+    EXPECT_EQ(result.size(), LONG_PRESS_TEST_RESULT_SIZE_2);
+
     /**
      * @tc.steps: step6.1. Execute callback when longPressEvent_ and onAccessibilityEventFunc_ are not nullptr.
      */

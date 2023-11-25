@@ -99,7 +99,6 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto viewScale = context->GetViewScale();
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     if (lastLayoutSize_ != frameSize) {
-        UpdateRecordingCanvas(frameSize.Width() * viewScale, frameSize.Height() * viewScale);
         lastLayoutSize_.SetSizeT(frameSize);
     }
 #ifndef USE_ROSEN_DRAWING

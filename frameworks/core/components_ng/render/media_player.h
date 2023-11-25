@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 using PositionUpdatedEvent = std::function<void(uint32_t)>;
 using StateChangedEvent = std::function<void(PlaybackStatus)>;
 using CommonEvent = std::function<void()>;
+using TextureRefreshEnVent = std::function<void(uint32_t, uint64_t)>;
 // MediaPlayer is used to show and play meida
 class MediaPlayer : public virtual AceType {
     DECLARE_ACE_TYPE(NG::MediaPlayer, AceType)
@@ -59,6 +60,8 @@ public:
         StateChangedEvent&& stateChangedEvent, CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
         CommonEvent&& startRenderFrameEvent)
     {}
+
+    virtual void RegisterTextureEvent(TextureRefreshEnVent&& textureRefreshEvent) {}
 
     virtual int32_t GetDuration(int32_t& /*duration*/)
     {

@@ -17,8 +17,8 @@
 
 #define private public
 #define protected public
-#include "form_render/include/form_renderer_delegate_impl.h"
-#include "form_render/include/form_renderer_dispatcher_impl.h"
+#include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
+#include "interfaces/inner_api/form_render/include/form_renderer_dispatcher_impl.h"
 #undef private
 #undef protected
 

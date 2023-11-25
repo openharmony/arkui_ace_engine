@@ -19,6 +19,7 @@
 
 #include "base/log/ace_checker.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -213,7 +214,8 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
         if (layoutProperty->GetCalcLayoutConstraint()) {
             idealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
         }
-        constraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(), idealSize);
+        auto greaterThanApiTen = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
+        constraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(), idealSize, greaterThanApiTen);
     }
 
     auto&& insets = layoutProperty->GetSafeAreaInsets();

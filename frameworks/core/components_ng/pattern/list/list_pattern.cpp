@@ -727,11 +727,6 @@ void ListPattern::OnScrollEndCallback()
     MarkDirtyNodeSelf();
 }
 
-void ListPattern::OnScrollStartCallback()
-{
-    FireOnScrollStart();
-}
-
 SizeF ListPattern::GetContentSize() const
 {
     auto host = GetHost();
@@ -1399,6 +1394,9 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
             }
         }
     } else {
+        if (indexInGroup.has_value()) {
+            return false;
+        }
         GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
     }
     if (!NearZero(targetPos)) {
