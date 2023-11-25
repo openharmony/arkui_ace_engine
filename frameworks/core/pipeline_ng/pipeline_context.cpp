@@ -1804,7 +1804,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 
 bool PipelineContext::RequestDefaultFocus(const RefPtr<FocusHub>& mainView)
 {
-    if (mainView->GetFocusType() != FocusType::SCOPE) {
+    if (!mainView || mainView->GetFocusType() != FocusType::SCOPE) {
         return false;
     }
     auto viewRootScope = mainView->GetMainViewRootScope();
@@ -1820,7 +1820,7 @@ bool PipelineContext::RequestDefaultFocus(const RefPtr<FocusHub>& mainView)
     if (mainView->GetIsViewRootScopeFocused() && viewRootScope) {
         mainView->SetIsViewRootScopeFocused(viewRootScope, true);
         auto ret = viewRootScope->RequestFocusImmediately();
-        LOGI("Target view's default focus is %{public}s/%{public}d. Request view root focus return: %{public}d.",
+        LOGI("Target view has no default focus. Request focus on view root: %{public}s/%{public}d return: %{public}d.",
             viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
         return ret;
     }
@@ -2054,7 +2054,7 @@ void PipelineContext::WindowFocus(bool isFocus)
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
-        LOGD("WindowFocus: window - %{public}d on blur.", windowId_);
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d lost focus.", windowId_);
         auto mouseStyle = MouseStyle::CreateMouseStyle();
         if (mouseStyle) {
             mouseStyle->ChangePointerStyle(static_cast<int32_t>(GetWindowId()), MouseFormat::DEFAULT);
@@ -2063,7 +2063,7 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     } else {
-        LOGD("WindowFocus: window - %{public}d on focus.", windowId_);
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
         auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
         if (rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
             rootFocusHub->RequestFocusImmediately();
