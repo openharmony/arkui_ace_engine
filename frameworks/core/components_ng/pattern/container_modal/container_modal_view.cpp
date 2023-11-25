@@ -322,7 +322,7 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     if (!canDrag) {
         // if can not be drag, cover father panEvent
         PanDirection panDirection;
-        auto panGesture = MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
+        auto panGesture = MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, 0.0);
         gestureGroup->AddGesture(panGesture);
     }
     buttonEventHub->AddGesture(gestureGroup);
