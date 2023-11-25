@@ -1090,7 +1090,10 @@ void WebDelegate::AddJavascriptInterface(const std::string& objectName, const st
                 return;
             }
             if (delegate->nweb_) {
-                delegate->nweb_->RegisterArkJSfunction(objectName, methodList);
+                // webcontroller not support object, so the object_id param assign
+                // error code
+                delegate->nweb_->RegisterArkJSfunctionExt(
+                    objectName, methodList, static_cast<int32_t>(JavaScriptObjIdErrorCode::WEBCONTROLLERERROR));
             }
         },
         TaskExecutor::TaskType::PLATFORM);

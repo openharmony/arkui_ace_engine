@@ -403,6 +403,9 @@ public:
         RELEASED,
     };
 
+    // for webcontoller, the enum is same as web_webview and core side
+    enum class JavaScriptObjIdErrorCode : int32_t { WEBCONTROLLERERROR = -2, WEBVIEWCONTROLLERERROR = -1, END = 0 };
+
     WebDelegate() = delete;
     ~WebDelegate() override;
     WebDelegate(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type)
