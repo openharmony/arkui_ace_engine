@@ -388,6 +388,11 @@ struct ArkUIPanelModifierAPI {
     void (*ResetShow)(NodeHandle node);
 };
 
+struct ArkUITextAreaModifierAPI {
+    void (*SetTextAreaMaxLines)(NodeHandle node, uint32_t maxLine);
+    void (*ResetTextAreaMaxLines)(NodeHandle node);
+};
+
 struct ArkUINavigationModifierAPI {
     void (*SetHideToolBar)(NodeHandle node, bool hide);
     void (*ResetHideToolBar)(NodeHandle node);
@@ -414,6 +419,7 @@ struct ArkUINodeAPI {
     ArkUINavDestinationModifierAPI (*GetNavDestinationModifier)();
     ArkUIGridColModifierAPI (*GetGridColModifier)();
     ArkUIPanelModifierAPI (*GetPanelModifier)();
+    ArkUITextAreaModifierAPI (*GetTextAreaModifier)();
     ArkUINavigationModifierAPI (*GetNavigationModifier)();
 };
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);

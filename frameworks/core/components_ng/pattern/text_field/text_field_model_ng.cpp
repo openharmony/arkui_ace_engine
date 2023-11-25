@@ -603,4 +603,9 @@ void TextFieldModelNG::SetSelectAllValue(bool isSelectAllValue)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue);
 }
+
+void TextFieldModelNG::SetMaxViewLines(FrameNode* frameNode, uint32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxViewLines, value, frameNode);
+}
 } // namespace OHOS::Ace::NG
