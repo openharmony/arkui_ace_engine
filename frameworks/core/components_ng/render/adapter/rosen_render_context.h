@@ -61,6 +61,10 @@ public:
 
     void RemoveSurfaceChangedCallBack() override;
 
+    void MarkNewFrameAvailable(void* nativeWindow) override;
+    void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) override;
+    void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) override;
+
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
     void SyncGeometryProperties(GeometryNode* geometryNode, bool needRoundToPixelGrid = false) override;

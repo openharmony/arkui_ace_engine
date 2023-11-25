@@ -807,6 +807,7 @@ template("ace_core_ng_source_set") {
         "components/declaration/common/event.cpp",
         "components/svg/svg_transform.cpp",
         "components/video/resource/ext_surface.cpp",
+        "components/video/resource/ext_texture.cpp",
         "components/video/resource/resource.cpp",
       ]
     }
