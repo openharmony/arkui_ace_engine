@@ -100,6 +100,26 @@ void WindowScene::OnAttachToFrameNode()
 
 void WindowScene::RegisterFocusCallback()
 {
+    CHECK_NULL_VOID(session_);
+
+    auto requestFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent([weakThis]() {
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            auto focusHub = host->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetParentFocusable(true);
+            focusHub->RequestFocusWithDefaultFocusFirstly();
+        },
+            TaskExecutor::TaskType::UI);
+    };
+    session_->SetNotifyUIRequestFocusFunc(requestFocusCallback);
+
     auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
         ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -111,11 +131,10 @@ void WindowScene::RegisterFocusCallback()
             CHECK_NULL_VOID(host);
             auto focusHub = host->GetFocusHub();
             CHECK_NULL_VOID(focusHub);
-            focusHub->LostFocus();
+            focusHub->SetParentFocusable(false);
         },
             TaskExecutor::TaskType::UI);
     };
-    CHECK_NULL_VOID(session_);
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
 }
 
