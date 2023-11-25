@@ -33,6 +33,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_slider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.h"
 
 
 namespace OHOS::Ace::NG {
@@ -618,11 +619,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::ResetOrder));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "gridCol"), gridCol);
 
+    auto richEditor = panda::ObjectRef::New(vm);
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetCopyOptions));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetCopyOptions));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "richEditor"), richEditor);
+
     auto textArea = panda::ObjectRef::New(vm);
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxLines"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextAreaBridge::SetMaxLines));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLines"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextAreaBridge::ResetMaxLines));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetMaxLines));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
 
     RegisterButtonAttributes(object, vm);

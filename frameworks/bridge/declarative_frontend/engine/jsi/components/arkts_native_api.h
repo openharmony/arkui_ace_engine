@@ -398,6 +398,11 @@ struct ArkUINavigationModifierAPI {
     void (*ResetHideToolBar)(NodeHandle node);
 };
 
+struct ArkUIRichEditorModifierAPI {
+    void (*SetRichEditorCopyOptions)(NodeHandle node, int8_t copyOptionsValue);
+    void (*ResetRichEditorCopyOptions)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -421,6 +426,7 @@ struct ArkUINodeAPI {
     ArkUIPanelModifierAPI (*GetPanelModifier)();
     ArkUITextAreaModifierAPI (*GetTextAreaModifier)();
     ArkUINavigationModifierAPI (*GetNavigationModifier)();
+    ArkUIRichEditorModifierAPI (*GetRichEditorModifier)();
 };
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H
