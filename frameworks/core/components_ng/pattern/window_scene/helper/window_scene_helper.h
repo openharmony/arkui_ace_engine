@@ -24,6 +24,10 @@
 namespace OHOS::Rosen {
 class Session;
 }
+namespace OHOS::MMI {
+class KeyEvent;
+class PointerEvent;
+}
 
 namespace OHOS::Ace::NG {
 class WindowSceneHelper : public AceType {
@@ -44,6 +48,14 @@ public:
     static void IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode);
 
     static void IsCloseKeyboard(RefPtr<FrameNode> frameNode);
+
+    static void InjectPointerEvent(const std::string& targetNodeName,
+        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
+
+    static void InjectPointerEvent(RefPtr<FrameNode> node,
+        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
+
+    static void InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_HELPER_H

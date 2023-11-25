@@ -2300,6 +2300,23 @@ RefPtr<NodeAnimatablePropertyBase> FrameNode::GetAnimatablePropertyFloat(const s
     return iter->second;
 }
 
+RefPtr<FrameNode> FrameNode::FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName)
+{
+    CHECK_NULL_RETURN(parentNode, nullptr);
+    const auto& children = parentNode->GetChildren();
+    for (const auto& child : children) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        if (childFrameNode && childFrameNode->GetInspectorId().value_or("") == nodeName) {
+            return childFrameNode;
+        }
+        auto childFindResult = FindChildByName(childFrameNode, nodeName);
+        if (childFindResult) {
+            return childFindResult;
+        }
+    }
+    return nullptr;
+}
+
 void FrameNode::CreateAnimatablePropertyFloat(
     const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent)
 {

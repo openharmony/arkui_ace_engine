@@ -1395,6 +1395,21 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive)
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
+    OnTouchEvent(point, rootNode_, isSubPipe);
+}
+
+void PipelineContext::OnMouseEvent(const MouseEvent& event)
+{
+    OnMouseEvent(event, rootNode_);
+}
+
+void PipelineContext::OnAxisEvent(const AxisEvent& event)
+{
+    OnAxisEvent(event, rootNode_);
+}
+
+void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe)
+{
     CHECK_RUN_ON(UI);
 
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -1431,7 +1446,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
-        eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
+        eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
         for (const auto& weakContext : touchPluginPipelineContext_) {
             auto pipelineContext = DynamicCast<OHOS::Ace::PipelineBase>(weakContext.Upgrade());
             if (!pipelineContext) {
@@ -1735,7 +1750,7 @@ void PipelineContext::FlushTouchEvents()
     }
 }
 
-void PipelineContext::OnMouseEvent(const MouseEvent& event)
+void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
 {
     CHECK_RUN_ON(UI);
     if (!lastMouseEvent_) {
@@ -1771,12 +1786,12 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
         eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
     }
 
-    CHECK_NULL_VOID(rootNode_);
+    CHECK_NULL_VOID(node);
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = event.sourceType;
     touchRestrict.hitTestType = SourceType::MOUSE;
-    eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
+    eventManager_->MouseTest(scaleEvent, node, touchRestrict);
     eventManager_->DispatchMouseEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
@@ -1963,7 +1978,7 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     return result;
 }
 
-void PipelineContext::OnAxisEvent(const AxisEvent& event)
+void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node)
 {
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
 
@@ -1974,7 +1989,7 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
             TouchRestrict touchRestrict { TouchRestrict::NONE };
             touchRestrict.sourceType = event.sourceType;
             touchRestrict.hitTestType = SourceType::TOUCH;
-            eventManager_->TouchTest(scaleEvent, rootNode_, touchRestrict);
+            eventManager_->TouchTest(scaleEvent, node, touchRestrict);
         }
         eventManager_->DispatchTouchEvent(scaleEvent);
     } else if (isBeforeDragHandleAxis_ && event.action == AxisAction::END) {
@@ -1983,7 +1998,7 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
     }
 
     if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
-        eventManager_->AxisTest(scaleEvent, rootNode_);
+        eventManager_->AxisTest(scaleEvent, node);
         eventManager_->DispatchAxisEventNG(scaleEvent);
     }
 

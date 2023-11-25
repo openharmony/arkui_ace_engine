@@ -61,6 +61,9 @@ class RSTransaction;
 }
 
 namespace OHOS::Ace {
+namespace NG {
+class FrameNode;
+}
 
 struct KeyboardAnimationConfig {
     std::string curveType_;
@@ -164,6 +167,9 @@ public:
     // Called by view when touch event received.
     virtual void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) = 0;
 
+    // Called by ohos AceContainer when touch event received.
+    virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) {}
+
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     virtual bool OnKeyEvent(const KeyEvent& event) = 0;
@@ -171,8 +177,14 @@ public:
     // Called by view when mouse event received.
     virtual void OnMouseEvent(const MouseEvent& event) = 0;
 
+    // Called by ohos AceContainer when mouse event received.
+    virtual void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) {}
+
     // Called by view when axis event received.
     virtual void OnAxisEvent(const AxisEvent& event) = 0;
+
+    // Called by ohos AceContainer when axis event received.
+    virtual void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) {}
 
     // Called by container when rotation event received.
     // if return false, then this event needs platform to handle it.
