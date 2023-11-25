@@ -1419,6 +1419,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 
     if (scalePoint.type == TouchType::UP) {
         lastTouchTime_ = GetTimeFromExternalTimer();
+        if (historyPointsById_.find(scalePoint.id) != historyPointsById_.end()) {
+            historyPointsById_.erase(scalePoint.id);
+        }
     }
 
     std::optional<TouchEvent> lastMoveEvent;
