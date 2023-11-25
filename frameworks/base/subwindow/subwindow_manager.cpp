@@ -625,4 +625,16 @@ void SubwindowManager::RequestFocusSubwindow(int32_t instanceId)
         subwindow->RequestFocus();
     }
 }
+
+bool SubwindowManager::GetShown()
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        AddSubwindow(containerId, subwindow);
+    }
+    return subwindow->GetShown();
+}
 } // namespace OHOS::Ace
