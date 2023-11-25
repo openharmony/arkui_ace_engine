@@ -29,6 +29,7 @@ namespace {
 constexpr uint32_t SHOW_TIME = 250; // unit is ms.
 constexpr uint32_t HIDE_TIME = 250; // unit is ms.
 constexpr Dimension TARGET_SPACE = 8.0_vp;
+constexpr Dimension BORDER_RADIUS_POPUP = 20.0_vp;
 constexpr double DEFAULT_OPACITY = 0.95;
 } // namespace
 
@@ -79,8 +80,8 @@ public:
             theme->buttonHoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->buttonPressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
             theme->focusColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
-            theme->radius_ = Radius(pattern->GetAttr<Dimension>(POPUP_BORDER_RADIUS, 24.0_vp),
-                pattern->GetAttr<Dimension>(POPUP_BORDER_RADIUS, 24.0_vp));
+
+            theme->radius_ = Radius(BORDER_RADIUS_POPUP, BORDER_RADIUS_POPUP);
             theme->padding_ = Edge(pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 12.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
