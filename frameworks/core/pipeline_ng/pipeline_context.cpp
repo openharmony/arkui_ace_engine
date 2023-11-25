@@ -1022,6 +1022,13 @@ void PipelineContext::SetIsLayoutFullScreen(bool value)
     }
 }
 
+void PipelineContext::SetIsNeedAvoidWindow(bool value)
+{
+    if (safeAreaManager_->SetIsNeedAvoidWindow(value)) {
+        SyncSafeArea();
+    }
+}
+
 PipelineBase::SafeAreaInsets PipelineContext::GetSafeArea() const
 {
     return safeAreaManager_->GetSafeArea();

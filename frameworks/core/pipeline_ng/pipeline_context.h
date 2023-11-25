@@ -432,6 +432,7 @@ public:
 
     void SetIgnoreViewSafeArea(bool value) override;
     void SetIsLayoutFullScreen(bool value) override;
+    void SetIsNeedAvoidWindow(bool value) override;
 
     void AddAnimationClosure(std::function<void()>&& animation);
     void FlushAnimationClosure();
@@ -537,7 +538,7 @@ private:
 
     // only used for static form.
     void UpdateFormLinkInfos();
-    
+
     void FlushFrameRate();
 
     template<typename T>

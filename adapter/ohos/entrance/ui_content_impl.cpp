@@ -1551,6 +1551,12 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             if (rsWindow) {
                 pipelineContext->SetIsLayoutFullScreen(
                     rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+                auto isNeedAvoidWindowMode = (rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
+                                              rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                                              rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN) &&
+                                             (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
+                                              SystemProperties::GetDeviceType() == DeviceType::TABLET);
+                pipelineContext->SetIsNeedAvoidWindow(isNeedAvoidWindowMode);
             }
             if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
                 pipelineContext->FlushBuild();
