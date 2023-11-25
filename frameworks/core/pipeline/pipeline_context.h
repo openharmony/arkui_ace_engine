@@ -353,6 +353,13 @@ public:
     bool RequestFocus(const std::string& targetNodeId) override;
     bool RequestDefaultFocus();
 
+    bool NeedSoftKeyboard() override
+    {
+        return false;
+    }
+
+    void SetOnWindowFocused(const std::function<void()>& callback) override {};
+
     BaseId::IdType AddPageTransitionListener(const PageTransitionListenable::CallbackFuncType& funcObject);
 
     const RefPtr<OverlayElement> GetOverlayElement() const;

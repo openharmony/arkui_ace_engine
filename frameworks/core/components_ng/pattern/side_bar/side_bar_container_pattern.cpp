@@ -430,6 +430,7 @@ void SideBarContainerPattern::UpdateDividerShadow() const
         SideBarContainerType::EMBED != layoutProperty->GetSideBarContainerType()) {
         return;
     }
+    
     auto sidebarNode = GetSideBarNode(host);
     if (sidebarNode) {
         auto renderContext = sidebarNode->GetRenderContext();

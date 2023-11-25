@@ -603,7 +603,7 @@ struct SegmentButtonItemArrayComponent {
                 .onAreaChange((_, newValue) => {
                   // Calculate height of items
                   this.buttonItemsRealHeight[index] = newValue.height as number
-                  let maxHeight = Math.max(...this.buttonItemsRealHeight.slice(0, this.options.buttons.length - 1))
+                  let maxHeight = Math.max(...this.buttonItemsRealHeight.slice(0, this.options.buttons.length))
                   for (let index = 0; index < this.buttonItemsSize.length; index++) {
                     this.buttonItemsSize[index] = { width: this.buttonItemsSize[index].width, height: maxHeight }
                   }

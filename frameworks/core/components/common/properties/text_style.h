@@ -50,7 +50,7 @@ enum class FontWeight {
 };
 
 enum class FontStyle {
-    NORMAL,
+    NORMAL = 0,
     ITALIC,
 };
 

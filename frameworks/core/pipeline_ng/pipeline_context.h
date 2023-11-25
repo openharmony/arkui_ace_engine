@@ -76,6 +76,23 @@ public:
 
     void SetupSubRootElement();
 
+    bool NeedSoftKeyboard() override;
+
+    void SetFocusNode(RefPtr<FrameNode> node)
+    {
+        focusNode_ = node;
+    }
+
+    RefPtr<FrameNode> GetFocusNode()
+    {
+        return focusNode_;
+    }
+
+    void SetOnWindowFocused(const std::function<void()>& callback) override
+    {
+        focusOnNodeCallback_ = callback;
+    }
+
     const RefPtr<FrameNode>& GetRootElement() const
     {
         return rootNode_;
@@ -228,7 +245,7 @@ public:
     {
         return safeAreaManager_;
     }
-    SafeAreaInsets GetSafeArea() const;
+    virtual SafeAreaInsets GetSafeArea() const;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
@@ -449,7 +466,27 @@ public:
 
     void SetJSViewActive(bool active, WeakPtr<CustomNode> custom);
 
+    void UpdateCurrentActiveNode(const WeakPtr<FrameNode>& node) override
+    {
+        activeNode_ = std::move(node);
+    }
+
+    const WeakPtr<FrameNode>& GetCurrentActiveNode() const
+    {
+        return activeNode_;
+    }
+
+    std::string GetCurrentExtraInfo() override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
+
+    void SetCursor(int32_t cursorValue) override;
+
+    void RestoreDefault() override;
+
+    // for frontend animation interface.
+    void OpenFrontendAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+        const std::function<void()>& finishCallback);
+    void CloseFrontendAnimation();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -590,6 +627,11 @@ private:
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;
+    WeakPtr<FrameNode> activeNode_;
+
+    RefPtr<FrameNode> focusNode_;
+    std::function<void()> focusOnNodeCallback_;
+
     std::unique_ptr<MouseEvent> lastMouseEvent_;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;

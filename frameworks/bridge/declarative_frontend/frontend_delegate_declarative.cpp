@@ -25,6 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/resource/ace_res_config.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "bridge/common/manifest/manifest_parser.h"
@@ -208,6 +209,20 @@ void FrontendDelegateDeclarative::RunPage(
     }
     AddRouterTask(RouterTask { RouterAction::PUSH, PageTarget(mainPagePath_), params });
     LoadPage(GenerateNextPageId(), PageTarget(mainPagePath_), true, params);
+}
+
+void FrontendDelegateDeclarative::RunPage(
+    const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params, const std::string& profile)
+{
+    ACE_SCOPED_TRACE("FrontendDelegateDeclarativeNG::RunPage by buffer size:%zu", content->size());
+    taskExecutor_->PostTask(
+        [delegate = Claim(this), weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), content, params]() {
+            auto pageRouterManager = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageRouterManager->RunPage(content, params);
+            auto pipeline = delegate->GetPipelineContext();
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
@@ -797,11 +812,13 @@ void FrontendDelegateDeclarative::GetStageSourceMap(
 }
 
 void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback,
+    NG::LoadPageByBufferCallback&& loadPageByBufferCallback,
     NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
     NG::UpdateRootComponentCallback&& updateRootComponentCallback)
 {
     pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
     pageRouterManager_->SetLoadJsCallback(std::move(loadPageCallback));
+    pageRouterManager_->SetLoadJsByBufferCallback(std::move(loadPageByBufferCallback));
     pageRouterManager_->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
     pageRouterManager_->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
 }
@@ -1396,8 +1413,23 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
         };
         auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
+            RefPtr<NG::FrameNode> dialog;
             LOGI("Begin to show dialog ");
-            overlayManager->ShowDialog(dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+            if (dialogProperties.isShowInSubWindow) {
+                dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, nullptr);
+                CHECK_NULL_VOID(dialog);
+                if (dialogProperties.isModal) {
+                    DialogProperties Maskarg;
+                    Maskarg.isMask = true;
+                    Maskarg.autoCancel = dialogProperties.autoCancel;
+                    auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
+                    CHECK_NULL_VOID(mask);
+                }
+            } else {
+                dialog = overlayManager->ShowDialog(
+                    dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+                CHECK_NULL_VOID(dialog);
+            }
         };
         MainWindowOverlay(std::move(task));
         return;
@@ -1472,6 +1504,8 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
         .buttons = buttons,
         .maskRect = dialogAttr.maskRect,
     };
@@ -1492,6 +1526,8 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
         .buttons = buttons,
         .onStatusChanged = std::move(onStatusChanged),
         .maskRect = dialogAttr.maskRect,
@@ -1522,8 +1558,22 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
             [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
                 auto overlayManager = weak.Upgrade();
                 CHECK_NULL_VOID(overlayManager);
-                overlayManager->ShowDialog(
-                    dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+                RefPtr<NG::FrameNode> dialog;
+                if (dialogProperties.isShowInSubWindow) {
+                    dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, nullptr);
+                    CHECK_NULL_VOID(dialog);
+                    if (dialogProperties.isModal) {
+                        DialogProperties Maskarg;
+                        Maskarg.isMask = true;
+                        Maskarg.autoCancel = dialogProperties.autoCancel;
+                        auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
+                        CHECK_NULL_VOID(mask);
+                    }
+                } else {
+                    dialog = overlayManager->ShowDialog(
+                        dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+                    CHECK_NULL_VOID(dialog);
+                }
             },
             TaskExecutor::TaskType::UI);
         return;

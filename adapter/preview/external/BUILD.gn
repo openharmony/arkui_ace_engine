@@ -47,16 +47,10 @@ ohos_source_set("preview_external_source") {
     # for rosen backend
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       # for event loop
-      include_dirs = [
-        "//third_party/flutter/engine",
-        "//ide/tools/previewer",
-      ]
+      include_dirs = [ "//third_party/flutter/engine" ]
 
       # for window
-      external_deps = [
-        "graphic_2d:librender_service_client",
-        "previewer:ide_extension",
-      ]
+      external_deps = [ "graphic_2d:librender_service_client" ]
 
       sources += [
         # for event loop

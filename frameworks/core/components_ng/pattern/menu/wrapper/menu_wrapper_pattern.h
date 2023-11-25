@@ -146,6 +146,11 @@ public:
         onDisappearCallback_ = onDisappear;
     }
 
+    void RegisterMenuStateChangeCallback(const std::function<void(const std::string&)>& callback)
+    {
+        onStateChangeCallback_ = callback;
+    }
+
     void CallMenuAppearCallback()
     {
         if (onAppearCallback_) {
@@ -160,9 +165,26 @@ public:
         }
     }
 
+    void CallMenuStateChangeCallback(const std::string& value)
+    {
+        if (onStateChangeCallback_) {
+            onStateChangeCallback_(value);
+        }
+    }
+
     const std::function<void()>& GetMenuDisappearCallback()
     {
         return onDisappearCallback_;
+    }
+
+    void SetShow(bool isShow)
+    {
+        isShow_ = isShow;
+    }
+
+    bool GetShow() const
+    {
+        return isShow_;
     }
 
 protected:
@@ -185,6 +207,7 @@ private:
 
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
+    std::function<void(const std::string&)> onStateChangeCallback_ = nullptr;
     RefPtr<TouchEventImpl> onTouch_;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
@@ -193,6 +216,7 @@ private:
     Placement menuPlacement_ = Placement::NONE;
     bool isFirstShow_ = true;
     bool isHided_ = false;
+    bool isShow_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };

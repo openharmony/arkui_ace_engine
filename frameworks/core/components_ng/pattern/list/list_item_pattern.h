@@ -34,6 +34,7 @@ enum class ListItemSwipeIndex {
     SWIPER_END = -1,
     ITEM_CHILD = 0,
     SWIPER_START = 1,
+    SWIPER_ACTION = 2,
 };
 
 class ACE_EXPORT ListItemPattern : public Pattern {

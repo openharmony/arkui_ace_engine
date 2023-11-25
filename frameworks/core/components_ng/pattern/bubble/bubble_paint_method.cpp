@@ -74,6 +74,7 @@ void BubblePaintMethod::PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper)
     canvas.Save();
     RSBrush brush;
     brush.SetColor(maskColor.GetValue());
+    brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     canvas.DrawRect(RSRect(0.0, 0.0, layoutSize.Width(), layoutSize.Height()));
     canvas.DetachBrush();
@@ -217,8 +218,7 @@ void BubblePaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RS
     RSPoint3 lightPos = { rsPath.GetBounds().GetLeft() / 2 + rsPath.GetBounds().GetRight(),
         rsPath.GetBounds().GetTop() / 2.0 + rsPath.GetBounds().GetBottom() / 2.0, shadow.GetLightHeight() };
 #else
-    auto tmpPath = rsPath.GetCmdList()->Playback();
-    auto bounds = tmpPath->GetBounds();
+    auto bounds = rsPath.GetBounds();
     RSPoint3 lightPos = { bounds.GetLeft() / 2.0 + bounds.GetRight() / 2.0,
         bounds.GetTop() / 2.0 + bounds.GetBottom() / 2.0, shadow.GetLightHeight() };
 #endif
@@ -238,7 +238,6 @@ void BubblePaintMethod::PaintDefaultBubble(RSCanvas& canvas)
     PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
     canvas.Restore();
     canvas.DrawRoundRect(rect);
-    canvas.ClipRoundRect(rect, RSClipOp::INTERSECT);
 }
 
 RSRoundRect BubblePaintMethod::MakeRRect()
@@ -265,7 +264,6 @@ void BubblePaintMethod::PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* pai
     canvas.ClipPath(path_, RSClipOp::DIFFERENCE, true);
     PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
     canvas.Restore();
-    canvas.ClipPath(path_, RSClipOp::INTERSECT, true);
     canvas.DrawPath(path_);
 }
 

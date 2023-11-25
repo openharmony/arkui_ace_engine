@@ -103,10 +103,7 @@ ohos_source_set("preview_osal_source") {
       "//third_party/curl:curl_config",
     ]
 
-    include_dirs = [
-      "//commonlibrary/c_utils/base/include",
-      "//ide/tools/previewer",
-    ]
+    include_dirs = [ "//commonlibrary/c_utils/base/include" ]
 
     if (is_ohos_standard_system) {
       sources += [

@@ -26,6 +26,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_task_executor.h"
+#include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
@@ -38,9 +39,15 @@
 namespace OHOS::Ace::Platform {
 DialogContainer::DialogContainer(int32_t instanceId, FrontendType type) : instanceId_(instanceId), type_(type)
 {
-    auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    flutterTaskExecutor->InitPlatformThread(true);
-    taskExecutor_ = flutterTaskExecutor;
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        auto taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>();
+        taskExecutorImpl->InitPlatformThread(true);
+        taskExecutor_ = taskExecutorImpl;
+    } else {
+        auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+        flutterTaskExecutor->InitPlatformThread(true);
+        taskExecutor_ = flutterTaskExecutor;
+    }
     GetSettings().useUIAsJSThread = true;
     GetSettings().usePlatformAsUIThread = true;
     GetSettings().usingSharedRuntime = true;
@@ -317,13 +324,23 @@ void DialogContainer::AttachView(
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
-    auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
-    auto* aceView = static_cast<AceViewOhos*>(aceView_);
-    ACE_DCHECK(aceView != nullptr);
-    flutterTaskExecutor->InitOtherThreads(aceView->GetThreadModel());
-    ContainerScope scope(instanceId);
-    // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
-    flutterTaskExecutor->InitJsThread(false);
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        auto taskExecutorImpl = AceType::DynamicCast<TaskExecutorImpl>(taskExecutor_);
+        auto* aceView = static_cast<AceViewOhos*>(aceView_);
+        ACE_DCHECK(aceView != nullptr);
+        taskExecutorImpl->InitOtherThreads(aceView->GetThreadModelImpl());
+        ContainerScope scope(instanceId);
+        // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
+        taskExecutorImpl->InitJsThread(false);
+    } else {
+        auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
+        auto* aceView = static_cast<AceViewOhos*>(aceView_);
+        ACE_DCHECK(aceView != nullptr);
+        flutterTaskExecutor->InitOtherThreads(aceView->GetThreadModel());
+        ContainerScope scope(instanceId);
+        // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
+        flutterTaskExecutor->InitJsThread(false);
+    }
     InitializeFrontend();
     SetUseNewPipeline();
 

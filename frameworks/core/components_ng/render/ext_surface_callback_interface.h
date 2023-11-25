@@ -42,6 +42,12 @@ public:
      *
      */
     virtual void ProcessSurfaceDestroy() = 0;
+
+    /**
+     * @brief Process texture refresh event.
+     *
+     */
+    virtual void ProcessTextureRefresh(int32_t instanceId, int64_t textureId) {};
 };
 } // namespace OHOS::Ace::NG
 

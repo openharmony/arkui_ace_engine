@@ -25,6 +25,10 @@ bool TouchEventActuator::DispatchEvent(const TouchEvent& point)
 
 bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 {
+    auto attachedNode = GetAttachedNode();
+    if (attachedNode.Invalid()) {
+        return true;
+    }
     return TriggerTouchCallBack(point);
 }
 

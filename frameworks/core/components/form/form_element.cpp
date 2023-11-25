@@ -19,6 +19,9 @@
 
 #include "core/common/container_scope.h"
 #include "core/common/form_manager.h"
+#ifdef OHOS_STANDARD_SYSTEM
+#include "form_info.h"
+#endif
 #include "frameworks/base/utils/string_utils.h"
 #include "frameworks/core/components/form/form_component.h"
 #include "frameworks/core/components/form/render_form.h"
@@ -53,34 +56,28 @@ void FormElement::Update()
         cardInfo_ = info;
     } else {
         // for update form component
-        if (cardInfo_.allowUpdate != info.allowUpdate) {
-            cardInfo_.allowUpdate = info.allowUpdate;
-            LOGI(" update card allow info:%{public}d", cardInfo_.allowUpdate);
-            if (subContainer_) {
-                subContainer_->SetAllowUpdate(cardInfo_.allowUpdate);
-            }
-        }
-
-        if (cardInfo_.width != info.width || cardInfo_.height != info.height) {
-            LOGI("update card size old w:%lf,h:%lf", cardInfo_.width.Value(), cardInfo_.height.Value());
-            LOGI("update card size new w:%lf,h:%lf", info.width.Value(), info.height.Value());
-            cardInfo_.width = info.width;
-            cardInfo_.height = info.height;
-            GetRenderNode()->Update(component_);
-            subContainer_->SetFormComponent(component_);
-            subContainer_->UpdateRootElementSize();
-            subContainer_->UpdateSurfaceSize();
-        }
-
+        UpdateInner(info);
         return;
     }
 
     GetRenderNode()->Update(component_);
 
+#if OHOS_STANDARD_SYSTEM
+    AppExecFwk::FormInfo formInfo;
+    if (!FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo)) {
+        LOGE("failed to get formInfo with bundleName: %{public}s, moduleName: %{public}s, cardName: %{public}s",
+            info.bundleName.c_str(), info.moduleName.c_str(), info.cardName.c_str());
+    }
+#endif
+
     CreateCardContainer();
 
     if (formManagerBridge_) {
+#if OHOS_STANDARD_SYSTEM
+        formManagerBridge_->AddForm(GetContext(), info, formInfo);
+#else
         formManagerBridge_->AddForm(GetContext(), info);
+#endif
     }
 
     InitEvent(form);
@@ -109,6 +106,28 @@ void FormElement::InitEvent(const RefPtr<FormComponent>& component)
 
     if (!component->GetOnRouterEvent().IsEmpty()) {
         onRouterEvent_ = AceAsyncEvent<void(const std::string&)>::Create(component->GetOnRouterEvent(), context_);
+    }
+}
+
+void FormElement::UpdateInner(const RequestFormInfo& info)
+{
+    if (cardInfo_.allowUpdate != info.allowUpdate) {
+        cardInfo_.allowUpdate = info.allowUpdate;
+        LOGI(" update card allow info:%{public}d", cardInfo_.allowUpdate);
+        if (subContainer_) {
+            subContainer_->SetAllowUpdate(cardInfo_.allowUpdate);
+        }
+    }
+
+    if (cardInfo_.width != info.width || cardInfo_.height != info.height) {
+        LOGI("update card size old w:%lf,h:%lf", cardInfo_.width.Value(), cardInfo_.height.Value());
+        LOGI("update card size new w:%lf,h:%lf", info.width.Value(), info.height.Value());
+        cardInfo_.width = info.width;
+        cardInfo_.height = info.height;
+        GetRenderNode()->Update(component_);
+        subContainer_->SetFormComponent(component_);
+        subContainer_->UpdateRootElementSize();
+        subContainer_->UpdateSurfaceSize();
     }
 }
 

@@ -55,6 +55,7 @@ struct NodeInfoPU {
     int32_t codeCol = -1;
 
     std::string jsViewName;
+    NG::ExtraInfo extraInfo;
 };
 
 using UpdateTask = std::tuple<int32_t, RefPtr<AceType>, RefPtr<AceType>>;

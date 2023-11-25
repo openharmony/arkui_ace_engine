@@ -121,6 +121,21 @@ RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
     return DynamicCast<PipelineContext>(pipeline);
 }
 
+bool PipelineContext::NeedSoftKeyboard()
+{
+    auto focusNode = GetFocusNode();
+    if (!focusNode) {
+        return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Focus node id is: %{public}d, tag is %{public}s",
+        focusNode->GetId(), focusNode->GetTag().c_str());
+    auto pattern = focusNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    bool isNeed = pattern->NeedSoftKeyboard();
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "need soft keyboard: %{public}d", isNeed);
+    return isNeed;
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     auto context = GetCurrentContext();
@@ -384,6 +399,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 #endif
     ProcessDelayTasks();
     FlushAnimation(nanoTimestamp);
+    bool hasAnimation = window_->FlushAnimation(nanoTimestamp);
+    if (hasAnimation) {
+        RequestFrame();
+    }
     FlushTouchEvents();
     FlushBuild();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
@@ -415,10 +434,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     } while (false);
 #endif
 
-    bool hasAnimation = window_->FlushCustomAnimation(nanoTimestamp);
-    if (hasAnimation) {
-        RequestFrame();
-    }
+    window_->FlushModifier();
     FlushFrameRate();
     FlushMessages();
     if (dragCleanTask_) {
@@ -1153,6 +1169,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
         float keyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
         float positionYWithOffset = positionY - keyboardOffset;
+        if (rootSize.Height() - positionY - height < 0) {
+            height = rootSize.Height() - positionY;
+        }
         float offsetFix = (rootSize.Height() - positionY - height) < keyboardHeight
                                 ? keyboardHeight - (rootSize.Height() - positionY - height)
                                 : keyboardHeight;
@@ -1289,7 +1308,13 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
     const auto& children = node->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
-
+        auto destinationNode = AceType::DynamicCast<NavDestinationGroupNode>(child);
+        if (destinationNode && destinationNode->GetLayoutProperty()) {
+            auto property = destinationNode->GetLayoutProperty<LayoutProperty>();
+            if (property->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+                continue;
+            }
+        }
         auto target = FindNavigationNodeToHandleBack(child);
         if (target) {
             return target;
@@ -2046,6 +2071,9 @@ void PipelineContext::WindowFocus(bool isFocus)
                 curMainView->HandleFocusOnMainView();
             }
         }
+        if (focusOnNodeCallback_) {
+            focusOnNodeCallback_();
+        }
     }
     FlushWindowFocusChangedCallback(isFocus);
 }
@@ -2547,5 +2575,69 @@ void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& no
 void PipelineContext::SetJSViewActive(bool active, WeakPtr<CustomNode> custom)
 {
     taskScheduler_->SetJSViewActive(active, custom);
+}
+
+std::string PipelineContext::GetCurrentExtraInfo()
+{
+    auto node = activeNode_.Upgrade();
+    return node ? node->GetCurrentCustomNodeInfo() : std::string();
+}
+
+void PipelineContext::SetCursor(int32_t cursorValue)
+{
+    if (cursorValue >= 0 && cursorValue <= static_cast<int32_t>(MouseFormat::RUNNING)) {
+        cursor_ = static_cast<MouseFormat>(cursorValue);
+        auto mouseStyle = MouseStyle::CreateMouseStyle();
+        CHECK_NULL_VOID(mouseStyle);
+        mouseStyle->ChangePointerStyle(GetWindowId(), cursor_);
+    }
+}
+
+void PipelineContext::RestoreDefault()
+{
+    cursor_ = MouseFormat::DEFAULT;
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    CHECK_NULL_VOID(mouseStyle);
+    mouseStyle->ChangePointerStyle(GetWindowId(), MouseFormat::DEFAULT);
+}
+
+void PipelineContext::OpenFrontendAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
+{
+    // push false to show we already open a animation closure.
+    pendingFrontendAnimation_.push(false);
+
+    // flush ui tasks before open animation closure.
+    if (!isReloading_ && !IsLayouting()) {
+        FlushUITasks();
+    }
+    auto wrapFinishCallback = GetWrappedAnimationCallback(finishCallback);
+    if (IsFormRender()) {
+        SetIsFormAnimation(true);
+        if (!IsFormAnimationFinishCallback()) {
+            SetFormAnimationStartTime(GetMicroTickCount());
+        }
+    }
+    AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback);
+}
+
+void PipelineContext::CloseFrontendAnimation()
+{
+    if (pendingFrontendAnimation_.empty()) {
+        return;
+    }
+
+    if (pendingFrontendAnimation_.top()) {
+        if (!isReloading_ && !IsLayouting()) {
+            FlushUITasks();
+        } else if (IsLayouting()) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION,
+                "IsLayouting, CloseFrontendAnimation has tasks not flushed, maybe some layout animation not generated");
+        }
+    }
+    if (!pendingFrontendAnimation_.empty()) {
+        pendingFrontendAnimation_.pop();
+    }
+    AnimationUtils::CloseImplicitAnimation();
 }
 } // namespace OHOS::Ace::NG

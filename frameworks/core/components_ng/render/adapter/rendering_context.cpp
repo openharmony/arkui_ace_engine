@@ -100,7 +100,7 @@ void PixelMapImage::DrawToRSCanvas(
         return;
     }
 
-    auto& recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
+    auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     RSBrush brush;
     auto config = GetPaintConfig();
     RSSamplingOptions options;
@@ -123,9 +123,8 @@ void PixelMapImage::DrawToRSCanvas(
     Rosen::Drawing::AdaptiveImageInfo rsImageInfo = { static_cast<int32_t>(config.imageFit_),
         static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
         1.0, 0, 0, 0 };
-    RSSamplingOptions sampling;
     recordingCanvas.AttachBrush(brush);
-    recordingCanvas.DrawPixelMap(pixelMap->GetPixelMapSharedPtr(), rsImageInfo, sampling);
+    recordingCanvas.DrawExtendPixelMap(pixelMap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();
 }
 #endif

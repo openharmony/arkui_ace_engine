@@ -832,9 +832,6 @@ void RosenRenderImage::ApplyInterpolation(RSBrush& brush)
         default:
             break;
     }
-    auto filter = brush.GetFilter();
-    filter.SetFilterQuality(filterQuality);
-    brush.SetFilter(filter);
 }
 #endif
 

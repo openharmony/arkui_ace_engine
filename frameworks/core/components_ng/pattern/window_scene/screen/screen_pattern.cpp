@@ -75,7 +75,7 @@ void ScreenPattern::UpdateDisplayInfo()
 {
     CHECK_NULL_VOID(screenSession_);
 
-    auto pid = IPCSkeleton::GetCallingPid();
+    auto pid = getprocpid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto screenId = screenSession_->GetScreenId();
     auto screenProperty = screenSession_->GetScreenProperty();

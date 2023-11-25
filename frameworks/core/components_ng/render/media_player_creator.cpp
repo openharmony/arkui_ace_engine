@@ -13,15 +13,18 @@
  * limitations under the License.
  */
 
+#if defined(PLAYER_FRAMEWORK_EXISTS)
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OHOS_PLATFORM)
 #include "core/components_ng/render/adapter/rosen_media_player.h"
 #endif
 #include "core/components_ng/render/adapter/media_player_impl.h"
+#endif
 #include "core/components_ng/render/media_player.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<MediaPlayer> MediaPlayer::Create()
 {
+#if defined(PLAYER_FRAMEWORK_EXISTS)
     if (SystemProperties::GetRosenBackendEnabled()) {
 #ifdef ENABLE_ROSEN_BACKEND
 #if defined(OHOS_PLATFORM)
@@ -31,6 +34,7 @@ RefPtr<MediaPlayer> MediaPlayer::Create()
 #endif
 #endif
     }
+#endif
     return MakeRefPtr<MediaPlayer>();
 }
 } // namespace OHOS::Ace::NG

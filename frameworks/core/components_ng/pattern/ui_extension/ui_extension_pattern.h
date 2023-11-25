@@ -115,14 +115,13 @@ public:
         int32_t action, int32_t offset) override;
 
     int32_t GetSessionId();
+    void SetModalFlag(bool isModal)
+    {
+        isModal_ = isModal;
+    }
 
     int32_t GetUiExtensionId() override;
-
     int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId) override;
-    const RefPtr<FrameNode>& GetUiExtensionNode()
-    {
-        return contentNode_;
-    }
 
     void OnAccessibilityEvent(
         const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList);
@@ -206,6 +205,7 @@ private:
 
     bool transferringCaller_ = false;
     bool isVisible_ = true;
+    bool isModal_ = false;
 
     int32_t uiExtensionId_ = 0;
 };

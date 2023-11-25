@@ -28,6 +28,7 @@ build_component_ng("text_field_pattern_ng") {
     "text_field_paint_method.cpp",
     "text_field_paint_property.cpp",
     "text_field_pattern.cpp",
+    "text_input_ai_checker.cpp",
     "text_input_response_area.cpp",
     "text_select_controller.cpp",
   ]

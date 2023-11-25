@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
@@ -51,6 +52,17 @@ struct TextConfig;
 namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
+
+enum class AutoScrollEvent { HANDLE, DRAG, MOUSE, NONE };
+enum class EdgeDetectionStrategy { OUT_BOUNDARY, IN_BOUNDARY, DISABLE };
+struct AutoScrollParam {
+    AutoScrollEvent autoScrollEvent = AutoScrollEvent::NONE;
+    RectF handleRect;
+    bool isFirstHandle = false;
+    float offset = 0.0f;
+    bool showScrollbar = false;
+    Offset eventOffset;
+};
 
 struct SelectionMenuParams {
     RichEditorType type;
@@ -110,6 +122,11 @@ public:
         return timestamp_;
     }
 
+    bool NeedSoftKeyboard() const override
+    {
+        return true;
+    }
+
     void ResetBeforePaste();
     void ResetAfterPaste();
 
@@ -166,6 +183,7 @@ public:
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
+    int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
     RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     void SetSelection(int32_t start, int32_t end);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
@@ -270,13 +288,43 @@ public:
     std::vector<RectF> GetTextBoxes() override;
     bool OnBackPressed() override;
 
+    // Add for Scroll
+    const RectF& GetTextRect() override
+    {
+        return richTextRect_;
+    }
+
+    float GetScrollOffset() const
+    {
+        return scrollOffset_;
+    }
+
+    RefPtr<ScrollBar> GetScrollControllerBar()
+    {
+        return GetScrollBar();
+    }
+
+    bool OnScrollCallback(float offset, int32_t source) override;
+    void OnScrollEndCallback() override;
+    bool IsScrollable() const override
+    {
+        return scrollable_;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
     {
         auto hasValue = (static_cast<int32_t>(GetWideText().length()) + imageCount_) > 0;
         bool isShowItem = copyOption_ != CopyOptions::None;
-        selectInfo.menuInfo.showCopy = isShowItem && hasValue && textSelector_.IsValid();
-        selectInfo.menuInfo.showCut = isShowItem && hasValue && textSelector_.IsValid();
+        selectInfo.menuInfo.showCopy = isShowItem && hasValue && textSelector_.IsValid() &&
+                                       !textSelector_.StartEqualToDest();
+        selectInfo.menuInfo.showCut = isShowItem && hasValue && textSelector_.IsValid() &&
+                                      !textSelector_.StartEqualToDest();
         selectInfo.menuInfo.showCopyAll = !isCopyAll && hasValue;
         selectInfo.menuInfo.showPaste = hasData;
         selectInfo.menuInfo.menuIsShow = hasValue || hasData;
@@ -291,6 +339,8 @@ private:
     void HandleBlurEvent();
     void HandleFocusEvent();
     void HandleClickEvent(GestureEvent& info);
+    void HandleSingleClickEvent(GestureEvent& info);
+    void HandleDoubleClickEvent(GestureEvent& info);
     bool HandleUserClickEvent(GestureEvent& info);
     bool HandleUserLongPressEvent(GestureEvent& info);
     bool HandleUserGestureEvent(
@@ -307,6 +357,8 @@ private:
     void InitTouchEvent();
     bool SelectOverlayIsOn();
     void HandleLongPress(GestureEvent& info);
+    void HandleDoubleClickOrLongPress(GestureEvent& info);
+    std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
     void MouseRightFocus(const MouseInfo& info);
     void HandleMouseLeftButton(const MouseInfo& info);
@@ -372,6 +424,35 @@ private:
     void SetCaretSpanIndex(int32_t index);
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
     bool IsSelectedBindSelectionMenu();
+
+    // add for scroll.
+    void UpdateChildrenOffset();
+    void MoveFirstHandle(float offset);
+    void MoveSecondHandle(float offset);
+    void InitScrollablePattern();
+    bool IsReachedBoundary(float offset);
+    void UpdateScrollBarOffset() override;
+    void CheckScrollable();
+    void UpdateScrollStateAfterLayout(bool shouldDisappear);
+    void ScheduleAutoScroll(AutoScrollParam param);
+    void OnAutoScroll(AutoScrollParam param);
+    void StopAutoScroll();
+    void AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy);
+    float MoveTextRect(float offset);
+    bool MoveCaretToContentRect();
+    bool IsTextArea() const override
+    {
+        return true;
+    }
+    void ProcessInnerPadding();
+
+    // ai analysis fun
+    bool NeedAiAnalysis(
+        const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);
+    void AdjustCursorPosition(int32_t& pos);
+    void AdjustWordSelection(int32_t& start, int32_t& end);
+    bool IsClickBoundary(const int32_t position);
+
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else
@@ -423,6 +504,18 @@ private:
 
     std::function<void()> customKeyboardBuilder_;
     Offset selectionMenuOffset_;
+    // add for scroll
+    RectF richTextRect_;
+    float scrollOffset_ = 0.0f;
+    bool isFirstCallOnReady_ = false;
+    bool scrollable_ = true;
+    CancelableCallback<void()> autoScrollTask_;
+    OffsetF prevAutoScrollOffset_;
+    // add for ai input analysis
+    bool hasClicked_ = false;
+    CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
+    TimeStamp lastClickTimeStamp_;
+    TimeStamp lastAiPosTimeStamp_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };

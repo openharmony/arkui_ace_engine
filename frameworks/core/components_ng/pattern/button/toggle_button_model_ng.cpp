@@ -65,4 +65,19 @@ void ToggleButtonModelNG::SetBackgroundColor(const Color& backgroundColor)
     NG::ViewAbstract::SetBackgroundColor(backgroundColor);
 }
 
+void ToggleButtonModelNG::SetSelectedColor(FrameNode* frameNode, const Color& selectedColor)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColor, selectedColor, frameNode);
+}
+
+void ToggleButtonModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& backgroundColor)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    if (buttonPattern) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, BackgroundColor, backgroundColor, frameNode);
+        return;
+    }
+    NG::ViewAbstract::SetBackgroundColor(frameNode, backgroundColor);
+}
 } // namespace OHOS::Ace::NG

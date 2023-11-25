@@ -1203,6 +1203,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto menuEndOffset =
             menuPosition - (previewOffset_ - previewOriginOffset_) + FixMenuOriginOffset(1.0f, afterAnimationScale);
         menuPattern->SetEndOffset(menuEndOffset);
+        menuPattern->SetHasLaid(true);
     }
 
     // translate each option by the height of previous options

@@ -172,6 +172,11 @@ public:
         }
     }
 
+    bool NeedSoftKeyboard() const override
+    {
+        return true;
+    }
+
     void OnModifyDone() override;
     void UpdateSelectionOffset();
     void CalcCaretMetricsByPosition(
@@ -872,11 +877,6 @@ public:
         return isCustomFont_;
     }
 
-    bool IsFocus()
-    {
-        return HasFocus();
-    }
-
     void SetISCounterIdealHeight(bool IsIdealHeight)
     {
         isCounterIdealheight_ = IsIdealHeight;
@@ -984,7 +984,13 @@ public:
     }
 
     void ShowMenu();
+    bool HasFocus() const;
+    void StopTwinkling();
 
+    const TimeStamp& GetLastClickTime()
+    {
+        return lastClickTimeStamp_;
+    }
 #ifdef ENABLE_DRAG_FRAMEWORK
 protected:
     virtual void InitDragEvent();
@@ -992,7 +998,6 @@ protected:
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
-    bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
@@ -1036,7 +1041,8 @@ private:
 
     void CursorMoveOnClick(const Offset& offset);
 
-    void ProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
+    void ProcessOverlay(
+        bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true, bool isHiddenHandle = false);
     void DelayProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
     SelectHandleInfo GetSelectHandleInfo(OffsetF info);
     void UpdateSelectOverlaySecondHandle(bool needLayout = false);
@@ -1067,7 +1073,6 @@ private:
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
     void StartTwinkling();
-    void StopTwinkling();
     void CheckIfNeedToResetKeyboard();
 
     float PreferredTextHeight(bool isPlaceholder, bool isAlgorithmMeasure = false);

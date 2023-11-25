@@ -571,6 +571,38 @@ HWTEST_F(MenuTestNg, MenuWrapperPatternTestNg007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuWrapperPatternTestNg008
+ * @tc.desc: CallMenuStateChangeCallback (Menu).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuWrapperPatternTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create wrapper and child menu
+     * @tc.expected: wrapper pattern not null
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    
+    mainMenu->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    /**
+     * @tc.steps: step2. excute HideMenu
+     * @tc.expected: wrapper child size is 3
+     */
+    int32_t callNum = 0;
+    std::function<void(const std::string&)> callback = [&](const std::string& param) {
+        callNum++;
+    };
+    wrapperPattern->RegisterMenuStateChangeCallback(callback);
+    wrapperPattern->CallMenuStateChangeCallback("false");
+    EXPECT_EQ(callNum, 1);
+}
+
+/**
  * @tc.name: MenuPatternTestNg001
  * @tc.desc: Verify RegisterOnTouch.
  * @tc.type: FUNC
@@ -1841,6 +1873,29 @@ HWTEST_F(MenuTestNg, PerformActionTest002, TestSize.Level1)
     textNode->MarkModifyDone();
     EXPECT_TRUE(menuAccessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(menuAccessibilityProperty->ActActionScrollBackward());
+}
+
+/**
+ * @tc.name: PerformActionTest003
+ * @tc.desc: MenuItem Accessibility PerformAction test Select and ClearSelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, PerformActionTest003, TestSize.Level1)
+{
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    MenuItemModelNG MneuItemModelInstance;
+    MneuItemModelInstance.Create(itemOption);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto menuItemAccessibilityProperty = frameNode->GetAccessibilityProperty<MenuItemAccessibilityProperty>();
+    ASSERT_NE(menuItemAccessibilityProperty, nullptr);
+    bool isSelected = true;
+    menuItemPattern->isSelected_ = false;
+    menuItemPattern->MarkIsSelected(isSelected);
+    EXPECT_TRUE(menuItemAccessibilityProperty->ActActionSelect());
 }
 
 /**
@@ -4827,13 +4882,14 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
      * @tc.steps: step1. create menuLayoutAlgorithm and target is null
      * @tc.expected: menuLayoutAlgorithm is not null
      */
-    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(NODEID, "menu");
+    auto nodeId =  ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(nodeId, "menu");
     ASSERT_NE(menuLayoutAlgorithm, nullptr);
 
     menuLayoutAlgorithm->InitTargetSizeAndPosition(nullptr, true);
-    menuLayoutAlgorithm->targetNodeId_ = NODEID;
+    menuLayoutAlgorithm->targetNodeId_ = nodeId;
     menuLayoutAlgorithm->targetTag_ = "text";
-    auto target = FrameNode::GetOrCreateFrameNode("text", NODEID, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto target = FrameNode::GetOrCreateFrameNode("text", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
     ASSERT_NE(target, nullptr);
 
     /**

@@ -100,7 +100,7 @@ void ScrollFadeEffect::Paint(RSCanvas& canvas, const SizeF& viewPort, const Offs
     }
 }
 
-void ScrollFadeEffect::HandleOverScroll(Axis axis, float overScroll, const SizeF& viewPort)
+void ScrollFadeEffect::HandleOverScroll(Axis axis, float overScroll, const SizeF& viewPort, bool isScrollFromUpdate)
 {
     if (NearZero(overScroll)) {
         return;
@@ -119,7 +119,7 @@ void ScrollFadeEffect::HandleOverScroll(Axis axis, float overScroll, const SizeF
     }
 
     if (fadeController_ && scrollable_) {
-        if (!scrollable_->GetIsDragging()) {
+        if (!isScrollFromUpdate) {
             fadeController_->ProcessAbsorb(std::abs(scrollable_->GetCurrentVelocity()));
         } else {
             axis == Axis::VERTICAL

@@ -33,25 +33,27 @@ config("standard_camera_config") {
   ]
 }
 
-build_component("camera") {
-  sources = [
-    "camera_component.cpp",
-    "camera_element.cpp",
-  ]
-
-  if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
-    configs = [ ":standard_camera_config" ]
-
-    sources += [ "standard_system/camera.cpp" ]
-
-    external_deps = [
-      "c_utils:utils",
-      "camera_framework:camera_framework",
-      "graphic_2d:surface",
-      "ipc:ipc_core",
-      "player_framework:media_client",
+if (enable_camera_framework && enable_player_framework) {
+  build_component("camera") {
+    sources = [
+      "camera_component.cpp",
+      "camera_element.cpp",
     ]
-  } else {
-    sources += [ "large_system/camera.cpp" ]
+
+    if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
+      configs = [ ":standard_camera_config" ]
+
+      sources += [ "standard_system/camera.cpp" ]
+
+      external_deps = [
+        "c_utils:utils",
+        "camera_framework:camera_framework",
+        "graphic_2d:surface",
+        "ipc:ipc_core",
+        "player_framework:media_client",
+      ]
+    } else {
+      sources += [ "large_system/camera.cpp" ]
+    }
   }
 }

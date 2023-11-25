@@ -93,6 +93,7 @@ protected:
     AssertionResult VerifyItemRect(
         int32_t viewItemNumber, int32_t lanes, float width, float height, int32_t startIndex, FlexDirection direction);
     AssertionResult VerifyBigItemRect(int32_t index, RectF expectRect);
+    AssertionResult ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset);
     int32_t findFocusNodeIndex(RefPtr<FocusHub>& focusNode);
     void UpdateLayoutInfo();
 
@@ -381,6 +382,20 @@ AssertionResult GridTestNg::VerifyBigItemRect(int32_t index, RectF expectRect)
     return IsEqual(GetChildRect(frameNode_, index), expectRect);
 }
 
+AssertionResult GridTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset)
+{
+    float startOffset = pattern_->GetTotalOffset();
+    pattern_->ScrollToIndex(index, smooth, align);
+    RunMeasureAndLayout(frameNode_);
+    if (smooth) {
+        // Straight to the end of the anmiation
+    }
+    float currentOffset = pattern_->GetTotalOffset();
+    // reset offset before return
+    pattern_->ScrollTo(startOffset);
+    RunMeasureAndLayout(frameNode_);
+    return IsEqual(currentOffset, expectOffset);
+}
 
 /**
  * @tc.name: Property001
@@ -2274,7 +2289,6 @@ HWTEST_F(GridTestNg, VerticalGridWithScrollBarWithAnimation001, TestSize.Level1)
     EXPECT_FALSE(isOnReachStartCallBack); EXPECT_FALSE(isOnReachEndCallBack);
 }
 
-
 /**
  * @tc.name: VerticalGridWithScrollBarWithAnimation002
  * @tc.desc: Test Grid(Axis::VERTICAL) Scroll With Scroll Bar With Animation
@@ -2908,9 +2922,10 @@ HWTEST_F(GridTestNg, PositionController002, TestSize.Level1)
      * @tc.steps: step4. Test GetCurrentOffset func.
      * @tc.expected: Verify return value.
      */
-    pattern_->UpdateCurrentOffset(20.f, SCROLL_FROM_UPDATE);
+    // When finger moves up, offset is negative.
+    pattern_->UpdateCurrentOffset(-20.f, SCROLL_FROM_UPDATE);
     Offset currentOffset = controller->GetCurrentOffset();
-    EXPECT_EQ(currentOffset, Offset(0, -20.f));
+    EXPECT_EQ(currentOffset, Offset(0, 20.f));
 
     /**
      * @tc.steps: step5. Test ScrollToEdge func.
@@ -2930,10 +2945,12 @@ HWTEST_F(GridTestNg, PositionController002, TestSize.Level1)
      * @tc.expected: Verify currentOffset.
      */
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
-    controller->ScrollPage(true, true);
-    EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, -DEVICE_HEIGHT));
-
+    // scroll to next page
     controller->ScrollPage(false, true);
+    EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, DEVICE_HEIGHT));
+
+    // scroll to previous page
+    controller->ScrollPage(true, true);
     EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, 0));
 
     /**
@@ -3080,7 +3097,8 @@ HWTEST_F(GridTestNg, GridAccessibilityTest003, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateColItem(24);
     });
-    UpdateCurrentOffset(ITEM_HEIGHT);
+    EXPECT_TRUE(pattern_->IsAtTop());
+    EXPECT_FALSE(pattern_->IsAtBottom());
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions_1 = 0;
     exptectActions_1 |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
@@ -3090,6 +3108,8 @@ HWTEST_F(GridTestNg, GridAccessibilityTest003, TestSize.Level1)
      * @tc.steps: step2. Scroll to middle.
      */
     UpdateCurrentOffset(-ITEM_HEIGHT);
+    EXPECT_FALSE(pattern_->IsAtTop());
+    EXPECT_FALSE(pattern_->IsAtBottom());
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions_2 = 0;
     exptectActions_2 |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
@@ -3100,6 +3120,8 @@ HWTEST_F(GridTestNg, GridAccessibilityTest003, TestSize.Level1)
      * @tc.steps: step3. Scroll to bottom.
      */
     UpdateCurrentOffset(-ITEM_HEIGHT * 2);
+    EXPECT_FALSE(pattern_->IsAtTop());
+    EXPECT_TRUE(pattern_->IsAtBottom());
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions_3 = 0;
     exptectActions_3 |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
@@ -4751,28 +4773,6 @@ HWTEST_F(GridTestNg, GridSetFriction001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ScrollTo001
- * @tc.desc: Test ScrollTo Function.
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, ScrollTo001, TestSize.Level1)
-{
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(10);
-    });
-    pattern_->ScrollTo(ITEM_HEIGHT);
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
-
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(20);
-    });
-    pattern_->ScrollTo(ITEM_HEIGHT);
-    EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT));
-}
-
-/**
  * @tc.name: GetTotalHeight001
  * @tc.desc: Test GetTotalHeight Function.
  * @tc.type: FUNC
@@ -5402,5 +5402,349 @@ HWTEST_F(GridTestNg, GridPattern_GetItemRect001, TestSize.Level1)
         Rect(0, ITEM_HEIGHT + ITEM_HEIGHT / 2, DEVICE_WIDTH, ITEM_HEIGHT)));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(5),
         Rect(DEVICE_WIDTH / 2, ITEM_HEIGHT * 2 + ITEM_HEIGHT / 2, DEVICE_WIDTH / 2, ITEM_HEIGHT)));
+}
+
+/**
+ * @tc.name: ScrollToIndex001
+ * @tc.desc: Test ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, ScrollToIndex001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(40);
+    });
+
+    /**
+     * @tc.steps: step1. first item in viewport
+     */
+    int32_t index = 0;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0));
+
+    /**
+     * @tc.steps: step2. the item in viewport
+     */
+    index = 8;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 2));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 0.5));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0));
+
+    /**
+     * @tc.steps: step3. the item below viewport
+     */
+    index = 16;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 4));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 2.5));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, ITEM_HEIGHT));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT));
+
+    /**
+     * @tc.steps: step4. last item below viewport
+     */
+    index = LAST_ITEM;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 6));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 6));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, ITEM_HEIGHT * 6));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT * 6));
+
+    /**
+     * @tc.steps: step5. scroll to middle, first item above viewport
+     */
+    UpdateCurrentOffset(-ITEM_HEIGHT * 4);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 4);
+    index = 0;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0));
+
+    /**
+     * @tc.steps: step6. the item above viewport
+     */
+    index = 6;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT));
+
+    /**
+     * @tc.steps: step7. scroll to bottom, last item in viewport
+     */
+    UpdateCurrentOffset(-ITEM_HEIGHT * 2);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    index = LAST_ITEM;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 6));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 6));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, ITEM_HEIGHT * 6));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT * 6));
+}
+
+/**
+ * @tc.name: ScrollToIndex002
+ * @tc.desc: Test ScrollToIndex invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, ScrollToIndex002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(24);
+    });
+
+    /**
+     * @tc.steps: step1. Invalid index, index < -1
+     */
+    int32_t index = -2;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0));
+}
+
+/**
+ * @tc.name: Gap001
+ * @tc.desc: Test gap
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, Gap001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default
+     */
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateItem(16, NULL_VALUE, NULL_VALUE);
+    });
+    EXPECT_EQ(GetChildRect(frameNode_, 1).GetX(), ITEM_WIDTH);
+    EXPECT_EQ(GetChildRect(frameNode_, 4).GetY(), ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step2. Set normal value
+     * @tc.expected: valid
+     */
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateItem(16, NULL_VALUE, NULL_VALUE);
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
+    });
+    EXPECT_EQ(GetChildRect(frameNode_, 1).GetX(), (DEVICE_WIDTH + COL_GAP) / 4);
+    EXPECT_EQ(GetChildRect(frameNode_, 4).GetY(), (DEVICE_HEIGHT + ROW_GAP) / 4);
+
+    /**
+     * @tc.steps: step3. Set out of range value
+     * @tc.expected: Invalid
+     */
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateItem(16, NULL_VALUE, NULL_VALUE);
+        model.SetColumnsGap(Dimension(-1));
+        model.SetRowsGap(Dimension(-1));
+    });
+    EXPECT_EQ(GetChildRect(frameNode_, 1).GetX(), ITEM_WIDTH);
+    EXPECT_EQ(GetChildRect(frameNode_, 4).GetY(), ITEM_HEIGHT);
+
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateItem(16, NULL_VALUE, NULL_VALUE);
+        model.SetColumnsGap(Dimension(DEVICE_WIDTH / 3));
+        model.SetRowsGap(Dimension(DEVICE_HEIGHT / 3 + 1));
+    });
+    EXPECT_EQ(GetChildRect(frameNode_, 1).GetX(), ITEM_WIDTH);
+    EXPECT_EQ(GetChildRect(frameNode_, 4).GetY(), ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step4. Set grid scrollable
+     * @tc.expected: the scrollable direction gap valid, the another one invalid
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(16);
+        model.SetColumnsGap(Dimension(DEVICE_WIDTH / 3));
+        model.SetRowsGap(Dimension(DEVICE_HEIGHT / 3));
+    });
+    EXPECT_EQ(GetChildRect(frameNode_, 1).GetX(), ITEM_WIDTH);
+    EXPECT_EQ(GetChildRect(frameNode_, 4).GetY(), ITEM_HEIGHT + DEVICE_HEIGHT / 3);
+}
+
+/**
+ * @tc.name: MinMaxCount
+ * @tc.desc: Test minCount maxCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, MinMaxCount, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default
+     */
+    Create([](GridModelNG model) {
+        model.SetLayoutDirection(FlexDirection::ROW);
+        CreateColItem(16);
+    });
+    EXPECT_EQ(GetChildRect(frameNode_, 15).GetY(), 0);
+    EXPECT_EQ(GetChildRect(frameNode_, 15).GetX(), 0);
+
+    /**
+     * @tc.steps: step2. Valid
+     */
+    Create([](GridModelNG model) {
+        model.SetLayoutDirection(FlexDirection::ROW);
+        CreateColItem(16);
+        model.SetMinCount(2);
+        model.SetMaxCount(5);
+    });
+    EXPECT_EQ(GetChildRect(frameNode_, 15).GetY(), ITEM_HEIGHT * 3);
+    EXPECT_EQ(GetChildRect(frameNode_, 15).GetX(), 0);
+
+    /**
+     * @tc.steps: step3. Invalid
+     */
+    Create([](GridModelNG model) {
+        model.SetLayoutDirection(FlexDirection::ROW);
+        CreateColItem(16);
+        model.SetMinCount(-1);
+        model.SetMaxCount(-1);
+    });
+    EXPECT_EQ(GetChildRect(frameNode_, 15).GetY(), 0);
+    EXPECT_EQ(GetChildRect(frameNode_, 15).GetX(), 0);
+}
+
+/**
+ * @tc.name: ScrollTo001
+ * @tc.desc: Test ScrollTo Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, ScrollTo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. UnScrollable grid
+     * @tc.expected: Unroll
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr");
+        CreateColItem(4);
+    });
+    pattern_->ScrollTo(ITEM_HEIGHT);
+    EXPECT_TRUE(IsEqualCurrentOffset(0));
+
+    /**
+     * @tc.steps: step2. Scrollable grid
+     * @tc.expected: Rolled
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr");
+        CreateColItem(10);
+    });
+    pattern_->ScrollTo(ITEM_HEIGHT);
+    EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT));
+
+    /**
+     * @tc.steps: step3. Scrollable grid, scroll position greater than DEVICE_HEIGHT
+     * @tc.expected: Rolled
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr");
+        CreateColItem(10);
+    });
+    pattern_->ScrollTo(ITEM_HEIGHT * 5);
+    EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT * 5));
+}
+
+/**
+ * @tc.name: AnimateTo001
+ * @tc.desc: Test AnimateTo Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, AnimateTo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. UnScrollable grid
+     * @tc.expected: Unroll
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr");
+        CreateColItem(4);
+    });
+    pattern_->AnimateTo(ITEM_HEIGHT, 200.f, Curves::LINEAR, true);
+    float endValue = pattern_->springMotion_->GetEndValue();
+    pattern_->springMotion_->NotifyListener(endValue);
+    EXPECT_TRUE(IsEqualCurrentOffset(0));
+
+    /**
+     * @tc.steps: step2. Scrollable grid
+     * @tc.expected: Rolled
+     */
+    // smooth is true
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr");
+        CreateColItem(10);
+    });
+    pattern_->AnimateTo(ITEM_HEIGHT, 200.f, Curves::LINEAR, true);
+    endValue = pattern_->springMotion_->GetEndValue();
+    pattern_->springMotion_->NotifyListener(endValue);
+    EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT));
+
+    // smooth is false
+    pattern_->AnimateTo(0, 200.f, Curves::LINEAR, false);
+    pattern_->animator_->interpolators_.front()->OnNormalizedTimestampChanged(1.f, false);
+    EXPECT_TRUE(IsEqualCurrentOffset(0));
+
+    /**
+     * @tc.steps: step3. Scrollable grid, scroll position greater than DEVICE_HEIGHT
+     * @tc.expected: Rolled
+     */
+    // smooth is true
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr");
+        CreateColItem(10);
+    });
+    pattern_->AnimateTo(ITEM_HEIGHT * 9, 200.f, Curves::LINEAR, true);
+    endValue = pattern_->springMotion_->GetEndValue();
+    pattern_->springMotion_->NotifyListener(endValue);
+    EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT * 9));
+
+    // smooth is false
+    pattern_->AnimateTo(0, 200.f, Curves::LINEAR, false);
+    pattern_->animator_->interpolators_.front()->OnNormalizedTimestampChanged(1.f, false);
+    EXPECT_TRUE(IsEqualCurrentOffset(0));
+}
+
+/**
+ * @tc.name: ChangeItemNumber001
+ * @tc.desc: Test ChangeItemNumber
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, ChangeItemNumber001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(5);
+    });
+
+    /**
+     * @tc.steps: step1. Add item
+     * @tc.expected: The added item in the correct position
+     */
+    for (int32_t i = 0; i < 4; i++) {
+        GridItemModelNG itemModel;
+        itemModel.Create(GridItemStyle::NONE);
+        SetHeight(Dimension(ITEM_HEIGHT));
+        RefPtr<UINode> currentNode = ViewStackProcessor::GetInstance()->Finish();
+        auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
+        currentFrameNode->MountToParent(frameNode_);
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    RunMeasureAndLayout(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 6), OffsetF(ITEM_WIDTH * 2, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 8), OffsetF(0, ITEM_HEIGHT * 2)));
 }
 } // namespace OHOS::Ace::NG

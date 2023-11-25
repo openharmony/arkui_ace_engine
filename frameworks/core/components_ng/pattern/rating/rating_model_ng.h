@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RATING_RATING_MODEL_NG_H
 
 #include "core/components_ng/pattern/rating/rating_model.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RatingModelNG : public OHOS::Ace::RatingModel {
@@ -31,6 +32,12 @@ public:
     void SetBackgroundSrc(const std::string& value, bool flag = false) override;
     void SetOnChange(ChangeEvent&& onChange) override;
     void SetOnChangeEvent(ChangeEvent&& onChangeEvent) override;
+    
+    static void SetStars(FrameNode* frameNode, int32_t value);
+    static void SetStepSize(FrameNode* frameNode, double value);
+    static void SetForegroundSrc(FrameNode* frameNode, const std::string& value, bool flag = false);
+    static void SetSecondarySrc(FrameNode* frameNode, const std::string& value, bool flag = false);
+    static void SetBackgroundSrc(FrameNode* frameNode, const std::string& value, bool flag = false);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RATING_RATING_MODEL_NG_H

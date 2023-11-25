@@ -203,6 +203,20 @@ if (defined(global_parts_info)) {
   }
 }
 
+if (defined(global_parts_info.multimedia_camera_framework)) {
+  enable_camera_framework = true
+  ace_common_defines += [ "CAMERA_FRAMEWORK_EXISTS" ]
+} else {
+  enable_camera_framework = false
+}
+
+if (defined(global_parts_info.multimedia_player_framework)) {
+  enable_player_framework = true
+  ace_common_defines += [ "PLAYER_FRAMEWORK_EXISTS" ]
+} else {
+  enable_player_framework = false
+}
+
 if (!defined(global_parts_info) ||
     defined(global_parts_info.security_security_component_manager)) {
   security_component_enable = true

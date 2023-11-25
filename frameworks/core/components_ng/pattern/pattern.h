@@ -80,6 +80,11 @@ public:
         return true;
     }
 
+    virtual bool NeedSoftKeyboard() const
+    {
+        return false;
+    }
+
     virtual bool DefaultSupportDrag()
     {
         return false;
@@ -375,6 +380,8 @@ public:
     virtual void OnRecycle() {}
     virtual void OnReuse() {}
 
+    virtual void OnAttachToMainTree() {}
+
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
     virtual void OnAreaChangedInner() {}
@@ -408,7 +415,8 @@ public:
     virtual void HandleDragEvent(const PointerEvent& info) {};
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
-    virtual void OnDirectionOrDpiConfigurationUpdate() {}
+    virtual void OnDirectionConfigurationUpdate() {}
+    virtual void OnDpiConfigurationUpdate() {}
 
     virtual bool ShouldDelayChildPressedState() const
     {

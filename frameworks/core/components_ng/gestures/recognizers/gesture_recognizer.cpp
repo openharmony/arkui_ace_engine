@@ -76,6 +76,10 @@ void NGGestureRecognizer::ResetGlobalTransCfg()
 
 bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 {
+    auto attachedNode = GetAttachedNode();
+    if (attachedNode.Invalid()) {
+        return true;
+    }
     switch (point.type) {
         case TouchType::MOVE:
             HandleTouchMoveEvent(point);

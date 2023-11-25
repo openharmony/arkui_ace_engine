@@ -327,15 +327,7 @@ public:
         }
     }
 
-    void SetIsTransparentForm(bool isTransparentForm)
-    {
-        isTransparentForm_ = isTransparentForm;
-    }
-
-    bool IsTransparentForm() const
-    {
-        return isTransparentForm_;
-    }
+    bool IsTransparentBg() const;
 
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
@@ -344,6 +336,8 @@ public:
     static void DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback = nullptr);
     static bool RunPage(
         int32_t instanceId, const std::string& content, const std::string& params, bool isNamedRouter = false);
+    static bool RunPage(
+        int32_t instanceId, const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params);
     static bool PushPage(int32_t instanceId, const std::string& content, const std::string& params);
     static bool OnBackPressed(int32_t instanceId);
     static void OnShow(int32_t instanceId);
@@ -471,30 +465,30 @@ public:
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         StopDragCallback&& stopDragCallback) override;
-    
+
     bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
 
-    static void SearchElementInfoByAccessibilityIdNG(
-        int32_t instanceId, int32_t elementId, int32_t mode,
-        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void SearchElementInfoByAccessibilityIdNG(
+        int32_t elementId, int32_t mode, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output);
 
-    static void SearchElementInfosByTextNG(
-        int32_t instanceId, int32_t elementId, const std::string& text,
-        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output);
-    
-    static void FindFocusedElementInfoNG(
-        int32_t instanceId, int32_t elementId, int32_t focusType,
-        int32_t baseParent, Accessibility::AccessibilityElementInfo& output);
+    void SearchElementInfosByTextNG(
+        int32_t elementId, const std::string& text, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output);
 
-    static void FocusMoveSearchNG(
-        int32_t instanceId, int32_t elementId, int32_t direction,
-        int32_t baseParent, Accessibility::AccessibilityElementInfo& output);
-    
-    static bool NotifyExecuteAction(
-        int32_t instanceId, int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+    void FindFocusedElementInfoNG(
+        int32_t elementId, int32_t focusType, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& output);
+
+    void FocusMoveSearchNG(
+        int32_t elementId, int32_t direction, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& output);
+
+    bool NotifyExecuteAction(
+        int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset);
-    
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -545,7 +539,6 @@ private:
     bool isFormRender_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
-    bool isTransparentForm_ = false;
 
     mutable std::mutex frontendMutex_;
     mutable std::mutex pipelineMutex_;

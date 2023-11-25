@@ -130,6 +130,10 @@ public:
         const std::function<void(float, float, float, float)>& callback) {}
     virtual void RemoveSurfaceChangedCallBack() {}
 
+    virtual void MarkNewFrameAvailable(void* nativeWindow) {}
+    virtual void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) {}
+    virtual void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) {}
+
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
 
@@ -347,6 +351,7 @@ public:
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnOpacityUpdate(double opacity) {}
+    virtual void SetAlphaOffscreen(bool isOffScreen) {}
     virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
     virtual void OnLightUpEffectUpdate(double radio) {}

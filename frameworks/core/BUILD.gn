@@ -218,6 +218,13 @@ template("ace_core_source_set") {
       "common/flutter/flutter_asset_manager.cpp",
       "common/flutter/flutter_task_executor.cpp",
       "common/flutter/flutter_thread_model.cpp",
+
+      # recorder
+      "common/recorder/event_config.cpp",
+      "common/recorder/event_controller.cpp",
+      "common/recorder/event_recorder.cpp",
+      "common/recorder/exposure_processor.cpp",
+      "common/recorder/node_data_cache.cpp",
     ]
 
     if (!(defined(config.enable_rosen_backend) && config.enable_rosen_backend)) {
@@ -547,15 +554,19 @@ template("ace_core_source_set") {
     }
     if (!is_wearable_product) {
       deps += [
-        "$ace_root/frameworks/core/components/camera:ace_core_components_camera_$platform",
         "$ace_root/frameworks/core/components/multimodal:ace_core_components_multimodal_$platform",
         "$ace_root/frameworks/core/components/piece:ace_core_components_piece_$platform",
         "$ace_root/frameworks/core/components/popup:ace_core_components_popup_$platform",
         "$ace_root/frameworks/core/components/rating:ace_core_components_rating_$platform",
         "$ace_root/frameworks/core/components/select:ace_core_components_select_$platform",
         "$ace_root/frameworks/core/components/tool_bar:ace_core_components_tool_bar_$platform",
-        "$ace_root/frameworks/core/components/video:ace_core_components_video_$platform",
       ]
+      if (enable_player_framework) {
+        deps += [ "$ace_root/frameworks/core/components/video:ace_core_components_video_$platform" ]
+        if (enable_camera_framework) {
+          deps += [ "$ace_root/frameworks/core/components/camera:ace_core_components_camera_$platform" ]
+        }
+      }
     }
 
     if ((current_os == "mingw" || current_os == "mac" ||
@@ -788,6 +799,13 @@ template("ace_core_ng_source_set") {
 
       #declaration
       "components/declaration/common/declaration.cpp",
+
+      # recorder
+      "common/recorder/event_config.cpp",
+      "common/recorder/event_controller.cpp",
+      "common/recorder/event_recorder.cpp",
+      "common/recorder/exposure_processor.cpp",
+      "common/recorder/node_data_cache.cpp",
     ]
     include_dirs = []
     if (is_arkui_x) {
@@ -808,6 +826,7 @@ template("ace_core_ng_source_set") {
         "components/declaration/common/event.cpp",
         "components/svg/svg_transform.cpp",
         "components/video/resource/ext_surface.cpp",
+        "components/video/resource/ext_texture.cpp",
         "components/video/resource/resource.cpp",
       ]
     }

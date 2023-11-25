@@ -40,6 +40,14 @@ public:
     {
         return false;
     }
+
+    void OnAttachToFrameNode() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
+        host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    }
 };
 } // namespace OHOS::Ace::NG
 

@@ -31,6 +31,7 @@ template("web_pattern_unit_source_set") {
         "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
         "//foundation/multimedia/image_framework/interfaces/innerkits/include",
         "//foundation/window/window_manager/interfaces/innerkits",
+        "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
       ]
       sources += [
         "web_accessibility_property_test_ng.cpp",

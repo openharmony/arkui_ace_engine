@@ -138,8 +138,8 @@ const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email",
 const std::string SHEET_HEIGHT_MEDIUM = "medium";
 const std::string SHEET_HEIGHT_LARGE = "large";
 const std::string SHEET_HEIGHT_AUTO = "auto";
-const std::string BLOOM_RADIUI_SYS_RES_NAME = "ohos_id_point_light_bloom_radius";
-const std::string BLOOM_COLOR_SYS_RES_NAME = "ohos_id_point_light_bloom_color";
+const std::string BLOOM_RADIUI_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_radius";
+const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -188,7 +188,7 @@ bool CheckJSCallbackInfo(
     return typeVerified || infoTypes.size() == 0;
 }
 
-void ParseJsScale(std::unique_ptr<JsonValue>& argsPtrItem, float& scaleX, float& scaleY, float& scaleZ,
+void ParseJsonScale(std::unique_ptr<JsonValue>& argsPtrItem, float& scaleX, float& scaleY, float& scaleZ,
     CalcDimension& centerX, CalcDimension& centerY)
 {
     double xVal = 1.0;
@@ -220,7 +220,35 @@ void ParseJsScale(std::unique_ptr<JsonValue>& argsPtrItem, float& scaleX, float&
     }
 }
 
-void ParseJsTranslate(std::unique_ptr<JsonValue>& argsPtrItem, CalcDimension& translateX, CalcDimension& translateY,
+void ParseJsScale(const JSRef<JSVal>& jsValue, float& scaleX, float& scaleY, float& scaleZ,
+    CalcDimension& centerX, CalcDimension& centerY)
+{
+    double xVal = 1.0;
+    double yVal = 1.0;
+    double zVal = 1.0;
+    if (!jsValue->IsObject()) {
+        scaleX = static_cast<float>(xVal);
+        scaleY = static_cast<float>(yVal);
+        scaleZ = static_cast<float>(zVal);
+        CalcDimension length;
+        centerX = length;
+        centerY = length;
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSViewAbstract::ParseJsDouble(jsObj->GetProperty("x"), xVal);
+    JSViewAbstract::ParseJsDouble(jsObj->GetProperty("y"), yVal);
+    JSViewAbstract::ParseJsDouble(jsObj->GetProperty("z"), zVal);
+    scaleX = static_cast<float>(xVal);
+    scaleY = static_cast<float>(yVal);
+    scaleZ = static_cast<float>(zVal);
+    // if specify centerX
+    JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("centerX"), centerX);
+    // if specify centerY
+    JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("centerY"), centerY);
+}
+
+void ParseJsonTranslate(std::unique_ptr<JsonValue>& argsPtrItem, CalcDimension& translateX, CalcDimension& translateY,
     CalcDimension& translateZ)
 {
     CalcDimension length;
@@ -235,6 +263,18 @@ void ParseJsTranslate(std::unique_ptr<JsonValue>& argsPtrItem, CalcDimension& tr
     }
 }
 
+void ParseJsTranslate(const JSRef<JSVal>& jsValue, CalcDimension& translateX, CalcDimension& translateY,
+    CalcDimension& translateZ)
+{
+    if (!jsValue->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("x"), translateX);
+    JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("y"), translateY);
+    JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("z"), translateZ);
+}
+
 void GetDefaultRotateVector(double& dx, double& dy, double& dz)
 {
     dx = 0.0;
@@ -245,7 +285,7 @@ void GetDefaultRotateVector(double& dx, double& dy, double& dz)
     }
 }
 
-void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& rotate, std::optional<float>& angle)
+void ParseJsonRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& rotate, std::optional<float>& angle)
 {
     // default: dx, dy, dz (0.0, 0.0, 0.0)
     double dxVal = 0.0;
@@ -285,31 +325,72 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& r
     rotate.perspective = perspective;
 }
 
-bool ParseMotionPath(const std::unique_ptr<JsonValue>& argsPtrItem, MotionPathOption& option)
+void ParseJsRotate(const JSRef<JSVal>& jsValue, NG::RotateOptions& rotate, std::optional<float>& angle)
 {
-    if (argsPtrItem && !argsPtrItem->IsNull()) {
-        auto path = argsPtrItem->GetString("path", "");
-        if (!path.empty()) {
-            option.SetPath(path);
-            double from = 0.0;
-            double to = 1.0;
-            JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("from"), from);
-            JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("to"), to);
-            if (GreatNotEqual(from, 1.0) || LessNotEqual(from, 0.0)) {
-                from = 0.0;
-            }
-            if (GreatNotEqual(to, 1.0) || LessNotEqual(to, 0.0)) {
-                to = 1.0;
-            } else if (to < from) {
-                to = from;
-            }
-            option.SetBegin(static_cast<float>(from));
-            option.SetEnd(static_cast<float>(to));
-            option.SetRotate(argsPtrItem->GetBool("rotatable", false));
-            return true;
-        }
+    if (!jsValue->IsObject()) {
+        return;
     }
-    return false;
+    // default: dx, dy, dz (0.0, 0.0, 0.0)
+    double dxVal = 0.0;
+    double dyVal = 0.0;
+    double dzVal = 0.0;
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    if (!jsObj->HasProperty("x") && !jsObj->HasProperty("y") && !jsObj->HasProperty("z")) {
+        GetDefaultRotateVector(dxVal, dyVal, dzVal);
+    } else {
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("x"), dxVal);
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("y"), dyVal);
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("z"), dzVal);
+    }
+    rotate.xDirection = static_cast<float>(dxVal);
+    rotate.yDirection = static_cast<float>(dyVal);
+    rotate.zDirection = static_cast<float>(dzVal);
+    // if specify centerX
+    if (!JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("centerX"), rotate.centerX)) {
+        rotate.centerX = Dimension(0.5f, DimensionUnit::PERCENT);
+    }
+    // if specify centerY
+    if (!JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("centerY"), rotate.centerY)) {
+        rotate.centerY = Dimension(0.5f, DimensionUnit::PERCENT);
+    }
+    // if specify centerZ
+    if (!JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("centerZ"), rotate.centerZ)) {
+        rotate.centerZ = Dimension(0.5f, DimensionUnit::PERCENT);
+    }
+    // if specify angle
+    JSViewAbstract::GetJsAngle("angle", jsObj, angle);
+    rotate.perspective = 0.0f;
+    JSViewAbstract::GetJsPerspective("perspective", jsObj, rotate.perspective);
+}
+
+bool ParseMotionPath(const JSRef<JSVal>& jsValue, MotionPathOption& option)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    auto path = jsObj->GetPropertyValue<std::string>("path", "");
+    if (path.empty()) {
+        return false;
+    }
+    option.SetPath(path);
+    double from = 0.0;
+    double to = 1.0;
+    JSViewAbstract::ParseJsDouble(jsObj->GetProperty("from"), from);
+    JSViewAbstract::ParseJsDouble(jsObj->GetProperty("to"), to);
+    if (GreatNotEqual(from, 1.0) || LessNotEqual(from, 0.0)) {
+        from = 0.0;
+    }
+    if (GreatNotEqual(to, 1.0) || LessNotEqual(to, 0.0)) {
+        to = 1.0;
+    } else if (to < from) {
+        to = from;
+    }
+    option.SetBegin(static_cast<float>(from));
+    option.SetEnd(static_cast<float>(to));
+    option.SetRotate(jsObj->GetPropertyValue<bool>("rotatable", false));
+    return true;
 }
 
 void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, const double valueX, const double valueY,
@@ -418,13 +499,9 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedRotateTransition(
 {
     RefPtr<NG::ChainedTransitionEffect> effect;
     if (effectOption->IsObject()) {
-        auto rotateArgs = JsonUtil::ParseJsonString(effectOption->ToString());
-        if (!rotateArgs || rotateArgs->IsNull()) {
-            return nullptr;
-        }
         NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
         std::optional<float> angle;
-        ParseJsRotate(rotateArgs, rotate, angle);
+        ParseJsRotate(effectOption, rotate, angle);
         if (angle.has_value()) {
             rotate.angle = angle.value();
             return AceType::MakeRefPtr<NG::ChainedRotateEffect>(rotate);
@@ -450,10 +527,9 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedTranslateTransition(
     const JSRef<JSVal>& effectOption, const JSExecutionContext& context)
 {
     if (effectOption->IsObject()) {
-        auto translateArgs = JsonUtil::ParseJsonString(effectOption->ToString());
         // default: x, y, z (0.0, 0.0, 0.0)
         NG::TranslateOptions translate;
-        ParseJsTranslate(translateArgs, translate.x, translate.y, translate.z);
+        ParseJsTranslate(effectOption, translate.x, translate.y, translate.z);
         return AceType::MakeRefPtr<NG::ChainedTranslateEffect>(translate);
     }
     return nullptr;
@@ -463,10 +539,9 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedScaleTransition(
     const JSRef<JSVal>& effectOption, const JSExecutionContext& context)
 {
     if (effectOption->IsObject()) {
-        auto scaleArgs = JsonUtil::ParseJsonString(effectOption->ToString());
         // default: x, y, z (1.0, 1.0, 1.0), centerX, centerY 50% 50%;
         NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
-        ParseJsScale(scaleArgs, scale.xScale, scale.yScale, scale.zScale, scale.centerX, scale.centerY);
+        ParseJsScale(effectOption, scale.xScale, scale.yScale, scale.zScale, scale.centerX, scale.centerY);
         return AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
     }
     return nullptr;
@@ -557,9 +632,8 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
         CHECK_NULL_RETURN(container, nullptr);
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
-        auto animationOptionArgs = JsonUtil::ParseJsonString(propAnimationOption->ToString());
         auto animationOptionResult = std::make_shared<AnimationOption>(
-            JSViewContext::CreateAnimation(animationOptionArgs, nullptr, pipelineContext->IsFormRender()));
+            JSViewContext::CreateAnimation(propAnimationOption, nullptr, pipelineContext->IsFormRender()));
         // The maximum of the form-animation-playback duration value is 1000 ms.
         if (pipelineContext->IsFormRender() && pipelineContext->IsFormAnimation()) {
             auto formAnimationTimeInterval = GetFormAnimationTimeInterval(pipelineContext);
@@ -1054,11 +1128,8 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsObject()) {
-        auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!argsPtrItem || argsPtrItem->IsNull()) {
-            return;
-        }
-        if (argsPtrItem->Contains("x") || argsPtrItem->Contains("y") || argsPtrItem->Contains("z")) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        if (jsObj->HasProperty("x") || jsObj->HasProperty("y") || jsObj->HasProperty("z")) {
             // default: x, y, z (1.0, 1.0, 1.0)
             auto scaleX = 1.0f;
             auto scaleY = 1.0f;
@@ -1066,7 +1137,7 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
             // default centerX, centerY 50% 50%;
             CalcDimension centerX = 0.5_pct;
             CalcDimension centerY = 0.5_pct;
-            ParseJsScale(argsPtrItem, scaleX, scaleY, scaleZ, centerX, centerY);
+            ParseJsScale(info[0], scaleX, scaleY, scaleZ, centerX, centerY);
             ViewAbstractModel::GetInstance()->SetScale(scaleX, scaleY, scaleZ);
             ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY, 0.0_vp);
             return;
@@ -1133,25 +1204,21 @@ void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
         return;
     }
 
-    CalcDimension value;
-
     if (info[0]->IsObject()) {
-        auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!argsPtrItem || argsPtrItem->IsNull()) {
-            return;
-        }
-        if (argsPtrItem->Contains("x") || argsPtrItem->Contains("y") || argsPtrItem->Contains("z")) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        if (jsObj->HasProperty("x") || jsObj->HasProperty("y") || jsObj->HasProperty("z")) {
             // default: x, y, z (0.0, 0.0, 0.0)
             auto translateX = CalcDimension(0.0);
             auto translateY = CalcDimension(0.0);
             auto translateZ = CalcDimension(0.0);
-            ParseJsTranslate(argsPtrItem, translateX, translateY, translateZ);
+            ParseJsTranslate(info[0], translateX, translateY, translateZ);
             ViewAbstractModel::GetInstance()->SetTranslate(translateX, translateY, translateZ);
             return;
         } else {
             SetDefaultTranslate();
         }
     }
+    CalcDimension value;
     if (ParseJsDimensionVp(info[0], value)) {
         ViewAbstractModel::GetInstance()->SetTranslate(value, value, value);
     }
@@ -1189,14 +1256,9 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsObject()) {
-        auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!argsPtrItem || argsPtrItem->IsNull()) {
-            SetDefaultRotate();
-            return;
-        }
         NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
         std::optional<float> angle;
-        ParseJsRotate(argsPtrItem, rotate, angle);
+        ParseJsRotate(info[0], rotate, angle);
         if (angle) {
             ViewAbstractModel::GetInstance()->SetRotate(
                 rotate.xDirection, rotate.yDirection, rotate.zDirection, angle.value(), rotate.perspective);
@@ -1245,19 +1307,16 @@ void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
         SetDefaultTransform();
         return;
     }
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        return;
-    }
-    auto array = argsPtrItem->GetValue("matrix4x4");
+    JSRef<JSVal> array = JSRef<JSObject>::Cast(info[0])->GetProperty("matrix4x4");
     const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
-    if (!array || array->IsNull() || !array->IsArray() || array->GetArraySize() != matrix4Len) {
+    if (!array->IsArray() || JSRef<JSArray>::Cast(array)->Length() != matrix4Len) {
         return;
     }
+    JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(array);
     std::vector<float> matrix(matrix4Len);
     for (int32_t i = 0; i < matrix4Len; i++) {
         double value = 0.0;
-        ParseJsonDouble(array->GetArrayItem(i), value);
+        ParseJsDouble(jsArray->GetValueAt(i), value);
         matrix[i] = static_cast<float>(value);
     }
     ViewAbstractModel::GetInstance()->SetTransformMatrix(matrix);
@@ -1293,7 +1352,7 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
         auto translateArgs = transitionArgs->GetObject("translate");
         // default: x, y, z (0.0, 0.0, 0.0)
         NG::TranslateOptions translate;
-        ParseJsTranslate(translateArgs, translate.x, translate.y, translate.z);
+        ParseJsonTranslate(translateArgs, translate.x, translate.y, translate.z);
         transitionOption.UpdateTranslate(translate);
         hasEffect = true;
     }
@@ -1301,7 +1360,7 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
         auto scaleArgs = transitionArgs->GetObject("scale");
         // default: x, y, z (1.0, 1.0, 1.0), centerX, centerY 50% 50%;
         NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
-        ParseJsScale(scaleArgs, scale.xScale, scale.yScale, scale.zScale, scale.centerX, scale.centerY);
+        ParseJsonScale(scaleArgs, scale.xScale, scale.yScale, scale.zScale, scale.centerX, scale.centerY);
         transitionOption.UpdateScale(scale);
         hasEffect = true;
     }
@@ -1310,7 +1369,59 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
         // default: dx, dy, dz (0.0, 0.0, 0.0), angle 0, centerX, centerY 50% 50%;
         NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
         std::optional<float> angle;
-        ParseJsRotate(rotateArgs, rotate, angle);
+        ParseJsonRotate(rotateArgs, rotate, angle);
+        if (angle.has_value()) {
+            rotate.angle = angle.value();
+            transitionOption.UpdateRotate(rotate);
+            hasEffect = true;
+        }
+    }
+    if (!hasEffect) {
+        // default transition
+        transitionOption = NG::TransitionOptions::GetDefaultTransition(transitionOption.Type);
+    }
+    return transitionOption;
+}
+
+NG::TransitionOptions JSViewAbstract::ParseJsTransition(const JSRef<JSVal>& transitionArgs)
+{
+    NG::TransitionOptions transitionOption;
+    if (!transitionArgs->IsObject()) {
+        return transitionOption;
+    }
+
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(transitionArgs);
+    bool hasEffect = false;
+    transitionOption.Type = ParseTransitionType(jsObj->GetPropertyValue<std::string>("type", "All"));
+    if (jsObj->HasProperty("opacity")) {
+        double opacity = 1.0;
+        ParseJsDouble(jsObj->GetProperty("opacity"), opacity);
+        if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
+            opacity = 1.0;
+        }
+        transitionOption.UpdateOpacity(static_cast<float>(opacity));
+        hasEffect = true;
+    }
+    if (jsObj->HasProperty("translate")) {
+        // default: x, y, z (0.0, 0.0, 0.0)
+        NG::TranslateOptions translate;
+        ParseJsTranslate(jsObj->GetProperty("translate"), translate.x, translate.y, translate.z);
+        transitionOption.UpdateTranslate(translate);
+        hasEffect = true;
+    }
+    if (jsObj->HasProperty("scale")) {
+        // default: x, y, z (1.0, 1.0, 1.0), centerX, centerY 50% 50%;
+        NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+        ParseJsScale(jsObj->GetProperty("scale"), scale.xScale, scale.yScale, scale.zScale,
+            scale.centerX, scale.centerY);
+        transitionOption.UpdateScale(scale);
+        hasEffect = true;
+    }
+    if (jsObj->HasProperty("rotate")) {
+        // default: dx, dy, dz (0.0, 0.0, 0.0), angle 0, centerX, centerY 50% 50%;
+        NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
+        std::optional<float> angle;
+        ParseJsRotate(jsObj->GetProperty("rotate"), rotate, angle);
         if (angle.has_value()) {
             rotate.angle = angle.value();
             transitionOption.UpdateRotate(rotate);
@@ -1343,8 +1454,7 @@ void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect);
         return;
     }
-    auto transitionArgs = JsonUtil::ParseJsonString(info[0]->ToString());
-    auto options = ParseTransition(transitionArgs);
+    auto options = ParseJsTransition(info[0]);
     ViewAbstractModel::GetInstance()->SetTransition(options);
 }
 
@@ -1894,60 +2004,47 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
 
     // options
     if (info.Length() > 1 && info[1]->IsObject()) {
-        auto optionsArgs = JsonUtil::ParseJsonString(info[1]->ToString());
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[1]);
         sharedOption = std::make_shared<SharedTransitionOption>();
         // default: duration: 1000
-        int32_t duration = DEFAULT_DURATION;
-        auto durationValue = optionsArgs->GetValue("duration");
-        if (durationValue && durationValue->IsNumber()) {
-            duration = durationValue->GetInt();
-            if (duration < 0) {
-                duration = DEFAULT_DURATION;
-            }
+        sharedOption->duration = jsObj->GetPropertyValue<int32_t>("duration", DEFAULT_DURATION);
+        if (sharedOption->duration < 0) {
+            sharedOption->duration = DEFAULT_DURATION;
         }
-        sharedOption->duration = duration;
         // default: delay: 0
-        auto delay = optionsArgs->GetInt("delay", 0);
-        if (delay < 0) {
-            delay = 0;
+        sharedOption->delay = jsObj->GetPropertyValue<int32_t>("delay", 0);
+        if (sharedOption->delay < 0) {
+            sharedOption->delay = 0;
         }
-        sharedOption->delay = delay;
         // default: LinearCurve
         RefPtr<Curve> curve;
-        auto curveArgs = optionsArgs->GetValue("curve");
+        JSRef<JSVal> curveArgs = jsObj->GetProperty("curve");
         if (curveArgs->IsString()) {
-            curve = CreateCurve(optionsArgs->GetString("curve", "linear"), false);
+            curve = CreateCurve(jsObj->GetPropertyValue<std::string>("curve", "linear"), false);
         } else if (curveArgs->IsObject()) {
-            auto curveString = curveArgs->GetValue("__curveString");
-            if (!curveString) {
+            JSRef<JSVal> curveString = JSRef<JSObject>::Cast(curveArgs)->GetProperty("__curveString");
+            if (!curveString->IsString()) {
                 return;
             }
-            curve = CreateCurve(curveString->GetString(), false);
+            curve = CreateCurve(curveString->ToString(), false);
         }
         if (!curve) {
             curve = Curves::LINEAR;
         }
         sharedOption->curve = curve;
         // motionPath
-        if (optionsArgs->Contains("motionPath")) {
+        if (jsObj->HasProperty("motionPath")) {
             MotionPathOption motionPathOption;
-            if (ParseMotionPath(optionsArgs->GetValue("motionPath"), motionPathOption)) {
+            if (ParseMotionPath(jsObj->GetProperty("motionPath"), motionPathOption)) {
                 sharedOption->motionPathOption = motionPathOption;
             }
         }
         // zIndex
-        int32_t zIndex = 0;
-        if (optionsArgs->Contains("zIndex")) {
-            zIndex = optionsArgs->GetInt("zIndex", 0);
-        }
-        sharedOption->zIndex = zIndex;
+        sharedOption->zIndex = jsObj->GetPropertyValue<int32_t>("zIndex", 0);
         // type
-        SharedTransitionEffectType type = SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE;
-        if (optionsArgs->Contains("type")) {
-            type = static_cast<SharedTransitionEffectType>(
-                optionsArgs->GetInt("type", static_cast<int32_t>(SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE)));
-        }
-        sharedOption->type = type;
+        int32_t type = jsObj->GetPropertyValue<int32_t>("type",
+            static_cast<int32_t>(SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE));
+        sharedOption->type = static_cast<SharedTransitionEffectType>(type);
     }
     ViewAbstractModel::GetInstance()->SetSharedTransition(id, sharedOption);
 }
@@ -2247,10 +2344,6 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
         bgImgSize.SetSizeTypeX(sizeType);
         bgImgSize.SetSizeTypeY(sizeType);
     } else {
-        auto imageArgs = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (imageArgs->IsNull()) {
-            return;
-        }
         CalcDimension width;
         CalcDimension height;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
@@ -2325,10 +2418,6 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
                 break;
         }
     } else {
-        auto imageArgs = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (imageArgs->IsNull()) {
-            return;
-        }
         CalcDimension x;
         CalcDimension y;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
@@ -2352,9 +2441,9 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackgroundImagePosition(bgImgPosition);
 }
 
-std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info)
+std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, size_t optionIndex)
 {
-    auto paramArray = JSRef<JSArray>::Cast(info[0]);
+    auto paramArray = JSRef<JSArray>::Cast(info[optionIndex]);
     std::vector<NG::OptionParam> params(paramArray->Length());
     // parse paramArray
     for (size_t i = 0; i < paramArray->Length(); ++i) {
@@ -2464,9 +2553,9 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     ParseMenuArrowParam(menuOptions, menuParam);
 }
 
-void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
+void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
 {
-    auto menuOptions = JSRef<JSObject>::Cast(info[1]);
+    auto menuOptions = JSRef<JSObject>::Cast(info[optionIndex]);
     JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
     ParseMenuParam(info, menuOptions, menuParam);
 }
@@ -2504,15 +2593,37 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         menuParam.placement = Placement::BOTTOM_LEFT;
     }
-    if (info.Length() > PARAMETER_LENGTH_FIRST && info[1]->IsObject()) {
-        ParseBindOptionParam(info, menuParam);
+    size_t builderIndex = 0;
+    if (info.Length() > PARAMETER_LENGTH_FIRST) {
+        if (info[0]->IsBoolean()) {
+            menuParam.isShow = info[0]->ToBoolean();
+            builderIndex = 1;
+            if (info.Length() > PARAMETER_LENGTH_SECOND) {
+                ParseBindOptionParam(info, menuParam, builderIndex + 1);
+            }
+        } else {
+            JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
+            menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj);
+            auto isShowObj = callbackObj->GetProperty("value");
+            if (isShowObj->IsBoolean()) {
+                menuParam.isShow = isShowObj->ToBoolean();
+                builderIndex = 1;
+                if (info.Length() > PARAMETER_LENGTH_SECOND) {
+                    ParseBindOptionParam(info, menuParam, builderIndex + 1);
+                }
+            } else {
+                builderIndex = 0;
+                ParseBindOptionParam(info, menuParam, builderIndex + 1);
+            }            
+        }
     }
-    if (info[0]->IsArray()) {
-        std::vector<NG::OptionParam> optionsParam = ParseBindOptionParam(info);
+
+    if (info[builderIndex]->IsArray()) {
+        std::vector<NG::OptionParam> optionsParam = ParseBindOptionParam(info, builderIndex);
         ViewAbstractModel::GetInstance()->BindMenu(std::move(optionsParam), nullptr, menuParam);
-    } else if (info[0]->IsObject()) {
+    } else if (info[builderIndex]->IsObject()) {
         // CustomBuilder
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[builderIndex]);
         auto builder = obj->GetProperty("builder");
         if (!builder->IsFunction()) {
             return;
@@ -2826,22 +2937,22 @@ void JSViewAbstract::ParseBorderImageDimension(
 
 void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, uint8_t& bitset)
 {
-    auto argsPtrItem = JsonUtil::ParseJsonString(args->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
+    if (!args->IsObject()) {
         return;
     }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args);
     NG::Gradient lineGradient;
     lineGradient.CreateGradientWithType(NG::GradientType::LINEAR);
     // angle
     std::optional<float> degree;
-    GetAngle("angle", argsPtrItem, degree);
+    GetJsAngle("angle", jsObj, degree);
     if (degree) {
         lineGradient.GetLinearGradient()->angle = CalcDimension(degree.value(), DimensionUnit::PX);
         degree.reset();
     }
     // direction
     auto direction = static_cast<NG::GradientDirection>(
-        argsPtrItem->GetInt("direction", static_cast<int32_t>(NG::GradientDirection::NONE)));
+        jsObj->GetPropertyValue<int32_t>("direction", static_cast<int32_t>(NG::GradientDirection::NONE)));
     switch (direction) {
         case NG::GradientDirection::LEFT:
             lineGradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
@@ -2877,9 +2988,9 @@ void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, ui
         default:
             break;
     }
-    auto repeating = argsPtrItem->GetBool("repeating", false);
+    auto repeating = jsObj->GetPropertyValue<bool>("repeating", false);
     lineGradient.SetRepeat(repeating);
-    NewGetGradientColorStops(lineGradient, argsPtrItem->GetValue("colors"));
+    NewGetJsGradientColorStops(lineGradient, jsObj->GetProperty("colors"));
     ViewAbstractModel::GetInstance()->SetBorderImageGradient(lineGradient);
     bitset |= BorderImage::GRADIENT_BIT;
 }
@@ -3186,32 +3297,36 @@ void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
 }
 
 void JSViewAbstract::GetFractionStops(
-    std::vector<std::pair<float, float>>& fractionStops, const std::unique_ptr<JsonValue>& array)
+    std::vector<std::pair<float, float>>& fractionStops, const JSRef<JSVal>& array)
 {
-    if (!array || !array->IsArray() || static_cast<int32_t>(array->GetArraySize()) <= 1) {
+    if (!array->IsArray() || JSRef<JSArray>::Cast(array)->Length() <= 1) {
         return;
     }
+    JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(array);
     float tmpPos = -1.0f;
-    for (int32_t i = 0; i < array->GetArraySize(); i++) {
+    size_t length = jsArray->Length();
+    for (size_t i = 0; i < length; i++) {
         std::pair<float, float> fractionStop;
-        auto item = array->GetArrayItem(i);
-        if (item && !item->IsNull() && item->IsArray() && item->GetArraySize() >= 1) {
-            auto fraction = item->GetArrayItem(0);
-            double value = 0.0;
-            if (ParseJsonDouble(fraction, value)) {
-                value = std::clamp(value, 0.0, 1.0);
-                fractionStop.first = static_cast<float>(value);
-            }
-            if (item->GetArraySize() <= 1) {
-                continue;
-            }
-            auto stop = item->GetArrayItem(1);
-            value = 0.0;
-            if (ParseJsonDouble(stop, value)) {
-                value = std::clamp(value, 0.0, 1.0);
-                fractionStop.second = static_cast<float>(value);
-            }
+        JSRef<JSVal> item = jsArray->GetValueAt(i);
+        if (!item->IsArray()) {
+            continue;
         }
+        JSRef<JSArray> subArray = JSRef<JSArray>::Cast(item);
+        if (subArray->Length() < 2) {
+            continue;
+        }
+
+        double value = 0.0;
+        if (ParseJsDouble(subArray->GetValueAt(0), value)) {
+            value = std::clamp(value, 0.0, 1.0);
+            fractionStop.first = static_cast<float>(value);
+        }
+        value = 0.0;
+        if (ParseJsDouble(subArray->GetValueAt(1), value)) {
+            value = std::clamp(value, 0.0, 1.0);
+            fractionStop.second = static_cast<float>(value);
+        }
+
         if (fractionStop.second <= tmpPos) {
             fractionStops.clear();
             return;
@@ -3232,19 +3347,15 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
     std::vector<std::pair<float, float>> fractionStops;
     auto direction = GradientDirection::BOTTOM;
     if (info[1]->IsObject()) {
-        auto argsPtrItem = JsonUtil::ParseJsonString(info[1]->ToString());
-        if (argsPtrItem && !argsPtrItem->IsNull()) {
-            auto array = argsPtrItem->GetValue("fractionStops");
-            if (array) {
-                GetFractionStops(fractionStops, array);
-            }
-            auto directionValue = argsPtrItem->GetInt("direction", static_cast<int8_t>(GradientDirection::BOTTOM));
-            if (directionValue < static_cast<int8_t>(GradientDirection::LEFT) ||
-                directionValue >= static_cast<int8_t>(GradientDirection::NONE)) {
-                directionValue = static_cast<int8_t>(GradientDirection::BOTTOM);
-            }
-            direction = static_cast<GradientDirection>(directionValue);
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[1]);
+        GetFractionStops(fractionStops, jsObj->GetProperty("fractionStops"));
+        auto directionValue =
+            jsObj->GetPropertyValue<int8_t>("direction", static_cast<int8_t>(GradientDirection::BOTTOM));
+        if (directionValue < static_cast<int8_t>(GradientDirection::LEFT) ||
+            directionValue >= static_cast<int8_t>(GradientDirection::NONE)) {
+            directionValue = static_cast<int8_t>(GradientDirection::BOTTOM);
         }
+        direction = static_cast<GradientDirection>(directionValue);
     }
     if (static_cast<int32_t>(fractionStops.size()) <= 1) {
         fractionStops.clear();
@@ -3262,17 +3373,13 @@ void JSViewAbstract::JsBackgroundBrightness(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        return;
-    }
-
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     double rate = 0.0;
     double lightUpDegree = 0.0;
-    if (!ParseJsonDouble(argsPtrItem->GetValue("rate"), rate)) {
+    if (!ParseJsDouble(jsObj->GetProperty("rate"), rate)) {
         return;
     }
-    if (!ParseJsonDouble(argsPtrItem->GetValue("lightUpDegree"), lightUpDegree)) {
+    if (!ParseJsDouble(jsObj->GetProperty("lightUpDegree"), lightUpDegree)) {
         return;
     }
     SetDynamicLightUp(rate, lightUpDegree);
@@ -3285,13 +3392,11 @@ void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
         return;
     }
 
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        return;
-    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     double progress = 0.0;
-    ParseJsonDouble(argsPtrItem->GetValue("percent"), progress);
-    auto style = argsPtrItem->GetInt("style", static_cast<int32_t>(WindowBlurStyle::STYLE_BACKGROUND_SMALL_LIGHT));
+    ParseJsDouble(jsObj->GetProperty("percent"), progress);
+    auto style = jsObj->GetPropertyValue<int32_t>("style",
+        static_cast<int32_t>(WindowBlurStyle::STYLE_BACKGROUND_SMALL_LIGHT));
 
     progress = std::clamp(progress, 0.0, 1.0);
     style = std::clamp(style, static_cast<int32_t>(WindowBlurStyle::STYLE_BACKGROUND_SMALL_LIGHT),
@@ -3646,6 +3751,9 @@ bool JSViewAbstract::ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, Sha
         std::string colorStr = jsValue->ToString();
         if (colorStr.compare("average") == 0) {
             strategy = ShadowColorStrategy::AVERAGE;
+            return true;
+        } else if (colorStr.compare("primary") == 0) {
+            strategy = ShadowColorStrategy::PRIMARY;
             return true;
         }
     }
@@ -4061,15 +4169,11 @@ std::pair<CalcDimension, CalcDimension> JSViewAbstract::ParseSize(const JSCallba
     if (!CheckJSCallbackInfo("ParseSize", info, checkList)) {
         return std::pair<CalcDimension, CalcDimension>();
     }
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        info.SetReturnValue(info.This());
-        return std::pair<CalcDimension, CalcDimension>();
-    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     CalcDimension width;
     CalcDimension height;
-    if (!ParseJsonDimensionVp(argsPtrItem->GetValue("width"), width) ||
-        !ParseJsonDimensionVp(argsPtrItem->GetValue("height"), height)) {
+    if (!ParseJsDimensionVp(jsObj->GetProperty("width"), width) ||
+        !ParseJsDimensionVp(jsObj->GetProperty("height"), height)) {
         return std::pair<CalcDimension, CalcDimension>();
     }
     LOGD("Js parse size width = %lf unit = %d, height = %lf unit = %d", width.Value(), width.Unit(), height.Value(),
@@ -4439,14 +4543,6 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetLinearGradient(newGradient);
         return;
     }
-    if (!info[0]->IsObject()) {
-        return;
-    }
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        info.ReturnSelf();
-        return;
-    }
     NG::Gradient newGradient;
     NewJsLinearGradient(info, newGradient);
     ViewAbstractModel::GetInstance()->SetLinearGradient(newGradient);
@@ -4454,18 +4550,18 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
 
 void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
 {
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     newGradient.CreateGradientWithType(NG::GradientType::LINEAR);
     // angle
     std::optional<float> degree;
-    GetAngle("angle", argsPtrItem, degree);
+    GetJsAngle("angle", jsObj, degree);
     if (degree) {
         newGradient.GetLinearGradient()->angle = CalcDimension(degree.value(), DimensionUnit::PX);
         degree.reset();
     }
     // direction
-    auto direction =
-        static_cast<GradientDirection>(argsPtrItem->GetInt("direction", static_cast<int32_t>(GradientDirection::NONE)));
+    auto direction = static_cast<GradientDirection>(
+        jsObj->GetPropertyValue<int32_t>("direction", static_cast<int32_t>(GradientDirection::NONE)));
     switch (direction) {
         case GradientDirection::LEFT:
             newGradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
@@ -4501,9 +4597,9 @@ void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradien
         default:
             break;
     }
-    auto repeating = argsPtrItem->GetBool("repeating", false);
+    auto repeating = jsObj->GetPropertyValue<bool>("repeating", false);
     newGradient.SetRepeat(repeating);
-    NewGetGradientColorStops(newGradient, argsPtrItem->GetValue("colors"));
+    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty("colors"));
 }
 
 void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
@@ -4515,12 +4611,6 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetRadialGradient(newGradient);
         return;
     }
-
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        info.ReturnSelf();
-        return;
-    }
     NG::Gradient newGradient;
     NewJsRadialGradient(info, newGradient);
     ViewAbstractModel::GetInstance()->SetRadialGradient(newGradient);
@@ -4528,13 +4618,14 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
 
 void JSViewAbstract::NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
 {
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     newGradient.CreateGradientWithType(NG::GradientType::RADIAL);
     // center
-    auto center = argsPtrItem->GetValue("center");
-    if (center && !center->IsNull() && center->IsArray() && center->GetArraySize() == 2) {
+    JSRef<JSVal> center = jsObj->GetProperty("center");
+    if (center->IsArray() && JSRef<JSArray>::Cast(center)->Length() == 2) {
         CalcDimension value;
-        if (ParseJsonDimensionVp(center->GetArrayItem(0), value)) {
+        JSRef<JSArray> centerArray = JSRef<JSArray>::Cast(center);
+        if (ParseJsDimensionVp(centerArray->GetValueAt(0), value)) {
             newGradient.GetRadialGradient()->radialCenterX = CalcDimension(value);
             if (value.Unit() == DimensionUnit::PERCENT) {
                 // [0,1] -> [0, 100]
@@ -4542,7 +4633,7 @@ void JSViewAbstract::NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradien
                     CalcDimension(value.Value() * 100.0, DimensionUnit::PERCENT);
             }
         }
-        if (ParseJsonDimensionVp(center->GetArrayItem(1), value)) {
+        if (ParseJsDimensionVp(centerArray->GetValueAt(1), value)) {
             newGradient.GetRadialGradient()->radialCenterY = CalcDimension(value);
             if (value.Unit() == DimensionUnit::PERCENT) {
                 // [0,1] -> [0, 100]
@@ -4553,15 +4644,15 @@ void JSViewAbstract::NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradien
     }
     // radius
     CalcDimension radius;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("radius"), radius)) {
+    if (ParseJsDimensionVp(jsObj->GetProperty("radius"), radius)) {
         newGradient.GetRadialGradient()->radialVerticalSize = CalcDimension(radius);
         newGradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(radius);
     }
     // repeating
-    auto repeating = argsPtrItem->GetBool("repeating", false);
+    auto repeating = jsObj->GetPropertyValue<bool>("repeating", false);
     newGradient.SetRepeat(repeating);
     // color stops
-    NewGetGradientColorStops(newGradient, argsPtrItem->GetValue("colors"));
+    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty("colors"));
 }
 
 void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
@@ -4574,12 +4665,6 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
         return;
     }
 
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        info.ReturnSelf();
-        return;
-    }
-
     NG::Gradient newGradient;
     NewJsSweepGradient(info, newGradient);
     ViewAbstractModel::GetInstance()->SetSweepGradient(newGradient);
@@ -4587,20 +4672,21 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
 
 void JSViewAbstract::NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
 {
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     newGradient.CreateGradientWithType(NG::GradientType::SWEEP);
     // center
-    auto center = argsPtrItem->GetValue("center");
-    if (center && !center->IsNull() && center->IsArray() && center->GetArraySize() == 2) {
+    JSRef<JSVal> center = jsObj->GetProperty("center");
+    if (center->IsArray() && JSRef<JSArray>::Cast(center)->Length() == 2) {
         CalcDimension value;
-        if (ParseJsonDimensionVp(center->GetArrayItem(0), value)) {
+        JSRef<JSArray> centerArray = JSRef<JSArray>::Cast(center);
+        if (ParseJsDimensionVp(centerArray->GetValueAt(0), value)) {
             newGradient.GetSweepGradient()->centerX = CalcDimension(value);
             if (value.Unit() == DimensionUnit::PERCENT) {
                 // [0,1] -> [0, 100]
                 newGradient.GetSweepGradient()->centerX = CalcDimension(value.Value() * 100.0, DimensionUnit::PERCENT);
             }
         }
-        if (ParseJsonDimensionVp(center->GetArrayItem(1), value)) {
+        if (ParseJsDimensionVp(centerArray->GetValueAt(1), value)) {
             newGradient.GetSweepGradient()->centerY = CalcDimension(value);
             if (value.Unit() == DimensionUnit::PERCENT) {
                 // [0,1] -> [0, 100]
@@ -4610,31 +4696,31 @@ void JSViewAbstract::NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient
     }
     std::optional<float> degree;
     // start
-    GetAngle("start", argsPtrItem, degree);
+    GetJsAngle("start", jsObj, degree);
     if (degree) {
         CheckAngle(degree);
         newGradient.GetSweepGradient()->startAngle = CalcDimension(degree.value(), DimensionUnit::PX);
         degree.reset();
     }
     // end
-    GetAngle("end", argsPtrItem, degree);
+    GetJsAngle("end", jsObj, degree);
     if (degree) {
         CheckAngle(degree);
         newGradient.GetSweepGradient()->endAngle = CalcDimension(degree.value(), DimensionUnit::PX);
         degree.reset();
     }
     // rotation
-    GetAngle("rotation", argsPtrItem, degree);
+    GetJsAngle("rotation", jsObj, degree);
     if (degree) {
         CheckAngle(degree);
         newGradient.GetSweepGradient()->rotation = CalcDimension(degree.value(), DimensionUnit::PX);
         degree.reset();
     }
     // repeating
-    auto repeating = argsPtrItem->GetBool("repeating", false);
+    auto repeating = jsObj->GetPropertyValue<bool>("repeating", false);
     newGradient.SetRepeat(repeating);
     // color stops
-    NewGetGradientColorStops(newGradient, argsPtrItem->GetValue("colors"));
+    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty("colors"));
 }
 
 void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
@@ -4644,9 +4730,8 @@ void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetMotionPath(MotionPathOption());
         return;
     }
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
     MotionPathOption motionPathOption;
-    if (ParseMotionPath(argsPtrItem, motionPathOption)) {
+    if (ParseMotionPath(info[0], motionPathOption)) {
         ViewAbstractModel::GetInstance()->SetMotionPath(motionPathOption);
     } else {
         LOGI("Parse animation motionPath failed. %{public}s", info[0]->ToString().c_str());
@@ -5069,8 +5154,7 @@ void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect);
         return;
     }
-    auto transitionArgs = JsonUtil::ParseJsonString(info[0]->ToString());
-    auto options = ParseTransition(transitionArgs);
+    auto options = ParseJsTransition(obj);
     ViewAbstractModel::GetInstance()->SetTransition(options, true);
 }
 
@@ -5951,32 +6035,27 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
         shadow = Shadow::CreateShadow(style);
         return true;
     }
-    CHECK_NULL_RETURN(jsValue->IsObject(), false);
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    auto argsPtrItem = JsonUtil::ParseJsonString(jsValue->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        return false;
-    }
     double radius = 0.0;
-    ParseJsonDouble(argsPtrItem->GetValue("radius"), radius);
+    ParseJsDouble(jsObj->GetProperty("radius"), radius);
     if (LessNotEqual(radius, 0.0)) {
         radius = 0.0;
     }
     shadow.SetBlurRadius(radius);
     CalcDimension offsetX;
-    if (ParseJsonResource(argsPtrItem->GetValue("offsetX"), offsetX)) {
+    if (ParseJsResource(jsObj->GetProperty("offsetX"), offsetX)) {
         shadow.SetOffsetX(offsetX.Value());
     } else {
-        if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
+        if (ParseJsDimensionVp(jsObj->GetProperty("offsetX"), offsetX)) {
             shadow.SetOffsetX(offsetX.Value());
         }
     }
 
     CalcDimension offsetY;
-    if (ParseJsonResource(argsPtrItem->GetValue("offsetY"), offsetY)) {
+    if (ParseJsResource(jsObj->GetProperty("offsetY"), offsetY)) {
         shadow.SetOffsetY(offsetY.Value());
     } else {
-        if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
+        if (ParseJsDimensionVp(jsObj->GetProperty("offsetY"), offsetY)) {
             shadow.SetOffsetY(offsetY.Value());
         }
     }
@@ -5984,36 +6063,38 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     ShadowColorStrategy shadowColorStrategy;
     if (ParseJsShadowColorStrategy(jsObj->GetProperty("color"), shadowColorStrategy)) {
         shadow.SetShadowColorStrategy(shadowColorStrategy);
-    } else if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
+    } else if (ParseJsColor(jsObj->GetProperty("color"), color)) {
         shadow.SetColor(color);
     }
-    auto type = argsPtrItem->GetInt("type", static_cast<int32_t>(ShadowType::COLOR));
+    auto type = jsObj->GetPropertyValue<int32_t>("type", static_cast<int32_t>(ShadowType::COLOR));
     type = std::clamp(type, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
     shadow.SetShadowType(static_cast<ShadowType>(type));
-    bool isFilled = argsPtrItem->GetBool("fill", false);
+    bool isFilled = jsObj->GetPropertyValue<bool>("fill", false);
     shadow.SetIsFilled(isFilled);
     return true;
 }
 
-bool JSViewAbstract::ParseJsonResource(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result)
+bool JSViewAbstract::ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
-    if (!jsonValue->IsObject()) {
+    if (!jsValue->IsObject()) {
         return false;
     }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     auto resourceWrapper = CreateResourceWrapper();
     CHECK_NULL_RETURN(resourceWrapper, false);
-    if (jsonValue->GetValue("type")->GetInt() == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(jsonValue->GetValue("id")->GetInt());
+    uint32_t type = jsObj->GetPropertyValue<uint32_t>("type", 0);
+    if (type == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(jsObj->GetPropertyValue<uint32_t>("id", 0));
         return StringUtils::StringToCalcDimensionNG(value, result, false);
     }
-    if (jsonValue->GetValue("type")->GetInt() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(resourceWrapper->GetInt(jsonValue->GetValue("id")->GetInt()));
+    if (type == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(resourceWrapper->GetInt(jsObj->GetPropertyValue<uint32_t>("id", 0)));
         StringUtils::StringToDimensionWithUnitNG(value, result);
         return true;
     }
 
-    if (jsonValue->GetValue("type")->GetInt() == static_cast<uint32_t>(ResourceType::FLOAT)) {
-        result = resourceWrapper->GetDimension(jsonValue->GetValue("id")->GetInt());
+    if (type == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = resourceWrapper->GetDimension(jsObj->GetPropertyValue<uint32_t>("id", 0));
         return true;
     }
     return false;
@@ -6035,7 +6116,10 @@ bool JSViewAbstract::ParseDataDetectorConfig(const JSCallbackInfo& info, std::st
             LOGI("Text detect types(%d) is invalid value", index);
             return false;
         }
-        types.append(",").append(TEXT_DETECT_TYPES[index]);
+        if (i != 0) {
+            types.append(",");
+        }
+        types.append(TEXT_DETECT_TYPES[index]);
     }
 
     JSRef<JSVal> resultCallback = obj->GetProperty("onDetectResultUpdate");
@@ -6060,6 +6144,22 @@ void JSViewAbstract::GetAngle(
     }
 }
 
+void JSViewAbstract::GetJsAngle(
+    const std::string& key, const JSRef<JSVal>& jsValue, std::optional<float>& angle)
+{
+    if (!jsValue->IsObject()) {
+        return;
+    }
+    JSRef<JSVal> value = JSRef<JSObject>::Cast(jsValue)->GetProperty(key.c_str());
+    if (value->IsString()) {
+        angle = static_cast<float>(StringUtils::StringToDegree(value->ToString()));
+    } else if (value->IsNumber()) {
+        angle = value->ToNumber<float>();
+    } else {
+        LOGE("Invalid value type");
+    }
+}
+
 void JSViewAbstract::CheckAngle(std::optional<float>& angle)
 {
     if (LessNotEqual(angle.value(), 0.0f)) {
@@ -6075,6 +6175,17 @@ void JSViewAbstract::GetPerspective(
     auto value = jsonValue->GetValue(key);
     if (value && value->IsNumber()) {
         perspective = static_cast<float>(value->GetDouble());
+    }
+}
+
+void JSViewAbstract::GetJsPerspective(const std::string& key, const JSRef<JSVal>& jsValue, float& perspective)
+{
+    if (!jsValue->IsObject()) {
+        return;
+    }
+    auto value = JSRef<JSObject>::Cast(jsValue)->GetProperty(key.c_str());
+    if (value->IsNumber()) {
+        perspective = value->ToNumber<float>();
     }
 }
 
@@ -6144,6 +6255,43 @@ void JSViewAbstract::NewGetGradientColorStops(NG::Gradient& gradient, const std:
             }
             gradient.AddColor(gradientColor);
         }
+    }
+}
+
+void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops)
+{
+    if (!colorStops->IsArray()) {
+        return;
+    }
+
+    JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(colorStops);
+    size_t length = jsArray->Length();
+    for (size_t i = 0; i < length; i++) {
+        NG::GradientColor gradientColor;
+        JSRef<JSVal> item = jsArray->GetValueAt(i);
+        if (!item->IsArray()) {
+            continue;
+        }
+        JSRef<JSArray> subArray = JSRef<JSArray>::Cast(item);
+        if (subArray->Length() < 2) {
+            continue;
+        }
+        // color
+        Color color;
+        if (!ParseJsColor(subArray->GetValueAt(0), color)) {
+            continue;
+        }
+        gradientColor.SetColor(color);
+        gradientColor.SetHasValue(false);
+        // stop value
+        double value = 0.0;
+        if (ParseJsDouble(subArray->GetValueAt(1), value)) {
+            value = std::clamp(value, 0.0, 1.0);
+            gradientColor.SetHasValue(true);
+            //  [0, 1] -> [0, 100.0];
+            gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
+        }
+        gradient.AddColor(gradientColor);
     }
 }
 

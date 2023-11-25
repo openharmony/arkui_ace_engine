@@ -14,6 +14,7 @@
  */
 
 #include "core/common/container_scope.h"
+#include "core/common/container.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {

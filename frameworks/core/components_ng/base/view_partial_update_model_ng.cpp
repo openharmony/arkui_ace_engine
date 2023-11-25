@@ -51,6 +51,7 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
         }
     } else {
         customNode = NG::CustomNode::CreateCustomNode(viewId, key);
+        customNode->SetExtraInfo(std::move(info.extraInfo));
     }
 
     if (info.updateNodeFunc) {

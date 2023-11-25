@@ -30,7 +30,7 @@ constexpr char UICAST_PROXY_UPDATE_CONTEXT_FUNC[] = "OHOS_ACE_UICastProxyUpdateC
 using UICastProxyStartFunc = void (*)(int, UIContent*);
 using UICastProxyUpdateContextFunc = void (*)(UIContent*);
 
-#ifdef __aarch64__
+#if (defined(__aarch64__) || defined(__x86_64__))
 const char* DISTRIBUTED_UI_PROXY_SO_PATH = "/system/lib64/libace_uicast_proxy.z.so";
 #else
 const char* DISTRIBUTED_UI_PROXY_SO_PATH = "/system/lib/libace_uicast_proxy.z.so";

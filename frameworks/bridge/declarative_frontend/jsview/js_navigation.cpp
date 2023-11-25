@@ -304,6 +304,7 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
                 }
             }
             if (!isValid || titleHeight.Value() < 0) {
+                NavigationModel::GetInstance()->SetTitleHeight(titleHeight, false);
                 return;
             }
             NavigationModel::GetInstance()->SetTitleHeight(titleHeight);

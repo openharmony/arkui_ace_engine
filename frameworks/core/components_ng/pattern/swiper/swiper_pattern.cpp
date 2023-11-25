@@ -294,6 +294,15 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     auto oldIndex = GetLoopIndex(oldIndex_);
     if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != TotalCount()) {
         oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
+        if (HasIndicatorNode()) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto indicatorNode = DynamicCast<FrameNode>(
+                host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
+            if (indicatorNode && indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+                indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
+        }
     }
     if (userSetCurrentIndex < 0 || userSetCurrentIndex >= TotalCount()) {
         currentIndex_ = 0;
@@ -1135,8 +1144,8 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             pattern->FireAndCleanScrollingListener();
             pattern->HandleDragStart(info);
             // notify scrollStart upwards
-            pattern->OnScrollStartRecursive(pattern->direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
-                                                                                    : info.GetGlobalLocation().GetY());
+            pattern->NotifyParentScrollStart(pattern->direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
+                                                                                     : info.GetGlobalLocation().GetY());
         }
     };
 
@@ -1497,18 +1506,9 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
 {
     TAG_LOGD(AceLogTag::ACE_SWIPER, "Swiper drag start.");
     UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::START);
-    if (usePropertyAnimation_) {
-        StopPropertyTranslateAnimation();
-    }
-    if (indicatorController_) {
-        indicatorController_->Stop();
-    }
-    StopTranslateAnimation();
-    if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
-        StopSpringAnimationAndFlushImmediately();
-    } else {
-        StopSpringAnimation();
-    }
+
+    StopAnimationOnScrollStart(
+        info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD);
     StopAutoPlay();
 
     const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
@@ -1530,6 +1530,22 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     mainDeltaSum_ = 0.0f;
     // in drag process, close lazy feature.
     SetLazyLoadFeature(false);
+}
+
+void SwiperPattern::StopAnimationOnScrollStart(bool flushImmediately)
+{
+    if (usePropertyAnimation_) {
+        StopPropertyTranslateAnimation();
+    }
+    if (indicatorController_) {
+        indicatorController_->Stop();
+    }
+    StopTranslateAnimation();
+    if (flushImmediately) {
+        StopSpringAnimationAndFlushImmediately();
+    } else {
+        StopSpringAnimation();
+    }
 }
 
 void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
@@ -2683,7 +2699,7 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
                 return;
             }
             if (!swiper->IsLoop() &&
-                swiper->GetLoopIndex(swiper->currentIndex_ + 1) > (childrenSize - displayCount)) {
+                swiper->GetLoopIndex(swiper->currentIndex_) + 1 > (childrenSize - displayCount)) {
                 return;
             }
             swiper->targetIndex_ = swiper->currentIndex_ + 1;
@@ -2857,7 +2873,7 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
                     for (auto index : forEachIndexSet) {
                         auto childNode = forEachNode->GetChildAtIndex(index);
                         CHECK_NULL_VOID(childNode);
-                        childNode->Build();
+                        childNode->Build(nullptr);
                     }
                 },
                 TaskExecutor::TaskType::UI);
@@ -3306,9 +3322,13 @@ void SwiperPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus)
 
 void SwiperPattern::OnScrollStartRecursive(float position)
 {
-    if (!isDragging_) {
-        childScrolling_ = true;
-    }
+    childScrolling_ = true;
+    StopAnimationOnScrollStart(false);
+    NotifyParentScrollStart(position);
+}
+
+void SwiperPattern::NotifyParentScrollStart(float position)
+{
     auto parent = enableNestedScroll_ ? SearchParent() : nullptr;
     if (parent) {
         parent->OnScrollStartRecursive(position);

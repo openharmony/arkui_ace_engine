@@ -438,21 +438,33 @@ void FrameNode::InitializePatternAndContext()
 
 void FrameNode::DumpCommonInfo()
 {
-    DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
+    auto transInfo = renderContext_->GetTrans();
+    if (!geometryNode_->GetFrameRect().ToString().compare(renderContext_->GetPaintRectWithTransform().ToString())) {
+        DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
+    }
+    // transInfo is a one-dimensional expansion of the affine transformation matrix
+    if (!transInfo.empty()) {
+        if (!(NearEqual(transInfo[0], 1) && NearEqual(transInfo[0], 1))) {
+            DumpLog::GetInstance().AddDesc(std::string("scale: ").append(
+                std::to_string(transInfo[0]).append(",").append(std::to_string(transInfo[1]))));
+        }
+        if (!(NearZero(transInfo[6]) && NearZero(transInfo[7]))) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("translate: ")
+                    .append(std::to_string(transInfo[6]).append(",").append(std::to_string(transInfo[7]))));
+        }
+        if (!(NearZero(transInfo[8]))) {
+            DumpLog::GetInstance().AddDesc(std::string("degree: ").append(std::to_string(transInfo[8])));
+        }
+    }
     if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
         DumpLog::GetInstance().AddDesc(
             std::string("BackgroundColor: ").append(renderContext_->GetBackgroundColor()->ColorToString()));
     }
-    if (renderContext_ && renderContext_->GetBorder() && renderContext_->GetBorder()->GetBorderRadius().has_value()) {
-        DumpLog::GetInstance().AddDesc(
-            std::string("BorderRadius: ").append(renderContext_->GetBorder()->GetBorderRadius()->ToString().c_str()));
-    }
-
-    DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
-                                       .append(geometryNode_->GetParentLayoutConstraint().has_value()
-                                                   ? geometryNode_->GetParentLayoutConstraint().value().ToString()
-                                                   : "NA"));
-    if (NearZero(GetOffsetRelativeToWindow().GetY()) && NearZero(GetOffsetRelativeToWindow().GetX())) {
+    if (geometryNode_->GetParentLayoutConstraint().has_value())
+        DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
+                                           .append(geometryNode_->GetParentLayoutConstraint().value().ToString()));
+    if (!(NearZero(GetOffsetRelativeToWindow().GetY()) && NearZero(GetOffsetRelativeToWindow().GetX()))) {
         DumpLog::GetInstance().AddDesc(std::string("top: ")
                                            .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
                                            .append(" left: ")
@@ -487,13 +499,15 @@ void FrameNode::DumpCommonInfo()
     if (!propInspectorId_->empty()) {
         DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
     }
-    DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
-                                       .append(layoutProperty_->GetContentLayoutConstraint().has_value()
-                                                   ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
-                                                   : "NA"));
+    if (layoutProperty_->GetPaddingProperty() || layoutProperty_->GetBorderWidthProperty() ||
+        layoutProperty_->GetMarginProperty() || layoutProperty_->GetCalcLayoutConstraint()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("ContentConstraint: ")
+                .append(layoutProperty_->GetContentLayoutConstraint().has_value()
+                            ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
+                            : "NA"));
+    }
     DumpOverlayInfo();
-    DumpLog::GetInstance().AddDesc(
-        std::string("PaintRect: ").append(renderContext_->GetPaintRectWithTransform().ToString()));
     if (frameProxy_->Dump().compare("totalCount is 0") != 0) {
         DumpLog::GetInstance().AddDesc(std::string("FrameProxy: ").append(frameProxy_->Dump().c_str()));
     }
@@ -691,6 +705,7 @@ void FrameNode::OnAttachToMainTree(bool recursive)
 {
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
+    pattern_->OnAttachToMainTree();
     if (IsResponseRegion() || HasPositionProp()) {
         auto parent = GetParent();
         while (parent) {
@@ -729,8 +744,13 @@ void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configuration
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (configurationChange.DirectionOrDpiUpdate) {
-        pattern_->OnDirectionOrDpiConfigurationUpdate();
+    if (configurationChange.directionUpdate) {
+        pattern_->OnDirectionConfigurationUpdate();
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    if (configurationChange.dpiUpdate) {
+        pattern_->OnDpiConfigurationUpdate();
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }

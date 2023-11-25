@@ -72,6 +72,8 @@ struct OptionParam {
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
+    bool isShow = false;
+    std::function<void(const std::string&)> onStateChange;
     std::optional<Placement> placement;
     std::function<void()> onAppear;
     std::function<void()> onDisappear;
@@ -310,6 +312,13 @@ public:
         const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
     static void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts);
 
+    // global light
+    static void SetLightPosition(
+        const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
+    static void SetLightIntensity(const float value);
+    static void SetLightIlluminated(const uint32_t value);
+    static void SetBloom(const float value);
+
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);
     static void SetHeight(FrameNode* frameNode, const CalcLength& height);
@@ -329,13 +338,49 @@ public:
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
-    // global light
-    static void SetLightPosition(
-        const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
-    static void SetLightIntensity(const float value);
-    static void SetLightIlluminated(const uint32_t value);
-    static void SetBloom(const float value);
-
+    static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius);
+    static void SetInvert(FrameNode* frameNode, const InvertVariant& invert);
+    static void SetSepia(FrameNode* frameNode, const Dimension& sepia);
+    static void SetSaturate(FrameNode* frameNode, const Dimension& saturate);
+    static void SetColorBlend(FrameNode* frameNode, const Color& colorBlend);
+    static void SetGrayScale(FrameNode* frameNode, const Dimension& grayScale);
+    static void SetContrast(FrameNode* frameNode, const Dimension& contrast);
+    static void SetBrightness(FrameNode* frameNode, const Dimension& brightness);
+    static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius);
+    static void SetHueRotate(FrameNode* frameNode, float hueRotate);
+    static void SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient);
+    static void SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient);
+    static void SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient);
+    static void SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle);
+    static void SetLinearGradientBlur(FrameNode* frameNode, NG::LinearGradientBlurPara blurPara);
+    static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
+    static void SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition);
+    static void SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize);
+    static void SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src);
+    static void SetBackgroundImageRepeat(FrameNode* frameNode, const ImageRepeat& imageRepeat);
+    static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
+    static void SetScale(FrameNode* frameNode, const NG::VectorF& value);
+    static void SetPivot(FrameNode* frameNode, const DimensionOffset& value);
+    static void SetGeometryTransition(FrameNode* frameNode, const std::string& id, bool followWithoutTransition);
+    static void SetRotate(FrameNode* frameNode, const NG::Vector5F& value);
+    static void SetClipEdge(FrameNode* frameNode, bool isClip);
+    static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
+    static void SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectOption& option);
+    static void SetLightUpEffect(FrameNode* frameNode, double radio);
+    static void SetSphericalEffect(FrameNode* frameNode, double radio);
+    static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
+    static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
+    static void SetUseEffect(FrameNode* frameNode, bool useEffect);
+    static void SetForegroundColor(FrameNode* frameNode, const Color& color);
+    static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
+    static void SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath);
+    static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
+    static void SetGroupDefaultFocus(FrameNode* frameNode, bool isSet);
+    static void SetFocusable(FrameNode* frameNode, bool focusable);
+    static void SetTouchable(FrameNode* frameNode, bool touchable);
+    static void SetDefaultFocus(FrameNode* frameNode, bool isSet);
+    static void SetDisplayIndex(FrameNode* frameNode, int32_t value);
+    
 private:
     static void AddDragFrameNodeToManager();
 };

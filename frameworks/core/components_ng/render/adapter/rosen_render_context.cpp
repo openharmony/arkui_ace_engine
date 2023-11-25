@@ -319,11 +319,17 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
             break;
         }
         case ContextType::HARDWARE_SURFACE: {
+#ifndef VIDEO_TEXTURE_SUPPORTED
             Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or("") };
             auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
             if (surfaceNode) {
                 surfaceNode->SetHardwareEnabled(true);
             }
+#else
+            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or("") };
+            auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig,
+                RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
+#endif
             rsNode_ = surfaceNode;
             break;
         }
@@ -1208,6 +1214,12 @@ void RosenRenderContext::OnOpacityUpdate(double opacity)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetAlpha(opacity);
     RequestNextFrame();
+}
+
+void RosenRenderContext::SetAlphaOffscreen(bool isOffScreen)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetAlphaOffscreen(isOffScreen);
 }
 
 class DrawDragThumbnailCallback : public SurfaceCaptureCallback {
@@ -2303,17 +2315,19 @@ void RosenRenderContext::PaintFocusState(
     CHECK_NULL_VOID(rsNode_);
     auto borderWidthPx = static_cast<float>(paintWidth.ConvertToPx());
     auto frameNode = GetHost();
-    auto paintTask = [paintColor, borderWidthPx, frameNode](const RSRoundRect& rrect, RSCanvas& rsCanvas) mutable {
+    auto paintTask = [paintColor, borderWidthPx, weak = WeakClaim(AceType::RawPtr(frameNode))]
+    (const RSRoundRect& rrect, RSCanvas& rsCanvas) mutable {
         RSPen pen;
         pen.SetAntiAlias(true);
         pen.SetColor(ToRSColor(paintColor));
         pen.SetWidth(borderWidthPx);
         rsCanvas.AttachPen(pen);
-        CHECK_NULL_VOID(frameNode);
-        if (!frameNode->GetCheckboxFlag()) {
+        auto delegatePtr = weak.Upgrade();
+        CHECK_NULL_VOID(delegatePtr);
+        if (!delegatePtr->GetCheckboxFlag()) {
             rsCanvas.DrawRoundRect(rrect);
         } else {
-            auto paintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+            auto paintProperty = delegatePtr->GetPaintProperty<CheckBoxPaintProperty>();
             CHECK_NULL_VOID(paintProperty);
             CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
             if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -2749,7 +2763,8 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
     rsNode_->SetShadowMask(shadow.GetShadowType() == ShadowType::BLUR);
     rsNode_->SetShadowIsFilled(shadow.GetIsFilled());
-    rsNode_->SetShadowColorStrategy(shadow.GetShadowColorStrategy() == ShadowColorStrategy::AVERAGE);
+    rsNode_->SetShadowColorStrategy(shadow.GetShadowColorStrategy() == ShadowColorStrategy::AVERAGE ||
+                                    shadow.GetShadowColorStrategy() == ShadowColorStrategy::PRIMARY);
     if (shadow.GetHardwareAcceleration()) {
         rsNode_->SetShadowElevation(shadow.GetElevation());
     } else {
@@ -3637,7 +3652,94 @@ void RosenRenderContext::PaintMouseSelectRect(const RectF& rect, const Color& fi
 void RosenRenderContext::DumpInfo() const
 {
     if (rsNode_) {
+        DumpLog::GetInstance().AddDesc("------------start print rsNode");
         DumpLog::GetInstance().AddDesc(rsNode_->DumpNode(0));
+        auto center = rsNode_->GetStagingProperties().GetPivot();
+        if (!NearEqual(center[0], 0.5) || !NearEqual(center[1], 0.5)) {
+            DumpLog::GetInstance().AddDesc(std::string("Center: x:")
+                                               .append(std::to_string(center[0]))
+                                               .append(" y:")
+                                               .append(std::to_string(center[1])));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetPivotZ())) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("PivotZ:").append(std::to_string(rsNode_->GetStagingProperties().GetPivotZ())));
+        }
+        std::string res = "";
+        if (!NearZero(rsNode_->GetStagingProperties().GetRotation())) {
+            res.append(" Rotation:").append(std::to_string(rsNode_->GetStagingProperties().GetRotation()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetRotationX())) {
+            res.append(" RotationX:").append(std::to_string(rsNode_->GetStagingProperties().GetRotationX()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetRotationY())) {
+            res.append(" RotationY:").append(std::to_string(rsNode_->GetStagingProperties().GetRotationY()));
+        }
+        if (!res.empty()) {
+            DumpLog::GetInstance().AddDesc(res);
+            res.clear();
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetCameraDistance())) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("CameraDistance:")
+                    .append(std::to_string(rsNode_->GetStagingProperties().GetCameraDistance())));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetTranslateZ())) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("TranslateZ:").append(std::to_string(rsNode_->GetStagingProperties().GetTranslateZ())));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetBgImageWidth())) {
+            res.append(" BgImageWidth:").append(std::to_string(rsNode_->GetStagingProperties().GetBgImageWidth()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetBgImageHeight())) {
+            res.append(" BgImageHeight:").append(std::to_string(rsNode_->GetStagingProperties().GetBgImageHeight()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetBgImagePositionX())) {
+            res.append(" BgImagePositionX")
+                .append(std::to_string(rsNode_->GetStagingProperties().GetBgImagePositionX()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetBgImagePositionY())) {
+            res.append(" BgImagePositionY")
+                .append(std::to_string(rsNode_->GetStagingProperties().GetBgImagePositionY()));
+        }
+        if (!res.empty()) {
+            DumpLog::GetInstance().AddDesc(res);
+            res.clear();
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetShadowOffsetX())) {
+            res.append(" ShadowOffsetX:").append(std::to_string(rsNode_->GetStagingProperties().GetShadowOffsetX()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetShadowOffsetY())) {
+            res.append(" ShadowOffsetY:").append(std::to_string(rsNode_->GetStagingProperties().GetShadowOffsetY()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetShadowAlpha())) {
+            res.append(" ShadowAlpha:").append(std::to_string(rsNode_->GetStagingProperties().GetShadowAlpha()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetShadowElevation())) {
+            res.append(" ShadowElevation:")
+                .append(std::to_string(rsNode_->GetStagingProperties().GetShadowElevation()));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetShadowRadius())) {
+            res.append(" ShadowRadius:").append(std::to_string(rsNode_->GetStagingProperties().GetShadowRadius()));
+        }
+        if (!res.empty()) {
+            DumpLog::GetInstance().AddDesc(res);
+            res.clear();
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetSpherizeDegree())) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("SpherizeDegree:")
+                    .append(std::to_string(rsNode_->GetStagingProperties().GetSpherizeDegree())));
+        }
+        if (!NearZero(rsNode_->GetStagingProperties().GetLightUpEffectDegree())) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("LightUpEffectDegree:")
+                    .append(std::to_string(rsNode_->GetStagingProperties().GetLightUpEffectDegree())));
+        }
+        if (!NearEqual(rsNode_->GetStagingProperties().GetAlpha(), 1)) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("Alpha:").append(std::to_string(rsNode_->GetStagingProperties().GetAlpha())));
+        }
     }
 }
 
@@ -3721,7 +3823,17 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
                 auto context = weakThis.Upgrade();
                 CHECK_NULL_VOID(context);
                 ContainerScope scope(id);
-                context->OnTransitionInFinish();
+                auto pipeline = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                auto taskExecutor = pipeline->GetTaskExecutor();
+                CHECK_NULL_VOID(taskExecutor);
+                taskExecutor->PostTask(
+                    [weakThis]() {
+                        auto context = weakThis.Upgrade();
+                        CHECK_NULL_VOID(context);
+                        context->OnTransitionInFinish();
+                    },
+                    TaskExecutor::TaskType::UI);
             },
             false);
     } else {
@@ -4055,6 +4167,43 @@ void RosenRenderContext::SetContentRectToFrame(RectF rect)
         rect.SetSize(size);
     }
     rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+}
+
+void RosenRenderContext::MarkNewFrameAvailable(void* nativeWindow)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+#if defined(ANDROID_PLATFORM)
+    rsSurfaceNode->MarkUiFrameAvailable(true);
+#endif
+#if defined(IOS_PLATFORM)
+    RSSurfaceExtConfig config = {
+        .type = RSSurfaceExtType::SURFACE_TEXTURE,
+        .additionalData = nativeWindow,
+    };
+    rsSurfaceNode->SetSurfaceTexture(config);
+#endif
+}
+
+void RosenRenderContext::AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback)
+{
+    CHECK_NULL_VOID(rsNode_);
+#if defined(ANDROID_PLATFORM)
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetSurfaceTextureAttachCallBack(attachCallback);
+#endif
+}
+
+void RosenRenderContext::AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback)
+{
+    CHECK_NULL_VOID(rsNode_);
+#if defined(ANDROID_PLATFORM)
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetSurfaceTextureUpdateCallBack(updateCallback);
+#endif
 }
 
 } // namespace OHOS::Ace::NG
