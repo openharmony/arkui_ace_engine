@@ -57,6 +57,8 @@ public:
         canvasSize_ = canvasSize;
     }
 
+    void OnPixelRoundFinish(const SizeF& pixelGridRoundSize) override;
+
     void SetAntiAlias(bool isEnabled);
 
     void FillRect(const Rect& rect);
