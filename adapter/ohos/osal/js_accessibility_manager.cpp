@@ -1860,7 +1860,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
 {
     auto context = GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
-    int32_t windowId = context->GetWindowId();
+    int32_t windowId = context->GetFocusWindowId();
     if (windowId == 0) {
         return;
     }
