@@ -108,6 +108,12 @@ private:
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
     void ClipArrowBubble(const RefPtr<FrameNode>& frameNode);
     void ClipArrowlessBubble(const RefPtr<FrameNode>& frameNode);
+
+    float GetInnerBorderOffset();
+    float outerBorderWidth_ = Dimension(1.0_vp).ConvertToPx();
+    float innerBorderWidth_ = Dimension(1.0_vp).ConvertToPx();
+    bool needPaintInnerBorder_ = false;
+
     // Get from RenderProp
     bool useCustom_ = false;
     Placement arrowPlacement_ = Placement::BOTTOM;

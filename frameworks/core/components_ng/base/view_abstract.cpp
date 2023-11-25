@@ -572,6 +572,83 @@ void ViewAbstract::SetBorderStyle(FrameNode *frameNode, const BorderStylePropert
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderStyle, value, frameNode);
 }
 
+void ViewAbstract::SetOuterBorderRadius(const Dimension& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(value);
+    borderRadius.multiValued = false;
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderRadius, borderRadius);
+}
+
+void ViewAbstract::SetOuterBorderRadius(const BorderRadiusProperty& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderRadius, value);
+}
+
+void ViewAbstract::SetOuterBorderColor(const Color& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    BorderColorProperty borderColor;
+    borderColor.SetColor(value);
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderColor, borderColor);
+}
+
+void ViewAbstract::SetOuterBorderColor(const BorderColorProperty& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderColor, value);
+}
+
+void ViewAbstract::SetOuterBorderWidth(const Dimension& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    BorderWidthProperty borderWidth;
+    if (Negative(value.Value())) {
+        borderWidth.SetBorderWidth(Dimension(0));
+    } else {
+        borderWidth.SetBorderWidth(value);
+    }
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderWidth, borderWidth);
+}
+
+void ViewAbstract::SetOuterBorderWidth(const BorderWidthProperty& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderWidth, value);
+}
+
+void ViewAbstract::SetOuterBorderStyle(const BorderStyleProperty& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderStyle, value);
+}
+
+void ViewAbstract::SetOuterBorderStyle(const BorderStyle& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    BorderStyleProperty borderStyle;
+    borderStyle.SetBorderStyle(value);
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderStyle, borderStyle);
+}
+
 void ViewAbstract::DisableOnClick()
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();

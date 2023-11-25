@@ -130,6 +130,17 @@ public:
 
     static void SetBorderImage(const RefPtr<BorderImage> &borderImage);
     static void SetBorderImageSource(const std::string &bdImageSrc);
+
+    // outer border
+    static void SetOuterBorderRadius(const BorderRadiusProperty& value);
+    static void SetOuterBorderRadius(const Dimension& value);
+    static void SetOuterBorderColor(const Color& value);
+    static void SetOuterBorderColor(const BorderColorProperty& value);
+    static void SetOuterBorderWidth(const Dimension& value);
+    static void SetOuterBorderWidth(const BorderWidthProperty& value);
+    static void SetOuterBorderStyle(const BorderStyle& value);
+    static void SetOuterBorderStyle(const BorderStyleProperty& value);
+
     static void SetHasBorderImageSlice(bool tag);
     static void SetHasBorderImageWidth(bool tag);
     static void SetHasBorderImageOutset(bool tag);
