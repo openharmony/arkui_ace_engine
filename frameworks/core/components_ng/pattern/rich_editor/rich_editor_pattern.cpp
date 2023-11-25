@@ -1357,7 +1357,6 @@ void RichEditorPattern::CalcCaretInfoByClick(GestureEvent& info)
     lastClickOffset.AddX(textRect.GetX());
     lastClickOffset.AddY(textRect.GetY());
 
-    SetCaretPosition(position);
     CHECK_NULL_VOID(overlayMod_);
     DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(lastClickOffset, selectLineHeight);
     SetLastClickOffset(lastClickOffset);
@@ -4386,7 +4385,7 @@ bool RichEditorPattern::NeedAiAnalysis(
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NeedAiAnalysis IsClickBoundary,return!");
         return false;
     }
-    return false;
+    return true;
 }
 
 void RichEditorPattern::AdjustCursorPosition(int32_t& pos)
