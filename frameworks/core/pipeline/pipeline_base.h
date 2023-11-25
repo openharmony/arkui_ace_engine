@@ -48,6 +48,7 @@
 #include "core/event/mouse_event.h"
 #include "core/event/rotation_event.h"
 #include "core/event/touch_event.h"
+#include "core/event/pointer_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
@@ -109,6 +110,10 @@ public:
 
     virtual uint64_t GetTimeFromExternalTimer();
 
+    virtual bool NeedSoftKeyboard() = 0;
+
+    virtual void SetOnWindowFocused(const std::function<void()>& callback) = 0;
+
     bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
         const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr);
 
@@ -120,7 +125,7 @@ public:
     void PrepareOpenImplicitAnimation();
 
     void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& finishCallBack = nullptr);
+        const std::function<void()>& finishCallback = nullptr);
 
     void PrepareCloseImplicitAnimation();
 
@@ -157,7 +162,7 @@ public:
     virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
 
     // Called by view
-    virtual void OnDragEvent(int32_t x, int32_t y, DragEventAction action) = 0;
+    virtual void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) = 0;
 
     // Called by view when idle event.
     virtual void OnIdle(int64_t deadline) = 0;
@@ -974,7 +979,25 @@ public:
         return onFocus_;
     }
 
+    virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
+
+    virtual std::string GetCurrentExtraInfo() { return ""; }
     virtual void UpdateTitleInTargetPos(bool isShow = true, int32_t height = 0) {}
+
+    virtual void SetCursor(int32_t cursorValue)
+    {
+        cursor_ = static_cast<MouseFormat>(cursorValue);
+    }
+
+    virtual void RestoreDefault()
+    {
+        cursor_ = MouseFormat::DEFAULT;
+    }
+
+    MouseFormat GetCursor() const
+    {
+        return cursor_;
+    }
 
 protected:
     virtual bool MaybeRelease() override;
@@ -1010,6 +1033,8 @@ protected:
         isReloading_ = isReloading;
     }
 
+    std::function<void()> GetWrappedAnimationCallback(const std::function<void()>& finishCallback);
+
     std::list<configChangedCallback> configChangedCallback_;
     std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
 
@@ -1021,6 +1046,7 @@ protected:
     bool isAppWindow_ = true;
     bool installationFree_ = false;
     bool isSubPipeline_ = false;
+    bool isReloading_ = false;
 
     bool isJsPlugin_ = false;
 
@@ -1049,6 +1075,7 @@ protected:
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;
     std::stack<bool> pendingImplicitRender_;
+    std::stack<bool> pendingFrontendAnimation_;
     std::shared_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
@@ -1092,6 +1119,7 @@ protected:
     std::atomic<bool> onFocus_ = true;
     uint64_t lastTouchTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
+    MouseFormat cursor_ = MouseFormat::DEFAULT;
 
 private:
     void DumpFrontend() const;
@@ -1113,7 +1141,6 @@ private:
     bool isFormAnimationFinishCallback_ = false;
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
-    bool isReloading_ = false;
     bool halfLeading_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);

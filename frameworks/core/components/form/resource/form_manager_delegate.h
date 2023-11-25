@@ -27,6 +27,7 @@
 #include "core/pipeline/pipeline_base.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
+#include "form_info.h"
 #include "form_js_info.h"
 #include "ui/rs_surface_node.h"
 #include "want.h"
@@ -73,7 +74,12 @@ public:
         : FormManagerResource("formAdaptor", context), state_(State::WAITINGFORSIZE)
     {}
 
+#if OHOS_STANDARD_SYSTEM
+    void AddForm(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info,
+        const AppExecFwk::FormInfo& formInfo);
+#else
     void AddForm(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info);
+#endif
     void ReleasePlatformResource();
 
     void AddFormAcquireCallback(const OnFormAcquiredCallback& callback);
@@ -107,6 +113,8 @@ public:
     void ResetForm();
     void ReleaseForm();
     void NotifySurfaceChange(float width, float height);
+    static bool GetFormInfo(const std::string& bundleName, const std::string& moduleName,
+        const std::string& cardName, AppExecFwk::FormInfo& formInfo);
 #endif
 
 private:

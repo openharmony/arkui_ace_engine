@@ -79,6 +79,15 @@ public:
 
     virtual void SetSurfaceDefaultSize(int32_t width, int32_t height) {}
 
+    virtual bool IsTexture()
+    {
+        return false;
+    }
+
+    virtual void AttachToGLContext(int64_t textureId, bool isAttach) {}
+
+    virtual void UpdateTextureImage(std::vector<float>& matrix) {}
+
     virtual void SetWebMessage(OffsetF offset) {}
 
     virtual void SetPatternType(const std::string& type) {}

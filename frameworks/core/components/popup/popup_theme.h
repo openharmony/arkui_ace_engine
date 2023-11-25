@@ -29,6 +29,7 @@ namespace {
 constexpr uint32_t SHOW_TIME = 250; // unit is ms.
 constexpr uint32_t HIDE_TIME = 250; // unit is ms.
 constexpr Dimension TARGET_SPACE = 8.0_vp;
+constexpr Dimension BORDER_RADIUS_POPUP = 20.0_vp;
 constexpr double DEFAULT_OPACITY = 0.95;
 } // namespace
 
@@ -51,18 +52,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            // init theme from global data
-            theme->padding_ = Edge(themeConstants->GetDimension(THEME_POPUP_PADDING_HORIZONTAL),
-                themeConstants->GetDimension(THEME_POPUP_PADDING_VERTICAL),
-                themeConstants->GetDimension(THEME_POPUP_PADDING_HORIZONTAL),
-                themeConstants->GetDimension(THEME_POPUP_PADDING_VERTICAL));
-            theme->maskColor_ = themeConstants->GetColor(THEME_POPUP_MASK_COLOR);
-            theme->backgroundColor_ =
-                themeConstants->GetColor(THEME_POPUP_BACKGROUND_COLOR).ChangeOpacity(DEFAULT_OPACITY);
-            theme->textStyle_.SetTextColor(themeConstants->GetColor(THEME_POPUP_TEXT_COLOR));
-            theme->textStyle_.SetFontSize(themeConstants->GetDimension(THEME_POPUP_TEXT_FONTSIZE));
-            theme->radius_ = Radius(
-                themeConstants->GetDimension(THEME_POPUP_RADIUS), themeConstants->GetDimension(THEME_POPUP_RADIUS));
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             theme->showTime_ = SHOW_TIME;
             theme->hideTime_ = HIDE_TIME;
@@ -81,6 +70,9 @@ public:
                 LOGW("find pattern of popup fail");
                 return;
             }
+            theme->maskColor_ = pattern->GetAttr<Color>("popup_mask_color", Color());
+            theme->textStyle_.SetTextColor(pattern->GetAttr<Color>("popup_text_color", Color()));
+            theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>("popup_text_font_size", 0.0_vp));
             theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 14.0_fp);
             theme->buttonFontSize_ = pattern->GetAttr<Dimension>(POPUP_BUTTON_TEXT_FONT_SIZE, 14.0_fp);
@@ -88,8 +80,8 @@ public:
             theme->buttonHoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->buttonPressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
             theme->focusColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
-            theme->radius_ = Radius(pattern->GetAttr<Dimension>(POPUP_BORDER_RADIUS, 24.0_vp),
-                pattern->GetAttr<Dimension>(POPUP_BORDER_RADIUS, 24.0_vp));
+
+            theme->radius_ = Radius(BORDER_RADIUS_POPUP, BORDER_RADIUS_POPUP);
             theme->padding_ = Edge(pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 12.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),

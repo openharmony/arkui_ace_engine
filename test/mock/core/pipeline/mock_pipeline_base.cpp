@@ -81,7 +81,7 @@ void PipelineContext::FlushTouchEvents() {}
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event) {}
 
-void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action) {}
+void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) {}
 
 void PipelineContext::OnIdle(int64_t deadline) {}
 
@@ -491,5 +491,19 @@ bool NG::PipelineContext::SetIsFocusActive(bool isFocusActive)
     return false;
 }
 
-void HandleSubwindow(bool isShow) {}
+bool NG::PipelineContext::NeedSoftKeyboard()
+{
+    return false;
+}
+
+void NG::PipelineContext::SetCursor(int32_t cursorValue) {}
+
+void NG::PipelineContext::RestoreDefault() {}
+
+void NG::PipelineContext::HandleSubwindow(bool isShow) {}
+
+std::string NG::PipelineContext::GetCurrentExtraInfo()
+{
+    return std::string();
+}
 } // namespace OHOS::Ace

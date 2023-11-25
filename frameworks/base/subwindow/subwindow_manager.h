@@ -62,8 +62,8 @@ public:
     Rect GetParentWindowRect();
 
     void ShowMenu(const RefPtr<Component>& newComponent);
-    void ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, int32_t targetId,
-        const NG::OffsetF& offset, bool isAboveApps = false);
+    void ShowMenuNG(
+        const RefPtr<NG::FrameNode>& menuNode, int32_t targetId, const NG::OffsetF& offset, bool isAboveApps = false);
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId);
     void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
@@ -73,16 +73,27 @@ public:
     void CloseMenu();
     void ClearMenu();
     void ClearMenuNG(int32_t instanceId = -1, bool inWindow = true, bool showAnimation = false);
+    void ClearPopupInSubwindow(int32_t instanceId = -1);
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
     void HideSubWindowNG();
-
+    void HideDialogSubWindow(int32_t instanceId);
+    void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId);
     void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId = -1, int32_t instanceId = -1);
-
+    int32_t GetDialogSubWindowId()
+    {
+        return dialogSubWindowId_;
+    }
+    void SetDialogSubWindowId(int32_t dialogSubWindowId)
+    {
+        dialogSubWindowId_ = dialogSubWindowId;
+    }
     void AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow);
     // Get the dialog subwindow of instance, return the window or nullptr.
+    int32_t GetDialogSubwindowInstanceId(int32_t SubwindowId);
     const RefPtr<Subwindow> GetDialogSubwindow(int32_t instanceId);
     void SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwindow);
     const RefPtr<Subwindow>& GetCurrentDialogWindow();
+    void DeleteHotAreas(int32_t subwindowid, int32_t overlayid);
 
     void ClearToastInSubwindow();
     void ShowToast(
@@ -96,6 +107,8 @@ public:
         std::function<void(int32_t, int32_t)>&& callback);
     void CloseDialog(int32_t instanceId);
     void RequestFocusSubwindow(int32_t instanceId);
+    
+    bool GetShown();
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
@@ -112,7 +125,7 @@ private:
     // Used to save the relationship between container and subwindow, it is 1:1
     std::mutex subwindowMutex_;
     SubwindowMap subwindowMap_;
-
+    int32_t dialogSubWindowId_;
     std::mutex currentSubwindowMutex_;
     std::string currentSubwindowName_;
 

@@ -39,9 +39,26 @@ std::string GetDeclaration(const std::optional<Color>& color, const std::optiona
         "type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value_or(TextDecoration::NONE)).c_str());
     jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
     jsonSpanDeclaration->Put("style",
-        V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID))
-            .c_str());
+        V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID)).c_str());
     return jsonSpanDeclaration->ToString();
+}
+inline std::unique_ptr<JsonValue> ConvertShadowToJson(const Shadow& shadow)
+{
+    auto jsonShadow = JsonUtil::Create(true);
+    jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
+    jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
+    jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
+    jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
+    jsonShadow->Put("type", std::to_string(static_cast<int32_t>(shadow.GetShadowType())).c_str());
+    return jsonShadow;
+}
+std::unique_ptr<JsonValue> ConvertShadowsToJson(const std::vector<Shadow>& shadows)
+{
+    auto jsonShadows = JsonUtil::CreateArray(true);
+    for (const auto& shadow : shadows) {
+        jsonShadows->Put(ConvertShadowToJson(shadow));
+    }
+    return jsonShadows;
 }
 } // namespace
 
@@ -71,6 +88,11 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str());
         json->Put("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str());
         json->Put("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str());
+
+        auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
+        // Determines if there are multiple textShadows
+        auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
+        json->Put("textShadow", jsonShadow);
     }
     if (textLineStyle) {
         json->Put("lineHeight", textLineStyle->GetLineHeight().value_or(Dimension()).ToString().c_str());
@@ -143,12 +165,23 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
             return -1;
         }
         textStyle = themeTextStyle;
+        textStyle->SetHalfLeading(pipelineContext->GetHalfLeading());
         builder->PushStyle(themeTextStyle);
     }
-    UpdateTextStyle(builder, textStyle);
+    auto spanContent = GetSpanContent();
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, -1);
+    if (textPattern->GetTextDetectEnable() && !aiSpanMap.empty()) {
+        UpdateTextStyleForAISpan(spanContent, builder, textStyle);
+    } else {
+        UpdateTextStyle(spanContent, builder, textStyle);
+    }
     textStyle_ = textStyle;
     for (const auto& child : children) {
         if (child) {
+            if (!aiSpanMap.empty()) {
+                child->aiSpanMap = aiSpanMap;
+            }
             child->UpdateParagraph(frameNode, builder);
         }
     }
@@ -156,6 +189,61 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         builder->PopStyle();
     }
     return -1;
+}
+
+void SpanItem::UpdateTextStyleForAISpan(
+    const std::string& spanContent, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle)
+{
+    auto wSpanContent = StringUtils::ToWstring(spanContent);
+    int32_t wSpanContentLength = static_cast<int32_t>(wSpanContent.length());
+    int32_t spanStart = position - wSpanContentLength;
+    int32_t preEnd = spanStart;
+    while (!aiSpanMap.empty()) {
+        auto aiSpan = aiSpanMap.begin()->second;
+        if (aiSpan.start >= position) {
+            break;
+        }
+        if (aiSpan.end <= spanStart) {
+            aiSpanMap.erase(aiSpanMap.begin());
+            continue;
+        }
+        int32_t aiSpanStartInSpan = std::max(spanStart, aiSpan.start);
+        int32_t aiSpanEndInSpan = std::min(position, aiSpan.end);
+        if (preEnd < aiSpanStartInSpan) {
+            auto beforeContent = StringUtils::ToString(
+                wSpanContent.substr(preEnd - spanStart, aiSpanStartInSpan- preEnd));
+            UpdateTextStyle(beforeContent, builder, textStyle);
+        }
+        std::optional<TextStyle> aiSpanTextStyle = textStyle;
+        if (!aiSpanTextStyle.has_value()) {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            TextStyle themeTextStyle =
+                CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
+            if (NearZero(themeTextStyle.GetFontSize().Value())) {
+                return;
+            }
+            aiSpanTextStyle = themeTextStyle;
+        }
+        if (aiSpanTextStyle.has_value()) {
+            aiSpanTextStyle.value().SetTextColor(Color::BLUE);
+            aiSpanTextStyle.value().SetTextDecoration(TextDecoration::UNDERLINE);
+            aiSpanTextStyle.value().SetTextDecorationColor(Color::BLUE);
+        }
+        auto displayContent = StringUtils::ToWstring(
+            aiSpan.content).substr(aiSpanStartInSpan - aiSpan.start, aiSpanEndInSpan - aiSpanStartInSpan);
+        UpdateTextStyle(StringUtils::ToString(displayContent), builder, aiSpanTextStyle);
+        preEnd = aiSpanEndInSpan;
+        if (aiSpan.end > position) {
+            return;
+        } else {
+            aiSpanMap.erase(aiSpanMap.begin());
+        }
+    }
+    if (preEnd < position) {
+        auto afterContent = StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, position - preEnd));
+        UpdateTextStyle(afterContent, builder, textStyle);
+    }
 }
 
 void SpanItem::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle)
@@ -192,7 +280,8 @@ void SpanItem::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const Te
     }
 }
 
-void SpanItem::UpdateTextStyle(const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle)
+void SpanItem::UpdateTextStyle(
+    const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle)
 {
     auto textCase = fontStyle ? fontStyle->GetTextCase().value_or(TextCase::NORMAL) : TextCase::NORMAL;
     auto updateTextAction = [builder, textCase](const std::string& content, const std::optional<TextStyle>& textStyle) {
@@ -212,8 +301,7 @@ void SpanItem::UpdateTextStyle(const RefPtr<Paragraph>& builder, const std::opti
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (!IsDragging()) {
 #endif // ENABLE_DRAG_FRAMEWORK
-        auto data = GetSpanContent();
-        updateTextAction(data, textStyle);
+        updateTextAction(content, textStyle);
 #ifdef ENABLE_DRAG_FRAMEWORK
     } else {
         if (content.empty()) {
@@ -312,5 +400,19 @@ void SpanItem::GetIndex(int32_t& start, int32_t& end) const
     auto contentLen = StringUtils::ToWstring(content).length();
     start = position - contentLen;
     end = position;
+}
+
+int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
+    double width, double height, VerticalAlign /* verticalAlign */)
+{
+    CHECK_NULL_RETURN(builder, -1);
+    PlaceholderRun run;
+    run.width = width;
+    run.height = height;
+    textStyle.SetTextDecoration(TextDecoration::NONE);
+    builder->PushStyle(textStyle);
+    int32_t index = builder->AddPlaceholder(run);
+    builder->PopStyle();
+    return index;
 }
 } // namespace OHOS::Ace::NG

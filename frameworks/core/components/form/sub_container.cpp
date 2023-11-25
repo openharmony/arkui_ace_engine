@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "frameworks/core/common/flutter/flutter_asset_manager.h"
 #include "frameworks/core/common/flutter/flutter_task_executor.h"
+#include "frameworks/core/common/task_executor_impl.h"
 #include "frameworks/core/components/form/form_element.h"
 #include "frameworks/core/components/form/form_window.h"
 #include "frameworks/core/components/form/render_form.h"
@@ -45,6 +46,12 @@ SubContainer::~SubContainer()
 
 void SubContainer::Initialize()
 {
+    auto formPattern = formPattern_.Upgrade();
+    if (formPattern && !formPattern->IsJsCard()) {
+        LOGI("ETS card do not require the creation of a separate TaskExecutor");
+        return;
+    }
+
     if (!outSidePipelineContext_.Upgrade()) {
         LOGE("no pipeline context for create form component container.");
         return;
@@ -56,12 +63,21 @@ void SubContainer::Initialize()
         return;
     }
 
-    auto taskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(executor);
-    if (!taskExecutor) {
-        LOGE("main pipeline context executor is not flutter taskexecutor");
-        return;
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        auto taskExecutor = AceType::DynamicCast<TaskExecutorImpl>(executor);
+        if (!taskExecutor) {
+            LOGE("main pipeline context executor is not flutter taskexecutor");
+            return;
+        }
+        taskExecutor_ = Referenced::MakeRefPtr<TaskExecutorImpl>(taskExecutor);
+    } else {
+        auto taskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(executor);
+        if (!taskExecutor) {
+            LOGE("main pipeline context executor is not flutter taskexecutor");
+            return;
+        }
+        taskExecutor_ = Referenced::MakeRefPtr<FlutterTaskExecutor>(taskExecutor);
     }
-    taskExecutor_ = Referenced::MakeRefPtr<FlutterTaskExecutor>(taskExecutor);
 }
 
 void SubContainer::Destroy()

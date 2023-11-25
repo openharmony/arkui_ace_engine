@@ -29,7 +29,7 @@ public:
         const std::string& title) override;
     void SetTitle(const std::string& title, bool hasSubTitle = false) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
-    void SetTitleHeight(const Dimension& height) override;
+    void SetTitleHeight(const Dimension& height, bool isValid = true) override;
     void SetTitleMode(NG::NavigationTitleMode mode) override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetHideTitleBar(bool hideTitleBar) override;
@@ -59,6 +59,7 @@ public:
     RefPtr<NG::NavigationStack> GetNavigationStack() override;
     void SetMenuCount(int32_t menuCount) override;
     void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onModeChange) override;
+    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar);
 private:
     bool setDefaultNavBarWidthFlag_ = false;
 };

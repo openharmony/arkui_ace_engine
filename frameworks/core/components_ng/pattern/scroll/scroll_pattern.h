@@ -100,6 +100,7 @@ public:
     }
 
     bool OnScrollCallback(float offset, int32_t source) override;
+    void OnScrollStartCallback() override {};
     void OnScrollEndCallback() override;
 
     double GetCurrentPosition() const
@@ -162,7 +163,6 @@ public:
 
     void OnAnimateStop() override;
     bool UpdateCurrentOffset(float offset, int32_t source) override;
-    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
     void ScrollBy(float pixelX, float pixelY, bool smooth, const std::function<void()>& onFinish = nullptr);
     bool ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish = nullptr);
@@ -306,7 +306,7 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> scrollEffect);
     void UpdateScrollBarOffset() override;
-    void FireOnScrollStart();
+    void FireOnScrollStart() override;
     void FireOnScrollStop();
     void SetAccessibilityAction();
     void ScrollSnapTrigger();
@@ -321,7 +321,6 @@ private:
     SizeF viewSize_;
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
-    bool scrollStop_ = false;
     std::vector<std::shared_ptr<IScrollUpdateCallback>> listenerVector_;
 
     // scrollSnap

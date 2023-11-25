@@ -34,15 +34,15 @@ struct LayoutConstraintT {
     OptionalSize<T> parentIdealSize;
     OptionalSize<T> selfIdealSize;
 
-    void ApplyAspectRatio(float ratio, const std::optional<CalcSize>& calcSize);
+    void ApplyAspectRatio(float ratio, const std::optional<CalcSize>& calcSize, bool greaterThanApiTen = false);
 
     void ApplyAspectRatioToParentIdealSize(bool useWidth, float ratio);
 
-    void ApplyAspectRatioByMaxSize(float ratio, std::optional<bool> useDefinedWidth);
+    void ApplyAspectRatioByMaxSize(float ratio, std::optional<bool> useDefinedWidth, bool greaterThanApiTen = false);
 
     void ApplyAspectRatioWithCalcSize(float ratio, bool useDefinedWidth);
 
-    void ApplyAspectRatioWithoutCalcSize(float ratio);
+    void ApplyAspectRatioWithoutCalcSize(float ratio, bool greaterThanApiTen = false);
 
     void Reset();
 

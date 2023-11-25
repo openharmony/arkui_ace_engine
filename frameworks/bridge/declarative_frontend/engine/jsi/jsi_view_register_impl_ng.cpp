@@ -20,7 +20,7 @@
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -170,9 +170,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 #endif
 #ifdef WEB_SUPPORTED
-#include "frameworks/bridge/declarative_frontend/jsview/js_richtext.h"
 #include "bridge/declarative_frontend/jsview/js_web.h"
 #include "bridge/declarative_frontend/jsview/js_web_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_richtext.h"
 #endif
 #ifdef REMOTE_WINDOW_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
@@ -189,18 +189,77 @@
 #include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_screen.h"
 #include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_window_scene.h"
 #endif
-#include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
+#include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_location_button.h"
 #include "bridge/declarative_frontend/jsview/js_paste_button.h"
-#include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_save_button.h"
+#include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #ifdef EFFECT_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_effect_component.h"
 #endif
 
 namespace OHOS::Ace::Framework {
+
+void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
+{
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
+    if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
+        return;
+    }
+    auto uiNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode(true));
+    CHECK_NULL_VOID(uiNode);
+    auto customNode = AceType::DynamicCast<NG::CustomTitleNode>(uiNode);
+    CHECK_NULL_VOID(customNode);
+
+    const auto object = JSRef<JSObject>::Make(obj);
+    auto id = ContainerScope::CurrentId();
+    const JSRef<JSVal> setAppTitle = object->GetProperty("setAppTitle");
+    if (setAppTitle->IsFunction()) {
+        JSRef<JSFunc> jsSetAppTitleFunc = JSRef<JSFunc>::Cast(setAppTitle);
+        auto callback = [obj = object, jsFunc = jsSetAppTitleFunc, id](const std::string& title) {
+            ContainerScope scope(id);
+            const EcmaVM* vm = obj->GetEcmaVM();
+            CHECK_NULL_VOID(vm);
+            JSRef<JSVal> param = JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, title));
+            jsFunc->Call(obj, 1, &param);
+        };
+        customNode->SetAppTitleCallback(callback);
+    }
+#ifdef PIXEL_MAP_SUPPORTED
+    const JSRef<JSVal> setAppIcon = object->GetProperty("setAppIcon");
+    if (setAppIcon->IsFunction()) {
+        JSRef<JSFunc> jsSetAppIconFunc = JSRef<JSFunc>::Cast(setAppIcon);
+        auto callback = [obj = object, jsFunc = jsSetAppIconFunc, id](const RefPtr<PixelMap>& icon) {
+            ContainerScope scope(id);
+            JSRef<JSVal> param = ConvertPixmap(icon);
+            jsFunc->Call(obj, 1, &param);
+        };
+        customNode->SetAppIconCallback(callback);
+    }
+#endif
+    const JSRef<JSVal> onWindowFocused = object->GetProperty("onWindowFocused");
+    if (onWindowFocused->IsFunction()) {
+        JSRef<JSFunc> jsOnWindowFocusedFunc = JSRef<JSFunc>::Cast(onWindowFocused);
+        auto callback = [obj = object, jsFunc = jsOnWindowFocusedFunc, id]() {
+            ContainerScope scope(id);
+            jsFunc->Call(obj);
+        };
+        customNode->SetOnWindowFocusedCallback(callback);
+    }
+
+    const JSRef<JSVal> onWindowUnfocused = object->GetProperty("onWindowUnfocused");
+    if (onWindowUnfocused->IsFunction()) {
+        JSRef<JSFunc> jsOnWindowUnfocusedFunc = JSRef<JSFunc>::Cast(onWindowUnfocused);
+        auto callback = [obj = object, jsFunc = jsOnWindowUnfocusedFunc, id]() {
+            ContainerScope scope(id);
+            jsFunc->Call(obj);
+        };
+        customNode->SetOnWindowUnfocusedCallback(callback);
+    }
+    NG::ViewStackProcessor::GetInstance()->SetCustomTitleNode(customNode);
+}
 
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {

@@ -19,11 +19,11 @@
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
-
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::NG {
 using ArkUINativeModuleValue = panda::Local<panda::JSValueRef>;
@@ -32,6 +32,12 @@ class ArkUINativeModule {
 public:
     static ArkUINativeModuleValue GetFrameNodeById(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetArkUINativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
+private:
+    static void RegisterButtonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterToggleAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterDividerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterNavigationAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 };
-}
+} // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H

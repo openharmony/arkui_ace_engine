@@ -573,18 +573,18 @@ Offset RosenSvgPainter::UpdateText(RSCanvas* canvas, const SvgTextInfo& svgTextI
 
     RSBrush brush;
     RSPen strokePen;
-    RosenSvgPainter::SetFillStyle(brush svgTextInfo.fillState, svgTextInfo.opacity);
+    RosenSvgPainter::SetFillStyle(brush, svgTextInfo.fillState, svgTextInfo.opacity);
     RosenSvgPainter::SetStrokeStyle(strokePen, svgTextInfo.strokeState, svgTextInfo.opacity);
 
     for (int i = 0; i < (int)data.size(); i++) {
         wchar_t temp = data[i];
         if (temp >= 0x4e00 && temp <= 0x9fa5) {
             // range of chinese
-            font.setTypeface(fontTypeChinese_);
+            font.SetTypeface(fontTypeChinese_);
         } else {
-            font.setTypeface(fontTypeNormal_);
+            font.SetTypeface(fontTypeNormal_);
         }
-        auto blob = SkTextBlob::MakeFromText(&temp, sizeof(temp), font, SkTextEncoding::kUTF16);
+        auto blob = RSTextBlob::MakeFromText(&temp, sizeof(temp), font, RSTextEncoding::UTF16);
         auto width = font.MeasureText(&temp, sizeof(temp), RSTextEncoding::UTF16);
 
         canvas->Save();
@@ -594,7 +594,7 @@ Offset RosenSvgPainter::UpdateText(RSCanvas* canvas, const SvgTextInfo& svgTextI
         canvas->DetachBrush();
         if (svgTextInfo.strokeState.HasStroke() && !NearZero(svgTextInfo.strokeState.GetLineWidth().Value())) {
             canvas->AttachPen(strokePen);
-            canvas->drawTextBlob(blob.get(), x, y);
+            canvas->DrawTextBlob(blob.get(), x, y);
             canvas->DetachPen();
         }
         canvas->Restore();

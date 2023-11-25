@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -68,6 +69,8 @@ void TabBarPattern::OnAttachToFrameNode()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToFrame(true);
+    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(
+        SafeAreaExpandOpts { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
 
     swiperController_->SetTabBarFinishCallback([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -500,6 +503,7 @@ void TabBarPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
+    SetDefaultAnimationDuration();
     InitClick(gestureHub);
     InitTurnPageRateEvent();
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
@@ -1976,6 +1980,27 @@ float TabBarPattern::GetLeftPadding() const
         return 0.0f;
     }
     return geometryNode->GetPadding()->left.value_or(0.0f);
+}
+
+void TabBarPattern::SetDefaultAnimationDuration()
+{
+    if (animationDuration_.has_value() || Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    SetAnimationDuration(static_cast<int32_t>(tabTheme->GetTabContentAnimationDuration()));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_VOID(swiperPaintProperty);
+    swiperPaintProperty->UpdateDuration(static_cast<int32_t>(tabTheme->GetTabContentAnimationDuration()));
 }
 
 void TabBarPattern::DumpAdvanceInfo()

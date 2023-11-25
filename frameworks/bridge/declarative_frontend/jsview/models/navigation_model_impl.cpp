@@ -58,7 +58,7 @@ void NavigationModelImpl::SetCustomTitle(const RefPtr<AceType>& customTitle)
 #endif
 }
 
-void NavigationModelImpl::SetTitleHeight(const Dimension& height)
+void NavigationModelImpl::SetTitleHeight(const Dimension& height, bool isValid)
 {
     return;
 }

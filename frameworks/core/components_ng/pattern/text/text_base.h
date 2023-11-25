@@ -105,6 +105,43 @@ public:
         return StringUtils::NotInUtf16Bmp(aroundChar) ? 2 : 1;
     }
 
+    static void CalculateSelectedRect(std::vector<RectF>& selectedRect, float longestLine)
+    {
+        if (selectedRect.size() <= 1) {
+            return;
+        }
+        std::map<float, RectF> lineGroup;
+        for (auto const& localRect : selectedRect) {
+            if (NearZero(localRect.Width()) && NearZero(localRect.Height())) {
+                continue;
+            }
+            auto it = lineGroup.find(localRect.GetY());
+            if (it == lineGroup.end()) {
+                lineGroup.emplace(localRect.GetY(), localRect);
+            } else {
+                auto lineRect = it->second;
+                it->second = lineRect.CombineRectT(localRect);
+            }
+        }
+        selectedRect.clear();
+        auto firstRect = lineGroup.begin()->second;
+        if (lineGroup.size() == 1) {
+            selectedRect.emplace_back(firstRect);
+            return;
+        }
+        firstRect.SetWidth(longestLine - firstRect.Left());
+        selectedRect.emplace_back(firstRect);
+        auto endRect = lineGroup.rbegin()->second;
+        endRect.SetWidth(endRect.Right());
+        endRect.SetLeft(0.0f);
+        selectedRect.emplace_back(endRect);
+        const int32_t drawMiddleLineNumberLimit = 2;
+        if (static_cast<int32_t>(lineGroup.size()) > drawMiddleLineNumberLimit || firstRect.Left() <= endRect.Right()) {
+            auto middleRect = RectF(0.0f, firstRect.Bottom(), longestLine, endRect.Top() - firstRect.Bottom());
+            selectedRect.emplace_back(middleRect);
+        }
+    }
+
     // The methods that need to be implemented for input class components
     virtual RectF GetCaretRect() const
     {

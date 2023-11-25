@@ -253,8 +253,8 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
 
     std::function<void()> endAction;
     auto endObject = obj->GetProperty("end");
-    if (startObject->IsObject()) {
-        if (startObject->IsFunction()) {
+    if (endObject->IsObject()) {
+        if (endObject->IsFunction()) {
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(endObject));
             endAction = [builderFunc]() { builderFunc->Execute(); };
             ListItemModel::GetInstance()->SetDeleteArea(

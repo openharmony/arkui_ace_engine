@@ -74,6 +74,7 @@ void BubblePaintMethod::PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper)
     canvas.Save();
     RSBrush brush;
     brush.SetColor(maskColor.GetValue());
+    brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     canvas.DrawRect(RSRect(0.0, 0.0, layoutSize.Width(), layoutSize.Height()));
     canvas.DetachBrush();
@@ -168,6 +169,26 @@ void BubblePaintMethod::PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper
     canvas.DetachPen();
 }
 
+void BubblePaintMethod::ClipBubble(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    auto paintProperty = DynamicCast<BubbleRenderProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+    enableArrow_ = paintProperty->GetEnableArrow().value_or(true);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(popupTheme);
+    border_.SetBorderRadius(popupTheme->GetRadius());
+    if (clipFrameNode_) {
+        if (enableArrow_ && showArrow_) {
+            ClipArrowBubble(clipFrameNode_);
+        } else {
+            ClipArrowlessBubble(clipFrameNode_);
+        }
+    }
+}
+
 void BubblePaintMethod::UpdateArrowOffset(const std::optional<Dimension>& offset, const Placement& placement)
 {
     if (offset.has_value()) {
@@ -217,8 +238,7 @@ void BubblePaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RS
     RSPoint3 lightPos = { rsPath.GetBounds().GetLeft() / 2 + rsPath.GetBounds().GetRight(),
         rsPath.GetBounds().GetTop() / 2.0 + rsPath.GetBounds().GetBottom() / 2.0, shadow.GetLightHeight() };
 #else
-    auto tmpPath = rsPath.GetCmdList()->Playback();
-    auto bounds = tmpPath->GetBounds();
+    auto bounds = rsPath.GetBounds();
     RSPoint3 lightPos = { bounds.GetLeft() / 2.0 + bounds.GetRight() / 2.0,
         bounds.GetTop() / 2.0 + bounds.GetBottom() / 2.0, shadow.GetLightHeight() };
 #endif
@@ -238,7 +258,6 @@ void BubblePaintMethod::PaintDefaultBubble(RSCanvas& canvas)
     PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
     canvas.Restore();
     canvas.DrawRoundRect(rect);
-    canvas.ClipRoundRect(rect, RSClipOp::INTERSECT);
 }
 
 RSRoundRect BubblePaintMethod::MakeRRect()
@@ -265,7 +284,6 @@ void BubblePaintMethod::PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* pai
     canvas.ClipPath(path_, RSClipOp::DIFFERENCE, true);
     PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
     canvas.Restore();
-    canvas.ClipPath(path_, RSClipOp::INTERSECT, true);
     canvas.DrawPath(path_);
 }
 
@@ -505,6 +523,24 @@ void BubblePaintMethod::InitEdgeSize(Edge& edge)
     edge.SetRight(
         Dimension(std::max(padding_.Top().ConvertToPx(), border_.TopLeftRadius().GetY().ConvertToPx()) +
                   std::max(padding_.Bottom().ConvertToPx(), border_.BottomLeftRadius().GetY().ConvertToPx())));
+}
+
+void BubblePaintMethod::ClipArrowBubble(const RefPtr<FrameNode>& frameNode)
+{
+    auto path = AceType::MakeRefPtr<Path>();
+    path->SetValue(clipPath_);
+    path->SetBasicShapeType(BasicShapeType::PATH);
+    auto renderContext = frameNode->GetRenderContext();
+    renderContext->UpdateClipShape(path);
+}
+
+void BubblePaintMethod::ClipArrowlessBubble(const RefPtr<FrameNode>& frameNode)
+{
+    auto geometryNode = frameNode->GetGeometryNode();
+    auto renderContext = frameNode->GetRenderContext();
+    renderContext->ClipWithRRect(
+        RectF(0.0f, 0.0f, geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height()),
+        RadiusF(EdgeF(border_.TopLeftRadius().GetX().ConvertToPx(), border_.TopRightRadius().GetX().ConvertToPx())));
 }
 
 } // namespace OHOS::Ace::NG

@@ -213,6 +213,8 @@ struct PromptAsyncContext {
     napi_value messageNApi = nullptr;
     napi_value buttonsNApi = nullptr;
     napi_value autoCancel = nullptr;
+    napi_value showInSubWindow = nullptr;
+    napi_value isModal = nullptr;
     napi_value alignmentApi = nullptr;
     napi_value offsetApi = nullptr;
     napi_value maskRectApi = nullptr;
@@ -223,6 +225,8 @@ struct PromptAsyncContext {
     std::string messageString;
     std::vector<ButtonInfo> buttons;
     bool autoCancelBool = true;
+    bool showInSubWindowBool = true;
+    bool isModalBool = true;
     std::set<std::string> callbacks;
     std::string callbackSuccessString;
     std::string callbackCancelString;
@@ -417,6 +421,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "message", &asyncContext->messageNApi);
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
             napi_get_named_property(env, argv[0], "autoCancel", &asyncContext->autoCancel);
+            napi_get_named_property(env, argv[0], "showInSubWindow", &asyncContext->showInSubWindow);
+            napi_get_named_property(env, argv[0], "isModal", &asyncContext->isModal);
             napi_get_named_property(env, argv[0], "alignment", &asyncContext->alignmentApi);
             napi_get_named_property(env, argv[0], "offset", &asyncContext->offsetApi);
             napi_get_named_property(env, argv[0], "maskRect", &asyncContext->maskRectApi);
@@ -434,6 +440,14 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_typeof(env, asyncContext->autoCancel, &valueType);
             if (valueType == napi_boolean) {
                 napi_get_value_bool(env, asyncContext->autoCancel, &asyncContext->autoCancelBool);
+            }
+            napi_typeof(env, asyncContext->showInSubWindow, &valueType);
+            if (valueType == napi_boolean) {
+                napi_get_value_bool(env, asyncContext->showInSubWindow, &asyncContext->showInSubWindowBool);
+            }
+            napi_typeof(env, asyncContext->isModal, &valueType);
+            if (valueType == napi_boolean) {
+                napi_get_value_bool(env, asyncContext->isModal, &asyncContext->isModalBool);
             }
         } else if (valueType == napi_function) {
             napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
@@ -528,6 +542,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .title = asyncContext->titleString,
         .message = asyncContext->messageString,
         .autoCancel = asyncContext->autoCancelBool,
+        .showInSubWindow = asyncContext->showInSubWindowBool,
+        .isModal = asyncContext->isModalBool,
         .alignment = alignment,
         .offset = offset,
         .maskRect = maskRect,

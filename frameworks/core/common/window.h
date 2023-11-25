@@ -69,15 +69,17 @@ public:
 
     virtual void FlushTasks() {}
 
-    virtual bool FlushCustomAnimation(uint64_t timeStamp)
-    {
-        return false;
-    }
-
     virtual std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const
     {
         return nullptr;
     }
+
+    virtual bool FlushAnimation(uint64_t timeStamp)
+    {
+        return false;
+    }
+
+    virtual void FlushModifier() {}
 
     void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
 

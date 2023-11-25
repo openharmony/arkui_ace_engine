@@ -71,6 +71,7 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
         static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->SetHeight(drawCmdList->GetHeight());
     }
     drawCmdList->Playback(recordingCanvas);
+    rsRecordingCanvas_->Clear();
 #endif
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,8 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "ace_type.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "core/common/flutter/flutter_asset_manager.h"
-#include "core/components/theme/theme_constants_defines.h"
 #include "frameworks/core/components/theme/theme_constants.h"
 #include "core/components/test/unittest/theme/theme_mock.h"
 

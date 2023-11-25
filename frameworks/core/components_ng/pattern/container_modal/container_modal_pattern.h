@@ -18,6 +18,7 @@
 
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/container_modal/container_modal_accessibility_property.h"
+#include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -80,15 +81,25 @@ public:
     {
         isFocus_ = isFocus;
     }
-protected:
-    virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& titleNode, int32_t originIndex)
+
+    std::string GetAppLabel()
     {
-        return titleNode->GetChildAtIndex(originIndex);
+        return appLabel_;
     }
 
-    virtual void ChangeFloatingTitle(const RefPtr<FrameNode>& floatingNode, bool isFocus);
+protected:
+    virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
+    {
+        return controlButtonsNode->GetChildAtIndex(originIndex);
+    }
 
-    virtual void ChangeTitle(const RefPtr<FrameNode>& titleNode, bool isFocus);
+    virtual void AddOrRemovePanEvent(const RefPtr<FrameNode>& controlButtonsNode);
+
+    virtual void ChangeFloatingTitle(bool isFocus);
+
+    virtual void ChangeCustomTitle(bool isFocus);
+
+    virtual void ChangeControlButtons(bool isFocus);
 
     virtual void ChangeTitleButtonIcon(
         const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus);
@@ -106,7 +117,10 @@ private:
     void WindowFocus(bool isFocus);
 
     void SetTitleButtonHide(
-        const RefPtr<FrameNode>& titleNode, bool hideSplit, bool hideMaximize, bool hideMinimize);
+        const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize);
+
+    std::string appLabel_;
+    RefPtr<PanEvent> panEvent_ = nullptr;
 
     float moveX_ = 0.0f;
     float moveY_ = 0.0f;

@@ -255,6 +255,10 @@ ACE_FORCE_EXPORT extern const char QRCODE_ETS_TAG[];
 ACE_EXPORT extern const char SPAN_COMPONENT_TAG[];
 ACE_EXPORT extern const char SPAN_ETS_TAG[];
 
+// placeholder span
+ACE_EXPORT extern const char PLACEHOLDER_SPAN_COMPONENT_TAG[];
+ACE_EXPORT extern const char PLACEHOLDER_SPAN_ETS_TAG[];
+
 // text
 ACE_EXPORT extern const char TEXT_COMPONENT_TAG[];
 ACE_EXPORT extern const char TEXT_ETS_TAG[];

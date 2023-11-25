@@ -99,7 +99,6 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto viewScale = context->GetViewScale();
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     if (lastLayoutSize_ != frameSize) {
-        UpdateRecordingCanvas(frameSize.Width() * viewScale, frameSize.Height() * viewScale);
         lastLayoutSize_.SetSizeT(frameSize);
     }
 #ifndef USE_ROSEN_DRAWING
@@ -246,7 +245,7 @@ void CanvasPaintMethod::DrawImage(
     RSRect bounds = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
     rosen::SaveLayerOps layerOps(&bounds, &imageBrush_);
     switch (canvasImage.flag) {
-        case 0:
+        case 0: {
             if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
                 rsCanvas_->AttachBrush(imageBrush_);
                 rsCanvas_->DrawImage(*image, canvasImage.dx, canvasImage.dy, sampleOptions_);
@@ -260,6 +259,7 @@ void CanvasPaintMethod::DrawImage(
                 rsCanvas_->Restore();
             }
             break;
+        }
         case 1: {
             RSRect rect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
                 canvasImage.dHeight + canvasImage.dy);
@@ -276,7 +276,6 @@ void CanvasPaintMethod::DrawImage(
                 rsCanvas_->DetachBrush();
                 rsCanvas_->Restore();
             }
-            }
             break;
         }
         case 2: {
@@ -292,7 +291,7 @@ void CanvasPaintMethod::DrawImage(
             } else {
                 InitPaintBlend(imageBrush_);
                 rsCanvas_->SaveLayer(layerOps);
-                rsCanvas_->AttachBrush(&imageBrush_);
+                rsCanvas_->AttachBrush(imageBrush_);
                 rsCanvas_->DrawImageRect(*image, srcRect, dstRect, sampleOptions_);
                 rsCanvas_->DetachBrush();
                 rsCanvas_->Restore();
@@ -1026,13 +1025,13 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         if (globalState_.HasGlobalAlpha()) {
             if (txtStyle.has_foreground_brush) {
                 txtStyle.foreground_brush.SetColor(fillState_.GetColor().GetValue());
-                txtStyle.foreground_brush.SetAlphaf(globalState_.GetAlpha()); // set alpha after color
+                txtStyle.foreground_brush.SetAlphaF(globalState_.GetAlpha()); // set alpha after color
             } else {
                 RSBrush brush;
                 RSSamplingOptions options;
                 InitImagePaint(nullptr, &brush, options);
                 brush.SetColor(fillState_.GetColor().GetValue());
-                brush.SetAlphaf(globalState_.GetAlpha()); // set alpha after color
+                brush.SetAlphaF(globalState_.GetAlpha()); // set alpha after color
                 InitPaintBlend(brush);
                 txtStyle.foreground_brush = brush;
                 txtStyle.has_foreground_brush = true;
@@ -1054,7 +1053,7 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         if (hasShadow) {
             pen.SetColor(shadow_.GetColor().GetValue());
             RSFilter filter;
-            filter.SetMaskFilter(RSRecordingMaskFilter::CreateBlurMaskFilter(SkBlurType::NORMAL,
+            filter.SetMaskFilter(RSRecordingMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL,
                 RosenDecorationPainter::ConvertRadiusToSigma(shadow_.GetBlurRadius())));
             pen.SetFilter(filter);
         }

@@ -32,6 +32,7 @@ public:
     MOCK_METHOD0(OnShow, void());
     MOCK_METHOD0(OnHide, void());
     MOCK_METHOD0(FlushTasks, void());
+    MOCK_METHOD0(FlushModifier, void());
     MOCK_CONST_METHOD0(GetRefreshRate, float());
     MOCK_CONST_METHOD0(GetCurrentWindowRect, Rect());
     MOCK_CONST_METHOD0(GetRSUIDirector, std::shared_ptr<Rosen::RSUIDirector>());
@@ -41,7 +42,7 @@ public:
     MOCK_METHOD1(SetTaskExecutor, void(const RefPtr<TaskExecutor>& taskExecutor));
     MOCK_METHOD1(SetVsyncCallback, void(AceVsyncCallback&& callback));
     MOCK_METHOD1(SetRootRenderNode, void(const RefPtr<RenderNode>& root));
-    MOCK_METHOD1(FlushCustomAnimation, bool(uint64_t timeStamp));
+    MOCK_METHOD1(FlushAnimation, bool(uint64_t timeStamp));
     MOCK_METHOD2(RecordFrameTime, void(uint64_t timeStamp, const std::string& name));
 };
 } // namespace OHOS::Ace

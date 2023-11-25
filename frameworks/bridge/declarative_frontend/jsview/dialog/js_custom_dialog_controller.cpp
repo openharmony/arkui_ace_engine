@@ -189,6 +189,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.closeAnimation = closeAnimation;
         }
 
+        // Parse showInSubWindowValue.
         auto showInSubWindowValue = constructorArg->GetProperty("showInSubWindow");
         if (showInSubWindowValue->IsBoolean()) {
 #if defined(PREVIEW)
@@ -199,6 +200,11 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 #endif
         }
 
+        // Parse isModal.
+        auto isModalValue = constructorArg->GetProperty("isModal");
+        if (isModalValue->IsBoolean()) {
+            instance->dialogProperties_.isModal = isModalValue->ToBoolean();
+        }
         info.SetReturnValue(instance);
     } else {
         LOGE("JSView creation with invalid arguments.");
@@ -357,8 +363,10 @@ bool JSCustomDialogController::ParseAnimation(
     auto iterations = animationArgs->GetInt("iterations", 1);
     auto tempo = static_cast<float>(animationArgs->GetDouble("tempo", 1.0));
     auto finishCallbackType = static_cast<FinishCallbackType>(animationArgs->GetInt("finishCallbackType", 0));
-    if (NonPositive(tempo)) {
+    if (tempo < 0) {
         tempo = 1.0f;
+    } else if (tempo == 0) {
+        tempo = 1000.0f;
     }
     auto direction = StringToAnimationDirection(animationArgs->GetString("playMode", "normal"));
     RefPtr<Curve> curve;

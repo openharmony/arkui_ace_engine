@@ -579,6 +579,7 @@ private:
         const std::vector<NWeb::DateTimeSuggestion>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task) const;
+    void OfflineMode();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -637,7 +638,8 @@ private:
     bool isFirstFlingScrollVelocity_ = true;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool scrollState_ = false;
-    NestedScrollMode nestedScrollMode_ = NestedScrollMode::SELF_FIRST;
+    NestedScrollMode nestedScrollForwardMode_ = NestedScrollMode::SELF_FIRST;
+    NestedScrollMode nestedScrollBackwardMode_ = NestedScrollMode::SELF_FIRST;
     Axis axis_ = Axis::FREE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
@@ -646,6 +648,7 @@ private:
     RefPtr<WebDelegateObserver> observer_;
     std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
     std::optional<ScriptItems> scriptItems_;
+    bool isOfflineMode_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
     bool accessibilityState_ = false;
     RefPtr<WebAccessibilityNode> webAccessibilityNode_;

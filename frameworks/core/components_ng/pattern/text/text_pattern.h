@@ -18,6 +18,9 @@
 
 #include <optional>
 #include <string>
+#include <unordered_map>
+
+#include "interfaces/inner_api/ace/ai/data_detector_interface.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -26,6 +29,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -39,12 +43,11 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "interfaces/inner_api/ace/ai/data_detector_interface.h"
 
 namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public Pattern, public TextDragBase, public TextBase {
-    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase);
+class TextPattern : public ScrollablePattern, public TextDragBase, public TextBase {
+    DECLARE_ACE_TYPE(TextPattern, ScrollablePattern, TextDragBase, TextBase);
 
 public:
     TextPattern() = default;
@@ -147,7 +150,13 @@ public:
 
     void SetTextDetectEnable(bool enable)
     {
+        bool cache = textDetectEnable_;
         textDetectEnable_ = enable;
+        if (cache != textDetectEnable_) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
     }
 
     bool GetTextDetectEnable()
@@ -155,10 +164,7 @@ public:
         return textDetectEnable_;
     }
 
-    void SetTextDetectTypes(const std::string& types)
-    {
-        textDetectTypes_ = types;
-    }
+    void SetTextDetectTypes(const std::string& types);
 
     std::string GetTextDetectTypes()
     {
@@ -280,17 +286,17 @@ public:
     virtual std::function<void(Offset)> GetThumbnailCallback();
 #endif
 
-    void InitSpanImageLayout(const std::vector<int32_t>& placeHolderIndex,
+    void InitSpanImageLayout(const std::vector<int32_t>& placeholderIndex,
         const std::vector<RectF>& rectsForPlaceholders, OffsetF contentOffset) override
     {
-        placeHolderIndex_ = placeHolderIndex;
+        placeholderIndex_ = placeholderIndex;
         imageOffset_ = contentOffset;
         rectsForPlaceholders_ = rectsForPlaceholders;
     }
 
     const std::vector<int32_t>& GetPlaceHolderIndex()
     {
-        return placeHolderIndex_;
+        return placeholderIndex_;
     }
 
     const std::vector<RectF>& GetRectsForPlaceholders()
@@ -361,6 +367,32 @@ public:
 
     void OnAreaChangedInner() override;
     void RemoveAreaChangeInner();
+    bool IsAtBottom() const override
+    {
+        return true;
+    }
+
+    bool IsAtTop() const override
+    {
+        return true;
+    }
+
+    bool UpdateCurrentOffset(float offset, int32_t source) override
+    {
+        return true;
+    }
+
+    virtual void UpdateScrollBarOffset() override {}
+
+    const std::map<int32_t, AISpan>& GetAISpanMap()
+    {
+        return aiSpanMap_;
+    }
+
+    const std::string& GetTextForAI()
+    {
+        return textForAI_;
+    }
 
 protected:
     virtual void HandleOnCopy();
@@ -371,7 +403,15 @@ protected:
     void HandleLongPress(GestureEvent& info);
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
+    void HandleSpanSingleClickEvent(GestureEvent& info, RectF textContentRect, PointF textOffset, bool& isClickOnSpan);
     void HandleDoubleClickEvent(GestureEvent& info);
+    void InitTextDetect(int32_t startPos, std::string detectText);
+    void ShowUIExtensionMenu(AISpan aiSpan);
+    bool ClickAISpan(GestureEvent& info, PointF textOffset);
+    void ParseAIResult(const TextDataDetectResult& result, int32_t startPos);
+    void ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos,
+        bool isMenuOption = false);
+    void StartAITask();
     bool IsDraggable(const Offset& localOffset);
     virtual void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
@@ -408,6 +448,19 @@ protected:
     SelectMenuInfo selectMenuInfo_;
     std::vector<RectF> dragBoxes_;
 
+    // properties for AI
+    bool textDetectEnable_ = false;
+    bool aiDetectInitialized_ = false;
+    bool aiDetectTypesChanged_ = false;
+    std::string textDetectTypes_;
+    std::set<std::string> textDetectTypesSet_;
+    std::string textForAI_;
+    std::optional<TextDataDetectResult> textDetectResult_;
+    std::unordered_map<std::string, std::vector<std::string>> aiMenuOptionsMap_;
+    std::function<void(const std::string&)> onResult_;
+    std::map<int32_t, AISpan> aiSpanMap_;
+    CancelableCallback<void()> aiDetectDelayTask_;
+
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAttachToFrameNode() override;
@@ -419,7 +472,6 @@ private:
     void HandlePanUpdate(const GestureEvent& info);
     void HandlePanEnd(const GestureEvent& info);
     void InitTouchEvent();
-    void InitTextDetect();
     void HandleTouchEvent(const TouchEventInfo& info);
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
@@ -435,13 +487,11 @@ private:
     bool blockPress_ = false;
     bool hasClicked_ = false;
     bool isDoubleClick_ = false;
-    bool textDetectEnable_ = false;
     TimeStamp lastClickTimeStamp_;
-    std::string textDetectTypes_;
 
     RefPtr<Paragraph> paragraph_;
     std::vector<MenuOptionsParam> menuOptionItems_;
-    std::vector<int32_t> placeHolderIndex_;
+    std::vector<int32_t> placeholderIndex_;
     std::vector<RectF> rectsForPlaceholders_;
     OffsetF imageOffset_;
 
@@ -452,8 +502,6 @@ private:
     RefPtr<DragDropProxy> dragDropProxy_;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
-    std::optional<TextDataDetectResult> textDetectResult_;
-    std::function<void(const std::string&)> onResult_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG
