@@ -24,8 +24,8 @@
 #include "base/memory/referenced.h"
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
-#include "test/unittest/core/pattern/app_bar/mock_theme_manager.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/calc_length.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -53,14 +54,17 @@ public:
 
 void AppBarTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppBarTheme>()));
+    EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
 }
 
 void AppBarTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void AppBarTestNg::SetUp() {}

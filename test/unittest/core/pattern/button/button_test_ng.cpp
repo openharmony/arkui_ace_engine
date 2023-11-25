@@ -41,7 +41,7 @@
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/event/touch_event.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 using namespace testing;
@@ -131,10 +131,10 @@ protected:
 
 void ButtonTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     // set buttonTheme to themeManager before using themeManager to get buttonTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     buttonTheme->height_ = DEFAULT_HEIGTH;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
@@ -142,7 +142,7 @@ void ButtonTestNg::SetUpTestCase()
 
 void ButtonTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void ButtonTestNg::FontWeightTest(RefPtr<ButtonLayoutProperty> buttonLayoutProperty,

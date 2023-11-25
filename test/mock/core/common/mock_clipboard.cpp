@@ -20,7 +20,7 @@
 namespace OHOS::Ace {
 namespace {
 std::optional<std::string> saveData;
-}
+} // namespace
 ClipboardProxy* ClipboardProxy::inst_ = nullptr;
 std::mutex ClipboardProxy::mutex_;
 
@@ -53,10 +53,9 @@ void MockClipBoard::HasData(const std::function<void(bool hasData)>& callback)
     }
 }
 
-void MockClipBoard::SetData(const std::string& data, CopyOptions copyOption, bool isDragData)
+void MockClipBoard::SetData(const std::string& data, CopyOptions /* copyOption */, bool /* isDragData */)
 {
     saveData = data;
-    GTEST_LOG_(INFO) << "SetData has called. data is { " << data << " }";
 }
 
 void MockClipBoard::GetData(const std::function<void(const std::string&)>& callback, bool syncMode)
@@ -64,7 +63,6 @@ void MockClipBoard::GetData(const std::function<void(const std::string&)>& callb
     if (callback) {
         callback(saveData.value_or(""));
     }
-    GTEST_LOG_(INFO) << "GetData has called";
 }
 
 void MockClipBoard::AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) {}

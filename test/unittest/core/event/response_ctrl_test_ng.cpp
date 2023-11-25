@@ -21,10 +21,11 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/response_ctrl.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -34,28 +35,18 @@ class ResponseCtrlTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    void SetUp() override;
-    void TearDown() override;
 };
 
 void ResponseCtrlTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     GTEST_LOG_(INFO) << "ResponseCtrlTestNg SetUpTestCase";
 }
 
 void ResponseCtrlTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
     GTEST_LOG_(INFO) << "ResponseCtrlTestNg TearDownTestCase";
-}
-
-void ResponseCtrlTestNg::SetUp()
-{
-}
-
-void ResponseCtrlTestNg::TearDown()
-{
 }
 
 /**

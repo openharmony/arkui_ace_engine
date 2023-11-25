@@ -37,6 +37,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -137,7 +138,7 @@ void MarqueePattern::StartMarqueeAnimation()
         repeatCount = 1;
     }
     FireStartEvent();
-    bool needSecondPlay = repeatCount != 1 ? true : false;
+    bool needSecondPlay = repeatCount != 1;
     PlayMarqueeAnimation(0.0f, repeatCount, needSecondPlay);
 }
 

@@ -18,7 +18,7 @@
 #define private public
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "core/components/common/properties/decoration.h"
@@ -99,7 +99,7 @@ class ViewAbstractTestNg : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
-        MockPipelineBase::SetUp();
+        MockPipelineContext::SetUp();
         MockContainer::SetUp();
         MockContainer::Current()->pipelineContext_ = PipelineBase::GetCurrentContext();
         auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -110,7 +110,7 @@ public:
     static void TearDownTestSuite()
     {
         MockContainer::Current()->pipelineContext_ = nullptr;
-        MockPipelineBase::TearDown();
+        MockPipelineContext::TearDown();
     }
 };
 
@@ -1084,7 +1084,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
     /**
      * @tc.steps: step2. get popupInfo and change some params.
      */
-    auto overlayManager = MockPipelineBase::GetCurrent()->GetOverlayManager();
+    auto overlayManager = MockPipelineContext::GetCurrent()->GetOverlayManager();
     PopupInfo info = overlayManager->GetPopupInfo(targetNode->GetId());
     info.isCurrentOnShow = true;
     info.popupId = 1;
@@ -1676,7 +1676,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
      */
     const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     ViewStackProcessor::GetInstance()->Push(mainNode);
-    ASSERT_NE(MockPipelineBase::GetCurrent()->GetOverlayManager(), nullptr);
+    ASSERT_NE(MockPipelineContext::GetCurrent()->GetOverlayManager(), nullptr);
     ASSERT_NE(SubwindowManager::GetInstance(), nullptr);
     std::function<void()> flagFunc = []() { flag++; };
     std::vector<NG::OptionParam> params = {};

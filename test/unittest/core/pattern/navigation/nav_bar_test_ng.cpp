@@ -31,7 +31,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -54,7 +54,7 @@ const std::string NAVIGATION_GROUP_NODE = "navigation_group_node";
 const std::string MENU_ITEM_ICON = "menu_item_icon";
 const std::string MENU_ITEM_TEXT = "menu_item";
 struct TestParameters {
-    RefPtr<MockPipelineBase> pipeline = nullptr;
+    RefPtr<MockPipelineContext> pipeline = nullptr;
     RefPtr<NavigationBarTheme> theme = nullptr;
     RefPtr<NavBarLayoutProperty> navBarLayoutProperty = nullptr;
     RefPtr<NavigationGroupNode> navigationGroupNode = nullptr;
@@ -79,11 +79,11 @@ public:
 
 void NavBarTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 void NavBarTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void NavBarTestNg::CreateNavBar()
@@ -117,7 +117,7 @@ void NavBarTestNg::InitializationParameters(TestParameters& testParameters)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
-    testParameters.pipeline = MockPipelineBase::GetCurrent();
+    testParameters.pipeline = MockPipelineContext::GetCurrent();
     ASSERT_NE(testParameters.pipeline, nullptr);
     testParameters.pipeline->SetThemeManager(themeManager);
     testParameters.theme = AceType::MakeRefPtr<NavigationBarTheme>();
@@ -796,7 +796,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern005, TestSize.Level1)
     barItemEventHub->SetItemAction([&]() { isItemActionFired = true; });
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 
     /**
      * @tc.steps: step3. call OnWindowSizeChanged func when PrevMenuIsCustom is true
@@ -850,7 +850,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern006, TestSize.Level1)
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 
     /**
      * @tc.steps: step3. call OnWindowSizeChanged func when the width of navBar is 0
@@ -882,7 +882,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern006, TestSize.Level1)
     navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
     SystemProperties::SetDeviceType(DeviceType::PHONE);
 
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**

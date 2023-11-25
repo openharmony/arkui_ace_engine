@@ -24,8 +24,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension RESERVE_BOTTOM_HEIGHT = 24.0_vp; 
-}
+constexpr Dimension RESERVE_BOTTOM_HEIGHT = 24.0_vp;
+} // namespace
 const RefPtr<KeyEventHandler>& TextFieldManagerNG::GetKeyEventHandler()
 {
     if (!keyEventHandler_) {

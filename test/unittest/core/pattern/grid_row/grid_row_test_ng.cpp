@@ -29,7 +29,7 @@
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
 #include "core/components_ng/pattern/grid_row/grid_row_layout_pattern.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -75,14 +75,14 @@ void GridRowTestNg::SetUpTestSuite()
     }
     rowNode_ = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ViewStackProcessor::GetInstance()->PopContainer();
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void GridRowTestNg::TearDownTestSuite()
 {
     rowNode_->Clean();
     colNodes_.clear();
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void GridRowTestNg::SetUp()
@@ -106,9 +106,9 @@ void GridRowTestNg::SetUp()
     colLayoutBack->UpdateOffset(V2::GridContainerSize(0));
     colLayoutBack->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
 
-    MockPipelineBase::GetCurrent()->SetWindowModal(WindowModal::CONTAINER_MODAL);
-    MockPipelineBase::GetCurrent()->windowManager_ = AceType::MakeRefPtr<WindowManager>();
-    MockPipelineBase::GetCurrent()->windowManager_->SetWindowGetModeCallBack(
+    MockPipelineContext::GetCurrent()->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    MockPipelineContext::GetCurrent()->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+    MockPipelineContext::GetCurrent()->windowManager_->SetWindowGetModeCallBack(
         []() -> WindowMode { return WindowMode::WINDOW_MODE_FLOATING; });
 }
 

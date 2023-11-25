@@ -267,9 +267,7 @@ bool KeyEventHandler::HandleTabEvent(const KeyEvent& keyEvent)
     CHECK_NULL_RETURN(pattern, false);
     if (keyEvent.IsShiftWith(KeyCode::KEY_TAB)) {
         return pattern->UpdateFocusBackward();
-    } else if (keyEvent.code == KeyCode::KEY_TAB) {
-        return pattern->UpdateFocusForward();
     }
-    return false;
+    return pattern->UpdateFocusForward();
 }
 } // namespace OHOS::Ace::NG

@@ -28,7 +28,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/pipeline/base/constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -103,12 +103,12 @@ private:
 
 void DataPanelTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void DataPanelTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void DataPanelTestNg::GradientColorSet(std::vector<Gradient>& valueColors, const int& length)
@@ -354,7 +354,7 @@ HWTEST_F(DataPanelTestNg, DataPanelMeasureTest004, TestSize.Level1)
      * @tc.steps: step6. compare dataPanelSize with expected value by infinite.
      * @tc.expected: step6. dataPanelSize is the same with expected value as root width and height.
      */
-    MockPipelineBase::GetCurrent()->SetRootSize(ROOT_WIDTH, ROOT_HEIGHT);
+    MockPipelineContext::GetCurrent()->SetRootSize(ROOT_WIDTH, ROOT_HEIGHT);
     LayoutConstraintF layoutConstraintInfinite;
     layoutConstraintInfinite.percentReference = MAX_INFINITE_SIZE;
     dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintInfinite, &layoutWrapper).value();
@@ -791,7 +791,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest010, TestSize.Level1)
 HWTEST_F(DataPanelTestNg, DataPanelPaintRainbowFilterMaskTest001, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
 
@@ -824,7 +824,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintRainbowFilterMaskTest001, TestSize.Level
 HWTEST_F(DataPanelTestNg, DataPanelPaintProgressTest001, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
 
@@ -857,7 +857,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintProgressTest001, TestSize.Level1)
 HWTEST_F(DataPanelTestNg, DataPanelPaintBackgroundTest001, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
 
@@ -877,7 +877,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintBackgroundTest001, TestSize.Level1)
 HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
 
@@ -898,7 +898,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level1)
 HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
 
@@ -931,7 +931,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level1)
 HWTEST_F(DataPanelTestNg, DataPanelPaintTrackBackgroundTest001, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
 
@@ -955,7 +955,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest001, TestSize.Level1)
      * radius = -10.0f
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DataPanelTheme>()));
 
     DataPanelModifier dataPanelModifier;
@@ -980,7 +980,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest002, TestSize.Level1)
      *  values = { 10.0f, 10.0f } totalvalue = 20
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
@@ -1011,7 +1011,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
      * isShadowVisible = true
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
@@ -1078,7 +1078,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest001, TestSize.Level1)
      * values ={10.0f,10.0f} max = 20.0f
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
@@ -1131,7 +1131,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest002, TestSize.Level1)
      * values ={-5.0f, 0.0f} max = -20.0f
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
@@ -1161,7 +1161,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest003, TestSize.Level1)
      * values ={ 0.0001f, 5.0f} max = 20.0f
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
@@ -1187,7 +1187,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest003, TestSize.Level1)
 HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
@@ -1239,7 +1239,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
 HWTEST_F(DataPanelTestNg, DataPanelUpdateDateTest001, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
 
@@ -1269,7 +1269,7 @@ HWTEST_F(DataPanelTestNg, DataPanelOnDrawTest001, TestSize.Level1)
      * @tc.steps: step1. statement dataPanelModifier.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
     DataPanelModifier dataPanelModifier;

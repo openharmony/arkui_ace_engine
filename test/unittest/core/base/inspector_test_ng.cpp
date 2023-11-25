@@ -26,7 +26,7 @@
 #define private public
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
@@ -49,11 +49,11 @@ class InspectorTestNg : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
-        MockPipelineBase::SetUp();
+        MockPipelineContext::SetUp();
     }
     static void TeardownTestSuite()
     {
-        MockPipelineBase::TearDown();
+        MockPipelineContext::TearDown();
     }
 };
 

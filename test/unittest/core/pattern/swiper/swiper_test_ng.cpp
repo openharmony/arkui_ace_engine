@@ -47,7 +47,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 
@@ -95,9 +95,9 @@ public:
 
 void SwiperTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->SetThemeManager(themeManager);
     auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
@@ -105,7 +105,7 @@ void SwiperTestNg::SetUpTestSuite()
 
 void SwiperTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void SwiperTestNg::SetUp() {}
@@ -685,7 +685,7 @@ HWTEST_F(SwiperTestNg, SwiperEvent002, TestSize.Level1)
     CreateWithItem([](SwiperModelNG model) {});
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub_)));
 
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->restoreNodeInfo_.emplace(std::make_pair(1, "testFlushUITasks"));
     pattern_->InitPanEvent(gestureEventHub);
     EXPECT_EQ(pattern_->direction_, Axis::HORIZONTAL);

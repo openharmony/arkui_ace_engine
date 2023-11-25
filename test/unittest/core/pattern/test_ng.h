@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_TEST_NG_H
 
 #include "gtest/gtest.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -25,7 +26,6 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "test/mock/core/render/mock_render_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -44,8 +44,8 @@ class TestNG {
 public:
     static void SetWidth(const Dimension& width);
     static void SetHeight(const Dimension& height);
-    void RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode,
-        float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
+    void RunMeasureAndLayout(
+        const RefPtr<FrameNode>& frameNode, float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
 
     AssertionResult IsEqualOverScrollOffset(const OverScrollOffset& actual, const OverScrollOffset& expected)
@@ -53,8 +53,10 @@ public:
         if (NearEqual(actual.start, expected.start) && NearEqual(actual.end, expected.end)) {
             return AssertionSuccess();
         }
-        return AssertionFailure() << "Actual: " << "{ " << actual.start << " , " << actual.end << " }" <<
-            " Expected: " << "{ " << expected.start << " , " << expected.end << " }";
+        return AssertionFailure() << "Actual: "
+                                  << "{ " << actual.start << " , " << actual.end << " }"
+                                  << " Expected: "
+                                  << "{ " << expected.start << " , " << expected.end << " }";
     }
 
     AssertionResult IsEqual(const Offset& actual, const Offset& expected)
