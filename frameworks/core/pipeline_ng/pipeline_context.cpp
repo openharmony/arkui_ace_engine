@@ -1458,7 +1458,7 @@ void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint)
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
     if (manager->IsDragging() && manager->IsSameDraggingPointer(touchPoint.id)) {
-        manager->OnDragEnd({ touchPoint.x, touchPoint.y }, "");
+        manager->OnDragEnd(PointerEvent(touchPoint.x, touchPoint.y), "");
     }
 }
 
@@ -1765,7 +1765,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         auto manager = GetDragDropManager();
         if (manager) {
             manager->SetIsDragCancel(true);
-            manager->OnDragEnd({ 0.0f, 0.0f }, "");
+            manager->OnDragEnd(PointerEvent(0, 0), "");
         }
     }
 
@@ -2327,7 +2327,7 @@ void PipelineContext::FlushWindowSizeChangeCallback(int32_t width, int32_t heigh
     }
 }
 
-void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
+void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action)
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -2356,13 +2356,13 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     manager->GetExtraInfoFromClipboard(extraInfo);
 #endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
-        manager->OnDragEnd(Point(x, y, x, y), extraInfo);
+        manager->OnDragEnd(pointerEvent, extraInfo);
 #ifndef ENABLE_DRAG_FRAMEWORK
         manager->RestoreClipboardData();
 #endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
-    manager->OnDragMove(Point(x, y, x, y), extraInfo);
+    manager->OnDragMove(pointerEvent, extraInfo);
 }
 
 void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId)

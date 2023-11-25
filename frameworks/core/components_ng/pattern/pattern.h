@@ -29,6 +29,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/event/pointer_event.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -412,6 +413,7 @@ public:
     virtual void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
 
+    virtual void HandleDragEvent(const PointerEvent& info) {};
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
     virtual void OnDirectionConfigurationUpdate() {}
