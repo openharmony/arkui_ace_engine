@@ -1718,7 +1718,8 @@ void PipelineContext::FlushMouseEvent()
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
-    if (mouseStyleNodeId_ != nodeId) {
+    auto userCursor = GetCursor();
+    if (mouseStyleNodeId_ != nodeId || userCursor != MouseFormat::DEFAULT) {
         return false;
     }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
