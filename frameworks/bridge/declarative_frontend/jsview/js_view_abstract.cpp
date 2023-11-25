@@ -6116,7 +6116,10 @@ bool JSViewAbstract::ParseDataDetectorConfig(const JSCallbackInfo& info, std::st
             LOGI("Text detect types(%d) is invalid value", index);
             return false;
         }
-        types.append(",").append(TEXT_DETECT_TYPES[index]);
+        if (i != 0) {
+            types.append(",");
+        }
+        types.append(TEXT_DETECT_TYPES[index]);
     }
 
     JSRef<JSVal> resultCallback = obj->GetProperty("onDetectResultUpdate");

@@ -705,6 +705,7 @@ void FrameNode::OnAttachToMainTree(bool recursive)
 {
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
+    pattern_->OnAttachToMainTree();
     if (IsResponseRegion() || HasPositionProp()) {
         auto parent = GetParent();
         while (parent) {

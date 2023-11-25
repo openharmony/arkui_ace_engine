@@ -471,15 +471,6 @@ void ScrollPattern::OnAnimateStop()
     scrollStop_ = true;
 }
 
-void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
-    ScrollablePattern::AnimateTo(position, duration, curve, smooth);
-    FireOnScrollStart();
-}
-
 void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 {
     if (scrollEdgeType == ScrollEdgeType::SCROLL_NONE) {

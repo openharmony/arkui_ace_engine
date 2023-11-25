@@ -15,13 +15,15 @@
 
 #include "core/common/ai/data_detector_mgr.h"
 
+#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 #include "want.h"
 
 #include "base/log/log_wrapper.h"
 #include "core/common/ai/data_detector_default.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace {
 namespace {
 #ifdef __aarch64__
@@ -85,27 +87,20 @@ RefPtr<NG::FrameNode> DataDetectorMgr::CreateUIExtensionMenu(
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability onReceive");
     };
 
-    auto wantWrap = WantWrap::CreateWantWrap(bundleName_, abilityName_);
-    wantWrap->SetWantParam(paramaters);
-    auto* stack = NG::ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto uiExtNode = NG::FrameNode::GetOrCreateFrameNode(
-        V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NG::UIExtensionPattern>(); });
+    AAFwk::Want want;
+    want.SetElementName(bundleName_, abilityName_);
+    for (const auto& param : paramaters) {
+        want.SetParam(param.first, param.second);
+    }
+    ModalUIExtensionCallbacks callbacks;
+    callbacks.onResult = onResult;
+    callbacks.onDestroy = onDestroy;
+    callbacks.onError = onError;
+    callbacks.onRelease = onRelease;
+    callbacks.onReceive = onReceive;
+    auto uiExtNode = NG::UIExtensionModelNG::Create(want, callbacks);
     CHECK_NULL_RETURN(uiExtNode, nullptr);
     uiExtNode->MarkModifyDone();
-    auto uiExtPattern = uiExtNode->GetPattern<NG::UIExtensionPattern>();
-    CHECK_NULL_RETURN(uiExtPattern, nullptr);
-    uiExtPattern->SetTransferringCaller(false);
-    uiExtPattern->UpdateWant(wantWrap);
-    stack->Push(uiExtNode);
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    pipeline->AddWindowStateChangedCallback(nodeId);
-    uiExtPattern->SetOnResultCallback(std::move(onResult));
-    uiExtPattern->SetModalOnDestroy(std::move(onDestroy));
-    uiExtPattern->SetOnErrorCallback(std::move(onError));
-    uiExtPattern->SetOnReleaseCallback(std::move(onRelease));
-    uiExtPattern->SetOnReceiveCallback(std::move(onReceive));
     return uiExtNode;
 }
 

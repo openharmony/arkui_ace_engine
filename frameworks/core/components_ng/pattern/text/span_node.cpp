@@ -39,8 +39,7 @@ std::string GetDeclaration(const std::optional<Color>& color, const std::optiona
         "type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value_or(TextDecoration::NONE)).c_str());
     jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
     jsonSpanDeclaration->Put("style",
-        V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID))
-            .c_str());
+        V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID)).c_str());
     return jsonSpanDeclaration->ToString();
 }
 } // namespace
@@ -378,5 +377,19 @@ void SpanItem::GetIndex(int32_t& start, int32_t& end) const
     auto contentLen = StringUtils::ToWstring(content).length();
     start = position - contentLen;
     end = position;
+}
+
+int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
+    double width, double height, VerticalAlign /* verticalAlign */)
+{
+    CHECK_NULL_RETURN(builder, -1);
+    PlaceholderRun run;
+    run.width = width;
+    run.height = height;
+    textStyle.SetTextDecoration(TextDecoration::NONE);
+    builder->PushStyle(textStyle);
+    int32_t index = builder->AddPlaceholder(run);
+    builder->PopStyle();
+    return index;
 }
 } // namespace OHOS::Ace::NG

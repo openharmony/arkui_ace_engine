@@ -190,7 +190,7 @@ void RichEditorTestNg::AddImageSpan()
     imageNode->MountToParent(richEditorNode_, richEditorNode_->children_.size());
     auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
     spanItem->content = " ";
-    spanItem->placeHolderIndex = 0;
+    spanItem->placeholderIndex = 0;
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->spans_.emplace_back(spanItem);

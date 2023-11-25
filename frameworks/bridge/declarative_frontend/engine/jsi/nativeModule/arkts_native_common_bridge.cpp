@@ -2219,5 +2219,27 @@ ArkUINativeModuleValue CommonBridge::ResetDefaultFocus(ArkUIRuntimeCallInfo* run
     GetArkUIInternalNodeAPI()->GetCommonModifier().ResetDefaultFocus(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue CommonBridge::SetDisplayPriority(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    double value = secondArg->ToNumber(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetDisplayPriority(nativeNode, value);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetDisplayPriority(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetDisplayPriority(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG
 

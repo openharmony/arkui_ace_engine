@@ -130,11 +130,11 @@ private:
     bool IncludeImageSpan(LayoutWrapper* layoutWrapper);
     void SetImageSpanTextStyle(const TextStyle& textStyle);
     void GetSpanAndImageSpanList(std::list<RefPtr<SpanItem>>& spanList,
-        std::map<int32_t, std::pair<RectF, RefPtr<ImageSpanItem>>>& imageSpanList);
+        std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList);
     void SplitSpanContentByLines(const TextStyle& textStyle, const std::list<RefPtr<SpanItem>>& spanList,
         std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines);
     void SetImageSpanTextStyleByLines(const TextStyle& textStyle,
-        std::map<int32_t, std::pair<RectF, RefPtr<ImageSpanItem>>>& imageSpanList,
+        std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList,
         std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines);
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;

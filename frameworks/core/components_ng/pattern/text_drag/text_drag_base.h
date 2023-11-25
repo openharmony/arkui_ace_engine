@@ -57,7 +57,7 @@ public:
     virtual bool CloseKeyboard(bool forceClose) = 0;
     virtual OffsetF GetDragUpperLeftCoordinates() = 0;
 
-    virtual void InitSpanImageLayout(const std::vector<int32_t>& placeHolderIndex,
+    virtual void InitSpanImageLayout(const std::vector<int32_t>& placeholderIndex,
         const std::vector<RectF>& rectsForPlaceholders, OffsetF contentOffset) {}
     
     virtual OffsetF GetContentOffset()

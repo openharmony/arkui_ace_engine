@@ -2814,14 +2814,13 @@ void OverlayManager::CloseModalUIExtension(int32_t sessionId)
     BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, -(sessionId));
 }
 
-RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(
-    const RefPtr<FrameNode>& uiExtNode, const std::vector<std::string>& aiMenuOptions)
+RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
+    const RefPtr<NG::FrameNode>& targetNode, const std::vector<std::string>& aiMenuOptions)
 {
     CHECK_NULL_RETURN(uiExtNode, nullptr);
+    CHECK_NULL_RETURN(targetNode, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto targetNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_RETURN(targetNode, nullptr);
     MenuParam menuParam;
     menuParam.type = MenuType::MENU;
     auto menuWrapperNode =
@@ -2856,7 +2855,7 @@ SizeF OverlayManager::CaculateMenuSize(
     CHECK_NULL_RETURN(textTheme, SizeF());
     TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
     std::string textContent = "";
-    for (auto option : aiMenuOptions) {
+    for (const auto& option : aiMenuOptions) {
         if (option.length() > textContent.length()) {
             textContent = option;
         }
@@ -2900,7 +2899,7 @@ bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode,
     const std::vector<std::string>& aiMenuOptions, const RefPtr<NG::FrameNode>& targetNode)
 {
     CHECK_NULL_RETURN(uiExtNode, false);
-    auto menuNode = BindUIExtensionToMenu(uiExtNode, aiMenuOptions);
+    auto menuNode = BindUIExtensionToMenu(uiExtNode, targetNode, aiMenuOptions);
     CHECK_NULL_RETURN(menuNode, false);
     auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(menuLayoutProperty, false);
