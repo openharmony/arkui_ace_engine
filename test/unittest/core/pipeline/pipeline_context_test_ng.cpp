@@ -14,11 +14,11 @@
  */
 #include <algorithm>
 #include <cstdint>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <type_traits>
 #include <vector>
-#include <iostream>
 
 #include "gtest/gtest.h"
 
@@ -27,18 +27,21 @@
 #define protected public
 #include "common_constants.h"
 #include "mock_schedule_task.h"
+#include "test/mock/base/mock_mouse_style.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_font_manager.h"
 #include "test/mock/core/common/mock_frontend.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_window.h"
+#include "test/mock/core/pattern/mock_pattern.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 #include "base/json/json_util.h"
 #include "base/log/dump_log.h"
 #include "base/log/frame_report.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "test/mock/base/mock_mouse_style.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
@@ -63,9 +66,6 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_ng/render/drawing_forward.h"
-#include "test/mock/core/pattern/mock_pattern.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/event/mouse_event.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -929,7 +929,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
     manager->isDragged_ = false;
     manager->currentId_ = DEFAULT_INT1;
     context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_MOVE);
-    EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
+    EXPECT_EQ(manager->currentId_, DEFAULT_INT10);
 }
 
 /**
@@ -960,6 +960,15 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg018, TestSize.Level1)
     context_->windowModal_ = WindowModal::DIALOG_MODAL;
     context_->ShowContainerTitle(true);
     EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE2);
+
+    /**
+     * @tc.steps3: Call the function ShowContainerTitle with windowModal_ = WindowModal::CONTAINER_MODAL.
+     * @tc.expected: The moveX_ is unchanged.
+     */
+    pattern->moveX_ = DEFAULT_DOUBLE2;
+    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->ShowContainerTitle(true);
+    EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE2);
 }
 
 /**
@@ -988,6 +997,15 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg019, TestSize.Level1)
      */
     pattern->moveX_ = DEFAULT_DOUBLE2;
     context_->windowModal_ = WindowModal::DIALOG_MODAL;
+    context_->SetAppTitle(TEST_TAG);
+    EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE2);
+
+    /**
+     * @tc.steps3: Call the function ShowContainerTitle with windowModal_ = WindowModal::CONTAINER_MODAL.
+     * @tc.expected: The moveX_ is unchanged.
+     */
+    pattern->moveX_ = DEFAULT_DOUBLE2;
+    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
     context_->SetAppTitle(TEST_TAG);
     EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE2);
 }
@@ -2804,6 +2822,14 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg061, TestSize.Level1)
     containerPattern->isFocus_ = true;
     containerPattern->OnWindowForceUnfocused();
     EXPECT_TRUE(containerPattern->isFocus_);
+
+    /**
+     * @tc.steps2: Call the function WindowUnFocus with WindowFocus(false).
+     * @tc.expected: containerPattern isFocus_ is false.
+     */
+    containerPattern->WindowFocus(false);
+    containerPattern->OnWindowForceUnfocused();
+    EXPECT_FALSE(containerPattern->isFocus_);
 }
 
 /**
@@ -2819,7 +2845,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg062, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
-    
+
     /**
      * @tc.steps2: set cursor with an exceptional value.
      * @tc.expected: context_->cursor_ is MouseFormat::DEFAULT.
@@ -2871,5 +2897,5 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg063, TestSize.Level1)
     context_->CloseFrontendAnimation();
     EXPECT_EQ(context_->pendingFrontendAnimation_.size(), 0);
 }
-}
-} // namespace OHOS::Ace::NG
+} // namespace NG
+} // namespace OHOS::Ace

@@ -176,7 +176,6 @@ template("ace_unittest") {
         "$ace_root/test/unittest:ace_components_event",
         "$ace_root/test/unittest:ace_components_gestures",
         "$ace_root/test/unittest:ace_components_layout",
-        "$ace_root/test/unittest:ace_components_manager",
         "$ace_root/test/unittest:ace_components_pattern",
         "$ace_root/test/unittest:ace_components_property",
         "$ace_root/test/unittest:ace_components_render",
