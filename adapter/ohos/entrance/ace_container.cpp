@@ -57,12 +57,10 @@
 #include "bridge/js_frontend/js_frontend.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
-#include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
-#include "core/common/hdc_register.h"
 #include "core/common/platform_window.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/resource/resource_manager.h"
@@ -825,8 +823,6 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, const 
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(
         instanceId, type, aceAbility, std::move(callback), useCurrentEventRunner, useNewPipeline);
     AceEngine::Get().AddContainer(instanceId, aceContainer);
-    ConnectServerManager::Get().SetDebugMode();
-    HdcRegister::Get().StartHdcRegister(instanceId);
     aceContainer->Initialize();
     ContainerScope scope(instanceId);
     auto front = aceContainer->GetFrontend();
@@ -845,7 +841,6 @@ void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void
     SubwindowManager::GetInstance()->CloseDialog(instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
-    HdcRegister::Get().StopHdcRegister(instanceId);
     container->Destroy();
     // unregister watchdog before stop thread to avoid UI_BLOCK report
     AceEngine::Get().UnRegisterFromWatchDog(instanceId);
@@ -859,7 +854,6 @@ void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void
         LOGI("Remove on Platform thread...");
         EngineHelper::RemoveEngine(instanceId);
         AceEngine::Get().RemoveContainer(instanceId);
-        ConnectServerManager::Get().RemoveInstance(instanceId);
         CHECK_NULL_VOID(destroyCallback);
         destroyCallback();
     };

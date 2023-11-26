@@ -23,12 +23,15 @@
 #include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace {
+// Callback in core/common/register/define.h
+// do not include define.h to avoid libuv
+using Callback = std::function<void(int fd, std::string str)>;
 
 class HdcRegister {
 public:
     ~HdcRegister() = default;
     static HdcRegister& Get();
-    void StartHdcRegister(int32_t instanceId);
+    void StartHdcRegister(int32_t instanceId, Callback callback);
     void StopHdcRegister(int32_t instanceId);
 
 private:

@@ -59,8 +59,8 @@ using DebuggerPostTask = std::function<void(std::function<void()>&&)>;
 class ArkJSRuntime final : public JsRuntime, public std::enable_shared_from_this<ArkJSRuntime> {
 public:
     using ErrorEventHandler = std::function<void(const std::string&, const std::string&)>;
-#if !defined(WINDOWS_PLATFORM)
-    bool StartDebugger(const char* libraryPath, EcmaVM* vm) const;
+#if !defined(PREVIEW)
+    void StartDebuggerForSocketPair(std::string& option, uint32_t socketFd);
 #endif
     bool Initialize(const std::string& libraryPath, bool isDebugMode, int32_t instanceId) override;
     bool InitializeFromExistVM(EcmaVM* vm);
