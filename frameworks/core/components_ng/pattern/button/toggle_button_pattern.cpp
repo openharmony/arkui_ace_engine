@@ -257,7 +257,9 @@ void ToggleButtonPattern::InitButtonAndText()
         layoutProperty->UpdateFontSize(textLayoutProperty->GetFontSizeValue(textFontSize_));
     }
     layoutProperty->UpdateLabel(textLayoutProperty->GetContentValue(""));
-    textLayoutProperty->UpdateTextColor(textColor_);
+    if (!textLayoutProperty->GetTextColor().has_value()) {
+        textLayoutProperty->UpdateTextColor(textColor_);
+    }
 
     if (!textLayoutProperty->GetMarginProperty()) {
         MarginProperty margin;

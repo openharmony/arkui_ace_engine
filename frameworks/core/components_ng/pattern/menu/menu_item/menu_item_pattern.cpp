@@ -700,6 +700,9 @@ void MenuItemPattern::UpdateTextNodes()
         host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
     CHECK_NULL_VOID(rightRow);
     UpdateText(rightRow, menuProperty, true);
+    if (IsDisabled()) {
+        UpdateDisabledStyle();
+    }
 }
 
 bool MenuItemPattern::IsDisabled()
@@ -717,6 +720,9 @@ void MenuItemPattern::UpdateDisabledStyle()
     auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     content_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
+    auto textLayoutProperty = content_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
     content_->MarkModifyDone();
 }
 
