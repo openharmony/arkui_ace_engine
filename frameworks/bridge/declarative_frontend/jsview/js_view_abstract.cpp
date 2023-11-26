@@ -2671,6 +2671,13 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             if (info.Length() > PARAMETER_LENGTH_SECOND) {
                 ParseBindOptionParam(info, menuParam, builderIndex + 1);
             }
+        } else if (info[0]->IsUndefined()) {
+            menuParam.setShow = true;
+            menuParam.isShow = false;
+            builderIndex = 1;
+            if (info.Length() > PARAMETER_LENGTH_SECOND) {
+                ParseBindOptionParam(info, menuParam, builderIndex + 1);
+            }
         } else {
             JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
             menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj);
