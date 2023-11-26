@@ -1504,6 +1504,8 @@ void WebPattern::OnModifyDone()
         } else {
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
+            int32_t instanceId = Container::CurrentId();
+            renderSurface_->SetInstanceId(instanceId);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (type_ == WebType::TEXTURE) {
                 renderSurface_->SetIsTexture(true);
