@@ -328,7 +328,6 @@ private:
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
     bool DialogInMapHoldingFocus();
     void PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bool isTransitionIn);
-    void FireNavigationStateChange(bool show, const RefPtr<UINode>& node = nullptr);
 
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
