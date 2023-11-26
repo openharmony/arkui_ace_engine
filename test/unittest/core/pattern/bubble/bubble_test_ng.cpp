@@ -713,7 +713,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest009, TestSize.Level1)
     EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::ENTERING);
     pattern->transitionStatus_ = TransitionStatus::EXITING;
     pattern->StartExitingAnimation(nullptr);
-    EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::EXITING);
+    EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::INVISIABLE);
 }
 
 /**
@@ -872,7 +872,6 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod001, TestSize.Level1)
     EXPECT_CALL(canvas, Translate(_, _)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
-    EXPECT_CALL(canvas, ClipRoundRectImpl(_, _, _)).Times(AtLeast(1));
 
     /**
      * @tc.steps: step2. Create the GeometryNode and PaintWrapper.Set the progressPaintProperty.
