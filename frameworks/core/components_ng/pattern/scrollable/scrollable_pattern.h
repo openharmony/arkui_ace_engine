@@ -518,6 +518,7 @@ private:
     enum SelectDirection { SELECT_DOWN, SELECT_UP, SELECT_NONE };
     SelectDirection selectDirection_ = SELECT_NONE;
     bool mousePressed_ = false;
+    bool canMultiSelect_ = false;
     OffsetF mouseEndOffset_;
     OffsetF mousePressOffset_;
     OffsetF lastMouseStart_;
