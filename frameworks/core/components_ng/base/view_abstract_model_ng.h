@@ -425,6 +425,11 @@ public:
         ViewAbstract::SetAlignRules(alignRules);
     }
 
+    void SetBias(const BiasPair& biasPair) override
+    {
+        ViewAbstract::SetBias(biasPair);
+    }
+
     void SetUseAlign(
         AlignDeclarationPtr declaration, AlignDeclaration::Edge edge, const std::optional<Dimension>& offset) override
     {}
