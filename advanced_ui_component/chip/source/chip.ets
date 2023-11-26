@@ -590,7 +590,7 @@ export struct ChipComponent {
   @Builder
   chipBuilder() {
     Row() {
-      if (this.prefixIcon?.src) {
+      if (this.prefixIcon?.src !== "") {
         Image(this.prefixIcon?.src)
           .opacity(this.getChipNodeOpacity())
           .size(this.getPrefixIconSize())
