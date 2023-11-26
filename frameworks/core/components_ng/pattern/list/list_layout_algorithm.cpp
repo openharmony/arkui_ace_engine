@@ -635,7 +635,7 @@ bool ListLayoutAlgorithm::CheckJumpValid(LayoutWrapper* layoutWrapper)
         auto groupItemCount = groupWrapper->GetTotalChildCount() - groupPattern->GetItemStartIndex();
 
         if (jumpIndexInGroup_.value() == LAST_ITEM) {
-            jumpIndex_ = groupItemCount - 1;
+            jumpIndexInGroup_ = groupItemCount - 1;
         } else if ((jumpIndexInGroup_.value() < 0) || (jumpIndexInGroup_.value() >= groupItemCount)) {
             return false;
         }
