@@ -86,6 +86,10 @@ public:
                 pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 12.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 12.0_vp));
+            auto popupDoubleBorderEnable = pattern->GetAttr<std::string>("popup_double_border_enable", "0");
+            theme->popupDoubleBorderEnable_ = StringUtils::StringToInt(popupDoubleBorderEnable);
+            theme->popupOuterBorderColor_ = pattern->GetAttr<Color>("popup_outer_border_color", Color::TRANSPARENT);
+            theme->popupInnerBorderColor_ = pattern->GetAttr<Color>("popup_inner_border_color", Color::TRANSPARENT);
         }
     };
 
@@ -249,6 +253,21 @@ public:
         return opacityPress_;
     }
 
+    int32_t GetPopupDoubleBorderEnable() const
+    {
+        return popupDoubleBorderEnable_;
+    }
+
+    Color GetPopupOuterBorderColor() const
+    {
+        return popupOuterBorderColor_;
+    }
+
+    Color GetPopupInnerBorderColor() const
+    {
+        return popupInnerBorderColor_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -260,6 +279,9 @@ private:
     Color buttonBackgroundColor_ = Color::TRANSPARENT;
     Color buttonPressColor_ = Color(0x1affffff);
     Color focusColor_ = Color::WHITE;
+    uint32_t popupDoubleBorderEnable_ = 0;
+    Color popupOuterBorderColor_ = Color::TRANSPARENT;
+    Color popupInnerBorderColor_ = Color::TRANSPARENT;
 
     TextStyle textStyle_;
     Radius radius_;
