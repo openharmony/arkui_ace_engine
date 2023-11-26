@@ -250,7 +250,7 @@ void BubblePaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RS
     RSColor spotColor = ToRSColor(shadow.GetColor());
     RSPoint3 planeParams = { 0.0f, 0.0f, shadow.GetElevation() };
 #ifndef USE_ROSEN_DRAWING
-    RSPoint3 lightPos = { rsPath.GetBounds().GetLeft() / 2 + rsPath.GetBounds().GetRight(),
+    RSPoint3 lightPos = { rsPath.GetBounds().GetLeft() / 2.0 + rsPath.GetBounds().GetRight() / 2.0,
         rsPath.GetBounds().GetTop() / 2.0 + rsPath.GetBounds().GetBottom() / 2.0, shadow.GetLightHeight() };
 #else
     auto bounds = rsPath.GetBounds();
