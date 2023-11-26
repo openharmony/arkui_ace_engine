@@ -316,6 +316,8 @@ public:
         return true;
     }
 
+    void CheckHandles(SelectHandleInfo& handleInfo) override;
+
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
     {

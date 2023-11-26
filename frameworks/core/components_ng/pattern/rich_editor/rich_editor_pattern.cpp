@@ -79,6 +79,7 @@ constexpr float DEFAULT_TEXT_SIZE = 16.0f;
 constexpr int32_t AUTO_SCROLL_INTERVAL = 20;
 constexpr Dimension AUTO_THRESHOLD = 2.0_vp;
 constexpr float DOUBLE_CLICK_INTERVAL_MS = 300.0f;
+constexpr float BOX_EPSILON = 0.5f;
 
 const std::wstring lineSeparator = L"\n";
 const std::wstring NUM_SYMBOL = L")!@#$%^&*(";
@@ -4453,5 +4454,18 @@ std::string RichEditorPattern::GetPositionSpansText(int32_t position, int32_t& s
 
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "get spans text ret spanStart:%{public}d", startSpan);
     return sstream.str();
+}
+
+void RichEditorPattern::CheckHandles(SelectHandleInfo& handleInfo)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset() - pipeline->GetRootRect().GetOffset();
+    RectF contentGlobalRect(offset, contentRect_.GetSize());
+    contentGlobalRect = GetVisibleContentRect(host->GetAncestorNodeOfFrame(), contentGlobalRect);
+    auto handleOffset = handleInfo.paintRect.GetOffset();
+    handleInfo.isShow = contentGlobalRect.IsInRegion(PointF(handleOffset.GetX(), handleOffset.GetY() + BOX_EPSILON));
 }
 } // namespace OHOS::Ace::NG
