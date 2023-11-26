@@ -155,7 +155,6 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void RequestKeyboard();
     // Init touch and hover event
-    void InitTextFieldMouseEvent();
     void InitTextFieldValueChangeEvent();
     void InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int32_t childId);
     void InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId);
