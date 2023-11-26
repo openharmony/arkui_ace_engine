@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "bridge/declarative_frontend/engine/jsi/utils/arkts_native_parse.h"
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
@@ -52,89 +53,6 @@ constexpr int SIZE_OF_FIVE = 5;
 constexpr int SIZE_OF_EIGHT = 8;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
-
-bool ParseJsDimensionVp(const EcmaVM *vm, const Local<JSValueRef>& value, CalcDimension& result)
-{
-    if (value->IsNumber()) {
-        result = CalcDimension(value->ToNumber(vm)->Value(), DimensionUnit::VP);
-        return true;
-    }
-    if (value->IsString()) {
-        result = StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::VP);
-        return true;
-    }
-
-    return false;
-}
-
-bool ParseJsColor(const EcmaVM *vm, const Local<JSValueRef> &value, Color &result)
-{
-    if (value->IsNumber()) {
-        result = Color(value->Uint32Value(vm));
-        return true;
-    }
-    if (value->IsString()) {
-        return Color::ParseColorString(value->ToString(vm)->ToString(), result);
-    }
-
-    return false;
-}
-
-bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result)
-{
-    if (value->IsNumber()) {
-        result = value->Int32Value(vm);
-        return true;
-    }
-
-    return false;
-}
-
-bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &result)
-{
-    if (value->IsNumber()) {
-        result = value->ToNumber(vm)->Value();
-        return true;
-    }
-    if (value->IsString()) {
-        return StringUtils::StringToDouble(value->ToString(vm)->ToString(), result);
-    }
-
-    return false;
-}
-
-void ParseAllBorder(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result)
-{
-    if (ParseJsDimensionVp(vm, args, result) && result.IsNonNegative()) {
-        if (result.Unit() == DimensionUnit::PERCENT) {
-            result.Reset();
-        }
-    }
-}
-
-bool ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
-    DimensionUnit defaultUnit, bool isSupportPercent = true)
-{
-    if (jsValue->IsNumber()) {
-        result = CalcDimension(jsValue->ToNumber(vm)->Value(), defaultUnit);
-        return true;
-    }
-    if (jsValue->IsString()) {
-        auto value = jsValue->ToString(vm)->ToString();
-        if (value.back() == '%' && !isSupportPercent) {
-            return false;
-        }
-        return StringUtils::StringToCalcDimensionNG(jsValue->ToString(vm)->ToString(), result, false, defaultUnit);
-    }
-
-    return false;
-}
-
-bool ParseJsDimensionVpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
-    bool isSupportPercent = true)
-{
-    return ParseJsDimensionNG(vm, jsValue, result, DimensionUnit::VP, isSupportPercent);
-}
 
 bool ParseJsInt32(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result)
 {
