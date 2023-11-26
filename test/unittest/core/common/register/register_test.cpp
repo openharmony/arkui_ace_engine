@@ -60,7 +60,7 @@ HWTEST_F(RegisterTest, CastToRegisterTest002, TestSize.Level1)
      * @tc.steps: step1. start connect.
      * @tc.expected: step1. g_connectManagement is not null and the pktName is right.
      */
-    StartConnect("test_pkt_name");
+    StartConnect("", "test_pkt_name", true, nullptr);
     ASSERT_NE(g_connectManagement, nullptr);
     EXPECT_EQ(g_connectManagement->GetPkgName(), "test_pkt_name");
 
@@ -88,7 +88,7 @@ HWTEST_F(RegisterTest, CastToRegisterTest003, TestSize.Level1)
      * @tc.steps: step1. start connect.
      * @tc.expected: step1. g_connectManagement is not null and the pktName is right.
      */
-    StartConnect("test_pkt_name");
+    StartConnect("", "test_pkt_name", true, nullptr);
     ASSERT_NE(g_connectManagement, nullptr);
     EXPECT_EQ(g_connectManagement->GetPkgName(), "test_pkt_name");
 
@@ -101,7 +101,7 @@ HWTEST_F(RegisterTest, CastToRegisterTest003, TestSize.Level1)
      # @tc.steps: step3. start connect again
      * @tc.expected: step3. start fail and g_connectManagement is not null and the pktName is same with first start.
      */
-    StartConnect("test_pkt_name_2");
+    StartConnect("", "test_pkt_name_2", true, nullptr);
     ASSERT_NE(g_connectManagement, nullptr);
     EXPECT_EQ(g_connectManagement->GetPkgName(), "test_pkt_name");
 }
@@ -112,7 +112,9 @@ void* HdcConnectRun_Test(void* pkgContent)
 {
     g_threadRunning = true;
     std::string pkgName = static_cast<ConnectManagement*>(pkgContent)->GetPkgName();
-    g_hdcJdwpSimulator = new (std::nothrow) HdcJdwpSimulator(pkgName);
+    std::string processName = static_cast<ConnectManagement*>(pkgContent)->GetProcessName();
+    bool isDebug = static_cast<ConnectManagement*>(pkgContent)->GetDebug();
+    g_hdcJdwpSimulator = new (std::nothrow) HdcJdwpSimulator(processName, pkgName, isDebug, nullptr);
     if (!g_hdcJdwpSimulator->Connect()) {
         LOGE("Connect fail.");
         g_threadRunning = false;
@@ -165,7 +167,7 @@ HWTEST_F(RegisterTest, CastToRegisterTest006, TestSize.Level1)
      * @tc.steps: step1. new a ConnectManagement and start the connect thread
      * @tc.expected: step1. connect ok, the thread is runed.
      */
-    auto hdcJdwpSimulator = std::make_unique<HdcJdwpSimulator>("test_pkt_name");
+    auto hdcJdwpSimulator = std::make_unique<HdcJdwpSimulator>("", "test_pkt_name", true, nullptr);
     auto retFlag = hdcJdwpSimulator->ConnectJpid((void*)hdcJdwpSimulator.get());
 
     EXPECT_FALSE(retFlag);
@@ -177,7 +179,7 @@ void* ConnectJpidTest(void* pkgName)
     g_threadRunning = true;
 
     std::string name = (char*)pkgName;
-    g_hdcJdwpSimulator = new (std::nothrow) HdcJdwpSimulator(name);
+    g_hdcJdwpSimulator = new (std::nothrow) HdcJdwpSimulator(name, name, true, nullptr);
     if (g_isCtxPointNull) {
         delete g_hdcJdwpSimulator->ctxPoint_;
         g_hdcJdwpSimulator->ctxPoint_ = nullptr;
