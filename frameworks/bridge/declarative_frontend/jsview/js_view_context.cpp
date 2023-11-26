@@ -272,13 +272,15 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentId(), node = frameNode]() {
+                            id = Container::CurrentId(), node = frameNode]() mutable {
+            CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto pipelineContext = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
             func->Execute();
+            func = nullptr;
         };
     }
 
@@ -336,13 +338,15 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentId(), traceStreamPtr, node = frameNode]() {
+                            id = Container::CurrentId(), traceStreamPtr, node = frameNode]() mutable {
+            CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto pipelineContext = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
             func->Execute();
+            func = nullptr;
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     } else {
