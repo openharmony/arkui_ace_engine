@@ -136,6 +136,7 @@ void SelectOverlayPattern::BeforeCreateLayoutWrapper()
     layoutProperty->UpdateTargetSize(safeArea.GetSize());
     OffsetF offset(safeArea.GetX(), safeArea.Bottom());
     layoutProperty->UpdateMenuOffset(offset);
+    layoutProperty->UpdateAlignType(MenuAlignType::CENTER);
 }
 
 void SelectOverlayPattern::AddMenuResponseRegion(std::vector<DimensionRect>& responseRegion)

@@ -73,6 +73,7 @@ public:
 
     void SetShowUnderline(bool showUnderLine) override;
     void SetShowCounter(bool value) override;
+    void SetCounterType(int32_t value) override;
     void SetOnChangeEvent(std::function<void(const std::string&)>&& func) override;
     void SetBackgroundColor(const Color& color, bool tmp) override;
     void SetHeight(const Dimension& value) override;

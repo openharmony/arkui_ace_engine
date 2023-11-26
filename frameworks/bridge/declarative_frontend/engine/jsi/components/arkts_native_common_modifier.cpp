@@ -23,6 +23,7 @@
 #include "frameworks/core/image/image_source_info.h"
 #include "frameworks/core/components/common/properties/animation_option.h"
 #include "frameworks/base/geometry/ng/vector.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -316,11 +317,17 @@ void ResetBackgroundColor(NodeHandle node)
     ViewAbstract::SetBackgroundColor(frameNode, Color(DEFAULT_BUTTON_COLOR));
 }
 
-void SetWidth(NodeHandle node, double value, int unit)
+void SetWidth(NodeHandle node, double value, int unit, const char* calcVlaue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetWidth(frameNode, CalcLength(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    if (unitEnum == DimensionUnit::CALC) {
+        ViewAbstract::SetWidth(
+            frameNode, CalcLength(CalcLength(std::string(calcVlaue))));
+    } else {
+        ViewAbstract::SetWidth(frameNode, CalcLength(value, unitEnum));
+    }
 }
 
 void ResetWidth(NodeHandle node)
@@ -329,17 +336,23 @@ void ResetWidth(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ClearWidthOrHeight(frameNode, true);
 }
-void SetHeight(NodeHandle node, double value, int unit)
+void SetHeight(NodeHandle node, double value, int unit, const char* calcVlaue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetHeight(frameNode, CalcLength(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    if (unitEnum == DimensionUnit::CALC) {
+        ViewAbstract::SetHeight(
+            frameNode, CalcLength(CalcLength(std::string(calcVlaue))));
+    } else {
+        ViewAbstract::SetHeight(frameNode, CalcLength(value, unitEnum));
+    }
 }
 void ResetHeight(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ClearWidthOrHeight(frameNode, true);
+    ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 /**
  * @param values radius values
@@ -492,10 +505,10 @@ void SetBorderStyle(NodeHandle node, const int32_t *styles, int32_t length)
     }
     if (length == NUM_4) {
         NG::BorderStyleProperty borderStyles;
-        borderStyles.styleLeft = ConvertBorderStyle(styles[NUM_0]);
+        borderStyles.styleLeft = ConvertBorderStyle(styles[NUM_3]);
         borderStyles.styleRight = ConvertBorderStyle(styles[NUM_1]);
-        borderStyles.styleTop = ConvertBorderStyle(styles[NUM_2]);
-        borderStyles.styleBottom = ConvertBorderStyle(styles[NUM_3]);
+        borderStyles.styleTop = ConvertBorderStyle(styles[NUM_0]);
+        borderStyles.styleBottom = ConvertBorderStyle(styles[NUM_2]);
         borderStyles.multiValued = true;
         ViewAbstract::SetBorderStyle(frameNode, borderStyles);
     }
@@ -519,6 +532,11 @@ void SetBackShadow(NodeHandle node, const double *shadows, int32_t length)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (length == NUM_1) {
+        auto shadowStyle = static_cast<ShadowStyle>(shadows[NUM_0]);
+        auto shadow = Shadow::CreateShadow(shadowStyle);
+        ViewAbstract::SetBackShadow(frameNode, shadow);
+    }
     if (length != NUM_7) {
         return;
     }
@@ -1714,6 +1732,43 @@ void ResetVisibility(NodeHandle node)
     ViewAbstract::SetVisibility(frameNode, DEFAULT_VISIBILITY);
 }
 
+void SetAccessibilityText(NodeHandle node, const char* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = value;
+    ViewAbstractModelNG::SetAccessibilityText(frameNode, valueStr);
+}
+
+void ResetAccessibilityText(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityText(frameNode, "");
+}
+
+void SetAllowDrop(NodeHandle node, char** allowDropCharArray, int32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::set<std::string> allowDropSet;
+    allowDropSet.clear();
+    std::string allowDropStr;
+    for (size_t i = 0; i < length; i++) {
+        allowDropStr = allowDropCharArray[i];
+        allowDropSet.insert(allowDropStr);
+    }
+    ViewAbstract::SetAllowDrop(frameNode, allowDropSet);
+}
+
+void ResetAllowDrop(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::set<std::string> allowDrop;
+    ViewAbstract::SetAllowDrop(frameNode, allowDrop);
+}
+
 ArkUICommonModifierAPI GetCommonModifier()
 {
     static const ArkUICommonModifierAPI modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
@@ -1740,7 +1795,8 @@ ArkUICommonModifierAPI GetCommonModifier()
         ResetFocusable, SetTouchable, ResetTouchable, SetDefaultFocus, ResetDefaultFocus,
         SetDisplayPriority, ResetDisplayPriority, SetOffset, ResetOffset,
         SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
-        SetVisibility, ResetVisibility };
+        SetVisibility, ResetVisibility, SetAccessibilityText, ResetAccessibilityText,
+        SetAllowDrop, ResetAllowDrop };
 
     return modifier;
 }

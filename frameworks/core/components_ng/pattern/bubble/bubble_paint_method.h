@@ -44,7 +44,7 @@ public:
             auto bubble = weak.Upgrade();
             if (bubble) {
                 bubble->PaintMask(canvas, paintWrapper);
-                bubble->PaintBubble(canvas, paintWrapper);
+                bubble->ClipBubble(paintWrapper);
                 bubble->PaintBorder(canvas, paintWrapper);
             }
         };
@@ -70,9 +70,20 @@ public:
         arrowPosition_ = offset;
     }
 
+    void SetClipPath(const std::string& clipPath)
+    {
+        clipPath_ = clipPath;
+    }
+
+    void SetClipFrameNode(RefPtr<FrameNode>& clipFrameNode)
+    {
+        clipFrameNode_ = clipFrameNode;
+    }
+
     void PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
+    void ClipBubble(PaintWrapper* paintWrapper);
 
 private:
     void PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* paintWrapper);
@@ -95,6 +106,13 @@ private:
     void BuildBottomLinePath(RSPath& path, float arrowOffset, float radius);
     void BuildLeftLinePath(RSPath& path, float arrowOffset, float radius);
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
+    void ClipArrowBubble(const RefPtr<FrameNode>& frameNode);
+    void ClipArrowlessBubble(const RefPtr<FrameNode>& frameNode);
+
+    float GetInnerBorderOffset();
+    float outerBorderWidth_ = Dimension(1.0_vp).ConvertToPx();
+    float innerBorderWidth_ = Dimension(1.0_vp).ConvertToPx();
+    bool needPaintInnerBorder_ = false;
 
     // Get from RenderProp
     bool useCustom_ = false;
@@ -109,7 +127,8 @@ private:
     OffsetF arrowPosition_;
     SizeF childSize_;
     bool showArrow_ = false;
-
+    std::string clipPath_;
+    RefPtr<FrameNode> clipFrameNode_;
     // Get from theme
     Border border_;
     Edge padding_;

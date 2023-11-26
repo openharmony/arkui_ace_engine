@@ -124,6 +124,7 @@ public:
         queryStateFunc_ = queryStateFunc;
     }
     bool QueryAllDone(size_t touchId);
+    bool QueryAllDone();
     bool CheckSourceTypeChange(SourceType type, bool isAxis = false);
     void CleanAll(bool isBlocked = false);
 private:

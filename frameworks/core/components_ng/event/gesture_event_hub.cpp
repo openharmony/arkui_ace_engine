@@ -1185,6 +1185,16 @@ bool GestureEventHub::IsAccessibilityLongClickable()
     return ret;
 }
 
+bool GestureEventHub::GetMonopolizeEvents() const
+{
+    return monopolizeEvents_;
+}
+
+void GestureEventHub::SetMonopolizeEvents(bool monopolizeEvents)
+{
+    monopolizeEvents_ = monopolizeEvents;
+}
+
 void GestureEventHub::ClearUserOnClick()
 {
     if (clickEventActuator_) {

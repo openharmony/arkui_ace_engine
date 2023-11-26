@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -164,8 +165,9 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         child = CreateCombinedChild(param, popupId, targetId, popupNode);
         popupPaintProp->UpdatePrimaryButtonShow(primaryButton.showButton);
         popupPaintProp->UpdateSecondaryButtonShow(secondaryButton.showButton);
-        popupPaintProp->UpdateAutoCancel(false);
     } else {
+        auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<LinearLayoutPattern>(true));
         auto textNode = CreateMessage(message, useCustom);
         bobblePattern->SetMessageNode(textNode);
         auto popupTheme = GetPopupTheme();
@@ -182,13 +184,26 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         auto buttonMiniMumHeight = popupTheme->GetBubbleMiniMumHeight().ConvertToPx();
         layoutProps->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(buttonMiniMumHeight)));
         textNode->MarkModifyDone();
-        child = textNode;
+        textNode->MountToParent(columnNode);
+        child = columnNode;
     }
     // TODO: GridSystemManager is not completed, need to check later.
     auto maxWidth = GetMaxWith();
     auto childLayoutProperty = child->GetLayoutProperty();
     CHECK_NULL_RETURN(childLayoutProperty, nullptr);
     childLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));
+    if (param->GetChildWidth().has_value()) {
+        childLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
+    }
+    auto renderContext = child->GetRenderContext();
+    if (renderContext) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = BlurStyle::THICK;
+        renderContext->UpdateBackBlurStyle(styleOption);
+        auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
+        renderContext->UpdateBackgroundColor(backgroundColor);
+    }
     child->MountToParent(popupNode);
     return popupNode;
 }
@@ -232,11 +247,37 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     }
 
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
     customNode->MountToParent(columnNode);
-    auto renderContext = columnNode->GetRenderContext();
-    if (renderContext) {
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto maxWidth = GetMaxWith();
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::THICK;
+    auto columnRenderContext = columnNode->GetRenderContext();
+    auto columnLayoutProperty = columnNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(columnLayoutProperty, nullptr);
+    auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode);
+    columnLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));
+    if (param->GetChildWidth().has_value()) {
+        columnLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
+    }
+    auto backgroundColor = popupPaintProps->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
+    RefPtr<RenderContext> customRenderContext;
+    if (columnRenderContext) {
+        if (customFrameNode) {
+            customRenderContext = customFrameNode->GetRenderContext();
+        } else {
+            columnRenderContext->UpdateBackgroundColor(backgroundColor);
+        }
+        columnRenderContext->UpdateBackBlurStyle(styleOption);
+    }
+    if (customRenderContext) {
+        if (customRenderContext->HasBackgroundColor()) {
+            columnRenderContext->UpdateBackgroundColor(customRenderContext->GetBackgroundColorValue());
+            customRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        } else {
+            columnRenderContext->UpdateBackgroundColor(backgroundColor);
+        }
     }
     popupPaintProps->UpdateAutoCancel(!param->HasAction());
     popupPaintProps->UpdatePlacement(param->GetPlacement());
@@ -264,6 +305,9 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     popupPaintProp->UpdatePlacement(param->GetPlacement());
     popupPaintProp->UpdateUseCustom(param->IsUseCustom());
     popupPaintProp->UpdateEnableArrow(param->EnableArrow());
+    if (param->IsBackgroundColorSetted()) {
+        popupPaintProp->UpdateBackgroundColor(param->GetBackgroundColor());
+    }
 }
 
 void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam>& param)

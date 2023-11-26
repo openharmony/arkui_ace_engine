@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
+#include "base/subwindow/subwindow.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -571,6 +572,83 @@ void ViewAbstract::SetBorderStyle(FrameNode *frameNode, const BorderStylePropert
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderStyle, value, frameNode);
 }
 
+void ViewAbstract::SetOuterBorderRadius(const Dimension& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(value);
+    borderRadius.multiValued = false;
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderRadius, borderRadius);
+}
+
+void ViewAbstract::SetOuterBorderRadius(const BorderRadiusProperty& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderRadius, value);
+}
+
+void ViewAbstract::SetOuterBorderColor(const Color& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    BorderColorProperty borderColor;
+    borderColor.SetColor(value);
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderColor, borderColor);
+}
+
+void ViewAbstract::SetOuterBorderColor(const BorderColorProperty& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderColor, value);
+}
+
+void ViewAbstract::SetOuterBorderWidth(const Dimension& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    BorderWidthProperty borderWidth;
+    if (Negative(value.Value())) {
+        borderWidth.SetBorderWidth(Dimension(0));
+    } else {
+        borderWidth.SetBorderWidth(value);
+    }
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderWidth, borderWidth);
+}
+
+void ViewAbstract::SetOuterBorderWidth(const BorderWidthProperty& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderWidth, value);
+}
+
+void ViewAbstract::SetOuterBorderStyle(const BorderStyleProperty& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderStyle, value);
+}
+
+void ViewAbstract::SetOuterBorderStyle(const BorderStyle& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    BorderStyleProperty borderStyle;
+    borderStyle.SetBorderStyle(value);
+    ACE_UPDATE_RENDER_CONTEXT(OuterBorderStyle, borderStyle);
+}
+
 void ViewAbstract::DisableOnClick()
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
@@ -822,6 +900,13 @@ void ViewAbstract::SetTouchable(bool touchable)
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetTouchable(touchable);
+}
+
+void ViewAbstract::SetMonopolizeEvents(bool monopolizeEvents)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetMonopolizeEvents(monopolizeEvents);
 }
 
 void ViewAbstract::SetHitTestMode(HitTestMode hitTestMode)
@@ -1218,6 +1303,11 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam> &&params, const Re
 void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode> &customNode, const RefPtr<FrameNode> &targetNode,
     const NG::OffsetF &offset, const MenuParam &menuParam, const RefPtr<UINode> &previewCustomNode)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto expandDisplay = theme->GetExpandDisplay();
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(targetNode);
     auto menuNode =
@@ -1227,12 +1317,26 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode> &customNode, cons
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }
+    if (menuParam.type == MenuType::MENU && expandDisplay) {
+        bool isShown = SubwindowManager::GetInstance()->GetShown();
+        if (!isShown) {
+            SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
+        } else {
+            SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetNode->GetId());
+        }
+        return;
+    }
     BindMenu(menuNode, targetNode->GetId(), offset);
 }
 
 void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool isContextMenu)
 {
-    if (isContextMenu) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto expandDisplay = theme->GetExpandDisplay();
+    if (isContextMenu || expandDisplay) {
         SubwindowManager::GetInstance()->ShowMenuNG(nullptr, targetId, offset);
         return;
     }
@@ -2166,5 +2270,11 @@ void ViewAbstract::SetMargin(FrameNode *frameNode, const PaddingProperty &value)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, value, frameNode);
+}
+
+void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::set<std::string>& allowDrop)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetAllowDrop(allowDrop);
 }
 } // namespace OHOS::Ace::NG

@@ -34,6 +34,7 @@
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
+#include "core/event/pointer_event.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::Platform {
@@ -312,32 +313,41 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
 #ifdef ENABLE_DRAG_FRAMEWORK
 void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    MMI::PointerEvent::PointerItem pointerItem;
-    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     DragEventAction action;
+    PointerEvent event;
+    ConvertPointerEvent(pointerEvent, event);
+    CHECK_NULL_VOID(dragEventCallback_);
     int32_t orgAction = pointerEvent->GetPointerAction();
     switch (orgAction) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE: {
             action = DragEventAction::DRAG_EVENT_MOVE;
-            if (!pointerItem.IsPressed()) {
+            if (!event.pressed) {
                 action = DragEventAction::DRAG_EVENT_END;
             }
-            ProcessDragEvent(pointerItem.GetWindowX(), pointerItem.GetWindowY(), action);
+            event.x = event.windowX;
+            event.y = event.windowY;
+            dragEventCallback_(event, action);
             break;
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP: {
             action = DragEventAction::DRAG_EVENT_END;
-            ProcessDragEvent(pointerItem.GetWindowX(), pointerItem.GetWindowY(), action);
+            event.x = event.windowX;
+            event.y = event.windowY;
+            dragEventCallback_(event, action);
             break;
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW: {
             action = DragEventAction::DRAG_EVENT_START;
-            ProcessDragEvent(pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), action);
+            event.x = event.displayX;
+            event.y = event.displayY;
+            dragEventCallback_(event, action);
             break;
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW: {
             action = DragEventAction::DRAG_EVENT_OUT;
-            ProcessDragEvent(pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), action);
+            event.x = event.displayX;
+            event.y = event.displayY;
+            dragEventCallback_(event, action);
             break;
         }
         default:
@@ -350,7 +360,7 @@ void AceViewOhos::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& 
 {
     TAG_LOGD(AceLogTag::ACE_DRAG, "Process drag event");
     CHECK_NULL_VOID(dragEventCallback_);
-    dragEventCallback_(x, y, action);
+    dragEventCallback_(PointerEvent(x, y), action);
 }
 
 void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

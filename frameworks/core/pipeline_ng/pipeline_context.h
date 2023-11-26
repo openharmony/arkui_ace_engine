@@ -132,7 +132,7 @@ public:
         return false;
     }
 
-    void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override;
+    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) override;
 
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
@@ -464,6 +464,16 @@ public:
         }
     }
 
+    void SetScreenNode(const RefPtr<FrameNode>& node)
+    {
+        CHECK_NULL_VOID(node);
+        screenNode_ = AceType::WeakClaim(AceType::RawPtr(node));
+    }
+    RefPtr<FrameNode> GetScreenNode() const
+    {
+        return screenNode_.Upgrade();
+    }
+
     void SetJSViewActive(bool active, WeakPtr<CustomNode> custom);
 
     void UpdateCurrentActiveNode(const WeakPtr<FrameNode>& node) override
@@ -615,6 +625,7 @@ private:
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     WeakPtr<FrameNode> dirtyDefaultFocusNode_;
+    WeakPtr<FrameNode> screenNode_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
     uint64_t resampleTimeStamp_ = 0;

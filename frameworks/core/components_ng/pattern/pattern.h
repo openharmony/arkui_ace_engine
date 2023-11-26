@@ -29,6 +29,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/event/pointer_event.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -369,6 +370,7 @@ public:
     virtual void OnWindowHide() {}
     virtual void OnWindowFocused() {}
     virtual void OnWindowUnfocused() {}
+    virtual void OnPixelRoundFinish(const SizeF& pixelGridRoundSize) {}
     virtual void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
@@ -411,6 +413,7 @@ public:
     virtual void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
 
+    virtual void HandleDragEvent(const PointerEvent& info) {};
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
     virtual void OnDirectionConfigurationUpdate() {}

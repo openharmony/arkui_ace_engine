@@ -16,6 +16,7 @@
 #include "test/unittest/core/pipeline/common_constants.h"
 
 #include "core/common/event_manager.h"
+#include "core/components_ng/event/response_ctrl.h"
 
 namespace OHOS::Ace {
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
@@ -158,5 +159,5 @@ EventManager::EventManager() {}
 
 void EventManager::DumpEvent() const {}
 
-void AddGestureSnapshot(int32_t finger, const RefPtr<TouchEventTarget>& target) {}
+void AddGestureSnapshot(int32_t finger, int32_t depth,  const RefPtr<TouchEventTarget>& target) {}
 } // namespace OHOS::Ace

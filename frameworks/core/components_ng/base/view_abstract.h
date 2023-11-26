@@ -72,6 +72,7 @@ struct OptionParam {
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
+    bool setShow = false;
     bool isShow = false;
     std::function<void(const std::string&)> onStateChange;
     std::optional<Placement> placement;
@@ -130,6 +131,17 @@ public:
 
     static void SetBorderImage(const RefPtr<BorderImage> &borderImage);
     static void SetBorderImageSource(const std::string &bdImageSrc);
+
+    // outer border
+    static void SetOuterBorderRadius(const BorderRadiusProperty& value);
+    static void SetOuterBorderRadius(const Dimension& value);
+    static void SetOuterBorderColor(const Color& value);
+    static void SetOuterBorderColor(const BorderColorProperty& value);
+    static void SetOuterBorderWidth(const Dimension& value);
+    static void SetOuterBorderWidth(const BorderWidthProperty& value);
+    static void SetOuterBorderStyle(const BorderStyle& value);
+    static void SetOuterBorderStyle(const BorderStyleProperty& value);
+
     static void SetHasBorderImageSlice(bool tag);
     static void SetHasBorderImageWidth(bool tag);
     static void SetHasBorderImageOutset(bool tag);
@@ -228,6 +240,7 @@ public:
     static void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDrop);
 
     static void SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragEvent> &)> &&onDragEnd);
+    static void SetMonopolizeEvents(bool monopolizeEvents);
 
     // flex properties
     static void SetAlignSelf(FlexAlign value);
@@ -386,6 +399,8 @@ public:
     static void SetMargin(FrameNode *frameNode, const PaddingProperty &value);
     static void SetPadding(FrameNode *frameNode, const CalcLength &value);
     static void SetPadding(FrameNode *frameNode, const PaddingProperty &value);
+    static void SetAllowDrop(FrameNode* frameNode, const std::set<std::string>& allowDrop);
+
 private:
     static void AddDragFrameNodeToManager();
 };

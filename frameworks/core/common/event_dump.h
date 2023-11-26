@@ -34,6 +34,7 @@ struct FrameNodeSnapshot {
     int32_t parentNodeId = -1;
     std::string tag;
     std::string comId;
+    bool monopolizeEvents = false;
     bool isHit = false;
     int32_t hitTestMode = 0;
 };

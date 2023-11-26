@@ -185,6 +185,7 @@ export class ChipComponent extends ViewPU {
         this.__useDefaultSuffixIcon = new ObservedPropertySimplePU(!1, this, "useDefaultSuffixIcon");
         this.chipNodeSize = {};
         this.onClose = noop;
+        this.__suffixIconOnFocus = new ObservedPropertySimplePU(!1, this, "suffixIconOnFocus");
         this.__chipBreakPoints = new ObservedPropertySimplePU(BreakPointsType.SM, this, "chipBreakPoints");
         this.smListener = mediaquery.matchMediaSync("0vp<width<600vp");
         this.mdListener = mediaquery.matchMediaSync("600vp<=width<840vp");
@@ -212,6 +213,7 @@ export class ChipComponent extends ViewPU {
         void 0 !== e.useDefaultSuffixIcon && (this.useDefaultSuffixIcon = e.useDefaultSuffixIcon);
         void 0 !== e.chipNodeSize && (this.chipNodeSize = e.chipNodeSize);
         void 0 !== e.onClose && (this.onClose = e.onClose);
+        void 0 !== e.suffixIconOnFocus && (this.suffixIconOnFocus = e.suffixIconOnFocus);
         void 0 !== e.chipBreakPoints && (this.chipBreakPoints = e.chipBreakPoints);
         void 0 !== e.smListener && (this.smListener = e.smListener);
         void 0 !== e.mdListener && (this.mdListener = e.mdListener);
@@ -246,6 +248,7 @@ export class ChipComponent extends ViewPU {
         this.__deleteChip.purgeDependencyOnElmtId(e);
         this.__chipNodeOnFocus.purgeDependencyOnElmtId(e);
         this.__useDefaultSuffixIcon.purgeDependencyOnElmtId(e);
+        this.__suffixIconOnFocus.purgeDependencyOnElmtId(e);
         this.__chipBreakPoints.purgeDependencyOnElmtId(e)
     }
 
@@ -266,6 +269,7 @@ export class ChipComponent extends ViewPU {
         this.__deleteChip.aboutToBeDeleted();
         this.__chipNodeOnFocus.aboutToBeDeleted();
         this.__useDefaultSuffixIcon.aboutToBeDeleted();
+        this.__suffixIconOnFocus.aboutToBeDeleted();
         this.__chipBreakPoints.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal()
@@ -397,6 +401,14 @@ export class ChipComponent extends ViewPU {
 
     set useDefaultSuffixIcon(e) {
         this.__useDefaultSuffixIcon.set(e)
+    }
+
+    get suffixIconOnFocus() {
+        return this.__suffixIconOnFocus.get()
+    }
+
+    set suffixIconOnFocus(e) {
+        this.__suffixIconOnFocus.set(e)
     }
 
     get chipBreakPoints() {
@@ -661,7 +673,7 @@ export class ChipComponent extends ViewPU {
         }), Stack);
         this.observeComponentCreation2(((e, i) => {
             If.create();
-            this.chipNodeOnFocus ? this.ifElseBranchUpdateFunction(0, (() => {
+            this.chipNodeOnFocus && !this.suffixIconOnFocus ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation2(((e, i) => {
                     Stack.create();
                     Stack.borderRadius(this.getChipNodeRadius());
@@ -725,7 +737,7 @@ export class ChipComponent extends ViewPU {
                 this.hoverAnimate(e)
             }));
             Row.onKeyEvent((e => {
-                e.type === KeyType.Down && e.keyCode === KeyCode.KEYCODE_FORWARD_DEL && this.deleteChipNodeAnimate()
+                e.type !== KeyType.Down || e.keyCode !== KeyCode.KEYCODE_FORWARD_DEL || this.suffixIconOnFocus || this.deleteChipNodeAnimate()
             }))
         }), Row);
         this.observeComponentCreation2(((e, i) => {
@@ -779,6 +791,12 @@ export class ChipComponent extends ViewPU {
             Image.borderColor(Color.Transparent);
             Image.borderWidth(0);
             ViewStackProcessor.visualState();
+            Image.onFocus((() => {
+                this.suffixIconOnFocus = !0
+            }));
+            Image.onBlur((() => {
+                this.suffixIconOnFocus = !1
+            }));
             Image.onClick((() => {
                 var e;
                 if (this.getChipEnable()) if (null === (e = this.suffixIcon) || void 0 === e ? void 0 : e.action) this.suffixIcon.action(); else if (this.allowClose && this.useDefaultSuffixIcon) {

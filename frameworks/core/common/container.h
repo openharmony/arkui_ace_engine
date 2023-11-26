@@ -38,6 +38,7 @@
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
+#include "core/event/pointer_event.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -49,7 +50,7 @@ using MouseEventCallback = std::function<void(const MouseEvent&, const std::func
 using AxisEventCallback = std::function<void(const AxisEvent&, const std::function<void()>&)>;
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
-using DragEventCallBack = std::function<void(int32_t x, int32_t y, const DragEventAction& action)>;
+using DragEventCallBack = std::function<void(const PointerEvent& pointerEvent, const DragEventAction& action)>;
 using StopDragCallback = std::function<void()>;
 
 enum ContainerType {

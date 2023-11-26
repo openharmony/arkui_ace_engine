@@ -113,18 +113,14 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
         overlayManager->CloseDialog(dialog);
         dialogs.pop_back();
         if (dialogProperties.isShowInSubWindow) {
-            auto containerId = Container::CurrentId();
-            RefPtr<PipelineContext> parentContext;
-            auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-            auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
-            CHECK_NULL_VOID(parentContainer);
-            parentContext = AccessibilityManager::DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
+            auto parentContext = PipelineContext::GetMainPipelineContext();
             CHECK_NULL_VOID(parentContext);
-            auto parentoverlay = parentContext->GetOverlayManager();
-            CHECK_NULL_VOID(parentoverlay);
-            SubwindowManager::GetInstance()->DeleteHotAreas(parentoverlay->GetSubwindowId(), dialog->GetId());
+            auto parentOverlay = parentContext->GetOverlayManager();
+            CHECK_NULL_VOID(parentOverlay);
+            SubwindowManager::GetInstance()->DeleteHotAreas(parentOverlay->GetSubwindowId(), dialog->GetId());
+            SubwindowManager::GetInstance()->HideDialogSubWindow(parentOverlay->GetSubwindowId());
             if (dialogProperties.isModal) {
-                parentoverlay->CloseMask();
+                parentOverlay->CloseMask();
             }
         }
     };

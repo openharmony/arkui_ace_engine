@@ -27,6 +27,7 @@
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
+#include "core/event/pointer_event.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -82,6 +83,8 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event);
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event);
+
+void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, PointerEvent& event);
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 

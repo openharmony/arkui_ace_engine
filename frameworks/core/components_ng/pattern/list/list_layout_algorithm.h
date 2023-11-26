@@ -271,7 +271,13 @@ public:
     void HandleJumpEnd(LayoutWrapper* layoutWrapper);
 
     bool NoNeedJump(LayoutWrapper* layoutWrapper, float startPos, float endPos,
-        int32_t startIndex, int32_t endIndex);
+        int32_t startIndex, int32_t endIndex, int32_t jumpIndex, float jumpIndexStartPos);
+
+    bool CheckNoNeedJumpListItem(LayoutWrapper* layoutWrapper, float startPos, float endPos,
+        int32_t startIndex, int32_t endIndex, int32_t jumpIndex);
+
+    bool CheckNoNeedJumpListItemGroup(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t endIndex,
+        int32_t jumpIndex, float jumpIndexStartPos);
 
     virtual float MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex);
 
