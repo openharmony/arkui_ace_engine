@@ -39,6 +39,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/web/web_event.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -1976,13 +1977,17 @@ void JSWeb::OnCommonDialog(const JSCallbackInfo& args, int dialogEventType)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc =
         AceType::MakeRefPtr<JsEventFunction<WebDialogEvent, 1>>(JSRef<JSFunc>::Cast(args[0]), WebDialogEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebDialogEvent>(info);
         JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
         if (message->IsBoolean()) {
@@ -2002,10 +2007,14 @@ void JSWeb::OnConsoleLog(const JSCallbackInfo& args)
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebConsoleLogEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebConsoleLogEventToJSValue);
 
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                           const BaseEventInfo* info) -> bool {
         bool result = false;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, result);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebConsoleLogEvent>(info);
         JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
         if (message->IsBoolean()) {
@@ -2026,10 +2035,14 @@ void JSWeb::OnPageStart(const JSCallbackInfo& args)
         JSRef<JSFunc>::Cast(args[0]), LoadWebPageStartEventToJSValue);
 
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebPageStartEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2045,10 +2058,14 @@ void JSWeb::OnPageFinish(const JSCallbackInfo& args)
         JSRef<JSFunc>::Cast(args[0]), LoadWebPageFinishEventToJSValue);
 
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebPageFinishEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2064,10 +2081,14 @@ void JSWeb::OnProgressChange(const JSCallbackInfo& args)
         JSRef<JSFunc>::Cast(args[0]), LoadWebProgressChangeEventToJSValue);
 
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info);
         func->ExecuteWithValue(*eventInfo);
     };
@@ -2079,13 +2100,17 @@ void JSWeb::OnTitleReceive(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebTitleReceiveEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebTitleReceiveEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebTitleReceiveEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2097,13 +2122,17 @@ void JSWeb::OnFullScreenExit(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FullScreenExitEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), FullScreenExitEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenExitEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2115,14 +2144,18 @@ void JSWeb::OnFullScreenEnter(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FullScreenEnterEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), FullScreenEnterEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         CHECK_NULL_VOID(func);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenEnterEvent>(info);
         CHECK_NULL_VOID(eventInfo);
         func->Execute(*eventInfo);
@@ -2135,13 +2168,17 @@ void JSWeb::OnGeolocationHide(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebGeolocationHideEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebGeolocationHideEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebGeolocationHideEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2153,13 +2190,17 @@ void JSWeb::OnGeolocationShow(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebGeolocationShowEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebGeolocationShowEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebGeolocationShowEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2171,10 +2212,15 @@ void JSWeb::OnRequestFocus(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebRequestFocusEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebRequestFocusEventToJSValue);
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebRequestFocusEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2186,13 +2232,17 @@ void JSWeb::OnDownloadStart(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DownloadStartEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), DownloadStartEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<DownloadStartEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2204,13 +2254,17 @@ void JSWeb::OnHttpAuthRequest(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebHttpAuthEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), WebHttpAuthEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebHttpAuthEvent>(info);
         JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
         if (message->IsBoolean()) {
@@ -2226,13 +2280,17 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebSslErrorEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), WebSslErrorEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebSslErrorEvent>(info);
         func->Execute(*eventInfo);
         return true;
@@ -2245,13 +2303,17 @@ void JSWeb::OnSslSelectCertRequest(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebSslSelectCertEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), WebSslSelectCertEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebSslSelectCertEvent>(info);
         JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
         if (message->IsBoolean()) {
@@ -2273,10 +2335,14 @@ void JSWeb::OnKeyEvent(const JSCallbackInfo& args)
         return;
     }
 
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<JsKeyFunction> jsOnKeyEventFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyEventFunc)](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyEventFunc), node = frameNode](
                           KeyEventInfo& keyEventInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         func->Execute(keyEventInfo);
     };
     WebModel::GetInstance()->SetOnKeyEvent(jsCallback);
@@ -2323,13 +2389,17 @@ void JSWeb::OnErrorReceive(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ReceivedErrorEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ReceivedErrorEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<ReceivedErrorEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2341,13 +2411,17 @@ void JSWeb::OnHttpErrorReceive(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ReceivedHttpErrorEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ReceivedHttpErrorEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<ReceivedHttpErrorEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2369,13 +2443,17 @@ void JSWeb::OnInterceptRequest(const JSCallbackInfo& args)
     if ((args.Length() <= 0) || !args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<OnInterceptRequestEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), OnInterceptRequestEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) -> RefPtr<WebResponse> {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<OnInterceptRequestEvent>(info);
         JSRef<JSVal> obj = func->ExecuteWithValue(*eventInfo);
         if (!obj->IsObject()) {
@@ -2395,13 +2473,17 @@ void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<UrlLoadInterceptEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), UrlLoadInterceptEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<UrlLoadInterceptEvent>(info);
         JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
         if (message->IsBoolean()) {
@@ -2420,11 +2502,15 @@ void JSWeb::OnLoadIntercept(const JSCallbackInfo& args)
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadInterceptEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadInterceptEventToJSValue);
     auto instanceId = Container::CurrentId();
-
-    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadInterceptEvent>(info);
         JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
         if (message->IsBoolean()) {
@@ -2458,13 +2544,17 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
         return;
     }
 
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FileSelectorEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), FileSelectorEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info);
         JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
         if (message->IsBoolean()) {
@@ -2497,13 +2587,17 @@ void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ContextMenuEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ContextMenuEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<ContextMenuEvent>(info);
         JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
         if (message->IsBoolean()) {
@@ -2519,14 +2613,18 @@ void JSWeb::OnContextMenuHide(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ContextMenuHideEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ContextMenuHideEventToJSValue);
 
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<ContextMenuHideEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2656,13 +2754,17 @@ void JSWeb::OnRenderExited(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<RenderExitedEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), RenderExitedEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<RenderExitedEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2674,13 +2776,17 @@ void JSWeb::OnRefreshAccessedHistory(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<RefreshAccessedHistoryEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), RefreshAccessedHistoryEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<RefreshAccessedHistoryEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2758,9 +2864,14 @@ void JSWeb::OnMouse(const JSCallbackInfo& args)
         return;
     }
 
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<JsClickFunction> jsOnMouseFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args[0]));
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnMouseFunc)](MouseInfo& info) {
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnMouseFunc), node = frameNode](
+                          MouseInfo& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         func->Execute(info);
     };
     WebModel::GetInstance()->SetOnMouseEvent(jsCallback);
@@ -2778,13 +2889,17 @@ void JSWeb::OnResourceLoad(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ResourceLoadEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ResourceLoadEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<ResourceLoadEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2804,13 +2919,17 @@ void JSWeb::OnScaleChange(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ScaleChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ScaleChangeEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<ScaleChangeEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2830,13 +2949,18 @@ void JSWeb::OnScroll(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
+
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc =
         AceType::MakeRefPtr<JsEventFunction<WebOnScrollEvent, 1>>(JSRef<JSFunc>::Cast(args[0]), ScrollEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnScrollEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2858,13 +2982,17 @@ void JSWeb::OnPermissionRequest(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebPermissionRequestEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), PermissionRequestEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2886,13 +3014,17 @@ void JSWeb::OnScreenCaptureRequest(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebScreenCaptureRequestEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ScreenCaptureRequestEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebScreenCaptureRequestEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2946,13 +3078,17 @@ void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<SearchResultReceiveEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), SearchResultReceiveEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<SearchResultReceiveEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -2965,12 +3101,15 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
         return;
     }
 
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
         NG::DragDropBaseInfo itemInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
-
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, itemInfo);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
             return itemInfo;
@@ -3007,11 +3146,15 @@ void JSWeb::JsOnDragEnter(const JSCallbackInfo& info)
         return;
     }
 
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragEnter");
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         func->Execute(info, extraParams);
     };
 
@@ -3024,11 +3167,15 @@ void JSWeb::JsOnDragMove(const JSCallbackInfo& info)
         return;
     }
 
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc), node = frameNode](
                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragMove");
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         func->Execute(info, extraParams);
     };
 
@@ -3041,11 +3188,15 @@ void JSWeb::JsOnDragLeave(const JSCallbackInfo& info)
         return;
     }
 
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragLeave");
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         func->Execute(info, extraParams);
     };
 
@@ -3058,11 +3209,15 @@ void JSWeb::JsOnDrop(const JSCallbackInfo& info)
         return;
     }
 
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
+    auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc), node = frameNode](
                         const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDrop");
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         func->Execute(info, extraParams);
     };
 
@@ -3113,13 +3268,18 @@ void JSWeb::OnWindowNew(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
+
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebWindowNewEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), WindowNewEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const std::shared_ptr<BaseEventInfo>& info) {
         ContainerScope scope(instanceId);
         ACE_SCORING_EVENT("OnWindowNew CallBack");
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewEvent>(info.get());
         if (!func || !HandleWindowNewEvent(eventInfo)) {
             return;
@@ -3140,13 +3300,17 @@ void JSWeb::OnWindowExit(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebWindowExitEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), WindowExitEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowExitEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -3230,15 +3394,17 @@ void JSWeb::OnPageVisible(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<PageVisibleEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), PageVisibleEventToJSValue);
 
     auto instanceId = Container::CurrentId();
-    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const std::shared_ptr<BaseEventInfo>& info) {
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
+        context->UpdateCurrentActiveNode(node);
         context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<PageVisibleEvent>(info.get());
@@ -3254,12 +3420,16 @@ void JSWeb::OnInterceptKeyEvent(const JSCallbackInfo& args)
         return;
     }
 
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<JsKeyFunction> jsOnPreKeyEventFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
-    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnPreKeyEventFunc)](
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnPreKeyEventFunc), node = frameNode](
                           KeyEventInfo& keyEventInfo) -> bool {
         bool result = false;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, result);
         ACE_SCORING_EVENT("onPreKeyEvent");
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, result);
+        pipelineContext->UpdateCurrentActiveNode(node);
         JSRef<JSVal> obj = func->ExecuteWithValue(keyEventInfo);
         if (obj->IsBoolean()) {
             result = obj->ToBoolean();
@@ -3291,11 +3461,13 @@ void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
         JSRef<JSFunc>::Cast(args[0]), DataResubmittedEventToJSValue);
 
     auto instanceId = Container::CurrentId();
-    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const std::shared_ptr<BaseEventInfo>& info) {
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
+        context->UpdateCurrentActiveNode(node);
         context->PostSyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<DataResubmittedEvent>(info.get());
@@ -3388,15 +3560,17 @@ void JSWeb::OnFaviconReceived(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FaviconReceivedEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), FaviconReceivedEventToJSValue);
 
     auto instanceId = Container::CurrentId();
-    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const std::shared_ptr<BaseEventInfo>& info) {
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
+        context->UpdateCurrentActiveNode(node);
         context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<FaviconReceivedEvent>(info.get());
@@ -3419,15 +3593,17 @@ void JSWeb::OnTouchIconUrlReceived(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<TouchIconUrlEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), TouchIconUrlEventToJSValue);
 
     auto instanceId = Container::CurrentId();
-    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const std::shared_ptr<BaseEventInfo>& info) {
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
+        context->UpdateCurrentActiveNode(node);
         context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<TouchIconUrlEvent>(info.get());
@@ -3486,14 +3662,18 @@ void JSWeb::OnAudioStateChanged(const JSCallbackInfo& args)
         return;
     }
 
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<AudioStateChangedEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), AudioStateChangedEventToJSValue);
 
     auto instanceId = Container::CurrentId();
-    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const std::shared_ptr<BaseEventInfo>& info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<AudioStateChangedEvent>(info.get());
         func->Execute(*eventInfo);
     };
@@ -3532,15 +3712,17 @@ void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FirstContentfulPaintEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), FirstContentfulPaintEventToJSValue);
 
     auto instanceId = Container::CurrentId();
-    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const std::shared_ptr<BaseEventInfo>& info) {
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
+        context->UpdateCurrentActiveNode(node);
         context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<FirstContentfulPaintEvent>(info.get());
@@ -3555,12 +3737,15 @@ void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(args[0]));
     auto instanceId = Container::CurrentId();
-    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId]() {
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId,
+                          node = frameNode]() {
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
+        context->UpdateCurrentActiveNode(node);
         context->PostAsyncEvent([execCtx, postFunc = func]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             postFunc->Execute();
@@ -3582,13 +3767,17 @@ void JSWeb::OnOverScroll(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebOnOverScrollEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), OverScrollEventToJSValue);
     auto instanceId = Container::CurrentId();
-    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnOverScrollEvent>(info);
         func->Execute(*eventInfo);
     };
