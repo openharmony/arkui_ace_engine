@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_list.h"
+#include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/grid_model_impl.h"
@@ -187,6 +188,25 @@ void SetGridLayoutOptions(const JSCallbackInfo& info)
     ParseGetGridItemRect(info, obj, option);
 
     GridModel::GetInstance()->SetLayoutOptions(option);
+}
+
+void JsOnScrollToIndex(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto onScrollIndex = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[0])](
+                             const BaseEventInfo* event) {
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<V2::GridEventInfo>(event);
+        if (!eventInfo) {
+            return;
+        }
+        auto params = ConvertToJSValues(eventInfo->GetScrollIndex());
+        func->Call(JSRef<JSObject>(), static_cast<int>(params.size()), params.data());
+    };
+    GridModel::GetInstance()->SetOnScrollToIndex(std::move(onScrollIndex));
 }
 } // namespace
 
@@ -388,48 +408,24 @@ void JSGrid::JSBind(BindingTarget globalObj)
 
 void JSGrid::SetScrollBar(const JSCallbackInfo& info)
 {
-    int32_t displayMode = 1;
-    if (!info[0]->IsUndefined() && info[0]->IsNumber()) {
-        ParseJsInt32(info[0], displayMode);
-        if (displayMode < 0 || displayMode >= static_cast<int32_t>(DISPLAY_MODE.size())) {
-            LOGE("Param is not valid");
-            return;
-        }
-    }
+    auto displayMode = JSScrollable::ParseDisplayMode(info, GridModel::GetInstance()->GetDisplayMode());
     GridModel::GetInstance()->SetScrollBarMode(displayMode);
 }
 
 void JSGrid::SetScrollBarColor(const std::string& color)
 {
-    if (!color.empty() && color != "undefined") {
-        GridModel::GetInstance()->SetScrollBarColor(color);
-        return;
+    auto scrollBarColor = JSScrollable::ParseBarColor(color);
+    if (!scrollBarColor.empty()) {
+        GridModel::GetInstance()->SetScrollBarColor(scrollBarColor);
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-    CHECK_NULL_VOID(theme);
-    Color defaultColor(theme->GetForegroundColor());
-    GridModel::GetInstance()->SetScrollBarColor(defaultColor.ColorToString());
 }
 
 void JSGrid::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-    CHECK_NULL_VOID(theme);
-    CalcDimension scrollBarWidth;
-    if (scrollWidth.Length() < 1) {
-        LOGE("scrollWidth is invalid");
-        return;
+    auto scrollBarWidth = JSScrollable::ParseBarWidth(scrollWidth);
+    if (!scrollBarWidth.empty()) {
+        GridModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
     }
-    if (!ParseJsDimensionVp(scrollWidth[0], scrollBarWidth) || scrollWidth[0]->IsNull() ||
-        scrollWidth[0]->IsUndefined() || (scrollWidth[0]->IsString() && scrollWidth[0]->ToString().empty()) ||
-        LessNotEqual(scrollBarWidth.Value(), 0.0) || scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
-        scrollBarWidth = theme->GetNormalWidth();
-    }
-    GridModel::GetInstance()->SetScrollBarWidth(scrollBarWidth.ToString());
 }
 
 void JSGrid::SetCachedCount(const JSCallbackInfo& info)
@@ -498,26 +494,9 @@ void JSGrid::SetDragAnimation(bool value)
 
 void JSGrid::SetEdgeEffect(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("args is invalid");
-        return;
-    }
-    int32_t edgeEffect;
-    if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsInt32(info[0], edgeEffect) ||
-        edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
-        edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
-    }
-    GridModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), false);
-    if (info.Length() == 2) { // 2 is parameter count
-        auto paramObject = JSRef<JSObject>::Cast(info[1]);
-        if (info[1]->IsNull() || info[1]->IsUndefined()) {
-            return;
-        } else {
-            JSRef<JSVal> alwaysEnabledParam = paramObject->GetProperty("alwaysEnabled");
-            bool alwaysEnabled = alwaysEnabledParam->IsBoolean() ? alwaysEnabledParam->ToBoolean() : false;
-            GridModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), alwaysEnabled);
-        }
-    }
+    auto edgeEffect = JSScrollable::ParseEdgeEffect(info, EdgeEffect::NONE);
+    auto alwaysEnabled = JSScrollable::ParseAlwaysEnable(info, false);
+    GridModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
 }
 
 void JSGrid::SetLayoutDirection(int32_t value)
@@ -728,6 +707,11 @@ void JSGrid::JsOnScrollStop(const JSCallbackInfo& args)
 
 void JSGrid::JsOnScrollIndex(const JSCallbackInfo& args)
 {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        JsOnScrollToIndex(args);
+        return;
+    }
+
     if (args[0]->IsFunction()) {
         auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                                  const int32_t first, const int32_t last) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,36 +43,6 @@ constexpr double DEFAULT_MINANGLE = 10.0;
 constexpr double STRAIGHT_ANGLE = 180.0;
 constexpr double BAR_FRICTION = 0.9;
 constexpr Color PRESSED_BLEND_COLOR = Color(0x19000000);
-
-enum class ShapeMode {
-    /*
-     * unspecified, follow theme.
-     */
-    DEFAULT = 0,
-    /*
-     * rect scrollbar.
-     */
-    RECT,
-    /*
-     * round scrollbar.
-     */
-    ROUND,
-};
-
-enum class DisplayMode {
-    /*
-     * do not display scrollbar.
-     */
-    OFF = 0,
-    /*
-     * display scrollbar on demand.
-     */
-    AUTO,
-    /*
-     * always display scrollbar.
-     */
-    ON,
-};
 
 class ScrollBar final : public AceType {
     DECLARE_ACE_TYPE(ScrollBar, AceType);

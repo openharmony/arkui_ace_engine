@@ -68,15 +68,15 @@ void ListPattern::OnModifyDone()
     if (!GetScrollableEvent()) {
         InitScrollableEvent();
     }
-    auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-    SetEdgeEffect(edgeEffect);
 
-    auto defaultDisplayMode = DisplayMode::OFF;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        defaultDisplayMode = DisplayMode::AUTO;
+    SetEdgeEffect();
+
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetScrollBarProperty()) {
+        SetScrollBar(paintProperty->GetScrollBarProperty());
     }
-    auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
-    SetScrollBar(listPaintProperty->GetBarDisplayMode().value_or(defaultDisplayMode));
+
     SetChainAnimation();
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
@@ -393,7 +393,7 @@ void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
+    auto listPaintProperty = host->GetPaintProperty<ScrollablePaintProperty>();
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     auto stickyStyle = listLayoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
     bool barNeedPaint = GetScrollBar() ? GetScrollBar()->NeedPaint() : false;
@@ -1597,7 +1597,7 @@ void ListPattern::SetChainAnimation()
 {
     auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
-    auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
+    auto edgeEffect = GetEdgeEffect();
     int32_t lanes = std::max(listLayoutProperty->GetLanes().value_or(1), 1);
     bool autoLanes = listLayoutProperty->HasLaneMinLength() || listLayoutProperty->HasLaneMaxLength();
     bool animation = listLayoutProperty->GetChainAnimation().value_or(false);
@@ -1900,12 +1900,12 @@ int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
 
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
+    ScrollablePattern::ToJsonValue(json);
     json->Put("multiSelectable", multiSelectable_);
     json->Put("startIndex", startIndex_);
     if (!itemPosition_.empty()) {
         json->Put("itemStartPos", itemPosition_.begin()->second.startPos);
     }
-    json->Put("friction", GetFriction());
     json->Put("edgeEffectAlwaysEnabled", GetAlwaysEnabled());
 }
 
@@ -2151,5 +2151,14 @@ void ListPattern::DumpAdvanceInfo()
     IsAtTop() ? DumpLog::GetInstance().AddDesc("IsAtTop:true") : DumpLog::GetInstance().AddDesc("IsAtTop:false");
     IsAtBottom() ? DumpLog::GetInstance().AddDesc("IsAtBottom:true")
                  : DumpLog::GetInstance().AddDesc("IsAtBottom:false");
+}
+
+DisplayMode ListPattern::GetDefaultScrollBarDisplayMode() const
+{
+    auto defaultDisplayMode = DisplayMode::OFF;
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        defaultDisplayMode = DisplayMode::AUTO;
+    }
+    return defaultDisplayMode;
 }
 } // namespace OHOS::Ace::NG

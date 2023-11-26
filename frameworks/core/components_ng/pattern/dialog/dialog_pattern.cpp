@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,9 +48,6 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/components_ng/pattern/list/list_layout_property.h"
-#include "core/components_ng/pattern/list/list_paint_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
@@ -796,7 +793,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheet(const std::vector<ActionSheetInfo>& 
         .bottom = padding,
     };
     list->GetLayoutProperty()->UpdatePadding(sheetPadding);
-    list->GetPaintProperty<ListPaintProperty>()->UpdateBarDisplayMode(DisplayMode::OFF);
+    list->GetPaintProperty<ScrollablePaintProperty>()->UpdateScrollBarMode(DisplayMode::OFF);
 
     for (auto&& item : sheets) {
         auto itemNode = BuildSheetItem(item);

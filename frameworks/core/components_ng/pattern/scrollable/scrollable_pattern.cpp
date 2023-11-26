@@ -36,6 +36,26 @@ constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 } // namespace
 
+RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
+{
+    auto defaultDisplayMode = GetDefaultScrollBarDisplayMode();
+    auto property = MakeRefPtr<ScrollablePaintProperty>();
+    property->UpdateScrollBarMode(defaultDisplayMode);
+    return property;
+}
+
+void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("friction", GetFriction());
+    if (edgeEffect_ == EdgeEffect::SPRING) {
+        json->Put("edgeEffect", "EdgeEffect.Spring");
+    } else if (edgeEffect_ == EdgeEffect::FADE) {
+        json->Put("edgeEffect", "EdgeEffect.Fade");
+    } else {
+        json->Put("edgeEffect", "EdgeEffect.None");
+    }
+}
+
 void ScrollablePattern::SetAxis(Axis axis)
 {
     if (axis_ == axis) {
@@ -1254,8 +1274,7 @@ bool ScrollablePattern::GetCanOverScroll() const
 
 EdgeEffect ScrollablePattern::GetEdgeEffect() const
 {
-    CHECK_NULL_RETURN(scrollEffect_, EdgeEffect::NONE);
-    return scrollEffect_->GetEdgeEffect();
+    return edgeEffect_;
 }
 
 ScrollState ScrollablePattern::GetScrollState() const
