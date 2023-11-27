@@ -240,7 +240,7 @@ float ListPattern::CalculateTargetPos(float startPos, float endPos)
     topOffset = std::abs(startPos);
     bottomOffset = std::abs(endPos - contentMainSize_);
 
-    if (Positive(startPos) && LessOrEqual(endPos, contentMainSize_)) {
+    if (GreatOrEqual(startPos, 0.0f) && LessOrEqual(endPos, contentMainSize_)) {
         return 0.0f;
     }
     if (LessNotEqual(topOffset, bottomOffset)) {
@@ -1245,6 +1245,29 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
     FireAndCleanScrollingListener();
 }
 
+bool ListPattern::CheckTargetValid(int32_t index, int32_t indexInGroup)
+{
+    auto host = GetHost();
+    auto totalItemCount = host->GetTotalChildCount();
+    if ((index < 0) || (index >= totalItemCount)) {
+        return false;
+    }
+    auto groupWrapper = host->GetOrCreateChildByIndex(index);
+    CHECK_NULL_RETURN(groupWrapper, false);
+    if (groupWrapper->GetHostTag() != V2::LIST_ITEM_GROUP_ETS_TAG) {
+        return false;
+    }
+    auto groupNode = groupWrapper->GetHostNode();
+    CHECK_NULL_RETURN(groupNode, false);
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(groupPattern, false);
+    auto groupItemCount = groupWrapper->GetTotalChildCount() - groupPattern->GetItemStartIndex();
+    if ((indexInGroup < 0) || (indexInGroup >= groupItemCount)) {
+        return false;
+    }
+    return true;
+}
+
 void ListPattern::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
@@ -1254,10 +1277,12 @@ void ListPattern::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool 
         smooth_ = smooth;
         if (smooth_) {
             if (!AnimateToTarget(index, indexInGroup, align)) {
-                targetIndex_ = index;
-                currentDelta_ = 0;
-                targetIndexInGroup_ = indexInGroup;
-                scrollAlign_ = align;
+                if (CheckTargetValid(index, indexInGroup)) {
+                    targetIndex_ = index;
+                    currentDelta_ = 0;
+                    targetIndexInGroup_ = indexInGroup;
+                    scrollAlign_ = align;
+                }
             }
         } else {
             jumpIndex_ = index;
