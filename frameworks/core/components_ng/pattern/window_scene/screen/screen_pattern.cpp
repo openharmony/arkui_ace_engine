@@ -150,7 +150,7 @@ void ScreenPattern::DeduplicateDisplayInfo()
     auto screenId = screenSession_->GetScreenId();
     auto it = std::remove_if(g_displayInfoVector.begin(), g_displayInfoVector.end(),
         [screenId](MMI::DisplayInfo displayInfo) {
-            return displayInfo.id == screenId;
+            return displayInfo.id == static_cast<int32_t>(screenId);
         });
     g_displayInfoVector.erase(it, g_displayInfoVector.end());
 }
