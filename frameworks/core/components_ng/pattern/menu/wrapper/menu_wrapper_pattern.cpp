@@ -106,10 +106,14 @@ void MenuWrapperPattern::HideSubMenu()
     if (focusMenu) {
         auto menuHub = DynamicCast<FrameNode>(focusMenu);
         CHECK_NULL_VOID(menuHub);
-        auto focusHub = menuHub->GetFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetParentFocusable(true);
-        focusHub->RequestFocusImmediately();
+        // SelectOverlay's custom menu does not need to be focused.
+        auto isCustomMenu = IsSelectOverlayCustomMenu(menuHub);
+        if (!isCustomMenu) {
+            auto focusHub = menuHub->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetParentFocusable(true);
+            focusHub->RequestFocusImmediately();
+        }
     }
     host->RemoveChild(subMenu);
     auto menuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
@@ -300,5 +304,12 @@ OffsetT<Dimension> MenuWrapperPattern::GetAnimationOffset()
             break;
     }
     return offset;
+}
+
+bool MenuWrapperPattern::IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const
+{
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, false);
+    return menuPattern->IsSelectOverlayCustomMenu();
 }
 } // namespace OHOS::Ace::NG
