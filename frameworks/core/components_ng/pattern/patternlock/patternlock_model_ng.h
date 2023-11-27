@@ -33,6 +33,15 @@ public:
     void SetCircleRadius(const Dimension& radius) override;
     void SetSideLength(const Dimension& sideLength) override;
     void SetStrokeWidth(const Dimension& lineWidth) override;
+
+    static void SetActiveColor(FrameNode* frameNode, const Color& activeColor);
+    static void SetCircleRadius(FrameNode* frameNode, const Dimension& radius);
+    static void SetSelectedColor(FrameNode* frameNode, const Color& selectedColor);
+    static void SetSideLength(FrameNode* frameNode, const Dimension& sideLength);
+    static void SetAutoReset(FrameNode* frameNode, bool isAutoReset);
+    static void SetStrokeWidth(FrameNode* frameNode, const Dimension& lineWidth);
+    static void SetRegularColor(FrameNode* frameNode, const Color& color);
+    static void SetPathColor(FrameNode* frameNode, const Color& color);
 };
 
 } // namespace OHOS::Ace::NG
