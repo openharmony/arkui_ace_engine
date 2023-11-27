@@ -856,6 +856,17 @@ class AccessibilityDescriptionModifier extends Modifier<string> {
     }
 }
 
+class DisplayPriorityModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('displayPriority');
+  applyPeer(node: KNode, reset: boolean): void {
+    //console.log('DisplayPriorityModifier reset = ' + reset);
+    if (reset) {
+      GetUINativeModule().common.resetDisplayPriority(node);
+    } else {
+      GetUINativeModule().common.setDisplayPriority(node, this.value!);
+    }
+  }
+}
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType) => typeof val === 'string'
@@ -1761,9 +1772,14 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         throw new Error("Method not implemented.");
     }
 
-    displayPriority(value: number): this {
-        throw new Error("Method not implemented.");
+  displayPriority(value: number): this {
+    if (isNaN(value)) {
+      modifier(this._modifiers, DisplayPriorityModifier, undefined);
+    } else {
+      modifier(this._modifiers, DisplayPriorityModifier, value);
     }
+    return this;
+  }
 
     zIndex(value: number): this {
         if (value !== null) {
