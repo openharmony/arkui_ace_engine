@@ -277,6 +277,9 @@ struct SelectionMenuComponent {
               this.customerChange = !this.customerChange
             } else {
               this.showCustomerIndex = -1
+              if (!this.controller) {
+                this.showExpandedMenuOptions = true
+              }
             }
             if (item.action) {
               item.action()

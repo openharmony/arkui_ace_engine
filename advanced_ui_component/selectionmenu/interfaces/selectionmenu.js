@@ -369,7 +369,10 @@ class SelectionMenuComponent extends ViewPU {
                                     this.showCustomerIndex = t;
                                     this.showExpandedMenuOptions = !1;
                                     this.customerChange = !this.customerChange
-                                } else this.showCustomerIndex = -1;
+                                } else {
+                                    this.showCustomerIndex = -1;
+                                    this.controller || (this.showExpandedMenuOptions = !0)
+                                }
                                 o.action && o.action()
                             }));
                             Button.borderRadius(this.theme.iconBorderRadius);
