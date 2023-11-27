@@ -168,6 +168,7 @@ template("declarative_js_engine_ark") {
       "components/arkts_native_textpicker_modifier.cpp",
       "components/arkts_native_timepicker_modifier.cpp",
       "components/arkts_native_toggle_modifier.cpp",
+      "components/arkts_native_video_modifier.cpp",
       "js_converter.cpp",
       "jsi_declarative_engine.cpp",
       "jsi_declarative_group_js_bridge.cpp",
@@ -206,6 +207,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_textpicker_bridge.cpp",
       "nativeModule/arkts_native_timepicker_bridge.cpp",
       "nativeModule/arkts_native_toggle_bridge.cpp",
+      "nativeModule/arkts_native_video_bridge.cpp",
       "utils/arkts_native_parse.cpp",
     ]
 

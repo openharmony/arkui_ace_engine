@@ -221,4 +221,35 @@ void VideoModelNG::AddDragFrameNodeToManager() const
 
     dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
 }
+
+void VideoModelNG::SetAutoPlay(FrameNode* frameNode, bool autoPlay)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    videoPattern->UpdateAutoPlay(autoPlay);
+}
+
+void VideoModelNG::SetControls(FrameNode* frameNode, bool controls)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, Controls, controls, frameNode);
+}
+
+void VideoModelNG::SetObjectFit(FrameNode* frameNode, ImageFit objectFit)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, ObjectFit, objectFit, frameNode);
+}
+
+void VideoModelNG::SetMuted(FrameNode* frameNode, bool muted)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    videoPattern->UpdateMuted(muted);
+}
+
+void VideoModelNG::SetLoop(FrameNode* frameNode, bool loop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    videoPattern->UpdateLoop(loop);
+}
 } // namespace OHOS::Ace::NG
