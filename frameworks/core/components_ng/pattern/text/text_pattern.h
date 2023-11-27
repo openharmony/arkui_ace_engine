@@ -407,7 +407,7 @@ protected:
     void HandleDoubleClickEvent(GestureEvent& info);
     void InitTextDetect(int32_t startPos, std::string detectText);
     void ShowUIExtensionMenu(AISpan aiSpan);
-    bool ClickAISpan(GestureEvent& info, PointF textOffset);
+    bool ClickAISpan(GestureEvent& info, PointF textOffset, AISpan aiSpan);
     void ParseAIResult(const TextDataDetectResult& result, int32_t startPos);
     void ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos,
         bool isMenuOption = false);
