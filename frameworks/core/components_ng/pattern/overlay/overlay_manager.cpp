@@ -2916,7 +2916,7 @@ SizeF OverlayManager::CaculateMenuSize(
     childConstraint.minSize.SetWidth(minWidth);
     auto idealWidth = std::max(contentWidth, childConstraint.minSize.Width());
     auto idealHeight = groupHeight * (aiMenuOptions.size() - 1) +
-        menuItemHeight + static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
+        menuItemHeight + static_cast<float>(selectTheme->GetOutPadding().ConvertToPx()) * 2;
     return SizeF(idealWidth, idealHeight);
 }
 

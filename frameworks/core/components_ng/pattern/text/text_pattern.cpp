@@ -50,7 +50,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t AI_TEXT_MAX_LENGTH = 300;
-constexpr int32_t AI_TEXT_GAP = 30;
+constexpr int32_t AI_TEXT_GAP = 100;
 constexpr int32_t AI_DELAY_TIME = 300;
 constexpr const char COPY_ACTION[] = "copy";
 constexpr const char SELECT_ACTION[] = "select";
@@ -59,7 +59,7 @@ constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 constexpr float BOX_EPSILON = 0.5f;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
-const std::map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
+const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     {TextDataDetectType::PHONE_NUMBER, "phoneNum"}, {TextDataDetectType::URL, "url"},
     {TextDataDetectType::EMAIL, "email"}, {TextDataDetectType::ADDRESS, "location"} };
 }; // namespace
@@ -535,10 +535,20 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
         info.GetLocalLocation().GetY() - textContentRect.GetY() };
     HandleSpanSingleClickEvent(info, textContentRect, textOffset, isClickOnSpan);
+    if (isClickOnSpan) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (textDetectEnable_ && host->GetChildren().empty() && !aiSpanMap_.empty()) {
-        ClickAISpan(info, textOffset);
+    if (textDetectEnable_ && host->GetChildren().empty() && !aiSpanMap_.empty() && paragraph_) {
+        bool isClickOnAISpan = false;
+        for (const auto& kv : aiSpanMap_) {
+            auto aiSpan = kv.second;
+            isClickOnAISpan = ClickAISpan(info, textOffset, aiSpan);
+            if (isClickOnAISpan) {
+                return;
+            }
+        }
     }
     if (onClick_ && !isClickOnSpan) {
         auto onClick = onClick_;
@@ -552,13 +562,27 @@ void TextPattern::HandleSpanSingleClickEvent(
     if (textContentRect.IsInRegion(PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY())) &&
         !spans_.empty() && paragraph_) {
         int32_t start = 0;
-        bool processed = false;
+        auto aiSpanIterator = aiSpanMap_.begin();
         for (const auto& item : spans_) {
             if (!item) {
                 continue;
             }
-            if (textDetectEnable_ && !aiSpanMap_.empty() && !processed) {
-                processed = ClickAISpan(info,  textOffset);
+            auto spanStart = item->position - static_cast<int32_t>(StringUtils::ToWstring(item->content).length());
+            while (textDetectEnable_ && aiSpanIterator != aiSpanMap_.end() &&
+                aiSpanIterator->second.start <= item->position) {
+                if (aiSpanIterator->second.end <= spanStart) {
+                    ++aiSpanIterator;
+                    continue;
+                }
+                isClickOnSpan = ClickAISpan(info,  textOffset, aiSpanIterator->second);
+                if (isClickOnSpan) {
+                    return;
+                }
+                if (aiSpanIterator->second.end >= item->position) {
+                    break;
+                } else {
+                    ++aiSpanIterator;
+                }
             }
             std::vector<RectF> selectedRects;
             paragraph_->GetRectsForRange(start, item->position, selectedRects);
@@ -582,17 +606,14 @@ void TextPattern::HandleSpanSingleClickEvent(
     }
 }
 
-bool TextPattern::ClickAISpan(GestureEvent& info, PointF textOffset)
+bool TextPattern::ClickAISpan(GestureEvent& info, PointF textOffset, AISpan aiSpan)
 {
-    for (const auto& kv : aiSpanMap_) {
-        auto aiSpan = kv.second;
-        std::vector<RectF> aiRects;
-        paragraph_->GetRectsForRange(aiSpan.start, aiSpan.end, aiRects);
-        for (auto&& rect : aiRects) {
-            if (rect.IsInRegion(textOffset)) {
-                ShowUIExtensionMenu(aiSpan);
-                return true;
-            }
+    std::vector<RectF> aiRects;
+    paragraph_->GetRectsForRange(aiSpan.start, aiSpan.end, aiRects);
+    for (auto&& rect : aiRects) {
+        if (rect.IsInRegion(textOffset)) {
+            ShowUIExtensionMenu(aiSpan);
+            return true;
         }
     }
     return false;
