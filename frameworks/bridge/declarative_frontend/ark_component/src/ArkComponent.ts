@@ -9,7 +9,15 @@ function GetUINativeModule() {
 
 function isResource(variable: any): variable is Resource {
     return (variable as Resource)?.bundleName!== undefined;
-  }
+}
+
+function isResourceEqual(stageValue: Resource, value: Resource): boolean {
+    return (stageValue.bundleName === value.bundleName) &&
+            (stageValue.moduleName === value.moduleName) &&
+            (stageValue.id === value.id) &&
+            (stageValue.params === value.params) &&
+            (stageValue.type === value.type);
+}
 
 const SAFE_AREA_TYPE_NONE = 0;
 const SAFE_AREA_TYPE_SYSTEM = 1;
@@ -90,6 +98,12 @@ class ModifierWithKey<T extends number | string | boolean | object> {
         if (different) {
             this.value = this.stageValue;
             this.applyPeer(node, false);
+            if (this.stageValue === undefined) {
+                this.applyPeer(node, true);
+            } else {
+                this.value = this.stageValue;
+                this.applyPeer(node, false);
+            }
         }
         this.stageValue = undefined;
         return false;
@@ -102,16 +116,25 @@ class ModifierWithKey<T extends number | string | boolean | object> {
     }
 }
 class BackgroundColorModifier extends Modifier<number | undefined > {
+class BackgroundColorModifier extends ModifierWithKey<ResourceColor> {
     static identity: Symbol = Symbol("backgroundColor");
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
             GetUINativeModule().common.resetBackgroundColor(node);
         } else {
             GetUINativeModule().common.setBackgroundColor(node, this.value!);
+            GetUINativeModule().common.setBackgroundColor(node, this.value);
+        }
+    }
+
+    checkObjectDiff(): boolean {
+        if (isResource(this.stageValue) && isResource(this.value)) {
+            return !isResourceEqual(this.stageValue, this.value);
+        } else {
+            return true;
         }
     }
 }
-
 
 class WidthModifier extends Modifier<number | string> {
     static identity: Symbol = Symbol("width");
@@ -174,14 +197,34 @@ class PositionModifier extends Modifier<ArkPosition> {
     }
 }
 
-class BorderColorModifier extends Modifier<ArkBorderColor> {
+class BorderColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
     static identity: Symbol = Symbol("borderColor");
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
             GetUINativeModule().common.resetBorderColor(node);
         }
         else {
-            GetUINativeModule().common.setBorderColor(node, this.value.leftColor, this.value.rightColor, this.value.topColor, this.value.bottomColor);
+            if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+                GetUINativeModule().common.setBorderColor(node, this.value, this.value, this.value, this.value);
+            } else {
+                GetUINativeModule().common.setBorderColor(node, (this.value as EdgeColors).left,
+                    (this.value as EdgeColors).right, (this.value as EdgeColors).top,
+                    (this.value as EdgeColors).bottom);
+            }
+
+        }
+    }
+
+    checkObjectDiff(): boolean {
+        if (isResource(this.stageValue) && isResource(this.value)) {
+            return !isResourceEqual(this.stageValue, this.value);
+        } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+            return !((this.stageValue as EdgeColors).left === (this.value as EdgeColors).left &&
+                (this.stageValue as EdgeColors).right === (this.value as EdgeColors).right &&
+                (this.stageValue as EdgeColors).top === (this.value as EdgeColors).top &&
+                (this.stageValue as EdgeColors).bottom === (this.value as EdgeColors).bottom);
+        } else {
+            return true;
         }
     }
 }
@@ -1099,16 +1142,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     backgroundColor(value: ResourceColor): this {
-        if(isResource(value)){
-            modifier(this._modifiers, BackgroundColorModifier, undefined);
-            return this;
-        }
-        var arkColor = new ArkColor();
-        if (arkColor.parseColorValue(value)) {
-            modifier(this._modifiers, BackgroundColorModifier, arkColor.color);
-        } else {
-            modifier(this._modifiers, BackgroundColorModifier, undefined);
-        }
+        modifierWithKey(this._modifiersWithKeys, BackgroundColorModifier.identity, BackgroundColorModifier, value);
         return this;
     }
 
@@ -1355,40 +1389,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     borderColor(value: ResourceColor | EdgeColors): this {
-        if( isResource(value)  || isUndefined(value))
-        {
-            modifier(this._modifiers, BorderColorModifier, undefined);
-            return this;
-        }
-
-        var arkColor = new ArkColor();
-        var borderColorGroup = new ArkBorderColor()      
-        if (typeof value === "number" || typeof value === "string") {
-            arkColor.parseColorValue(value)
-            borderColorGroup.leftColor = arkColor.color
-            borderColorGroup.rightColor = arkColor.color
-            borderColorGroup.topColor = arkColor.color
-            borderColorGroup.bottomColor = arkColor.color
-            modifier(this._modifiers, BorderColorModifier, borderColorGroup);
-        }
-        else if (!!value.left || !!value.right || !!value.top || !!value.bottom) {
-            if (arkColor.parseColorValue(value.left)) {
-                borderColorGroup.leftColor = arkColor.color;
-            }
-            if (arkColor.parseColorValue(value.right)) {
-                borderColorGroup.rightColor = arkColor.color;
-            }
-            if (arkColor.parseColorValue(value.top)) {
-                borderColorGroup.topColor = arkColor.color;
-            }
-            if (arkColor.parseColorValue(value.bottom)) {
-                borderColorGroup.bottomColor = arkColor.color;
-            }
-            modifier(this._modifiers, BorderColorModifier, borderColorGroup);
-        }
-        else {
-            modifier(this._modifiers, BorderColorModifier, undefined);
-        }       
+        modifierWithKey(this._modifiersWithKeys, BorderColorModifier.identity, BorderColorModifier, value);
         return this;
     }
 

@@ -17,17 +17,18 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
-#include "bridge/declarative_frontend/engine/jsi/utils/arkts_native_parse.h"
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -53,6 +54,98 @@ constexpr int SIZE_OF_FIVE = 5;
 constexpr int SIZE_OF_EIGHT = 8;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
+
+uint32_t ColorAlphaAdapt(uint32_t origin)
+{
+    uint32_t result = origin;
+    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
+        result = origin | COLOR_ALPHA_VALUE;
+    }
+    return result;
+}
+
+bool ParseJsDimensionVp(const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension &result)
+{
+    if (value->IsNumber()) {
+        result = CalcDimension(value->ToNumber(vm)->Value(), DimensionUnit::VP);
+        return true;
+    }
+    if (value->IsString()) {
+        result = StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::VP);
+        return true;
+    }
+
+    return false;
+}
+
+bool ParseJsColor(const EcmaVM *vm, const Local<JSValueRef> &value, Color &result)
+{
+    if (value->IsNumber()) {
+        result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
+        return true;
+    }
+    if (value->IsString()) {
+        return Color::ParseColorString(value->ToString(vm)->ToString(), result);
+    }
+
+    return false;
+}
+
+bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result)
+{
+    if (value->IsNumber()) {
+        result = value->Int32Value(vm);
+        return true;
+    }
+
+    return false;
+}
+
+bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &result)
+{
+    if (value->IsNumber()) {
+        result = value->ToNumber(vm)->Value();
+        return true;
+    }
+    if (value->IsString()) {
+        return StringUtils::StringToDouble(value->ToString(vm)->ToString(), result);
+    }
+
+    return false;
+}
+
+void ParseAllBorder(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result)
+{
+    if (ParseJsDimensionVp(vm, args, result) && result.IsNonNegative()) {
+        if (result.Unit() == DimensionUnit::PERCENT) {
+            result.Reset();
+        }
+    }
+}
+
+bool ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
+    DimensionUnit defaultUnit, bool isSupportPercent = true)
+{
+    if (jsValue->IsNumber()) {
+        result = CalcDimension(jsValue->ToNumber(vm)->Value(), defaultUnit);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        auto value = jsValue->ToString(vm)->ToString();
+        if (value.back() == '%' && !isSupportPercent) {
+            return false;
+        }
+        return StringUtils::StringToCalcDimensionNG(jsValue->ToString(vm)->ToString(), result, false, defaultUnit);
+    }
+
+    return false;
+}
+
+bool ParseJsDimensionVpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
+    bool isSupportPercent = true)
+{
+    return ParseJsDimensionNG(vm, jsValue, result, DimensionUnit::VP, isSupportPercent);
+}
 
 bool ParseJsInt32(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result)
 {
@@ -403,9 +496,13 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t color = secondArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundColor(nativeNode, color);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBackgroundColor(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundColor(nativeNode, color.GetValue());
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -678,28 +775,25 @@ ArkUINativeModuleValue CommonBridge::SetBorderColor(ArkUIRuntimeCallInfo *runtim
     Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    if (leftArg->IsUndefined() && rifghtArg->IsUndefined() && topArg->IsUndefined() && bottomArg->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBorderColor(nativeNode);
-    }
-    uint32_t leftColor = COLOR_ALPHA_VALUE;
-    uint32_t rightColor = COLOR_ALPHA_VALUE;
-    uint32_t topColor = COLOR_ALPHA_VALUE;
-    uint32_t bottomColor = COLOR_ALPHA_VALUE;
+    Color leftColor;
+    Color rightColor;
+    Color topColor;
+    Color bottomColor;
 
-    if (!leftArg->IsUndefined()) {
-        leftColor = leftArg->Uint32Value(vm);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, leftArg, leftColor)) {
+        leftColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    if (!rifghtArg->IsUndefined()) {
-        rightColor = rifghtArg->Uint32Value(vm);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, rifghtArg, rightColor)) {
+        rightColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    if (!topArg->IsUndefined()) {
-        topColor = topArg->Uint32Value(vm);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, topArg, topColor)) {
+        topColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    if (!bottomArg->IsUndefined()) {
-        bottomColor = bottomArg->Uint32Value(vm);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottomColor)) {
+        bottomColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBorderColor(nativeNode, leftColor, rightColor, topColor,
-        bottomColor);
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBorderColor(nativeNode, leftColor.GetValue(),
+        rightColor.GetValue(), topColor.GetValue(), bottomColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 
