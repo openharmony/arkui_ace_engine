@@ -2773,7 +2773,9 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
     auto wideInsertValue = StringUtils::ToWstring(insertValue);
     selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
     if (!IsTextArea() && IsInPasswordMode() && GetTextObscured()) {
-        if (wideInsertValue.length() == 1) {
+        if (wideInsertValue.length() == 1 
+            && ( textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::NUMBER_PASSWORD
+            || std::isdigit(insertValue[0]))) {
             obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
             nakedCharPosition_ = selectController_->GetCaretIndex() - 1;
         } else {
