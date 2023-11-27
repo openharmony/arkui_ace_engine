@@ -830,6 +830,14 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("optionFontColor", optionPattern->GetFontColor().ColorToString().c_str());
     }
     ToJsonOptionAlign(json);
+    for (size_t i = 0; i < options_.size(); ++i) {
+        auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
+        CHECK_NULL_VOID(optionPaintProperty);
+        std::string optionWidth = std::to_string(optionPaintProperty->GetSelectModifiedWidthValue(0.0f));
+        json->Put("optionWidth", optionWidth.c_str());
+        std::string optionHeight = std::to_string(optionPaintProperty->GetSelectModifiedHeightValue(0.0f));
+        json->Put("optionHeight", optionHeight.c_str());
+    }
 }
 
 void SelectPattern::ToJsonOptionAlign(std::unique_ptr<JsonValue>& json) const
