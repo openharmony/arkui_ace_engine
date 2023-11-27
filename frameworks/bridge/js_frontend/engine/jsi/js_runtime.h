@@ -77,6 +77,8 @@ public:
     virtual void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) = 0;
     virtual void HandleUncaughtException(panda::TryCatch& tryCatch,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) = 0;
+    virtual void HandleUncaughtExceptionWithoutNativeEngine(panda::TryCatch& tryCatch,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) = 0;
     virtual bool HasPendingException() = 0;
     virtual void ExecutePendingJob() = 0;
     virtual void DumpHeapSnapshot(bool isPrivate) {}
