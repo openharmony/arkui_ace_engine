@@ -169,12 +169,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                     HideFilter();
                     SubwindowManager::GetInstance()->HideMenuNG(false, true);
-                    AnimationOption option;
-                    option.SetDuration(PIXELMAP_ANIMATION_DURATION);
-                    option.SetCurve(Curves::SHARP);
-                    AnimationUtils::Animate(
-                        option, [renderContext]() { renderContext->UpdateOpacity(SCALE_NUMBER); },
-                        option.GetOnFinishEvent());
                 }
             }
         }
