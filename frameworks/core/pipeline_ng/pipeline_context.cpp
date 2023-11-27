@@ -1746,8 +1746,11 @@ void PipelineContext::FlushMouseEvent()
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
-    auto userCursor = GetCursor();
-    if (mouseStyleNodeId_ != nodeId || userCursor != MouseFormat::DEFAULT) {
+    auto window = GetWindow();
+    if (window && window->IsUserSetCursor()) {
+        return false;
+    }
+    if (mouseStyleNodeId_ != nodeId) {
         return false;
     }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
@@ -2056,10 +2059,7 @@ void PipelineContext::WindowFocus(bool isFocus)
     onFocus_ = isFocus;
     if (!isFocus) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d lost focus.", windowId_);
-        auto mouseStyle = MouseStyle::CreateMouseStyle();
-        if (mouseStyle) {
-            mouseStyle->ChangePointerStyle(static_cast<int32_t>(GetWindowId()), MouseFormat::DEFAULT);
-        }
+        RestoreDefault();
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
@@ -2590,18 +2590,25 @@ std::string PipelineContext::GetCurrentExtraInfo()
 void PipelineContext::SetCursor(int32_t cursorValue)
 {
     if (cursorValue >= 0 && cursorValue <= static_cast<int32_t>(MouseFormat::RUNNING)) {
-        cursor_ = static_cast<MouseFormat>(cursorValue);
+        auto window = GetWindow();
+        CHECK_NULL_VOID(window);
         auto mouseStyle = MouseStyle::CreateMouseStyle();
         CHECK_NULL_VOID(mouseStyle);
-        mouseStyle->ChangePointerStyle(GetWindowId(), cursor_);
+        auto cursor = static_cast<MouseFormat>(cursorValue);
+        window->SetCursor(cursor);
+        window->SetUserSetCursor(true);
+        mouseStyle->ChangePointerStyle(GetWindowId(), cursor);
     }
 }
 
 void PipelineContext::RestoreDefault()
 {
-    cursor_ = MouseFormat::DEFAULT;
+    auto window = GetWindow();
+    CHECK_NULL_VOID(window);
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     CHECK_NULL_VOID(mouseStyle);
+    window->SetCursor(MouseFormat::DEFAULT);
+    window->SetUserSetCursor(false);
     mouseStyle->ChangePointerStyle(GetWindowId(), MouseFormat::DEFAULT);
 }
 
