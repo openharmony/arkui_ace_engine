@@ -205,11 +205,7 @@ public:
                 theme->expandDisplay_ = false;
             } else {
                 std::string expandDisplay = pattern->GetAttr<std::string>("menu_expand_display", "");
-                if (expandDisplay == "true") {
-                    theme->expandDisplay_ = true;
-                } else {
-                    theme->expandDisplay_ = false;
-                }
+                theme->expandDisplay_ = (expandDisplay == "true");
             }
             theme->maxPaddingStart_ = pattern->GetAttr<Dimension>("max_padding_start", theme->maxPaddingStart_);
             theme->maxPaddingEnd_ = pattern->GetAttr<Dimension>("max_padding_end", theme->maxPaddingEnd_);
