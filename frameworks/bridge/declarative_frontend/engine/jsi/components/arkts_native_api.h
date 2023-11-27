@@ -387,6 +387,11 @@ struct ArkUIGridColModifierAPI {
     void (*ResetOrder)(NodeHandle node);
 };
 
+struct ArkUIGridRowModifierAPI {
+    void (*SetAlignItems)(NodeHandle node, int32_t alignItems);
+    void (*ResetAlignItems)(NodeHandle node);
+};
+
 struct ArkUIPanelModifierAPI {
     void (*SetShowCloseIcon)(NodeHandle node, bool value);
     void (*ResetShowCloseIcon)(NodeHandle node);
@@ -449,6 +454,7 @@ struct ArkUINodeAPI {
     ArkUIDividerModifierAPI (*GetDividerModifier)();
     ArkUINavDestinationModifierAPI (*GetNavDestinationModifier)();
     ArkUIGridColModifierAPI (*GetGridColModifier)();
+    ArkUIGridRowModifierAPI (*GetGridRowModifier)();
     ArkUIPanelModifierAPI (*GetPanelModifier)();
     ArkUITextAreaModifierAPI (*GetTextAreaModifier)();
     ArkUINavigationModifierAPI (*GetNavigationModifier)();
