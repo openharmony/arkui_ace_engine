@@ -106,6 +106,8 @@ public:
     virtual void OnPageError(const std::string& param) = 0;
     virtual void OnProgressChanged(const std::string& param) = 0;
     virtual void OnReceivedTitle(const std::string& param) = 0;
+    virtual void OnPageVisible(const std::string& param) = 0;
+    virtual void OnGeolocationPermissionsHidePrompt() = 0;
     virtual bool LoadDataWithRichText() = 0;
     virtual void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern) = 0;
     virtual void SetBoundsOrResize(const Size& drawSize, const Offset& offset) = 0;
