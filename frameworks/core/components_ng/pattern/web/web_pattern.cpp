@@ -1530,11 +1530,19 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateDomStorageEnabled(GetDomStorageAccessEnabledValue(false));
         delegate_->UpdateGeolocationEnabled(GetGeolocationAccessEnabledValue(true));
         delegate_->UpdateCacheMode(GetCacheModeValue(WebCacheMode::DEFAULT));
-        delegate_->UpdateDarkMode(GetDarkModeValue(WebDarkMode::Off));
-        delegate_->UpdateForceDarkAccess(GetForceDarkAccessValue(false));
+        if (webData_) {
+            // Created a richtext component
+            delegate_->SetRichtextIdentifier(webData_);
+            delegate_->UpdateDarkMode(GetDarkModeValue(WebDarkMode::Auto));
+            delegate_->UpdateForceDarkAccess(GetForceDarkAccessValue(true));
+            delegate_->UpdateOverviewModeEnabled(GetOverviewModeAccessEnabledValue(false));
+        } else {
+            delegate_->UpdateDarkMode(GetDarkModeValue(WebDarkMode::Off));
+            delegate_->UpdateForceDarkAccess(GetForceDarkAccessValue(false));
+            delegate_->UpdateOverviewModeEnabled(GetOverviewModeAccessEnabledValue(true));
+        }
         delegate_->UpdateAudioResumeInterval(GetAudioResumeIntervalValue(-1));
         delegate_->UpdateAudioExclusive(GetAudioExclusiveValue(true));
-        delegate_->UpdateOverviewModeEnabled(GetOverviewModeAccessEnabledValue(true));
         delegate_->UpdateFileFromUrlEnabled(GetFileFromUrlAccessEnabledValue(false));
         delegate_->UpdateDatabaseEnabled(GetDatabaseAccessEnabledValue(false));
         delegate_->UpdateTextZoomRatio(GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));

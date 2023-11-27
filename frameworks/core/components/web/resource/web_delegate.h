@@ -524,6 +524,10 @@ public:
     }
     void NotifyMemoryLevel(int32_t level);
     void SetAudioMuted(bool muted);
+    void SetRichtextIdentifier(std::optional<std::string>& richtextData)
+    {
+        richtextData_ = richtextData;
+    }
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -814,6 +818,7 @@ private:
     float lowerFrameRateVisibleRatio_ = 0.1;
     std::optional<ScriptItems> scriptItems_;
     bool accessibilityState_ = false;
+    std::optional<std::string> richtextData_;
 #endif
 };
 
