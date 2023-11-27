@@ -518,6 +518,7 @@ bool UIExtensionPattern::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
+        DisPatchFocusActiveEvent(true);
         // tab trigger consume the key event
         return pipeline->IsTabJustTriggerOnKeyEvent();
     } else {
