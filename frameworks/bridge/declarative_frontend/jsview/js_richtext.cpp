@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/richtext_model_impl.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/richtext_model_ng.h"
 
 namespace OHOS::Ace {
@@ -77,10 +78,11 @@ void JSRichText::OnStart(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-
-        auto onStartEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto onStartEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                 const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
 
@@ -92,10 +94,11 @@ void JSRichText::OnComplete(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-
-        auto onCompleteEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto onCompleteEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                    const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
 

@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
@@ -507,15 +508,19 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
     }
 
     auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](GestureEvent& info) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onTap = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), node = targetNode](
+                     GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info);
     };
-
-    auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](const ClickInfo* info) {
+    auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = targetNode](
+                       const ClickInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(*info);
     };
 

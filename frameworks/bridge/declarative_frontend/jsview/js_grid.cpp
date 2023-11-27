@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/jsview/models/grid_model_impl.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 
 namespace OHOS::Ace {
@@ -297,7 +298,6 @@ void JSGrid::JsOnScrollBarUpdate(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-
     auto onScrollBarUpdate = [execCtx = info.GetExecutionContext(),
                                  func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
                                      JSRef<JSFunc>::Cast(info[0]))](int32_t index, const Dimension& offset) {
@@ -601,7 +601,8 @@ void JSGrid::JsOnGridDragStart(const JSCallbackInfo& info)
     }
 
     auto jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onItemDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFunc)](
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onItemDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFunc), node = targetNode](
                                const ItemDragInfo& dragInfo, int32_t itemIndex) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Grid.onItemDragStart");
@@ -619,6 +620,7 @@ void JSGrid::JsOnGridDragStart(const JSCallbackInfo& info)
         }
         auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
         CHECK_NULL_VOID(builderFunc);
+        PipelineContext::SetCallBackNode(node);
         builderFunc->Execute();
     };
     GridModel::GetInstance()->SetOnItemDragStart(std::move(onItemDragStart));

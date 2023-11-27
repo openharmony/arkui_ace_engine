@@ -62,13 +62,16 @@ void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSObject>& re
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                           const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         if (param != "true" && param != "false") {
             return;
         }
         bool newValue = StringToBool(param);
         ACE_SCORING_EVENT("Refresh.ChangeEvent");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -163,9 +166,12 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onStateChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const int32_t& value) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onStateChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                             const int32_t& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Refresh.OnStateChange");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -178,9 +184,11 @@ void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onRefreshing = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onRefreshing = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Refresh.OnRefreshing");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make();
         func->ExecuteJS(1, &newJSVal);
     };

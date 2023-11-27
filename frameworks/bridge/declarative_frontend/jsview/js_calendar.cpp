@@ -26,7 +26,10 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
+#include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/calendar_model_impl.h"
@@ -299,14 +302,15 @@ void JSCalendar::JsOnSelectedChange(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-
     if (info[0]->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto selectedChangeFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto selectedChange = [execCtx = info.GetExecutionContext(), func = std::move(selectedChangeFuc)](
-                                    const std::string& info) {
+        auto selectedChange = [execCtx = info.GetExecutionContext(), func = std::move(selectedChangeFuc),
+                                  node = frameNode](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             std::vector<std::string> keys = { "year", "month", "day" };
             ACE_SCORING_EVENT("Calendar.onSelectedChange");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(keys, info);
         };
         CalendarModel::GetInstance()->SetSelectedChangeEvent(std::move(selectedChange));
@@ -318,12 +322,14 @@ void JSCalendar::JsOnRequestData(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto requestDataFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto requestData = [execCtx = info.GetExecutionContext(), func = std::move(requestDataFuc)](
-                            const std::string& info) {
+    auto requestData = [execCtx = info.GetExecutionContext(), func = std::move(requestDataFuc), node = frameNode](
+                           const std::string& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Calendar.onRequestData");
         std::vector<std::string> keys = { "year", "month", "currentMonth", "currentYear", "monthState" };
+        PipelineContext::SetCallBackNode(node);
         func->Execute(keys, info);
     };
     CalendarModel::GetInstance()->SetOnRequestDataEvent(std::move(requestData));

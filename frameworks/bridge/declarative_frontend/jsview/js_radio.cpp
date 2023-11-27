@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/models/radio_model_impl.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 
 namespace OHOS::Ace {
@@ -103,9 +104,11 @@ void ParseCheckedObject(const JSCallbackInfo& args, const JSRef<JSVal>& changeEv
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto onChecked = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool check) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChecked = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool check) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Radio.onChangeEvent");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(check));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -361,9 +364,11 @@ void JSRadio::OnChange(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool check) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool check) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Radio.onChange");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(check));
         func->ExecuteJS(1, &newJSVal);
     };

@@ -101,6 +101,13 @@ PipelineBase::~PipelineBase()
     LOG_DESTROY();
 }
 
+void PipelineBase::SetCallBackNode(const WeakPtr<NG::FrameNode>& node)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(node);
+}
+
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 {
     auto currentContainer = Container::Current();

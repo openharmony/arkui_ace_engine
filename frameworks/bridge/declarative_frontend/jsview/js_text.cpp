@@ -36,6 +36,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
@@ -441,9 +442,7 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             ACE_SCORING_EVENT("Text.onClick");
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->UpdateCurrentActiveNode(node);
+            PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
         };
         TextModel::GetInstance()->SetOnClick(std::move(onClick));
@@ -452,9 +451,10 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
         if (info[0]->IsFunction()) {
             auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
             auto impl = inspector ? inspector->GetInspectorFunctionImpl() : nullptr;
+            WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
             RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-            auto onClickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](
-                                 const BaseEventInfo* info) {
+            auto onClickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl,
+                                 node = frameNode](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
                 auto newInfo = *clickInfo;
@@ -462,6 +462,7 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
                     impl->UpdateEventInfo(newInfo);
                 }
                 ACE_SCORING_EVENT("Text.onClick");
+                PipelineContext::SetCallBackNode(node);
                 func->Execute(newInfo);
             };
             TextModel::GetInstance()->SetOnClick(std::move(onClickId));
@@ -516,7 +517,6 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
                            const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
         NG::DragDropBaseInfo itemInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
-
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
             return itemInfo;
@@ -526,7 +526,6 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
             itemInfo.node = node;
             return itemInfo;
         }
-
         auto builderObj = JSRef<JSObject>::Cast(ret);
 #if defined(PIXEL_MAP_SUPPORTED)
         auto pixmap = builderObj->GetProperty("pixelMap");
@@ -545,11 +544,13 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
 void JSText::JsOnDragEnter(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragEnter");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info, extraParams);
     };
     TextModel::GetInstance()->SetOnDragEnter(std::move(onDragEnterId));
@@ -558,11 +559,13 @@ void JSText::JsOnDragEnter(const JSCallbackInfo& info)
 void JSText::JsOnDragMove(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc), node = frameNode](
                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragMove");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info, extraParams);
     };
     TextModel::GetInstance()->SetOnDragMove(std::move(onDragMoveId));
@@ -571,11 +574,13 @@ void JSText::JsOnDragMove(const JSCallbackInfo& info)
 void JSText::JsOnDragLeave(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragLeave");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info, extraParams);
     };
     TextModel::GetInstance()->SetOnDragLeave(std::move(onDragLeaveId));

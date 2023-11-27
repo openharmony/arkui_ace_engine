@@ -80,10 +80,12 @@ void JSNavRouter::SetOnStateChange(const JSCallbackInfo& info)
     }
     if (info[0]->IsFunction()) {
         auto onStateChangeCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onStateChange = [execCtx = info.GetExecutionContext(), func = std::move(onStateChangeCallback)](
-                                 bool isActivated) {
+        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto onStateChange = [execCtx = info.GetExecutionContext(), func = std::move(onStateChangeCallback),
+                                 node = targetNode](bool isActivated) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("OnStateChange");
+            PipelineContext::SetCallBackNode(node);
             JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(isActivated));
             func->ExecuteJS(1, &param);
         };

@@ -24,6 +24,7 @@
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
@@ -85,9 +86,12 @@ void ParseToggleIsOnObject(const JSCallbackInfo& info, const JSRef<JSVal>& chang
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto onChangeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool isOn) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChangeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                             bool isOn) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Toggle.onChangeEvent");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -221,9 +225,11 @@ void JSToggle::OnChange(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool isOn) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool isOn) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Toggle.onChange");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
         func->ExecuteJS(1, &newJSVal);
     };
