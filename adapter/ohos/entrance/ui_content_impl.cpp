@@ -1433,6 +1433,27 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
         TaskExecutor::TaskType::UI);
 }
 
+void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintrect)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID(stageNode);
+    auto renderContext = stageNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintRectf = renderContext->GetPaintRectWithoutTransform();
+    auto offset = stageNode->GetPaintRectOffset(false);
+    paintrect.posX_ = static_cast<int>(offset.GetX());
+    paintrect.posY_ = static_cast<int>(offset.GetY());
+    paintrect.width_ = static_cast<uint32_t>(paintRectf.Width());
+    paintrect.height_ = static_cast<uint32_t>(paintRectf.Height());
+}
+
 bool UIContentImpl::ProcessBackPressed()
 {
     LOGI("OnBackPressed called");
