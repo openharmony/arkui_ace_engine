@@ -416,6 +416,19 @@ struct ArkUIImageModifierAPI {
     void (*ResetObjectFit)(NodeHandle node);
 };
 
+struct ArkUIVideoModifierAPI {
+    void (*SetAutoPlay)(NodeHandle node, uint32_t autoPlay);
+    void (*ResetAutoPlay)(NodeHandle node);
+    void (*SetVideoObjectFit)(NodeHandle node, int32_t objectFit);
+    void (*ResetVideoObjectFit)(NodeHandle node);
+    void (*SetVideoControls)(NodeHandle node, uint32_t controlsValue);
+    void (*ResetVideoControls)(NodeHandle node);
+    void (*SetVideoLoop)(NodeHandle node, uint32_t value);
+    void (*ResetVideoLoop)(NodeHandle node);
+    void (*SetVideoMuted)(NodeHandle node, uint32_t value);
+    void (*ResetVideoMuted)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -441,6 +454,7 @@ struct ArkUINodeAPI {
     ArkUINavigationModifierAPI (*GetNavigationModifier)();
     ArkUIRichEditorModifierAPI (*GetRichEditorModifier)();
     ArkUIImageModifierAPI (*GetImageModifier)();
+    ArkUIVideoModifierAPI (*GetVideoModifier)();
 };
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H

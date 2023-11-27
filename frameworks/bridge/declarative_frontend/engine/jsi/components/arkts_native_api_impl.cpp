@@ -37,6 +37,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_textpicker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_timepicker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rich_editor_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_video_modifier.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -74,7 +75,8 @@ static struct ArkUINodeAPI impl = {
     GetTextAreaModifier,
     GetNavigationModifier,
     GetRichEditorModifier,
-    GetImageModifier
+    GetImageModifier,
+    GetVideoModifier,
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI()
