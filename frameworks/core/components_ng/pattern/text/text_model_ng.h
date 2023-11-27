@@ -76,6 +76,19 @@ public:
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
     static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
+    static void SetTextCase(FrameNode* frameNode, TextCase value);
+    static void SetMaxLines(FrameNode* frameNode, uint32_t value);
+    static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetDraggable(FrameNode* frameNode, bool draggable);
+    static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
+    static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
+    static void SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value);
+    static void SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value);
+    static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
+    static void SetBaselineOffset(FrameNode* frameNode, const Dimension& value);
+    static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
+    static void SetFont(FrameNode* frameNode, const Font& value);
 };
 } // namespace OHOS::Ace::NG
 
