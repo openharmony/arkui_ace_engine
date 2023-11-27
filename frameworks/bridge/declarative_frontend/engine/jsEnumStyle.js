@@ -2078,9 +2078,9 @@ var OptionWidthMode;
   OptionWidthMode["FIT_TRIGGER"] = "fit_trigger";
 })(OptionWidthMode || (OptionWidthMode = {}));
 
-var ArrowPlacement;
-(function (ArrowPlacement) {
-  ArrowPlacement["START"] = "Start";
-  ArrowPlacement["CENTER"] = "Center";
-  ArrowPlacement["END"] = "End";
-})(ArrowPlacement || (ArrowPlacement = {}));
+var ArrowPointPosition;
+(function (ArrowPointPosition) {
+  ArrowPointPosition["START"] = "Start";
+  ArrowPointPosition["CENTER"] = "Center";
+  ArrowPointPosition["END"] = "End";
+})(ArrowPointPosition || (ArrowPointPosition = {}));
