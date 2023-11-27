@@ -417,7 +417,7 @@ void TextFieldPattern::UpdateCaretRect()
         return;
     }
 
-    selectController_->MoveCaretToContentRect(selectController_->GetCaretIndex());
+    selectController_->MoveCaretToContentRect(selectController_->GetCaretIndex(), TextAffinity::DOWNSTREAM);
 }
 
 void TextFieldPattern::AdjustTextInReasonableArea()
