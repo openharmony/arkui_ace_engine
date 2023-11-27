@@ -532,6 +532,13 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
         }
         scrollBar_->ScheduleDisappearDelayTask();
     }
+    UpdateBorderRadius();
+}
+
+void ScrollablePattern::UpdateBorderRadius()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (renderContext->HasBorderRadius()) {
@@ -585,6 +592,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
             }
         }
         Offset scrollOffset = { offset, offset }; // fit for w/h switched.
+        UpdateBorderRadius();
         scrollBar_->SetIsOutOfBoundary(IsOutOfBoundary());
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
         scrollBar_->MarkNeedRender();
