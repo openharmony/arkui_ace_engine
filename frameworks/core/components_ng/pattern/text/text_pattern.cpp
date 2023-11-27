@@ -1708,26 +1708,27 @@ void TextPattern::ProcessBoundRectByTextShadow(RectF& rect)
     float upOffsetY = 0.0f;
     float downOffsetY = 0.0f;
     for (const auto& shadow : shadows.value()) {
+        auto shadowBlurRadius = shadow.GetBlurRadius() * 2.0f;
         if (LessNotEqual(shadow.GetOffset().GetX(), 0.0f) && LessNotEqual(shadow.GetOffset().GetX(), leftOffsetX)) {
-            leftOffsetX = shadow.GetOffset().GetX();
+            leftOffsetX = shadow.GetOffset().GetX() - shadowBlurRadius;
         }
 
         if (GreatNotEqual(shadow.GetOffset().GetX(), 0.0f) &&
-            GreatNotEqual(shadow.GetOffset().GetX() + shadow.GetBlurRadius(), rightOffsetX)) {
-            rightOffsetX = shadow.GetOffset().GetX() + shadow.GetBlurRadius();
+            GreatNotEqual(shadow.GetOffset().GetX() + shadowBlurRadius, rightOffsetX)) {
+            rightOffsetX = shadow.GetOffset().GetX() + shadowBlurRadius;
         }
 
         if (LessNotEqual(shadow.GetOffset().GetY(), 0.0f) && LessNotEqual(shadow.GetOffset().GetY(), upOffsetY)) {
-            upOffsetY = shadow.GetOffset().GetY();
+            upOffsetY = shadow.GetOffset().GetY() - shadowBlurRadius;
         }
 
         if (GreatNotEqual(shadow.GetOffset().GetY(), 0.0f) &&
-            GreatNotEqual(shadow.GetOffset().GetY() + shadow.GetBlurRadius(), downOffsetY)) {
-            downOffsetY = shadow.GetOffset().GetY() + shadow.GetBlurRadius();
+            GreatNotEqual(shadow.GetOffset().GetY() + shadowBlurRadius, downOffsetY)) {
+            downOffsetY = shadow.GetOffset().GetY() + shadowBlurRadius;
         }
     }
-    rect.SetRect(rect.GetX() + leftOffsetX, rect.GetY() + upOffsetY, rect.Width() + rightOffsetX - leftOffsetX,
-        rect.Height() + downOffsetY - upOffsetY);
+    rect.SetRect(
+        leftOffsetX, upOffsetY, rect.Width() + rightOffsetX - leftOffsetX, rect.Height() + downOffsetY - upOffsetY);
 }
 
 RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
@@ -1748,13 +1749,21 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(context, paintMethod);
     if (context->GetClipEdge().has_value()) {
         auto geometryNode = host->GetGeometryNode();
-        auto frameOffset = geometryNode->GetFrameOffset();
         auto frameSize = geometryNode->GetFrameSize();
         CHECK_NULL_RETURN(paragraph_, paintMethod);
-        auto height = static_cast<float>(paragraph_->GetHeight() + std::fabs(baselineOffset_));
-        if (!context->GetClipEdge().value() && LessNotEqual(frameSize.Height(), height)) {
-            RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(), height);
-            ProcessBoundRectByTextShadow(boundsRect);
+        RectF boundsRect = overlayMod_->GetBoundsRect();
+        auto boundsWidth = contentRect_.GetX() + static_cast<float>(paragraph_->GetLongestLine());
+        auto boundsHeight =
+            contentRect_.GetY() + static_cast<float>(paragraph_->GetHeight() + std::fabs(baselineOffset_));
+        boundsRect.SetWidth(boundsWidth);
+        boundsRect.SetHeight(boundsHeight);
+        ProcessBoundRectByTextShadow(boundsRect);
+        if (!context->GetClipEdge().value() && (LessNotEqual(frameSize.Width(), boundsRect.Width()) ||
+                                                   LessNotEqual(frameSize.Height(), boundsRect.Height()))) {
+            boundsWidth = std::max(frameSize.Width(), boundsRect.Width());
+            boundsHeight = std::max(frameSize.Height(), boundsRect.Height());
+            boundsRect.SetWidth(boundsWidth);
+            boundsRect.SetHeight(boundsHeight);
             overlayMod_->SetBoundsRect(boundsRect);
         }
     }
