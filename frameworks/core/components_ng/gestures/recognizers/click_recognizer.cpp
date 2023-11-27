@@ -244,7 +244,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         return;
     }
     InitGlobalValue(event.sourceType);
-    // In form and sceneboard scenario, if move more than 20vp, reject click gesture.
+    // In form scenario, if move more than 20vp, reject click gesture.
     // Remove form scenario when formal solution is completed.
     auto pipeline = PipelineBase::GetCurrentContext();
     if (pipeline && pipeline->IsFormRender()) {
