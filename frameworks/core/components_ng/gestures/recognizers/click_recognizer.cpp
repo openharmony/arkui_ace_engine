@@ -43,7 +43,7 @@ constexpr int32_t DEFAULT_LONGPRESS_DURATION = 800000000;
 
 } // namespace
 
-void ClickRecognizer::IsPointInRegion(const TouchEvent& event)
+bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
 {
     PointF localPoint(event.x, event.y);
     auto frameNode = GetAttachedNode();
@@ -57,7 +57,9 @@ void ClickRecognizer::IsPointInRegion(const TouchEvent& event)
             TAG_LOGI(AceLogTag::ACE_GESTURE, "This MOVE/UP event is out of region, try to reject click gesture");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
+        return false;
     }
+    return true;
 }
 
 ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count) : MultiFingersRecognizer(fingers), count_(count)
@@ -192,15 +194,15 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
     InitGlobalValue(event.sourceType);
-    IsPointInRegion(event);
     touchPoints_[event.id] = event;
     UpdateFingerListInfo();
+    auto isUpInRegion = IsPointInRegion(event);
     --currentTouchPointsNum_;
     if (currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();
     }
     // Check whether multi-finger taps are completed in count_ times
-    if (equalsToFingers_ && (currentTouchPointsNum_ == 0)) {
+    if (equalsToFingers_ && (currentTouchPointsNum_ == 0) && isUpInRegion) {
         // Turn off the multi-finger lift deadline timer
         fingerDeadlineTimer_.Cancel();
         focusPoint_ = ComputeFocusPoint();
