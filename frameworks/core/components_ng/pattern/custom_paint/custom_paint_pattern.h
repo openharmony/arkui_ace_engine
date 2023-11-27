@@ -150,6 +150,7 @@ private:
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
     bool isCanvasInit_ = false;
+    SizeF oldPixelGridRoundSize = {-1, -1};
 
     RefPtr<RenderingContext2DModifier> contentModifier_;
 
