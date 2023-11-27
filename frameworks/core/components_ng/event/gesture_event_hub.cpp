@@ -108,6 +108,7 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
         auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
         if (recognizer) {
             recognizer->BeginReferee(touchId);
+            recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
             recognizer->SetTargetComponent(targetComponent);
             if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
                 auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
@@ -211,6 +212,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             for (const auto& groupRecognizer : groupRecognizers) {
                 if (groupRecognizer) {
                     groupRecognizer->SetCoordinateOffset(offset);
+                    groupRecognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
                     groupRecognizer->SetTargetComponent(targetComponent);
                 }
             }
