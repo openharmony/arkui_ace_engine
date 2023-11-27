@@ -94,6 +94,8 @@ public:
 
     virtual void SetSurfaceQueueSize(int32_t queueSize) {}
 
+    virtual void DrawBufferForXComponent(RSCanvas& canvas, float width, float height) {};
+
 protected:
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);
 };
