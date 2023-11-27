@@ -33,6 +33,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_radio_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rating_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_select_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_stack_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_slider_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_textpicker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_timepicker_modifier.h"
@@ -69,6 +70,7 @@ static struct ArkUINodeAPI impl = {
     GetRatingModifier,
     GetSliderModifier,
     GetDividerModifier,
+    GetStackModifier,
     GetNavDestinationModifier,
     GetGridColModifier,
     GetPanelModifier,

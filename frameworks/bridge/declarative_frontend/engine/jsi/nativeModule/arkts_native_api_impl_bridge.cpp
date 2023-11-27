@@ -31,6 +31,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_radio_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rating_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_slider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h"
@@ -603,6 +604,13 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetThickness"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetThickness));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "slider"), slider);
+
+    auto stack = panda::ObjectRef::New(vm);
+    stack->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignContent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StackBridge::SetAlignContent));
+    stack->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignContent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StackBridge::ResetAlignContent));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "stack"), stack);
 
     auto blank = panda::ObjectRef::New(vm);
     blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColor"),

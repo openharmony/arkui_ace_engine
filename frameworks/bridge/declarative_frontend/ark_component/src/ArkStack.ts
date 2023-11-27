@@ -4,8 +4,24 @@ class ArkStackComponent extends ArkComponent implements StackAttribute {
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
         throw new Error("Method not implemented.");
     }
-    alignContent(value: Alignment): this {
-        throw new Error("Method not implemented.");
+    alignContent(value: Alignment): StackAttribute {
+        if (value) {
+            modifier(this._modifiers, StackAlignContentModifier, value);
+        } else {
+            modifier(this._modifiers, StackAlignContentModifier, undifined);
+        }
+        return this;
+    }
+}
+
+class StackAlignContentModifier extends Modifier<number> {
+    static identity: Symbol = Symbol('stackAlignContent');
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().stack.resetAlignContent(node);
+        } else {
+            GetUINativeModule().stack.setAlignContent(node, this.value!);
+        }
     }
 }
 // @ts-ignore

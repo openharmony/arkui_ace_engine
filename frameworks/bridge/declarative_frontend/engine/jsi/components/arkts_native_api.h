@@ -378,6 +378,11 @@ struct ArkUIDividerModifierAPI {
     void (*ResetDividerVertical)(NodeHandle node);
 };
 
+struct ArkUIStackModifierAPI {
+    void (*SetAlignContent)(NodeHandle node, int32_t alignment);
+    void (*ResetAlignContent)(NodeHandle node);
+};
+
 struct ArkUIGridColModifierAPI {
     void (*SetSpan)(NodeHandle node, int32_t* containerSizeArray, int32_t size);
     void (*ResetSpan)(NodeHandle node);
@@ -447,6 +452,7 @@ struct ArkUINodeAPI {
     ArkUIRatingModifierAPI (*GetRatingModifier)();
     ArkUISliderModifierAPI (*GetSliderModifier)();
     ArkUIDividerModifierAPI (*GetDividerModifier)();
+    ArkUIStackModifierAPI (*GetStackModifier)();
     ArkUINavDestinationModifierAPI (*GetNavDestinationModifier)();
     ArkUIGridColModifierAPI (*GetGridColModifier)();
     ArkUIPanelModifierAPI (*GetPanelModifier)();
