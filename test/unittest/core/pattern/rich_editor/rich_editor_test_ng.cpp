@@ -2673,4 +2673,24 @@ HWTEST_F(RichEditorTestNg, CheckScrollable, TestSize.Level1)
 
     ClearSpan();
 }
+
+/**
+ * @tc.name: NeedSoftKeyboard001
+ * @tc.desc: test NeedSoftKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, NeedSoftKeyboard001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Get frameNode and pattern.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test whether rich editor need soft keyboard.
+     */
+    EXPECT_TRUE(richEditorPattern->NeedSoftKeyboard());
+}
 } // namespace OHOS::Ace::NG
