@@ -739,23 +739,45 @@ void JSSelect::SetMenuAlign(const JSCallbackInfo& info)
     SelectModel::GetInstance()->SetMenuAlign(menuAlignObj);
 }
 
+bool JSSelect::IsPercentStr(std::string& percent)
+{
+    if (percent.find("%") != std::string::npos) {
+        size_t index = percent.find("%");
+        percent = percent.substr(0, index);
+        return true;
+    }
+    return false;
+}
+
 void JSSelect::SetOptionWidth(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    
-    if (info[0]->IsString()) {
+    if (info[0]->IsUndefined()) {
+        LOGE("OptionWidth is undefined");
+        return;
+    } else if (info[0]->IsNull()) {
+        LOGE("OptionWidth is null");
+        return;
+    } else if (info[0]->IsString()) {
         std::string modeFlag = info[0]->ToString();
         if (modeFlag.compare("fit_content") == 0) {
             SelectModel::GetInstance()->SetOptionWidthFitTrigger(false);
         } else if (modeFlag.compare("fit_trigger") == 0) {
             SelectModel::GetInstance()->SetOptionWidthFitTrigger(true);
+        } else if (IsPercentStr(modeFlag)) {
+            LOGE("OptionWidth is percentage");
+            return;
         } else {
-            ParseJsDimensionVp(info[0], value);
+            ParseJsDimensionVpNG(info[0], value);
+            if (value.IsNegative()) {
+                value.Reset();
+            }
             SelectModel::GetInstance()->SetOptionWidth(value);
         }
     } else {
-        if (!ParseJsDimensionVp(info[0], value)) {
-            return;
+        ParseJsDimensionVpNG(info[0], value);
+        if (value.IsNegative()) {
+            value.Reset();
         }
         SelectModel::GetInstance()->SetOptionWidth(value);
     }
@@ -764,11 +786,33 @@ void JSSelect::SetOptionWidth(const JSCallbackInfo& info)
 void JSSelect::SetOptionHeight(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
+    if (info[0]->IsUndefined()) {
+        LOGE("OptionHeight is undefined");
         return;
+    } else if (info[0]->IsNull()) {
+        LOGE("OptionHeight is null");
+        return;
+    } else if (info[0]->IsString()) {
+        std::string modeFlag = info[0]->ToString();
+        if (IsPercentStr(modeFlag)) {
+            LOGE("OptionHeight is a percentage");
+            return;
+        } else {
+            ParseJsDimensionVpNG(info[0], value);
+            if (value.IsNegative()) {
+                LOGE("OptionHeight is negative");
+                return;
+            }
+            SelectModel::GetInstance()->SetOptionHeight(value);
+        }
+    } else {
+        ParseJsDimensionVpNG(info[0], value);
+        if (value.IsNegative()) {
+            LOGE("OptionHeight is negative");
+            return;
+        }
+        SelectModel::GetInstance()->SetOptionHeight(value);
     }
-    
-    SelectModel::GetInstance()->SetOptionHeight(value);
 }
 
 void JSSelect::SetOptionWidthFitTrigger(const JSCallbackInfo& info)
