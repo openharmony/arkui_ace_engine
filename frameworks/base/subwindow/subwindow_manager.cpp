@@ -454,13 +454,6 @@ void SubwindowManager::ShowToast(
     const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
     auto containerId = Container::CurrentId();
-    // Get active container when current instanceid is less than 0
-    if (containerId < 0) {
-        auto container = Container::GetActive();
-        if (container) {
-            containerId = container->GetInstanceId();
-        }
-    }
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
         auto subwindow = GetOrCreateSubWindow();
