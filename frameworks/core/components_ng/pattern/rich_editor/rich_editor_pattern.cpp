@@ -3109,12 +3109,14 @@ void RichEditorPattern::ShowSelectOverlay(
 
         pattern->UpdateSelectMenuInfo(hasData, selectInfo, isCopyAll);
 
-        selectInfo.menuCallback.onCopy = [weak]() {
+        selectInfo.menuCallback.onCopy = [weak, usingMouse]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->HandleOnCopy();
             pattern->CloseSelectOverlay();
-            pattern->ResetSelection();
+            if (!usingMouse) {
+                pattern->ResetSelection();
+            }
         };
 
         selectInfo.menuCallback.onCut = [weak]() {

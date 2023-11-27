@@ -902,8 +902,10 @@ void TextFieldPattern::HandleOnCopy()
         clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
     }
 
-    selectController_->UpdateCaretIndex(selectController_->GetSecondHandleIndex());
-    StartTwinkling();
+    if (!IsUsingMouse()) {
+        selectController_->UpdateCaretIndex(selectController_->GetSecondHandleIndex());
+        StartTwinkling();
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
