@@ -44,6 +44,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t NAVIMODE_CHANGE_ANIMATION_DURATION = 250;
 constexpr int32_t OPACITY_ANIMATION_DURATION_APPEAR = 150;
 constexpr int32_t OPACITY_ANIMATION_DURATION_DISAPPEAR = 250;
+constexpr int32_t EMPTY_DESTINATION_CHILD_SIZE = 1;
 constexpr Dimension DEFAULT_DRAG_REGION = 12.0_vp;
 constexpr float DEFAULT_HALF = 2.0f;
 
@@ -590,6 +591,23 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 } else {
                     navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
                     navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+                }
+                auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetContentNode());
+                CHECK_NULL_VOID(navigationContentNode);
+                auto navDestinationNode =
+                    AceType::DynamicCast<NavDestinationGroupNode>(navigationContentNode->GetLastChild());
+                CHECK_NULL_VOID(navDestinationNode);
+                auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+                if (navDestinationNode->GetChildren().size() <= EMPTY_DESTINATION_CHILD_SIZE &&
+                    navDestinationPattern->GetBackButtonState()) {
+                    auto focusHub = navDestinationNode->GetOrCreateFocusHub();
+                    focusHub->SetFocusable(true);
+                    focusHub->SetParentFocusable(true);
+                    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+                    CHECK_NULL_VOID(titleBarNode);
+                    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+                    backButtonNode->GetOrCreateFocusHub()->SetIsDefaultFocus(true);
+                    focusHub->RequestFocusWithDefaultFocusFirstly();
                 }
             },
             TaskExecutor::TaskType::UI);

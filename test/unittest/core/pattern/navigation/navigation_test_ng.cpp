@@ -3294,4 +3294,63 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
     navigationPattern->OnModifyDone();
     ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
+
+/**
+ * @tc.name: NavigationFocusTest001
+ * @tc.desc: Test NavigationPattern::OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationFocusTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    pattern->OnModifyDone();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    config.skipLayout = true;
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function while navDestination has no child or 2 children.
+     * @tc.expected: check whether the defaultFocus property is correct.
+     */
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navigationContentNode = AceType::DynamicCast<FrameNode>(frameNode->GetContentNode());
+    ASSERT_NE(navigationContentNode, nullptr);
+    navigationContentNode->children_.emplace_back(navDestination);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navigationContentNode->GetLastChild());
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBar = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navDestinationNode->titleBarNode_ = titleBar;
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto backButtonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    titleBarNode->backButton_ = backButtonNode;
+    navDestinationNode->children_.emplace_back(backButtonNode);
+    navDestinationNode->children_.emplace_back(backButtonNode);
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(backButtonNode->GetOrCreateFocusHub()->IsDefaultFocus());
+}
 } // namespace OHOS::Ace::NG
