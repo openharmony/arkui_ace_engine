@@ -310,6 +310,15 @@ public:
 
     bool CheckJumpValid(LayoutWrapper* layoutWrapper);
 
+    float GetListGroupItemHeight(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
+
+    bool JudgeInOfScreenScrollAutoType(const RefPtr<LayoutWrapper>& layoutWrapper,
+        const RefPtr<ListLayoutProperty>& layoutProperty, float topPos, float bottomPos);
+
+    void JudgeOutOfScreenScrollAutoType(const RefPtr<LayoutWrapper>& layoutWrapper,
+        const RefPtr<ListLayoutProperty>& layoutProperty, int32_t indexInGroup, int32_t judgeIndex,
+        int32_t startIndex, int32_t endIndex);
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
