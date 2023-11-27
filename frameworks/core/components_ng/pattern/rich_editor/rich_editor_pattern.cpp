@@ -2681,6 +2681,9 @@ bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
             } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
                        keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
                 HandleOnPaste();
+            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_X }) ||
+                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_X })) {
+                HandleOnCut();
             }
         }
         if (keyEvent.code == KeyCode::KEY_DEL) {
