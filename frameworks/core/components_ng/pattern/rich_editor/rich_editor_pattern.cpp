@@ -3665,15 +3665,16 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     int32_t currentPosition = paragraphs_.GetIndex(pos);
     currentPosition = std::min(currentPosition, GetTextContentLength());
     int32_t nextPosition = currentPosition + GetGraphemeClusterLength(GetWideText(), currentPosition);
+    auto wideTextWidth = static_cast<int32_t>(GetWideText());
     // if \n char is between current and next position, it's necessary to move selection
     // range one char ahead to reserve handle at the current line
-    if ((currentPosition < GetTextContentLength() && currentPosition > 0 &&
+    if ((currentPosition < std::min(GetTextContentLength(), wideTextWidth) && currentPosition > 0 &&
             GetWideText().substr(currentPosition, 1) == WIDE_NEWLINE)) {
         nextPosition = std::max(currentPosition - GetGraphemeClusterLength(GetWideText(), currentPosition, true), 0);
         std::swap(currentPosition, nextPosition);
     } else if (currentPosition == 0 && GetWideText().substr(currentPosition, 1) == WIDE_NEWLINE) {
         nextPosition = 0;
-    } else if (currentPosition == GetTextContentLength() && currentPosition > 0 &&
+    } else if (currentPosition == std::min(GetTextContentLength(), wideTextWidth) && currentPosition > 0 &&
                GetWideText().substr(currentPosition - 1, 1) == WIDE_NEWLINE &&
                LessOrEqual(pos.GetY(), contentRect_.Height() + contentRect_.GetY())) {
         // if caret at last position and prev char is \n, set selection to the char before \n
