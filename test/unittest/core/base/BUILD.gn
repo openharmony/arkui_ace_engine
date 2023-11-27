@@ -56,7 +56,11 @@ ace_unittest("ui_node_test_ng") {
 ace_unittest("view_abstract_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "view_abstract_test_ng.cpp" ]
+  sources = [
+    "$ace_root/frameworks/core/common/event_manager.cpp",
+    "$ace_root/frameworks/core/pipeline/base/element.cpp",
+    "view_abstract_test_ng.cpp",
+  ]
 }
 
 ace_unittest("view_full_update_model_ng_test") {
@@ -89,10 +93,9 @@ group("core_base_unittest") {
     ":inspector_test_ng",
     ":observer_test_ng",
     ":ui_node_test_ng",
+    ":view_abstract_test_ng",
     ":view_full_update_model_ng_test",
     ":view_partial_update_model_test_ng",
     ":view_stack_processor_test_ng",
-
-    # ":view_abstract_test_ng",
   ]
 }
