@@ -243,7 +243,7 @@ void CanvasPaintMethod::DrawImage(
     }
 
     RSRect bounds = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-    rosen::SaveLayerOps layerOps(&bounds, &imageBrush_);
+    RSSaveLayerOps layerOps(&bounds, &imageBrush_);
     switch (canvasImage.flag) {
         case 0: {
             if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
@@ -1004,28 +1004,51 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
     }
 }
 #else
+#ifndef USE_GRAPHIC_TEXT_GINE
 void CanvasPaintMethod::UpdateTextStyleForeground(
     const OffsetF& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow)
+#else
+void CanvasPaintMethod::UpdateTextStyleForeground(
+    const OffsetF& offset, bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow)
+#endif
 {
     using namespace Constants;
     if (!isStroke) {
+#ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.foreground_pen.Reset();
         txtStyle.has_foreground_pen = false;
+#else
+        txtStyle.foregroundPen = std::nullopt;
+#endif
         txtStyle.color = ConvertSkColor(fillState_.GetColor());
+#ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.font_size = fillState_.GetTextStyle().GetFontSize().Value();
+#else
+        txtStyle.fontSize = fillState_.GetTextStyle().GetFontSize().Value();
+#endif
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
         if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
             RSBrush brush;
             RSSamplingOptions options;
             InitImagePaint(nullptr, &brush, options);
             UpdatePaintShader(offset, nullptr, &brush, fillState_.GetGradient());
+#ifndef USE_GRAPHIC_TEXT_GINE
             txtStyle.foreground_brush = brush;
             txtStyle.has_foreground_brush = true;
+#else
+            txtStyle.foregroundBrush = brush;
+#endif
         }
         if (globalState_.HasGlobalAlpha()) {
+#ifndef USE_GRAPHIC_TEXT_GINE
             if (txtStyle.has_foreground_brush) {
                 txtStyle.foreground_brush.SetColor(fillState_.GetColor().GetValue());
                 txtStyle.foreground_brush.SetAlphaF(globalState_.GetAlpha()); // set alpha after color
+#else
+            if (txtStyle.foregroundBrush.has_value()) {
+                txtStyle.foregroundBrush->SetColor(fillState_.GetColor().GetValue());
+                txtStyle.foregroundBrush->SetAlphaF(globalState_.GetAlpha()); // set alpha after color
+#endif
             } else {
                 RSBrush brush;
                 RSSamplingOptions options;
@@ -1033,20 +1056,32 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
                 brush.SetColor(fillState_.GetColor().GetValue());
                 brush.SetAlphaF(globalState_.GetAlpha()); // set alpha after color
                 InitPaintBlend(brush);
+#ifndef USE_GRAPHIC_TEXT_GINE
                 txtStyle.foreground_brush = brush;
                 txtStyle.has_foreground_brush = true;
+#else
+                txtStyle.foregroundBrush = brush;
+#endif
             }
         }
     } else {
         // use foreground to draw stroke
+#ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.foreground_pen.Reset();
         txtStyle.has_foreground_pen = false;
+#else
+        txtStyle.foregroundPen = std::nullopt;
+#endif
         RSPen pen;
         RSSamplingOptions options;
         GetStrokePaint(pen, options);
         InitPaintBlend(pen);
         ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
+#ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
+#else
+        txtStyle.fontSize = strokeState_.GetTextStyle().GetFontSize().Value();
+#endif
         if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
             UpdatePaintShader(offset, &pen, nullptr, strokeState_.GetGradient());
         }
@@ -1057,8 +1092,12 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
                 RosenDecorationPainter::ConvertRadiusToSigma(shadow_.GetBlurRadius())));
             pen.SetFilter(filter);
         }
+#ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.foreground_pen = pen;
         txtStyle.has_foreground_pen = true;
+#else
+        txtStyle.foregroundPen = pen;
+#endif
     }
 }
 #endif
