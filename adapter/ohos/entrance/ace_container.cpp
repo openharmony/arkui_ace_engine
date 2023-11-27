@@ -1858,6 +1858,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     if (!parsedConfig.themeTag.empty()) {
         if (ParseThemeConfig(parsedConfig.themeTag)) {
+            configurationChange.defaultFontUpdate = true;
             CheckAndSetFontFamily();
         } else {
             LOGE("AceContainer::ParseThemeConfig false");
