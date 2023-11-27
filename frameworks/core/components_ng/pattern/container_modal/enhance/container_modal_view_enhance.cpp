@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
+#include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
@@ -90,6 +91,18 @@ const int32_t MENU_TASK_DELAY_TIME = 600;
 const Color MENU_ITEM_HOVER_COLOR = Color(0x0c000000);
 const Color MENU_ITEM_PRESS_COLOR = Color(0x1a000000);
 const Color MENU_ITEM_COLOR = Color(0xffffff);
+
+const int32_t DOUBLE_CLICK_TO_MAXIMIZE = 1;
+const int32_t DOUBLE_CLICK_TO_RECOVER = 2;
+
+const int32_t MAX_MENU_ITEM_LEFT_SPLIT = 1;
+const int32_t MAX_MENU_ITEM_RIGHT_SPLIT = 2;
+const int32_t MAX_MENU_ITEM_FULLSCREEN = 3;
+const int32_t MAX_MENU_ITEM_MAXIMIZE = 4;
+
+const int32_t MAX_MENU_DEFAULT_TO_FULLSCREEN = 1;
+const int32_t MAX_MENU_DEFAULT_TO_MAXIMIZE = 2;
+const int32_t MAX_MENU_DEFAULT_NOT_CHANGE = 3;
 } // namespace
 bool ContainerModalViewEnhance::sIsForbidMenuEvent_ = false;
 bool ContainerModalViewEnhance::sIsMenuPending_ = false;
@@ -164,9 +177,11 @@ RefPtr<FrameNode> ContainerModalViewEnhance::SetTapGestureEvent(
         auto maximizeMode = windowManager->GetCurrentWindowMaximizeMode();
         if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
             LOGD("double click to recover");
+            EventReport::ReportDoubleClickTitle(DOUBLE_CLICK_TO_RECOVER);
             windowManager->WindowRecover();
         } else if (windowMode == WindowMode::WINDOW_MODE_FLOATING) {
             LOGD("double click to maximize");
+            EventReport::ReportDoubleClickTitle(DOUBLE_CLICK_TO_MAXIMIZE);
             windowManager->WindowMaximize(true);
         }
         containerNode->OnWindowFocused();
@@ -375,9 +390,11 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMaximizeMenuItem()
         LOGD("Enhance Menu, MODE_MAXIMIZE selected");
         ResetHoverTimer();
         if (MaximizeMode::MODE_AVOID_SYSTEM_BAR == windowManager->GetCurrentWindowMaximizeMode()) {
+            EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_MENU_DEFAULT_NOT_CHANGE);
             windowManager->WindowRecover();
         } else {
             ACE_SCOPED_TRACE("ContainerModalViewEnhance::SwithToMaximize");
+            EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_MENU_DEFAULT_TO_MAXIMIZE);
             windowManager->SetWindowMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
             windowManager->WindowMaximize(true);
         }
@@ -408,6 +425,12 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildFullScreenMenuItem()
         }
         ResetHoverTimer();
         LOGD("Enhance Menu, MODE_FULLSCREEN selected");
+        if (MaximizeMode::MODE_FULL_FILL == windowManager->GetCurrentWindowMaximizeMode()) {
+            EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_FULLSCREEN, MAX_MENU_DEFAULT_NOT_CHANGE);
+        } else {
+            EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_FULLSCREEN, MAX_MENU_DEFAULT_TO_FULLSCREEN);
+        }
+
         if (MaximizeMode::MODE_FULL_FILL == windowManager->GetCurrentWindowMaximizeMode() &&
             WindowMode::WINDOW_MODE_FULLSCREEN == windowManager->GetWindowMode()) {
             windowManager->WindowRecover();
@@ -455,6 +478,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildLeftSplitMenuItem()
             return;
         }
         LOGD("Enhance Menu, left split selected");
+        EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_LEFT_SPLIT, MAX_MENU_DEFAULT_NOT_CHANGE);
         windowManager->FireWindowSplitCallBack();
     };
     auto leftSplitEvent = AceType::MakeRefPtr<ClickEvent>(std::move(leftSplitClickFunc));
@@ -479,6 +503,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildRightSplitMenuItem()
             return;
         }
         LOGD("Enhance Menu, right split selected");
+        EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_RIGHT_SPLIT, MAX_MENU_DEFAULT_NOT_CHANGE);
         windowManager->FireWindowSplitCallBack(false);
     };
     auto rightSplitEvent = AceType::MakeRefPtr<ClickEvent>(std::move(rightSplitClickFunc));
