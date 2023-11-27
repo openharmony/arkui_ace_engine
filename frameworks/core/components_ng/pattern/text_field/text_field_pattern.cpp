@@ -1514,7 +1514,8 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     // emulate clicking bottom of the textField
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     auto isSelectAll = layoutProperty->GetSelectAllValueValue(false);
-    if (isSelectAll && !contentController_->IsEmpty() && !HasFocus()) {
+    if (isSelectAll && !contentController_->IsEmpty() && isFocusedBeforeClick_) {
+        isFocusedBeforeClick_ = false;
         HandleOnSelectAll(true);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
