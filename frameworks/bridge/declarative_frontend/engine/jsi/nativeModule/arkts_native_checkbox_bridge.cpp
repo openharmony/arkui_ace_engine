@@ -15,7 +15,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkbox_bridge.h"
 
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
-#include "bridge/declarative_frontend/engine/jsi/utils/arkts_native_parse.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -24,6 +23,20 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 const Color STROKE_COLOR = Color::WHITE;
 const double DEFAULT_MARK_WIDTH = 2.0;
+
+bool ParseJsDimensionVp(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
+{
+    if (value->IsNumber()) {
+        result = CalcDimension(value->ToNumber(vm)->Value(), DimensionUnit::VP);
+        return true;
+    }
+    if (value->IsString()) {
+        result = StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::VP);
+        return true;
+    }
+    // resouce ignore by design
+    return false;
+}
 
 ArkUINativeModuleValue CheckboxBridge::SetMark(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
