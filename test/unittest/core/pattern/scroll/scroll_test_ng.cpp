@@ -29,6 +29,7 @@
 #include "test/mock/core/common/mock_container.h"
 
 #include "core/animation/animator.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -2780,7 +2781,8 @@ HWTEST_F(ScrollTestNg, EdgeEffectOption003, TestSize.Level1)
 {
     Create([](ScrollModelNG model) {
         model.SetEdgeEffect(EdgeEffect::SPRING, false);
-        CreateContent(20); // 20 is childNumber.
+        // 20 is childNumber.
+        CreateContent(20);
     });
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnable());
@@ -2795,9 +2797,89 @@ HWTEST_F(ScrollTestNg, EdgeEffectOption004, TestSize.Level1)
 {
     Create([](ScrollModelNG model) {
         model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        CreateContent(20); // 20 is childNumber.
+        // 20 is childNumber.
+        CreateContent(20);
     });
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnable());
+}
+
+/**
+ * @tc.name: ScrollWidth001
+ * @tc.desc: Test Get and Set of ScrollWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollWidth001, TestSize.Level1)
+{
+    CreateWithContent();
+    float SCROLL_WIDTH = 150.0f;
+    EXPECT_FALSE(layoutProperty_->GetScrollWidth().has_value());
+    layoutProperty_->UpdateScrollWidth(SCROLL_WIDTH);
+    EXPECT_EQ(layoutProperty_->GetScrollWidth().value(), SCROLL_WIDTH);
+}
+
+/**
+ * @tc.name: ScrollWidth001
+ * @tc.desc: Test Get and Set of ScrollWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, SelectScroll001, TestSize.Level1)
+{
+    CreateWithContent();
+    EXPECT_FALSE(pattern_->IsWidthModifiedBySelect());
+    EXPECT_FALSE(pattern_->IsSelectScroll());
+    pattern_->SetIsWidthModifiedBySelect(true);
+    pattern_->SetIsSelectScroll(true);
+    EXPECT_TRUE(pattern_->IsWidthModifiedBySelect());
+    EXPECT_TRUE(pattern_->IsSelectScroll());
+}
+
+/**
+ * @tc.name: Measure002
+ * @tc.desc: Test select scroll default width Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, Measure002, TestSize.Level1)
+{
+    CreateWithContent();
+    ScrollModelNG model;
+    model.Create();
+    model.SetAxis(Axis::NONE);
+    CreateContent();
+    GetInstance();
+    
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    layoutWrapper->SetActive();
+    layoutWrapper->SetRootMeasureNode();
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    LayoutConstraint.percentReference = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    pattern_->SetIsSelectScroll(true);
+    layoutWrapper->Measure(LayoutConstraint);
+    layoutWrapper->Layout();
+    layoutWrapper->MountToHostOnMainThread();
+    
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    columnInfo->GetParent()->BuildColumnWidth();
+    auto defaultWidth = static_cast<float>(columnInfo->GetWidth(2));
+    auto scrollSize = frameNode_->GetGeometryNode()->GetFrameSize();
+    auto expectSize = SizeF(defaultWidth, ITEM_HEIGHT * TOTAL_LINE_NUMBER);
+    EXPECT_NE(scrollSize, expectSize) << "scrollSize: " << scrollSize.ToString()
+                                      << " expectSize: " << expectSize.ToString();
+}
+
+/**
+ * @tc.name: SelectScroll002
+ * @tc.desc: Test select scroll default width Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, SelectScroll002, TestSize.Level1)
+{
+    CreateWithContent();
+    if (pattern_) {
+        std::cout << "optionPattern_ not null" << std::endl;
+    }
+    auto ScrollWidth=pattern_->GetSelectScrollWidth();
+    ASSERT_NE(ScrollWidth, 0.0);
 }
 } // namespace OHOS::Ace::NG

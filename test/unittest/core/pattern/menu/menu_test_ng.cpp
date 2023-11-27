@@ -7320,6 +7320,30 @@ HWTEST_F(MenuTestNg, MenuPreviewPatternTestNg0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WidthModifiedBySelectTestNg001
+ * @tc.desc: Verify the usability of mod flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, WidthModifiedBySelectTestNg001, TestSize.Level1)
+{
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
+    menuPattern->SetIsWidthModifiedBySelect(true);
+    EXPECT_TRUE(menuPattern->IsWidthModifiedBySelect());
+}
+
+/**
+ * @tc.name: WidthModifiedBySelectTestNg002
+ * @tc.desc: Verify the usability of mod flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, WidthModifiedBySelectTestNg002, TestSize.Level1)
+{
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
+    auto menuWidth = menuPattern->GetSelectMenuWidth();
+    ASSERT_NE(menuWidth,0.0);
+}
+
+/**
  * @tc.name: MenuPreviewLayoutAlgorithmTestNg0100
  * @tc.desc: Test MenuPreviewLayoutAlgorithm Measure and Layout function.
  * @tc.type: FUNC
