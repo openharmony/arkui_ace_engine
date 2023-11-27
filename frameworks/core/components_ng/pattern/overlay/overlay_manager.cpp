@@ -1864,7 +1864,10 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         if (modalStyle.backgroundColor.has_value()) {
             modalNode->GetRenderContext()->UpdateBackgroundColor(modalStyle.backgroundColor.value());
         }
-        modalNode->GetPattern<ModalPresentationPattern>()->UpdateOnDisappear(std::move(onDisappear));
+        auto modalPagePattern = modalNode->GetPattern<ModalPresentationPattern>();
+        CHECK_NULL_VOID(modalPagePattern);
+        modalPagePattern->UpdateOnDisappear(std::move(onDisappear));
+        modalPagePattern->UpdateUIExtensionMode(modalStyle.isUIExtension);
         modalStack_.push(WeakClaim(RawPtr(modalNode)));
         modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
         SaveLastModalNode();
@@ -1884,6 +1887,8 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         }
         return;
     }
+
+    // isShow = false, Pop ModalPage
     if (!modalStack_.empty()) {
         auto topModalNode = modalStack_.top().Upgrade();
         CHECK_NULL_VOID(topModalNode);
@@ -2817,6 +2822,7 @@ int32_t OverlayManager::CreateModalUIExtension(
     isProhibitBack_ = isProhibitBack;
     ModalStyle modalStyle;
     modalStyle.modalTransition = NG::ModalTransition::NONE;
+    modalStyle.isUIExtension = true;
     auto uiExtNode = ModalUIExtension::Create(want, callbacks);
     auto layoutProperty = uiExtNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, 0);

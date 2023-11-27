@@ -30,10 +30,12 @@ enum ModalTransition {
 struct ModalStyle {
     std::optional<ModalTransition> modalTransition;
     std::optional<Color> backgroundColor;
+    bool isUIExtension = false;
 
     bool operator==(const ModalStyle& modelStyle) const
     {
-        return !(modalTransition != modelStyle.modalTransition || backgroundColor != modelStyle.backgroundColor);
+        return !(modalTransition != modelStyle.modalTransition || backgroundColor != modelStyle.backgroundColor ||
+            isUIExtension != modelStyle.isUIExtension);
     }
 };
 } // namespace OHOS::Ace::NG
