@@ -25,6 +25,7 @@ ohos_fuzztest("ArkuiFormRenderImplFuzzTest") {
   fuzz_config_file = "$ace_root/test/fuzztest/arkuiformrenderimpl_fuzzer"
 
   sources = [ "arkuiformrenderimpl_fuzzer.cpp" ]
+  sources += [ "$ace_root/frameworks/core/common/container_scope.cpp" ]
 
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",

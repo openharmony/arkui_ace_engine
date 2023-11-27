@@ -213,7 +213,9 @@ public:
     // MUST implement these interface on each platform.
     static char GetSeparatorCharacter();
     static void PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const char* fmt, va_list args);
+#ifdef ACE_INSTANCE_LOG
     static int32_t GetId();
+#endif
 
 private:
     LogWrapper() = delete;

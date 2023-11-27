@@ -64,6 +64,7 @@ ohos_unittest("svg_dom_test_ng") {
   module_out_path = svg_test_output_path
 
   sources = [
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/image_painter_utils.cpp",
     "$ace_root/frameworks/core/components_ng/svg/svg_context.cpp",
     "$ace_root/frameworks/core/components_ng/svg/svg_dom.cpp",

@@ -43,6 +43,7 @@ ohos_fuzztest("UtilMostFuzzTest") {
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/spring_curve.cpp",
     "$ace_root/frameworks/core/animation/spring_model.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/common/properties/clip_path.cpp",
     "$ace_root/test/mock/core/pipeline/mock_pipeline_base.cpp",
     "//third_party/cJSON/cJSON.c",

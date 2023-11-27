@@ -23,6 +23,7 @@ ohos_fuzztest("UtilFuzzTest") {
   fuzz_config_file = "//foundation/arkui/ace_engine/test/fuzztest/util_fuzzer"
   sources = [
     "$ace_root/frameworks/bridge/common/utils/source_map.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "util_fuzzer.cpp",
   ]
 

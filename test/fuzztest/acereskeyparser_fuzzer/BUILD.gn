@@ -24,6 +24,7 @@ ohos_fuzztest("AceResKeyParserFuzzTest") {
   sources = [
     #fuzz
     "$ace_root/frameworks/base/resource/ace_res_key_parser.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/test/fuzztest/acereskeyparser_fuzzer/acereskeyparser_fuzzer.cpp",
   ]
 

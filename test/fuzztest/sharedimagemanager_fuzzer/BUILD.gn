@@ -30,6 +30,7 @@ ohos_fuzztest("SharedImageManagerFuzzTest") {
     "$cjson_root:cjson",
   ]
   sources = [ "$ace_root/test/fuzztest/sharedimagemanager_fuzzer/sharedimagemanager_fuzzer.cpp" ]
+  sources += [ "$ace_root/frameworks/core/common/container_scope.cpp" ]
   configs = [ "$ace_root/test/fuzztest:ace_fuzz_config" ]
 }
 

@@ -27,6 +27,7 @@ ohos_fuzztest("ArkResschedFuzzTest") {
   sources = [
     "$ace_root/adapter/ohos/osal/ressched_report.cpp",
     "$ace_root/frameworks/base/ressched/ressched_report.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
     "arkressched_fuzzer.cpp",
   ]
