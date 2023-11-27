@@ -1439,6 +1439,17 @@ class VisibilityModifier extends Modifier {
     }
 }
 VisibilityModifier.identity = Symbol('visibility');
+class DisplayPriorityModifier extends Modifier {
+  applyPeer(node, reset) {
+      if (reset) {
+          GetUINativeModule().common.resetDisplayPriority(node);
+      }
+      else {
+          GetUINativeModule().common.setDisplayPriority(node, this.value);
+      }
+  }
+}
+DisplayPriorityModifier.identity = Symbol('displayPriority');
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 const isString = (val) => typeof val === 'string';
 const isNumber = (val) => typeof val === 'number';
@@ -2273,7 +2284,13 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     displayPriority(value) {
-        throw new Error("Method not implemented.");
+      if (isNaN(value)) {
+          modifier(this._modifiers, DisplayPriorityModifier, undefined);
+      }
+      else {
+          modifier(this._modifiers, DisplayPriorityModifier, value);
+      }
+      return this;
     }
     zIndex(value) {
         if (value !== null) {
@@ -3196,6 +3213,17 @@ globalThis.Text.attributeModifier = function (modifier) {
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class TextAreaMaxLinesModifier extends Modifier {
+  applyPeer(node, reset) {
+      if (reset) {
+          GetUINativeModule().textArea.resetMaxLines(node);
+      }
+      else {
+          GetUINativeModule().textArea.setMaxLines(node, this.value);
+      }
+  }
+}
+TextAreaMaxLinesModifier.identity = Symbol('textAreaMaxLines');
 class ArkTextAreaComponent extends ArkComponent {
     onGestureJudgeBegin(callback) {
         throw new Error("Method not implemented.");
@@ -3276,7 +3304,16 @@ class ArkTextAreaComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
     maxLines(value) {
-        throw new Error("Method not implemented.");
+      if (!isNumber(value)) {
+          modifier(this._modifiers, TextAreaMaxLinesModifier, MAX_LINES);
+          return this;
+      }
+      if (Number(value) <= 0) {
+          modifier(this._modifiers, TextAreaMaxLinesModifier, MAX_LINES);
+          return this;
+      }
+      modifier(this._modifiers, TextAreaMaxLinesModifier, Number(value));
+      return this;
     }
     customKeyboard(value) {
         throw new Error("Method not implemented.");

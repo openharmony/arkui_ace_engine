@@ -1,5 +1,16 @@
 
 /// <reference path="./import.ts" />
+
+class TextAreaMaxLinesModifier extends Modifier<number | undefined> {
+  static identity: Symbol = Symbol('textAreaMaxLines');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetMaxLines(node);
+    } else {
+      GetUINativeModule().textArea.setMaxLines(node, this.value!);
+    }
+  }
+}
 class ArkTextAreaComponent extends ArkComponent implements TextAreaAttribute {
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
         throw new Error("Method not implemented.");
@@ -79,9 +90,19 @@ class ArkTextAreaComponent extends ArkComponent implements TextAreaAttribute {
     selectionMenuHidden(value: boolean): this {
         throw new Error("Method not implemented.");
     }
-    maxLines(value: number): this {
-        throw new Error("Method not implemented.");
+  maxLines(value: number): TextAreaAttribute {
+    if (!isNumber(value)) {
+      modifier(this._modifiers, TextAreaMaxLinesModifier, undefined);
+      return this;
     }
+    if (Number(value) <= 0) {
+      modifier(this._modifiers, TextAreaMaxLinesModifier, undefined);
+      return this;
+    }
+    modifier(this._modifiers, TextAreaMaxLinesModifier, Number(value));
+    return this;
+  }
+
     customKeyboard(value: CustomBuilder): this {
         throw new Error("Method not implemented.");
     }
