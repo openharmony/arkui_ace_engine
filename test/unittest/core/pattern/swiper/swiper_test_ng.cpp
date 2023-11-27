@@ -10629,6 +10629,25 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperPatternHandleScroll007
+ * @tc.desc: test HandleScroll from child mouse scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll007, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+
+    // showPrevious
+    auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_AXIS, NestedState::CHILD_SCROLL);
+    EXPECT_EQ(res.remain, 0.0f);
+
+    // showNext
+    res = pattern_->HandleScroll(-5.0f, SCROLL_FROM_AXIS, NestedState::CHILD_SCROLL);
+    EXPECT_EQ(res.remain, 0.0f);
+}
+
+/**
  * @tc.name: SwiperPatternHandleScrollVelocity001
  * @tc.desc: test HandleScrollVelocity self handle
  * @tc.type: FUNC
