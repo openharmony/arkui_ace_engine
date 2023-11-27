@@ -752,6 +752,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
+    pattern->ResetDragOption();
     if (pattern->GetDragRecordSize() >= 0) {
         recordsSize = pattern->GetDragRecordSize();
     } else if (unifiedData) {
