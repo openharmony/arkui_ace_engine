@@ -2504,7 +2504,7 @@ void TextFieldPattern::HandleRightMouseEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleRightMousePressEvent(MouseInfo& info)
 {
-    if (IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+    if (IsSelected()) {
         return;
     }
     auto focusHub = GetFocusHub();
