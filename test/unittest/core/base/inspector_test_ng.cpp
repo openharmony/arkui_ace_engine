@@ -339,4 +339,39 @@ HWTEST_F(InspectorTestNg, InspectorTestNg007, TestSize.Level1)
 
     context1->stageManager_ = nullptr;
 }
+
+/**
+ * @tc.name: InspectorTestNg008
+ * @tc.desc: Test the GetRectangleById
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat frameNode
+     * @tc.expected: expect the function is run ok
+     */
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> ONE = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    /**
+     * @tc.steps: step2. assign value to rootNode_
+     * @tc.expected: rootNode_ pass non-null check.
+     */
+    context->rootNode_ = ONE;
+    context->rootNode_->SetGeometryNode(AceType::MakeRefPtr<GeometryNode>());
+
+    /**
+     * @tc.steps: step3. construct assignments and call GetRectangleById.
+     * @tc.expected: expect the GetRectangleById is run ok and result is expected.
+     */
+    OHOS::Ace::NG::Rectangle rect;
+    string key = "";
+    Inspector::GetRectangleById(key, rect);
+    float zResult = 1.0f;
+    EXPECT_EQ(rect.scale.z, zResult);
+    context->rootNode_ = nullptr;
+}
 } // namespace OHOS::Ace::NG
