@@ -18,6 +18,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <map>
 
 #include "base/json/json_util.h"
 #include "base/log/log.h"
@@ -67,6 +68,88 @@ public:
     virtual int GetLineNumber(void* object) = 0;
 };
 
+class WebCommonDialogObject : public Referenced {
+public:
+    virtual std::string GetUrl(void* object) = 0;
+    virtual std::string GetMessage(void* object) = 0;
+    virtual std::string GetValue(void* object) = 0;
+    virtual void Confirm(void* object, const std::string& promptResult, int index) {};
+    virtual void Confirm(void* object, int index) {};
+    virtual void Cancel(void* object, int index) {};
+    virtual int AddObject(void* object)
+    {
+        return 0;
+    };
+    virtual void DelObject(int index) {};
+};
+
+class WebPermissionRequestObject : public Referenced {
+public:
+    virtual std::string GetOrigin(void* object) = 0;
+    virtual int GetResourcesId(void* object) = 0;
+    virtual void Grant(void* object, const int resourcesId, int index) {};
+    virtual void Deny(void* object, int index) {};
+    virtual int AddObject(void* object)
+    {
+        return 0;
+    };
+    virtual void DelObject(int index) {};
+};
+
+class WebHttpAuthRequestObject : public Referenced {
+public:
+    virtual std::string GetHost(void* object) = 0;
+    virtual std::string GetRealm(void* object) = 0;
+    virtual int AddObject(void* object)
+    {
+        return 0;
+    };
+    virtual void DelObject(int index) {};
+    virtual bool Confirm(void* object, std::string& userName, std::string& pwd, int index)
+    {
+        return false;
+    };
+    virtual bool IsHttpAuthInfoSaved(void* object, int index)
+    {
+        return false;
+    };
+    virtual void Cancel(void* object, int index) {};
+};
+
+class WebDownloadResponseObject : public Referenced {
+public:
+    virtual std::string GetUrl(void* object) = 0;
+    virtual std::string GetMimetype(void* object) = 0;
+    virtual long GetContentLength(void* object) = 0;
+    virtual std::string GetContentDisposition(void* object) = 0;
+    virtual std::string GetUserAgent(void* object) = 0;
+};
+
+class WebFileChooserObject : public Referenced {
+public:
+    virtual std::string GetTitle(void* object) = 0;
+    virtual int GetMode(void* object) = 0;
+    virtual std::vector<std::string> GetAcceptType(void* object) = 0;
+    virtual bool IsCapture(void* object) = 0;
+    virtual int AddObject(void* object)
+    {
+        return 0;
+    };
+    virtual void DelObject(int index) {};
+    virtual void HandleFileList(void* object, std::vector<std::string>& result, int index) = 0;
+};
+
+class WebGeolocationObject : public Referenced {
+public:
+    virtual std::string GetOrigin(void* object) = 0;
+    virtual int AddObject(void* object)
+    {
+        return 0;
+    };
+    virtual void DelObject(int index) {};
+    virtual void Invoke(int index, const std::string& origin, const bool& allow, const bool& retain) = 0;
+};
+
 class WebResourceErrorObject : public Referenced {
 public:
     virtual std::string GetErrorInfo(void* object) = 0;
@@ -88,7 +171,7 @@ public:
     void RegisterObjectEventWithBoolReturn(
 		const std::string& eventId, const EventObjectWithBoolReturnCallback&& eventCallback)
     {
-        LOGI("RegisterObjectEventWithBoolReturn %{public}s", eventId.c_str());
+        TAG_LOGI(AceLogTag::ACE_WEB, "RegisterObjectEventWithBoolReturn %{public}s", eventId.c_str());
         eventObjectWithBoolReturnMap_[eventId] = std::move(eventCallback);
     }
 
@@ -115,7 +198,7 @@ public:
 
     bool OnObjectEventWithBoolReturn(const std::string& eventId, const std::string& param, void *jObject)
     {
-        LOGI("OnObjectEventWithBoolReturn %{public}s", eventId.c_str());
+        TAG_LOGI(AceLogTag::ACE_WEB, "OnObjectEventWithBoolReturn %{public}s", eventId.c_str());
         auto event = eventObjectWithBoolReturnMap_.find(eventId);
         if (event != eventObjectWithBoolReturnMap_.end() && event->second) {
             return event->second(param, jObject);
@@ -185,6 +268,66 @@ public:
         consoleMessageObject_ = object;
     }
 
+    const RefPtr<WebCommonDialogObject>& GetCommonDialogObject()
+    {
+        return commonDialogObject_;
+    }
+
+    void SetCommonDialogObject(const RefPtr<WebCommonDialogObject>& object)
+    {
+        commonDialogObject_ = object;
+    }
+
+    const RefPtr<WebPermissionRequestObject>& GetPermissionRequestObject()
+    {
+        return permissionRequestObject_;
+    }
+
+    void SetPermissionRequestObject(const RefPtr<WebPermissionRequestObject>& object)
+    {
+        permissionRequestObject_ = object;
+    }
+
+    const RefPtr<WebHttpAuthRequestObject>& GetHttpAuthRequestObject()
+    {
+        return httpAuthRequestObject_;
+    }
+
+    void SetHttpAuthRequestObject(const RefPtr<WebHttpAuthRequestObject>& object)
+    {
+        httpAuthRequestObject_ = object;
+    }
+
+    const RefPtr<WebDownloadResponseObject>& GetDownloadResponseObject()
+    {
+        return downloadResponseObject_;
+    }
+
+    void SetDownloadResponseObject(const RefPtr<WebDownloadResponseObject>& object)
+    {
+        downloadResponseObject_ = object;
+    }
+
+    const RefPtr<WebFileChooserObject>& GetFileChooserObject()
+    {
+        return fileChooserObject_;
+    }
+
+    void SetFileChooserObject(const RefPtr<WebFileChooserObject>& object)
+    {
+        fileChooserObject_ = object;
+    }
+
+    const RefPtr<WebGeolocationObject>& GetGeolocationObject()
+    {
+        return GeolocationObject_;
+    }
+
+    void SetGeolocationObject(const RefPtr<WebGeolocationObject>& object)
+    {
+        GeolocationObject_ = object;
+    }
+
 private:
     RefPtr<WebResourceRequestObject> resourceRequestObject_;
     RefPtr<WebScrollObject> scrollObject_;
@@ -192,6 +335,12 @@ private:
     RefPtr<WebResourceErrorObject> resourceErrorObject_;
     RefPtr<WebResourceResponseObject> resourceResponseObject_;
     RefPtr<WebConsoleMessageObject> consoleMessageObject_;
+    RefPtr<WebCommonDialogObject> commonDialogObject_;
+    RefPtr<WebPermissionRequestObject> permissionRequestObject_;
+    RefPtr<WebHttpAuthRequestObject> httpAuthRequestObject_;
+    RefPtr<WebDownloadResponseObject> downloadResponseObject_;
+    RefPtr<WebFileChooserObject> fileChooserObject_;
+    RefPtr<WebGeolocationObject> GeolocationObject_;
     std::unordered_map<std::string, EventObJectCallback> eventObjectMap_;
     std::unordered_map<std::string, EventObjectWithBoolReturnCallback> eventObjectWithBoolReturnMap_;
 };
