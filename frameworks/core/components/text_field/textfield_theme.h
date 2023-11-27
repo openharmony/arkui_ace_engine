@@ -46,68 +46,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            // init theme from global data
-            theme->padding_ = Edge(themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
-                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL),
-                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
-                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL));
-            theme->height_ = themeConstants->GetDimension(THEME_TEXTFIELD_HEIGHT);
-            theme->fontSize_ = themeConstants->GetDimension(THEME_TEXTFIELD_FONT_SIZE);
-            theme->fontWeight_ = FontWeight(themeConstants->GetInt(THEME_TEXTFIELD_FONT_WEIGHT));
-            theme->borderRadius_ = Radius(themeConstants->GetDimension(THEME_TEXTFIELD_BORDER_RADIUS));
-
-            theme->bgColor_ = themeConstants->GetColor(THEME_TEXTFIELD_BACKGROUND_COLOR);
-            theme->placeholderColor_ = themeConstants->GetColor(THEME_TEXTFIELD_PLACEHOLDER_COLOR);
-            theme->textColor_ = themeConstants->GetColor(THEME_TEXTFIELD_TEXT_COLOR);
-            theme->selectedColor_ = themeConstants->GetColor(THEME_TEXTFIELD_TEXT_SELECTED_COLOR);
-            theme->hoverColor_ = themeConstants->GetColor(THEME_TEXTFIELD_HOVER_COLOR);
-            theme->pressColor_ = themeConstants->GetColor(THEME_TEXTFIELD_PRESS_COLOR);
-
-            theme->focusBgColor_ = themeConstants->GetColor(THEME_TEXTFIELD_FOCUS_BACKGROUND_COLOR);
-            theme->focusPlaceholderColor_ = themeConstants->GetColor(THEME_TEXTFIELD_FOCUS_PLACEHOLDER_COLOR);
-            theme->focusTextColor_ = themeConstants->GetColor(THEME_TEXTFIELD_FOCUS_TEXT_COLOR);
-
-            theme->disableOpacityRatio_ = themeConstants->GetDouble(THEME_TEXTFIELD_DISABLE_OPACITY_RATIO);
-            theme->disableTextColor_ = themeConstants->GetColor(THEME_TEXTFIELD_TEXT_COLOR_DISABLE);
-
-            theme->overHideLength_ = themeConstants->GetDimension(THEME_TEXTFIELD_OVER_HIDE_LENGTH);
-
-            theme->cursorColor_ = themeConstants->GetColor(THEME_TEXTFIELD_CURSOR_COLOR);
-            theme->cursorRadius_ = themeConstants->GetDimension(THEME_TEXTFIELD_CURSOR_RADIUS);
-            theme->needFade_ = static_cast<bool>(themeConstants->GetInt(THEME_TEXTFIELD_NEED_FADE));
-
-            theme->iconSize_ = themeConstants->GetDimension(THEME_TEXTFIELD_ICON_SIZE);
-            theme->iconHotZoneSize_ = themeConstants->GetDimension(THEME_TEXTFIELD_ICON_HOT_ZONE_SIZE);
-
-            theme->showEllipsis_ = static_cast<bool>(themeConstants->GetInt(THEME_TEXTFIELD_SHOW_ELLIPSIS));
-
-            theme->errorSpacing_ = themeConstants->GetDimension(THEME_TEXTFIELD_ERROR_SPACING);
-            theme->errorIsInner_ = static_cast<bool>(themeConstants->GetInt(THEME_TEXTFIELD_ERROR_IS_INNER));
-            theme->errorBorderWidth_ = themeConstants->GetDimension(THEME_TEXTFIELD_ERROR_BORDER_WIDTH);
-            theme->errorBorderColor_ = themeConstants->GetColor(THEME_TEXTFIELD_ERROR_BORDER_COLOR);
-            theme->errorTextStyle_.SetTextColor(themeConstants->GetColor(THEME_TEXTFIELD_ERROR_COLOR));
-            theme->errorTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_TEXTFIELD_ERROR_FONT_SIZE));
-            theme->errorTextStyle_.SetFontWeight(FontWeight(themeConstants->GetInt(THEME_TEXTFIELD_ERROR_FONT_WEIGHT)));
-
-            theme->countTextStyle_.SetTextColor(themeConstants->GetColor(THEME_TEXTFIELD_COUNT_TEXT_COLOR));
-            theme->countTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_TEXTFIELD_COUNT_FONT_SIZE));
-            theme->countTextStyle_.SetFontWeight(FontWeight(themeConstants->GetInt(THEME_TEXTFIELD_COUNT_FONT_WEIGHT)));
-            theme->overCountStyle_.SetTextColor(themeConstants->GetColor(THEME_TEXTFIELD_OVER_COUNT_TEXT_COLOR));
-            theme->overCountStyle_.SetFontSize(themeConstants->GetDimension(THEME_TEXTFIELD_OVER_COUNT_FONT_SIZE));
-            theme->overCountStyle_.SetFontWeight(
-                FontWeight(themeConstants->GetInt(THEME_TEXTFIELD_OVER_COUNT_FONT_WEIGHT)));
-
-            theme->countTextStyleOuter_.SetTextColor(themeConstants->GetColor(THEME_TEXTFIELD_COUNT_TEXT_COLOR));
-            theme->countTextStyleOuter_.SetFontSize(
-                themeConstants->GetDimension(THEME_TEXTFIELD_COUNT_FONT_SIZE_OUTER));
-            theme->countTextStyleOuter_.SetFontWeight(
-                FontWeight(themeConstants->GetInt(THEME_TEXTFIELD_COUNT_FONT_WEIGHT)));
-            theme->overCountStyleOuter_.SetTextColor(themeConstants->GetColor(THEME_TEXTFIELD_OVER_COUNT_TEXT_COLOR));
-            theme->overCountStyleOuter_.SetFontSize(
-                themeConstants->GetDimension(THEME_TEXTFIELD_COUNT_FONT_SIZE_OUTER));
-            theme->overCountStyleOuter_.SetFontWeight(
-                FontWeight(themeConstants->GetInt(THEME_TEXTFIELD_OVER_COUNT_FONT_WEIGHT)));
-
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -130,6 +68,33 @@ public:
             const Color defaultUnderlineTextColor = Color(0x99182431);
             const Color defaultCounterColor = Color(0x66182431);
             const Color overCounterColor = Color(0x99FA2A2D);
+            theme->padding_ = Edge(pattern->GetAttr<Dimension>("textfield_padding_horizontal", 0.0_vp),
+                pattern->GetAttr<Dimension>("textfield_padding_vertical", 0.0_vp),
+                pattern->GetAttr<Dimension>("textfield_padding_horizontal", 0.0_vp),
+                pattern->GetAttr<Dimension>("textfield_padding_vertical", 0.0_vp));
+            theme->fontWeight_ =
+                FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("textfield_font_weight", 0.0)));
+            theme->borderRadius_ = Radius(pattern->GetAttr<Dimension>("textfield_border_radius", 0.0_vp));
+            theme->disableOpacityRatio_ = pattern->GetAttr<double>("textfield_disable_opacity_ratio", 0.0);
+            theme->overHideLength_ = pattern->GetAttr<Dimension>("textfield_over_hide_length", 0.0_vp);
+            theme->cursorRadius_ = pattern->GetAttr<Dimension>("textfield_cursor_radius", 0.0_vp);
+            theme->needFade_ = static_cast<bool>(pattern->GetAttr<double>("textfield_need_fade", 0.0));
+            theme->iconSize_ = pattern->GetAttr<Dimension>("textfield_icon_size", 0.0_vp);
+            theme->iconHotZoneSize_ = pattern->GetAttr<Dimension>("textfield_icon_hot_zone_size", 0.0_vp);
+            theme->showEllipsis_ = static_cast<bool>(pattern->GetAttr<double>("textfield_show_ellipsis", 0.0));
+            theme->errorSpacing_ = pattern->GetAttr<Dimension>("textfield_error_spacing", 0.0_vp);
+            theme->errorIsInner_ = static_cast<bool>(pattern->GetAttr<double>("textfield_error_is_inner", 0.0));
+            theme->errorBorderWidth_ = pattern->GetAttr<Dimension>("textfield_error_border_width", 0.0_vp);
+            theme->errorTextStyle_.SetFontWeight(
+                FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("textfield_error_font_weight", 0.0))));
+            theme->countTextStyle_.SetFontWeight(
+                FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("textfield_count_font_weight", 0.0))));
+            theme->overCountStyle_.SetFontWeight(
+                FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("textfield_over_count_font_weight", 0.0))));
+            theme->countTextStyleOuter_.SetFontWeight(
+                FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("textfield_count_font_weight", 0.0))));
+            theme->overCountStyleOuter_.SetFontWeight(
+                FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("textfield_over_count_font_weight", 0.0))));
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp);
             theme->textColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());
             theme->focusTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_FOCUSED, Color());
