@@ -942,8 +942,11 @@ void TextFieldPattern::HandleOnPaste()
         }
         std::wstring pasteData = StringUtils::ToWstring(data);
         textfield->StripNextLine(pasteData);
+        auto originLength = static_cast<int32_t>(textfield->contentController_->GetWideText().length());
         textfield->contentController_->ReplaceSelectedValue(start, end, StringUtils::ToString(pasteData));
-        auto newCaretPosition = std::clamp(std::min(start, end) + static_cast<int32_t>(pasteData.length()), 0,
+        auto caretMoveLength = static_cast<int32_t>(textfield->contentController_->GetWideText().length()) -
+                               originLength;
+        auto newCaretPosition = std::clamp(std::max(start, end) + caretMoveLength, 0,
             static_cast<int32_t>(textfield->contentController_->GetWideText().length()));
         textfield->ResetObscureTickCountDown();
         textfield->selectController_->UpdateCaretIndex(newCaretPosition);
