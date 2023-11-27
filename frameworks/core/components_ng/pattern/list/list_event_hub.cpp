@@ -64,6 +64,9 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
     auto globalY = static_cast<float>(info.GetGlobalPoint().GetY());
 
     draggedIndex_ = GetListItemIndexByPosition(globalX, globalY, true);
+    if (draggedIndex_ == -1) {
+        return;
+    }
     OHOS::Ace::ItemDragInfo itemDragInfo;
     itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
