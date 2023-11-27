@@ -335,6 +335,11 @@ void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
     } else {
         LOGW("the move point is not in drag area");
     }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (host->IsLayoutDirtyMarked()) {
+        context->AddDirtyLayoutNode(host);
+    }
 }
 
 void SelectOverlayPattern::HandlePanEnd(GestureEvent& /*info*/)
