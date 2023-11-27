@@ -2830,6 +2830,19 @@ void RosenRenderContext::UpdateFrontBlur(const Dimension& radius, const BlurOpti
     }
 }
 
+Rosen::SHADOW_COLOR_STRATEGY RosenRenderContext::ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy)
+{
+    if (shadowColorStrategy == ShadowColorStrategy::NONE) {
+        return Rosen::SHADOW_COLOR_STRATEGY::COLOR_STRATEGY_NONE ;
+    } else if (shadowColorStrategy == ShadowColorStrategy::AVERAGE) {
+        return Rosen::SHADOW_COLOR_STRATEGY::COLOR_STRATEGY_AVERAGE ;
+    } else if (shadowColorStrategy == ShadowColorStrategy::PRIMARY) {
+        return Rosen::SHADOW_COLOR_STRATEGY::COLOR_STRATEGY_MAIN ;
+    } else {
+        return Rosen::SHADOW_COLOR_STRATEGY::COLOR_STRATEGY_NONE;
+    }
+}
+
 void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -2847,8 +2860,7 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
     rsNode_->SetShadowMask(shadow.GetShadowType() == ShadowType::BLUR);
     rsNode_->SetShadowIsFilled(shadow.GetIsFilled());
-    rsNode_->SetShadowColorStrategy(shadow.GetShadowColorStrategy() == ShadowColorStrategy::AVERAGE ||
-                                    shadow.GetShadowColorStrategy() == ShadowColorStrategy::PRIMARY);
+    rsNode_->SetShadowColorStrategy(ToShadowColorStrategy(shadow.GetShadowColorStrategy()));
     if (shadow.GetHardwareAcceleration()) {
         rsNode_->SetShadowElevation(shadow.GetElevation());
     } else {

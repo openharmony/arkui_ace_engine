@@ -167,6 +167,7 @@ public:
     void OnLightUpEffectUpdate(double radio) override;
     void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList) override;
 
+    Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void OnBackBlendModeUpdate(BlendMode blendMode) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
