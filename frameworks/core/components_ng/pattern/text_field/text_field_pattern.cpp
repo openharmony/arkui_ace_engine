@@ -2751,8 +2751,8 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
     auto caretStart = 0;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
     if (IsSelected()) {
@@ -2773,8 +2773,8 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
     auto wideInsertValue = StringUtils::ToWstring(insertValue);
     selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
     if (!IsTextArea() && IsInPasswordMode() && GetTextObscured()) {
-        if (wideInsertValue.length() == 1 
-            && ( textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::NUMBER_PASSWORD
+        if (wideInsertValue.length() == 1 &&
+            (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::NUMBER_PASSWORD
             || std::isdigit(insertValue[0]))) {
             obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
             nakedCharPosition_ = selectController_->GetCaretIndex() - 1;
@@ -2786,8 +2786,6 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
     UpdateEditingValueToRecord();
     cursorVisible_ = true;
     StartTwinkling();
-    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
         HandleCounterBorder();
     }
