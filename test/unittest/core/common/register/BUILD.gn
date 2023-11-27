@@ -19,6 +19,7 @@ ohos_unittest("register_test") {
   defines = [ "JS_JDWP_CONNECT" ]
 
   sources = [
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/register/hdc_connect.cpp",
     "$ace_root/frameworks/core/common/register/hdc_jdwp.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",

@@ -32,6 +32,7 @@ constexpr Dimension MAGNIFIER_OFFSET_Y = 4.0_vp;
 constexpr Dimension PIXEL_MAP_IMAGE_OFFSET = 4.0_vp;
 constexpr Dimension CLOSE_MAGNIFIER_MAX_OFFSET_X = 70.0_vp;
 constexpr Dimension MAGNIFIER_BOUNDRY_WIDTH = 1.0_vp;
+constexpr Dimension DEFAULT_STATUS_BAR_HEIGHT = 48.0_vp;
 } // namespace
 
 TextFieldOverlayModifier::TextFieldOverlayModifier(
@@ -328,7 +329,7 @@ bool TextFieldOverlayModifier::GetMagnifierRect(
         }
     }
     startY = cursorOffsetY - magnifierHeight - magnifierOffsetY;
-    if (startY < 0 && (pattern->GetParentGlobalOffset().GetY() + startY) < 0) {
+    if ((pattern->GetParentGlobalOffset().GetY() + startY) < DEFAULT_STATUS_BAR_HEIGHT.ConvertToPx()) {
         startY = cursorOffsetY + pattern->GetLineHeight() + magnifierHeight + magnifierOffsetY;
     }
     startX = std::max(startX, 0.0f);

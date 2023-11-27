@@ -160,6 +160,15 @@ public:
         return AceType::DynamicCast<Pattern>(frameNode->GetPattern());
     }
 
+    template<typename Pattern>
+    RefPtr<Pattern> GetMainFrameNodePattern(FrameNode* frameNode) const
+    {
+        if (!frameNode) {
+            return nullptr;
+        }
+        return AceType::DynamicCast<Pattern>(frameNode->GetPattern());
+    }
+
     template<typename EventHubType>
     RefPtr<EventHubType> GetMainFrameNodeEventHub() const
     {

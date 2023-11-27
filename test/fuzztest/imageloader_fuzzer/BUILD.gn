@@ -33,6 +33,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$cjson_root:cjson",
   ]
   sources = [
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/image/image_cache.cpp",
     "$ace_root/frameworks/core/image/image_compressor.cpp",
     "$ace_root/frameworks/core/image/image_file_cache.cpp",

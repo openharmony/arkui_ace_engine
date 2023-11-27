@@ -233,22 +233,33 @@ ScrollAlign ListPattern::GetScrollAlignByScrollSnapAlign() const
 
 float ListPattern::CalculateTargetPos(float startPos, float endPos)
 {
-    float downOffset = 0.0f;
-    float upOffset = 0.0f;
-    if (Negative(startPos)) {
-        downOffset = -startPos;
-    }
-    if (GreatNotEqual(endPos, contentMainSize_)) {
-        upOffset = endPos - contentMainSize_;
-    }
+    float topOffset = 0.0f;
+    float bottomOffset = 0.0f;
+    float targetPos = 0.0f;
 
-    if (LessNotEqual(downOffset, upOffset)) {
-        return -downOffset;
+    topOffset = std::abs(startPos);
+    bottomOffset = std::abs(endPos - contentMainSize_);
+
+    if (GreatOrEqual(startPos, 0.0f) && LessOrEqual(endPos, contentMainSize_)) {
+        return 0.0f;
     }
-    if (LessNotEqual(upOffset, downOffset)) {
-        return upOffset;
+    if (LessNotEqual(topOffset, bottomOffset)) {
+        if (Positive(startPos)) {
+            targetPos = -startPos;
+        } else {
+            targetPos = startPos;
+        }
+    } else {
+        if (Positive(endPos - contentMainSize_)) {
+            targetPos = endPos - contentMainSize_;
+        } else {
+            targetPos = contentMainSize_ - endPos;
+        }
     }
-    return 0.0f;
+    if (GreatOrEqual(endPos - startPos, contentMainSize_)) {
+        targetPos = -targetPos;
+    }
+    return targetPos;
 }
 
 RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
@@ -1234,6 +1245,29 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
     FireAndCleanScrollingListener();
 }
 
+bool ListPattern::CheckTargetValid(int32_t index, int32_t indexInGroup)
+{
+    auto host = GetHost();
+    auto totalItemCount = host->GetTotalChildCount();
+    if ((index < 0) || (index >= totalItemCount)) {
+        return false;
+    }
+    auto groupWrapper = host->GetOrCreateChildByIndex(index);
+    CHECK_NULL_RETURN(groupWrapper, false);
+    if (groupWrapper->GetHostTag() != V2::LIST_ITEM_GROUP_ETS_TAG) {
+        return false;
+    }
+    auto groupNode = groupWrapper->GetHostNode();
+    CHECK_NULL_RETURN(groupNode, false);
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(groupPattern, false);
+    auto groupItemCount = groupWrapper->GetTotalChildCount() - groupPattern->GetItemStartIndex();
+    if ((indexInGroup < 0) || (indexInGroup >= groupItemCount)) {
+        return false;
+    }
+    return true;
+}
+
 void ListPattern::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
@@ -1243,10 +1277,12 @@ void ListPattern::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool 
         smooth_ = smooth;
         if (smooth_) {
             if (!AnimateToTarget(index, indexInGroup, align)) {
-                targetIndex_ = index;
-                currentDelta_ = 0;
-                targetIndexInGroup_ = indexInGroup;
-                scrollAlign_ = align;
+                if (CheckTargetValid(index, indexInGroup)) {
+                    targetIndex_ = index;
+                    currentDelta_ = 0;
+                    targetIndexInGroup_ = indexInGroup;
+                    scrollAlign_ = align;
+                }
             }
         } else {
             jumpIndex_ = index;
@@ -1369,6 +1405,15 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
             }
             break;
         case ScrollAlign::AUTO:
+            float itemStartPos = paddingBeforeContent + startPos + itemPosInGroup.value().first;
+            float itemEndPos = paddingBeforeContent + startPos + itemPosInGroup.value().second;
+            if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
+                itemStartPos -= groupPattern->GetHeaderMainSize();
+            }
+            if (stickyStyle == V2::StickyStyle::FOOTER || stickyStyle == V2::StickyStyle::BOTH) {
+                itemEndPos += groupPattern->GetFooterMainSize();
+            }
+            targetPos = CalculateTargetPos(itemStartPos, itemEndPos);
             break;
     }
     return true;

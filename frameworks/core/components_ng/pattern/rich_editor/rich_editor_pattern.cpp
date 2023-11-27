@@ -68,6 +68,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const std::string NEWLINE = "\n";
+const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 #if defined(ENABLE_STANDARD_INPUT)
 // should be moved to theme
 constexpr float CARET_WIDTH = 1.5f;
@@ -77,8 +79,11 @@ constexpr int32_t IMAGE_SPAN_LENGTH = 1;
 constexpr int32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
 constexpr float DEFAULT_TEXT_SIZE = 16.0f;
 constexpr int32_t AUTO_SCROLL_INTERVAL = 20;
-constexpr Dimension AUTO_THRESHOLD = 2.0_vp;
+constexpr Dimension AUTO_SCROLL_MOVE_THRESHOLD = 2.0_vp;
+constexpr Dimension AUTO_SCROLL_EDGE_DISTANCE = 15.0_vp;
+constexpr Dimension AUTO_SCROLL_DRAG_EDGE_DISTANCE = 25.0_vp;
 constexpr float DOUBLE_CLICK_INTERVAL_MS = 300.0f;
+constexpr float BOX_EPSILON = 0.5f;
 
 const std::wstring lineSeparator = L"\n";
 const std::wstring NUM_SYMBOL = L")!@#$%^&*(";
@@ -3737,6 +3742,22 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     int32_t currentPosition = paragraphs_.GetIndex(pos);
     currentPosition = std::min(currentPosition, GetTextContentLength());
     int32_t nextPosition = currentPosition + GetGraphemeClusterLength(GetWideText(), currentPosition);
+    // if \n char is between current and next position, it's necessary to move selection
+    // range one char ahead to reserve handle at the current line
+    if ((currentPosition < GetTextContentLength() && currentPosition > 0 &&
+            GetWideText().substr(currentPosition, 1) == WIDE_NEWLINE)) {
+        nextPosition = std::max(currentPosition - GetGraphemeClusterLength(GetWideText(), currentPosition, true), 0);
+        std::swap(currentPosition, nextPosition);
+    } else if (currentPosition == 0 && GetWideText().substr(currentPosition, 1) == WIDE_NEWLINE) {
+        nextPosition = 0;
+    } else if (currentPosition == GetTextContentLength() && currentPosition > 0 &&
+               GetWideText().substr(currentPosition - 1, 1) == WIDE_NEWLINE &&
+               LessOrEqual(pos.GetY(), contentRect_.Height() + contentRect_.GetY())) {
+        // if caret at last position and prev char is \n, set selection to the char before \n
+        currentPosition--;
+        nextPosition = std::max(currentPosition - GetGraphemeClusterLength(GetWideText(), currentPosition, true), 0);
+        std::swap(currentPosition, nextPosition);
+    }
     nextPosition = std::min(nextPosition, GetTextContentLength());
     AdjustWordSelection(currentPosition, nextPosition);
     textSelector_.Update(currentPosition, nextPosition);
@@ -3814,6 +3835,7 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end)
         }
     }
     SetCaretPosition(textSelector_.GetTextEnd());
+    MoveCaretToContentRect();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -4230,18 +4252,29 @@ void RichEditorPattern::UpdateChildrenOffset()
 void RichEditorPattern::AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy)
 {
     auto deltaOffset = offset - prevAutoScrollOffset_;
-    auto thresholdDistance = AUTO_THRESHOLD.ConvertToPx();
+    auto thresholdDistance = AUTO_SCROLL_MOVE_THRESHOLD.ConvertToPx();
     if (std::abs(deltaOffset.GetY()) < thresholdDistance) {
         return;
     }
     prevAutoScrollOffset_ = offset;
     auto contentRect = GetTextContentRect();
-    if (strategy == EdgeDetectionStrategy::OUT_BOUNDARY) {
-        if (GreatNotEqual(offset.GetY(), contentRect.GetY() + contentRect.Height())) {
-            param.offset = contentRect.GetY() + contentRect.Height() - offset.GetY();
+    float edgeThreshold = param.autoScrollEvent == AutoScrollEvent::DRAG ? AUTO_SCROLL_DRAG_EDGE_DISTANCE.ConvertToPx()
+                                                                         : AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
+    if (GreatOrEqual(edgeThreshold, contentRect.Height())) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AutoScrollByEdgeDetection: Content height is too small.");
+        return;
+    }
+    float topEdgeThreshold = edgeThreshold + contentRect.GetY();
+    float bottomThreshold = contentRect.Bottom() - edgeThreshold;
+
+    if (param.autoScrollEvent == AutoScrollEvent::HANDLE) {
+        auto handleTopOffset = offset;
+        auto handleBottomOffset = OffsetF(offset.GetX(), offset.GetY() + param.handleRect.Height());
+        if (GreatNotEqual(handleBottomOffset.GetY(), bottomThreshold)) {
+            param.offset = bottomThreshold - handleBottomOffset.GetY();
             ScheduleAutoScroll(param);
-        } else if (LessNotEqual(offset.GetY(), contentRect.GetY())) {
-            param.offset = contentRect.GetY() - offset.GetY();
+        } else if (LessNotEqual(handleTopOffset.GetY(), topEdgeThreshold)) {
+            param.offset = topEdgeThreshold - handleTopOffset.GetY();
             ScheduleAutoScroll(param);
         } else {
             StopAutoScroll();
@@ -4249,20 +4282,15 @@ void RichEditorPattern::AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF
         return;
     }
 
-    if (strategy == EdgeDetectionStrategy::IN_BOUNDARY) {
-        float edgeThreshold = 0.0f;
-        CalcCursorOffsetByPosition(GetCaretPosition(), edgeThreshold, true);
-        float topEdgeThreshold = edgeThreshold + contentRect.GetY();
-        float bottomThreshold = contentRect.Bottom() - edgeThreshold;
-        if (GreatNotEqual(offset.GetY(), bottomThreshold)) {
-            param.offset = bottomThreshold - offset.GetY();
-            ScheduleAutoScroll(param);
-        } else if (LessNotEqual(offset.GetY(), topEdgeThreshold)) {
-            param.offset = topEdgeThreshold - offset.GetY();
-            ScheduleAutoScroll(param);
-        } else {
-            StopAutoScroll();
-        }
+    // drag and mouse
+    if (GreatNotEqual(offset.GetY(), bottomThreshold)) {
+        param.offset = bottomThreshold - offset.GetY();
+        ScheduleAutoScroll(param);
+    } else if (LessNotEqual(offset.GetY(), topEdgeThreshold)) {
+        param.offset = topEdgeThreshold - offset.GetY();
+        ScheduleAutoScroll(param);
+    } else {
+        StopAutoScroll();
     }
 }
 
@@ -4453,5 +4481,18 @@ std::string RichEditorPattern::GetPositionSpansText(int32_t position, int32_t& s
 
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "get spans text ret spanStart:%{public}d", startSpan);
     return sstream.str();
+}
+
+void RichEditorPattern::CheckHandles(SelectHandleInfo& handleInfo)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset() - pipeline->GetRootRect().GetOffset();
+    RectF contentGlobalRect(offset, contentRect_.GetSize());
+    contentGlobalRect = GetVisibleContentRect(host->GetAncestorNodeOfFrame(), contentGlobalRect);
+    auto handleOffset = handleInfo.paintRect.GetOffset();
+    handleInfo.isShow = contentGlobalRect.IsInRegion(PointF(handleOffset.GetX(), handleOffset.GetY() + BOX_EPSILON));
 }
 } // namespace OHOS::Ace::NG

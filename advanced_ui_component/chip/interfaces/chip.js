@@ -743,7 +743,7 @@ export class ChipComponent extends ViewPU {
         this.observeComponentCreation2(((e, i) => {
             var t;
             If.create();
-            (null === (t = this.prefixIcon) || void 0 === t ? void 0 : t.src) ? this.ifElseBranchUpdateFunction(0, (() => {
+            "" !== (null === (t = this.prefixIcon) || void 0 === t ? void 0 : t.src) ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation2(((e, i) => {
                     var t;
                     Image.create(null === (t = this.prefixIcon) || void 0 === t ? void 0 : t.src);

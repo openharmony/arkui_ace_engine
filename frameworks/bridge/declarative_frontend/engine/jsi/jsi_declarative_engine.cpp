@@ -951,7 +951,8 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
     if (debugVersion) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    auto&& initWorkerFunc = [weakInstance, libraryPath](NativeEngine* nativeEngine) {
+    auto&& initWorkerFunc = [weakInstance, libraryPath, debugVersion, instanceId = instanceId_](
+                                NativeEngine* nativeEngine) {
         if (nativeEngine == nullptr) {
             return;
         }
@@ -971,7 +972,8 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         };
         bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
         panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode };
-        panda::JSNApi::StartDebugger(vm, debugOption, gettid(), workerPostTask);
+        JSNApi::NotifyDebugMode(gettid(), vm, libraryPath.c_str(), debugOption, instanceId, workerPostTask,
+            debugVersion, debugMode);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
 

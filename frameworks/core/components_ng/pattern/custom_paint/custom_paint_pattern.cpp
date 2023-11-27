@@ -61,7 +61,6 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     CHECK_NULL_RETURN(customPaintEventHub, false);
 
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        static SizeF oldPixelGridRoundSize = {-1, -1};
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto geometryNode = host->GetGeometryNode();

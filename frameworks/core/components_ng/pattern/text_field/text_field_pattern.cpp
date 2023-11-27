@@ -799,7 +799,7 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_ESCAPE) {
         CloseSelectOverlay(true);
     }
-    if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_) {
+    if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
         isFocusedBeforeClick_ = false;
         HandleOnSelectAll(true);
     }
@@ -942,8 +942,11 @@ void TextFieldPattern::HandleOnPaste()
         }
         std::wstring pasteData = StringUtils::ToWstring(data);
         textfield->StripNextLine(pasteData);
+        auto originLength = static_cast<int32_t>(textfield->contentController_->GetWideText().length());
         textfield->contentController_->ReplaceSelectedValue(start, end, StringUtils::ToString(pasteData));
-        auto newCaretPosition = std::clamp(std::min(start, end) + static_cast<int32_t>(pasteData.length()), 0,
+        auto caretMoveLength = static_cast<int32_t>(textfield->contentController_->GetWideText().length()) -
+                               originLength;
+        auto newCaretPosition = std::clamp(std::max(start, end) + caretMoveLength, 0,
             static_cast<int32_t>(textfield->contentController_->GetWideText().length()));
         textfield->ResetObscureTickCountDown();
         textfield->selectController_->UpdateCaretIndex(newCaretPosition);
@@ -1514,7 +1517,8 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     // emulate clicking bottom of the textField
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     auto isSelectAll = layoutProperty->GetSelectAllValueValue(false);
-    if (isSelectAll && !contentController_->IsEmpty() && !HasFocus()) {
+    if (isSelectAll && !contentController_->IsEmpty() && isFocusedBeforeClick_) {
+        isFocusedBeforeClick_ = false;
         HandleOnSelectAll(true);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -2401,7 +2405,6 @@ void TextFieldPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(textFieldTheme);
     if (isHover) {
         pipeline->SetMouseStyleHoldNode(frameId);
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
     } else {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(frameId);
@@ -2463,6 +2466,22 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     info.SetStopPropagation(true);
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        if (isOnHover_ && !scrollBar->IsHover() && !scrollBar->IsPressed()) {
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
+        } else {
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+            return;
+        }
+    } else {
+        if (isOnHover_) {
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
+        } else {
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+            return;
+        }
+    }
     ChangeMouseState(info.GetLocalLocation(), pipeline, frameId);
 
     isUsingMouse_ = true;
@@ -2647,9 +2666,10 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         auto optionalTextConfig = GetMiscTextConfig();
         CHECK_NULL_RETURN(optionalTextConfig.has_value(), false);
         MiscServices::TextConfig textConfig = optionalTextConfig.value();
-        TAG_LOGI(
-            AceLogTag::ACE_TEXT_FIELD, "RequestKeyboard set calling window id:%{public}u"
-            "inputType: %{public}d", textConfig.windowId, textConfig.inputAttribute.inputPattern);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+            "RequestKeyboard set calling window id:%{public}u"
+            "inputType: %{public}d",
+            textConfig.windowId, textConfig.inputAttribute.inputPattern);
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
 #else
         if (!HasConnection()) {
@@ -2711,8 +2731,7 @@ AceAutoFillType TextFieldPattern::ConvertToAceAutoFillType(TextInputType type)
     static std::unordered_map<TextInputType, AceAutoFillType> convertMap = {
         { TextInputType::VISIBLE_PASSWORD, AceAutoFillType::ACE_PASSWORD },
         { TextInputType::USER_NAME, AceAutoFillType::ACE_USER_NAME },
-        { TextInputType::NEW_PASSWORD, AceAutoFillType::ACE_NEW_PASSWORD }
-    };
+        { TextInputType::NEW_PASSWORD, AceAutoFillType::ACE_NEW_PASSWORD } };
     if (convertMap.find(type) != convertMap.end()) {
         return convertMap[type];
     }
@@ -3482,7 +3501,9 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
         "Textfield handleSurface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
         "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
-    CloseSelectOverlay();
+    auto proxy = GetSelectOverlayProxy();
+    CHECK_NULL_VOID(proxy);
+    proxy->ShowOrHiddenMenu(true);
     if (HasFocus() && IsSingleHandle()) {
         StartTwinkling();
     }

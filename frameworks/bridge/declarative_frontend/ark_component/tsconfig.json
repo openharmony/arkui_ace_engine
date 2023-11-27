@@ -28,6 +28,8 @@
         "src/ArkPanel.ts",
         "src/ArkNavigation.ts",
         "src/ArkRichEditor.ts",
+        "src/ArkNavRouter.ts",
+        "src/ArkNavigator.ts",
     ],
 
     "compilerOptions": {

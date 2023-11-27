@@ -82,6 +82,7 @@ ohos_source_set("ace_unittest_log") {
   sources = [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
   external_deps = [ "hilog:libhilog" ]
   configs = [ ":ace_unittest_config" ]
+  configs += [ "$ace_root:ace_test_config" ]
 }
 
 # ace unittest trace
@@ -134,6 +135,7 @@ ohos_source_set("ace_components_event") {
     "$ace_root/frameworks/core/components_ng/event/input_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/event/long_press_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/pan_event.cpp",
+    "$ace_root/frameworks/core/components_ng/event/response_ctrl.cpp",
     "$ace_root/frameworks/core/components_ng/event/scrollable_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/state_style_manager.cpp",
     "$ace_root/frameworks/core/components_ng/event/target_component.cpp",

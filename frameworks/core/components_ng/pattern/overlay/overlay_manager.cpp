@@ -1693,8 +1693,10 @@ void OverlayManager::BlurOverlayNode(const RefPtr<FrameNode>& currentOverlay, bo
             CHECK_NULL_VOID(overlay);
             auto pattern = overlay->GetPattern();
             if (currentOverlay != overlay &&
-                (InstanceOf<DialogPattern>(pattern) || InstanceOf<MenuWrapperPattern>(pattern)) &&
+                (InstanceOf<DialogPattern>(pattern) || InstanceOf<MenuWrapperPattern>(pattern) ||
+                    InstanceOf<SheetPresentationPattern>(pattern) || InstanceOf<ModalPresentationPattern>(pattern)) &&
                 !overlay->IsRemoving()) {
+                // Focus returns to the previous in the overlay
                 FocusOverlayNode(overlay, isInSubWindow);
                 return;
             }

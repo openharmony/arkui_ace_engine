@@ -73,6 +73,8 @@ public:
 
     void SetBorderRadius(const BorderRadiusProperty& value) override;
 
+    void SetOuterBorderRadius(const BorderRadiusProperty& value) override;
+
     void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) override;
 
     bool HasSandBox() const override
@@ -165,6 +167,7 @@ public:
     void OnLightUpEffectUpdate(double radio) override;
     void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList) override;
 
+    Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void OnBackBlendModeUpdate(BlendMode blendMode) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
@@ -312,6 +315,11 @@ private:
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnBorderColorUpdate(const BorderColorProperty& value) override;
     void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
+
+    void OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value) override;
+    void OnOuterBorderColorUpdate(const BorderColorProperty& value) override;
+    void OnOuterBorderStyleUpdate(const BorderStyleProperty& value) override;
+    void OnOuterBorderWidthUpdate(const BorderWidthProperty& value) override;
 
     void OnTransformScaleUpdate(const VectorF& value) override;
     void OnTransformCenterUpdate(const DimensionOffset& value) override;
@@ -476,6 +484,7 @@ private:
     bool hasDefaultTransition_ = false;
     bool measureTriggered_ = false;
     bool particleAnimationPlaying_ = false;
+    bool allowSandBox_ = true;
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;

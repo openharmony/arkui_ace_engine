@@ -50,14 +50,7 @@ protected:
         touchPoints_[touchId] = {};
     }
 
-    void OnFinishGestureReferee(int32_t touchId, bool isBlocked) override
-    {
-        touchPoints_.erase(touchId);
-        activeFingers_.remove(touchId);
-        if (touchPoints_.empty()) {
-            ResetStatusOnFinish(isBlocked);
-        }
-    }
+    void OnFinishGestureReferee(int32_t touchId, bool isBlocked) override;
 
     void OnResetStatus() override
     {
@@ -65,6 +58,8 @@ protected:
         fingerList_.clear();
         activeFingers_.clear();
     }
+
+    bool IsNeedResetStatus();
 
     bool IsActiveFinger(int32_t touchId) const
     {

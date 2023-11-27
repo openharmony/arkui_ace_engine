@@ -29,46 +29,44 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace {
-
 class ImageModel {
 public:
-    static ImageModel* GetInstance();
+    static ImageModel *GetInstance();
     virtual ~ImageModel() = default;
 
-    virtual void SetAlt(const ImageSourceInfo& src) = 0;
+    virtual void SetAlt(const ImageSourceInfo &src) = 0;
     virtual void SetBlur(double blur) = 0;
-    virtual void SetBorder(const Border& border) = 0;
+    virtual void SetBorder(const Border &border) = 0;
     virtual void SetBackBorder() = 0;
     virtual void SetImageFit(ImageFit value) = 0;
     virtual void SetMatchTextDirection(bool value) = 0;
     virtual void SetFitOriginSize(bool value) = 0;
-    virtual void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) = 0;
-    virtual void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) = 0;
-    virtual void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) = 0;
-    virtual void Create(const std::string& src, RefPtr<PixelMap>& pixmap, const std::string& bundleName,
-        const std::string& moduleName) = 0;
-    virtual void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) = 0;
-    virtual void SetImageFill(const Color& color) = 0;
+    virtual void SetOnComplete(std::function<void(const LoadImageSuccessEvent &info)> &&callback) = 0;
+    virtual void SetOnError(std::function<void(const LoadImageFailEvent &info)> &&callback) = 0;
+    virtual void SetSvgAnimatorFinishEvent(std::function<void()> &&callback) = 0;
+    virtual void Create(const std::string &src, RefPtr<PixelMap> &pixmap, const std::string &bundleName,
+        const std::string &moduleName) = 0;
+    virtual void SetImageSourceSize(const std::pair<Dimension, Dimension> &size) = 0;
+    virtual void SetImageFill(const Color &color) = 0;
     virtual void SetImageInterpolation(ImageInterpolation interpolation) = 0;
     virtual void SetImageRepeat(ImageRepeat imageRepeat) = 0;
     virtual void SetImageRenderMode(ImageRenderMode imageRenderMode) = 0;
     virtual bool IsSrcSvgImage() = 0;
     virtual void SetAutoResize(bool autoResize) = 0;
     virtual void SetSyncMode(bool syncMode) = 0;
-    virtual void SetColorFilterMatrix(const std::vector<float>& matrix) = 0;
+    virtual void SetColorFilterMatrix(const std::vector<float> &matrix) = 0;
     virtual void SetDraggable(bool draggable) = 0;
-    virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
-    virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
-    virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
-    virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
-    virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
-    virtual void SetCopyOption(const CopyOptions& copyOption) = 0;
-    virtual bool UpdateDragItemInfo(DragItemInfo& itemInfo) = 0;
+    virtual void SetOnDragStart(NG::OnDragStartFunc &&onDragStart) = 0;
+    virtual void SetOnDragEnter(NG::OnDragDropFunc &&onDragEnter) = 0;
+    virtual void SetOnDragLeave(NG::OnDragDropFunc &&onDragLeave) = 0;
+    virtual void SetOnDragMove(NG::OnDragDropFunc &&onDragMove) = 0;
+    virtual void SetOnDrop(NG::OnDragDropFunc &&onDrop) = 0;
+    virtual void SetCopyOption(const CopyOptions &copyOption) = 0;
+    virtual bool UpdateDragItemInfo(DragItemInfo &itemInfo) = 0;
 
 private:
     static std::unique_ptr<ImageModel> instance_;
     static std::mutex mutex_;
 };
-
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_H

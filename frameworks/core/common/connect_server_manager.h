@@ -37,6 +37,7 @@ public:
     void SetLayoutInspectorCallback(
         const std::function<void(int32_t)>& createLayoutInfo, const std::function<void(bool)>& setStatus);
     std::function<void(int32_t)> GetLayoutInspectorCallback();
+    void StartConnectServerWithSocketPair(int32_t socketFd);
 
 private:
     ConnectServerManager();

@@ -464,6 +464,7 @@ private:
     float GetOutOfScrollableOffset() const;
     float GetOffsetWithLimit(float offset) const;
     void LimitMouseEndOffset();
+    void UpdateBorderRadius();
 
     bool ProcessAssociatedScroll(double offset, int32_t source);
 

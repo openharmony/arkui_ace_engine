@@ -127,6 +127,13 @@ void JSInteractableView::JsTouchable(const JSCallbackInfo& info)
     }
 }
 
+void JSInteractableView::JsMonopolizeEvents(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetMonopolizeEvents(info[0]->ToBoolean());
+    }
+}
+
 void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined() && IsDisableEventVersion()) {

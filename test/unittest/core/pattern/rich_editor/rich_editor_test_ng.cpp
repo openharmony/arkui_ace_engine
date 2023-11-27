@@ -2388,6 +2388,7 @@ HWTEST_F(RichEditorTestNg, HandleMouseLeftButton002, TestSize.Level1)
         std::shared_ptr<SelectionMenuParams> params1 = std::make_shared<SelectionMenuParams>(
             selectType[i], buildFunc, onAppear, onDisappear, RichEditorResponseType::SELECTED_BY_MOUSE);
         richEditorPattern->selectionMenuMap_[key] = params1;
+        richEditorPattern->mouseStatus_ = MouseStatus::MOVE;
         richEditorPattern->HandleMouseLeftButton(mouseInfo);
         EXPECT_EQ(richEditorPattern->selectionMenuOffsetByMouse_.GetX(),
             static_cast<float>(mouseInfo.GetGlobalLocation().GetX()));
@@ -2641,7 +2642,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection, TestSize.Level1)
     richEditorPattern->StopAutoScroll();
 
     param.autoScrollEvent = AutoScrollEvent::DRAG;
-    richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(0, 90), EdgeDetectionStrategy::IN_BOUNDARY);
+    richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(0, 160), EdgeDetectionStrategy::IN_BOUNDARY);
     EXPECT_TRUE(richEditorPattern->autoScrollTask_);
     richEditorPattern->StopAutoScroll();
     pipeline->taskExecutor_.Reset();
@@ -2672,5 +2673,25 @@ HWTEST_F(RichEditorTestNg, CheckScrollable, TestSize.Level1)
     EXPECT_FALSE(richEditorPattern->scrollable_);
 
     ClearSpan();
+}
+
+/**
+ * @tc.name: NeedSoftKeyboard001
+ * @tc.desc: test NeedSoftKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, NeedSoftKeyboard001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Get frameNode and pattern.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test whether rich editor need soft keyboard.
+     */
+    EXPECT_TRUE(richEditorPattern->NeedSoftKeyboard());
 }
 } // namespace OHOS::Ace::NG

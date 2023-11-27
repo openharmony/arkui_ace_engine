@@ -23,8 +23,6 @@
 #include "frameworks/core/components_ng/pattern/text/text_model_ng.h"
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
-constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr Dimension DEFAULT_LINE_HEIGHT = Dimension(0.0, DimensionUnit::PX);
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
@@ -37,15 +35,6 @@ FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeig
 {
     std::string weightStr(weight);
     return StringUtils::StringToFontWeight(weightStr, defaultFontWeight);
-}
-
-uint32_t ColorAlphaAdapt(uint32_t origin)
-{
-    uint32_t result = origin;
-    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
-        result = origin | COLOR_ALPHA_VALUE;
-    }
-    return result;
 }
 } // namespace
 void SetFontWeight(NodeHandle node, const char* weight)
@@ -97,7 +86,7 @@ void SetFontColor(NodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetTextColor(frameNode, Color(ColorAlphaAdapt(color)));
+    TextModelNG::SetTextColor(frameNode, Color(color));
 }
 void ResetFontColor(NodeHandle node)
 {

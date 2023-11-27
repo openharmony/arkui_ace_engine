@@ -209,6 +209,7 @@ HWTEST_F(FormTestNg, FormModelNGTest001, TestSize.Level1)
     ASSERT_NE(property, nullptr);
     auto formInfo = property->GetRequestFormInfoValue();
     ASSERT_EQ(formInfo.dimension, 1);
+    ASSERT_EQ(formInfo.renderingMode, 0);
     EXPECT_FALSE(formInfo.allowUpdate);
     ASSERT_EQ(formInfo.moduleName, "test form");
 }

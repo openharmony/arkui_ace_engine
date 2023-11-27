@@ -321,9 +321,6 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     switch (orgAction) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE: {
             action = DragEventAction::DRAG_EVENT_MOVE;
-            if (!event.pressed) {
-                action = DragEventAction::DRAG_EVENT_END;
-            }
             event.x = event.windowX;
             event.y = event.windowY;
             dragEventCallback_(event, action);
