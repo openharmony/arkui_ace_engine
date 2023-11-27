@@ -247,9 +247,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     // In form and sceneboard scenario, if move more than 20vp, reject click gesture.
     // Remove form scenario when formal solution is completed.
     auto pipeline = PipelineBase::GetCurrentContext();
-    auto container = Container::Current();
-    if ((pipeline && pipeline->IsFormRender()) ||
-        (container && container->IsSceneBoardWindow())) {
+    if (pipeline && pipeline->IsFormRender()) {
         Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
         if (offset.GetDistance() > MAX_THRESHOLD) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "This gesture is out of offset, try to reject it");
