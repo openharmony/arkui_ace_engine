@@ -1860,7 +1860,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
 {
     auto context = GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
-    int32_t windowId = context->GetFocusWindowId();
+    int32_t windowId = static_cast<int32_t>(context->GetFocusWindowId());
     if (windowId == 0) {
         return;
     }
@@ -3654,7 +3654,7 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     CHECK_NULL_VOID(stageManager);
     auto page = stageManager->GetLastPage();
     CHECK_NULL_VOID(page);
-    output.windowId = ngPipeline->GetFocusWindowId();
+    output.windowId = static_cast<int32_t>(ngPipeline->GetFocusWindowId());
     output.windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
     output.windowTop = GetWindowTop(ngPipeline->GetWindowId());
     output.pageId = page->GetPageId();
