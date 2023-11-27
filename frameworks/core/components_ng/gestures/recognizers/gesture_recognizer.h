@@ -143,10 +143,7 @@ public:
         return refereeState_;
     }
 
-    void SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
-    {
-        gestureGroup_ = gestureGroup;
-    }
+    bool SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
 
     void SetOnAction(const GestureEventFunc& onAction)
     {
