@@ -832,6 +832,30 @@ class AllowDropModifier extends Modifier<ArkAllowDrop> {
     }
 }
 
+class AccessibilityLevelModifier extends Modifier<string> {
+    static identity: Symbol = Symbol("accessibilityLevel");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetAccessibilityLevel(node);
+        }
+        else {
+            GetUINativeModule().common.setAccessibilityLevel(node, this.value);
+        }
+    }
+}
+
+class AccessibilityDescriptionModifier extends Modifier<string> {
+    static identity: Symbol = Symbol("accessibilityDescription");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetAccessibilityDescription(node);
+        }
+        else {
+            GetUINativeModule().common.setAccessibilityDescription(node, this.value);
+        }
+    }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType) => typeof val === 'string'
@@ -2048,12 +2072,25 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         return this;
     }
 
+
     accessibilityDescription(value: string): this {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "string") {
+            modifier(this._modifiers, AccessibilityDescriptionModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, AccessibilityDescriptionModifier, value);
+        }
+        return this;
     }
 
     accessibilityLevel(value: string): this {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "string") {
+            modifier(this._modifiers, AccessibilityLevelModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, AccessibilityLevelModifier, value);
+        }
+        return this;
     }
 
     obscured(reasons: Array<ObscuredReasons>): this {

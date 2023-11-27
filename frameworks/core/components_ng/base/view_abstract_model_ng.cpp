@@ -410,4 +410,20 @@ void ViewAbstractModelNG::SetAccessibilityText(FrameNode* frameNode, const std::
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->SetAccessibilityText(text);
 }
+
+void ViewAbstractModelNG::SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel(importance);
+}
+
+void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, const std::string& description)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityDescription(description);
+}
 } // namespace OHOS::Ace::NG

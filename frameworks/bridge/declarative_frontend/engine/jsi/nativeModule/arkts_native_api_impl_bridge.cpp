@@ -295,6 +295,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAllowDrop));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAllowDrop"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAllowDrop));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityLevel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityLevel));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityLevel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityLevel));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityDescription"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityDescription));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityDescription"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityDescription));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto counter = panda::ObjectRef::New(vm);

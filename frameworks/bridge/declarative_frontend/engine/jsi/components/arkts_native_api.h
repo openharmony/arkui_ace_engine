@@ -155,6 +155,10 @@ struct ArkUICommonModifierAPI {
     void (*ResetAccessibilityText)(NodeHandle node);
     void (*SetAllowDrop)(NodeHandle node, char** value, int32_t length);
     void (*ResetAllowDrop)(NodeHandle node);
+    void (*SetAccessibilityLevel)(NodeHandle node, const char* value);
+    void (*ResetAccessibilityLevel)(NodeHandle node);
+    void (*SetAccessibilityDescription)(NodeHandle node, const char* value);
+    void (*ResetAccessibilityDescription)(NodeHandle node);
 };
 
 struct ArkUITextModifierAPI {
