@@ -64,4 +64,35 @@ void NavigatorModelNG::SetParams(const std::string& params)
     eventHub->SetParams(params);
 }
 
+void NavigatorModelNG::SetParams(FrameNode* frameNode, const std::string& params)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetParams(params);
+}
+
+void NavigatorModelNG::SetType(FrameNode* frameNode, NavigatorType value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetType(value);
+}
+
+void NavigatorModelNG::SetUri(FrameNode* frameNode, const std::string& uri)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetUrl(uri);
+}
+
+void NavigatorModelNG::SetActive(FrameNode* frameNode, bool active)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetActive(active);
+}
 } // namespace OHOS::Ace::NG

@@ -33,6 +33,10 @@ public:
     // empty implementations
     void SetIsDefWidth(bool isDefWidth) override {}
     void SetIsDefHeight(bool isDefHeight) override {}
+    static void SetParams(FrameNode* frameNode, const std::string& params);
+    static void SetType(FrameNode* frameNode, NavigatorType value);
+    static void SetUri(FrameNode* frameNode, const std::string& uri);
+    static void SetActive(FrameNode* frameNode, bool active);
 };
 
 } // namespace OHOS::Ace::NG

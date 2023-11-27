@@ -23,7 +23,9 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_col_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_router_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigator_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_panel_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_area_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.h"
@@ -668,6 +670,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterDividerAttributes(object, vm);
     RegisterNavigationAttributes(object, vm);
     RegisterImageAttributes(object, vm);
+    RegisterNavRouterAttributes(object, vm);
+    RegisterNavigatorAttributes(object, vm);
 
     return object;
 }
@@ -753,6 +757,42 @@ void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetHideToolBar));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideToolBar"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetHideToolBar));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTitleMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetTitleMode));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTitleMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetTitleMode));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHideBackButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetHideBackButton));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideBackButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetHideBackButton));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSubTitle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetSubtitle));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSubTitle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetSubtitle));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHideNavBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetHideNavBar));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideNavBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetHideNavBar));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetUsrNavigationMode));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetUsrNavigationMode));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setNavBarPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetNavBarPosition));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetNavBarPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetNavBarPosition));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinNavBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetMinNavBarWidth));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinNavBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetMinNavBarWidth));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxNavBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetMaxNavBarWidth));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxNavBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetMaxNavBarWidth));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHideTitleBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetHideTitleBar));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideTitleBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetHideTitleBar));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigation"), navigation);
 }
 
@@ -764,5 +804,37 @@ void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, 
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObjectFit"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ImageBridge::ResetObjectFit));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "image"), image);
+}
+
+void ArkUINativeModule::RegisterNavRouterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto navRouter = panda::ObjectRef::New(vm);
+    navRouter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavRouterBridge::SetMode));
+    navRouter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavRouterBridge::ResetMode));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navRouter"), navRouter);
+}
+
+void ArkUINativeModule::RegisterNavigatorAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto navigator = panda::ObjectRef::New(vm);
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTarget"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::SetTarget));
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTarget"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::ResetTarget));
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::SetType));
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::ResetType));
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setActive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::SetActive));
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetActive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::ResetActive));
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setParams"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::SetParams));
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetParams"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::ResetParams));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigator"), navigator);
 }
 } // namespace OHOS::Ace::NG

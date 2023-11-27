@@ -821,3 +821,14 @@ class ArkAllowDrop {
         return this.allowDropArray === another.allowDropArray;
     }
 }
+enum TabBarMode {
+    FIXED,
+    SCROLLABLE,
+    FIXED_START
+};
+
+class ArkBarMode {
+    convertStrToTabBarMode(value: string): number {
+        return value.toLowerCase() == "fixed" ? TabBarMode.FIXED : TabBarMode.FIXED_START;
+    }
+}
