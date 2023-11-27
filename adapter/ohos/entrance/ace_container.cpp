@@ -2022,7 +2022,6 @@ void AceContainer::UpdateResource()
     CHECK_NULL_VOID(pipelineContext_);
 
     if (SystemProperties::GetResourceDecoupling()) {
-        ResourceManager::GetInstance().Reset();
         auto context = runtimeContext_.lock();
         auto abilityInfo = abilityInfo_.lock();
         InitResourceAndThemeManager(pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo);

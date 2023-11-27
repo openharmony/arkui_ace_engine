@@ -1372,11 +1372,6 @@ void UIContentImpl::Destroy()
 {
     LOGI("UIContentImpl: window destroy");
 
-    if (isFormRender_) {
-        LOGD("Remove card for bundle %{public}s, module %{public}s", bundleName_.c_str(), moduleName_.c_str());
-        ResourceManager::GetInstance().RemoveResourceAdapter(bundleName_, moduleName_);
-    }
-
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     // stop performance check and output json file
