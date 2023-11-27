@@ -150,6 +150,7 @@ template("ace_osal_ohos_source_set") {
       "netstack:http_client",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
+      "window_manager:libdm",
       "window_manager:scene_session",
     ]
     deps += [
@@ -157,10 +158,7 @@ template("ace_osal_ohos_source_set") {
     ]
 
     if (ability_runtime_graphics) {
-      external_deps += [
-        "image_framework:image_native",
-        "window_manager:libdm",
-      ]
+      external_deps += [ "image_framework:image_native" ]
     }
   }
 }
