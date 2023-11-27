@@ -42,12 +42,20 @@ std::string ImageLoader::RemovePathHead(const std::string& uri)
     return uri.substr(0);
 }
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkData> ImageLoader::LoadDataFromCachedFile(const std::string& /*uri*/)
+#else
+std::shared_ptr<RSData> ImageLoader::LoadDataFromCachedFile(const std::string& /* uri */)
+#endif
 {
     return nullptr;
 }
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& /*sourceInfo*/)
+#else
+std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& /*sourceInfo*/)
+#endif
 {
     return nullptr;
 }

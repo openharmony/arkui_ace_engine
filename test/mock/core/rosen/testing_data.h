@@ -13,32 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_IMAGE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_IMAGE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_DATA_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_DATA_H
 
 namespace OHOS::Ace::Testing {
-class TestingImage {
+class TestingData {
 public:
-    TestingImage() = default;
-    ~TestingImage() = default;
+    TestingData() = default;
+    virtual ~TestingData() = default;
 
-    virtual int GetWidth()
+    virtual bool BuildWithCopy(const void* /* data */, size_t /* length */)
     {
-        const int imageWidth = 100;
-        return imageWidth;
+        return false;
     }
 
-    virtual int GetHeight()
+    virtual size_t GetSize() const
     {
-        const int imageHeight = 100;
-        return imageHeight;
+        return 0;
     }
 
-    virtual uint32_t GetUniqueID() const
+    virtual void* GetData() const
     {
-        const uint32_t id = 0;
-        return id;
+        return nullptr;
     }
 };
 } // namespace OHOS::Ace::Testing
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_IMAGE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_DATA_H

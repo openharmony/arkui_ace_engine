@@ -17,10 +17,17 @@
 namespace OHOS::Ace::NG {
 ImageDecoder::ImageDecoder(const RefPtr<ImageObject>& objW, const SizeF& targetSize, bool forceResize) {}
 
+#ifndef USE_ROSEN_DRAWING
 RefPtr<CanvasImage> ImageDecoder::MakeSkiaImage()
 {
     return MakeRefPtr<SkiaImage>(nullptr);
 }
+#else
+RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage()
+{
+    return MakeRefPtr<DrawingImage>(nullptr);
+}
+#endif
 
 RefPtr<CanvasImage> ImageDecoder::MakePixmapImage()
 {

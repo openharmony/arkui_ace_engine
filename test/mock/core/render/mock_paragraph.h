@@ -53,7 +53,9 @@ public:
     MOCK_METHOD2(ComputeOffsetForCaretUpstream, bool(int32_t extent, CaretMetricsF& result));
     MOCK_METHOD3(GetRectsForRange, void(int32_t start, int32_t end, std::vector<RectF>& selectedRects));
     MOCK_METHOD3(Paint, void(RSCanvas& canvas, float x, float y));
+#ifndef USE_ROSEN_DRAWING
     MOCK_METHOD3(Paint, void(SkCanvas* skCanvas, float x, float y));
+#endif
     MOCK_METHOD3(GetWordBoundary, bool(int32_t offset, int32_t& start, int32_t& end));
     MOCK_METHOD3(
         CalcCaretMetricsByPosition, bool(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity));

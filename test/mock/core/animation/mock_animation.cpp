@@ -198,7 +198,11 @@ RefPtr<Component> DialogModalComponent::Create(RefPtr<Component> child)
     return nullptr;
 }
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkData> FileImageLoader::LoadImageData(const std::string& src, const WeakPtr<PipelineContext> context)
+#else
+std::shared_ptr<RSData> FileImageLoader::LoadImageData(const std::string& src, const WeakPtr<PipelineContext> context)
+#endif
 {
     return nullptr;
 }

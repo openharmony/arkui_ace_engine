@@ -492,11 +492,19 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg006, TestSize.Level1)
     auto src = ImageSourceInfo(SRC_JPG);
     EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
 
+#ifndef USE_ROSEN_DRAWING
     auto data = AceType::MakeRefPtr<SkiaImageData>(nullptr, 0);
+#else
+    auto data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 0);
+#endif
     auto imageObject = ImageProvider::BuildImageObject(src, data);
     EXPECT_TRUE(AceType::DynamicCast<StaticImageObject>(imageObject));
 
+#ifndef USE_ROSEN_DRAWING
     data = AceType::MakeRefPtr<SkiaImageData>(nullptr, 2);
+#else
+    data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 2);
+#endif
     imageObject = ImageProvider::BuildImageObject(src, data);
     EXPECT_TRUE(AceType::DynamicCast<AnimatedImageObject>(imageObject));
 
