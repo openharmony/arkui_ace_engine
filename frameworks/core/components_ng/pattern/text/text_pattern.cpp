@@ -535,7 +535,9 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
         info.GetLocalLocation().GetY() - textContentRect.GetY() };
     HandleSpanSingleClickEvent(info, textContentRect, textOffset, isClickOnSpan);
-    if (textDetectEnable_ && !hasChildren_ && !aiSpanMap_.empty()) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (textDetectEnable_ && host->GetChildren().empty() && !aiSpanMap_.empty()) {
         ClickAISpan(info, textOffset);
     }
     if (onClick_ && !isClickOnSpan) {
@@ -586,7 +588,7 @@ bool TextPattern::ClickAISpan(GestureEvent& info, PointF textOffset)
         auto aiSpan = kv.second;
         std::vector<RectF> aiRects;
         paragraph_->GetRectsForRange(aiSpan.start, aiSpan.end, aiRects);
-        for (auto rect : aiRects) {
+        for (auto&& rect : aiRects) {
             if (rect.IsInRegion(textOffset)) {
                 ShowUIExtensionMenu(aiSpan);
                 return true;
@@ -630,6 +632,10 @@ void TextPattern::ShowUIExtensionMenu(AISpan aiSpan)
     std::map<std::string, std::string> paramaters;
     paramaters["entityType"] = TEXT_DETECT_MAP.at(aiSpan.type);
     paramaters["entityText"] = aiSpan.content;
+    if (TEXT_DETECT_MAP.find(aiSpan.type) == TEXT_DETECT_MAP.end() ||
+        aiMenuOptionsMap_.find(TEXT_DETECT_MAP.at(aiSpan.type)) == aiMenuOptionsMap_.end()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "Error menu options");
+    }
     std::vector<std::string> menuOptions = aiMenuOptionsMap_.at(TEXT_DETECT_MAP.at(aiSpan.type));
     if (menuOptions.empty()) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "Menu option is empty");
@@ -1016,11 +1022,14 @@ void TextPattern::OnModifyDone()
         host->GetRenderContext()->SetClipToFrame(shouldClipToContent);
     }
 
-    if (!hasChildren_) {
+    if (host->GetChildren().empty()) {
         std::string textCache = textForDisplay_;
         textForDisplay_ = textLayoutProperty->GetContent().value_or("");
         if (textCache != textForDisplay_) {
             host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
+            if (!textDetectEnable_) {
+                aiDetectInitialized_ = false;
+            }
         }
         textForAI_ = textForDisplay_;
         if (textDetectEnable_ && (aiDetectTypesChanged_ || !aiDetectInitialized_ || textCache != textForDisplay_)) {
@@ -1135,7 +1144,7 @@ void TextPattern::ParseAIResult(const TextDataDetectResult& result, int32_t star
     auto menuOptionsJson = JsonUtil::ParseJsonString(result.menuOption);
     CHECK_NULL_VOID(menuOptionsJson);
     auto aiMenuOptions = aiMenuOptionsMap_;
-    for (auto type : TEXT_DETECT_MAP) {
+    for (const auto& type : TEXT_DETECT_MAP) {
         auto jsonValue = entityJson->GetValue(type.second);
         ParseAIJson(jsonValue, type.first, startPos);
         if (aiMenuOptions.empty()) {
@@ -1341,7 +1350,6 @@ void TextPattern::PreCreateLayoutWrapper()
     std::string textCache;
     std::string textForAICache;
     if (!nodes.empty()) {
-        hasChildren_ = true;
         textCache = textForDisplay_;
         textForAICache = textForAI_;
         textForDisplay_.clear();
@@ -1353,6 +1361,9 @@ void TextPattern::PreCreateLayoutWrapper()
 
     if (textCache != textForDisplay_) {
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
+        if (!textDetectEnable_) {
+            aiDetectInitialized_ = false;
+        }
     }
     if (isSpanHasClick) {
         auto gestureEventHub = host->GetOrCreateGestureEventHub();
@@ -1378,7 +1389,7 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
             continue;
         }
         auto spanNode = DynamicCast<SpanNode>(current);
-        if (spanNode) {
+        if (spanNode && current->GetTag() != V2::PLACEHOLDER_SPAN_ETS_TAG) {
             spanNode->CleanSpanItemChildren();
             UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
@@ -1387,10 +1398,13 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
             if (spanNode->GetSpanItem()->onClick) {
                 isSpanHasClick = true;
             }
-        } else if (current->GetTag() == V2::IMAGE_ETS_TAG) {
+        } else if (current->GetTag() == V2::IMAGE_ETS_TAG || current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             imageCount_++;
             AddChildSpanItem(current);
             textForAI_.append("\n");
+        }
+        if (current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+            continue;
         }
         const auto& nextChildren = current->GetChildren();
         for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
@@ -1495,6 +1509,13 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
             spans_.back()->imageNodeId = imageNode->GetId();
             return;
         }
+    } else if (child->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        auto placeholderSpanNode = DynamicCast<PlaceholderSpanNode>(child);
+        if (placeholderSpanNode) {
+            auto placeholderSpan = placeholderSpanNode->GetSpanItem();
+            placeholderSpan->placeholderSpanNodeId = placeholderSpanNode->GetId();
+            spans_.emplace_back(placeholderSpan);
+        }
     }
 }
 
@@ -1592,6 +1613,11 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
             case PropertyInfo::LINEHEIGHT:
                 if (textLayoutProp->HasLineHeight()) {
                     child->UpdateLineHeightWithoutFlushDirty(textLayoutProp->GetLineHeight().value());
+                }
+                break;
+            case PropertyInfo::TEXTSHADOW:
+                if (textLayoutProp->HasTextShadow()) {
+                    child->UpdateTextShadowWithoutFlushDirty(textLayoutProp->GetTextShadow().value());
                 }
                 break;
             default:

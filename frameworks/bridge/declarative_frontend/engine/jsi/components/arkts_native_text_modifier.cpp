@@ -18,13 +18,15 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/pipeline/base/element_register.h"
+#include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components/common/properties/text_style.h"
 #include "frameworks/core/components_ng/pattern/text/text_model_ng.h"
-#include "frameworks/core/components/common/layout/constants.h"
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
-constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+constexpr Dimension DEFAULT_LINE_HEIGHT = Dimension(0.0, DimensionUnit::PX);
+constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
+constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
+constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 const std::vector<OHOS::Ace::TextAlign> TEXT_ALIGNS = { OHOS::Ace::TextAlign::START, OHOS::Ace::TextAlign::CENTER,
     OHOS::Ace::TextAlign::END, OHOS::Ace::TextAlign::JUSTIFY, OHOS::Ace::TextAlign::LEFT, OHOS::Ace::TextAlign::RIGHT };
@@ -33,15 +35,6 @@ FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeig
 {
     std::string weightStr(weight);
     return StringUtils::StringToFontWeight(weightStr, defaultFontWeight);
-}
-
-uint32_t ColorAlphaAdapt(uint32_t origin)
-{
-    uint32_t result = origin;
-    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
-        result = origin | COLOR_ALPHA_VALUE;
-    }
-    return result;
 }
 } // namespace
 void SetFontWeight(NodeHandle node, const char* weight)
@@ -93,7 +86,7 @@ void SetFontColor(NodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetTextColor(frameNode, Color(ColorAlphaAdapt(color)));
+    TextModelNG::SetTextColor(frameNode, Color(color));
 }
 void ResetFontColor(NodeHandle node)
 {
@@ -137,10 +130,58 @@ void ResetFontSize(NodeHandle node)
     TextModelNG::SetFontSize(frameNode, fontSize);
 }
 
+void SetTextLineHeight(NodeHandle node, const double number, const int8_t unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetLineHeight(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+}
+
+void ResetTextLineHeight(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetLineHeight(frameNode, DEFAULT_LINE_HEIGHT);
+}
+
+void SetTextTextOverflow(NodeHandle node, int32_t value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextOverflow value_textOverflow = static_cast<TextOverflow>(value);
+    TextModelNG::SetTextOverflow(frameNode, value_textOverflow);
+}
+
+void ResetTextTextOverflow(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextOverflow(frameNode, TextOverflow::NONE);
+}
+
+void SetTextDecoration(NodeHandle node, const int32_t decoration, const uint32_t color, const int32_t style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
+    TextModelNG::SetTextDecorationColor(frameNode, Color(color));
+    TextModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
+}
+
+void ResetTextDecoration(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
+    TextModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
+    TextModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
+}
+
 ArkUITextModifierAPI GetTextModifier()
 {
     static const ArkUITextModifierAPI modifier = { SetFontWeight, ResetFontWeight, SetFontStyle, ResetFontStyle,
-        SetTextAlign, ResetTextAlign, SetFontColor, ResetFontColor, SetFontSize, ResetFontSize };
+        SetTextAlign, ResetTextAlign, SetFontColor, ResetFontColor, SetFontSize, ResetFontSize, SetTextLineHeight,
+        ResetTextLineHeight, SetTextTextOverflow, ResetTextTextOverflow, SetTextDecoration, ResetTextDecoration };
 
     return modifier;
 }

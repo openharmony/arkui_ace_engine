@@ -28,6 +28,8 @@ namespace {
 
 constexpr int32_t MAX_ROTATION_FINGERS = 5;
 constexpr int32_t DEFAULT_ROTATION_FINGERS = 2;
+constexpr double ONE_CIRCLE = 360.0;
+constexpr double QUARTER_CIRCLE = 90.0;
 
 } // namespace
 
@@ -95,18 +97,36 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     if (!IsActiveFinger(event.id) || currentFingers_ < fingers_) {
+        lastAngle_ = 0.0;
+        angleSignChanged_ = false;
         return;
     }
     touchPoints_[event.id] = event;
     if (static_cast<int32_t>(activeFingers_.size()) < DEFAULT_ROTATION_FINGERS) {
+        lastAngle_ = 0.0;
+        angleSignChanged_ = false;
         return;
     }
     currentAngle_ = ComputeAngle();
     time_ = event.time;
 
     if (refereeState_ == RefereeState::DETECTING) {
-        double diffAngle = fabs((currentAngle_ - initialAngle_));
+        auto trueAngle = currentAngle_;
+        if (currentAngle_ * lastAngle_ < 0 && fabs(currentAngle_) > QUARTER_CIRCLE) {
+            angleSignChanged_ = !angleSignChanged_;
+        }
+        if (angleSignChanged_) {
+            if (initialAngle_ > 0.0) {
+                trueAngle += ONE_CIRCLE;
+            } else {
+                trueAngle -= ONE_CIRCLE;
+            }
+        }
+        lastAngle_ = currentAngle_;
+        double diffAngle = fabs((trueAngle - initialAngle_));
         if (GreatOrEqual(diffAngle, angle_)) {
+            lastAngle_ = 0.0;
+            angleSignChanged_ = false;
             resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
             auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
             if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
@@ -116,6 +136,8 @@ void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         }
     } else if (refereeState_ == RefereeState::SUCCEED) {
+        lastAngle_ = 0.0;
+        angleSignChanged_ = false;
         resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
         SendCallbackMsg(onActionUpdate_);
     }
@@ -171,6 +193,8 @@ void RotationRecognizer::OnResetStatus()
     initialAngle_ = 0.0;
     currentAngle_ = 0.0;
     resultAngle_ = 0.0;
+    lastAngle_ = 0.0;
+    angleSignChanged_ = false;
 }
 
 void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)

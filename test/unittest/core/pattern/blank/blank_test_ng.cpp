@@ -253,7 +253,7 @@ HWTEST_F(BlackTestNg, BlankFrameNodeCreator002, TestSize.Level1)
         EXPECT_NE(frameNode, nullptr);
         auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
         EXPECT_NE(blankLayoutProperty, nullptr);
-        EXPECT_EQ(blankLayoutProperty->GetMinSize().value_or(Dimension()), Dimension());
+        EXPECT_EQ(blankLayoutProperty->GetMinSize().value_or(Dimension()).ConvertToVp(),Dimension().ConvertToVp());
     }
 }
 

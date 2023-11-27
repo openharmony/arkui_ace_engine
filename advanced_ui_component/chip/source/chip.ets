@@ -204,6 +204,7 @@ export struct ChipComponent {
   @State useDefaultSuffixIcon: boolean = false
   private chipNodeSize: SizeOptions = {}
   private onClose: () => void = noop
+  @State suffixIconOnFocus: boolean = false
   @State chipBreakPoints: BreakPointsType = BreakPointsType.SM
   private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("0vp<width<600vp")
   private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("600vp<=width<840vp")
@@ -411,12 +412,16 @@ export struct ChipComponent {
     return calWidth
   }
 
+  private getChipEnable(): boolean {
+    return this.chipEnabled || this.chipEnabled === void (0)
+  }
+
   private getChipNodeOpacity(): number {
-    return this.chipEnabled ? this.chipOpacity : this.theme.chipNode.opacity.disabled
+    return this.getChipEnable() ? this.chipOpacity : this.theme.chipNode.opacity.disabled
   }
 
   private handleTouch(event: TouchEvent) {
-    if (!this.chipEnabled) {
+    if (!this.getChipEnable()) {
       return
     }
     this.isPressed = (event.type === TouchType.Down)
@@ -448,7 +453,7 @@ export struct ChipComponent {
   }
 
   private hoverAnimate(isHover: boolean) {
-    if (!this.chipEnabled) {
+    if (!this.getChipEnable()) {
       return
     }
     this.isHover = isHover
@@ -534,7 +539,7 @@ export struct ChipComponent {
   @Builder
   focusOverlay() {
     Stack() {
-      if (this.chipNodeOnFocus) {
+      if (this.chipNodeOnFocus && !this.suffixIconOnFocus) {
         Stack()
           .borderRadius(this.getChipNodeRadius())
           .size(this.getFocusOverlaySize())
@@ -585,12 +590,12 @@ export struct ChipComponent {
   @Builder
   chipBuilder() {
     Row() {
-      if (this.prefixIcon?.src) {
+      if (this.prefixIcon?.src !== "") {
         Image(this.prefixIcon?.src)
           .opacity(this.getChipNodeOpacity())
           .size(this.getPrefixIconSize())
           .fillColor(this.getPrefixIconFilledColor())
-          .enabled(this.chipEnabled)
+          .enabled(this.getChipEnable())
           .objectFit(ImageFit.Cover)
           .focusable(false)
           .flexShrink(0)
@@ -602,7 +607,7 @@ export struct ChipComponent {
         .fontColor(this.getLabelFontColor())
         .fontFamily(this.getLabelFontFamily())
         .margin(this.getLabelMargin())
-        .enabled(this.chipEnabled)
+        .enabled(this.getChipEnable())
         .maxLines(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .flexShrink(1)
@@ -613,7 +618,7 @@ export struct ChipComponent {
         .opacity(this.getChipNodeOpacity())
         .size(this.getSuffixIconSize())
         .fillColor(this.getSuffixIconFilledColor())
-        .enabled(this.chipEnabled)
+        .enabled(this.getChipEnable())
         .focusable(this.getSuffixIconFocusable())
         .objectFit(ImageFit.Cover)
         .flexShrink(0)
@@ -621,8 +626,14 @@ export struct ChipComponent {
           focused: this.suffixIconFocusStyles,
           normal: this.suffixIconNormalStyles,
         })
+        .onFocus(() => {
+          this.suffixIconOnFocus = true
+        })
+        .onBlur(() => {
+          this.suffixIconOnFocus = false
+        })
         .onClick(() => {
-          if (!this.chipEnabled) {
+          if (!this.getChipEnable()) {
             return
           }
           if (this.suffixIcon?.action) {
@@ -644,7 +655,7 @@ export struct ChipComponent {
     .constraintSize(this.getChipConstraintWidth())
     .backgroundColor(this.getChipNodeBackGroundColor())
     .borderRadius(this.getChipNodeRadius())
-    .enabled(this.chipEnabled)
+    .enabled(this.getChipEnable())
     .scale(this.chipScale)
     .focusable(true)
     .colorBlend(this.chipBlendColor)
@@ -663,7 +674,7 @@ export struct ChipComponent {
       this.hoverAnimate(isHover)
     })
     .onKeyEvent((event) => {
-      if (event.type === KeyType.Down && event.keyCode === KeyCode.KEYCODE_FORWARD_DEL) {
+      if (event.type === KeyType.Down && event.keyCode === KeyCode.KEYCODE_FORWARD_DEL && !this.suffixIconOnFocus) {
         this.deleteChipNodeAnimate()
       }
     })

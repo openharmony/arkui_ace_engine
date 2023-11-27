@@ -497,6 +497,10 @@ public:
         return dragEventActuator_;
     }
 
+    bool GetMonopolizeEvents() const;
+
+    void SetMonopolizeEvents(bool monopolizeEvents);
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
@@ -549,6 +553,7 @@ private:
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
+    bool monopolizeEvents_ = false;
 };
 
 } // namespace OHOS::Ace::NG

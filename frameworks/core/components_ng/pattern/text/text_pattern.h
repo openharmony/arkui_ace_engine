@@ -286,17 +286,17 @@ public:
     virtual std::function<void(Offset)> GetThumbnailCallback();
 #endif
 
-    void InitSpanImageLayout(const std::vector<int32_t>& placeHolderIndex,
+    void InitSpanImageLayout(const std::vector<int32_t>& placeholderIndex,
         const std::vector<RectF>& rectsForPlaceholders, OffsetF contentOffset) override
     {
-        placeHolderIndex_ = placeHolderIndex;
+        placeholderIndex_ = placeholderIndex;
         imageOffset_ = contentOffset;
         rectsForPlaceholders_ = rectsForPlaceholders;
     }
 
     const std::vector<int32_t>& GetPlaceHolderIndex()
     {
-        return placeHolderIndex_;
+        return placeholderIndex_;
     }
 
     const std::vector<RectF>& GetRectsForPlaceholders()
@@ -329,7 +329,7 @@ public:
         return isCustomFont_;
     }
     void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
-    void CheckHandles(SelectHandleInfo& handleInfo);
+    virtual void CheckHandles(SelectHandleInfo& handleInfo);
     OffsetF GetDragUpperLeftCoordinates() override;
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
 
@@ -449,7 +449,6 @@ protected:
     std::vector<RectF> dragBoxes_;
 
     // properties for AI
-    bool hasChildren_ = false;
     bool textDetectEnable_ = false;
     bool aiDetectInitialized_ = false;
     bool aiDetectTypesChanged_ = false;
@@ -492,7 +491,7 @@ private:
 
     RefPtr<Paragraph> paragraph_;
     std::vector<MenuOptionsParam> menuOptionItems_;
-    std::vector<int32_t> placeHolderIndex_;
+    std::vector<int32_t> placeholderIndex_;
     std::vector<RectF> rectsForPlaceholders_;
     OffsetF imageOffset_;
 

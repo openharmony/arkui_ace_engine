@@ -243,6 +243,17 @@ HWTEST_F(TouchEventTestNg, TouchEventActuatorHandleAndDispatchTest004, TestSize.
     touchEventActuator->userCallback_ = nullptr;
     const TouchEvent touchEvent3 { .pointers = POINTERS_2 };
     EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent3));
+
+    /**
+     * @tc.steps: step9. add history.
+     * @tc.expected: HandleEvent return TRUE;
+     */
+    TouchEvent touchEvent4 = touchEvent;
+    touchEvent4.history.push_back(touchEvent);
+    touchEvent4.history.push_back(touchEvent);
+    touchEvent4.history.push_back(touchEvent);
+    touchEvent4.isInterpolated = true;
+    EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent4));
 }
 
 /**

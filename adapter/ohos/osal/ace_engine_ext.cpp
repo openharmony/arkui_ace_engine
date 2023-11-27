@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 namespace {
-#ifdef __aarch64__
+#if (defined(__aarch64__) || defined(__x86_64__))
 const std::string DRAG_EXTENSION_SO_PATH = "system/lib64/module/autorun/libhmos_drag_drop.z.so";
 #else
 const std::string DRAG_EXTENSION_SO_PATH = "system/lib/module/autorun/libhmos_drag_drop.z.so";

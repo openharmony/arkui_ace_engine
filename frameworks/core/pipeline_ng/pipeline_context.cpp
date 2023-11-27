@@ -80,7 +80,7 @@
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
-constexpr uint64_t INTERPOLATION_THRESHOLD = 300 * 1000 * 1000; // 300ms
+constexpr uint64_t INTERPOLATION_THRESHOLD = 100 * 1000 * 1000; // 100ms
 constexpr int32_t INDEX_X = 0;
 constexpr int32_t INDEX_Y = 1;
 constexpr int32_t INDEX_TIME = 2;
@@ -1227,17 +1227,6 @@ bool PipelineContext::OnBackPressed()
         return true;
     }
 
-    auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
-    if (textfieldManager && textfieldManager->OnBackPressed()) {
-        return true;
-    }
-
-#ifdef WINDOW_SCENE_SUPPORTED
-    if (uiExtensionManager_->OnBackPressed()) {
-        return true;
-    }
-#endif
-
     // if has popup, back press would hide popup and not trigger page back
     auto hasOverlay = false;
     taskExecutor_->PostSyncTask(
@@ -1255,6 +1244,17 @@ bool PipelineContext::OnBackPressed()
     if (hasOverlay) {
         return true;
     }
+
+    auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    if (textfieldManager && textfieldManager->OnBackPressed()) {
+        return true;
+    }
+
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_->OnBackPressed()) {
+        return true;
+    }
+#endif
 
     auto result = false;
     taskExecutor_->PostSyncTask(
@@ -1308,7 +1308,13 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
     const auto& children = node->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
-
+        auto destinationNode = AceType::DynamicCast<NavDestinationGroupNode>(child);
+        if (destinationNode && destinationNode->GetLayoutProperty()) {
+            auto property = destinationNode->GetLayoutProperty<LayoutProperty>();
+            if (property->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+                continue;
+            }
+        }
         auto target = FindNavigationNodeToHandleBack(child);
         if (target) {
             return target;
@@ -1369,6 +1375,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             "type=%{public}d", scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type);
     }
     eventManager_->SetInstanceId(GetInstanceId());
+    if (scalePoint.type != TouchType::MOVE && historyPointsById_.find(scalePoint.id) != historyPointsById_.end()) {
+        historyPointsById_.erase(scalePoint.id);
+    }
     if (scalePoint.type == TouchType::DOWN) {
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false);
@@ -1449,7 +1458,7 @@ void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint)
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
     if (manager->IsDragging() && manager->IsSameDraggingPointer(touchPoint.id)) {
-        manager->OnDragEnd({ touchPoint.x, touchPoint.y }, "");
+        manager->OnDragEnd(PointerEvent(touchPoint.x, touchPoint.y), "");
     }
 }
 
@@ -1737,7 +1746,8 @@ void PipelineContext::FlushMouseEvent()
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
-    if (mouseStyleNodeId_ != nodeId) {
+    auto userCursor = GetCursor();
+    if (mouseStyleNodeId_ != nodeId || userCursor != MouseFormat::DEFAULT) {
         return false;
     }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
@@ -1756,7 +1766,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         auto manager = GetDragDropManager();
         if (manager) {
             manager->SetIsDragCancel(true);
-            manager->OnDragEnd({ 0.0f, 0.0f }, "");
+            manager->OnDragEnd(PointerEvent(0, 0), "");
         }
     }
 
@@ -1795,7 +1805,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 
 bool PipelineContext::RequestDefaultFocus(const RefPtr<FocusHub>& mainView)
 {
-    if (mainView->GetFocusType() != FocusType::SCOPE) {
+    if (!mainView || mainView->GetFocusType() != FocusType::SCOPE) {
         return false;
     }
     auto viewRootScope = mainView->GetMainViewRootScope();
@@ -1811,7 +1821,7 @@ bool PipelineContext::RequestDefaultFocus(const RefPtr<FocusHub>& mainView)
     if (mainView->GetIsViewRootScopeFocused() && viewRootScope) {
         mainView->SetIsViewRootScopeFocused(viewRootScope, true);
         auto ret = viewRootScope->RequestFocusImmediately();
-        LOGI("Target view's default focus is %{public}s/%{public}d. Request view root focus return: %{public}d.",
+        LOGI("Target view has no default focus. Request focus on view root: %{public}s/%{public}d return: %{public}d.",
             viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
         return ret;
     }
@@ -2045,7 +2055,7 @@ void PipelineContext::WindowFocus(bool isFocus)
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
-        LOGD("WindowFocus: window - %{public}d on blur.", windowId_);
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d lost focus.", windowId_);
         auto mouseStyle = MouseStyle::CreateMouseStyle();
         if (mouseStyle) {
             mouseStyle->ChangePointerStyle(static_cast<int32_t>(GetWindowId()), MouseFormat::DEFAULT);
@@ -2054,7 +2064,7 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     } else {
-        LOGD("WindowFocus: window - %{public}d on focus.", windowId_);
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
         auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
         if (rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
             rootFocusHub->RequestFocusImmediately();
@@ -2318,7 +2328,7 @@ void PipelineContext::FlushWindowSizeChangeCallback(int32_t width, int32_t heigh
     }
 }
 
-void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
+void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action)
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -2347,13 +2357,13 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     manager->GetExtraInfoFromClipboard(extraInfo);
 #endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
-        manager->OnDragEnd(Point(x, y, x, y), extraInfo);
+        manager->OnDragEnd(pointerEvent, extraInfo);
 #ifndef ENABLE_DRAG_FRAMEWORK
         manager->RestoreClipboardData();
 #endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
-    manager->OnDragMove(Point(x, y, x, y), extraInfo);
+    manager->OnDragMove(pointerEvent, extraInfo);
 }
 
 void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId)
@@ -2569,6 +2579,12 @@ void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& no
 void PipelineContext::SetJSViewActive(bool active, WeakPtr<CustomNode> custom)
 {
     taskScheduler_->SetJSViewActive(active, custom);
+}
+
+std::string PipelineContext::GetCurrentExtraInfo()
+{
+    auto node = activeNode_.Upgrade();
+    return node ? node->GetCurrentCustomNodeInfo() : std::string();
 }
 
 void PipelineContext::SetCursor(int32_t cursorValue)

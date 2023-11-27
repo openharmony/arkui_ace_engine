@@ -15,7 +15,7 @@
 
 #include "gtest/gtest.h"
 
-#include "core/common/flutter/flutter_task_executor.h"
+#include "core/common/task_executor_impl.h"
 #define private public
 #define protected public
 #include "core/components/plugin/plugin_component.h"
@@ -48,7 +48,7 @@ RefPtr<PipelineContext> PluginComponentTest::GetPipelineContext(const RefPtr<Plu
 {
     auto platformWindow = PlatformWindow::Create(nullptr);
     auto window = std::make_unique<Window>(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     taskExecutor->InitJsThread(false);
     auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();

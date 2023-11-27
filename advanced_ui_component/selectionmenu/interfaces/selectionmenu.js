@@ -125,6 +125,7 @@ class SelectionMenuComponent extends ViewPU {
         this.builder = this.CloserFun;
         this.__showExpandedMenuOptions = new ObservedPropertySimplePU(!1, this, "showExpandedMenuOptions");
         this.__showCustomerIndex = new ObservedPropertySimplePU(-1, this, "showCustomerIndex");
+        this.__customerChange = new ObservedPropertySimplePU(!1, this, "customerChange");
         this.__cutAndCopyEnable = new ObservedPropertySimplePU(!1, this, "cutAndCopyEnable");
         this.__pasteEnable = new ObservedPropertySimplePU(!1, this, "pasteEnable");
         this.__visibilityValue = new ObservedPropertySimplePU(Visibility.Visible, this, "visibilityValue");
@@ -144,6 +145,7 @@ class SelectionMenuComponent extends ViewPU {
         void 0 !== e.builder && (this.builder = e.builder);
         void 0 !== e.showExpandedMenuOptions && (this.showExpandedMenuOptions = e.showExpandedMenuOptions);
         void 0 !== e.showCustomerIndex && (this.showCustomerIndex = e.showCustomerIndex);
+        void 0 !== e.customerChange && (this.customerChange = e.customerChange);
         void 0 !== e.cutAndCopyEnable && (this.cutAndCopyEnable = e.cutAndCopyEnable);
         void 0 !== e.pasteEnable && (this.pasteEnable = e.pasteEnable);
         void 0 !== e.visibilityValue && (this.visibilityValue = e.visibilityValue);
@@ -156,6 +158,7 @@ class SelectionMenuComponent extends ViewPU {
     purgeVariableDependenciesOnElmtId(e) {
         this.__showExpandedMenuOptions.purgeDependencyOnElmtId(e);
         this.__showCustomerIndex.purgeDependencyOnElmtId(e);
+        this.__customerChange.purgeDependencyOnElmtId(e);
         this.__cutAndCopyEnable.purgeDependencyOnElmtId(e);
         this.__pasteEnable.purgeDependencyOnElmtId(e);
         this.__visibilityValue.purgeDependencyOnElmtId(e)
@@ -164,6 +167,7 @@ class SelectionMenuComponent extends ViewPU {
     aboutToBeDeleted() {
         this.__showExpandedMenuOptions.aboutToBeDeleted();
         this.__showCustomerIndex.aboutToBeDeleted();
+        this.__customerChange.aboutToBeDeleted();
         this.__cutAndCopyEnable.aboutToBeDeleted();
         this.__pasteEnable.aboutToBeDeleted();
         this.__visibilityValue.aboutToBeDeleted();
@@ -188,6 +192,14 @@ class SelectionMenuComponent extends ViewPU {
 
     set showCustomerIndex(e) {
         this.__showCustomerIndex.set(e)
+    }
+
+    get customerChange() {
+        return this.__customerChange.get()
+    }
+
+    set customerChange(e) {
+        this.__customerChange.set(e)
     }
 
     get cutAndCopyEnable() {
@@ -224,7 +236,7 @@ class SelectionMenuComponent extends ViewPU {
                 start: o + 1,
                 end: o + 1
             }).length ? this.visibilityValue = Visibility.None : this.visibilityValue = Visibility.Visible
-        }
+        } else this.expandedMenuOptions && this.expandedMenuOptions.length > 0 && (this.showExpandedMenuOptions = !0);
         let e = pasteboard.getSystemPasteboard();
         e && e.hasDataSync() && (this.pasteEnable = !0)
     }
@@ -324,6 +336,10 @@ class SelectionMenuComponent extends ViewPU {
         }))
     }
 
+    measureButtonWidth() {
+        return this.editorMenuOptions && this.editorMenuOptions.length < 5 ? (this.theme.defaultMenuWidth - 2 * this.theme.expandedOptionPadding - 2 * this.theme.editorOptionMargin * this.editorMenuOptions.length) / this.editorMenuOptions.length : this.theme.buttonSize
+    }
+
     IconPanel(e = null) {
         this.observeComponentCreation2(((e, t) => {
             Flex.create({ wrap: FlexWrap.Wrap });
@@ -351,12 +367,13 @@ class SelectionMenuComponent extends ViewPU {
                                 if (o.builder) {
                                     this.builder = o.builder;
                                     this.showCustomerIndex = t;
-                                    this.showExpandedMenuOptions = !1
+                                    this.showExpandedMenuOptions = !1;
+                                    this.customerChange = !this.customerChange
                                 } else this.showCustomerIndex = -1;
                                 o.action && o.action()
                             }));
                             Button.borderRadius(this.theme.iconBorderRadius);
-                            Button.width(this.theme.buttonSize);
+                            Button.width(this.measureButtonWidth());
                             Button.height(this.theme.buttonSize)
                         }), Button);
                         this.observeComponentCreation2(((e, t) => {
@@ -364,7 +381,8 @@ class SelectionMenuComponent extends ViewPU {
                             Image.width(this.theme.imageSize);
                             Image.height(this.theme.imageSize);
                             Image.fillColor(this.theme.imageFillColor);
-                            Image.focusable(!0)
+                            Image.focusable(!0);
+                            Image.draggable(!1)
                         }), Image);
                         Button.pop()
                     }), void 0,!0,!1)
@@ -463,20 +481,39 @@ class SelectionMenuComponent extends ViewPU {
                         }), MenuItem);
                         MenuItem.pop();
                         this.observeComponentCreation2(((e, t) => {
-                            MenuItem.create({ startIcon: this.theme.shareIcon, content: "分享", labelInfo: "" });
-                            MenuItem.enabled(!1)
-                        }), MenuItem);
-                        MenuItem.pop();
-                        this.observeComponentCreation2(((e, t) => {
-                            MenuItem.create({ startIcon: this.theme.translateIcon, content: "翻译", labelInfo: "" });
-                            MenuItem.enabled(!1)
-                        }), MenuItem);
-                        MenuItem.pop();
-                        this.observeComponentCreation2(((e, t) => {
-                            MenuItem.create({ startIcon: this.theme.searchIcon, content: "搜索", labelInfo: "" });
-                            MenuItem.enabled(!1)
-                        }), MenuItem);
-                        MenuItem.pop();
+                            If.create();
+                            this.showExpandedMenuOptions ? this.ifElseBranchUpdateFunction(0, (() => {
+                                this.observeComponentCreation2(((e, t) => {
+                                    MenuItem.create({
+                                        startIcon: this.theme.shareIcon,
+                                        content: "分享",
+                                        labelInfo: ""
+                                    });
+                                    MenuItem.enabled(!1)
+                                }), MenuItem);
+                                MenuItem.pop();
+                                this.observeComponentCreation2(((e, t) => {
+                                    MenuItem.create({
+                                        startIcon: this.theme.translateIcon,
+                                        content: "翻译",
+                                        labelInfo: ""
+                                    });
+                                    MenuItem.enabled(!1)
+                                }), MenuItem);
+                                MenuItem.pop();
+                                this.observeComponentCreation2(((e, t) => {
+                                    MenuItem.create({
+                                        startIcon: this.theme.searchIcon,
+                                        content: "搜索",
+                                        labelInfo: ""
+                                    });
+                                    MenuItem.enabled(!1)
+                                }), MenuItem);
+                                MenuItem.pop()
+                            })) : this.ifElseBranchUpdateFunction(1, (() => {
+                            }))
+                        }), If);
+                        If.pop();
                         MenuItemGroup.pop()
                     })) : this.ifElseBranchUpdateFunction(1, (() => {
                     }))
@@ -484,7 +521,7 @@ class SelectionMenuComponent extends ViewPU {
                 If.pop();
                 this.observeComponentCreation2(((e, t) => {
                     If.create();
-                    this.controller && !this.showExpandedMenuOptions && this.expandedMenuOptions && this.expandedMenuOptions.length > 0 ? this.ifElseBranchUpdateFunction(0, (() => {
+                    this.controller && !this.showExpandedMenuOptions ? this.ifElseBranchUpdateFunction(0, (() => {
                         this.observeComponentCreation2(((e, t) => {
                             MenuItem.create({ content: "更多", endIcon: this.theme.arrowDownIcon });
                             MenuItem.onClick((() => {
@@ -492,40 +529,42 @@ class SelectionMenuComponent extends ViewPU {
                             }))
                         }), MenuItem);
                         MenuItem.pop()
-                    })) : this.ifElseBranchUpdateFunction(1, (() => {
+                    })) : this.showExpandedMenuOptions && this.expandedMenuOptions && this.expandedMenuOptions.length > 0 ? this.ifElseBranchUpdateFunction(1, (() => {
                         this.observeComponentCreation2(((e, t) => {
-                            If.create();
-                            this.expandedMenuOptions && this.expandedMenuOptions.length > 0 ? this.ifElseBranchUpdateFunction(0, (() => {
+                            ForEach.create();
+                            this.forEachUpdateFunction(e, this.expandedMenuOptions, ((e, t) => {
+                                const o = e;
                                 this.observeComponentCreation2(((e, t) => {
-                                    ForEach.create();
-                                    this.forEachUpdateFunction(e, this.expandedMenuOptions, ((e, t) => {
-                                        const o = e;
-                                        this.observeComponentCreation2(((e, t) => {
-                                            MenuItem.create({
-                                                startIcon: o.startIcon,
-                                                content: o.content,
-                                                endIcon: o.endIcon,
-                                                labelInfo: o.labelInfo,
-                                                builder: o.builder
-                                            });
-                                            MenuItem.onClick((() => {
-                                                o.action && o.action()
-                                            }))
-                                        }), MenuItem);
-                                        MenuItem.pop()
-                                    }), void 0,!0,!1)
-                                }), ForEach);
-                                ForEach.pop()
-                            })) : this.ifElseBranchUpdateFunction(1, (() => {
-                            }))
-                        }), If);
-                        If.pop()
+                                    MenuItem.create({
+                                        startIcon: o.startIcon,
+                                        content: o.content,
+                                        endIcon: o.endIcon,
+                                        labelInfo: o.labelInfo,
+                                        builder: o.builder
+                                    });
+                                    MenuItem.onClick((() => {
+                                        o.action && o.action()
+                                    }))
+                                }), MenuItem);
+                                MenuItem.pop()
+                            }), void 0,!0,!1)
+                        }), ForEach);
+                        ForEach.pop()
+                    })) : this.ifElseBranchUpdateFunction(2, (() => {
                     }))
                 }), If);
                 If.pop();
                 Menu.pop()
             })) : this.showCustomerIndex > -1 && this.builder ? this.ifElseBranchUpdateFunction(1, (() => {
-                this.builder.bind(this)()
+                this.observeComponentCreation2(((e, t) => {
+                    If.create();
+                    this.customerChange ? this.ifElseBranchUpdateFunction(0, (() => {
+                        this.builder.bind(this)()
+                    })) : this.ifElseBranchUpdateFunction(1, (() => {
+                        this.builder.bind(this)()
+                    }))
+                }), If);
+                If.pop()
             })) : this.ifElseBranchUpdateFunction(2, (() => {
             }))
         }), If);

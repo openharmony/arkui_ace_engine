@@ -150,15 +150,11 @@ public:
     float GetTotalHeight() const override;
 
     // scroller
-    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) override
-    {
-        ScrollablePattern::AnimateTo(position, duration, curve, smooth);
-        FireOnScrollStart();
-    }
     void ScrollTo(float position) override;
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
         ScrollAlign align = ScrollAlign::START);
+    bool CheckTargetValid(int32_t index, int32_t indexInGroup);
     bool ScrollPage(bool reverse);
     void ScrollBy(float offset);
     bool AnimateToTarget(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
@@ -241,7 +237,6 @@ public:
 
 private:
     void OnScrollEndCallback() override;
-    void OnScrollStartCallback() override;
 
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -267,7 +262,7 @@ private:
     void InitScrollableEvent();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
-    void FireOnScrollStart();
+    void FireOnScrollStart() override;
     void CheckRestartSpring();
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
     void UpdateScrollSnap();
@@ -329,7 +324,6 @@ private:
     bool isFramePaintStateValid_ = false;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
-    bool scrollStop_ = false;
 
     std::map<int32_t, int32_t> lanesItemRange_;
     int32_t lanes_ = 1;

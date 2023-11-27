@@ -37,6 +37,7 @@ public:
     static void JsOnKey(const JSCallbackInfo& args);
     static void SetFocusable(bool focusable);
     static void SetFocusNode(bool isFocusNode);
+    static void JsMonopolizeEvents(const JSCallbackInfo& info);
 
     static void JsOnAppear(const JSCallbackInfo& info);
     static void JsOnDisAppear(const JSCallbackInfo& info);

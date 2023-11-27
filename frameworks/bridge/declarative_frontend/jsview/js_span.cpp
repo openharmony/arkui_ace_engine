@@ -277,6 +277,18 @@ void JSSpan::SetLineHeight(const JSCallbackInfo& info)
     SpanModel::GetInstance()->SetLineHeight(value);
 }
 
+void JSSpan::SetTextShadow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    std::vector<Shadow> shadows;
+    ParseTextShadowFromShadowObject(info[0], shadows);
+    if (!shadows.empty()) {
+        SpanModel::GetInstance()->SetTextShadow(shadows);
+    }
+}
+
 void JSSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSpan>::Declare("Span");
@@ -290,6 +302,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::StaticMethod("fontFamily", &JSSpan::SetFontFamily, opt);
     JSClass<JSSpan>::StaticMethod("letterSpacing", &JSSpan::SetLetterSpacing, opt);
     JSClass<JSSpan>::StaticMethod("textCase", &JSSpan::SetTextCase, opt);
+    JSClass<JSSpan>::StaticMethod("textShadow", &JSSpan::SetTextShadow, opt);
     JSClass<JSSpan>::StaticMethod("decoration", &JSSpan::SetDecoration);
     JSClass<JSSpan>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSpan>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

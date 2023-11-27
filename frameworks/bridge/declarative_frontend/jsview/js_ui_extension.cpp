@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/common/container_scope.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "interfaces/include/ws_common.h"
@@ -244,12 +245,16 @@ void JSUIExtensionProxy::On(const JSCallbackInfo& info)
         return;
     }
 
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
     auto instanceId = ContainerScope::CurrentId();
-    auto onOnFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId]
+    auto onOnFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
         (const RefPtr<NG::UIExtensionProxy>& session) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         JSRef<JSObject> contextObj = JSClass<JSUIExtensionProxy>::NewInstance();
         RefPtr<JSUIExtensionProxy> proxy = Referenced::Claim(contextObj->Unwrap<JSUIExtensionProxy>());
         proxy->SetInstanceId(instanceId);
@@ -372,12 +377,16 @@ void JSUIExtension::OnRemoteReady(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
-    auto onRemoteReady = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId]
+    auto onRemoteReady = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
         (const RefPtr<NG::UIExtensionProxy>& session) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         JSRef<JSObject> contextObj = JSClass<JSUIExtensionProxy>::NewInstance();
         RefPtr<JSUIExtensionProxy> proxy = Referenced::Claim(contextObj->Unwrap<JSUIExtensionProxy>());
         proxy->SetInstanceId(instanceId);
@@ -393,13 +402,17 @@ void JSUIExtension::OnReceive(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
-    auto onReceive = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId]
+    auto onReceive = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
         (const AAFwk::WantParams& wantParams) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("UIExtensionComponent.UIExtensionDataSession.onReceive");
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto engine = EngineHelper::GetCurrentEngine();
         CHECK_NULL_VOID(engine);
         NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -417,12 +430,17 @@ void JSUIExtension::OnRelease(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
-    auto onRelease = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId](int32_t releaseCode) {
+    auto onRelease = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
+        (int32_t releaseCode) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("UIExtensionComponent.onRelease");
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(releaseCode));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -434,13 +452,17 @@ void JSUIExtension::OnResult(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
-    auto onResult = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId]
+    auto onResult = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
         (int32_t code, const AAFwk::Want& want) {
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("UIExtensionComponent.onResult");
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
             auto engine = EngineHelper::GetCurrentEngine();
             CHECK_NULL_VOID(engine);
             NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -461,13 +483,17 @@ void JSUIExtension::OnError(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
-    auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId]
+    auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
         (int32_t code, const std::string& name, const std::string& message) {
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("UIExtensionComponent.onError");
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
             JSRef<JSObject> obj = JSRef<JSObject>::New();
             obj->SetProperty<int32_t>("code", code);
             obj->SetProperty<std::string>("name", name);

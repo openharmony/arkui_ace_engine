@@ -270,8 +270,8 @@ public:
         const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack);
     void CloseModalUIExtension(int32_t sessionId);
 
-    RefPtr<FrameNode> BindUIExtensionToMenu(
-        const RefPtr<FrameNode>& uiExtNode, const std::vector<std::string>& aiMenuOptions);
+    RefPtr<FrameNode> BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
+        const RefPtr<NG::FrameNode>& targetNode, const std::vector<std::string>& aiMenuOptions);
     SizeF CaculateMenuSize(const RefPtr<FrameNode>& menuNode, const std::vector<std::string>& aiMenuOptions);
     bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF safeArea,
         const std::vector<std::string>& aiMenuOptions, const RefPtr<NG::FrameNode>& targetNode);

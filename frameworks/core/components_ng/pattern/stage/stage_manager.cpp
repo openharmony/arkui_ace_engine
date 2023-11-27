@@ -175,7 +175,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     // mount to parent and mark build render tree.
     node->MountToParent(stageNode_);
     // then build the total child.
-    node->Build();
+    node->Build(nullptr);
     stageNode_->RebuildRenderContextTree();
     FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
 

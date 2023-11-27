@@ -39,9 +39,26 @@ std::string GetDeclaration(const std::optional<Color>& color, const std::optiona
         "type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value_or(TextDecoration::NONE)).c_str());
     jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
     jsonSpanDeclaration->Put("style",
-        V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID))
-            .c_str());
+        V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID)).c_str());
     return jsonSpanDeclaration->ToString();
+}
+inline std::unique_ptr<JsonValue> ConvertShadowToJson(const Shadow& shadow)
+{
+    auto jsonShadow = JsonUtil::Create(true);
+    jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
+    jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
+    jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
+    jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
+    jsonShadow->Put("type", std::to_string(static_cast<int32_t>(shadow.GetShadowType())).c_str());
+    return jsonShadow;
+}
+std::unique_ptr<JsonValue> ConvertShadowsToJson(const std::vector<Shadow>& shadows)
+{
+    auto jsonShadows = JsonUtil::CreateArray(true);
+    for (const auto& shadow : shadows) {
+        jsonShadows->Put(ConvertShadowToJson(shadow));
+    }
+    return jsonShadows;
 }
 } // namespace
 
@@ -71,6 +88,11 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str());
         json->Put("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str());
         json->Put("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str());
+
+        auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
+        // Determines if there are multiple textShadows
+        auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
+        json->Put("textShadow", jsonShadow);
     }
     if (textLineStyle) {
         json->Put("lineHeight", textLineStyle->GetLineHeight().value_or(Dimension()).ToString().c_str());
@@ -378,5 +400,19 @@ void SpanItem::GetIndex(int32_t& start, int32_t& end) const
     auto contentLen = StringUtils::ToWstring(content).length();
     start = position - contentLen;
     end = position;
+}
+
+int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
+    double width, double height, VerticalAlign /* verticalAlign */)
+{
+    CHECK_NULL_RETURN(builder, -1);
+    PlaceholderRun run;
+    run.width = width;
+    run.height = height;
+    textStyle.SetTextDecoration(TextDecoration::NONE);
+    builder->PushStyle(textStyle);
+    int32_t index = builder->AddPlaceholder(run);
+    builder->PopStyle();
+    return index;
 }
 } // namespace OHOS::Ace::NG

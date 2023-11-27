@@ -42,6 +42,7 @@ ohos_unittest("RenderTabContentTest") {
 
   sources = [
     "$ace_root/frameworks/base/log/dump_log.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
   ]
 

@@ -36,6 +36,10 @@ public:
     {
         return std::move(layoutInfo_);
     }
+    void SetCanOverScroll(bool canOverScroll)
+    {
+        canOverScroll_ = canOverScroll;
+    }
 
 private:
     FlowItemPosition GetItemPosition(int32_t index);
@@ -60,6 +64,7 @@ private:
     float crossGap_ = 0.0f;
     float mainSize_ = 0.0f;
     float footerMainSize_ = 0.0f;
+    bool canOverScroll_ = false;
     WaterFlowLayoutInfo layoutInfo_;
 };
 } // namespace OHOS::Ace::NG

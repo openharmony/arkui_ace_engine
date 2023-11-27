@@ -23,6 +23,11 @@
         "src/ArkDivider.ts",
         "src/ArkNavDestination.ts",
         "src/ArkCounter.ts",
+        "src/ArkCheckboxGroup.ts",
+        "src/ArkGridCol.ts",
+        "src/ArkPanel.ts",
+        "src/ArkNavigation.ts",
+        "src/ArkRichEditor.ts",
     ],
 
     "compilerOptions": {

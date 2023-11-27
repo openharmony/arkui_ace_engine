@@ -91,6 +91,8 @@ protected:
 
     virtual void UpdateParagraphForAISpan(const TextStyle& textStyle, LayoutWrapper* layoutWrapper);
 
+    virtual OffsetF GetContentOffset(LayoutWrapper* layoutWrapper);
+
 private:
     virtual void ApplyIndent(const TextStyle& textStyle, double width);
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
@@ -123,18 +125,16 @@ private:
         const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper);
     void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle);
     void UpdateParagraph(LayoutWrapper* layoutWrapper);
-    OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) const;
-    virtual OffsetF GetTextRectOffset(LayoutWrapper* layoutWrapper) const;
     bool CreateImageSpanAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool IncludeImageSpan(LayoutWrapper* layoutWrapper);
     void SetImageSpanTextStyle(const TextStyle& textStyle);
     void GetSpanAndImageSpanList(std::list<RefPtr<SpanItem>>& spanList,
-        std::map<int32_t, std::pair<RectF, RefPtr<ImageSpanItem>>>& imageSpanList);
+        std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList);
     void SplitSpanContentByLines(const TextStyle& textStyle, const std::list<RefPtr<SpanItem>>& spanList,
         std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines);
     void SetImageSpanTextStyleByLines(const TextStyle& textStyle,
-        std::map<int32_t, std::pair<RectF, RefPtr<ImageSpanItem>>>& imageSpanList,
+        std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList,
         std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines);
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;

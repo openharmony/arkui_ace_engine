@@ -63,5 +63,6 @@ JSRef<JSVal> ConvertPixmap(const RefPtr<PixelMap>& pixelMap);
 #endif
 
 bool IsDisableEventVersion();
+void ParseTextShadowFromShadowObject(const JSRef<JSVal>& shadowObject, std::vector<Shadow>& shadows);
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UTILS_H

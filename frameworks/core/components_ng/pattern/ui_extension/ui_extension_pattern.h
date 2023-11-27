@@ -121,15 +121,12 @@ public:
     }
 
     int32_t GetUiExtensionId() override;
-
     int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId) override;
-    const RefPtr<FrameNode>& GetUiExtensionNode()
-    {
-        return contentNode_;
-    }
 
     void OnAccessibilityEvent(
         const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList);
+
+    void HandleDragEvent(const PointerEvent& info) override;
 
 private:
     enum ReleaseCode {

@@ -30,7 +30,8 @@ void FrameNodeSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpLis
     if (!comId.empty()) {
         oss << "comId: " << comId << ", ";
     }
-    oss << "isHit: " << isHit << ", "
+    oss << "monopolizeEvents: " << monopolizeEvents << ", "
+        << "isHit: " << isHit << ", "
         << "hitTestMode: " << hitTestMode;
     dumpList.emplace_back(std::make_pair(depth, oss.str()));
 }

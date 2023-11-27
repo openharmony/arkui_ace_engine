@@ -72,6 +72,8 @@ public:
         OnFinishGestureReferee(touchId, isBlocked);
     }
 
+    virtual void AboutToAccept();
+
     // Called when request of handling gesture sequence is accepted by gesture referee.
     virtual void OnAccepted() = 0;
 
@@ -141,10 +143,7 @@ public:
         return refereeState_;
     }
 
-    void SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
-    {
-        gestureGroup_ = gestureGroup;
-    }
+    bool SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
 
     void SetOnAction(const GestureEventFunc& onAction)
     {
@@ -282,6 +281,7 @@ protected:
     virtual void OnResetStatus() = 0;
 
     virtual void OnSucceedCancel() {}
+    bool ShouldResponse() override;
 
     RefereeState refereeState_ = RefereeState::READY;
 

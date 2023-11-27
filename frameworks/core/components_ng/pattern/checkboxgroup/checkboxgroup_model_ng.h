@@ -34,6 +34,14 @@ public:
     void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag) override;
     void SetChangeEvent(GroupChangeEvent&& changeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
+    static void SetSelectAll(FrameNode* frameNode, bool isSelected);
+    static void SetSelectedColor(FrameNode* frameNode, const Color& color);
+    static void SetUnSelectedColor(FrameNode* frameNode, const Color& color);
+    static void SetWidth(FrameNode* frameNode, const Dimension& width);
+    static void SetHeight(FrameNode* frameNode, const Dimension& height);
+    static void SetCheckMarkColor(FrameNode* frameNode, const Color& color);
+    static void SetCheckMarkSize(FrameNode* frameNode, const Dimension& size);
+    static void SetCheckMarkWidth(FrameNode* frameNode, const Dimension& width);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_MODEL_NG_H

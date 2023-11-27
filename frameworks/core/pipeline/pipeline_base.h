@@ -48,6 +48,7 @@
 #include "core/event/mouse_event.h"
 #include "core/event/rotation_event.h"
 #include "core/event/touch_event.h"
+#include "core/event/pointer_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
@@ -161,7 +162,7 @@ public:
     virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
 
     // Called by view
-    virtual void OnDragEvent(int32_t x, int32_t y, DragEventAction action) = 0;
+    virtual void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) = 0;
 
     // Called by view when idle event.
     virtual void OnIdle(int64_t deadline) = 0;
@@ -978,6 +979,9 @@ public:
         return onFocus_;
     }
 
+    virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
+
+    virtual std::string GetCurrentExtraInfo() { return ""; }
     virtual void UpdateTitleInTargetPos(bool isShow = true, int32_t height = 0) {}
 
     virtual void SetCursor(int32_t cursorValue)

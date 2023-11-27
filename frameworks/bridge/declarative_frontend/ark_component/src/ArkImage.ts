@@ -1,5 +1,15 @@
 
 /// <reference path="./import.ts" />
+class ImageObjectFitModifier extends Modifier<number> {
+    static identity: Symbol = Symbol('imageObjectFit');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        GetUINativeModule().image.resetObjectFit(node);
+      } else {
+        GetUINativeModule().image.setObjectFit(node, this.value!);
+      }
+    }
+  }
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
         throw new Error("Method not implemented.");
@@ -17,8 +27,13 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
         throw new Error("Method not implemented.");
     }
     objectFit(value: ImageFit): this {
-        throw new Error("Method not implemented.");
-    }
+        if (value) {
+          modifier(this._modifiers, ImageObjectFitModifier, value);
+        } else {
+          modifier(this._modifiers, ImageObjectFitModifier, undefined);
+        }
+        return this;
+      }
     objectRepeat(value: ImageRepeat): this {
         throw new Error("Method not implemented.");
     }

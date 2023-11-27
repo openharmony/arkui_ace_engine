@@ -590,7 +590,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest015, TestSize.Level1)
     radioPaintProperty->ResetRadioCheck();
     pattern->OnClick();
     auto select1 = radioPaintProperty->GetRadioCheckValue();
-    EXPECT_TRUE(select1);
+    EXPECT_FALSE(select1);
 }
 
 /**
@@ -613,7 +613,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest016, TestSize.Level1)
     radioPaintProperty->ResetRadioCheck();
     pattern->OnClick();
     auto select1 = radioPaintProperty->GetRadioCheckValue();
-    EXPECT_TRUE(select1);
+    EXPECT_FALSE(select1);
 }
 
 /**

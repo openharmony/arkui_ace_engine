@@ -59,6 +59,39 @@ class TextAlignModifier extends Modifier<number> {
     }
 }
 
+class TextLineHeightModifier extends Modifier<number | string> {
+    static identity: Symbol = Symbol('textLineHeight');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        GetUINativeModule().text.resetLineHeight(node);
+      } else {
+        GetUINativeModule().text.setLineHeight(node, this.value!);
+      }
+    }
+}
+
+class TextTextOverflowModifier extends Modifier<number> {
+    static identity: Symbol = Symbol('textTextOverflow');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        GetUINativeModule().text.resetTextOverflow(node);
+      } else {
+        GetUINativeModule().text.setTextOverflow(node, this.value!);
+      }
+    }
+}
+
+class TextDecorationModifier extends Modifier<ArkDecoration> {
+    static identity: Symbol = Symbol('textDecoration');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        GetUINativeModule().text.resetDecoration(node);
+      } else {
+        GetUINativeModule().text.setDecoration(node, this.value!.type, this.value!.color);
+      }
+    }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
     enableDataDetector(enable: boolean): this {
         throw new Error("Method not implemented.");
@@ -141,11 +174,31 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
         modifier(this._modifiers, TextAlignModifier, textAlignNum);
         return this 
     }
-    lineHeight(value: any): this {
-        throw new Error("Method not implemented.");
+    lineHeight(value: number | string | Resource): TextAttribute {
+      if (isLengthType(value)) {
+        let arkValue: number | string = <number | string>value;
+        modifier(this._modifiers, TextLineHeightModifier, arkValue);
+      } else {
+        modifier(this._modifiers, TextLineHeightModifier, undefined);
+      }
+      return this;
     }
-    textOverflow(value: { overflow: TextOverflow; }): this {
-        throw new Error("Method not implemented.");
+    textOverflow(value: { overflow: TextOverflow }): TextAttribute {
+      if (value === null || value === undefined) {
+        modifier(this._modifiers, TextTextOverflowModifier, undefined);
+      }
+      else if (isObject(value)) {
+        let overflowValue = value.overflow;
+        if (isNumber(overflowValue)) {
+          if (!(overflowValue in CopyOptions)) {
+            overflowValue = TextOverflow.Clip;
+          }
+          modifier(this._modifiers, TextTextOverflowModifier, overflowValue);
+        } else {
+          modifier(this._modifiers, TextTextOverflowModifier, undefined);
+        }
+      }
+      return this;
     }
     fontFamily(value: any): this {
         throw new Error("Method not implemented.");
@@ -153,8 +206,23 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     maxLines(value: number): this {
         throw new Error("Method not implemented.");
     }
-    decoration(value: { type: TextDecorationType; color?: any; }): this {
-        throw new Error("Method not implemented.");
+    decoration(value: { type: TextDecorationType; color?: ResourceColor }): TextAttribute {
+      let arkDecoration: ArkDecoration = new ArkDecoration();
+      if (value === null || value === undefined) {
+        modifier(this._modifiers, TextDecorationModifier, arkDecoration);
+      } else if (isObject(value)) {
+        let typeValue = value.type;
+        if (!(typeValue in TextDecorationType)) {
+          arkDecoration.type = TextDecorationType.None;
+        } else {
+          arkDecoration.type = typeValue;
+        }
+        if (value.color !== null && value.color !== undefined) {
+          arkDecoration.color = <string | number>value.color
+        }
+        modifier(this._modifiers, TextDecorationModifier, arkDecoration);
+      }
+      return this;
     }
     letterSpacing(value: string | number): this {
         throw new Error("Method not implemented.");

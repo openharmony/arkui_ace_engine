@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_webview_function.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -268,10 +269,15 @@ public:
         JSRef<JSVal> tsCallback = JSRef<JSVal>::Cast(obj);
         std::function<void(std::string)> callback = nullptr;
         if (tsCallback->IsFunction()) {
+            WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
             auto jsCallback = AceType::MakeRefPtr<JsWebViewFunction>(JSRef<JSFunc>::Cast(tsCallback));
-            callback = [execCtx = args.GetExecutionContext(), func = std::move(jsCallback)](std::string result) {
+            callback = [execCtx = args.GetExecutionContext(), func = std::move(jsCallback), node = frameNode](
+                            std::string result) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("onMessageEvent CallBack");
+                auto pipelineContext = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID(pipelineContext);
+                pipelineContext->UpdateCurrentActiveNode(node);
                 func->Execute(result);
             };
             if (port_ != nullptr) {
@@ -603,10 +609,15 @@ void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
     JSRef<JSVal> tsCallback = obj->GetProperty("callback");
     std::function<void(std::string)> callback = nullptr;
     if (tsCallback->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto jsCallback = AceType::MakeRefPtr<JsWebViewFunction>(JSRef<JSFunc>::Cast(tsCallback));
-        callback = [execCtx = args.GetExecutionContext(), func = std::move(jsCallback)](std::string result) {
+        callback = [execCtx = args.GetExecutionContext(), func = std::move(jsCallback), node = frameNode](
+                        std::string result) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("ExecuteTypeScript CallBack");
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
             func->Execute(result);
         };
     }

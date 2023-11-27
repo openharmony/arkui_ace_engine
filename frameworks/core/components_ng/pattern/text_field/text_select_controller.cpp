@@ -168,6 +168,16 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
     }
 
     UpdateHandleIndex(start, end);
+    auto index = ConvertTouchOffsetToPosition(localOffset);
+    auto textLength = static_cast<int32_t>(contentController_->GetWideText().length());
+    if (index == textLength && GreatNotEqual(localOffset.GetX(), caretInfo_.rect.GetOffset().GetX())) {
+        UpdateHandleIndex(GetCaretIndex());
+    }
+    if (IsSelected()) {
+        MoveSecondHandleToContentRect(GetSecondHandleIndex());
+    } else {
+        MoveCaretToContentRect(GetCaretIndex());
+    }
 }
 
 int32_t TextSelectController::GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev)
@@ -445,29 +455,6 @@ void TextSelectController::ResetHandles()
     secondHandleInfo_.index = caretInfo_.index;
     UpdateFirstHandleOffset();
     UpdateSecondHandleOffset();
-}
-
-void TextSelectController::UpdateSelectByDoubleClick(const Offset& localOffset)
-{
-    UpdateSelectByOffset(localOffset);
-    if (IsSelected()) {
-        MoveSecondHandleToContentRect(GetSecondHandleIndex());
-    } else {
-        MoveCaretToContentRect(GetCaretIndex());
-    }
-}
-
-void TextSelectController::UpdateSelectByLongPress(const Offset& localOffset)
-{
-    UpdateSelectByOffset(localOffset);
-    if (CaretAtLast() && GreatNotEqual(localOffset.GetX(), caretInfo_.rect.GetOffset().GetX())) {
-        UpdateHandleIndex(GetCaretIndex());
-    }
-    if (IsSelected()) {
-        MoveSecondHandleToContentRect(GetSecondHandleIndex());
-    } else {
-        MoveCaretToContentRect(GetCaretIndex());
-    }
 }
 
 bool TextSelectController::NeedAIAnalysis(int32_t& index, const CaretUpdateType targetType, const Offset& touchOffset,
