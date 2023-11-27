@@ -1496,23 +1496,50 @@ class NavPathStack {
     this.pathArray = [];
     // indicate class has changed.
     this.changeFlag = 0;
+    // replace value 0: don't do anything;
+    // 1: replace value and do replace animation;
+    // 2: don't replace value but do replace animation
+    this.isReplace = 0;
     this.type = this.constructor.name;
   }
   pushName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
   }
   push(info) {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
   }
   pushPathByName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
   }
   pushPath(info) {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
+  }
+  replacePath(info) {
+    if (this.pathArray.length !== 0) {
+      this.pathArray.pop();
+    }
+    this.pathArray.push(info);
+    this.isReplace = 1;
+    this.changeFlag = this.changeFlag + 1;
+  }
+  replacePathByName(name, param) {
+    if (this.pathArray.length !== 0) {
+      this.pathArray.pop();
+    }
+    this.isReplace = 1;
+    this.pathArray.push(new NavPathInfo(name, param));
+    this.changeFlag = this.changeFlag + 1;
+  }
+  setIsReplace(value) {
+    this.isReplace = value;
   }
   pop() {
     if (this.pathArray.length === 0) {
@@ -1520,6 +1547,7 @@ class NavPathStack {
     }
     let pathInfo = this.pathArray.pop();
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
     return pathInfo;
   }
   popTo(name) {
@@ -1528,6 +1556,7 @@ class NavPathStack {
       return -1;
     }
     this.pathArray.splice(index + 1);
+    this.isReplace = 0;
     this.changeFlag = this.changeFlag + 1;
     return index;
   }
@@ -1538,6 +1567,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
     return index;
   }
   popToIndex(index) {
@@ -1546,6 +1576,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
   }
   moveToTop(name) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -1555,6 +1586,7 @@ class NavPathStack {
     let info = this.pathArray.splice(index, 1);
     this.pathArray.push(info[0]);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
     return index;
   }
   moveIndexToTop(index) {
@@ -1564,10 +1596,12 @@ class NavPathStack {
     let info = this.pathArray.splice(index, 1);
     this.pathArray.push(info[0]);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
   }
   clear() {
     this.pathArray.splice(0);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
   }
   removeName(name) {
     var removed = false;
@@ -1579,6 +1613,7 @@ class NavPathStack {
     }
     if (removed) {
       this.changeFlag = this.changeFlag + 1;
+      this.isReplace = 0;
     }
   }
   removeIndex(index) {
@@ -1587,6 +1622,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index, 1);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
   }
   getAllPathName() {
     let array = this.pathArray.flatMap(element => element.name);
