@@ -110,6 +110,8 @@ public:
     virtual void RemoveName(const std::string& name);
     virtual void RemoveIndex(int32_t index);
     virtual void Clear();
+    virtual void UpdateReplaceValue(int32_t replaceValue) const;
+    virtual int32_t GetReplaceValue() const;
     virtual RefPtr<UINode> CreateNodeByIndex(int32_t index);
     virtual RefPtr<UINode> CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo);
     int32_t FindIndex(const std::string& name, const RefPtr<UINode>& navDestinationNode, bool isNavPathList);

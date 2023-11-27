@@ -279,4 +279,11 @@ RefPtr<UINode> NavigationStack::CreateNodeByRouteInfo(const RefPtr<RouteInfo>& r
 {
     return nullptr;
 }
+
+void NavigationStack::UpdateReplaceValue(int32_t value) const {}
+
+int32_t NavigationStack::GetReplaceValue() const
+{
+    return 0;
+}
 } // namespace OHOS::Ace::NG

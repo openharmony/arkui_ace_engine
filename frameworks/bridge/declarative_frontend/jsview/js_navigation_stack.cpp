@@ -248,4 +248,24 @@ bool JSNavigationStack::CheckNavDestinationNodeInUINode(RefPtr<NG::UINode> node)
     }
     return false;
 }
+
+int32_t JSNavigationStack::GetReplaceValue() const
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return false;
+    }
+    auto replace = dataSourceObj_->GetProperty("isReplace");
+    return replace->ToNumber<int32_t>();
+}
+
+void JSNavigationStack::UpdateReplaceValue(int32_t replaceValue) const
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto replaceFunc = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("setIsReplace"));
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(replaceValue));
+    replaceFunc->Call(dataSourceObj_, 1, params);
+}
 } // namespace OHOS::Ace::Framework

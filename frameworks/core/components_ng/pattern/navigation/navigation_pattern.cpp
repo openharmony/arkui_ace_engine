@@ -141,21 +141,29 @@ void NavigationPattern::OnModifyDone()
     auto preTopNavPath = navigationStack_->GetPreTopNavPath();
     auto pathNames = navigationStack_->GetAllPathName();
     auto preSize = navigationStack_->PreSize();
-
     NavPathList navPathList;
+    auto replaceValue = navigationStack_->GetReplaceValue();
     for (size_t i = 0; i < pathNames.size(); ++i) {
         auto pathName = pathNames[i];
         RefPtr<UINode> uiNode = navigationStack_->Get(pathName);
+        auto isSameWithLast = preTopNavPath && (replaceValue == 1) && (uiNode == preTopNavPath->second)
+            && (preTopNavPath->first == pathName);
         if (uiNode) {
-            navPathList.emplace_back(std::make_pair(pathName, uiNode));
             navigationStack_->RemoveInNavPathList(pathName, uiNode);
             navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
+            if (isSameWithLast) {
+                uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
+            }
+            navPathList.emplace_back(std::make_pair(pathName, uiNode));
             continue;
         }
         uiNode = navigationStack_->GetFromPreBackup(pathName);
         if (uiNode) {
-            navPathList.emplace_back(std::make_pair(pathName, uiNode));
             navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
+            if (isSameWithLast) {
+                uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
+            }
+            navPathList.emplace_back(std::make_pair(pathName, uiNode));
             continue;
         }
         uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
@@ -189,8 +197,13 @@ void NavigationPattern::CheckTopNavPathChange(
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage)
 {
-    if (preTopNavPath == newTopNavPath) {
+    auto replaceValue = navigationStack_->GetReplaceValue();
+    if (preTopNavPath == newTopNavPath && replaceValue != 1) {
         return;
+    }
+    if (replaceValue == 1) {
+        const int32_t replaceAnimation = 2;
+        navigationStack_->UpdateReplaceValue(replaceAnimation);
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
@@ -394,6 +407,16 @@ void NavigationPattern::DoNavigationTransitionAnimation(const RefPtr<NavDestinat
     CHECK_NULL_VOID(navigationNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto replaceVal = navigationStack_->GetReplaceValue();
+    if (replaceVal != 0) {
+        if (newTopNavDestination && preTopNavDestination) {
+            navigationNode->TransitionWithReplace(preTopNavDestination, newTopNavDestination, false);
+        } else if (newTopNavDestination) {
+            navigationNode->TransitionWithReplace(navBarNode, newTopNavDestination, true);
+        }
+        navigationStack_->UpdateReplaceValue(0);
+        return;
+    }
     if (newTopNavDestination && preTopNavDestination) {
         if (isPopPage) {
             navigationNode->ExitTransitionWithPop(preTopNavDestination);
@@ -538,6 +561,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                         (pattern->GetNavigationMode() == NavigationMode::STACK && hostNode->GetNeedSetInvisible())) {
                         navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
                     } else {
+                        navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
                         navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
                     }
                 },
@@ -559,7 +583,7 @@ void NavigationPattern::UpdateContextRect(
     CHECK_NULL_VOID(curDestination);
     CHECK_NULL_VOID(hostNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
-    CHECK_NULL_VOID(hostNode);
+    CHECK_NULL_VOID(navBarNode);
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     CHECK_NULL_VOID(navigationPattern);
     auto size = curDestination->GetGeometryNode()->GetFrameSize();
