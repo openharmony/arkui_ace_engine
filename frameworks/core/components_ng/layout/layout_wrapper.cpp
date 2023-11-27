@@ -175,7 +175,7 @@ void LayoutWrapper::AdjustChildren(const OffsetF& offset)
 {
     for (const auto& childUI : GetHostNode()->GetChildren()) {
         auto child = DynamicCast<FrameNode>(childUI);
-        if (!child || child->GetLayoutProperty()->GetSafeAreaExpandOpts()) {
+        if (!child) {
             continue;
         }
         auto childGeo = child->GetGeometryNode();
