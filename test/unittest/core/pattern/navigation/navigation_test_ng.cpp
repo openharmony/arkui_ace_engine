@@ -3170,7 +3170,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
     ASSERT_NE(navigationNode, nullptr);
     auto pattern = navigationNode->GetPattern<NavigationPattern>();
     auto stack = pattern->GetNavigationStack();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.add page A to stack
@@ -3180,7 +3180,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     navigationPattern->SetNavigationMode(NavigationMode::STACK);
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.replace page A in stack
@@ -3188,17 +3188,17 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
     RefPtr<FrameNode> replaceNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
     stack->Remove();
     stack->Add("B", replaceNode);
-    stack->UpdateIsReplace(true);
-    ASSERT_TRUE(stack->IsReplace());
+    stack->UpdateReplaceValue(1);
+    ASSERT_EQ(stack->GetReplaceValue(), 1);
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.push A
      */
     stack->Add("C", frameNode);
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
 
 HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
@@ -3216,7 +3216,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
     ASSERT_NE(navigationNode, nullptr);
     auto pattern = navigationNode->GetPattern<NavigationPattern>();
     auto stack = pattern->GetNavigationStack();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.add page A to stack
@@ -3227,7 +3227,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     navigationPattern->SetNavigationMode(NavigationMode::STACK);
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.replace page A in stack
@@ -3235,17 +3235,17 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
     RefPtr<FrameNode> replaceNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
     stack->Remove();
     stack->Add("B", replaceNode);
-    stack->UpdateIsReplace(true);
-    ASSERT_TRUE(stack->IsReplace());
+    stack->UpdateReplaceValue(1);
+    ASSERT_EQ(stack->GetReplaceValue(), 1);
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step3.pop page B
      */
     stack->Remove();
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
 
 HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
@@ -3263,7 +3263,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
     ASSERT_NE(navigationNode, nullptr);
     auto pattern = navigationNode->GetPattern<NavigationPattern>();
     auto stack = pattern->GetNavigationStack();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.add page A to stack
@@ -3274,7 +3274,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     navigationPattern->SetNavigationMode(NavigationMode::STACK);
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.replace page A in stack
@@ -3282,16 +3282,16 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
     RefPtr<FrameNode> replaceNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
     stack->Remove();
     stack->Add("B", replaceNode);
-    stack->UpdateIsReplace(true);
-    ASSERT_TRUE(stack->IsReplace());
+    stack->UpdateReplaceValue(1);
+    ASSERT_EQ(stack->GetReplaceValue(), 1);
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step3.pop page B
      */
     stack->Clear();
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
 } // namespace OHOS::Ace::NG

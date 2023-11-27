@@ -614,6 +614,7 @@ public:
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
+    bool GetMonopolizeEvents() const;
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -661,6 +662,9 @@ private:
         std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
     void OnVisibleAreaChangeCallback(
         VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio, bool isHandled);
+
+    void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
+
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
     // set costom background layoutConstraint

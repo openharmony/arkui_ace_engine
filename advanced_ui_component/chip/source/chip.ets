@@ -204,6 +204,7 @@ export struct ChipComponent {
   @State useDefaultSuffixIcon: boolean = false
   private chipNodeSize: SizeOptions = {}
   private onClose: () => void = noop
+  @State suffixIconOnFocus: boolean = false
   @State chipBreakPoints: BreakPointsType = BreakPointsType.SM
   private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("0vp<width<600vp")
   private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("600vp<=width<840vp")
@@ -538,7 +539,7 @@ export struct ChipComponent {
   @Builder
   focusOverlay() {
     Stack() {
-      if (this.chipNodeOnFocus) {
+      if (this.chipNodeOnFocus && !this.suffixIconOnFocus) {
         Stack()
           .borderRadius(this.getChipNodeRadius())
           .size(this.getFocusOverlaySize())
@@ -625,6 +626,12 @@ export struct ChipComponent {
           focused: this.suffixIconFocusStyles,
           normal: this.suffixIconNormalStyles,
         })
+        .onFocus(() => {
+          this.suffixIconOnFocus = true
+        })
+        .onBlur(() => {
+          this.suffixIconOnFocus = false
+        })
         .onClick(() => {
           if (!this.getChipEnable()) {
             return
@@ -667,7 +674,7 @@ export struct ChipComponent {
       this.hoverAnimate(isHover)
     })
     .onKeyEvent((event) => {
-      if (event.type === KeyType.Down && event.keyCode === KeyCode.KEYCODE_FORWARD_DEL) {
+      if (event.type === KeyType.Down && event.keyCode === KeyCode.KEYCODE_FORWARD_DEL && !this.suffixIconOnFocus) {
         this.deleteChipNodeAnimate()
       }
     })

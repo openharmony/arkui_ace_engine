@@ -43,7 +43,7 @@ public:
     MOCK_METHOD1(OnMouseEvent, void(const MouseEvent& event));
     MOCK_METHOD1(OnAxisEvent, void(const AxisEvent& event));
     MOCK_CONST_METHOD1(OnRotationEvent, bool(const RotationEvent& event));
-    MOCK_METHOD3(OnDragEvent, void(int32_t x, int32_t y, DragEventAction action));
+    MOCK_METHOD2(OnDragEvent, void(const PointerEvent& pointerEvent, DragEventAction action));
     MOCK_METHOD1(OnIdle, void(int64_t deadline));
     MOCK_METHOD1(SetBuildAfterCallback, void(const std::function<void()>& callback));
     MOCK_METHOD1(FlushAnimation, void(uint64_t nanoTimestamp));

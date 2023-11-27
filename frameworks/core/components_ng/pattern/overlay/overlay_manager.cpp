@@ -501,7 +501,12 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                     mainPipeline->FlushPipelineImmediately();
                 }
                 // clear contextMenu then return
-                if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
+                auto pipeline = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                auto theme = pipeline->GetTheme<SelectTheme>();
+                CHECK_NULL_VOID(theme);
+                auto expandDisplay = theme->GetExpandDisplay();
+                if ((menuWrapperPattern && menuWrapperPattern->IsContextMenu()) || expandDisplay) {
                     SubwindowManager::GetInstance()->ClearMenuNG(id);
                     return;
                 }
@@ -1446,6 +1451,17 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         CHECK_NULL_RETURN(overlay, false);
         // close dialog with animation
         auto pattern = overlay->GetPattern();
+        if (InstanceOf<ToastPattern>(pattern)) {
+            // still have nodes on root expect stage and toast node.
+            if (overlay->GetChildren().size() > 2) {
+                // If the current node is a toast, the last second overlay's node should be processed.
+                overlay = DynamicCast<FrameNode>(rootNode->GetChildAtIndex(rootNode->GetChildren().size() - 2));
+                CHECK_NULL_RETURN(overlay, false);
+                pattern = overlay->GetPattern();
+            } else {
+                return false;
+            }
+        }
         if (InstanceOf<DialogPattern>(pattern)) {
             return RemoveDialog(overlay, isBackPressed, isPageRouter);
         }
@@ -1455,9 +1471,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         if (InstanceOf<MenuWrapperPattern>(pattern)) {
             return RemoveMenu(overlay);
         }
-        if (InstanceOf<ToastPattern>(pattern)) {
-            return false;
-        }
+
         // remove navDestination in navigation first
         do {
             auto pipeline = PipelineContext::GetCurrentContext();

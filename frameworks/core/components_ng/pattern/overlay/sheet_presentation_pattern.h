@@ -140,7 +140,7 @@ private:
     std::function<void()> onDisappear_;
     RefPtr<PanEvent> panEvent_;
     float currentOffset_ = 0.0f;
-    float height_ = 0.0f;
+    float height_ = 0.0f; // sheet height, start from the bottom
     float sheetHeight_ = 0.0f;
     float heightBoundary_ = 0.0f;
     float pageHeight_ = 0.0f;

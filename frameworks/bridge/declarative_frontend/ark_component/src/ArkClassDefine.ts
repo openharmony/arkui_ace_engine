@@ -2,11 +2,11 @@
 
 class ArkBorderStyle implements Equable {
     type: boolean | undefined;
-    style: number | undefined;
-    top: number | undefined;
-    right: number | undefined;
-    bottom: number | undefined;
-    left: number | undefined;
+    style: BorderStyle | undefined;
+    top: BorderStyle | undefined;
+    right: BorderStyle | undefined;
+    bottom: BorderStyle | undefined;
+    left: BorderStyle | undefined;
 
     constructor() {
         this.type = undefined;
@@ -21,21 +21,21 @@ class ArkBorderStyle implements Equable {
             (this.top === another.top) && (this.right === another.right) &&
             (this.bottom === another.bottom) && (this.left === another.left);
     }
-    parseBorderStyle(value: number | object): boolean {
+    parseBorderStyle(value: BorderStyle | EdgeStyles): boolean {
         if (typeof value === "number") {
             this.style = value
             this.type = true
             return true;
         } else if (typeof value === "object") {
-            return this.parseEdgeStyles(value);
+            return this.parseEdgeStyles(value as EdgeStyles);
         }
         return false;
     }
-    parseEdgeStyles(options: object): boolean {
-        this.top = (options as ArkBorderStyle).top;
-        this.right = (options as ArkBorderStyle).right;
-        this.bottom = (options as ArkBorderStyle).bottom;
-        this.left = (options as ArkBorderStyle).left;
+    parseEdgeStyles(options: EdgeStyles): boolean {
+        this.top = options.top;
+        this.right = options.right;
+        this.bottom = options.bottom;
+        this.left = options.left;
         this.type = true
         return true
     }
@@ -43,12 +43,12 @@ class ArkBorderStyle implements Equable {
 
 class ArkShadow {
     style: number | undefined;
-    radius: number | undefined;
-    type: number | undefined;
+    radius: number | Resource | undefined;
+    type: ShadowType | undefined;
     color: number | undefined;
-    offsetX: number | undefined;
-    offsetY: number | undefined;
-    fill: number | undefined;
+    offsetX: number | Resource | undefined;
+    offsetY: number | Resource | undefined;
+    fill: boolean | undefined;
 
     constructor() {
         this.style = undefined;
@@ -65,26 +65,29 @@ class ArkShadow {
             (this.offsetX === another.offsetX) && (this.offsetY === another.offsetY) &&
             (this.fill === another.fill);
     }
-    parseShadowValue(value: number | object): boolean {
+    parseShadowValue(value: ShadowOptions | ShadowStyle): boolean {
         if (typeof value === "number") {
             this.style = value
             return true;
         } else if (typeof value === "object") {
-            return this.parseShadowOptions(value);
+            return this.parseShadowOptions(value as ShadowOptions);
         }
         return false;
     }
-    parseShadowOptions(options: object): boolean {
-        var arkColor = new ArkColor();
-        if (!arkColor.parseColorValue((options as ArkShadow).color)) {
-            return false
+    parseShadowOptions(options: ShadowOptions): boolean {
+        if (isResource(options.radius) || isResource(options.color) ||
+            isResource(options.offsetX) || isResource(options.offsetY)) {
+            return false;
         }
-        this.radius = (options as ArkShadow).radius
-        this.type = (options as ArkShadow).type
-        this.color = arkColor.getColor();
-        this.offsetX = (options as ArkShadow).offsetX
-        this.offsetY = (options as ArkShadow).offsetY
-        this.fill = (options as ArkShadow).fill
+        var arkColor = new ArkColor();
+        this.radius = options.radius
+        this.type = options.type
+        if (arkColor.parseColorValue(options.color)) {
+            this.color = arkColor.getColor();
+        }
+        this.offsetX = options.offsetX
+        this.offsetY = options.offsetY
+        this.fill = options.fill
         return true
     }
 }
@@ -709,4 +712,15 @@ class ArkPadding implements Equable {
       this.left === another.left);
   }
 }
- 
+
+class ArkAllowDrop {
+    allowDropArray: Array<UniformDataType>;
+
+    constructor() {
+        this.allowDropArray = undefined;
+    }
+
+    isEqual(another: ArkAllowDrop): boolean {
+        return this.allowDropArray === another.allowDropArray;
+    }
+}

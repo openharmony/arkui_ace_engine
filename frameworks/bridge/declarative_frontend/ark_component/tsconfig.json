@@ -27,6 +27,7 @@
         "src/ArkGridCol.ts",
         "src/ArkPanel.ts",
         "src/ArkNavigation.ts",
+        "src/ArkRichEditor.ts",
     ],
 
     "compilerOptions": {

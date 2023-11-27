@@ -58,14 +58,14 @@ public:
                 LOGW("find pattern of button fail");
                 return;
             }
-            theme->bgColor_ = buttonPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
+            theme->bgColor_ = buttonPattern->GetAttr<Color>("button_bg_color", Color());
             theme->clickedColor_ = buttonPattern->GetAttr<Color>("bg_color_clicked_blend", Color());
             theme->disabledColor_ = theme->bgColor_
                 .BlendOpacity(buttonPattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, 0.0));
             theme->hoverColor_ = buttonPattern->GetAttr<Color>("bg_color_hovered_blend", Color());
             theme->borderColor_ = buttonPattern->GetAttr<Color>("border_color", Color());
             theme->borderWidth_ = buttonPattern->GetAttr<Dimension>("border_width", 0.0_vp);
-            theme->textStyle_.SetTextColor(buttonPattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
+            theme->textStyle_.SetTextColor(buttonPattern->GetAttr<Color>("button_text_color", Color()));
             theme->textDisabledColor_ = buttonPattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color())
                 .BlendOpacity(buttonPattern->GetAttr<double>("text_color_disabled_alpha", 0.0));
             theme->textWaitingColor_ = buttonPattern->GetAttr<Color>("waiting_button_text_color", Color());

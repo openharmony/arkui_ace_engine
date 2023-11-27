@@ -203,7 +203,8 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
             if (!eventHub) {
                 continue;
             }
-            if (eventHub->HasOnDrop() || eventHub->HasOnItemDrop() || eventHub->HasCustomerOnDrop()) {
+            if (eventHub->HasOnDrop() || eventHub->HasOnItemDrop() || eventHub->HasCustomerOnDrop()
+                || V2::UI_EXTENSION_COMPONENT_ETS_TAG == parentFrameNode->GetTag()) {
                 return parentFrameNode;
             }
         }
@@ -430,8 +431,9 @@ void DragDropManager::PrintDragFrameNode(const Point& point, const RefPtr<FrameN
     }
 }
 
-void DragDropManager::OnDragMove(const Point& point, const std::string& extraInfo)
+void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo)
 {
+    Point point  = pointerEvent.GetPoint();
 #ifdef ENABLE_DRAG_FRAMEWORK
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
@@ -460,6 +462,12 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
         return;
     }
 
+    if (V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) {
+        auto pattern = dragFrameNode->GetPattern<Pattern>();
+        pattern->HandleDragEvent(pointerEvent);
+        return;
+    }
+
     if (dragFrameNode == preTargetFrameNode_) {
         FireOnDragEvent(dragFrameNode, point, DragEventType::MOVE, extraInfo);
         return;
@@ -477,8 +485,9 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
     preTargetFrameNode_ = dragFrameNode;
 }
 
-void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo)
+void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo)
 {
+    Point point  = pointerEvent.GetPoint();
     dragDropState_ = DragDropMgrState::IDLE;
     preTargetFrameNode_ = nullptr;
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -531,6 +540,13 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
         return;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
+
+    if (V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) {
+        auto pattern = dragFrameNode->GetPattern<Pattern>();
+        pattern->HandleDragEvent(pointerEvent);
+        return;
+    }
+
     CHECK_NULL_VOID(dragFrameNode);
     auto eventHub = dragFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);

@@ -233,22 +233,33 @@ ScrollAlign ListPattern::GetScrollAlignByScrollSnapAlign() const
 
 float ListPattern::CalculateTargetPos(float startPos, float endPos)
 {
-    float downOffset = 0.0f;
-    float upOffset = 0.0f;
-    if (Negative(startPos)) {
-        downOffset = -startPos;
-    }
-    if (GreatNotEqual(endPos, contentMainSize_)) {
-        upOffset = endPos - contentMainSize_;
-    }
+    float topOffset = 0.0f;
+    float bottomOffset = 0.0f;
+    float targetPos = 0.0f;
 
-    if (LessNotEqual(downOffset, upOffset)) {
-        return -downOffset;
+    topOffset = std::abs(startPos);
+    bottomOffset = std::abs(endPos - contentMainSize_);
+
+    if (Positive(startPos) && LessOrEqual(endPos, contentMainSize_)) {
+        return 0.0f;
     }
-    if (LessNotEqual(upOffset, downOffset)) {
-        return upOffset;
+    if (LessNotEqual(topOffset, bottomOffset)) {
+        if (Positive(startPos)) {
+            targetPos = -startPos;
+        } else {
+            targetPos = startPos;
+        }
+    } else {
+        if (Positive(endPos - contentMainSize_)) {
+            targetPos = endPos - contentMainSize_;
+        } else {
+            targetPos = contentMainSize_ - endPos;
+        }
     }
-    return 0.0f;
+    if (GreatOrEqual(endPos - startPos, contentMainSize_)) {
+        targetPos = -targetPos;
+    }
+    return targetPos;
 }
 
 RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
@@ -1369,6 +1380,15 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
             }
             break;
         case ScrollAlign::AUTO:
+            float itemStartPos = paddingBeforeContent + startPos + itemPosInGroup.value().first;
+            float itemEndPos = paddingBeforeContent + startPos + itemPosInGroup.value().second;
+            if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
+                itemStartPos -= groupPattern->GetHeaderMainSize();
+            }
+            if (stickyStyle == V2::StickyStyle::FOOTER || stickyStyle == V2::StickyStyle::BOTH) {
+                itemEndPos += groupPattern->GetFooterMainSize();
+            }
+            targetPos = CalculateTargetPos(itemStartPos, itemEndPos);
             break;
     }
     return true;

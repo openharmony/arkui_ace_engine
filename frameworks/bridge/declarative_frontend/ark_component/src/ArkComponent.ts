@@ -43,6 +43,10 @@ class Modifier<T extends number | string | boolean | Equable | Resource> {
 
     applyStage(node: KNode): boolean {
         if (this.stageValue === this.value) {
+            if(this.value === undefined)
+            {                
+                this.applyPeer(node, true);                
+            }
             delete this.stageValue;
             return;
         }
@@ -802,6 +806,30 @@ class VisibilityModifier extends Modifier<number> {
       GetUINativeModule().common.setVisibility(node, this.value!);
     }
   }
+}
+
+class AccessibilityTextModifier extends Modifier<string> {
+    static identity: Symbol = Symbol("accessibilityText");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetAccessibilityText(node);
+        }
+        else {
+            GetUINativeModule().common.setAccessibilityText(node, this.value);
+        }
+    }
+}
+
+class AllowDropModifier extends Modifier<ArkAllowDrop> {
+    static identity: Symbol = Symbol("allowDrop");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetAllowDrop(node);
+        }
+        else {
+            GetUINativeModule().common.setAllowDrop(node, this.value.allowDropArray);
+        }
+    }
 }
 
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
@@ -1840,7 +1868,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     allowDrop(value: Array<UniformDataType>): this {
-        throw new Error("Method not implemented.");
+        let allowDrop = new ArkAllowDrop();
+        allowDrop.allowDropArray = value;
+        modifier(this._modifiers, AllowDropModifier, allowDrop);
+        return this;
     }
 
     draggable(value: boolean): this {
@@ -2009,7 +2040,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     accessibilityText(value: string): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === "string") {
+            modifier(this._modifiers, AccessibilityTextModifier, value);
+        } else {
+            modifier(this._modifiers, AccessibilityTextModifier, undefined);
+        }
+        return this;
     }
 
     accessibilityDescription(value: string): this {

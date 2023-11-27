@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components_ng/event/response_ctrl.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"
 #include "core/event/touch_event.h"
@@ -26,13 +27,17 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-
-RefPtr<GestureReferee> GetCurrentGestureReferee()
+RefPtr<EventManager> GetCurrentEventManager()
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
 
-    auto eventManager = context->GetEventManager();
+    return context->GetEventManager();
+}
+
+RefPtr<GestureReferee> GetCurrentGestureReferee()
+{
+    auto eventManager = GetCurrentEventManager();
     CHECK_NULL_RETURN(eventManager, nullptr);
     return eventManager->GetGestureRefereeNG();
 }
@@ -74,10 +79,33 @@ void NGGestureRecognizer::ResetGlobalTransCfg()
     globalTransFormInstance[id].transFormIds.clear();
 }
 
+bool NGGestureRecognizer::ShouldResponse()
+{
+    if (AceType::InstanceOf<RecognizerGroup>(this)) {
+        return true;
+    }
+    auto eventManager = GetCurrentEventManager();
+    CHECK_NULL_RETURN(eventManager, true);
+
+    auto frameNode = GetAttachedNode();
+    auto ctrl = eventManager->GetResponseCtrl();
+    CHECK_NULL_RETURN(ctrl, true);
+    if (!ctrl->ShouldResponse(frameNode)) {
+        if (refereeState_ != RefereeState::FAIL) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
+        return false;
+    }
+    return true;
+}
+
 bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 {
     auto attachedNode = GetAttachedNode();
     if (attachedNode.Invalid()) {
+        return true;
+    }
+    if (!ShouldResponse()) {
         return true;
     }
     switch (point.type) {
@@ -105,6 +133,9 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 
 bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
 {
+    if (!ShouldResponse()) {
+        return true;
+    }
     switch (event.action) {
         case AxisAction::BEGIN:
             deviceId_ = event.deviceId;
@@ -165,6 +196,25 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
 void NGGestureRecognizer::SetTransInfo(int transId)
 {
     transId_ = transId;
+}
+
+void NGGestureRecognizer::AboutToAccept()
+{
+    if (AceType::InstanceOf<RecognizerGroup>(this)) {
+        OnAccepted();
+        return;
+    }
+    auto eventManager = GetCurrentEventManager();
+    CHECK_NULL_VOID(eventManager);
+
+    auto frameNode = GetAttachedNode();
+    auto ctrl = eventManager->GetResponseCtrl();
+    CHECK_NULL_VOID(ctrl);
+    if (!ctrl->ShouldResponse(frameNode)) {
+        return;
+    }
+    ctrl->TrySetFirstResponse(frameNode);
+    OnAccepted();
 }
 
 RefPtr<GestureSnapshot> NGGestureRecognizer::Dump() const

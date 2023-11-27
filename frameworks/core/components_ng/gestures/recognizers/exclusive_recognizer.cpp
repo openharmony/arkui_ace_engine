@@ -37,7 +37,7 @@ void ExclusiveRecognizer::OnAccepted()
         TAG_LOGI(AceLogTag::ACE_GESTURE,
             "The exclusive gesture recognizer has been accepted, active recognizer: %{public}s",
             AceType::TypeName(activeRecognizer_));
-        activeRecognizer_->OnAccepted();
+        activeRecognizer_->AboutToAccept();
     }
 
     for (const auto& recognizer : recognizers_) {

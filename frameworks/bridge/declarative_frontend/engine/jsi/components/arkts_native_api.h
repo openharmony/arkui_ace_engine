@@ -28,9 +28,9 @@ typedef void* NodeHandle;
 struct ArkUICommonModifierAPI {
     void (*SetBackgroundColor)(NodeHandle node, uint32_t color);
     void (*ResetBackgroundColor)(NodeHandle node);
-    void (*SetWidth)(NodeHandle node, double value, int unit);
+    void (*SetWidth)(NodeHandle node, double value, int unit, const char* calcVlaue);
     void (*ResetWidth)(NodeHandle node);
-    void (*SetHeight)(NodeHandle node, double value, int unit);
+    void (*SetHeight)(NodeHandle node, double value, int unit, const char* calcVlaue);
     void (*ResetHeight)(NodeHandle node);
     void (*SetBorderRadius)(NodeHandle node, const double *values, const int *units, int32_t length);
     void (*ResetBorderRadius)(NodeHandle node);
@@ -151,6 +151,10 @@ struct ArkUICommonModifierAPI {
     void (*ResetMarkAnchor)(NodeHandle node);
     void (*SetVisibility)(NodeHandle node, int32_t value);
     void (*ResetVisibility)(NodeHandle node);
+    void (*SetAccessibilityText)(NodeHandle node, const char* value);
+    void (*ResetAccessibilityText)(NodeHandle node);
+    void (*SetAllowDrop)(NodeHandle node, char** value, int32_t length);
+    void (*ResetAllowDrop)(NodeHandle node);
 };
 
 struct ArkUITextModifierAPI {
@@ -398,6 +402,11 @@ struct ArkUINavigationModifierAPI {
     void (*ResetHideToolBar)(NodeHandle node);
 };
 
+struct ArkUIRichEditorModifierAPI {
+    void (*SetRichEditorCopyOptions)(NodeHandle node, int8_t copyOptionsValue);
+    void (*ResetRichEditorCopyOptions)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -421,6 +430,7 @@ struct ArkUINodeAPI {
     ArkUIPanelModifierAPI (*GetPanelModifier)();
     ArkUITextAreaModifierAPI (*GetTextAreaModifier)();
     ArkUINavigationModifierAPI (*GetNavigationModifier)();
+    ArkUIRichEditorModifierAPI (*GetRichEditorModifier)();
 };
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H

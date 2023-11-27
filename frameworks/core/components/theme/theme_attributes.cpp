@@ -224,6 +224,9 @@ const char INLINE_BG_COLOR[] = "inline_bg_color";
 const char INLINE_BORDER_COLOR[] = "inline_border_color";
 const char DISABLE_UNDERLINE_ALPHA[] = "disable_underline_alpha";
 
+const char DEFAULT_COUNTER_COLOR[] = "default_counter_color";
+const char OVER_COUNTER_COLOR[] = "over_counter_color";
+
 // linear split attributes
 const char LINEAR_SPLIT_CHILD_MIN_SIZE[] = "linear_split_child_min_size";
 
