@@ -50,6 +50,7 @@ constexpr int NUM_15 = 15;
 constexpr int DEFAULT_LENGTH = 4;
 constexpr double ROUND_UNIT = 360.0;
 constexpr int32_t DEFAULT_DISPLAY_PRIORITY = 0;
+constexpr int32_t DEFAULT_ID = 0;
 
 BorderStyle ConvertBorderStyle(int32_t value)
 {
@@ -1801,6 +1802,151 @@ void ResetAccessibilityDescription(NodeHandle node)
     ViewAbstractModelNG::SetAccessibilityDescription(frameNode, "");
 }
 
+void SetId(NodeHandle node, const char* id)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = id;
+    ViewAbstract::SetInspectorId(frameNode, valueStr);
+}
+
+void ResetId(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string id = "";
+    ViewAbstract::SetInspectorId(frameNode, id);
+}
+
+void SetKey(NodeHandle node, const char* key)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = key;
+    ViewAbstract::SetInspectorId(frameNode, valueStr);
+}
+
+void ResetKey(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string key = "";
+    ViewAbstract::SetInspectorId(frameNode, key);
+}
+
+void SetRestoreId(NodeHandle node, uint32_t id)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetRestoreId(frameNode, id);
+}
+
+void ResetRestoreId(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetRestoreId(frameNode, DEFAULT_ID);
+}
+
+void SetTabIndex(NodeHandle node, int32_t index)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetTabIndex(frameNode, index);
+}
+
+void ResetTabIndex(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t index = 0;
+    ViewAbstract::SetTabIndex(frameNode, index);
+}
+
+void SetObscured(NodeHandle node, const int32_t* reason, int32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<ObscuredReasons> reasons(length);
+    reasons.clear();
+    for (int32_t i = 0; i < length; i++) {
+            reasons.emplace_back(static_cast<ObscuredReasons>(reason[i]));
+    }
+
+    ViewAbstract::SetObscured(frameNode, reasons);
+}
+
+void ResetObscured(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<ObscuredReasons> reasons(0);
+    ViewAbstract::SetObscured(frameNode, reasons);
+}
+
+void SetResponseRegion(NodeHandle node, const double* values, int32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<DimensionRect> region;
+    for (int32_t i = 0; i < length/NUM_4; i++) {
+        CalcDimension xDimen = CalcDimension(values[i * NUM_4 + NUM_0], DimensionUnit::VP);
+        CalcDimension yDimen = CalcDimension(values[i * NUM_4 + NUM_1], DimensionUnit::VP);
+        CalcDimension widthDimen = CalcDimension(values[i * NUM_4 + NUM_2], DimensionUnit::PERCENT);
+        CalcDimension heightDimen = CalcDimension(values[i * NUM_4 + NUM_3], DimensionUnit::PERCENT);
+        DimensionOffset offsetDimen(xDimen, yDimen);
+        DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+        region.emplace_back(dimenRect);
+    }
+    ViewAbstract::SetResponseRegion(frameNode, region);
+}
+
+void ResetResponseRegion(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<DimensionRect> region;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    DimensionOffset offsetDimen(xDimen, yDimen);
+    DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+    region.emplace_back(dimenRect);
+    ViewAbstract::SetResponseRegion(frameNode, region);
+}
+
+void SetMouseResponseRegion(NodeHandle node, const double* values, int32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<DimensionRect> region;
+    for (int32_t i = 0; i < length/NUM_4; i++) {
+        CalcDimension xDimen = CalcDimension(values[i * NUM_4 + NUM_0], DimensionUnit::VP);
+        CalcDimension yDimen = CalcDimension(values[i * NUM_4 + NUM_1], DimensionUnit::VP);
+        CalcDimension widthDimen = CalcDimension(values[i * NUM_4 + NUM_2], DimensionUnit::PERCENT);
+        CalcDimension heightDimen = CalcDimension(values[i * NUM_4 + NUM_3], DimensionUnit::PERCENT);
+        DimensionOffset offsetDimen(xDimen, yDimen);
+        DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+        region.emplace_back(dimenRect);
+    }
+    ViewAbstract::SetMouseResponseRegion(frameNode, region);
+}
+
+void ResetMouseResponseRegion(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<DimensionRect> region;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    DimensionOffset offsetDimen(xDimen, yDimen);
+    DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+    region.emplace_back(dimenRect);
+    ViewAbstract::SetMouseResponseRegion(frameNode, region);
+}
 ArkUICommonModifierAPI GetCommonModifier()
 {
     static const ArkUICommonModifierAPI modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
@@ -1829,7 +1975,9 @@ ArkUICommonModifierAPI GetCommonModifier()
         SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
         SetVisibility, ResetVisibility, SetAccessibilityText, ResetAccessibilityText,
         SetAllowDrop, ResetAllowDrop, SetAccessibilityLevel, ResetAccessibilityLevel,
-        SetAccessibilityDescription, ResetAccessibilityDescription };
+        SetAccessibilityDescription, ResetAccessibilityDescription, SetId, ResetId, SetKey, ResetKey, SetRestoreId,
+        ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured, ResetObscured, SetResponseRegion, ResetResponseRegion,
+        SetMouseResponseRegion, ResetMouseResponseRegion };
 
     return modifier;
 }

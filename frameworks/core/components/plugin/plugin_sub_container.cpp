@@ -19,12 +19,15 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "core/common/ace_engine.h"
+#include "core/common/asset_manager_impl.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/plugin_manager.h"
 #include "core/components/plugin/file_asset_provider.h"
+#include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "core/components/plugin/hap_asset_provider.h"
+#include "core/components/plugin/hap_asset_provider_impl.h"
 #include "core/components/plugin/plugin_element.h"
 #include "core/components/plugin/plugin_window.h"
 #include "core/components/plugin/render_plugin.h"
@@ -382,49 +385,72 @@ void PluginSubContainer::SetActionEventHandler()
 RefPtr<AssetManager> PluginSubContainer::GetDecompressedAssetManager(
     const std::string& hapPath, const std::string& module)
 {
-    RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-    if (flutterAssetManager) {
-        frontend_->SetAssetManager(flutterAssetManager);
-        assetManager_ = flutterAssetManager;
-
-        auto assetProvider = AceType::MakeRefPtr<Plugin::HapAssetProvider>();
-
-        std::vector<std::string> basePaths;
-        std::string path1 = "assets/js/" + module + "/";
-        std::string path2 = "assets/js/share";
-        basePaths.push_back(path1);
-        basePaths.push_back(path2);
-        basePaths.push_back("");
-
-        if (assetProvider->Initialize(hapPath, basePaths)) {
-            LOGD("push plugin asset provider to queue");
-            flutterAssetManager->PushBack(std::move(assetProvider));
+    std::vector<std::string> basePaths;
+    std::string path1 = "assets/js/" + module + "/";
+    std::string path2 = "assets/js/share";
+    basePaths.push_back(path1);
+    basePaths.push_back(path2);
+    basePaths.push_back("");
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        RefPtr<AssetManagerImpl> assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+        if (assetManagerImpl) {
+            frontend_->SetAssetManager(assetManagerImpl);
+            assetManager_ = assetManagerImpl;
+            auto assetProvider = AceType::MakeRefPtr<Plugin::HapAssetProviderImpl>();
+            if (assetProvider->Initialize(hapPath, basePaths)) {
+                LOGD("push plugin asset provider to queue");
+                assetManagerImpl->PushBack(std::move(assetProvider));
+            }
         }
+        return assetManagerImpl;
+    } else {
+        RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+        if (flutterAssetManager) {
+            frontend_->SetAssetManager(flutterAssetManager);
+            assetManager_ = flutterAssetManager;
+            auto assetProvider = AceType::MakeRefPtr<Plugin::HapAssetProvider>();
+            if (assetProvider->Initialize(hapPath, basePaths)) {
+                LOGD("push plugin asset provider to queue");
+                flutterAssetManager->PushBack(std::move(assetProvider));
+            }
+        }
+        return flutterAssetManager;
     }
-    return flutterAssetManager;
 }
 
 RefPtr<AssetManager> PluginSubContainer::SetAssetManager(const std::string& path, const std::string& module)
 {
-    RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-    if (flutterAssetManager) {
-        frontend_->SetAssetManager(flutterAssetManager);
-        assetManager_ = flutterAssetManager;
-
-        auto assetProvider = AceType::MakeRefPtr<Plugin::FileAssetProvider>();
-        std::string temp1 = "assets/js/" + module + "/";
-        std::string temp2 = "assets/js/share/";
-        std::vector<std::string> basePaths;
-        basePaths.push_back(temp1);
-        basePaths.push_back(temp2);
-        basePaths.push_back("");
-
-        if (assetProvider->Initialize(path, basePaths)) {
-            LOGD("push plugin asset provider to queue.");
-            flutterAssetManager->PushBack(std::move(assetProvider));
+    std::string temp1 = "assets/js/" + module + "/";
+    std::string temp2 = "assets/js/share/";
+    std::vector<std::string> basePaths;
+    basePaths.push_back(temp1);
+    basePaths.push_back(temp2);
+    basePaths.push_back("");
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        RefPtr<AssetManagerImpl> assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+        if (assetManagerImpl) {
+            frontend_->SetAssetManager(assetManagerImpl);
+            assetManager_ = assetManagerImpl;
+            auto assetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+            if (assetProvider->Initialize(path, basePaths)) {
+                LOGD("push plugin asset provider to queue.");
+                assetManagerImpl->PushBack(std::move(assetProvider));
+            }
         }
+        return assetManagerImpl;
+    } else {
+        RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+        if (flutterAssetManager) {
+            frontend_->SetAssetManager(flutterAssetManager);
+            assetManager_ = flutterAssetManager;
+            auto assetProvider = AceType::MakeRefPtr<Plugin::FileAssetProvider>();
+            if (assetProvider->Initialize(path, basePaths)) {
+                LOGD("push plugin asset provider to queue.");
+                flutterAssetManager->PushBack(std::move(assetProvider));
+            }
+        }
+        return flutterAssetManager;
     }
-    return flutterAssetManager;
 }
 
 void PluginSubContainer::UpdatePlugin(const std::string& content)

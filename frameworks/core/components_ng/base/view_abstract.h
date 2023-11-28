@@ -400,6 +400,12 @@ public:
     static void SetPadding(FrameNode *frameNode, const CalcLength &value);
     static void SetPadding(FrameNode *frameNode, const PaddingProperty &value);
     static void SetAllowDrop(FrameNode* frameNode, const std::set<std::string>& allowDrop);
+    static void SetInspectorId(FrameNode* frameNode, const std::string& inspectorId);
+    static void SetRestoreId(FrameNode* frameNode, int32_t restoreId);
+    static void SetTabIndex(FrameNode* frameNode, int32_t index);
+    static void SetObscured(FrameNode* frameNode, const std::vector< ObscuredReasons>& reasons);
+    static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
+    static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);
 
 private:
     static void AddDragFrameNodeToManager();

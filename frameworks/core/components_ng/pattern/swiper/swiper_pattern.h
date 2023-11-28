@@ -716,6 +716,7 @@ private:
     int32_t endIndex_ = 0;
     int32_t currentIndex_ = 0;
     int32_t oldIndex_ = 0;
+    int32_t nextIndex_ = 0;
 
     PanDirection panDirection_;
 

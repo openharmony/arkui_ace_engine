@@ -1118,8 +1118,9 @@ void RosenRenderOffscreenCanvas::UpdatePaintShader(RSPen* pen, RSBrush* brush, c
             shaderEffect =
                 RSShaderEffect::CreateRadialGradient(pts.at(1), gradient.GetOuterRadius(), colors, pos, mode);
         } else {
-            shaderEffect = RSShaderEffect::CreateTwoPointConical(
-                pts.at(0), gradient.GetInnerRadius(), pts.at(1), gradient.GetOuterRadius(), colors, pos, mode);
+            RSMatrix matrix;
+            shaderEffect = RSShaderEffect::CreateTwoPointConical(pts.at(0), gradient.GetInnerRadius(), pts.at(1),
+                gradient.GetOuterRadius(), colors, pos, mode, &matrix);
         }
     }
     if (pen) {

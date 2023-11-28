@@ -150,7 +150,7 @@ struct ArkUICommonModifierAPI {
     void (*SetDefaultFocus)(NodeHandle node, bool defaultFocus);
     void (*ResetDefaultFocus)(NodeHandle node);
     void (*SetDisplayPriority)(NodeHandle node, double value);
-    void (*ResetDisplayPriority)(NodeHandle node);     
+    void (*ResetDisplayPriority)(NodeHandle node);
     void (*SetOffset)(NodeHandle node, const double *number, const int8_t *unit);
     void (*ResetOffset)(NodeHandle node);
     void (*SetPadding)(NodeHandle node, const struct StringAndDouble *top, const struct StringAndDouble *right,
@@ -171,6 +171,20 @@ struct ArkUICommonModifierAPI {
     void (*ResetAccessibilityLevel)(NodeHandle node);
     void (*SetAccessibilityDescription)(NodeHandle node, const char* value);
     void (*ResetAccessibilityDescription)(NodeHandle node);
+    void (*SetId)(NodeHandle node, const char* id);
+    void (*ResetId)(NodeHandle node);
+    void (*SetKey)(NodeHandle node, const char* key);
+    void (*ResetKey)(NodeHandle node);
+    void (*SetRestoreId)(NodeHandle node, uint32_t id);
+    void (*ResetRestoreId)(NodeHandle node);
+    void (*SetTabIndex)(NodeHandle node, int32_t index);
+    void (*ResetTabIndex)(NodeHandle node);
+    void (*SetObscured)(NodeHandle node, const int32_t* reasons, int32_t length);
+    void (*ResetObscured)(NodeHandle node);
+    void (*SetResponseRegion)(NodeHandle node, const double* values, int32_t length);
+    void (*ResetResponseRegion)(NodeHandle node);
+    void (*SetMouseResponseRegion)(NodeHandle node, const double* values, int32_t length);
+    void (*ResetMouseResponseRegion)(NodeHandle node);
 };
 
 struct ArkUITextModifierAPI {
@@ -581,6 +595,13 @@ struct ArkUIPatternLockModifierAPI {
     void (*ResetPatternLockPathColor)(NodeHandle node);
 };
 
+struct ArkUIColumnSplitModifierAPI {
+    void (*SetColumnSplitDivider)(NodeHandle node, double stVal, int32_t stUnit, double endVal, int32_t endUnit);
+    void (*ResetColumnSplitDivider)(NodeHandle node);
+    void (*SetColumnSplitResizeable)(NodeHandle node, bool resizeable);
+    void (*ResetColumnSplitResizeable)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -612,6 +633,7 @@ struct ArkUINodeAPI {
     ArkUINavigatorModifierAPI (*GetNavigatorModifier)();
     ArkUINavRouterModifierAPI (*GetNavRouterModifier)();
     ArkUIPatternLockModifierAPI (*GetPatternLockModifier)();
+    ArkUIColumnSplitModifierAPI (*GetColumnSplitModifier)();
 };
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H
