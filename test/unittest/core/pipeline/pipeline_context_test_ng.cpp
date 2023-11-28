@@ -2844,28 +2844,32 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg062, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
+    ASSERT_NE(context_->GetWindow(), nullptr);
+    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::DEFAULT);
 
     /**
      * @tc.steps2: set cursor with an exceptional value.
      * @tc.expected: context_->cursor_ is MouseFormat::DEFAULT.
      */
     context_->SetCursor(EXCEPTIONAL_CURSOR);
-    ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
+    ASSERT_NE(context_->GetWindow(), nullptr);
+    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::DEFAULT);
 
     /**
      * @tc.steps3: set cursor with a normal value.
      * @tc.expected: context_->cursor_ is correct value.
      */
     context_->SetCursor(static_cast<int32_t>(MouseFormat::EAST));
-    ASSERT_EQ(context_->cursor_, MouseFormat::EAST);
+    ASSERT_NE(context_->GetWindow(), nullptr);
+    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::EAST);
 
     /**
      * @tc.steps4: restore mouse style.
      * @tc.expected: context_->cursor_ is MouseFormat::DEFAULT.
      */
     context_->RestoreDefault();
-    ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
+    ASSERT_NE(context_->GetWindow(), nullptr);
+    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::DEFAULT);
 }
 
 /**
