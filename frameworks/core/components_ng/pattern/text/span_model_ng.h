@@ -35,6 +35,7 @@ public:
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextCase(TextCase value) override;
+    void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetLetterSpacing(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
     // TODO: add extra event for span.

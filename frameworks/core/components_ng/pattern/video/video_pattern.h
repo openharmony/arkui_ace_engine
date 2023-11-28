@@ -217,6 +217,10 @@ public:
 
     RefPtr<VideoPattern> GetTargetVideoPattern();
 
+#ifdef VIDEO_TEXTURE_SUPPORTED
+    void OnTextureRefresh(void* surface);
+#endif
+
 protected:
     void OnUpdateTime(uint32_t time, int pos) const;
     void RegisterMediaPlayerEvent();
@@ -229,6 +233,11 @@ protected:
     RefPtr<MediaPlayer> mediaPlayer_ = MediaPlayer::Create();
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<RenderContext> renderContextForMediaPlayer_ = RenderContext::Create();
+
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(ENABLE_ROSEN_BACKEND)
+    WeakPtr<RenderSurface> renderSurfaceWeakPtr_;
+    WeakPtr<RenderContext> renderContextForMediaPlayerWeakPtr_;
+#endif
 
 private:
     void OnAttachToFrameNode() override;
@@ -289,6 +298,12 @@ private:
             renderSurface_->SetIsFullScreen(isFullScreen);
         }
     }
+
+#ifdef VIDEO_TEXTURE_SUPPORTED
+    void* GetNativeWindow(int32_t instanceId, int64_t textureId);
+#endif
+
+    void RegisterRenderContextCallBack();
 
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;

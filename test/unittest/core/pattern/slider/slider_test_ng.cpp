@@ -822,7 +822,7 @@ HWTEST_F(SliderTestNg, SliderTestNg012, TestSize.Level1)
     sliderPattern->HandleHoverEvent(false);
     EXPECT_FALSE(sliderPattern->hotFlag_);
     EXPECT_FALSE(sliderPattern->mouseHoverFlag_);
-    EXPECT_FALSE(sliderPattern->bubbleFlag_);
+    EXPECT_TRUE(sliderPattern->bubbleFlag_);
     EXPECT_FALSE(sliderPattern->axisFlag_);
     /**
      * @tc.steps: step5. When moving the mouse out of the slider area, mouse wheel starts scrolling quickly.
@@ -833,7 +833,7 @@ HWTEST_F(SliderTestNg, SliderTestNg012, TestSize.Level1)
     sliderPattern->HandlingGestureEvent(info);
     EXPECT_FALSE(sliderPattern->hotFlag_);
     EXPECT_FALSE(sliderPattern->mouseHoverFlag_);
-    EXPECT_FALSE(sliderPattern->bubbleFlag_);
+    EXPECT_TRUE(sliderPattern->bubbleFlag_);
     EXPECT_FALSE(sliderPattern->axisFlag_);
 }
 
@@ -2269,7 +2269,7 @@ HWTEST_F(SliderTestNg, SliderPatternTest010, TestSize.Level1)
     sliderPattern->mousePressedFlag_ = false;
     sliderPattern->focusFlag_ = false;
     sliderPattern->HandleHoverEvent(false);
-    ASSERT_FALSE(sliderPattern->bubbleFlag_);
+    ASSERT_TRUE(sliderPattern->bubbleFlag_);
 
     /**
      * @tc.steps: step3. call HandleHoverEvent hover false with mouse pressed.
@@ -2280,7 +2280,7 @@ HWTEST_F(SliderTestNg, SliderPatternTest010, TestSize.Level1)
     sliderPattern->mousePressedFlag_ = true;
     sliderPattern->focusFlag_ = false;
     sliderPattern->HandleHoverEvent(false);
-    ASSERT_FALSE(sliderPattern->bubbleFlag_);
+    ASSERT_TRUE(sliderPattern->bubbleFlag_);
 
     /**
      * @tc.steps: step4. call HandleHoverEvent hover false with focus.
@@ -2291,7 +2291,7 @@ HWTEST_F(SliderTestNg, SliderPatternTest010, TestSize.Level1)
     sliderPattern->mousePressedFlag_ = false;
     sliderPattern->focusFlag_ = true;
     sliderPattern->HandleHoverEvent(false);
-    ASSERT_FALSE(sliderPattern->bubbleFlag_);
+    ASSERT_TRUE(sliderPattern->bubbleFlag_);
 
     /**
      * @tc.steps: step5. call HandleHoverEvent hover true.

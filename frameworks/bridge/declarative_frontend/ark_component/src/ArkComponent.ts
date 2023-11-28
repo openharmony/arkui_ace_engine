@@ -9,7 +9,32 @@ function GetUINativeModule() {
 
 function isResource(variable: any): variable is Resource {
     return (variable as Resource)?.bundleName!== undefined;
-  }
+}
+
+function isResourceEqual(stageValue: Resource, value: Resource): boolean {
+    return (stageValue.bundleName === value.bundleName) &&
+            (stageValue.moduleName === value.moduleName) &&
+            (stageValue.id === value.id) &&
+            (stageValue.params === value.params) &&
+            (stageValue.type === value.type);
+}
+
+const SAFE_AREA_TYPE_NONE = 0;
+const SAFE_AREA_TYPE_SYSTEM = 1;
+const SAFE_AREA_TYPE_CUTOUT = 2;
+const SAFE_AREA_TYPE_KEYBOARD = 4;
+const SAFE_AREA_TYPE_ALL = 7;
+
+const SAFE_AREA_EDGE_NONE = 0;
+const SAFE_AREA_EDGE_TOP = 1;
+const SAFE_AREA_EDGE_BOTTOM = 2;
+const SAFE_AREA_EDGE_START = 4;
+const SAFE_AREA_EDGE_END = 8;
+const SAFE_AREA_EDGE_ALL = 15;
+
+const SAFE_AREA_TYPE_LIMIT = 3;
+const SAFE_AREA_EDGE_LIMIT = 4;
+const DIRECTION_RANGE = 3;
 
 type KNode = number | null
 
@@ -26,6 +51,10 @@ class Modifier<T extends number | string | boolean | Equable | Resource> {
 
     applyStage(node: KNode): boolean {
         if (this.stageValue === this.value) {
+            if(this.value === undefined)
+            {                
+                this.applyPeer(node, true);                
+            }
             delete this.stageValue;
             return;
         }
@@ -69,6 +98,12 @@ class ModifierWithKey<T extends number | string | boolean | object> {
         if (different) {
             this.value = this.stageValue;
             this.applyPeer(node, false);
+            if (this.stageValue === undefined) {
+                this.applyPeer(node, true);
+            } else {
+                this.value = this.stageValue;
+                this.applyPeer(node, false);
+            }
         }
         this.stageValue = undefined;
         return false;
@@ -81,16 +116,25 @@ class ModifierWithKey<T extends number | string | boolean | object> {
     }
 }
 class BackgroundColorModifier extends Modifier<number | undefined > {
+class BackgroundColorModifier extends ModifierWithKey<ResourceColor> {
     static identity: Symbol = Symbol("backgroundColor");
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
             GetUINativeModule().common.resetBackgroundColor(node);
         } else {
             GetUINativeModule().common.setBackgroundColor(node, this.value!);
+            GetUINativeModule().common.setBackgroundColor(node, this.value);
+        }
+    }
+
+    checkObjectDiff(): boolean {
+        if (isResource(this.stageValue) && isResource(this.value)) {
+            return !isResourceEqual(this.stageValue, this.value);
+        } else {
+            return true;
         }
     }
 }
-
 
 class WidthModifier extends Modifier<number | string> {
     static identity: Symbol = Symbol("width");
@@ -153,14 +197,34 @@ class PositionModifier extends Modifier<ArkPosition> {
     }
 }
 
-class BorderColorModifier extends Modifier<ArkBorderColor> {
+class BorderColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
     static identity: Symbol = Symbol("borderColor");
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
             GetUINativeModule().common.resetBorderColor(node);
         }
         else {
-            GetUINativeModule().common.setBorderColor(node, this.value.leftColor, this.value.rightColor, this.value.topColor, this.value.bottomColor);
+            if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+                GetUINativeModule().common.setBorderColor(node, this.value, this.value, this.value, this.value);
+            } else {
+                GetUINativeModule().common.setBorderColor(node, (this.value as EdgeColors).left,
+                    (this.value as EdgeColors).right, (this.value as EdgeColors).top,
+                    (this.value as EdgeColors).bottom);
+            }
+
+        }
+    }
+
+    checkObjectDiff(): boolean {
+        if (isResource(this.stageValue) && isResource(this.value)) {
+            return !isResourceEqual(this.stageValue, this.value);
+        } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+            return !((this.stageValue as EdgeColors).left === (this.value as EdgeColors).left &&
+                (this.stageValue as EdgeColors).right === (this.value as EdgeColors).right &&
+                (this.stageValue as EdgeColors).top === (this.value as EdgeColors).top &&
+                (this.stageValue as EdgeColors).bottom === (this.value as EdgeColors).bottom);
+        } else {
+            return true;
         }
     }
 }
@@ -694,7 +758,158 @@ class FocusOnTouchModifier extends Modifier <boolean> {
         }
     }
 }
+class OffsetModifier extends Modifier<ArkPosition> {
+  static identity: Symbol = Symbol('offset');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetOffset(node);
+    } else {
+      GetUINativeModule().common.setOffset(node, this.value.x, this.value.y);
+    }
+  }
+}
 
+class MarkAnchorModifier extends Modifier<ArkPosition> {
+  static identity: Symbol = Symbol('markAnchor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetMarkAnchor(node);
+    } else {
+      GetUINativeModule().common.setMarkAnchor(node, this.value.x, this.value.y);
+    }
+  }
+}
+class DefaultFocusModifier extends Modifier<boolean>{
+    static identity: Symbol = Symbol("defaultFocus");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetDefaultFocus(node);
+        }
+        else {
+            GetUINativeModule().common.setDefaultFocus(node, this.value);
+        }
+    }
+}
+
+class FocusableModifier extends Modifier<boolean>{
+    static identity: Symbol = Symbol("focusable");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetFocusable(node);
+        }
+        else {
+            GetUINativeModule().common.setFocusable(node, this.value);
+        }
+    }
+}
+
+class TouchableModifier extends Modifier<boolean>{
+    static identity: Symbol = Symbol("touchable");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetTouchable(node);
+        }
+        else {
+            GetUINativeModule().common.setTouchable(node, this.value);
+        }
+    }
+}
+
+class MarginModifier extends Modifier<ArkPadding> {
+  static identity: Symbol = Symbol('margin');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetMargin(node);
+    } else {
+      GetUINativeModule().common.setMargin(node, this.value.top,
+        this.value.right, this.value.bottom, this.value.left);
+    }
+
+  }
+}
+
+class PaddingModifier extends Modifier<ArkPadding> {
+  static identity: Symbol = Symbol('padding');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetPadding(node);
+    } else {
+      GetUINativeModule().common.setPadding(node, this.value.top,
+        this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+}
+
+class VisibilityModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('visibility');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetVisibility(node);
+    } else {
+      GetUINativeModule().common.setVisibility(node, this.value!);
+    }
+  }
+}
+
+class AccessibilityTextModifier extends Modifier<string> {
+    static identity: Symbol = Symbol("accessibilityText");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetAccessibilityText(node);
+        }
+        else {
+            GetUINativeModule().common.setAccessibilityText(node, this.value);
+        }
+    }
+}
+
+class AllowDropModifier extends Modifier<ArkAllowDrop> {
+    static identity: Symbol = Symbol("allowDrop");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetAllowDrop(node);
+        }
+        else {
+            GetUINativeModule().common.setAllowDrop(node, this.value.allowDropArray);
+        }
+    }
+}
+
+class AccessibilityLevelModifier extends Modifier<string> {
+    static identity: Symbol = Symbol("accessibilityLevel");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetAccessibilityLevel(node);
+        }
+        else {
+            GetUINativeModule().common.setAccessibilityLevel(node, this.value);
+        }
+    }
+}
+
+class AccessibilityDescriptionModifier extends Modifier<string> {
+    static identity: Symbol = Symbol("accessibilityDescription");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetAccessibilityDescription(node);
+        }
+        else {
+            GetUINativeModule().common.setAccessibilityDescription(node, this.value);
+        }
+    }
+}
+
+class DisplayPriorityModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('displayPriority');
+  applyPeer(node: KNode, reset: boolean): void {
+    //console.log('DisplayPriorityModifier reset = ' + reset);
+    if (reset) {
+      GetUINativeModule().common.resetDisplayPriority(node);
+    } else {
+      GetUINativeModule().common.setDisplayPriority(node, this.value!);
+    }
+  }
+}
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType) => typeof val === 'string'
@@ -705,6 +920,8 @@ const isSymbol = (val: basicType) => typeof val === 'symbol'
 const isUndefined = (val: basicType) => typeof val === 'undefined'
 const isObject = (val: basicType) => typeof val === 'object'
 const isFunction = (val: basicType) => typeof val === 'function'
+const isLengthType = (val: any) => typeof val === 'string' || typeof val === 'number'
+const lessThenFunction = (val1: number, val2: number) => (val1 - val2) < 0.001
 
 function CheckJSCallbackInfo(value: any, checklist: any[]) {
     var typeVerified = false;
@@ -841,7 +1058,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     touchable(value: boolean): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === 'boolean') {
+            modifier(this._modifiers, TouchableModifier, value);
+        } else {
+            modifier(this._modifiers, TouchableModifier, undefined);
+        }
+        return this;
     }
 
     hitTestBehavior(value: HitTestMode): this {
@@ -857,29 +1079,70 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         throw new Error("Method not implemented.");
     }
 
-    padding(value: Padding | Length): this {
-        throw new Error("Method not implemented.");
+  padding(value: Padding | Length): this {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value)) {
+        arkValue.top = <string | number>value;
+        arkValue.right = <string | number>value;
+        arkValue.bottom = <string | number>value;
+        arkValue.left = <string | number>value;
+      } else {
+        if ((<Padding>value).top && isLengthType((<Padding>value).top)) {
+          arkValue.top = <string | number>(<Padding>value).top;
+        }
+        if ((<Padding>value).right && isLengthType((<Padding>value).right)) {
+          arkValue.right = <string | number>(<Padding>value).right;
+        }
+        if ((<Padding>value).bottom && isLengthType((<Padding>value).bottom)) {
+          arkValue.bottom = <string | number>(<Padding>value).bottom;
+        }
+        if ((<Padding>value).left && isLengthType((<Padding>value).left)) {
+          arkValue.left = <string | number>(<Padding>value).left;
+        }
+      }
+      modifier(this._modifiers, PaddingModifier, arkValue);
+    } else {
+      modifier(this._modifiers, PaddingModifier, undefined);
     }
+    return this;
+  }
 
-    margin(value: Margin | Length): this {
-        throw new Error("Method not implemented.");
+  margin(value: Margin | Length): this {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (!isNaN(Number(value)) && isLengthType(value)) {
+        arkValue.top = <string | number>value;
+        arkValue.right = <string | number>value;
+        arkValue.bottom = <string | number>value;
+        arkValue.left = <string | number>value;
+      } else {
+        if ((<Padding>value).top && isLengthType((<Padding>value).top)) {
+          arkValue.top = <string | number>(<Padding>value).top;
+        }
+        if ((<Padding>value).right && isLengthType((<Padding>value).right)) {
+          arkValue.right = <string | number>(<Padding>value).right;
+        }
+        if ((<Padding>value).bottom && isLengthType((<Padding>value).bottom)) {
+          arkValue.bottom = <string | number>(<Padding>value).bottom;
+        }
+        if ((<Padding>value).left && isLengthType((<Padding>value).left)) {
+          arkValue.left = <string | number>(<Padding>value).left;
+        }
+      }
+      modifier(this._modifiers, MarginModifier, arkValue);
+    } else {
+      modifier(this._modifiers, MarginModifier, undefined);
     }
+    return this;
+  }
 
     background(builder: CustomBuilder, options?: { align?: Alignment }): this {
         throw new Error("Method not implemented.");
     }
 
     backgroundColor(value: ResourceColor): this {
-        if(isResource(value)){
-            modifier(this._modifiers, BackgroundColorModifier, undefined);
-            return this;
-        }
-        var arkColor = new ArkColor();
-        if (arkColor.parseColorValue(value)) {
-            modifier(this._modifiers, BackgroundColorModifier, arkColor.color);
-        } else {
-            modifier(this._modifiers, BackgroundColorModifier, undefined);
-        }
+        modifierWithKey(this._modifiersWithKeys, BackgroundColorModifier.identity, BackgroundColorModifier, value);
         return this;
     }
 
@@ -1126,40 +1389,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     borderColor(value: ResourceColor | EdgeColors): this {
-        if( isResource(value)  || isUndefined(value))
-        {
-            modifier(this._modifiers, BorderColorModifier, undefined);
-            return this;
-        }
-
-        var arkColor = new ArkColor();
-        var borderColorGroup = new ArkBorderColor()      
-        if (typeof value === "number" || typeof value === "string") {
-            arkColor.parseColorValue(value)
-            borderColorGroup.leftColor = arkColor.color
-            borderColorGroup.rightColor = arkColor.color
-            borderColorGroup.topColor = arkColor.color
-            borderColorGroup.bottomColor = arkColor.color
-            modifier(this._modifiers, BorderColorModifier, borderColorGroup);
-        }
-        else if (!!value.left || !!value.right || !!value.top || !!value.bottom) {
-            if (arkColor.parseColorValue(value.left)) {
-                borderColorGroup.leftColor = arkColor.color;
-            }
-            if (arkColor.parseColorValue(value.right)) {
-                borderColorGroup.rightColor = arkColor.color;
-            }
-            if (arkColor.parseColorValue(value.top)) {
-                borderColorGroup.topColor = arkColor.color;
-            }
-            if (arkColor.parseColorValue(value.bottom)) {
-                borderColorGroup.bottomColor = arkColor.color;
-            }
-            modifier(this._modifiers, BorderColorModifier, borderColorGroup);
-        }
-        else {
-            modifier(this._modifiers, BorderColorModifier, undefined);
-        }       
+        modifierWithKey(this._modifiersWithKeys, BorderColorModifier.identity, BorderColorModifier, value);
         return this;
     }
 
@@ -1236,7 +1466,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     focusable(value: boolean): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === 'boolean') {
+            modifier(this._modifiers, FocusableModifier, value);
+        } else {
+            modifier(this._modifiers, FocusableModifier, undefined);
+        }
+        return this;
     }
 
     onFocus(event: () => void): this {
@@ -1252,7 +1487,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     defaultFocus(value: boolean): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === 'boolean') {
+            modifier(this._modifiers, DefaultFocusModifier, value);
+        } else {
+            modifier(this._modifiers, DefaultFocusModifier, undefined);
+        }
+        return this;
     }
 
     groupDefaultFocus(value: boolean): this {
@@ -1508,9 +1748,14 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         throw new Error("Method not implemented.");
     }
 
-    visibility(value: Visibility): this {
-        throw new Error("Method not implemented.");
+  visibility(value: Visibility): this {
+    if (isNaN(value)) {
+      modifier(this._modifiers, VisibilityModifier, undefined);
+    } else {
+      modifier(this._modifiers, VisibilityModifier, value);
     }
+    return this;
+  }
 
     flexGrow(value: number): this {
         throw new Error("Method not implemented.");
@@ -1528,9 +1773,14 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         throw new Error("Method not implemented.");
     }
 
-    displayPriority(value: number): this {
-        throw new Error("Method not implemented.");
+  displayPriority(value: number): this {
+    if (isNaN(value)) {
+      modifier(this._modifiers, DisplayPriorityModifier, undefined);
+    } else {
+      modifier(this._modifiers, DisplayPriorityModifier, value);
     }
+    return this;
+  }
 
     zIndex(value: number): this {
         if (value !== null) {
@@ -1577,13 +1827,37 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         return this;
     }
 
-    markAnchor(value: Position): this {
-        throw new Error("Method not implemented.");
+  markAnchor(value: Position): this {
+    let arkValue = new ArkPosition();
+    if (!value || (!isLengthType(value.x) && !isLengthType(value.y))) {
+      modifier(this._modifiers, MarkAnchorModifier, undefined);
+      return this;
     }
+    if (value.x && isLengthType(value.x)) {
+      arkValue.x = value?.x;
+    }
+    if (value.y && isLengthType(value.y)) {
+      arkValue.y = value?.y;
+    }
+    modifier(this._modifiers, MarkAnchorModifier, arkValue);
+    return this;
+  }
 
-    offset(value: Position): this {
-        throw new Error("Method not implemented.");
+  offset(value: Position): this {
+    let arkValue = new ArkPosition();
+    if (!value || (!isLengthType(value.x) && !isLengthType(value.y))) {
+      modifier(this._modifiers, OffsetModifier, undefined);
+      return this;
     }
+    if (value.x && isLengthType(value.x)) {
+      arkValue.x = value?.x;
+    }
+    if (value.y && isLengthType(value.y)) {
+      arkValue.y = value?.y;
+    }
+    modifier(this._modifiers, OffsetModifier, arkValue);
+    return this;
+  }
 
     enabled(value: boolean): this {
         throw new Error("Method not implemented.");
@@ -1635,7 +1909,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     allowDrop(value: Array<UniformDataType>): this {
-        throw new Error("Method not implemented.");
+        let allowDrop = new ArkAllowDrop();
+        allowDrop.allowDropArray = value;
+        modifier(this._modifiers, AllowDropModifier, allowDrop);
+        return this;
     }
 
     draggable(value: boolean): this {
@@ -1804,15 +2081,33 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     accessibilityText(value: string): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === "string") {
+            modifier(this._modifiers, AccessibilityTextModifier, value);
+        } else {
+            modifier(this._modifiers, AccessibilityTextModifier, undefined);
+        }
+        return this;
     }
 
+
     accessibilityDescription(value: string): this {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "string") {
+            modifier(this._modifiers, AccessibilityDescriptionModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, AccessibilityDescriptionModifier, value);
+        }
+        return this;
     }
 
     accessibilityLevel(value: string): this {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "string") {
+            modifier(this._modifiers, AccessibilityLevelModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, AccessibilityLevelModifier, value);
+        }
+        return this;
     }
 
     obscured(reasons: Array<ObscuredReasons>): this {

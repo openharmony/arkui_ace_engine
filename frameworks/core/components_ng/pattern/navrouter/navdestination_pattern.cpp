@@ -229,7 +229,20 @@ void NavDestinationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
+    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_ALL, .type = SAFE_AREA_TYPE_SYSTEM };
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+}
+
+void NavDestinationPattern::OnAttachToMainTree()
+{
+    RefPtr<UINode> node = DynamicCast<UINode>(GetHost());
+    while (node) {
+        if (node->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            break;
+        }
+        node = node->GetParent();
+    }
+    CHECK_NULL_VOID(node);
+    navigationNode_ = AceType::WeakClaim(RawPtr(node));
 }
 } // namespace OHOS::Ace::NG

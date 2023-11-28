@@ -81,7 +81,7 @@ void PipelineContext::FlushTouchEvents() {}
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event) {}
 
-void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action) {}
+void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) {}
 
 void PipelineContext::OnIdle(int64_t deadline) {}
 
@@ -341,6 +341,7 @@ bool PipelineContext::IsEnableKeyBoardAvoidMode()
 }
 void PipelineContext::SetIgnoreViewSafeArea(bool value) {};
 void PipelineContext::SetIsLayoutFullScreen(bool value) {};
+void PipelineContext::SetIsNeedAvoidWindow(bool value) {};
 
 SafeAreaInsets PipelineContext::GetSafeArea() const
 {
@@ -500,7 +501,7 @@ void NG::PipelineContext::SetCursor(int32_t cursorValue) {}
 
 void NG::PipelineContext::RestoreDefault() {}
 
-void HandleSubwindow(bool isShow) {}
+void NG::PipelineContext::HandleSubwindow(bool isShow) {}
 
 std::string NG::PipelineContext::GetCurrentExtraInfo()
 {

@@ -173,6 +173,12 @@ public:
     static void JsHitTestBehavior(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
 
+    // outer border
+    static void ParseOuterBorderColor(const JSRef<JSVal>& args);
+    static void ParseOuterBorderWidth(const JSRef<JSVal>& args);
+    static void ParseOuterBorderRadius(const JSRef<JSVal>& args);
+    static void ParseOuterBorderStyle(const JSRef<JSVal>& args);
+
     // response region
     static void JsResponseRegion(const JSCallbackInfo& info);
     static bool ParseJsResponseRegionArray(const JSRef<JSVal>& jsValue, std::vector<DimensionRect>& result);

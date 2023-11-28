@@ -26,8 +26,6 @@ public:
     explicit WindowScene(const sptr<Rosen::Session>& session);
     ~WindowScene() override;
 
-    void UpdateSession(const sptr<Rosen::Session>& session);
-
 protected:
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {

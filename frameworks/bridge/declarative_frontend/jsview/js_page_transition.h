@@ -44,7 +44,7 @@ public:
     static void JsHandlerOnExit(const JSCallbackInfo& info);
 
 protected:
-    static PageTransitionOption ParseTransitionOption(const std::unique_ptr<JsonValue>& transitionArgs);
+    static PageTransitionOption ParseTransitionOption(const JSRef<JSVal>& transitionArgs);
 };
 
 class JSPageTransitionEnter final : public JSPageTransition {

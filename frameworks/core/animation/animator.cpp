@@ -641,7 +641,7 @@ void Animator::NotifyInterpolator(int32_t playedTime)
             isCurDirection_ = !isCurDirection_;
         }
         // make playedTime in range 0 ~ INTERPOLATE_DURATION_MAX
-        if (repeatTimesLeft_ == 0 || scaledDuration_ == 0) {
+        if (repeatTimesLeft_ == 0 || (scaledDuration_ == 0 && repeatTimesLeft_ != ANIMATION_REPEAT_INFINITE)) {
             LOGD("animation stop, repeatTimesLeft: %{public}d, duration: %{public}d, id: %{public}d", repeatTimesLeft_,
                 scaledDuration_, controllerId_);
             repeatTimesLeft_ = 0;

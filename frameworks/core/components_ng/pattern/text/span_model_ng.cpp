@@ -104,6 +104,11 @@ void SpanModelNG::SetTextCase(Ace::TextCase value)
     ACE_UPDATE_SPAN_PROPERTY(TextCase, value, PropertyInfo::TEXTCASE);
 }
 
+void SpanModelNG::SetTextShadow(const std::vector<Shadow>& value)
+{
+    ACE_UPDATE_SPAN_PROPERTY(TextShadow, value, PropertyInfo::TEXTSHADOW);
+}
+
 void SpanModelNG::SetLetterSpacing(const Dimension& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(LetterSpacing, value, PropertyInfo::LETTERSPACE);

@@ -557,7 +557,7 @@ public:
     bool IsFocusableScopeByTab();
 
     bool IsFocusableWholePath();
-    bool IsOnRootTree();
+    bool IsOnRootTree() const;
 
     bool IsFocusable();
     bool IsFocusableNode();

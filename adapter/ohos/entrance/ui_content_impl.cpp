@@ -31,6 +31,7 @@
 #include "wm_common.h"
 
 #include "base/log/log_wrapper.h"
+#include "core/components_ng/property/safe_area_insets.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
@@ -217,20 +218,31 @@ public:
         CHECK_NULL_VOID(pipeline);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        auto safeArea = ConvertAvoidArea(avoidArea);
+        switch (type) {
+            case Rosen::AvoidAreaType::TYPE_SYSTEM:
+                systemSafeArea_ = ConvertAvoidArea(avoidArea);
+                break;
+            case Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR:
+                navigationBar_ = NG::SafeAreaInsets::Inset { .start = avoidArea.bottomRect_.posY_,
+                    .end = avoidArea.bottomRect_.posY_ + avoidArea.bottomRect_.height_ };
+                break;
+            default:
+                // cutout doesn't affect layout
+                return;
+        }
+        auto safeArea = systemSafeArea_;
+        safeArea.bottom_ = safeArea.bottom_.Combine(navigationBar_);
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [pipeline, safeArea, type] {
-                if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
-                    pipeline->UpdateSystemSafeArea(safeArea);
-                } else if (type == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
-                    pipeline->UpdateCutoutSafeArea(safeArea);
-                }
+            [pipeline, safeArea] {
+                pipeline->UpdateSystemSafeArea(safeArea);
             },
             TaskExecutor::TaskType::UI);
     }
 
 private:
+    NG::SafeAreaInsets systemSafeArea_;
+    NG::SafeAreaInsets::Inset navigationBar_;
     int32_t instanceId_ = -1;
 };
 
@@ -1360,11 +1372,6 @@ void UIContentImpl::Destroy()
 {
     LOGI("UIContentImpl: window destroy");
 
-    if (isFormRender_) {
-        LOGD("Remove card for bundle %{public}s, module %{public}s", bundleName_.c_str(), moduleName_.c_str());
-        ResourceManager::GetInstance().RemoveResourceAdapter(bundleName_, moduleName_);
-    }
-
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     // stop performance check and output json file
@@ -1539,6 +1546,12 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             if (rsWindow) {
                 pipelineContext->SetIsLayoutFullScreen(
                     rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+                auto isNeedAvoidWindowMode = (rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
+                                              rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                                              rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN) &&
+                                             (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
+                                              SystemProperties::GetDeviceType() == DeviceType::TABLET);
+                pipelineContext->SetIsNeedAvoidWindow(isNeedAvoidWindowMode);
             }
             if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
                 pipelineContext->FlushBuild();
@@ -1870,7 +1883,6 @@ void UIContentImpl::SetFormBackgroundColor(const std::string& color)
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetAppBgColor(bgColor);
-            container->SetIsTransparentForm(bgColor == Color::TRANSPARENT);
         },
         TaskExecutor::TaskType::UI);
 }

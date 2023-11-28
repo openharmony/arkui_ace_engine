@@ -73,6 +73,15 @@ bool SafeAreaManager::SetIsFullScreen(bool value)
     return true;
 }
 
+bool SafeAreaManager::SetIsNeedAvoidWindow(bool value)
+{
+    if (isNeedAvoidWindow_ == value) {
+        return false;
+    }
+    isNeedAvoidWindow_ = value;
+    return true;
+}
+
 bool SafeAreaManager::SetIgnoreSafeArea(bool value)
 {
     if (ignoreSafeArea_ == value) {
@@ -107,7 +116,7 @@ SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 
 SafeAreaInsets SafeAreaManager::GetSafeArea() const
 {
-    if (ignoreSafeArea_ || !isFullScreen_) {
+    if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
         return {};
     }
     return systemSafeArea_.Combine(cutoutSafeArea_);

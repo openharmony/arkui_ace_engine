@@ -71,6 +71,14 @@ constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
 
 constexpr char DUMP_LOG_COMMAND[] = "B";
 
+constexpr char CLICK_TITLE_MAXIMIZE_MENU[] = "CLICK_TITLE_MAXIMIZE_MENU";
+constexpr char DOUBLE_CLICK_TITLE[] = "DOUBLE_CLICK_TITLE";
+constexpr char CURRENTPKG[] = "CURRENTPKG";
+constexpr char STATECHANGE[] = "STATECHANGE";
+constexpr char MAXMENUITEM[] = "MAXMENUITEM";
+constexpr char CHANGEDEFAULTSETTING[] = "CHANGEDEFAULTSETTING";
+constexpr char SCENE_BOARD_UE_DOMAIN[] = "SCENE_BOARD_UE";
+
 void StrTrim(std::string& str)
 {
     if (str.size() > MAX_PACKAGE_NAME_LENGTH) {
@@ -404,5 +412,26 @@ void EventReport::ReportJankFrameApp(JankInfo& info)
         EVENT_KEY_VERSION_NAME, versionName,
         EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
     ACE_SCOPED_TRACE("JANK_FRAME_APP: skipppedFrameTime=%lld(ms)", static_cast<long long>(skippedFrameTime / NS_TO_MS));
+}
+
+void EventReport::ReportDoubleClickTitle(int32_t stateChange)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    StrTrim(packageName);
+    HiSysEventWrite(SCENE_BOARD_UE_DOMAIN, DOUBLE_CLICK_TITLE,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        CURRENTPKG, packageName,
+        STATECHANGE, stateChange);
+}
+
+void EventReport::ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    StrTrim(packageName);
+    HiSysEventWrite(SCENE_BOARD_UE_DOMAIN, CLICK_TITLE_MAXIMIZE_MENU,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        CURRENTPKG, packageName,
+        MAXMENUITEM, maxMenuItem,
+        CHANGEDEFAULTSETTING, stateChange);
 }
 } // namespace OHOS::Ace

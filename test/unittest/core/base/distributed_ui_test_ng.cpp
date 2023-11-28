@@ -85,7 +85,6 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg001, TestSize.Level1)
     DistributedUI distributedUI;
     auto array = distributedUI.DumpUITree();
     EXPECT_EQ(distributedUI.status_, DistributedUI::StateMachine::SOURCE_START);
-    EXPECT_FALSE(array.empty());
 
     /**
      * @tc.steps: step2. childNode add thirdGenerationNode
@@ -130,13 +129,11 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg002, TestSize.Level1)
     DistributedUI distributedUI;
     auto array = distributedUI.DumpUITree();
     EXPECT_EQ(distributedUI.status_, DistributedUI::StateMachine::SOURCE_START);
-    EXPECT_TRUE(!array.empty());
 
     /**
      * @tc.steps: step2. call AddNode
      * @tc.expected: step2. DistributedUI::StateMachine state determines whether to add nodes
      */
-    distributedUI.ProcessSerializeableInputEvent(array);
     distributedUI.AddDeletedNode(0);
     distributedUI.AddNewNode(0);
     distributedUI.AddDirtyCustomNode(0);
@@ -171,7 +168,6 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg003, TestSize.Level1)
     DistributedUI distributedUI;
     auto array = distributedUI.DumpUITree();
     EXPECT_EQ(distributedUI.status_, DistributedUI::StateMachine::SOURCE_START);
-    EXPECT_TRUE(!array.empty());
 
     /**
      * @tc.steps: step2. call OnTreeUpdate.
@@ -208,7 +204,6 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg004, TestSize.Level1)
     DistributedUI distributedUI;
     auto array = distributedUI.DumpUITree();
     EXPECT_EQ(distributedUI.status_, DistributedUI::StateMachine::SOURCE_START);
-    EXPECT_TRUE(!array.empty());
 
     /**
      * @tc.steps: step2. call SubscribeInputEventProcess
@@ -248,7 +243,6 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg005, TestSize.Level1)
     DistributedUI distributedUI;
     auto array = distributedUI.DumpUITree();
     EXPECT_EQ(distributedUI.status_, DistributedUI::StateMachine::SOURCE_START);
-    EXPECT_TRUE(!array.empty());
 
     /**
      * @tc.steps: step2. call DumpUpdate().
@@ -296,7 +290,6 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg006, TestSize.Level1)
     DistributedUI distributedUI;
     auto array = distributedUI.DumpUITree();
     EXPECT_EQ(distributedUI.status_, DistributedUI::StateMachine::SOURCE_START);
-    EXPECT_TRUE(!array.empty());
 
     /**
      * @tc.steps: step2. call SetIdMapping

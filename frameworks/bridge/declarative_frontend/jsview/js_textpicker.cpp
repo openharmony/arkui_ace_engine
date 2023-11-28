@@ -28,6 +28,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/picker/picker_base_component.h"
 #include "core/components/picker/picker_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -158,12 +159,14 @@ void ParseTextPickerValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& 
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto onValueChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onValueChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                              const std::vector<std::string>& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("TextPicker.onValueChange");
         if (value.size() == 1) {
             JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(value[0]));
+            PipelineContext::SetCallBackNode(node);
             func->ExecuteJS(1, &newJSVal);
         } else {
             JSRef<JSArray> valueArray = JSRef<JSArray>::New();
@@ -171,6 +174,7 @@ void ParseTextPickerValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& 
                 valueArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(value[i])));
             }
             JSRef<JSVal> newJSVal = JSRef<JSVal>::Cast(valueArray);
+            PipelineContext::SetCallBackNode(node);
             func->ExecuteJS(1, &newJSVal);
         }
     };
@@ -182,11 +186,13 @@ void ParseTextPickerSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto onSelectedChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onSelectedChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                 const std::vector<double>& index) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("TextPicker.onSelectedChange");
         if (index.size() == 1) {
+            PipelineContext::SetCallBackNode(node);
             JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(index[0]));
             func->ExecuteJS(1, &newJSVal);
         } else {
@@ -194,6 +200,7 @@ void ParseTextPickerSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal
             for (uint32_t i = 0; i < index.size(); i++) {
                 indexArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(index[i])));
             }
+            PipelineContext::SetCallBackNode(node);
             JSRef<JSVal> newJSVal = JSRef<JSVal>::Cast(indexArray);
             func->ExecuteJS(1, &newJSVal);
         }
@@ -1040,31 +1047,37 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     std::function<void(const std::string&)> acceptEvent;
     std::function<void(const std::string&)> changeEvent;
     auto onCancel = paramObject->GetProperty("onCancel");
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
-        cancelEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        cancelEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("TextPickerDialog.onCancel");
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
     }
     auto onAccept = paramObject->GetProperty("onAccept");
     if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
-        acceptEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+        acceptEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                          const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             std::vector<std::string> keys = { "value", "index" };
             ACE_SCORING_EVENT("TextPickerDialog.onAccept");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(keys, info);
         };
     }
     auto onChange = paramObject->GetProperty("onChange");
     if (!onChange->IsUndefined() && onChange->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
-        changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+        changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                          const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             std::vector<std::string> keys = { "value", "index" };
             ACE_SCORING_EVENT("TextPickerDialog.onChange");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(keys, info);
         };
     }
@@ -1343,12 +1356,15 @@ std::map<std::string, NG::DialogTextEvent> JSTextPickerDialog::DialogEvent(const
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto onAccept = paramObject->GetProperty("onAccept");
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
-        auto acceptId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+        auto acceptId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                            const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             std::vector<std::string> keys = { "value", "index" };
             ACE_SCORING_EVENT("TextPickerDialog.onAccept");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(keys, info);
         };
         dialogEvent["acceptId"] = acceptId;
@@ -1356,10 +1372,12 @@ std::map<std::string, NG::DialogTextEvent> JSTextPickerDialog::DialogEvent(const
     auto onChange = paramObject->GetProperty("onChange");
     if (!onChange->IsUndefined() && onChange->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
-        auto changeId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+        auto changeId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                            const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             std::vector<std::string> keys = { "value", "index" };
             ACE_SCORING_EVENT("TextPickerDialog.onChange");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(keys, info);
         };
         dialogEvent["changeId"] = changeId;
@@ -1375,12 +1393,14 @@ std::map<std::string, NG::DialogGestureEvent> JSTextPickerDialog::DialogCancelEv
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto onCancel = paramObject->GetProperty("onCancel");
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
-        auto cancelId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+        auto cancelId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                             const GestureEvent& /* info */) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("TextPickerDialog.onCancel");
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
         dialogCancelEvent["cancelId"] = cancelId;
@@ -1395,37 +1415,42 @@ void JSTextPickerDialog::AddEvent(RefPtr<PickerTextComponent>& picker, const JSC
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto onAccept = paramObject->GetProperty("onAccept");
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
-        auto acceptId =
-            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                std::vector<std::string> keys = { "value", "index" };
-                ACE_SCORING_EVENT("TextPickerDialog.onAccept");
-                func->Execute(keys, info);
-            });
+        auto acceptId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                                        const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            std::vector<std::string> keys = { "value", "index" };
+            ACE_SCORING_EVENT("TextPickerDialog.onAccept");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute(keys, info);
+        });
         picker->SetDialogAcceptEvent(acceptId);
     }
     auto onCancel = paramObject->GetProperty("onCancel");
     if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
-        auto cancelId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("TextPickerDialog.onCancel");
-            func->Execute();
-        });
+        auto cancelId =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("TextPickerDialog.onCancel");
+                PipelineContext::SetCallBackNode(node);
+                func->Execute();
+            });
         picker->SetDialogCancelEvent(cancelId);
     }
     auto onChange = paramObject->GetProperty("onChange");
     if (!onChange->IsUndefined() && onChange->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
-        auto changeId =
-            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                std::vector<std::string> keys = { "value", "index" };
-                ACE_SCORING_EVENT("TextPickerDialog.onChange");
-                func->Execute(keys, info);
-            });
+        auto changeId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                                        const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            std::vector<std::string> keys = { "value", "index" };
+            ACE_SCORING_EVENT("TextPickerDialog.onChange");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute(keys, info);
+        });
         picker->SetDialogChangeEvent(changeId);
     }
 }

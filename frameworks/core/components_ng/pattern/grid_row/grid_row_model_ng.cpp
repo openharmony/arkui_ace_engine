@@ -65,4 +65,13 @@ void GridRowModelNG::SetAlignItems(FlexAlign alignItem)
     layoutPriority->UpdateAlignItems(alignItem);
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, AlignItems, alignItem);
 }
+
+void GridRowModelNG::SetAlignItems(FrameNode* frameNode, FlexAlign alignItem)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutPriority = frameNode->GetLayoutProperty<GridRowLayoutProperty>();
+    CHECK_NULL_VOID(layoutPriority);
+    layoutPriority->UpdateAlignItems(alignItem);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, AlignItems, alignItem, frameNode);
+}
 } // namespace OHOS::Ace::NG

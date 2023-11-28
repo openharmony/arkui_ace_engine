@@ -951,7 +951,8 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
     if (debugVersion) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    auto&& initWorkerFunc = [weakInstance, libraryPath](NativeEngine* nativeEngine) {
+    auto&& initWorkerFunc = [weakInstance, libraryPath, debugVersion, instanceId = instanceId_](
+                                NativeEngine* nativeEngine) {
         if (nativeEngine == nullptr) {
             return;
         }
@@ -971,7 +972,8 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         };
         bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
         panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode };
-        panda::JSNApi::StartDebugger(vm, debugOption, gettid(), workerPostTask);
+        JSNApi::NotifyDebugMode(gettid(), vm, libraryPath.c_str(), debugOption, instanceId, workerPostTask,
+            debugVersion, debugMode);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
 
@@ -1045,6 +1047,16 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
     const std::string& abcPath = fileName;
 #endif
     if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath, needUpdate_)) {
+        return false;
+    }
+    return true;
+}
+
+bool JsiDeclarativeEngine::ExecuteJs(const uint8_t* content, int32_t size)
+{
+    auto runtime = engineInstance_->GetJsRuntime();
+    CHECK_NULL_RETURN(runtime, false);
+    if (!runtime->EvaluateJsCode(content, size)) {
         return false;
     }
     return true;

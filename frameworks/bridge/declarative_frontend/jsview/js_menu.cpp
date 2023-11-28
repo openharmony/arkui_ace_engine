@@ -17,8 +17,10 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/menu_model_impl.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/menu/menu_model.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<MenuModel> MenuModel::instance_ = nullptr;
@@ -133,6 +135,12 @@ void JSMenu::SetWidth(const JSCallbackInfo& info)
     }
     CalcDimension width;
     if (!ParseJsDimensionVp(info[0], width)) {
+        return;
+    }
+
+    auto menuWidthToPx = width.ConvertToPx();
+    auto minMenuWidthToPx = MIN_MENU_WIDTH.ConvertToPx();
+    if (menuWidthToPx < minMenuWidthToPx) {
         return;
     }
 

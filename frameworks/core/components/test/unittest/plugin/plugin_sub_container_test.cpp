@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "base/i18n/localization.h"
-#include "core/common/flutter/flutter_task_executor.h"
+#include "core/common/task_executor_impl.h"
 #include "core/common/frontend.h"
 #define private public
 #define protected public
@@ -49,7 +49,7 @@ RefPtr<PipelineContext> PluginSubContainerTest::GetPipelineContext(const RefPtr<
     auto platformWindow = PlatformWindow::Create(nullptr);
     auto window = std::make_unique<Window>(std::move(platformWindow));
 
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     taskExecutor->InitPlatformThread();
     taskExecutor->InitJsThread(true);
     gTaskExecutor = taskExecutor;
@@ -74,7 +74,7 @@ HWTEST_F(PluginSubContainerTest, PluginSubContainerDestroyTest001, TestSize.Leve
     auto pipelineContext = PluginSubContainerTest::GetPipelineContext(fakeFrontend);
     PluginSubContainer pluginSubContainer(pipelineContext);
     pluginSubContainer.pipelineContext_ = pipelineContext;
-    pluginSubContainer.taskExecutor_ = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    pluginSubContainer.taskExecutor_ = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginSubContainer.assetManager_ = Referenced::MakeRefPtr<MockAssetManager>();
     EXPECT_TRUE(pluginSubContainer.pipelineContext_ != nullptr);
     EXPECT_TRUE(pluginSubContainer.taskExecutor_ != nullptr);
@@ -102,7 +102,7 @@ HWTEST_F(PluginSubContainerTest, PluginSubContainerGetTaskExecutorTest001, TestS
     auto fakeFrontend = Frontend::CreateDefault();
     auto pipelineContext = PluginSubContainerTest::GetPipelineContext(fakeFrontend);
     PluginSubContainer pluginSubContainer(pipelineContext);
-    pluginSubContainer.taskExecutor_ = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    pluginSubContainer.taskExecutor_ = Referenced::MakeRefPtr<TaskExecutorImpl>();
 
     /**
      * @tc.steps: step2. Get Task Executor.

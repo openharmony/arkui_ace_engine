@@ -318,6 +318,14 @@ void ListLayoutAlgorithm::HandleJumpAuto(LayoutWrapper* layoutWrapper,
                 BeginLayoutForward(startPos, layoutWrapper);
             }
         }
+    } else if (jumpIndexInGroup_) {
+        if (scrollAutoType_ == ScrollAutoType::START) {
+            scrollAlign_ = ScrollAlign::START;
+            HandleJumpStart(layoutWrapper);
+        } else if (scrollAutoType_ == ScrollAutoType::END) {
+            scrollAlign_ = ScrollAlign::END;
+            HandleJumpEnd(layoutWrapper);
+        }
     } else if (jumpIndex <= tempStartIndex) {
         auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
         SetListItemGroupParam(wrapper, contentMainSize_, false, listLayoutProperty, false);
@@ -436,35 +444,151 @@ void ListLayoutAlgorithm::HandleJumpEnd(LayoutWrapper* layoutWrapper)
     }
 }
 
-bool ListLayoutAlgorithm::NoNeedJump(LayoutWrapper* layoutWrapper, float startPos, float endPos,
-    int32_t startIndex, int32_t endIndex)
+bool ListLayoutAlgorithm::CheckNoNeedJumpListItem(LayoutWrapper* layoutWrapper,
+    float startPos, float endPos, int32_t startIndex, int32_t endIndex, int32_t jumpIndex)
 {
-    int32_t jumpIndex = 0;
-    if (jumpIndex_.has_value()) {
-        jumpIndex = jumpIndex_.value();
-    } else {
-        jumpIndex = targetIndex_.value();
-    }
+    int32_t tempJumpIndex = jumpIndex;
     int32_t tempStartIndex = startIndex;
     int32_t tempEndIndex = endIndex;
     if (GreatNotEqual(GetLanes(), 1)) {
-        jumpIndex = GetLanesFloor(layoutWrapper, jumpIndex);
+        tempJumpIndex = GetLanesFloor(layoutWrapper, jumpIndex);
         tempStartIndex = GetLanesFloor(layoutWrapper, tempStartIndex);
         tempEndIndex = GetLanesFloor(layoutWrapper, tempEndIndex);
     }
-    if (jumpIndex > tempStartIndex && jumpIndex < tempEndIndex) {
+    if (tempJumpIndex > tempStartIndex && tempJumpIndex < tempEndIndex) {
         return true;
     }
-    if (jumpIndex == tempStartIndex && jumpIndex == tempEndIndex) {
+    if (tempJumpIndex == tempStartIndex && tempJumpIndex == tempEndIndex) {
         return true;
     }
-    if ((jumpIndex == tempStartIndex) && GreatOrEqual(startPos, 0.0f)) {
+    if ((tempJumpIndex == tempStartIndex) && GreatOrEqual(startPos, 0.0f)) {
         return true;
     }
-    if ((jumpIndex == tempEndIndex) && LessOrEqual(endPos, contentMainSize_)) {
+    if ((tempJumpIndex == tempEndIndex) && LessOrEqual(endPos, contentMainSize_)) {
         return true;
+    }
+    return false;
+}
+
+bool ListLayoutAlgorithm::CheckNoNeedJumpListItemGroup(LayoutWrapper* layoutWrapper,
+    int32_t startIndex, int32_t endIndex, int32_t jumpIndex, float jumpIndexStartPos)
+{
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(jumpIndex);
+    CHECK_NULL_RETURN(wrapper, true);
+    if (wrapper->GetHostTag() != V2::LIST_ITEM_GROUP_ETS_TAG) {
+        return true;
+    }
+    int32_t jumpIndexInGroup = 0;
+    if (jumpIndexInGroup_.has_value()) {
+        jumpIndexInGroup = jumpIndexInGroup_.value();
+    } else {
+        return false;
     }
 
+    auto layoutAlgorithm = wrapper->GetLayoutAlgorithm();
+    CHECK_NULL_RETURN(layoutAlgorithm, true);
+    auto groupLayoutAlgorithm =
+        AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithm->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(groupLayoutAlgorithm, true);
+    auto groupItemPosition = groupLayoutAlgorithm->GetItemPosition();
+    auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(listLayoutProperty, false);
+
+    if (jumpIndex >= startIndex && jumpIndex <= endIndex) {
+        auto it = groupItemPosition.find(jumpIndexInGroup);
+        if (it != groupItemPosition.end()) {
+            auto topPos = jumpIndexStartPos + it->second.first;
+            auto bottomPos = jumpIndexStartPos + it->second.second;
+            if (JudgeInOfScreenScrollAutoType(wrapper, listLayoutProperty, topPos, bottomPos)) {
+                return true;
+            }
+        } else if (groupItemPosition.size() > 0) {
+            JudgeOutOfScreenScrollAutoType(wrapper, listLayoutProperty, jumpIndexInGroup, jumpIndexInGroup,
+                groupItemPosition.begin()->first, groupItemPosition.rbegin()->first);
+        } else {
+            scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
+            return true;
+        }
+    } else  {
+        JudgeOutOfScreenScrollAutoType(wrapper, listLayoutProperty, jumpIndexInGroup, jumpIndex,
+            startIndex, endIndex);
+    }
+    return false;
+}
+
+bool ListLayoutAlgorithm::JudgeInOfScreenScrollAutoType(const RefPtr<LayoutWrapper>& layoutWrapper,
+    const RefPtr<ListLayoutProperty>& layoutProperty, float topPos, float bottomPos)
+{
+    auto stickyStyle = layoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
+
+    auto groupNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(groupNode, true);
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(groupPattern, true);
+    
+    float headerMainSize = 0.0f;
+    float footerMainSize = 0.0f;
+    if (stickyStyle == V2::StickyStyle::BOTH || stickyStyle == V2::StickyStyle::HEADER) {
+        headerMainSize = groupPattern->GetHeaderMainSize();
+    } else if (stickyStyle == V2::StickyStyle::BOTH || stickyStyle == V2::StickyStyle::FOOTER) {
+        footerMainSize = groupPattern->GetFooterMainSize();
+    }
+
+    if (GreatOrEqual(topPos, startMainPos_ + headerMainSize) &&
+        LessOrEqual(bottomPos, endMainPos_ - footerMainSize)) {
+        scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
+        return true;
+    } else if (NearEqual(topPos, startMainPos_ + headerMainSize) ||
+        NearEqual(bottomPos, endMainPos_ - footerMainSize)) {
+        scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
+        return true;
+    } else if (GreatOrEqual(std::abs(topPos - startMainPos_), std::abs(endMainPos_ - bottomPos))) {
+        scrollAutoType_ = ScrollAutoType::END;
+    } else if (LessNotEqual(std::abs(topPos - startMainPos_), std::abs(endMainPos_ - bottomPos))) {
+        scrollAutoType_ = ScrollAutoType::START;
+    }
+
+    return false;
+}
+
+void ListLayoutAlgorithm::JudgeOutOfScreenScrollAutoType(const RefPtr<LayoutWrapper>& layoutWrapper,
+    const RefPtr<ListLayoutProperty>& layoutProperty, int32_t indexInGroup, int32_t judgeIndex,
+    int32_t startIndex, int32_t endIndex)
+{
+    SetListItemGroupParam(layoutWrapper, 0.0f, true, layoutProperty, false);
+    layoutWrapper->Measure(childLayoutConstraint_);
+    auto jumpItemHeight = GetListGroupItemHeight(layoutWrapper, indexInGroup);
+    jumpIndexInGroup_ = indexInGroup;
+
+    if (judgeIndex < startIndex) {
+        if (jumpItemHeight > contentMainSize_) {
+            scrollAutoType_ = ScrollAutoType::END;
+        } else {
+            scrollAutoType_ = ScrollAutoType::START;
+        }
+    } else if (judgeIndex > endIndex) {
+        if (jumpItemHeight > contentMainSize_) {
+            scrollAutoType_ = ScrollAutoType::START;
+        } else {
+            scrollAutoType_ = ScrollAutoType::END;
+        }
+    }
+}
+
+bool ListLayoutAlgorithm::NoNeedJump(LayoutWrapper* layoutWrapper, float startPos, float endPos,
+    int32_t startIndex, int32_t endIndex, int32_t jumpIndex, float jumpIndexStartPos)
+{
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(jumpIndex);
+    CHECK_NULL_RETURN(wrapper, true);
+    if (wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
+        if (CheckNoNeedJumpListItemGroup(layoutWrapper, startIndex, endIndex, jumpIndex, jumpIndexStartPos)) {
+            return true;
+        }
+    } else {
+        if (CheckNoNeedJumpListItem(layoutWrapper, startPos, endPos, startIndex, endIndex, jumpIndex)) {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -549,7 +673,7 @@ bool ListLayoutAlgorithm::CheckJumpValid(LayoutWrapper* layoutWrapper)
         auto groupItemCount = groupWrapper->GetTotalChildCount() - groupPattern->GetItemStartIndex();
 
         if (jumpIndexInGroup_.value() == LAST_ITEM) {
-            jumpIndex_ = groupItemCount - 1;
+            jumpIndexInGroup_ = groupItemCount - 1;
         } else if ((jumpIndexInGroup_.value() < 0) || (jumpIndexInGroup_.value() >= groupItemCount)) {
             return false;
         }
@@ -565,12 +689,27 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     float midItemMidPos = 0.0f;
     float startPos = 0.0f;
     float endPos = 0.0f;
+    float jumpIndexStartPos = 0.0f;
+    int32_t jumpIndex = 0;
+
+    if ((jumpIndex_ || targetIndex_) && scrollAlign_ == ScrollAlign::AUTO) {
+        if (jumpIndex_.has_value()) {
+            jumpIndex = jumpIndex_.value();
+        } else {
+            jumpIndex = targetIndex_.value();
+        }
+        auto it = itemPosition_.find(jumpIndex);
+        if (it != itemPosition_.end()) {
+            jumpIndexStartPos = it->second.startPos;
+        }
+    }
+
     if (jumpIndex_) {
         if (!CheckJumpValid(layoutWrapper)) {
             jumpIndex_.reset();
             jumpIndexInGroup_.reset();
         } else {
-            if (jumpIndex_ && jumpIndexInGroup_) {
+            if (jumpIndex_ && jumpIndexInGroup_ && scrollAlign_ == ScrollAlign::CENTER) {
                 ClearAllItemPosition(layoutWrapper);
             }
         }
@@ -606,8 +745,9 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         layoutWrapper->RemoveAllChildInRenderTree();
     }
     if ((jumpIndex_ || targetIndex_) && scrollAlign_ == ScrollAlign::AUTO &&
-        NoNeedJump(layoutWrapper, startPos, endPos, startIndex, endIndex)) {
+        NoNeedJump(layoutWrapper, startPos, endPos, startIndex, endIndex, jumpIndex, jumpIndexStartPos)) {
         jumpIndex_.reset();
+        jumpIndexInGroup_.reset();
         targetIndex_.reset();
     }
     if (jumpIndex_) {
@@ -630,9 +770,6 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         }
         CalculateEstimateOffset(scrollAlign_);
     } else if (targetIndex_.has_value()) {
-        if (scrollAlign_ == ScrollAlign::AUTO) {
-            HandleJumpAuto(layoutWrapper, startIndex, endIndex, startPos, endPos);
-        }
         if (LessOrEqual(startIndex, targetIndex_.value())) {
             LayoutForward(layoutWrapper, startIndex, startPos);
             if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
@@ -1211,6 +1348,15 @@ ListItemInfo ListLayoutAlgorithm::GetListItemGroupPosition(const RefPtr<LayoutWr
     CHECK_NULL_RETURN(itemGroup, pos);
     auto res = itemGroup->GetItemGroupPosition(index);
     return { res.first, res.second, true };
+}
+
+float ListLayoutAlgorithm::GetListGroupItemHeight(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index)
+{
+    auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm(true);
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, 0.0f);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(itemGroup, 0.0f);
+    return itemGroup->GetItemHeight(index);
 }
 
 void ListLayoutAlgorithm::SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index)

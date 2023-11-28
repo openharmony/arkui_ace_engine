@@ -81,9 +81,9 @@ void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
     // Update child position.
-    auto textNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(textNode);
-    auto textGeoNode = textNode->GetGeometryNode();
+    auto marqueeNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(marqueeNode);
+    auto textGeoNode = marqueeNode->GetGeometryNode();
     CHECK_NULL_VOID(textGeoNode);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         OffsetF translate;

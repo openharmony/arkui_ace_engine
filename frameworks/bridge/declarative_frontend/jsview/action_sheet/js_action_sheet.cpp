@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/models/action_sheet_model_impl.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 
 namespace OHOS::Ace {
@@ -90,10 +91,15 @@ ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
 
     auto actionValue = obj->GetProperty("action");
     if (actionValue->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-        auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc)](const GestureEvent&) {
+        auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc), node = frameNode]
+            (const GestureEvent&) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("SheetInfo.action");
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
             func->ExecuteJS();
         };
         ActionSheetModel::GetInstance()->SetAction(eventFunc, sheetInfo);
@@ -149,10 +155,14 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     // Parse cancel.
     auto cancelValue = obj->GetProperty("cancel");
     if (cancelValue->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto cancelFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(cancelValue));
-        auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
+        auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(cancelFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("ActionSheet.cancel");
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
             func->Execute();
         };
         ActionSheetModel::GetInstance()->SetCancel(eventFunc, properties);
@@ -169,18 +179,26 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
             JSRef<JSVal> actionValue = confirmObj->GetProperty("action");
             // parse confirm action
             if (actionValue->IsFunction()) {
+                WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
                 auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
                 auto gestureEvent = [execCtx = args.GetExecutionContext(),
-                    func = std::move(actionFunc)](GestureEvent&) {
+                    func = std::move(actionFunc), node = frameNode](GestureEvent&) {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                     ACE_SCORING_EVENT("ActionSheet.confirm.action");
+                    auto pipelineContext = PipelineContext::GetCurrentContext();
+                    CHECK_NULL_VOID(pipelineContext);
+                    pipelineContext->UpdateCurrentActiveNode(node);
                     LOGD("actionSheet confirm triggered");
                     func->ExecuteJS();
                 };
                 actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-                auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc)]() {
+                auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc),
+                                    node = frameNode]() {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                     ACE_SCORING_EVENT("ActionSheet.confirm.action");
+                    auto pipelineContext = PipelineContext::GetCurrentContext();
+                    CHECK_NULL_VOID(pipelineContext);
+                    pipelineContext->UpdateCurrentActiveNode(node);
                     func->Execute();
                 };
                 ActionSheetModel::GetInstance()->SetConfirm(gestureEvent, eventFunc, buttonInfo, properties);

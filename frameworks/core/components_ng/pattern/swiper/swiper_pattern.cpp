@@ -3386,6 +3386,16 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
         // deny conflicting animation from child
         return { offset, false };
     }
+    // mouse scroll triggers showNext / showPrev instead of updating offset
+    if (source == SCROLL_FROM_AXIS) {
+        auto targetBfr = targetIndex_;
+        (offset > 0) ? ShowPrevious() : ShowNext();
+        if (targetBfr == targetIndex_) {
+            // unchanged targetIndex_ implies Swiper has reached the edge and the mouse scroll isn't consumed.
+            return { offset, true };
+        }
+        return { 0.0f, false };
+    }
     auto parent = parent_.Upgrade();
     if (!parent || !enableNestedScroll_) {
         if (IsOutOfBoundary(offset) && ChildFirst(state)) {

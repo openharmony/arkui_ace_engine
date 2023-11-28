@@ -40,12 +40,10 @@
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
-#include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
-#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
@@ -1406,5 +1404,277 @@ RefPtr<NG::NavigationStack> NavigationModelNG::GetNavigationStack()
 void NavigationModelNG::SetMenuCount(int32_t menuCount)
 {
     return;
+}
+
+void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    navBarLayoutProperty->UpdateHideToolBar(hideToolBar);
+}
+
+void NavigationModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinContentWidth, value, frameNode);
+}
+
+void NavigationModelNG::SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinNavBarWidth, value, frameNode);
+}
+
+void NavigationModelNG::SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MaxNavBarWidth, value, frameNode);
+}
+
+void NavigationModelNG::SetNavBarWidth(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarWidth, value, frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SetUserSetNavBarWidthFlag(true);
+}
+
+void NavigationModelNG::SetNavBarPosition(FrameNode* frameNode, NG::NavBarPosition mode)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        NavigationLayoutProperty, NavBarPosition, static_cast<NG::NavBarPosition>(mode), frameNode);
+}
+
+void NavigationModelNG::SetUsrNavigationMode(FrameNode* frameNode, NavigationMode mode)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, UsrNavigationMode, mode, frameNode);
+}
+
+void NavigationModelNG::SetBackButtonIcon(
+    FrameNode* frameNode, const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    ImageSourceInfo imageSourceInfo(src);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, NoPixMap, noPixMap, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, ImageSource, imageSourceInfo, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, PixelMap, pixMap, frameNode);
+    titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
+    titleBarLayoutProperty->UpdateNoPixMap(noPixMap);
+    titleBarLayoutProperty->UpdatePixelMap(pixMap);
+    titleBarNode->MarkModifyDone();
+}
+
+void NavigationModelNG::SetHideNavBar(FrameNode* frameNode, bool hideNavBar)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(navigationLayoutProperty);
+
+    auto lastHideNavBarValue = navigationLayoutProperty->GetHideNavBar();
+    if (lastHideNavBarValue.has_value()) {
+        pattern->SetNavBarVisibilityChange(hideNavBar != lastHideNavBarValue.value());
+    } else {
+        pattern->SetNavBarVisibilityChange(true);
+    }
+
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideNavBar, hideNavBar, frameNode);
+}
+
+void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    navBarLayoutProperty->UpdateHideTitleBar(hideTitleBar);
+}
+
+void NavigationModelNG::SetSubtitle(FrameNode* frameNode, const std::string& subtitle)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    do {
+        if (!navBarNode->GetSubtitle()) {
+            navBarNode->UpdateSubtitleNodeOperation(ChildNodeOperation::ADD);
+            break;
+        }
+        auto subtitleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetSubtitle());
+        if (!subtitleNode) {
+            navBarNode->UpdateSubtitleNodeOperation(ChildNodeOperation::REPLACE);
+            break;
+        }
+        auto renderContext = subtitleNode->GetRenderContext();
+        if (renderContext) {
+            renderContext->UpdateOpacity(1.0);
+        }
+        auto subtitleProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
+        if (!subtitleProperty) {
+            navBarNode->UpdateSubtitleNodeOperation(ChildNodeOperation::REPLACE);
+            break;
+        }
+        if (subtitleProperty->GetContentValue() == subtitle) {
+            navBarNode->UpdateSubtitleNodeOperation(ChildNodeOperation::NONE);
+            return;
+        }
+        subtitleProperty->UpdateContent(subtitle);
+        navBarNode->UpdateSubtitleNodeOperation(ChildNodeOperation::NONE);
+        navBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    } while (false);
+    int32_t subtitleNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto subtitleNode =
+        FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, subtitleNodeId, AceType::MakeRefPtr<TextPattern>());
+    auto textLayoutProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto theme = NavigationGetTheme();
+    textLayoutProperty->UpdateContent(subtitle);
+    textLayoutProperty->UpdateFontSize(theme->GetSubTitleFontSize());
+    textLayoutProperty->UpdateTextColor(theme->GetSubTitleColor());
+    textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
+    textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    navBarNode->SetSubtitle(subtitleNode);
+}
+
+void NavigationModelNG::SetHideBackButton(FrameNode* frameNode, bool hideBackButton)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    navBarLayoutProperty->UpdateHideBackButton(hideBackButton);
+}
+
+void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    bool needAddBackButton = false;
+    bool needRemoveBackButton = false;
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    const auto& titleHeightProperty = titleBarLayoutProperty->GetTitleHeight();
+    if (titleHeightProperty.has_value()) {
+        mode = NavigationTitleMode::MINI;
+    }
+
+    do {
+        // add back button if current mode is mini and one of the following condition:
+        // first create or not first create but previous mode is not mini
+        if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI &&
+            mode == NavigationTitleMode::MINI && !titleHeightProperty.has_value()) {
+            needAddBackButton = true;
+            break;
+        }
+        // remove back button if current mode is not mini and previous mode is mini
+        if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI &&
+            mode != NavigationTitleMode::MINI) {
+            needRemoveBackButton = true;
+            break;
+        }
+    } while (false);
+    navBarLayoutProperty->UpdateTitleMode(static_cast<NG::NavigationTitleMode>(mode));
+    if (needAddBackButton) {
+        PutComponentInsideNavigator(navigationGroupNode, navBarNode);
+        return;
+    }
+    if (needRemoveBackButton) {
+        navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::REMOVE);
+    }
+}
+
+void NavigationModelNG::PutComponentInsideNavigator(
+    NavigationGroupNode* navigationGroupNode, const RefPtr<NavBarNode>& navBarNode)
+{
+    // put component inside navigator pattern to trigger back navigation
+    auto navigator = FrameNode::CreateFrameNode(
+        V2::NAVIGATOR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavigatorPattern>());
+    auto hub = navigator->GetEventHub<NavigatorEventHub>();
+    CHECK_NULL_VOID(hub);
+    hub->SetType(NavigatorType::BACK);
+    navigator->MarkModifyDone();
+    auto backButtonNode = FrameNode::CreateFrameNode(
+        V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    CHECK_NULL_VOID(backButtonNode);
+    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(backButtonLayoutProperty);
+    backButtonLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
+    backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
+    backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
+    backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto renderContext = backButtonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto eventHub = backButtonNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    PaddingProperty padding;
+    padding.left = CalcLength(BUTTON_PADDING);
+    padding.right = CalcLength(BUTTON_PADDING);
+    padding.top = CalcLength(BUTTON_PADDING);
+    padding.bottom = CalcLength(BUTTON_PADDING);
+    backButtonLayoutProperty->UpdatePadding(padding);
+    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_VOID(backButtonImageNode);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(theme->GetBackResourceId());
+    auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(backButtonImageLayoutProperty);
+    auto navigationEventHub = navigationGroupNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(navigationEventHub);
+    if (!navigationEventHub->IsEnabled()) {
+        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+    } else {
+        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor());
+    }
+    backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    backButtonImageNode->MountToParent(backButtonNode);
+    backButtonImageNode->MarkModifyDone();
+    backButtonNode->MountToParent(navigator);
+    backButtonNode->MarkModifyDone();
+    auto hasBackButton = navBarNode->GetBackButton();
+    if (hasBackButton) {
+        hasBackButton->Clean();
+    }
+    navBarNode->SetBackButton(navigator);
+    navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::ADD);
 }
 } // namespace OHOS::Ace::NG

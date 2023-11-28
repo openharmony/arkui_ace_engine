@@ -36,6 +36,8 @@ public:
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;
     void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) override;
 
+    static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
+
 private:
     void SetDraggable(bool draggable);
 };

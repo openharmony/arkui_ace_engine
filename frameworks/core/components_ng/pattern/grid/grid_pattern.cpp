@@ -273,15 +273,6 @@ void GridPattern::FireOnScrollStart()
     onScrollStart();
 }
 
-bool GridPattern::OnScrollCallback(float offset, int32_t source)
-{
-    if (source == SCROLL_FROM_START) {
-        FireOnScrollStart();
-        return true;
-    }
-    return ScrollablePattern::OnScrollCallback(offset, source);
-}
-
 SizeF GridPattern::GetContentSize() const
 {
     auto host = GetHost();
@@ -576,11 +567,6 @@ void GridPattern::OnScrollEndCallback()
     SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
-}
-
-void GridPattern::OnScrollStartCallback()
-{
-    FireOnScrollStart();
 }
 
 std::pair<bool, bool> GridPattern::IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex)
@@ -1355,11 +1341,7 @@ void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     if (!isConfigScrollable_) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     ScrollablePattern::AnimateTo(position, duration, curve, smooth);
-    FireOnScrollStart();
 }
 
 void GridPattern::ScrollTo(float position)

@@ -340,11 +340,19 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
         if (isForm_) {
             TextClockFormatElement tempFormatElement;
             std::vector<std::string> formSplitter = { "h", ":", "m" };
-            for (auto i = 0; i < formSplitter.size(); i++) {
-                tempFormatElement.formatElement = formSplitter[i];
-                tempFormatElement.formatElementNum = formSplitter[i].length();
-                formatElementMap[i] = tempFormatElement;
-            }
+            formatElementMap.clear();
+            tempFormatElement.formatElement = formSplitter[0];
+            tempFormatElement.elementKey = 'h';
+            tempFormatElement.formatElementNum = (int32_t)(TextClockElementIndex::CUR_HOUR_INDEX);
+            formatElementMap[0] = tempFormatElement;
+            tempFormatElement.formatElement = formSplitter[1];
+            tempFormatElement.elementKey = ':';
+            tempFormatElement.formatElementNum = (int32_t)(TextClockElementIndex::CUR_MAX_INDEX);
+            formatElementMap[1] = tempFormatElement;
+            tempFormatElement.formatElement = formSplitter[2];
+            tempFormatElement.elementKey = 'm';
+            tempFormatElement.formatElementNum = (int32_t)(TextClockElementIndex::CUR_MINUTE_INDEX);
+            formatElementMap[2] = tempFormatElement;
             outputDateTime = SpliceDateTime(curDateTime);
         } else {
             outputDateTime = dateTimeValue;

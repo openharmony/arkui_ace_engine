@@ -108,6 +108,22 @@ public:
     virtual void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) = 0;
     virtual void SetBorderImageGradient(const NG::Gradient& gradient) = 0;
 
+    // outerBorder
+    virtual void SetOuterBorderRadius(const Dimension& value) = 0;
+    virtual void SetOuterBorderRadius(const std::optional<Dimension>& radiusTopLeft,
+        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight) = 0;
+    virtual void SetOuterBorderColor(const Color& value) = 0;
+    virtual void SetOuterBorderColor(const std::optional<Color>& colorLeft, const std::optional<Color>& colorRight,
+        const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) = 0;
+    virtual void SetOuterBorderWidth(const Dimension& value) = 0;
+    virtual void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) = 0;
+    virtual void SetOuterBorderStyle(const BorderStyle& value) = 0;
+    virtual void SetOuterBorderStyle(const std::optional<BorderStyle>& styleLeft,
+        const std::optional<BorderStyle>& styleRight, const std::optional<BorderStyle>& styleTop,
+        const std::optional<BorderStyle>& styleBottom) = 0;
+
     // layout
     virtual void SetLayoutPriority(int32_t priority) = 0;
     virtual void SetLayoutWeight(int32_t value) = 0;
@@ -248,6 +264,7 @@ public:
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
     virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
+    virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;
 
     // obscured
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
