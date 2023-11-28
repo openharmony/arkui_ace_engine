@@ -52,7 +52,6 @@ void LinearSplitModelNG::SetResizeable(FrameNode* frameNode, NG::SplitType split
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Resizeable, resizeable, frameNode);
 }
-
 void LinearSplitModelNG::SetDivider(FrameNode* frameNode, NG::SplitType splitType, const ItemDivider& divider)
 {
     CHECK_NULL_VOID(frameNode);

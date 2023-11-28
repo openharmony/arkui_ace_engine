@@ -26,7 +26,6 @@ public:
     void Create(SplitType splitType) override;
     void SetResizeable(NG::SplitType splitType, bool resizeable) override;
     void SetDivider(NG::SplitType splitType, const NG::ItemDivider& divider) override;
-
     static void SetResizeable(FrameNode* frameNode, NG::SplitType splitType, bool resizeable);
     static void SetDivider(FrameNode* frameNode, NG::SplitType splitType, const NG::ItemDivider& divider);
 };

@@ -48,4 +48,16 @@ void RowModelNG::SetJustifyContent(FlexAlign flexAlign)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign);
 }
+
+void RowModelNG::SetJustifyContent(FrameNode* frameNode, FlexAlign flexAlign)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign, frameNode);
+}
+
+void RowModelNG::SetAlignItems(FrameNode* frameNode, FlexAlign flexAlign)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, flexAlign, frameNode);
+}
 } // namespace OHOS::Ace::NG
