@@ -588,6 +588,30 @@ struct ArkUIColumnSplitModifierAPI {
     void (*ResetColumnSplitResizeable)(NodeHandle node);
 };
 
+struct ArkUISpanModifierAPI {
+    void (*SetSpanTextCase)(NodeHandle node, int32_t value);
+    void (*ResetSpanTextCase)(NodeHandle node);
+    void (*SetSpanFontWeight)(NodeHandle node, const char* value);
+    void (*ResetSpanFontWeight)(NodeHandle node);
+    void (*SetSpanLineHeight)(NodeHandle node, struct StringAndDouble *lienHeight);
+    void (*ReSetSpanLineHeight)(NodeHandle node);
+    void (*SetSpanFontStyle)(NodeHandle node, int32_t fontStyle);
+    void (*ReSetSpanFontStyle)(NodeHandle node);
+    void (*SetSpanFontSize)(NodeHandle node, const double number, const int8_t unit);
+    void (*ResetSpanFontSize)(NodeHandle node);
+    void (*SetSpanFontFamily)(NodeHandle node, const char **fontFamilies, uint32_t length);
+    void (*ResetSpanFontFamily)(NodeHandle node);
+    void (*SetSpanDecoration)(NodeHandle node, const int32_t decoration, const uint32_t color, const uint32_t style);
+    void (*ResetSpanDecoration)(NodeHandle node);
+    void (*SetSpanFontColor)(NodeHandle node, uint32_t textColor);
+    void (*ResetSpanFontColor)(NodeHandle node);
+    void (*SetSpanLetterSpacing)(NodeHandle node, const struct StringAndDouble *letterSpacingValue);
+    void (*ResetSpanLetterSpacing)(NodeHandle node);
+    void (*SetSpanFont)(NodeHandle node, const struct StringAndDouble *size, const char* weight, const char *family,
+        int32_t style);
+    void (*ResetSpanFont)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -620,6 +644,7 @@ struct ArkUINodeAPI {
     ArkUINavRouterModifierAPI (*GetNavRouterModifier)();
     ArkUIPatternLockModifierAPI (*GetPatternLockModifier)();
     ArkUIColumnSplitModifierAPI (*GetColumnSplitModifier)();
+    ArkUISpanModifierAPI (*GetSpanModifier)();
 };
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H
