@@ -213,7 +213,7 @@ class ArkShadow {
             isResource(options.offsetX) || isResource(options.offsetY)) {
             return false;
         }
-        var arkColor = new ArkColor();
+        let arkColor = new ArkColor();
         this.radius = options.radius;
         this.type = options.type;
         if (arkColor.parseColorValue(options.color)) {
@@ -695,6 +695,29 @@ class ArkGridColColumnOption {
             (this.lg === another.lg) && (this.xl === another.xl) && (this.xxl === another.xxl);
     }
 }
+class ArkConstraintSizeOptions {
+    constructor() {
+        this.minWidth = undefined;
+        this.maxWidth = undefined;
+        this.minHeight = undefined;
+        this.maxHeight = undefined;
+    }
+    isEqual(another) {
+        return (this.minWidth === another.minWidth) &&
+            (this.maxWidth === another.maxWidth) &&
+            (this.minHeight === another.minHeight) &&
+            (this.maxHeight === another.maxHeight);
+    }
+}
+class ArkSize {
+    constructor() {
+        this.width = undefined;
+        this.height = undefined;
+    }
+    isEqual(another) {
+        return (this.width === another.width) && (this.height === another.height);
+    }
+}
 class ArkPadding {
     constructor() {
         this.top = undefined;
@@ -717,7 +740,7 @@ class ArkAllowDrop {
         return this.allowDropArray === another.allowDropArray;
     }
 }
-var TabBarMode;
+let TabBarMode;
 (function (TabBarMode) {
     TabBarMode[TabBarMode["FIXED"] = 0] = "FIXED";
     TabBarMode[TabBarMode["SCROLLABLE"] = 1] = "SCROLLABLE";
@@ -729,6 +752,222 @@ class ArkBarMode {
         return value.toLowerCase() == "fixed" ? TabBarMode.FIXED : TabBarMode.FIXED_START;
     }
 }
+class ArkObscured {
+    constructor() {
+        this.reasons = undefined;
+    }
+    parseReasonsArray(reasonObject) {
+        if (Array.isArray(reasonObject)) {
+            for (let i = 0; i < reasonObject.length; i++) {
+                this.reasons.push(reasonObject[i]);
+            }
+            return true;
+        }
+        return false;
+    }
+    isEqual(another) {
+        return (this.reasons === another.reasons);
+    }
+}
+class ArkResponseRegion {
+    constructor() {
+        this.responseRegion = undefined;
+    }
+    isObject(region) {
+        return region !== null && !Array.isArray(region) &&
+            typeof region === 'object';
+    }
+    parseRegionValue(value) {
+        if (Array.isArray(value)) {
+            return this.parseArrayList(value);
+        }
+        else if (this.isObject(value)) {
+            return this.parseArray(value);
+        }
+        else if (value === undefined) {
+            this.responseRegion = [];
+            return true;
+        }
+        return false;
+    }
+    parseArray(regionObject) {
+        if (this.isObject(regionObject)) {
+            let x = regionObject["x"].toString();
+            let y = regionObject["y"].toString();
+            let width = regionObject["width"].toString();
+            let height = regionObject["height"].toString();
+            this.responseRegion.push(x);
+            this.responseRegion.push(y);
+            this.responseRegion.push(width);
+            this.responseRegion.push(height);
+            return true;
+        }
+        return false;
+    }
+    parseArrayList(regionObject) {
+        if (Array.isArray(regionObject)) {
+            for (let i = 0; i < regionObject.length; i++) {
+                this.parseArray(regionObject[i]);
+            }
+            return true;
+        }
+        return false;
+    }
+    isEqual(another) {
+        return (this.responseRegion === another.responseRegion);
+    }
+}
+class ArkAlignRules {
+    constructor() {
+        this.left = undefined;
+        this.middle = undefined;
+        this.right = undefined;
+        this.top = undefined;
+        this.center = undefined;
+        this.bottom = undefined;
+    }
+    isEqual(another) {
+        return (this.left === another.left &&
+            this.middle === another.middle &&
+            this.right === another.right &&
+            this.top === another.top &&
+            this.center === another.center &&
+            this.bottom === another.bottom);
+    }
+}
+class ArkSafeAreaExpandOpts {
+    constructor() {
+        this.type = undefined;
+        this.edges = undefined;
+    }
+    isEqual(another) {
+        return false;
+    }
+}
+class ArkSideBarDividerStyle {
+    constructor() {
+        this.startMargin = 0;
+        this.endMargin = 0;
+    }
+    isEqual(another) {
+        return (this.strokeWidth === another.strokeWidth) && (this.color === another.color) && (this.startMargin === another.startMargin) && (this.endMargin === another.endMargin);
+    }
+}
+class ArkColumnSplitDividerStyle {
+    constructor() {
+        this.startMargin = '0';
+        this.endMargin = '0';
+    }
+    isEqual(another) {
+        return false;
+    }
+}
+class ArkButtonStyle {
+    constructor() {
+        this.left = 16;
+        this.top = 48;
+        this.width = 24;
+        this.height = 24;
+        this.icons = {
+            shown: undefined,
+            hidden: undefined,
+            switching: undefined
+        };
+    }
+    isEqual(another) {
+        return (this.left === another.left) && (this.top === another.top) && (this.width === another.width)
+            && (this.height === another.height) && (this.icons === another.icons);
+    }
+}
+class ArkShadowInfoToArray {
+    constructor() {
+        this.radius = [];
+        this.color = [];
+        this.offsetX = [];
+        this.offsetX = [];
+        this.offsetY = [];
+        this.fill = [];
+    }
+    isEqual(another) {
+        return (this.radius === another.radius) && (this.color === another.color) && (this.offsetX === another.offsetX) && (this.offsetY === another.offsetY) && (this.fill === another.fill);
+    }
+}
+class ArkPasswordIcon {
+    constructor() {
+        this.onIconSrc = undefined;
+        this.offIconSrc = undefined;
+    }
+    isEqual(another) {
+        return (this.onIconSrc === another.onIconSrc) &&
+            (this.offIconSrc === another.offIconSrc);
+    }
+}
+class ArkCaretStyle {
+    constructor() {
+        this.width = undefined;
+        this.color = undefined;
+    }
+    isEqual(another) {
+        return (this.width === another.width) &&
+            (this.color === another.color);
+    }
+}
+class ArkIconOptions {
+    constructor() {
+        this.size = undefined;
+        this.color = undefined;
+        this.src = undefined;
+    }
+    isEqual(another) {
+        return (this.size === another.color) &&
+            (this.color === another.color) &&
+            (this.src === another.src);
+    }
+}
+class ArkSearchButton {
+    constructor() {
+        this.value = undefined;
+        this.fontSize = undefined;
+        this.fontColor = undefined;
+    }
+    isEqual(another) {
+        return (this.value === another.value) &&
+            (this.fontSize === another.fontSize) &&
+            (this.fontColor === another.fontColor);
+    }
+}
+class ArkCancelButton {
+    constructor() {
+        this.style = undefined;
+        this.color = undefined;
+        this.size = undefined;
+        this.src = undefined;
+    }
+    isEqual(another) {
+        return (this.style === another.style) &&
+            (this.color === another.color) &&
+            (this.size === another.size) &&
+            (this.src === another.src);
+    }
+}
+class ArkImageFrameInfoToArray {
+    constructor() {
+        this.arrSrc = [];
+        this.arrWidth = [];
+        this.arrHeight = [];
+        this.arrTop = [];
+        this.arrLeft = [];
+        this.arrDuration = [];
+    }
+    isEqual(another) {
+        return (this.arrSrc.toString() === another.arrSrc.toString()) &&
+            (this.arrWidth.toString() === another.arrWidth.toString()) &&
+            (this.arrHeight.toString() === another.arrHeight.toString()) &&
+            (this.arrTop.toString() === another.arrTop.toString()) &&
+            (this.arrLeft.toString() === another.arrLeft.toString()) &&
+            (this.arrDuration.toString() === another.arrDuration.toString());
+    }
+}
 /// <reference path="./import.ts" />
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function GetUINativeModule() {
@@ -738,7 +977,7 @@ function GetUINativeModule() {
     return arkUINativeModule;
 }
 function isResource(variable) {
-    var _a;
+    let _a;
     return ((_a = variable) === null || _a === void 0 ? void 0 : _a.bundleName) !== undefined;
 }
 function isResourceEqual(stageValue, value) {
@@ -792,7 +1031,8 @@ class ModifierWithKey {
         this.stageValue = value;
     }
     applyStage(node) {
-        if (this.stageValue === this.value) {
+        if (this.stageValue === undefined) {  
+            this.value = this.stageValue;
             this.applyPeer(node, true);
             return true;
         }
@@ -810,14 +1050,7 @@ class ModifierWithKey {
         }
         if (different) {
             this.value = this.stageValue;
-            this.applyPeer(node, false);
-            if (this.stageValue === undefined) {
-                this.applyPeer(node, true);
-            }
-            else {
-                this.value = this.stageValue;
-                this.applyPeer(node, false);
-            }
+            this.applyPeer(node, false)
         }
         this.stageValue = undefined;
         return false;
@@ -907,7 +1140,8 @@ class BorderColorModifier extends ModifierWithKey {
             GetUINativeModule().common.resetBorderColor(node);
         }
         else {
-            if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+            const valueType = typeof this.value;
+            if (valueType === "number" || valueType === "string" || isResource(this.value)) {
                 GetUINativeModule().common.setBorderColor(node, this.value, this.value, this.value, this.value);
             }
             else {
@@ -1528,9 +1762,85 @@ class AccessibilityDescriptionModifier extends Modifier {
     }
 }
 AccessibilityDescriptionModifier.identity = Symbol("accessibilityDescription");
+class DirectionModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetDirection(node);
+        }
+        else {
+            GetUINativeModule().common.setDirection(node, this.value);
+        }
+    }
+}
+DirectionModifier.identity = Symbol('direction');
+class AlignRulesModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetAlignRules(node);
+        }
+        else {
+            GetUINativeModule().common.setAlignRules(node, this.value.left, this.value.middle, this.value.right, this.value.top, this.value.center, this.value.bottom);
+        }
+    }
+}
+AlignRulesModifier.identity = Symbol('alignRules');
+class ExpandSafeAreaModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetExpandSafeArea(node);
+        }
+        else {
+            GetUINativeModule().common.setExpandSafeArea(node, this.value.type, this.value.edges);
+        }
+    }
+}
+ExpandSafeAreaModifier.identity = Symbol('expandSafeArea');
+class GridSpanModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetGridSpan(node);
+        }
+        else {
+            GetUINativeModule().common.setGridSpan(node, this.value);
+        }
+    }
+}
+GridSpanModifier.identity = Symbol('gridSpan');
+class GridOffsetModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetGridOffset(node);
+        }
+        else {
+            GetUINativeModule().common.setGridOffset(node, this.value);
+        }
+    }
+}
+GridOffsetModifier.identity = Symbol('gridOffset');
+class AlignSelfModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetAlignSelf(node);
+        }
+        else {
+            GetUINativeModule().common.setAlignSelf(node, this.value);
+        }
+    }
+}
+AlignSelfModifier.identity = Symbol('alignSelf');
+class SizeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetSize(node);
+        }
+        else {
+            GetUINativeModule().common.setSize(node, this.value.width, this.value.height);
+        }
+    }
+}
+SizeModifier.identity = Symbol('size');
 class DisplayPriorityModifier extends Modifier {
     applyPeer(node, reset) {
-        //console.log('DisplayPriorityModifier reset = ' + reset);
         if (reset) {
             GetUINativeModule().common.resetDisplayPriority(node);
         }
@@ -1540,6 +1850,149 @@ class DisplayPriorityModifier extends Modifier {
     }
 }
 DisplayPriorityModifier.identity = Symbol('displayPriority');
+class IDModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetID(node);
+        }
+        else {
+            GetUINativeModule().common.setID(node, this.value);
+        }
+    }
+}
+IDModifier.identity = Symbol("id");
+class KeyModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetKey(node);
+        }
+        else {
+            GetUINativeModule().common.setKey(node, this.value);
+        }
+    }
+}
+KeyModifier.identity = Symbol("key");
+class RestoreIdModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetRestoreId(node);
+        }
+        else {
+            GetUINativeModule().common.setRestoreId(node, this.value);
+        }
+    }
+}
+RestoreIdModifier.identity = Symbol("restoreId");
+class TabIndexModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetTabIndex(node);
+        }
+        else {
+            GetUINativeModule().common.setTabIndex(node, this.value);
+        }
+    }
+}
+TabIndexModifier.identity = Symbol("tabIndex");
+class ObscuredModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetObscured(node);
+        }
+        else {
+            GetUINativeModule().common.setObscured(node, this.value.reasons);
+        }
+    }
+}
+ObscuredModifier.identity = Symbol("obscured");
+class MouseResponseRegionModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetMouseResponseRegion(node);
+        }
+        else {
+            GetUINativeModule().common.setMouseResponseRegion(node, this.value.responseRegion);
+        }
+    }
+}
+MouseResponseRegionModifier.identity = Symbol("mouseResponseRegion");
+class ResponseRegionModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetResponseRegion(node);
+        }
+        else {
+            GetUINativeModule().common.setResponseRegion(node, this.value.responseRegion);
+        }
+    }
+}
+ResponseRegionModifier.identity = Symbol("responseRegion");
+class FlexGrowModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetFlexGrow(node);
+        }
+        else {
+            GetUINativeModule().common.setFlexGrow(node, this.value);
+        }
+    }
+}
+FlexGrowModifier.identity = Symbol('flexGrow');
+class FlexShrinkModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetFlexShrink(node);
+        }
+        else {
+            GetUINativeModule().common.setFlexShrink(node, this.value);
+        }
+    }
+}
+FlexShrinkModifier.identity = Symbol('flexShrink');
+class AspectRatioModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetAspectRatio(node);
+        }
+        else {
+            GetUINativeModule().common.setAspectRatio(node, this.value);
+        }
+    }
+}
+AspectRatioModifier.identity = Symbol('aspectRatio');
+class ConstraintSizeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetConstraintSize(node);
+        }
+        else {
+            GetUINativeModule().common.setConstraintSize(node, this.value.minWidth, this.value.maxWidth, this.value.minHeight, this.value.maxHeight);
+        }
+    }
+}
+ConstraintSizeModifier.identity = Symbol('constraintSize');
+class FlexBasisModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetFlexBasis(node);
+        }
+        else {
+            GetUINativeModule().common.setFlexBasis(node, this.value);
+        }
+    }
+}
+FlexBasisModifier.identity = Symbol('flexBasis');
+class LayoutWeightModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetLayoutWeight(node);
+        }
+        else {
+            GetUINativeModule().common.setLayoutWeight(node, this.value);
+        }
+    }
+}
+LayoutWeightModifier.identity = Symbol('layoutWeight');
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 const isString = (val) => typeof val === 'string';
 const isNumber = (val) => typeof val === 'number';
@@ -1552,7 +2005,7 @@ const isFunction = (val) => typeof val === 'function';
 const isLengthType = (val) => typeof val === 'string' || typeof val === 'number';
 const lessThenFunction = (val1, val2) => (val1 - val2) < 0.001;
 function CheckJSCallbackInfo(value, checklist) {
-    var typeVerified = false;
+    let typeVerified = false;
     checklist.forEach(function (infoType) {
         switch (infoType) {
             case JSCallbackInfoType.STRING:
@@ -1648,19 +2101,105 @@ class ArkComponent {
         return this;
     }
     expandSafeArea(types, edges) {
-        throw new Error("Method not implemented.");
+        let opts = new ArkSafeAreaExpandOpts();
+        opts.type = SAFE_AREA_TYPE_ALL;
+        opts.edges = SAFE_AREA_EDGE_ALL;
+        if (types && types.length > 0) {
+            let safeAreaType = '';
+            for (let param of types) {
+                if (!isNumber(param) || param >= SAFE_AREA_TYPE_LIMIT) {
+                    safeAreaType = SAFE_AREA_TYPE_ALL;
+                    break;
+                }
+                if (safeAreaType) {
+                    safeAreaType += '|';
+                }
+                else {
+                    safeAreaType += param.toString();
+                }
+            }
+            opts.type = safeAreaType;
+        }
+        if (edges && edges.length > 0) {
+            let safeAreaEdge = '';
+            for (let param of edges) {
+                if (!isNumber(param) || param >= SAFE_AREA_EDGE_LIMIT) {
+                    safeAreaEdge = SAFE_AREA_EDGE_ALL;
+                    break;
+                }
+                if (safeAreaEdge) {
+                    safeAreaEdge += '|';
+                }
+                else {
+                    safeAreaEdge += param.toString();
+                }
+            }
+            opts.edges = safeAreaEdge;
+        }
+        if (opts.type === SAFE_AREA_TYPE_ALL && opts.edges === SAFE_AREA_EDGE_ALL) {
+            // modifier(this._modifiers, ExpandSafeAreaModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, ExpandSafeAreaModifier, opts);
+        }
+        return this;
     }
     responseRegion(value) {
-        throw new Error("Method not implemented.");
+        let arkResponseRegion = new ArkResponseRegion();
+        if (arkResponseRegion.parseRegionValue(value)) {
+            modifier(this._modifiers, ResponseRegionModifier, arkResponseRegion);
+        }
+        else {
+            modifier(this._modifiers, ResponseRegionModifier, undefined);
+        }
+        return this;
     }
     mouseResponseRegion(value) {
-        throw new Error("Method not implemented.");
+        let arkMouseResponseRegion = new ArkResponseRegion();
+        if (arkMouseResponseRegion.parseRegionValue(value)) {
+            modifier(this._modifiers, MouseResponseRegionModifier, arkMouseResponseRegion);
+        }
+        else {
+            modifier(this._modifiers, MouseResponseRegionModifier, undefined);
+        }
+        return this;
     }
     size(value) {
-        throw new Error("Method not implemented.");
+        let arkValue = new ArkSize();
+        if (!value || (!isLengthType(value.width) && !isLengthType(value.height))) {
+            modifier(this._modifiers, SizeModifier, undefined);
+        }
+        if (value.width && isLengthType(value.width)) {
+            arkValue.width = value.width;
+        }
+        if (value.height && isLengthType(value.height)) {
+            arkValue.height = value.height;
+        }
+        modifier(this._modifiers, SizeModifier, arkValue);
+        return this;
     }
     constraintSize(value) {
-        throw new Error("Method not implemented.");
+        let arkValue = new ArkConstraintSizeOptions();
+        if (!value ||
+            (!isLengthType(value.minWidth) && !isLengthType(value.maxWidth) &&
+                !isLengthType(value.minHeight) && !isLengthType(value.maxHeight))) {
+            modifier(this._modifiers, ConstraintSizeModifier, undefined);
+            return this;
+        }
+        if (value.minWidth && isLengthType(value.minWidth)) {
+            arkValue.minWidth = value === null || value === void 0 ? void 0 : value.minWidth;
+        }
+        if (value.maxWidth && isLengthType(value.maxWidth)) {
+            arkValue.maxWidth = value === null || value === void 0 ? void 0 : value.maxWidth;
+        }
+        if (value.minHeight && isLengthType(value.minHeight)) {
+            arkValue.minHeight = value === null || value === void 0 ? void 0 : value.minHeight;
+        }
+        if (value.maxHeight && isLengthType(value.maxHeight)) {
+            arkValue.maxHeight = value === null || value === void 0 ? void 0 : value.maxHeight;
+        }
+        modifier(this._modifiers, ConstraintSizeModifier, arkValue);
+        return this;
     }
     touchable(value) {
         if (typeof value === 'boolean') {
@@ -1681,7 +2220,16 @@ class ArkComponent {
         return this;
     }
     layoutWeight(value) {
-        throw new Error("Method not implemented.");
+        if (isNumber(value)) {
+            modifier(this._modifiers, LayoutWeightModifier, value);
+        }
+        else if (isString(value) && !isNaN(Number(value))) {
+            modifier(this._modifiers, LayoutWeightModifier, parseInt(value.toString()));
+        }
+        else {
+            modifier(this._modifiers, LayoutWeightModifier, 0);
+        }
+        return this;
     }
     padding(value) {
         let arkValue = new ArkPadding();
@@ -1751,7 +2299,7 @@ class ArkComponent {
         return this;
     }
     backgroundImage(src, repeat) {
-        var arkBackgroundImage = new ArkBackgroundImage();
+        let arkBackgroundImage = new ArkBackgroundImage();
         if (isString(src)) {
             arkBackgroundImage.src = src;
         }
@@ -1762,12 +2310,12 @@ class ArkComponent {
         return this;
     }
     backgroundImageSize(value) {
-        var _a, _b, _c, _d, _e, _f;
+        let _a, _b, _c, _d, _e, _f;
         if (isResource(value) || isUndefined(value)) {
             modifier(this._modifiers, BackgroundImageSizeModifier, undefined);
             return this;
         }
-        var arkBackgroundImageSize = new ArkBackgroundImageSize();
+        let arkBackgroundImageSize = new ArkBackgroundImageSize();
         if (isNumber(value)) {
             arkBackgroundImageSize.imageSize = value;
         }
@@ -1783,12 +2331,12 @@ class ArkComponent {
         return this;
     }
     backgroundImagePosition(value) {
-        var _a, _b, _c, _d, _e, _f;
+        let _a, _b, _c, _d, _e, _f;
         if (isResource(value) || isUndefined(value)) {
             modifier(this._modifiers, BackgroundImagePositionModifier, undefined);
             return this;
         }
-        var arkBackgroundImagePosition = new ArkBackgroundImagePosition();
+        let arkBackgroundImagePosition = new ArkBackgroundImagePosition();
         if (isNumber(value)) {
             arkBackgroundImagePosition.alignment = value;
         }
@@ -1826,12 +2374,12 @@ class ArkComponent {
         return this;
     }
     opacity(value) {
-        var opacityDefault = 0.0;
+        let opacityDefault = 0.0;
         if (isResource(value)) {
             modifier(this._modifiers, OpacityModifier, opacityDefault);
             return this;
         }
-        var checklist = [JSCallbackInfoType.OBJECT, JSCallbackInfoType.NUMBER, JSCallbackInfoType.STRING];
+        let checklist = [JSCallbackInfoType.OBJECT, JSCallbackInfoType.NUMBER, JSCallbackInfoType.STRING];
         if (!CheckJSCallbackInfo(value, checklist)) {
             modifier(this._modifiers, OpacityModifier, 1.0);
         }
@@ -1847,8 +2395,8 @@ class ArkComponent {
         return this;
     }
     border(value) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3;
-        var arkBorder = new ArkBorder();
+        let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3;
+        let arkBorder = new ArkBorder();
         if (!isResource(value === null || value === void 0 ? void 0 : value.width) && !isUndefined(value === null || value === void 0 ? void 0 : value.width) && (value === null || value === void 0 ? void 0 : value.width) !== null) {
             if (isNumber(value.width)) {
                 arkBorder.arkWidth.left = Number(value.width);
@@ -1878,7 +2426,7 @@ class ArkComponent {
             }
         }
         if (!isResource(value === null || value === void 0 ? void 0 : value.color) && !isUndefined(value === null || value === void 0 ? void 0 : value.color) && (value === null || value === void 0 ? void 0 : value.color) !== null) {
-            var arkColor = new ArkColor();
+            let arkColor = new ArkColor();
             if (isNumber(value.color)) {
                 arkColor.parseColorValue(Number(value.color));
                 arkBorder.arkColor.leftColor = arkColor.color;
@@ -1941,7 +2489,7 @@ class ArkComponent {
             }
         }
         if (!isUndefined(value === null || value === void 0 ? void 0 : value.style) && (value === null || value === void 0 ? void 0 : value.style) !== null) {
-            var arkBorderStyle = new ArkBorderStyle();
+            let arkBorderStyle = new ArkBorderStyle();
             if (arkBorderStyle.parseBorderStyle(value.style)) {
                 if (!isUndefined(arkBorderStyle.style)) {
                     arkBorder.arkStyle.top = arkBorderStyle.style;
@@ -1961,7 +2509,7 @@ class ArkComponent {
         return this;
     }
     borderStyle(value) {
-        var arkBorderStyle = new ArkBorderStyle();
+        let arkBorderStyle = new ArkBorderStyle();
         if (arkBorderStyle.parseBorderStyle(value)) {
             modifier(this._modifiers, BorderStyleModifier, arkBorderStyle);
         }
@@ -1971,7 +2519,7 @@ class ArkComponent {
         return this;
     }
     borderWidth(value) {
-        var borderWidth = new ArkBorderWidth();
+        let borderWidth = new ArkBorderWidth();
         if (isResource(value) || isUndefined(value)) {
             modifier(this._modifiers, BorderWidthModifier, undefined);
             return this;
@@ -2000,7 +2548,7 @@ class ArkComponent {
             modifier(this._modifiers, BorderRadiusModifier, undefined);
             return this;
         }
-        var borderRadius = new ArkBorderRadius;
+        let borderRadius = new ArkBorderRadius;
         if (typeof value === "number" || typeof value === "string") {
             borderRadius.topLeft = value;
             borderRadius.topRight = value;
@@ -2073,7 +2621,13 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     tabIndex(index) {
-        throw new Error("Method not implemented.");
+        if (typeof index !== "number") {
+            modifier(this._modifiers, TabIndexModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, TabIndexModifier, index);
+        }
+        return this;
     }
     defaultFocus(value) {
         if (typeof value === 'boolean') {
@@ -2162,7 +2716,7 @@ class ArkComponent {
         return this;
     }
     colorBlend(value) {
-        var arkColor = new ArkColor();
+        let arkColor = new ArkColor();
         if (arkColor.parseColorValue(value)) {
             modifier(this._modifiers, ColorBlendModifier, arkColor.color);
         }
@@ -2225,7 +2779,7 @@ class ArkComponent {
         return this;
     }
     translate(value) {
-        var arkTranslate = new ArkTranslate();
+        let arkTranslate = new ArkTranslate();
         if (isNumber(value === null || value === void 0 ? void 0 : value.x) || isString(value === null || value === void 0 ? void 0 : value.x)) {
             arkTranslate.x = value.x;
         }
@@ -2239,7 +2793,7 @@ class ArkComponent {
         return this;
     }
     scale(value) {
-        var arkScale = new ArkScale();
+        let arkScale = new ArkScale();
         if (isNumber(value === null || value === void 0 ? void 0 : value.x)) {
             arkScale.x = value === null || value === void 0 ? void 0 : value.x;
         }
@@ -2259,13 +2813,25 @@ class ArkComponent {
         return this;
     }
     gridSpan(value) {
-        throw new Error("Method not implemented.");
+        if (value === null || value === undefined) {
+            modifier(this._modifiers, GridSpanModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, GridSpanModifier, value);
+        }
+        return this;
     }
     gridOffset(value) {
-        throw new Error("Method not implemented.");
+        if (value === null || value === undefined) {
+            modifier(this._modifiers, GridOffsetModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, GridOffsetModifier, value);
+        }
+        return this;
     }
     rotate(value) {
-        var arkRotate = new ArkRotate();
+        let arkRotate = new ArkRotate();
         if (isNumber(value === null || value === void 0 ? void 0 : value.x)) {
             arkRotate.x = value === null || value === void 0 ? void 0 : value.x;
         }
@@ -2321,16 +2887,40 @@ class ArkComponent {
         return this;
     }
     flexGrow(value) {
-        throw new Error("Method not implemented.");
+        if (isNaN(value) || value < 0.0) {
+            modifier(this._modifiers, FlexGrowModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, FlexGrowModifier, value);
+        }
+        return this;
     }
     flexShrink(value) {
-        throw new Error("Method not implemented.");
+        if (isNaN(value) || value < 0.0) {
+            modifier(this._modifiers, FlexShrinkModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, FlexShrinkModifier, value);
+        }
+        return this;
     }
     flexBasis(value) {
-        throw new Error("Method not implemented.");
+        if (isLengthType(value)) {
+            modifier(this._modifiers, FlexBasisModifier, value);
+        }
+        else {
+            modifier(this._modifiers, FlexBasisModifier, undefined);
+        }
+        return this;
     }
     alignSelf(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, AlignSelfModifier, value);
+        }
+        else {
+            modifier(this._modifiers, AlignSelfModifier, ItemAlign.Auto);
+        }
+        return this;
     }
     displayPriority(value) {
         if (isNaN(value)) {
@@ -2343,7 +2933,7 @@ class ArkComponent {
     }
     zIndex(value) {
         if (value !== null) {
-            var zIndex = 0;
+            let zIndex = 0;
             if (typeof (value) === "number") {
                 zIndex = value;
             }
@@ -2355,7 +2945,21 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     direction(value) {
-        throw new Error("Method not implemented.");
+        let direction = '';
+        switch (value) {
+            case 0:
+                direction = 'Ltr';
+                break;
+            case 1:
+                direction = 'Rtl';
+                break;
+            case 2:
+            default:
+                direction = 'Auto';
+                break;
+        }
+        modifier(this._modifiers, DirectionModifier, direction);
+        return this;
     }
     align(value) {
         if (isNumber(value)) {
@@ -2372,7 +2976,7 @@ class ArkComponent {
             return this;
         }
         if (isNumber(value === null || value === void 0 ? void 0 : value.x) || isString(value === null || value === void 0 ? void 0 : value.x) || isNumber(value === null || value === void 0 ? void 0 : value.y) || isString(value === null || value === void 0 ? void 0 : value.y)) {
-            var position = new ArkPosition();
+            let position = new ArkPosition();
             position.x = value === null || value === void 0 ? void 0 : value.x;
             position.y = value === null || value === void 0 ? void 0 : value.y;
             modifier(this._modifiers, PositionModifier, position);
@@ -2419,10 +3023,87 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     alignRules(value) {
-        throw new Error("Method not implemented.");
+        if (!isObject(value) || JSON.stringify(value) === '{}') {
+            modifier(this._modifiers, AlignRulesModifier, undefined);
+            return this;
+        }
+        let keys = ['left', 'middle', 'right', 'top', 'center', 'bottom'];
+        let arkValue = new ArkAlignRules();
+        for (let i = 0; i < keys.length; i++) {
+            let rule = value[keys[i]];
+            let alignRule = '';
+            if (isObject(rule)) {
+                let alignSign = false;
+                let anchorSign = false;
+                let align = rule.align;
+                let anchor = rule.anchor;
+                if (isString(anchor)) {
+                    anchorSign = true;
+                }
+                if (i < DIRECTION_RANGE) {
+                    if (align in HorizontalAlign) {
+                        alignSign = true;
+                    }
+                }
+                else {
+                    if (align in VerticalAlign) {
+                        alignSign = true;
+                    }
+                }
+                if (!alignSign && !anchorSign) {
+                    alignRule += '';
+                }
+                else if (!anchorSign) {
+                    alignRule += align.toString();
+                    alignRule += '|';
+                    alignRule += '__container__';
+                }
+                else if (!alignSign) {
+                    alignRule += '2';
+                    alignRule += '|';
+                    alignRule += anchor;
+                }
+                else {
+                    alignRule += align.toString();
+                    alignRule += '|';
+                    alignRule += anchor;
+                }
+            }
+            else {
+                alignRule += '';
+            }
+            switch (keys[i]) {
+                case 'left':
+                    arkValue.left = alignRule;
+                    break;
+                case 'middle':
+                    arkValue.middle = alignRule;
+                    break;
+                case 'right':
+                    arkValue.right = alignRule;
+                    break;
+                case 'top':
+                    arkValue.top = alignRule;
+                    break;
+                case 'center':
+                    arkValue.center = alignRule;
+                    break;
+                case 'bottom':
+                    arkValue.bottom = alignRule;
+                    break;
+            }
+        }
+        modifier(this._modifiers, AlignRulesModifier, arkValue);
+        return this;
     }
     aspectRatio(value) {
-        throw new Error("Method not implemented.");
+        if (isNaN(value) || lessThenFunction(value, 0.0)) {
+            modifier(this._modifiers, AspectRatioModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, AspectRatioModifier, value);
+        }
+        return this;
     }
     clickEffect(value) {
         throw new Error("Method not implemented.");
@@ -2494,7 +3175,7 @@ class ArkComponent {
         return this;
     }
     shadow(value) {
-        var arkShadow = new ArkShadow();
+        let arkShadow = new ArkShadow();
         if (arkShadow.parseShadowValue(value)) {
             modifier(this._modifiers, ShadowModifier, arkShadow);
         }
@@ -2507,10 +3188,22 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     key(value) {
-        throw new Error("Method not implemented.");
+        if (typeof value === "string") {
+            modifier(this._modifiers, IDModifier, value);
+        }
+        else {
+            modifier(this._modifiers, IDModifier, undefined);
+        }
+        return this;
     }
     id(value) {
-        throw new Error("Method not implemented.");
+        if (typeof value === "string") {
+            modifier(this._modifiers, KeyModifier, value);
+        }
+        else {
+            modifier(this._modifiers, KeyModifier, undefined);
+        }
+        return this;
     }
     geometryTransition(id) {
         if (isString(id)) {
@@ -2544,7 +3237,13 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     restoreId(value) {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "number") {
+            modifier(this._modifiers, RestoreIdModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, RestoreIdModifier, value);
+        }
+        return this;
     }
     onVisibleAreaChange(ratios, event) {
         throw new Error("Method not implemented.");
@@ -2605,7 +3304,14 @@ class ArkComponent {
         return this;
     }
     obscured(reasons) {
-        throw new Error("Method not implemented.");
+        let arkObscured = new ArkObscured();
+        if (arkObscured.parseReasonsArray(reasons)) {
+            modifier(this._modifiers, ObscuredModifier, arkObscured);
+        }
+        else {
+            modifier(this._modifiers, ObscuredModifier, undefined);
+        }
+        return this;
     }
     reuseId(id) {
         throw new Error("Method not implemented.");
@@ -2642,7 +3348,7 @@ class ArkButtonComponent extends ArkComponent {
         return this;
     }
     fontColor(value) {
-        var arkColor = new ArkColor();
+        let arkColor = new ArkColor();
         if (arkColor.parseColorValue(value)) {
             modifier(this._modifiers, ButtonFontColorModifier, arkColor.color);
         }
@@ -2817,8 +3523,8 @@ ButtonFontWeightModifier.identity = Symbol("buttonFontWeight");
 // @ts-ignore
 globalThis.Button.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkButtonComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -2839,8 +3545,8 @@ class ArkLoadingProgressComponent extends ArkComponent {
 // @ts-ignore
 globalThis.LoadingProgress.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkLoadingProgressComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -2861,8 +3567,8 @@ class ArkRefreshComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Refresh.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkRefreshComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -2922,8 +3628,8 @@ class ArkScrollComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Scroll.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkScrollComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -2958,14 +3664,160 @@ StackAlignContentModifier.identity = Symbol('stackAlignContent');
 // @ts-ignore
 globalThis.Stack.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkStackComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class ImageColorFilterModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().image.resetColorFilter(node);
+        }
+        else {
+            GetUINativeModule().image.setColorFilter(node, JSON.parse(this.value));
+        }
+    }
+}
+ImageColorFilterModifier.identity = Symbol('imageColorFilter');
+class ImageFillColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().image.resetFillColor(node);
+        }
+        else {
+            GetUINativeModule().image.setFillColor(node, this.value);
+        }
+    }
+}
+ImageFillColorModifier.identity = Symbol('imageFillColor');
+class ImageAltModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().image.resetAlt(node);
+        }
+        else {
+            GetUINativeModule().image.setAlt(node, this.value);
+        }
+    }
+}
+ImageAltModifier.identity = Symbol('imageAlt');
+class ImageCopyOptionModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().image.resetCopyOption(node);
+        }
+        else {
+            GetUINativeModule().image.setCopyOption(node, this.value);
+        }
+    }
+}
+ImageCopyOptionModifier.identity = Symbol('imageCopyOption');
+class ImageAutoResizeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().image.resetAutoResize(node);
+        }
+        else {
+            GetUINativeModule().image.setAutoResize(node, this.value);
+        }
+    }
+}
+ImageAutoResizeModifier.identity = Symbol('imageAutoResize');
+class ImageFitOriginalSizeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().image.resetFitOriginalSize(node);
+        }
+        else {
+            GetUINativeModule().image.setFitOriginalSize(node, this.value);
+        }
+    }
+}
+ImageFitOriginalSizeModifier.identity = Symbol('imageFitOriginalSize');
+class ImageDraggableModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().image.resetDraggable(node);
+        }
+        else {
+            GetUINativeModule().image.setDraggable(node, this.value);
+        }
+    }
+}
+ImageDraggableModifier.identity = Symbol('imageDraggable');
+class ImageInterpolationModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().image.resetImageInterpolation(node);
+        }
+        else {
+            GetUINativeModule().image.setImageInterpolation(node, this.value);
+        }
+    }
+}
+ImageInterpolationModifier.identity = Symbol('imageInterpolation');
+class ImageSourceSizeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().image.resetSourceSize(node);
+        }
+        else {
+            let values = this.value.split("|");
+            let w = parseFloat(values[0]);
+            let h = parseFloat(values[1]);
+            GetUINativeModule().image.setSourceSize(node, w, h);
+        }
+    }
+}
+ImageSourceSizeModifier.identity = Symbol("imageSourceSize");
+class ImageMatchTextDirectionModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().image.resetMatchTextDirection(node);
+        }
+        else {
+            GetUINativeModule().image.setMatchTextDirection(node, this.value);
+        }
+    }
+}
+ImageMatchTextDirectionModifier.identity = Symbol('imageMatchTextDirection');
+class ImageObjectRepeatModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().image.resetObjectRepeat(node);
+        }
+        else {
+            GetUINativeModule().image.setObjectRepeat(node, this.value);
+        }
+    }
+}
+ImageObjectRepeatModifier.identity = Symbol('imageObjectRepeat');
+class ImageRenderModeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().image.resetRenderMode(node);
+        }
+        else {
+            GetUINativeModule().image.setRenderMode(node, this.value);
+        }
+    }
+}
+ImageRenderModeModifier.identity = Symbol('imageRenderMode');
+class ImageSyncLoadModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().image.resetSyncLoad(node);
+        }
+        else {
+            GetUINativeModule().image.setSyncLoad(node, this.value);
+        }
+    }
+}
+ImageSyncLoadModifier.identity = Symbol('imageSyncLoad');
 class ImageObjectFitModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -2981,17 +3833,47 @@ class ArkImageComponent extends ArkComponent {
     onGestureJudgeBegin(callback) {
         throw new Error("Method not implemented.");
     }
+    draggable(value) {
+        let arkValue = false;
+        if (isBoolean(value)) {
+            arkValue = value;
+        }
+        modifier(this._modifiers, ImageDraggableModifier, arkValue);
+        return this;
+    }
     alt(value) {
-        throw new Error("Method not implemented.");
+        let arkValue = null;
+        if (isString(value)) {
+            arkValue = value;
+        }
+        modifier(this._modifiers, ImageAltModifier, arkValue);
+        return this;
     }
     matchTextDirection(value) {
-        throw new Error("Method not implemented.");
+        let matchTextDirection = false;
+        if (isBoolean(value)) {
+            matchTextDirection = value;
+        }
+        modifier(this._modifiers, ImageMatchTextDirectionModifier, matchTextDirection);
+        return this;
     }
     fitOriginalSize(value) {
-        throw new Error("Method not implemented.");
+        let arkValue = false;
+        if (isBoolean(value)) {
+            arkValue = value;
+        }
+        modifier(this._modifiers, ImageFitOriginalSizeModifier, arkValue);
+        return this;
     }
     fillColor(value) {
-        throw new Error("Method not implemented.");
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, ImageFillColorModifier, arkColor.color);
+        }
+        else {
+            modifier(this._modifiers, ImageFillColorModifier, undefined);
+        }
+        return this;
     }
     objectFit(value) {
         if (value) {
@@ -3003,44 +3885,99 @@ class ArkImageComponent extends ArkComponent {
         return this;
     }
     objectRepeat(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, ImageObjectRepeatModifier, value);
+        }
+        else {
+            modifier(this._modifiers, ImageObjectRepeatModifier, undefined);
+        }
+        return this;
     }
     autoResize(value) {
-        throw new Error("Method not implemented.");
+        let arkValue = true;
+        if (isBoolean(value)) {
+            arkValue = value;
+        }
+        modifier(this._modifiers, ImageAutoResizeModifier, arkValue);
+        return this;
     }
     renderMode(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, ImageRenderModeModifier, value);
+        }
+        else {
+            modifier(this._modifiers, ImageRenderModeModifier, undefined);
+        }
+        return this;
     }
     interpolation(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, ImageInterpolationModifier, value);
+        }
+        else {
+            modifier(this._modifiers, ImageInterpolationModifier, undefined);
+        }
+        return this;
     }
     sourceSize(value) {
-        throw new Error("Method not implemented.");
+        let w = "0.0";
+        let h = "0.0";
+        if (isNumber(value.width)) {
+            w = value.width.toString();
+        }
+        if (isNumber(value.height)) {
+            h = value.height.toString();
+        }
+        modifier(this._modifiers, ImageSourceSizeModifier, w + "|" + h);
+        return this;
     }
     syncLoad(value) {
-        throw new Error("Method not implemented.");
+        let syncLoad = false;
+        if (isBoolean(value)) {
+            syncLoad = value;
+        }
+        modifier(this._modifiers, ImageSyncLoadModifier, syncLoad);
+        return this;
     }
     colorFilter(value) {
-        throw new Error("Method not implemented.");
+        if (isUndefined(value) || Object.prototype.toString.call(value) !== '[object Array]') {
+            modifier(this._modifiers, ImageColorFilterModifier, undefined);
+            return this;
+        }
+        if (Object.prototype.toString.call(value) === '[object Array]') {
+            let _value = value;
+            if (_value.length !== 20) {
+                modifier(this._modifiers, ImageColorFilterModifier, undefined);
+                return this;
+            }
+        }
+        modifier(this._modifiers, ImageColorFilterModifier, JSON.stringify(value));
+        return this;
     }
     copyOption(value) {
-        throw new Error("Method not implemented.");
+        if (value in CopyOptions) {
+            modifier(this._modifiers, ImageCopyOptionModifier, value);
+        }
+        else {
+            modifier(this._modifiers, ImageCopyOptionModifier, undefined);
+        }
+        return this;
     }
     onComplete(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onError(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onFinish(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
 globalThis.Image.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkImageComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -3102,6 +4039,50 @@ class TextAlignModifier extends Modifier {
     }
 }
 TextAlignModifier.identity = Symbol("textAlign");
+class TextHeightAdaptivePolicyModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetHeightAdaptivePolicy(node);
+        }
+        else {
+            GetUINativeModule().text.setHeightAdaptivePolicy(node, this.value);
+        }
+    }
+}
+TextHeightAdaptivePolicyModifier.identity = Symbol('textHeightAdaptivePolicy');
+class TextDraggableModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetDraggable(node);
+        }
+        else {
+            GetUINativeModule().text.setDraggable(node, this.value);
+        }
+    }
+}
+TextDraggableModifier.identity = Symbol('textDraggable');
+class TextMinFontSizeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetMinFontSize(node);
+        }
+        else {
+            GetUINativeModule().text.setMinFontSize(node, this.value);
+        }
+    }
+}
+TextMinFontSizeModifier.identity = Symbol('textMinFontSize');
+class TextMaxFontSizeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetMaxFontSize(node);
+        }
+        else {
+            GetUINativeModule().text.setMaxFontSize(node, this.value);
+        }
+    }
+}
+TextMaxFontSizeModifier.identity = Symbol('textMaxFontSize');
 class TextLineHeightModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -3113,6 +4094,50 @@ class TextLineHeightModifier extends Modifier {
     }
 }
 TextLineHeightModifier.identity = Symbol('textLineHeight');
+class TextCopyOptionModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetCopyOption(node);
+        }
+        else {
+            GetUINativeModule().text.setCopyOption(node, this.value);
+        }
+    }
+}
+TextCopyOptionModifier.identity = Symbol('textCopyOption');
+class TextFontFamilyModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetFontFamily(node);
+        }
+        else {
+            GetUINativeModule().text.setFontFamily(node, this.value);
+        }
+    }
+}
+TextFontFamilyModifier.identity = Symbol('textFontFamily');
+class TextMaxLinesModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetMaxLines(node);
+        }
+        else {
+            GetUINativeModule().text.setMaxLines(node, this.value);
+        }
+    }
+}
+TextMaxLinesModifier.identity = Symbol('textMaxLines');
+class TextLetterSpacingModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetLetterSpacing(node);
+        }
+        else {
+            GetUINativeModule().text.setLetterSpacing(node, this.value);
+        }
+    }
+}
+TextLetterSpacingModifier.identity = Symbol('textLetterSpacing');
 class TextTextOverflowModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -3124,6 +4149,51 @@ class TextTextOverflowModifier extends Modifier {
     }
 }
 TextTextOverflowModifier.identity = Symbol('textTextOverflow');
+class TextBaselineOffsetModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetBaselineOffset(node);
+        }
+        else {
+            GetUINativeModule().text.setBaselineOffset(node, this.value);
+        }
+    }
+}
+TextBaselineOffsetModifier.identity = Symbol('textBaselineOffset');
+class TextTextCaseModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetTextCase(node);
+        }
+        else {
+            GetUINativeModule().text.setTextCase(node, this.value);
+        }
+    }
+}
+TextTextCaseModifier.identity = Symbol('textTextCase');
+class TextTextIndentModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetTextIndent(node);
+        }
+        else {
+            GetUINativeModule().text.setTextIndent(node, this.value);
+        }
+    }
+}
+TextTextIndentModifier.identity = Symbol('textTextIndent');
+class TextTextShadowModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetTextShadow(node);
+        }
+        else {
+            GetUINativeModule().text
+                .setTextShadow(node, this.value.radius, this.value.color, this.value.offsetX, this.value.offsetY, this.value.fill, this.value.radius.length);
+        }
+    }
+}
+TextTextShadowModifier.identity = Symbol('textTextShadow');
 class TextDecorationModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -3135,6 +4205,17 @@ class TextDecorationModifier extends Modifier {
     }
 }
 TextDecorationModifier.identity = Symbol('textDecoration');
+class TextFontModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().text.resetFont(node);
+        }
+        else {
+            GetUINativeModule().text.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+        }
+    }
+}
+TextFontModifier.identity = Symbol('textFont');
 class ArkTextComponent extends ArkComponent {
     enableDataDetector(enable) {
         throw new Error("Method not implemented.");
@@ -3146,10 +4227,29 @@ class ArkTextComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
     font(value) {
-        throw new Error("Method not implemented.");
+        let arkValue = new ArkFont();
+        if (isLengthType(value.size)) {
+            arkValue.size = value.size;
+        }
+        if (isLengthType(value.weight)) {
+            arkValue.weight = value.weight;
+        }
+        if (isString(value.family)) {
+            arkValue.family = value.family;
+        }
+        if (isNumber(value.style)) {
+            if (value.style in FontStyle) {
+                arkValue.style = value.style;
+            }
+            else {
+                arkValue.style = FontStyle.Normal;
+            }
+        }
+        modifier(this._modifiers, TextFontModifier, arkValue);
+        return this;
     }
     fontColor(value) {
-        var arkColor = new ArkColor();
+        let arkColor = new ArkColor();
         if (arkColor.parseColorValue(value)) {
             modifier(this._modifiers, FontColorModifier, arkColor.color);
         }
@@ -3168,10 +4268,24 @@ class ArkTextComponent extends ArkComponent {
         return this;
     }
     minFontSize(value) {
-        throw new Error("Method not implemented.");
+        if (isLengthType(value)) {
+            let arkValue = value;
+            modifier(this._modifiers, TextMinFontSizeModifier, arkValue);
+        }
+        else {
+            modifier(this._modifiers, TextMinFontSizeModifier, undefined);
+        }
+        return this;
     }
     maxFontSize(value) {
-        throw new Error("Method not implemented.");
+        if (isLengthType(value)) {
+            let arkValue = value;
+            modifier(this._modifiers, TextMaxFontSizeModifier, arkValue);
+        }
+        else {
+            modifier(this._modifiers, TextMaxFontSizeModifier, undefined);
+        }
+        return this;
     }
     fontStyle(value) {
         if (isNumber(value)) {
@@ -3247,10 +4361,23 @@ class ArkTextComponent extends ArkComponent {
         return this;
     }
     fontFamily(value) {
-        throw new Error("Method not implemented.");
+        if (isLengthType(value)) {
+            let arkValue = value;
+            modifier(this._modifiers, TextFontFamilyModifier, arkValue);
+        }
+        else {
+            modifier(this._modifiers, TextFontFamilyModifier, undefined);
+        }
+        return this;
     }
     maxLines(value) {
-        throw new Error("Method not implemented.");
+        if (value === null || value === undefined) {
+            modifier(this._modifiers, TextMaxLinesModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, TextMaxLinesModifier, value);
+        }
+        return this;
     }
     decoration(value) {
         let arkDecoration = new ArkDecoration();
@@ -3273,25 +4400,112 @@ class ArkTextComponent extends ArkComponent {
         return this;
     }
     letterSpacing(value) {
-        throw new Error("Method not implemented.");
+        if (isLengthType(value)) {
+            modifier(this._modifiers, TextLetterSpacingModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextLetterSpacingModifier, undefined);
+        }
+        return this;
     }
     textCase(value) {
-        throw new Error("Method not implemented.");
+        if (!(value in TextCase)) {
+            modifier(this._modifiers, TextTextCaseModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, TextTextCaseModifier, value);
+        }
+        return this;
     }
     baselineOffset(value) {
-        throw new Error("Method not implemented.");
+        if (isLengthType(value)) {
+            modifier(this._modifiers, TextBaselineOffsetModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextBaselineOffsetModifier, undefined);
+        }
+        return this;
     }
     copyOption(value) {
-        throw new Error("Method not implemented.");
+        if (isNumber(value)) {
+            modifier(this._modifiers, TextCopyOptionModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextCopyOptionModifier, undefined);
+        }
+        return this;
+    }
+    draggable(value) {
+        if (isBoolean(value)) {
+            modifier(this._modifiers, TextDraggableModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextDraggableModifier, undefined);
+        }
+        return this;
     }
     textShadow(value) {
-        throw new Error("Method not implemented.");
+        let array = new ArkShadowInfoToArray();
+        if (value === null || value === undefined) {
+            modifier(this._modifiers, TextTextShadowModifier, undefined);
+        }
+        else if (Object.getPrototypeOf(value).constructor === Object) {
+            let objValue = value;
+            if (objValue.radius === null || objValue.radius === undefined) {
+                modifier(this._modifiers, TextTextShadowModifier, undefined);
+            }
+            else {
+                array.radius.push(objValue.radius);
+                array.color.push(objValue.color);
+                array.offsetX.push((objValue.offsetX === undefined || objValue.offsetX === null) ? 0 : objValue.offsetX);
+                array.offsetY.push((objValue.offsetY === undefined || objValue.offsetY === null) ? 0 : objValue.offsetY);
+                array.fill.push((objValue.fill === undefined || objValue.fill === null) ? false : objValue.fill);
+                modifier(this._modifiers, TextTextShadowModifier, array);
+            }
+        }
+        else if (Object.getPrototypeOf(value).constructor === Array) {
+            let arrayValue = value;
+            let isFlag = true;
+            for (let item of arrayValue) {
+                if (item.radius === undefined || item.radius === null) {
+                    isFlag = false;
+                    break;
+                }
+            }
+            if (isFlag) {
+                for (let objValue of arrayValue) {
+                    array.radius.push(objValue.radius);
+                    array.color.push(objValue.color);
+                    array.offsetX.push((objValue.offsetX === undefined || objValue.offsetX === null) ? 0 : objValue.offsetX);
+                    array.offsetY.push((objValue.offsetY === undefined || objValue.offsetY === null) ? 0 : objValue.offsetY);
+                    array.fill.push((objValue.fill === undefined || objValue.fill === null) ? false : objValue.fill);
+                }
+                modifier(this._modifiers, TextTextShadowModifier, array);
+            }
+            else {
+                modifier(this._modifiers, TextTextShadowModifier, undefined);
+            }
+        }
+        return this;
     }
     heightAdaptivePolicy(value) {
-        throw new Error("Method not implemented.");
+        if (!(value in TextHeightAdaptivePolicy)) {
+            modifier(this._modifiers, TextHeightAdaptivePolicyModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, TextHeightAdaptivePolicyModifier, value);
+        }
+        return this;
     }
     textIndent(value) {
-        throw new Error("Method not implemented.");
+        if (isLengthType(value)) {
+            let arkValue = value;
+            modifier(this._modifiers, TextTextIndentModifier, arkValue);
+        }
+        else {
+            modifier(this._modifiers, TextTextIndentModifier, undefined);
+        }
+        return this;
     }
     wordBreak(value) {
         throw new Error("Method not implemented.");
@@ -3309,14 +4523,36 @@ class ArkTextComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Text.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkTextComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class TextAreaFontStyleModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetFontStyle(node);
+        }
+        else {
+            GetUINativeModule().textArea.setFontStyle(node, this.value);
+        }
+    }
+}
+TextAreaFontStyleModifier.identity = Symbol('textAreaFontStyle');
+class TextAreaCopyOptionModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetCopyOption(node);
+        }
+        else {
+            GetUINativeModule().textArea.setCopyOption(node, this.value);
+        }
+    }
+}
+TextAreaCopyOptionModifier.identity = Symbol('textAreaCopyOption');
 class TextAreaMaxLinesModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -3328,39 +4564,244 @@ class TextAreaMaxLinesModifier extends Modifier {
     }
 }
 TextAreaMaxLinesModifier.identity = Symbol('textAreaMaxLines');
-class ArkTextAreaComponent extends ArkComponent {
-    onGestureJudgeBegin(callback) {
-        throw new Error("Method not implemented.");
+class TextAreaFontSizeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetFontSize(node);
+        }
+        else {
+            GetUINativeModule().textArea.setFontSize(node, this.value);
+        }
     }
+}
+TextAreaFontSizeModifier.identity = Symbol('textAreaFontSize');
+class TextAreaPlaceholderColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetPlaceholderColor(node);
+        }
+        else {
+            GetUINativeModule().textArea.setPlaceholderColor(node, this.value);
+        }
+    }
+}
+TextAreaPlaceholderColorModifier.identity = Symbol('textAreaPlaceholderColor');
+class TextAreaFontColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetFontColor(node);
+        }
+        else {
+            GetUINativeModule().textArea.setFontColor(node, this.value);
+        }
+    }
+}
+TextAreaFontColorModifier.identity = Symbol('textAreaFontColor');
+class TextAreaFontWeightModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetFontWeight(node);
+        }
+        else {
+            GetUINativeModule().textArea.setFontWeight(node, this.value);
+        }
+    }
+}
+TextAreaFontWeightModifier.identity = Symbol('textAreaFontWeight');
+class TextAreaBarStateModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetBarState(node);
+        }
+        else {
+            GetUINativeModule().textArea.setBarState(node, this.value);
+        }
+    }
+}
+TextAreaBarStateModifier.identity = Symbol('textAreaBarState');
+class TextAreaEnableKeyboardOnFocusModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetEnableKeyboardOnFocus(node);
+        }
+        else {
+            GetUINativeModule().textArea.setEnableKeyboardOnFocus(node, this.value);
+        }
+    }
+}
+TextAreaEnableKeyboardOnFocusModifier.identity = Symbol('textAreaEnableKeyboardOnFocus');
+class TextAreaFontFamilyModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetFontFamily(node);
+        }
+        else {
+            GetUINativeModule().textArea.setFontFamily(node, this.value);
+        }
+    }
+}
+TextAreaFontFamilyModifier.identity = Symbol('textAreaFontFamily');
+class TextAreaCaretColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetCaretColor(node);
+        }
+        else {
+            GetUINativeModule().textArea.setCaretColor(node, this.value);
+        }
+    }
+}
+TextAreaCaretColorModifier.identity = Symbol('textAreaCaretColor');
+class TextAreaMaxLengthModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetMaxLength(node);
+        }
+        else {
+            GetUINativeModule().textArea.setMaxLength(node, this.value);
+        }
+    }
+}
+TextAreaMaxLengthModifier.identity = Symbol('textAreaMaxLength');
+class TextAreaStyleModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetStyle(node);
+        }
+        else {
+            GetUINativeModule().textArea.setStyle(node, this.value);
+        }
+    }
+}
+TextAreaStyleModifier.identity = Symbol('textAreaStyle');
+class TextAreaSelectionMenuHiddenModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetSelectionMenuHidden(node);
+        }
+        else {
+            GetUINativeModule().textArea.setSelectionMenuHidden(node, this.value);
+        }
+    }
+}
+TextAreaSelectionMenuHiddenModifier.identity = Symbol('textAreaSelectionMenuHidden');
+class TextAreaPlaceholderFontModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetPlaceholderFont(node);
+        }
+        else {
+            GetUINativeModule().textArea.setPlaceholderFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+        }
+    }
+}
+TextAreaPlaceholderFontModifier.identity = Symbol('textAreaPlaceholderFont');
+class TextAreaTextAlignModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetTextAlign(node);
+        }
+        else {
+            GetUINativeModule().textArea.setTextAlign(node, this.value);
+        }
+    }
+}
+TextAreaTextAlignModifier.identity = Symbol('textAreaTextAlign');
+class TextAreaShowCounterModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetShowCounter(node);
+        }
+        else {
+            GetUINativeModule().textArea.setShowCounter(node, this.value);
+        }
+    }
+}
+TextAreaShowCounterModifier.identity = Symbol('textAreaShowCounter');
+class ArkTextAreaComponent extends ArkComponent {
     type(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     placeholderColor(value) {
-        throw new Error("Method not implemented.");
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, TextAreaPlaceholderColorModifier, arkColor.color);
+        }
+        return this;
     }
     placeholderFont(value) {
-        throw new Error("Method not implemented.");
+        let arkValue = new ArkFont();
+        if (isLengthType(value.size)) {
+            arkValue.size = value.size;
+        }
+        if (isLengthType(value.weight)) {
+            arkValue.weight = value.weight;
+        }
+        if (isString(value.family)) {
+            arkValue.family = value.family;
+        }
+        if (value.style in FontStyle) {
+            arkValue.style = value.style;
+        }
+        modifier(this._modifiers, TextAreaPlaceholderFontModifier, arkValue);
+        return this;
     }
     textAlign(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, TextAreaTextAlignModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextAreaTextAlignModifier, TextAlign.Start);
+        }
+        return this;
     }
     caretColor(value) {
-        throw new Error("Method not implemented.");
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, TextAreaCaretColorModifier, arkColor.color);
+        }
+        return this;
     }
     fontColor(value) {
-        throw new Error("Method not implemented.");
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, TextAreaFontColorModifier, arkColor.color);
+        }
+        return this;
     }
     fontSize(value) {
-        throw new Error("Method not implemented.");
+        if (isLengthType(value)) {
+            modifier(this._modifiers, TextAreaFontSizeModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextAreaFontSizeModifier, 16);
+        }
+        return this;
     }
     fontStyle(value) {
-        throw new Error("Method not implemented.");
+        let arkValue = FontStyle.Normal;
+        if (value) {
+            arkValue = value;
+        }
+        modifier(this._modifiers, TextAreaFontStyleModifier, arkValue);
+        return this;
     }
     fontWeight(value) {
-        throw new Error("Method not implemented.");
+        if (!isLengthType(value)) {
+            modifier(this._modifiers, TextAreaFontWeightModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, TextAreaFontWeightModifier, value);
+        }
+        return this;
     }
     fontFamily(value) {
-        throw new Error("Method not implemented.");
+        let arkValue = 'HarmonyOS Sans';
+        if (isString(value)) {
+            arkValue = value;
+        }
+        modifier(this._modifiers, TextAreaFontFamilyModifier, arkValue);
+        return this;
     }
     inputFilter(value, error) {
         throw new Error("Method not implemented.");
@@ -3387,25 +4828,68 @@ class ArkTextAreaComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
     copyOption(value) {
-        throw new Error("Method not implemented.");
+        if (value === undefined) {
+            value = CopyOptions.LocalDevice;
+            modifier(this._modifiers, TextAreaCopyOptionModifier, value);
+        }
+        let copyOptions = CopyOptions.None;
+        if (isNumber(value)) {
+            copyOptions = value;
+        }
+        modifier(this._modifiers, TextAreaCopyOptionModifier, copyOptions);
+        return this;
     }
     enableKeyboardOnFocus(value) {
-        throw new Error("Method not implemented.");
+        if (value === undefined) {
+            return this;
+        }
+        if (isUndefined(value) || !isBoolean(value)) {
+            modifier(this._modifiers, TextAreaEnableKeyboardOnFocusModifier, true);
+            return this;
+        }
+        modifier(this._modifiers, TextAreaEnableKeyboardOnFocusModifier, Boolean(value));
+        return this;
     }
     maxLength(value) {
-        throw new Error("Method not implemented.");
+        if (!value || isNaN(value)) {
+            modifier(this._modifiers, TextAreaMaxLengthModifier, undefined);
+            return this;
+        }
+        modifier(this._modifiers, TextAreaMaxLengthModifier, value);
+        return this;
     }
     showCounter(value) {
-        throw new Error("Method not implemented.");
+        let showCounter = false;
+        if (isBoolean(value)) {
+            showCounter = value;
+        }
+        modifier(this._modifiers, TextAreaShowCounterModifier, showCounter);
+        return this;
     }
     style(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, TextAreaStyleModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextAreaStyleModifier, undefined);
+        }
+        return this;
     }
     barState(value) {
-        throw new Error("Method not implemented.");
+        if (value === null || value === undefined || !isNumber(value)) {
+            modifier(this._modifiers, TextAreaBarStateModifier, BarState.Auto);
+            return this;
+        }
+        modifier(this._modifiers, TextAreaBarStateModifier, value);
+        return this;
     }
     selectionMenuHidden(value) {
-        throw new Error("Method not implemented.");
+        let selectionMenuHidden = false;
+        if (isBoolean(value)) {
+            selectionMenuHidden = value;
+        }
+        modifier(this._modifiers, TextAreaSelectionMenuHiddenModifier, selectionMenuHidden);
+        return this;
     }
     maxLines(value) {
         if (!isNumber(value)) {
@@ -3426,14 +4910,289 @@ class ArkTextAreaComponent extends ArkComponent {
 // @ts-ignore
 globalThis.TextArea.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkTextAreaComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class TextInputStyleModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetStyle(node);
+        }
+        else {
+            GetUINativeModule().textInput.setStyle(node, this.value);
+        }
+    }
+}
+TextInputStyleModifier.identity = Symbol('textInputStyle');
+class TextInputMaxLengthModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetMaxLength(node);
+        }
+        else {
+            GetUINativeModule().textInput.setMaxLength(node, this.value);
+        }
+    }
+}
+TextInputMaxLengthModifier.identity = Symbol('textInputMaxLength');
+class TextInputMaxLinesModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetMaxLines(node);
+        }
+        else {
+            GetUINativeModule().textInput.setMaxLines(node, this.value);
+        }
+    }
+}
+TextInputMaxLinesModifier.identity = Symbol('textInputMaxLines');
+class TextInputShowPasswordIconModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetShowPasswordIcon(node);
+        }
+        else {
+            GetUINativeModule().textInput.setShowPasswordIcon(node, this.value);
+        }
+    }
+}
+TextInputShowPasswordIconModifier.identity = Symbol('textInputShowPasswordIcon');
+class TextInputTextAlignModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetTextAlign(node);
+        }
+        else {
+            GetUINativeModule().textInput.setTextAlign(node, this.value);
+        }
+    }
+}
+TextInputTextAlignModifier.identity = Symbol('textInputTextAlign');
+class TextInputPlaceholderFontModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetPlaceholderFont(node);
+        }
+        else {
+            GetUINativeModule().textInput.setPlaceholderFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+        }
+    }
+}
+TextInputPlaceholderFontModifier.identity = Symbol('textInputPlaceholderFont');
+class TextInputPlaceholderColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetPlaceholderColor(node);
+        }
+        else {
+            GetUINativeModule().textInput.setPlaceholderColor(node, this.value);
+        }
+    }
+}
+TextInputPlaceholderColorModifier.identity = Symbol('textInputPlaceholderColor');
+class TextInputPasswordIconModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetPasswordIcon(node);
+        }
+        else {
+            GetUINativeModule().textInput.setPasswordIcon(node, this.value.onIconSrc, this.value.offIconSrc);
+        }
+    }
+}
+TextInputPasswordIconModifier.identity = Symbol('textInputPasswordIcon');
+class TextInputSelectedBackgroundColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetSelectedBackgroundColor(node);
+        }
+        else {
+            GetUINativeModule().textInput.setSelectedBackgroundColor(node, this.value);
+        }
+    }
+}
+TextInputSelectedBackgroundColorModifier.identity = Symbol('textInputSelectedBackgroundColor');
+class TextInputSelectionMenuHiddenModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetSelectionMenuHidden(node);
+        }
+        else {
+            GetUINativeModule().textInput.setSelectionMenuHidden(node, this.value);
+        }
+    }
+}
+TextInputSelectionMenuHiddenModifier.identity = Symbol('textInputSelectionMenuHidden');
+class TextInputShowUnderlineModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetShowUnderline(node);
+        }
+        else {
+            GetUINativeModule().textInput.setShowUnderline(node, this.value);
+        }
+    }
+}
+TextInputShowUnderlineModifier.identity = Symbol('textInputShowUnderLine');
+class TextInputShowErrorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetShowError(node);
+        }
+        else {
+            GetUINativeModule().textInput.setShowError(node, this.value);
+        }
+    }
+}
+TextInputShowErrorModifier.identity = Symbol('textInputShowError');
+class TextInputTypeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetType(node);
+        }
+        else {
+            GetUINativeModule().textInput.setType(node, this.value);
+        }
+    }
+}
+TextInputTypeModifier.identity = Symbol('textInputType');
+class TextInputCaretPositionModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetCaretPosition(node);
+        }
+        else {
+            GetUINativeModule().textInput.setCaretPosition(node, this.value);
+        }
+    }
+}
+TextInputCaretPositionModifier.identity = Symbol('textInputCaretPosition');
+class TextInputCopyOptionModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetCopyOption(node);
+        }
+        else {
+            GetUINativeModule().textInput.setCopyOption(node, this.value);
+        }
+    }
+}
+TextInputCopyOptionModifier.identity = Symbol('textInputCopyOption');
+class TextInputEnableKeyboardOnFocusModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetEnableKeyboardOnFocus(node);
+        }
+        else {
+            GetUINativeModule().textInput.setEnableKeyboardOnFocus(node, this.value);
+        }
+    }
+}
+TextInputEnableKeyboardOnFocusModifier.identity = Symbol('textInputEnableKeyboardOnFocus');
+class TextInputCaretStyleModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetCaretStyle(node);
+        }
+        else {
+            GetUINativeModule().textInput.setCaretStyle(node, this.value);
+        }
+    }
+}
+TextInputCaretStyleModifier.identity = Symbol('textInputCaretStyle');
+class TextInputEnterKeyTypeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetEnterKeyType(node);
+        }
+        else {
+            GetUINativeModule().textInput.setEnterKeyType(node, this.value);
+        }
+    }
+}
+TextInputEnterKeyTypeModifier.identity = Symbol('textInputEnterKeyType');
+class TextInputBarStateModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetBarState(node);
+        }
+        else {
+            GetUINativeModule().textInput.setBarState(node, this.value);
+        }
+    }
+}
+TextInputBarStateModifier.identity = Symbol('textInputBarState');
+class TextInputCaretColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetCaretColor(node);
+        }
+        else {
+            GetUINativeModule().textInput.setCaretColor(node, this.value);
+        }
+    }
+}
+TextInputCaretColorModifier.identity = Symbol('textinputCaretColor');
+class TextInputFontColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetFontColor(node);
+        }
+        else {
+            GetUINativeModule().textInput.setFontColor(node, this.value);
+        }
+    }
+}
+TextInputFontColorModifier.identity = Symbol('textInputFontColor');
+class TextInputFontSizeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetFontSize(node);
+        }
+        else {
+            GetUINativeModule().textInput.setFontSize(node, this.value);
+        }
+    }
+}
+TextInputFontSizeModifier.identity = Symbol('textInputFontSize');
+class TextInputFontStyleModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetFontStyle(node);
+        }
+        else {
+            GetUINativeModule().textInput.setFontStyle(node, this.value);
+        }
+    }
+}
+TextInputFontStyleModifier.identity = Symbol('textInputFontStyle');
+class TextInputFontWeightModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetFontWeight(node);
+        }
+        else {
+            GetUINativeModule().textInput.setFontWeight(node, this.value);
+        }
+    }
+}
+TextInputFontWeightModifier.identity = Symbol('textInputFontWeight');
+class TextInputFontFamilyModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textInput.resetFontFamily(node);
+        }
+        else {
+            GetUINativeModule().textInput.setFontFamily(node, this.value);
+        }
+    }
+}
+TextInputFontFamilyModifier.identity = Symbol('textInputFontFamily');
 class ArkTextInputComponent extends ArkComponent {
     cancelButton(value) {
         throw new Error("Method not implemented.");
@@ -3454,19 +5213,58 @@ class ArkTextInputComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
     type(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, TextInputTypeModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextInputTypeModifier, undefined);
+        }
+        return this;
     }
     placeholderColor(value) {
-        throw new Error("Method not implemented.");
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, TextInputPlaceholderColorModifier, arkColor.color);
+        }
+        else {
+            modifier(this._modifiers, TextInputPlaceholderColorModifier, undefined);
+        }
+        return this;
     }
     placeholderFont(value) {
-        throw new Error("Method not implemented.");
+        let arkValue = new ArkFont();
+        if (isLengthType(value.size)) {
+            arkValue.size = value.size;
+        }
+        if (isLengthType(value.weight)) {
+            arkValue.weight = value.weight;
+        }
+        if (isString(value.family)) {
+            arkValue.family = value.family;
+        }
+        if (value.style in FontStyle) {
+            arkValue.style = value.style;
+        }
+        modifier(this._modifiers, TextInputPlaceholderFontModifier, arkValue);
+        return this;
     }
     enterKeyType(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, TextInputEnterKeyTypeModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextInputEnterKeyTypeModifier, EnterKeyType.Done);
+        }
+        return this;
     }
     caretColor(value) {
-        throw new Error("Method not implemented.");
+        if (isNumber(value) || isString(value)) {
+            modifier(this._modifiers, TextInputCaretColorModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextInputCaretColorModifier, undefined);
+        }
+        return this;
     }
     onEditChanged(callback) {
         throw new Error("Method not implemented.");
@@ -3487,22 +5285,57 @@ class ArkTextInputComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
     maxLength(value) {
-        throw new Error("Method not implemented.");
+        if (!isNumber(value) || value === undefined || value === null) {
+            modifier(this._modifiers, TextInputMaxLengthModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, TextInputMaxLengthModifier, value);
+        }
+        return this;
     }
     fontColor(value) {
-        throw new Error("Method not implemented.");
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, TextInputFontColorModifier, arkColor.color);
+        }
+        else {
+            modifier(this._modifiers, TextInputFontColorModifier, undefined);
+        }
+        return this;
     }
     fontSize(value) {
-        throw new Error("Method not implemented.");
+        if (isLengthType(value)) {
+            let arkValue = value;
+            modifier(this._modifiers, TextInputFontSizeModifier, arkValue);
+        }
+        else {
+            modifier(this._modifiers, TextInputFontSizeModifier, undefined);
+        }
+        return this;
     }
     fontStyle(value) {
-        throw new Error("Method not implemented.");
+        if (!(value in FontStyle)) {
+            value = FontStyle.Normal;
+        }
+        modifier(this._modifiers, TextInputFontStyleModifier, value);
+        return this;
     }
     fontWeight(value) {
-        throw new Error("Method not implemented.");
+        if (!isLengthType(value)) {
+            modifier(this._modifiers, TextInputFontWeightModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, TextInputFontWeightModifier, value);
+        }
+        return this;
     }
     fontFamily(value) {
-        throw new Error("Method not implemented.");
+        if (!(isString(value))) {
+            value = 'HarmonyOS Sans';
+        }
+        let arkValue = value;
+        modifier(this._modifiers, TextInputFontFamilyModifier, arkValue);
+        return this;
     }
     inputFilter(value, error) {
         throw new Error("Method not implemented.");
@@ -3517,49 +5350,132 @@ class ArkTextInputComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
     copyOption(value) {
-        throw new Error("Method not implemented.");
+        if (!(value in CopyOptions)) {
+            value = CopyOptions.LocalDevice;
+        }
+        modifier(this._modifiers, TextInputCopyOptionModifier, value);
+        return this;
     }
     showPasswordIcon(value) {
-        throw new Error("Method not implemented.");
+        if (isBoolean(value)) {
+            modifier(this._modifiers, TextInputShowPasswordIconModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextInputShowPasswordIconModifier, undefined);
+        }
+        return this;
     }
     textAlign(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, TextInputTextAlignModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextInputTextAlignModifier, undefined);
+        }
+        return this;
     }
     style(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, TextInputStyleModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextInputStyleModifier, undefined);
+        }
+        return this;
     }
     caretStyle(value) {
-        throw new Error("Method not implemented.");
+        if (isUndefined(value)) {
+            modifier(this._modifiers, TextInputCaretStyleModifier, undefined);
+        }
+        else if (isObject(value)) {
+            if ((value.width !== undefined) && ((isNumber(value.width)) || (isString(value.width)))) {
+                modifier(this._modifiers, TextInputCaretStyleModifier, value.width);
+            }
+            else {
+                modifier(this._modifiers, TextInputCaretStyleModifier, undefined);
+            }
+        }
+        return this;
     }
     selectedBackgroundColor(value) {
-        throw new Error("Method not implemented.");
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, TextInputSelectedBackgroundColorModifier, arkColor.color);
+        }
+        else {
+            modifier(this._modifiers, TextInputSelectedBackgroundColorModifier, undefined);
+        }
+        return this;
     }
     caretPosition(value) {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, TextInputCaretPositionModifier, value);
+        return this;
     }
     enableKeyboardOnFocus(value) {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, TextInputEnableKeyboardOnFocusModifier, value);
+        return this;
     }
     passwordIcon(value) {
-        throw new Error("Method not implemented.");
+        let passwordIcon = new ArkPasswordIcon();
+        if (!value ||
+            (!isString(value.onIconSrc) && !isString(value.onIconSrc))) {
+            passwordIcon.offIconSrc = value.offIconSrc;
+            passwordIcon.onIconSrc = value.onIconSrc;
+            modifier(this._modifiers, TextInputPasswordIconModifier, passwordIcon);
+            return this;
+        }
+        else {
+            modifier(this._modifiers, TextInputPasswordIconModifier, undefined);
+        }
+        return this;
     }
     showError(value) {
-        throw new Error("Method not implemented.");
+        if (isString(value)) {
+            modifier(this._modifiers, TextInputShowErrorModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextInputShowErrorModifier, undefined);
+        }
+        return this;
     }
     showUnit(value) {
         throw new Error("Method not implemented.");
     }
     showUnderline(value) {
-        throw new Error("Method not implemented.");
+        if (isBoolean(value)) {
+            modifier(this._modifiers, TextInputShowUnderlineModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextInputShowUnderlineModifier, undefined);
+        }
+        return this;
     }
     selectionMenuHidden(value) {
-        throw new Error("Method not implemented.");
+        if (isBoolean(value)) {
+            modifier(this._modifiers, TextInputSelectionMenuHiddenModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextInputSelectionMenuHiddenModifier, undefined);
+        }
+        return this;
     }
     barState(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, TextInputBarStateModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextInputBarStateModifier, undefined);
+        }
+        return this;
     }
     maxLines(value) {
-        throw new Error("Method not implemented.");
+        if (typeof value === "number") {
+            modifier(this._modifiers, TextInputMaxLinesModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TextInputMaxLinesModifier, undefined);
+        }
+        return this;
     }
     customKeyboard(value) {
         throw new Error("Method not implemented.");
@@ -3568,8 +5484,8 @@ class ArkTextInputComponent extends ArkComponent {
 // @ts-ignore
 globalThis.TextInput.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkTextInputComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -3584,7 +5500,7 @@ class ArkToggleComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
     selectedColor(value) {
-        var arkColor = new ArkColor();
+        let arkColor = new ArkColor();
         if (arkColor.parseColorValue(value)) {
             modifier(this._modifiers, ToggleSelectedColorModifier, arkColor.color);
         }
@@ -3594,7 +5510,7 @@ class ArkToggleComponent extends ArkComponent {
         return this;
     }
     switchPointColor(value) {
-        var arkColor = new ArkColor();
+        let arkColor = new ArkColor();
         if (arkColor.parseColorValue(value)) {
             modifier(this._modifiers, ToggleSwitchPointColorModifier, arkColor.color);
         }
@@ -3629,8 +5545,8 @@ ToggleSwitchPointColorModifier.identity = Symbol("toggleSwitchPointColor");
 // @ts-ignore
 globalThis.Toggle.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkToggleComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -3807,8 +5723,8 @@ class ArkSelectComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Select.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkSelectComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -4020,8 +5936,8 @@ RadioStyleModifier.identity = Symbol("radioStyle");
 // @ts-ignore
 globalThis.Radio.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkRadioComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -4078,8 +5994,8 @@ class ArkTimePickerComponent extends ArkComponent {
 // @ts-ignore
 globalThis.TimePicker.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkTimePickerComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -4087,7 +6003,7 @@ globalThis.TimePicker.attributeModifier = function (modifier) {
 };
 class TimepickerTextStyleModifier extends Modifier {
     applyPeer(node, reset) {
-        var _a, _b, _c, _d;
+        let _a, _b, _c, _d;
         if (reset) {
             GetUINativeModule().timepicker.resetTextStyle(node);
         }
@@ -4099,7 +6015,7 @@ class TimepickerTextStyleModifier extends Modifier {
 TimepickerTextStyleModifier.identity = Symbol("textStyle");
 class TimepickerSelectedTextStyleModifier extends Modifier {
     applyPeer(node, reset) {
-        var _a, _b, _c, _d;
+        let _a, _b, _c, _d;
         if (reset) {
             GetUINativeModule().timepicker.resetSelectedTextStyle(node);
         }
@@ -4111,7 +6027,7 @@ class TimepickerSelectedTextStyleModifier extends Modifier {
 TimepickerSelectedTextStyleModifier.identity = Symbol("selectedTextStyle");
 class TimepickerDisappearTextStyleModifier extends Modifier {
     applyPeer(node, reset) {
-        var _a, _b, _c, _d;
+        let _a, _b, _c, _d;
         if (reset) {
             GetUINativeModule().timepicker.resetDisappearTextStyle(node);
         }
@@ -4205,8 +6121,8 @@ class ArkTextPickerComponent extends ArkComponent {
 // @ts-ignore
 globalThis.TextPicker.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkTextPickerComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -4236,7 +6152,7 @@ class TextpickerSelectedIndexModifier extends Modifier {
 TextpickerSelectedIndexModifier.identity = Symbol("textpickerSelectedIndex");
 class TextpickerTextStyleModifier extends Modifier {
     applyPeer(node, reset) {
-        var _a, _b, _c, _d;
+        let _a, _b, _c, _d;
         if (reset) {
             GetUINativeModule().textpicker.resetTextStyle(node);
         }
@@ -4248,7 +6164,7 @@ class TextpickerTextStyleModifier extends Modifier {
 TextpickerTextStyleModifier.identity = Symbol("textpickerTextStyle");
 class TextpickerSelectedTextStyleModifier extends Modifier {
     applyPeer(node, reset) {
-        var _a, _b, _c, _d;
+        let _a, _b, _c, _d;
         if (reset) {
             GetUINativeModule().textpicker.resetSelectedTextStyle(node);
         }
@@ -4271,7 +6187,7 @@ class TextpickerDefaultPickerItemHeightModifier extends Modifier {
 TextpickerDefaultPickerItemHeightModifier.identity = Symbol("textpickerDefaultPickerItemHeight");
 class TextpickerDisappearTextStyleModifier extends Modifier {
     applyPeer(node, reset) {
-        var _a, _b, _c, _d;
+        let _a, _b, _c, _d;
         if (reset) {
             GetUINativeModule().textpicker.resetDisappearTextStyle(node);
         }
@@ -4423,8 +6339,8 @@ class ArkSliderComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Slider.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkSliderComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -4432,7 +6348,7 @@ globalThis.Slider.attributeModifier = function (modifier) {
 };
 class ShowTipsModifier extends Modifier {
     applyPeer(node, reset) {
-        var _a;
+        let _a;
         if (reset) {
             GetUINativeModule().slider.resetShowTips(node);
         }
@@ -4588,7 +6504,7 @@ class RatingStepSizeModifier extends Modifier {
 RatingStepSizeModifier.identity = Symbol("ratingStepSize");
 class RatingStarStyleModifier extends Modifier {
     applyPeer(node, reset) {
-        var _a, _b, _c;
+        let _a, _b, _c;
         if (reset) {
             GetUINativeModule().rating.resetStarStyle(node);
         }
@@ -4640,8 +6556,8 @@ class ArkRatingComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Rating.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkRatingComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -4706,8 +6622,8 @@ class ArkCheckboxComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Checkbox.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkCheckboxComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -4715,7 +6631,7 @@ globalThis.Checkbox.attributeModifier = function (modifier) {
 };
 class CheckboxMarkModifier extends Modifier {
     applyPeer(node, reset) {
-        var _a, _b, _c;
+        let _a, _b, _c;
         if (reset) {
             GetUINativeModule().checkbox.resetMark(node);
         }
@@ -4922,8 +6838,8 @@ class ArkCounterComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Counter.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkCounterComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -4987,7 +6903,7 @@ class CheckboxGroupUnselectedColorModifier extends Modifier {
 CheckboxGroupUnselectedColorModifier.identity = Symbol("checkboxgroupUnselectedColor");
 class CheckboxGroupMarkModifier extends Modifier {
     applyPeer(node, reset) {
-        var _a, _b, _c;
+        let _a, _b, _c;
         if (reset) {
             GetUINativeModule().checkboxgroup.resetMark(node);
         }
@@ -5028,7 +6944,7 @@ class ArkCheckboxGroupComponent extends ArkComponent {
         return this;
     }
     mark(value) {
-        var arkMarkStyle = new ArkMarkStyle();
+        let arkMarkStyle = new ArkMarkStyle();
         if (arkMarkStyle.parseMarkStyle(value)) {
             modifier(this._modifiers, CheckboxGroupMarkModifier, arkMarkStyle);
         }
@@ -5154,10 +7070,22 @@ globalThis.GridCol.attributeModifier = function (modifier) {
 /// <reference path="./import.ts" />
 class ArkPanelComponent extends ArkComponent {
     mode(value) {
-        throw new Error("Method not implemented.");
+        if (typeof value === "number") {
+            modifier(this._modifiers, PanelModeModifier, value);
+        }
+        else {
+            modifier(this._modifiers, PanelModeModifier, undefined);
+        }
+        return this;
     }
     type(value) {
-        throw new Error("Method not implemented.");
+        if (typeof value === "number") {
+            modifier(this._modifiers, PanelTypeModifier, value);
+        }
+        else {
+            modifier(this._modifiers, PanelTypeModifier, undefined);
+        }
+        return this;
     }
     dragBar(value) {
         if (typeof value === "boolean") {
@@ -5169,16 +7097,40 @@ class ArkPanelComponent extends ArkComponent {
         return this;
     }
     customHeight(value) {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "number" && typeof value !== "string") {
+            modifier(this._modifiers, PanelCustomHeightModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, PanelCustomHeightModifier, value);
+        }
+        return this;
     }
     fullHeight(value) {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "number" && typeof value !== "string") {
+            modifier(this._modifiers, PanelFullHeightModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, PanelFullHeightModifier, value);
+        }
+        return this;
     }
     halfHeight(value) {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "number" && typeof value !== "string") {
+            modifier(this._modifiers, PanelHalfHeightModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, PanelHalfHeightModifier, value);
+        }
+        return this;
     }
     miniHeight(value) {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "number" && typeof value !== "string") {
+            modifier(this._modifiers, PanelMiniHeightModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, PanelMiniHeightModifier, value);
+        }
+        return this;
     }
     show(value) {
         if (typeof value === "boolean") {
@@ -5190,7 +7142,14 @@ class ArkPanelComponent extends ArkComponent {
         return this;
     }
     backgroundMask(color) {
-        throw new Error("Method not implemented.");
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(color)) {
+            modifier(this._modifiers, PanelBackgroundMaskModifier, arkColor.color);
+        }
+        else {
+            modifier(this._modifiers, PanelBackgroundMaskModifier, undefined);
+        }
+        return this;
     }
     showCloseIcon(value) {
         if (typeof value === "boolean") {
@@ -5208,16 +7167,83 @@ class ArkPanelComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
 }
-// @ts-ignore
-globalThis.Refresh.attributeModifier = function (modifier) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
-        return new ArkPanelComponent(nativeNode);
-    });
-    modifier.applyNormalAttribute(component);
-    component.applyModifierPatch();
-};
+class PanelBackgroundMaskModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().panel.resetBackgroundMask(node);
+        }
+        else {
+            GetUINativeModule().panel.setBackgroundMask(node, this.value);
+        }
+    }
+}
+PanelBackgroundMaskModifier.identity = Symbol("panelBackgroundMask");
+class PanelModeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().panel.ResetPanelMode(node);
+        }
+        else {
+            GetUINativeModule().panel.SetPanelMode(node, this.value);
+        }
+    }
+}
+PanelModeModifier.identity = Symbol("panelMode");
+class PanelTypeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().panel.ResetPanelType(node);
+        }
+        else {
+            GetUINativeModule().panel.SetPanelType(node, this.value);
+        }
+    }
+}
+PanelTypeModifier.identity = Symbol("panelType");
+class PanelCustomHeightModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().panel.resetPanelCustomHeight(node);
+        }
+        else {
+            GetUINativeModule().panel.setPanelCustomHeight(node, this.value);
+        }
+    }
+}
+PanelCustomHeightModifier.identity = Symbol("panelCustomHeight");
+class PanelFullHeightModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().panel.resetPanelFullHeight(node);
+        }
+        else {
+            GetUINativeModule().panel.setPanelFullHeight(node, this.value);
+        }
+    }
+}
+PanelFullHeightModifier.identity = Symbol("panelFullHeight");
+class PanelHalfHeightModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().panel.resetPanelHalfHeight(node);
+        }
+        else {
+            GetUINativeModule().panel.setPanelHalfHeight(node, this.value);
+        }
+    }
+}
+PanelHalfHeightModifier.identity = Symbol("panelHalfHeight");
+class PanelMiniHeightModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().panel.resetPanelMiniHeight(node);
+        }
+        else {
+            GetUINativeModule().panel.setPanelMiniHeight(node, this.value);
+        }
+    }
+}
+PanelMiniHeightModifier.identity = Symbol("panelMiniHeight");
 class ShowCloseIconModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -5251,6 +7277,16 @@ class ShowModifier extends Modifier {
     }
 }
 ShowModifier.identity = Symbol("show");
+// @ts-ignore
+globalThis.Panel.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkPanelComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
 /// <reference path="./import.ts" />
 const TITLE_MODE_RANGE = 2;
 const NAV_BAR_POSITION_RANGE = 1;
@@ -5516,8 +7552,8 @@ HideNavBarModifier.identity = Symbol("hideNavBar");
 // @ts-ignore
 globalThis.Navigation.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkNavigationComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -5620,15 +7656,15 @@ NavRouterModeModifier.identity = Symbol("mode");
 // @ts-ignore
 globalThis.NavRouter.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkNavRouterComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
-var NavigatorType;
+let NavigatorType;
 (function (NavigatorType) {
     NavigatorType[NavigatorType["DEFAULT"] = 0] = "DEFAULT";
     NavigatorType[NavigatorType["PUSH"] = 1] = "PUSH";
@@ -5710,8 +7746,8 @@ TargetModifier.identity = Symbol("target");
 // @ts-ignore
 globalThis.Navigator.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkNavigatorComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
@@ -5796,7 +7832,7 @@ globalThis.AlphabetIndexer.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="import.ts" />
+/// <reference path="./import.ts" />
 class BlankColorModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -6001,30 +8037,163 @@ globalThis.Gauge.attributeModifier = function (modifier) {
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class ImageAnimatorImagesModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().imageAnimator.resetImages(node);
+        }
+        else {
+            GetUINativeModule().imageAnimator.setImages(node, this.value.arrSrc, this.value.arrWidth, this.value.arrHeight, this.value.arrTop, this.value.arrLeft, this.value.arrDuration, this.value.arrSrc.length);
+        }
+    }
+}
+ImageAnimatorImagesModifier.identity = Symbol('imageAnimatorImages');
+class ImageAnimatorDurationModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().imageAnimator.resetDuration(node);
+        }
+        else {
+            GetUINativeModule().imageAnimator.setDuration(node, this.value);
+        }
+    }
+}
+ImageAnimatorDurationModifier.identity = Symbol('imageAnimatorDuration');
+class ImageAnimatorReverseModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().imageAnimator.resetReverse(node);
+        }
+        else {
+            GetUINativeModule().imageAnimator.setReverse(node, this.value);
+        }
+    }
+}
+ImageAnimatorReverseModifier.identity = Symbol('imageAnimatorReverse');
+class ImageAnimatorPreDecodeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().imageAnimator.resetPreDecode(node);
+        }
+        else {
+            GetUINativeModule().imageAnimator.setPreDecode(node, this.value);
+        }
+    }
+}
+ImageAnimatorPreDecodeModifier.identity = Symbol('imageAnimatorPreDecode');
+class ImageAnimatorStateModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().imageAnimator.resetState(node);
+        }
+        else {
+            GetUINativeModule().imageAnimator.setState(node, this.value);
+        }
+    }
+}
+ImageAnimatorStateModifier.identity = Symbol('imageAnimatorState');
+class ImageAnimatorFixedSizeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().imageAnimator.resetFixedSize(node);
+        }
+        else {
+            GetUINativeModule().imageAnimator.setFixedSize(node, this.value);
+        }
+    }
+}
+ImageAnimatorFixedSizeModifier.identity = Symbol('imageAnimatorFixedSize');
+class ImageAnimatorFillModeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().imageAnimator.resetFillMode(node);
+        }
+        else {
+            GetUINativeModule().imageAnimator.setFillMode(node, this.value);
+        }
+    }
+}
+ImageAnimatorFillModeModifier.identity = Symbol('imageAnimatorFillMode');
+class ImageAnimatorIterationsModeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().imageAnimator.resetIterations(node);
+        }
+        else {
+            GetUINativeModule().imageAnimator.setIterations(node, this.value);
+        }
+    }
+}
+ImageAnimatorIterationsModeModifier.identity = Symbol('imageAnimatorIterationsMode');
 class ArkImageAnimatorComponent extends ArkComponent {
     images(value) {
-        throw new Error("Method not implemented.");
+        if (value && value.length > 0) {
+            let isFlag = true;
+            for (let item of value) {
+                if (item.src === undefined || item.src === null) {
+                    isFlag = false;
+                    break;
+                }
+            }
+            if (isFlag) {
+                let array = new ArkImageFrameInfoToArray();
+                for (let item of value) {
+                    array.arrSrc.push(item.src);
+                    array.arrWidth.push((item.width === undefined || item.width === null) ? 0 : item.width);
+                    array.arrHeight.push((item.height === undefined || item.height === null) ? 0 : item.height);
+                    array.arrTop.push((item.top === undefined || item.top === null) ? 0 : item.top);
+                    array.arrLeft.push((item.left === undefined || item.left === null) ? 0 : item.left);
+                    array.arrDuration.push((item.duration === undefined || item.duration === null) ? 0 : item.duration);
+                }
+                modifier(this._modifiers, ImageAnimatorImagesModifier, array);
+            }
+            else {
+                modifier(this._modifiers, ImageAnimatorImagesModifier, undefined);
+            }
+        }
+        else {
+            modifier(this._modifiers, ImageAnimatorImagesModifier, undefined);
+        }
+        return this;
     }
     state(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, ImageAnimatorStateModifier, value);
+        }
+        else {
+            modifier(this._modifiers, ImageAnimatorStateModifier, AnimationStatus.Initial);
+        }
+        return this;
     }
     duration(value) {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, ImageAnimatorDurationModifier, value);
+        return this;
     }
     reverse(value) {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, ImageAnimatorReverseModifier, value);
+        return this;
     }
     fixedSize(value) {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, ImageAnimatorFixedSizeModifier, value);
+        return this;
     }
     preDecode(value) {
+        // modifier(this._modifiers, ImageAnimatorPreDecodeModifier, value);
+        // return this;
         throw new Error("Method not implemented.");
     }
     fillMode(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, ImageAnimatorFillModeModifier, value);
+        }
+        else {
+            modifier(this._modifiers, ImageAnimatorFillModeModifier, FillMode.Forwards);
+        }
+        return this;
     }
     iterations(value) {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, ImageAnimatorIterationsModeModifier, value);
+        return this;
     }
     onStart(event) {
         throw new Error("Method not implemented.");
@@ -6230,32 +8399,177 @@ globalThis.MenuItemGroup.attributeModifier = function (modifier) {
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class PatternLockActiveColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().patternLock.resetActiveColor(node);
+        }
+        else {
+            GetUINativeModule().patternLock.setActiveColor(node, this.value);
+        }
+    }
+}
+PatternLockActiveColorModifier.identity = Symbol('patternLockActiveColor');
+class PatternLockSelectedColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().patternLock.resetSelectedColor(node);
+        }
+        else {
+            GetUINativeModule().patternLock.setSelectedColor(node, this.value);
+        }
+    }
+}
+PatternLockSelectedColorModifier.identity = Symbol('patternLockSelectedColor');
+class PatternLockPathColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().patternLock.resetPathColor(node);
+        }
+        else {
+            GetUINativeModule().patternLock.setPathColor(node, this.value);
+        }
+    }
+}
+PatternLockPathColorModifier.identity = Symbol('patternLockPathColor');
+class PatternLockRegularColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().patternLock.resetRegularColor(node);
+        }
+        else {
+            GetUINativeModule().patternLock.setRegularColor(node, this.value);
+        }
+    }
+}
+PatternLockRegularColorModifier.identity = Symbol('patternLockRegularColor');
+class PatternLockSideLengthModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().patternLock.resetSideLength(node);
+        }
+        else {
+            GetUINativeModule().patternLock.setSideLength(node, this.value);
+        }
+    }
+}
+PatternLockSideLengthModifier.identity = Symbol('patternLockSideLength');
+class PatternLockPathStrokeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().patternLock.resetPathStrokeWidth(node);
+        }
+        else {
+            GetUINativeModule().patternLock.setPathStrokeWidth(node, this.value);
+        }
+    }
+}
+PatternLockPathStrokeModifier.identity = Symbol('patternLockPathStroke');
+class PatternLockCircleRadiusModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().patternLock.resetCircleRadius(node);
+        }
+        else {
+            GetUINativeModule().patternLock.setCircleRadius(node, this.value);
+        }
+    }
+}
+PatternLockCircleRadiusModifier.identity = Symbol('patternLockCircleRadius');
+class PatternLockAutoResetModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().patternLock.resetAutoReset(node);
+        }
+        else {
+            GetUINativeModule().patternLock.setAutoReset(node, this.value);
+        }
+    }
+}
+PatternLockAutoResetModifier.identity = Symbol('patternlockautoreset');
 class ArkPatternLockComponent extends ArkComponent {
     sideLength(value) {
-        throw new Error("Method not implemented.");
+        let arkValue = 288;
+        if (isLengthType(value)) {
+            let _value = value;
+            modifier(this._modifiers, PatternLockSideLengthModifier, _value);
+        }
+        else {
+            modifier(this._modifiers, PatternLockSideLengthModifier, arkValue);
+        }
+        return this;
     }
     circleRadius(value) {
-        throw new Error("Method not implemented.");
+        let arkValue = 6;
+        if (isLengthType(value)) {
+            let _value = value;
+            modifier(this._modifiers, PatternLockSideLengthModifier, _value);
+        }
+        else {
+            modifier(this._modifiers, PatternLockCircleRadiusModifier, arkValue);
+        }
+        return this;
     }
     regularColor(value) {
-        throw new Error("Method not implemented.");
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, PatternLockRegularColorModifier, arkColor.color);
+        }
+        else {
+            modifier(this._modifiers, PatternLockRegularColorModifier, undefined);
+        }
+        return this;
     }
     selectedColor(value) {
-        throw new Error("Method not implemented.");
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, PatternLockSelectedColorModifier, arkColor.color);
+        }
+        else {
+            modifier(this._modifiers, PatternLockSelectedColorModifier, undefined);
+        }
+        return this;
     }
     activeColor(value) {
-        throw new Error("Method not implemented.");
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, PatternLockActiveColorModifier, arkColor.color);
+        }
+        else {
+            modifier(this._modifiers, PatternLockActiveColorModifier, undefined);
+        }
+        return this;
     }
     pathColor(value) {
-        throw new Error("Method not implemented.");
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, PatternLockPathColorModifier, arkColor.color);
+        }
+        else {
+            modifier(this._modifiers, PatternLockPathColorModifier, undefined);
+        }
+        return this;
     }
     pathStrokeWidth(value) {
-        throw new Error("Method not implemented.");
-    }
-    onPatternComplete(callback) {
-        throw new Error("Method not implemented.");
+        let arkValue = 12;
+        if (isLengthType(value)) {
+            let _value = value;
+            modifier(this._modifiers, PatternLockPathStrokeModifier, _value);
+        }
+        else {
+            modifier(this._modifiers, PatternLockPathStrokeModifier, arkValue);
+        }
+        return this;
     }
     autoReset(value) {
+        let arkValue = false;
+        if (isBoolean(value)) {
+            arkValue = value;
+        }
+        modifier(this._modifiers, PatternLockAutoResetModifier, arkValue);
+        return this;
+    }
+    onPatternComplete(callback) {
         throw new Error("Method not implemented.");
     }
     onDotConnect(callback) {
@@ -6399,75 +8713,388 @@ globalThis.ScrollBar.attributeModifier = function (modifier) {
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class SearchSelectionMenuHiddenModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().search.resetSelectionMenuHidden(node);
+        }
+        else {
+            GetUINativeModule().search.setSelectionMenuHidden(node, this.value);
+        }
+    }
+}
+SearchSelectionMenuHiddenModifier.identity = Symbol('searchSelectionMenuHidden');
+class SearchCaretStyleModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().search.resetCaretStyle(node);
+        }
+        else {
+            GetUINativeModule().search.setCaretStyle(node, this.value.width, this.value.color);
+        }
+    }
+}
+SearchCaretStyleModifier.identity = Symbol('searchCaretStyle');
+class SearchEnableKeyboardOnFocusModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().search.resetEnableKeyboardOnFocus(node);
+        }
+        else {
+            GetUINativeModule().search.setEnableKeyboardOnFocus(node, this.value);
+        }
+    }
+}
+SearchEnableKeyboardOnFocusModifier.identity = Symbol('searchEnableKeyboardOnFocus');
+class SearchSearchIconModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().search.resetSearchIcon(node);
+        }
+        else {
+            GetUINativeModule().search.setSearchIcon(node, this.value.size, this.value.color, this.value.src);
+        }
+    }
+}
+SearchSearchIconModifier.identity = Symbol('searchSearchIcon');
+class SearchPlaceholderFontModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().search.resetPlaceholderFont(node);
+        }
+        else {
+            GetUINativeModule().search.setPlaceholderFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+        }
+    }
+}
+SearchPlaceholderFontModifier.identity = Symbol('searchPlaceholderFont');
+class SearchSearchButtonModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().search.resetSearchButton(node);
+        }
+        else {
+            GetUINativeModule().search.setSearchButton(node, this.value.value, this.value.fontSize, this.value.fontColor);
+        }
+    }
+}
+SearchSearchButtonModifier.identity = Symbol('searchSearchButton');
+class SearchFontColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().search.resetFontColor(node);
+        }
+        else {
+            GetUINativeModule().search.setFontColor(node, this.value);
+        }
+    }
+}
+SearchFontColorModifier.identity = Symbol('searchFontColor');
+class SearchCopyOptionModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().search.resetCopyOption(node);
+        }
+        else {
+            GetUINativeModule().search.setCopyOption(node, this.value);
+        }
+    }
+}
+SearchCopyOptionModifier.identity = Symbol('searchCopyOption');
+class SearchTextFontModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().search.resetTextFont(node);
+        }
+        else {
+            GetUINativeModule().search.setTextFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+        }
+    }
+}
+SearchTextFontModifier.identity = Symbol('searchTextFont');
+class SearchPlaceholderColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().search.resetPlaceholderColor(node);
+        }
+        else {
+            GetUINativeModule().search.setPlaceholderColor(node, this.value);
+        }
+    }
+}
+SearchPlaceholderColorModifier.identity = Symbol('searchPlaceholderColor');
+class SearchCancelButtonModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().search.resetCancelButton(node);
+        }
+        else {
+            GetUINativeModule().search.setCancelButton(node, this.value.style, this.value.size, this.value.color, this.value.src);
+        }
+    }
+}
+SearchCancelButtonModifier.identity = Symbol('searchCancelButton');
+class SearchTextAlignModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().search.resetTextAlign(node);
+        }
+        else {
+            GetUINativeModule().search.setTextAlign(node, this.value);
+        }
+    }
+}
+SearchTextAlignModifier.identity = Symbol('searchTextAlign');
 class ArkSearchComponent extends ArkComponent {
-    searchButton(value, option) {
-        throw new Error("Method not implemented.");
-    }
-    fontColor(value) {
-        throw new Error("Method not implemented.");
-    }
-    searchIcon(value) {
-        throw new Error("Method not implemented.");
-    }
-    cancelButton(value) {
-        throw new Error("Method not implemented.");
-    }
-    caretStyle(value) {
-        throw new Error("Method not implemented.");
-    }
-    placeholderColor(value) {
-        throw new Error("Method not implemented.");
-    }
-    placeholderFont(value) {
-        throw new Error("Method not implemented.");
-    }
-    textFont(value) {
-        throw new Error("Method not implemented.");
-    }
-    onSubmit(callback) {
-        throw new Error("Method not implemented.");
-    }
-    onChange(callback) {
-        throw new Error("Method not implemented.");
-    }
-    onTextSelectionChange(callback) {
-        throw new Error("Method not implemented.");
-    }
-    onContentScroll(callback) {
-        throw new Error("Method not implemented.");
-    }
-    onCopy(callback) {
-        throw new Error("Method not implemented.");
-    }
-    onCut(callback) {
-        throw new Error("Method not implemented.");
-    }
-    onPaste(callback) {
-        throw new Error("Method not implemented.");
-    }
-    copyOption(value) {
-        throw new Error("Method not implemented.");
-    }
-    maxLength(value) {
-        throw new Error("Method not implemented.");
-    }
-    textAlign(value) {
-        throw new Error("Method not implemented.");
-    }
-    enableKeyboardOnFocus(value) {
-        throw new Error("Method not implemented.");
-    }
-    selectionMenuHidden(value) {
-        throw new Error("Method not implemented.");
-    }
-    customKeyboard(value) {
-        throw new Error("Method not implemented.");
+    onEditChange(callback) {
+        throw new Error('Method not implemented.');
     }
     type(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
-    monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+    maxLength(value) {
+        throw new Error('Method not implemented.');
+    }
+    onEditChanged(callback) {
+        throw new Error('Method not implemented.');
+    }
+    customKeyboard(event) {
+        throw new Error('Method not implemented.');
+    }
+    showUnit(event) {
+        throw new Error('Method not implemented.');
+    }
+    onContentScroll(callback) {
+        throw new Error('Method not implemented.');
+    }
+    onChange(callback) {
+        throw new Error('Method not implemented.');
+    }
+    onTextSelectionChange(callback) {
+        throw new Error('Method not implemented.');
+    }
+    onCopy(callback) {
+        throw new Error('Method not implemented.');
+    }
+    onCut(callback) {
+        throw new Error('Method not implemented.');
+    }
+    onSubmit(callback) {
+        throw new Error('Method not implemented.');
+    }
+    onPaste(callback) {
+        throw new Error('Method not implemented.');
+    }
+    showCounter(value) {
+        throw new Error('Method not implemented.');
+    }
+    searchButton(value, option) {
+        let searchButton = new ArkSearchButton();
+        if (!isString(value)) {
+            value = '';
+        }
+        if (isObject(option)) {
+            if (!isLengthType(option.fontSize)) {
+                option.fontSize = '';
+            }
+            let fontColor = option.fontColor;
+            let arkColor = new ArkColor();
+            if (fontColor === undefined || fontColor === null || !arkColor.parseColorValue(fontColor)) {
+                option.fontColor = undefined;
+            }
+            else {
+                option.fontColor = arkColor.color;
+            }
+        }
+        else {
+            option.fontSize = '';
+            option.fontColor = undefined;
+        }
+        searchButton.value = value;
+        searchButton.fontColor = option.fontColor;
+        searchButton.fontSize = option.fontSize;
+        modifier(this._modifiers, SearchSearchButtonModifier, searchButton);
+        return this;
+    }
+    selectionMenuHidden(value) {
+        if (value === undefined || !isBoolean(value)) {
+            modifier(this._modifiers, SearchSelectionMenuHiddenModifier, false);
+            return this;
+        }
+        modifier(this._modifiers, SearchSelectionMenuHiddenModifier, value);
+        return this;
+    }
+    enableKeyboardOnFocus(value) {
+        if (value === undefined || !isBoolean(value)) {
+            modifier(this._modifiers, SearchEnableKeyboardOnFocusModifier, true);
+            return this;
+        }
+        modifier(this._modifiers, SearchEnableKeyboardOnFocusModifier, value);
+        return this;
+    }
+    caretStyle(value) {
+        let arkCaretStyle = new ArkCaretStyle();
+        if (isObject(value)) {
+            let caretWidth = value.width;
+            if (!isLengthType(caretWidth)) {
+                arkCaretStyle.width = undefined;
+            }
+            else {
+                arkCaretStyle.width = caretWidth;
+            }
+            let caretColor = value.color;
+            let arkColor = new ArkColor();
+            if (!caretColor || !arkColor.parseColorValue(caretColor)) {
+                caretColor = undefined;
+            }
+            else {
+                caretColor = arkColor.color;
+            }
+            arkCaretStyle.color = caretColor;
+            modifier(this._modifiers, SearchCaretStyleModifier, arkCaretStyle);
+        }
+        return this;
+    }
+    cancelButton(value) {
+        let cancelButton = new ArkCancelButton();
+        if (!isObject(value)) {
+            return this;
+        }
+        let style = value.style;
+        if (!style || isNaN(style)) {
+            style = CancelButtonStyle.INPUT;
+        }
+        value.style = style;
+        cancelButton.style = value.style;
+        let icon = value.icon;
+        if (!icon || !isObject(icon)) {
+            icon.size = '';
+            icon.color = undefined;
+            icon.src = '';
+        }
+        else {
+            if (!icon.size || !isLengthType(icon.size)) {
+                icon.size = '';
+            }
+            if (!icon.src || !isString(icon.src)) {
+                icon.src = '';
+            }
+            let arkColor = new ArkColor();
+            if (!icon.color || !arkColor.parseColorValue(icon.color)) {
+                icon.color = undefined;
+            }
+            else {
+                icon.color = arkColor.color;
+            }
+        }
+        cancelButton.color = icon.color;
+        cancelButton.size = icon.size;
+        cancelButton.src = icon.src;
+        modifier(this._modifiers, SearchCancelButtonModifier, cancelButton);
+        return this;
+    }
+    searchIcon(value) {
+        let iconOptions = new ArkIconOptions();
+        if (!isObject(value)) {
+            iconOptions.size = '';
+            iconOptions.color = undefined;
+            iconOptions.src = '';
+        }
+        else {
+            iconOptions.size = value.size;
+            iconOptions.color = value.color;
+            iconOptions.src = value.src;
+            if (!iconOptions.size || !isLengthType(iconOptions.size)) {
+                iconOptions.size = '';
+            }
+            if (!iconOptions.src || !isString(iconOptions.src)) {
+                iconOptions.src = '';
+            }
+            let arkColor = new ArkColor();
+            if (!iconOptions.color || !arkColor.parseColorValue(iconOptions.color)) {
+                iconOptions.color = undefined;
+            }
+            else {
+                iconOptions.color = arkColor.color;
+            }
+            modifier(this._modifiers, SearchSearchIconModifier, iconOptions);
+        }
+        return this;
+    }
+    fontColor(value) {
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, SearchFontColorModifier, arkColor.color);
+        }
+        else {
+            modifier(this._modifiers, SearchFontColorModifier, undefined);
+        }
+        return this;
+    }
+    placeholderColor(value) {
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, SearchPlaceholderColorModifier, arkColor.color);
+        }
+        else {
+            modifier(this._modifiers, SearchPlaceholderColorModifier, undefined);
+        }
+        return this;
+    }
+    placeholderFont(value) {
+        let arkValue = new ArkFont();
+        if (isLengthType(value.size)) {
+            arkValue.size = value.size;
+        }
+        if (isLengthType(value.weight)) {
+            arkValue.weight = value.weight;
+        }
+        if (isString(value.family)) {
+            arkValue.family = value.family;
+        }
+        if (value.style in FontStyle) {
+            arkValue.style = value.style;
+        }
+        modifier(this._modifiers, SearchPlaceholderFontModifier, arkValue);
+        return this;
+    }
+    textFont(value) {
+        let arkValue = new ArkFont();
+        if (isLengthType(value.size)) {
+            arkValue.size = value.size;
+        }
+        if (isLengthType(value.weight)) {
+            arkValue.weight = value.weight;
+        }
+        if (isString(value.family)) {
+            arkValue.family = value.family;
+        }
+        if (value.style in FontStyle) {
+            arkValue.style = value.style;
+        }
+        modifier(this._modifiers, SearchTextFontModifier, arkValue);
+        return this;
+    }
+    copyOption(value) {
+        if (value === undefined) {
+            value = CopyOptions.LocalDevice;
+            modifier(this._modifiers, SearchCopyOptionModifier, value);
+        }
+        let copyOptions = CopyOptions.None;
+        if (isNumber(value)) {
+            copyOptions = value;
+        }
+        modifier(this._modifiers, SearchCopyOptionModifier, copyOptions);
+        return this;
+    }
+    textAlign(value) {
+        let TEXT_ALIGNS = [
+            TextAlign.Start, TextAlign.Center, TextAlign.End, TextAlign.JUSTIFY
+        ];
+        if (value >= 0 && value <= TEXT_ALIGNS.length) {
+            modifier(this._modifiers, SearchTextAlignModifier, value);
+        }
+        return this;
     }
 }
 // @ts-ignore
@@ -6481,39 +9108,219 @@ globalThis.Search.attributeModifier = function (modifier) {
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class SpanFontSizeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().span.resetFontSize(node);
+        }
+        else {
+            GetUINativeModule().span.setFontSize(node, this.value);
+        }
+    }
+}
+SpanFontSizeModifier.identity = Symbol('spanFontSize');
+class SpanFontFamilyModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().span.resetFontFamily(node);
+        }
+        else {
+            GetUINativeModule().span.setFontFamily(node, this.value);
+        }
+    }
+}
+SpanFontFamilyModifier.identity = Symbol('spanFontFamily');
+class SpanLineHeightModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().span.resetLineHeight(node);
+        }
+        else {
+            GetUINativeModule().span.setLineHeight(node, this.value);
+        }
+    }
+}
+SpanLineHeightModifier.identity = Symbol('spanLineHeight');
+class SpanFontStyleModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().span.resetFontStyle(node);
+        }
+        else {
+            GetUINativeModule().span.setFontStyle(node, this.value);
+        }
+    }
+}
+SpanFontStyleModifier.identity = Symbol('spanFontStyle');
+class SpanTextCaseModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().span.resetTextCase(node);
+        }
+        else {
+            GetUINativeModule().span.setTextCase(node, this.value);
+        }
+    }
+}
+SpanTextCaseModifier.identity = Symbol('spanTextCase');
+class SpanFontColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().span.resetFontColor(node);
+        }
+        else {
+            GetUINativeModule().span.setFontColor(node, this.value);
+        }
+    }
+}
+SpanFontColorModifier.identity = Symbol('spanFontColor');
+class SpanLetterSpacingModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().span.resetLetterSpacing(node);
+        }
+        else {
+            GetUINativeModule().span.setLetterSpacing(node, this.value);
+        }
+    }
+}
+SpanLetterSpacingModifier.identity = Symbol('spanLetterSpacing');
+class SpanFontModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().span.resetFont(node);
+        }
+        else {
+            GetUINativeModule().span.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+        }
+    }
+}
+SpanFontModifier.identity = Symbol('spanFont');
+class SpanDecorationModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().span.resetDecoration(node);
+        }
+        else {
+            GetUINativeModule().span.setDecoration(node, this.value.type, this.value.color);
+        }
+    }
+}
+SpanDecorationModifier.identity = Symbol('spanDecoration');
+class SpanFontWeightModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().span.resetFontWeight(node);
+        }
+        else {
+            GetUINativeModule().span.setFontWeight(node, this.value);
+        }
+    }
+}
+SpanFontWeightModifier.identity = Symbol('spanfontweight');
 class ArkSpanComponent extends ArkComponent {
-    font(value) {
-        throw new Error("Method not implemented.");
-    }
-    fontColor(value) {
-        throw new Error("Method not implemented.");
-    }
-    fontSize(value) {
-        throw new Error("Method not implemented.");
-    }
-    fontStyle(value) {
-        throw new Error("Method not implemented.");
-    }
-    fontWeight(value) {
-        throw new Error("Method not implemented.");
-    }
-    fontFamily(value) {
-        throw new Error("Method not implemented.");
-    }
     decoration(value) {
-        throw new Error("Method not implemented.");
+        let arkValue = new ArkDecoration();
+        if (!isNumber(value.type) && !(value.type in TextDecorationType)) {
+            arkValue.type = undefined;
+        }
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value.color)) {
+            arkValue.color = arkColor.color;
+        }
+        else {
+            arkValue.color = undefined;
+        }
+        modifier(this._modifiers, SpanDecorationModifier, arkValue);
+        return this;
     }
-    letterSpacing(value) {
-        throw new Error("Method not implemented.");
-    }
-    textCase(value) {
-        throw new Error("Method not implemented.");
+    font(value) {
+        let arkValue = new ArkFont();
+        if (isLengthType(value.size)) {
+            arkValue.size = value.size;
+        }
+        if (isLengthType(value.weight)) {
+            arkValue.weight = value.weight;
+        }
+        if (isString(value.family)) {
+            arkValue.family = value.family;
+        }
+        if (value.style in FontStyle) {
+            arkValue.style = value.style;
+        }
+        modifier(this._modifiers, SpanFontModifier, arkValue);
+        return this;
     }
     lineHeight(value) {
-        throw new Error("Method not implemented.");
+        if (isString(value) || isNumber(value)) {
+            modifier(this._modifiers, SpanLineHeightModifier, value);
+        }
+        else {
+            modifier(this._modifiers, SpanLineHeightModifier, undefined);
+        }
+        return this;
     }
-    monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+    fontSize(value) {
+        if (isLengthType(value)) {
+            modifier(this._modifiers, SpanFontSizeModifier, value);
+        }
+        else {
+            modifier(this._modifiers, SpanFontSizeModifier, undefined);
+        }
+        return this;
+    }
+    fontColor(value) {
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, SpanFontColorModifier, arkColor.color);
+        }
+        else {
+            modifier(this._modifiers, SpanFontColorModifier, undefined);
+        }
+        return this;
+    }
+    fontStyle(value) {
+        if (!(value in FontStyle)) {
+            value = FontStyle.Normal;
+        }
+        modifier(this._modifiers, SpanFontStyleModifier, value);
+        return this;
+    }
+    fontWeight(value) {
+        if (!isLengthType(value)) {
+            modifier(this._modifiers, SpanFontWeightModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, SpanFontWeightModifier, value);
+        }
+        return this;
+    }
+    fontFamily(value) {
+        if (isString(value)) {
+            modifier(this._modifiers, SpanFontFamilyModifier, value);
+        }
+        else {
+            modifier(this._modifiers, SpanFontFamilyModifier, undefined);
+        }
+        return this;
+    }
+    letterSpacing(value) {
+        if (isLengthType(value)) {
+            modifier(this._modifiers, SpanLetterSpacingModifier, value);
+        }
+        else {
+            modifier(this._modifiers, SpanLetterSpacingModifier, undefined);
+        }
+        return this;
+    }
+    textCase(value) {
+        if (value in TextCase) {
+            modifier(this._modifiers, SpanTextCaseModifier, value);
+        }
+        else {
+            modifier(this._modifiers, SpanTextCaseModifier, undefined);
+        }
+        return this;
     }
 }
 // @ts-ignore
@@ -6984,15 +9791,57 @@ globalThis.Badge.attributeModifier = function (modifier) {
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class ColumnAlignItemsModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().column.resetAlignItems(node);
+        }
+        else {
+            GetUINativeModule().column.setAlignItems(node, this.value);
+        }
+    }
+}
+ColumnAlignItemsModifier.identity = Symbol('columnAlignItems');
+class ColumnJustifyContentModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().column.resetJustifyContent(node);
+        }
+        else {
+            GetUINativeModule().column.setJustifyContent(node, this.value);
+        }
+    }
+}
+ColumnJustifyContentModifier.identity = Symbol('columnJustifyContent');
 class ArkColumnComponent extends ArkComponent {
     alignItems(value) {
-        throw new Error("Method not implemented.");
+        if (value === null || value === undefined) {
+            modifier(this._modifiers, ColumnAlignItemsModifier, undefined);
+        }
+        else if (!(value in HorizontalAlign)) {
+            value = HorizontalAlign.Center;
+            modifier(this._modifiers, ColumnAlignItemsModifier, value);
+        }
+        else {
+            modifier(this._modifiers, ColumnAlignItemsModifier, value);
+        }
+        return this;
     }
     justifyContent(value) {
-        throw new Error("Method not implemented.");
+        if (value === null || value === undefined) {
+            modifier(this._modifiers, ColumnJustifyContentModifier, undefined);
+        }
+        else if (!(value in FlexAlign)) {
+            value = FlexAlign.Start;
+            modifier(this._modifiers, ColumnJustifyContentModifier, value);
+        }
+        else {
+            modifier(this._modifiers, ColumnJustifyContentModifier, value);
+        }
+        return this;
     }
     pointLight(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
         throw new Error("Method not implemented.");
@@ -7009,12 +9858,51 @@ globalThis.Column.attributeModifier = function (modifier) {
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class ColumnSplitDividerModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().columnSplit.resetDivider(node);
+        }
+        else {
+            GetUINativeModule().columnSplit.setDivider(node, this.value.startMargin, this.value.endMargin);
+        }
+    }
+}
+ColumnSplitDividerModifier.identity = Symbol('columnSplitDivider');
+class ColumnSplitResizeableModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().columnSplit.resetResizeable(node);
+        }
+        else {
+            GetUINativeModule().columnSplit.setResizeable(node, this.value);
+        }
+    }
+}
+ColumnSplitResizeableModifier.identity = Symbol('columnSplitResizeable');
 class ArkColumnSplitComponent extends ArkComponent {
     resizeable(value) {
-        throw new Error("Method not implemented.");
+        let arkResizeable = false;
+        if (isBoolean(value)) {
+            arkResizeable = value;
+        }
+        modifier(this._modifiers, ColumnSplitResizeableModifier, arkResizeable);
+        return this;
     }
     divider(value) {
-        throw new Error("Method not implemented.");
+        let arkValue = new ArkColumnSplitDividerStyle();
+        if (!value || (!isLengthType(value.startMargin) && !isLengthType(value.endMargin))) {
+            modifier(this._modifiers, ColumnSplitDividerModifier, undefined);
+            return this;
+        }
+        if (value.startMargin && isLengthType(value.startMargin)) {
+            arkValue.startMargin = value.startMargin.toString();
+        }
+        if (value.endMargin && isLengthType(value.endMargin)) {
+            arkValue.endMargin = value.endMargin.toString();
+        }
+        modifier(this._modifiers, ColumnSplitDividerModifier, arkValue);
+        return this;
     }
     monopolizeEvents(monopolize) {
         throw new Error("Method not implemented.");
@@ -7098,12 +9986,29 @@ globalThis.FormLink.attributeModifier = function (modifier) {
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class GridRowAlignItemsModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().gridRow.resetAlignItems(node);
+        }
+        else {
+            GetUINativeModule().gridRow.setAlignItems(node, this.value);
+        }
+    }
+}
+GridRowAlignItemsModifier.identity = Symbol('gridRowAlignItems');
 class ArkGridRowComponent extends ArkComponent {
     onBreakpointChange(callback) {
         throw new Error("Method not implemented.");
     }
     alignItems(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, GridRowAlignItemsModifier, value);
+        }
+        else {
+            modifier(this._modifiers, GridRowAlignItemsModifier, undefined);
+        }
+        return this;
     }
     monopolizeEvents(monopolize) {
         throw new Error("Method not implemented.");
@@ -7472,12 +10377,54 @@ globalThis.RelativeContainer.attributeModifier = function (modifier) {
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class RowAlignItemsModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().row.resetAlignItems(node);
+        }
+        else {
+            GetUINativeModule().row.setAlignItems(node, this.value);
+        }
+    }
+}
+RowAlignItemsModifier.identity = Symbol('rowAlignItems');
+class RowJustifyContentlModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().row.resetJustifyContent(node);
+        }
+        else {
+            GetUINativeModule().row.setJustifyContent(node, this.value);
+        }
+    }
+}
+RowJustifyContentlModifier.identity = Symbol('rowJustifyContent');
 class ArkRowComponent extends ArkComponent {
     alignItems(value) {
-        throw new Error("Method not implemented.");
+        if (value === null || value === undefined) {
+            modifier(this._modifiers, RowAlignItemsModifier, undefined);
+        }
+        else if (!(value in VerticalAlign)) {
+            value = VerticalAlign.Center;
+            modifier(this._modifiers, RowAlignItemsModifier, value);
+        }
+        else {
+            modifier(this._modifiers, RowAlignItemsModifier, value);
+        }
+        return this;
     }
     justifyContent(value) {
-        throw new Error("Method not implemented.");
+        if (value === null || value === undefined) {
+            modifier(this._modifiers, RowJustifyContentlModifier, undefined);
+        }
+        else if (!(value in FlexAlign)) {
+            value = FlexAlign.Start;
+            modifier(this._modifiers, RowJustifyContentlModifier, value);
+        }
+        else {
+            modifier(this._modifiers, RowJustifyContentlModifier, value);
+        }
+        return this;
     }
     pointLight(value) {
         throw new Error("Method not implemented.");
@@ -7497,9 +10444,25 @@ globalThis.Row.attributeModifier = function (modifier) {
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class RowSplitResizeableModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().rowSplit.ResetResizeable(node);
+        }
+        else {
+            GetUINativeModule().rowSplit.setResizeable(node, this.value);
+        }
+    }
+}
+RowSplitResizeableModifier.identity = Symbol('rowSplitResizeable');
 class ArkRowSplitComponent extends ArkComponent {
     resizeable(value) {
-        throw new Error("Method not implemented.");
+        let arkResizeable = false;
+        if (isBoolean(value)) {
+            arkResizeable = value;
+        }
+        modifier(this._modifiers, RowSplitResizeableModifier, arkResizeable);
+        return this;
     }
     monopolizeEvents(monopolize) {
         throw new Error("Method not implemented.");
@@ -7516,42 +10479,271 @@ globalThis.RowSplit.attributeModifier = function (modifier) {
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class SideBarContainerPositionModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().sideBarContainer.resetSideBarPosition(node);
+        }
+        else {
+            GetUINativeModule().sideBarContainer.setSideBarPosition(node, this.value);
+        }
+    }
+}
+SideBarContainerPositionModifier.identity = Symbol('sideBarContainerPosition');
+class SideBarContainerAutoHideModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().sideBarContainer.resetAutoHide(node);
+        }
+        else {
+            GetUINativeModule().sideBarContainer.setAutoHide(node, this.value);
+        }
+    }
+}
+SideBarContainerAutoHideModifier.identity = Symbol('sideBarContainerautoHide');
+class SideBarContainerShowSideBarModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().sideBarContainer.resetShowSideBar(node);
+        }
+        else {
+            GetUINativeModule().sideBarContainer.setShowSideBar(node, this.value);
+        }
+    }
+}
+SideBarContainerShowSideBarModifier.identity = Symbol('sideBarContainerShowSideBar');
+class SideBarContainerMaxSideBarWidthModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().sideBarContainer.resetMaxSideBarWidth(node);
+        }
+        else {
+            GetUINativeModule().sideBarContainer.setMaxSideBarWidth(node, this.value);
+        }
+    }
+}
+SideBarContainerMaxSideBarWidthModifier.identity = Symbol('sideBarContainerMaxSideBarWidth');
+class SideBarContainerWidthModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().sideBarContainer.resetSideBarWidth(node);
+        }
+        else {
+            GetUINativeModule().sideBarContainer.setSideBarWidth(node, this.value);
+        }
+    }
+}
+SideBarContainerWidthModifier.identity = Symbol('sideBarContainerWidth');
+class SideBarContainerMinContentWidthModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().sideBarContainer.resetMinContentWidth(node);
+        }
+        else {
+            GetUINativeModule().sideBarContainer.setMinContentWidth(node, this.value);
+        }
+    }
+}
+SideBarContainerMinContentWidthModifier.identity = Symbol('sideBarContainerMinContentWidth');
+class SideBarContainerShowControlButtonModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().sideBarContainer.resetShowControlButton(node);
+        }
+        else {
+            GetUINativeModule().sideBarContainer.setShowControlButton(node, this.value);
+        }
+    }
+}
+SideBarContainerShowControlButtonModifier.identity = Symbol('sideBarContainerShowControlButton');
+class SideBarContainerMinSideBarWidthModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().sideBarContainer.resetMinSideBarWidth(node);
+        }
+        else {
+            GetUINativeModule().sideBarContainer.setMinSideBarWidth(node, this.value);
+        }
+    }
+}
+SideBarContainerMinSideBarWidthModifier.identity = Symbol('sideBarContainerMinSideBarWidth');
+class SideBarContainerControlButtonModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().sideBarContainer.resetControlButton(node);
+        }
+        else {
+            GetUINativeModule().sideBarContainer.setControlButton(node, this.value.left, this.value.top, this.value.width, this.value.height, this.value.icons.shown, this.value.icons.hidden, this.value.icons.switching);
+        }
+    }
+}
+SideBarContainerControlButtonModifier.identity = Symbol('sideBarContainercontrolButton');
+class SideBarContainerDividerModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().sideBarContainer.resetDivider(node);
+        }
+        else {
+            GetUINativeModule().sideBarContainer.setDivider(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin);
+        }
+    }
+}
+SideBarContainerDividerModifier.identity = Symbol('sideBarContainerdivider');
 class ArkSideBarContainerComponent extends ArkComponent {
-    showSideBar(value) {
-        throw new Error("Method not implemented.");
-    }
-    controlButton(value) {
-        throw new Error("Method not implemented.");
-    }
-    showControlButton(value) {
-        throw new Error("Method not implemented.");
-    }
     onChange(callback) {
         throw new Error("Method not implemented.");
     }
-    sideBarWidth(value) {
-        throw new Error("Method not implemented.");
+    autoHide(value) {
+        if (isBoolean(value)) {
+            modifier(this._modifiers, SideBarContainerAutoHideModifier, value);
+        }
+        else {
+            modifier(this._modifiers, SideBarContainerAutoHideModifier, true);
+        }
+        return this;
     }
-    minSideBarWidth(value) {
-        throw new Error("Method not implemented.");
+    showSideBar(value) {
+        let isShow = true;
+        if (isBoolean(value)) {
+            isShow = value;
+        }
+        modifier(this._modifiers, SideBarContainerShowSideBarModifier, isShow);
+        return this;
     }
     maxSideBarWidth(value) {
-        throw new Error("Method not implemented.");
+        let maxSideBarWidth = 280;
+        if (isNumber(value)) {
+            let numberValue = value;
+            if (numberValue < 0) {
+                modifier(this._modifiers, SideBarContainerMaxSideBarWidthModifier, maxSideBarWidth);
+            }
+            else {
+                modifier(this._modifiers, SideBarContainerMaxSideBarWidthModifier, numberValue);
+            }
+        }
+        else if (isLengthType(value)) {
+            let arkValue = value;
+            modifier(this._modifiers, SideBarContainerMaxSideBarWidthModifier, arkValue);
+        }
+        else {
+            modifier(this._modifiers, SideBarContainerMaxSideBarWidthModifier, maxSideBarWidth);
+        }
+        return this;
     }
-    autoHide(value) {
-        throw new Error("Method not implemented.");
-    }
-    sideBarPosition(value) {
-        throw new Error("Method not implemented.");
-    }
-    divider(value) {
-        throw new Error("Method not implemented.");
+    minSideBarWidth(value) {
+        let minSideBarWidth = 240;
+        if (isNumber(value)) {
+            let numberValue = value;
+            if (numberValue < 0) {
+                modifier(this._modifiers, SideBarContainerMinSideBarWidthModifier, minSideBarWidth);
+            }
+            else {
+                modifier(this._modifiers, SideBarContainerMinSideBarWidthModifier, numberValue);
+            }
+        }
+        else if (isLengthType(value)) {
+            let _lengthValue = value;
+            modifier(this._modifiers, SideBarContainerMinSideBarWidthModifier, _lengthValue);
+        }
+        else {
+            modifier(this._modifiers, SideBarContainerMinSideBarWidthModifier, minSideBarWidth);
+        }
+        return this;
     }
     minContentWidth(value) {
-        throw new Error("Method not implemented.");
+        let minContentWidth = '360vp';
+        if (isLengthType(value)) {
+            let _lengthValue = value;
+            modifier(this._modifiers, SideBarContainerMinContentWidthModifier, _lengthValue);
+        }
+        else {
+            modifier(this._modifiers, SideBarContainerMinContentWidthModifier, minContentWidth);
+        }
+        return this;
     }
-    monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+    controlButton(value) {
+        let arkValue = new ArkButtonStyle();
+        if (value.left && isNumber(value.left) && !isNaN(value.left)) {
+            arkValue.left = value.left;
+        }
+        if (value.top && isNumber(value.top) && !isNaN(value.top)) {
+            arkValue.top = value.top;
+        }
+        if (value.width && isNumber(value.width) && !isNaN(value.width)) {
+            arkValue.width = value.width;
+        }
+        if (value.height && isNumber(value.height) && !isNaN(value.height)) {
+            arkValue.height = value.height;
+        }
+        if (!value.icons || !isObject(value.icons)) {
+            arkValue.icons = undefined;
+        }
+        else {
+            if (isString(value.icons.shown)) {
+                arkValue.icons.shown = value.icons.shown;
+            }
+            if (isString(value.icons.hidden)) {
+                arkValue.icons.hidden = value.icons.hidden;
+            }
+            if (isString(value.icons.switching)) {
+                arkValue.icons.switching = value.icons.switching;
+            }
+        }
+        modifier(this._modifiers, SideBarContainerControlButtonModifier, arkValue);
+        return this;
+    }
+    divider(value) {
+        let arkValue = new ArkSideBarDividerStyle();
+        if (value === null || !isObject(value) || !isLengthType(value.strokeWidth)) {
+            modifier(this._modifiers, SideBarContainerDividerModifier, arkValue);
+        }
+        else {
+            arkValue.strokeWidth = value.strokeWidth;
+            let arkColor = new ArkColor();
+            if (arkColor.parseColorValue(value.color)) {
+                arkValue.color = value.color;
+            }
+            if (isLengthType(value.startMargin)) {
+                arkValue.startMargin = value.startMargin;
+            }
+            if (isLengthType(value.endMargin)) {
+                arkValue.endMargin = value.endMargin;
+            }
+            modifier(this._modifiers, SideBarContainerDividerModifier, arkValue);
+        }
+        return this;
+    }
+    sideBarPosition(value) {
+        if (!(value in SideBarPosition)) {
+            modifier(this._modifiers, SideBarContainerPositionModifier, SideBarPosition.Start);
+        }
+        modifier(this._modifiers, SideBarContainerPositionModifier, value);
+        return this;
+    }
+    sideBarWidth(value) {
+        let sideBarWidthValue = 240;
+        if (isNumber(value)) {
+            let numberValue = value;
+            if (numberValue < 0) {
+                modifier(this._modifiers, SideBarContainerWidthModifier, sideBarWidthValue);
+            }
+            else {
+                let lengthValue = value;
+                modifier(this._modifiers, SideBarContainerWidthModifier, lengthValue);
+            }
+        }
+        else if (isLengthType(value)) {
+            let lengthValue = value;
+            modifier(this._modifiers, SideBarContainerWidthModifier, lengthValue);
+        }
+        else {
+            modifier(this._modifiers, SideBarContainerWidthModifier, sideBarWidthValue);
+        }
+        return this;
+    }
+    showControlButton(value) {
+        modifier(this._modifiers, SideBarContainerShowControlButtonModifier, value);
+        return this;
     }
 }
 // @ts-ignore
@@ -7822,21 +11014,102 @@ globalThis.WaterFlow.attributeModifier = function (modifier) {
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class VideoObjectFitModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().video.resetObjectFit(node);
+        }
+        else {
+            GetUINativeModule().video.setObjectFit(node, this.value);
+        }
+    }
+}
+VideoObjectFitModifier.identity = Symbol('videoObjectFit');
+class VideoAutoPlayModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().video.resetAutoPlay(node);
+        }
+        else {
+            GetUINativeModule().video.setAutoPlay(node, this.value);
+        }
+    }
+}
+VideoAutoPlayModifier.identity = Symbol('videoAutoPlayr');
+class VideoControlsModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().video.resetControls(node);
+        }
+        else {
+            GetUINativeModule().video.setControls(node, this.value);
+        }
+    }
+}
+VideoControlsModifier.identity = Symbol('videoControls');
+class VideoLoopModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().video.resetLoop(node);
+        }
+        else {
+            GetUINativeModule().video.setLoop(node, this.value);
+        }
+    }
+}
+VideoLoopModifier.identity = Symbol('videoLoop');
+class VideoMutedModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().video.resetMuted(node);
+        }
+        else {
+            GetUINativeModule().video.setMuted(node, this.value);
+        }
+    }
+}
+VideoMutedModifier.identity = Symbol('videoMuted');
 class ArkVideoComponent extends ArkComponent {
     muted(value) {
-        throw new Error("Method not implemented.");
+        let muted = false;
+        if (isBoolean(value)) {
+            muted = value;
+        }
+        modifier(this._modifiers, VideoMutedModifier, muted);
+        return this;
     }
     autoPlay(value) {
-        throw new Error("Method not implemented.");
+        let autoPlay = false;
+        if (isBoolean(value)) {
+            autoPlay = value;
+        }
+        modifier(this._modifiers, VideoAutoPlayModifier, autoPlay);
+        return this;
     }
     controls(value) {
-        throw new Error("Method not implemented.");
+        let controls = true;
+        if (isBoolean(value)) {
+            controls = value;
+        }
+        modifier(this._modifiers, VideoControlsModifier, controls);
+        return this;
     }
     loop(value) {
-        throw new Error("Method not implemented.");
+        let loop = false;
+        if (isBoolean(value)) {
+            loop = value;
+        }
+        modifier(this._modifiers, VideoLoopModifier, loop);
+        return this;
     }
     objectFit(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, VideoObjectFitModifier, value);
+        }
+        else {
+            modifier(this._modifiers, VideoObjectFitModifier, undefined);
+        }
+        return this;
     }
     onStart(event) {
         throw new Error("Method not implemented.");
@@ -8316,6 +11589,41 @@ globalThis.Canvas.attributeModifier = function (modifier) {
     let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
     let component = this.createOrGetNode(elmtId, () => {
         return new ArkCanvasComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkGridContainerComponent extends ArkComponent {
+    alignItems(value) {
+        throw new Error('Method not implemented.');
+    }
+    justifyContent(value) {
+        throw new Error('Method not implemented.');
+    }
+    pointLight(value) {
+        throw new Error('Method not implemented.');
+    }
+}
+// @ts-ignore
+globalThis.GridContainer.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkGridContainerComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkWindowSceneComponent extends ArkComponent {
+}
+// @ts-ignore
+globalThis.WindowScene.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkWindowSceneComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();

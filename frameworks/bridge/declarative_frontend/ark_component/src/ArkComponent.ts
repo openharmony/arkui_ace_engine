@@ -81,7 +81,8 @@ class ModifierWithKey<T extends number | string | boolean | object> {
     }
 
     applyStage(node: KNode): boolean {
-        if (this.stageValue === this.value) {  
+        if (this.stageValue === undefined) {
+            this.value = this.stageValue;
             this.applyPeer(node, true);
             return true;
         }
@@ -98,12 +99,6 @@ class ModifierWithKey<T extends number | string | boolean | object> {
         if (different) {
             this.value = this.stageValue;
             this.applyPeer(node, false);
-            if (this.stageValue === undefined) {
-                this.applyPeer(node, true);
-            } else {
-                this.value = this.stageValue;
-                this.applyPeer(node, false);
-            }
         }
         this.stageValue = undefined;
         return false;
@@ -203,7 +198,8 @@ class BorderColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
             GetUINativeModule().common.resetBorderColor(node);
         }
         else {
-            if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+            const valueType: string = typeof this.value;
+            if (valueType === "number" || valueType === "string" || isResource(this.value)) {
                 GetUINativeModule().common.setBorderColor(node, this.value, this.value, this.value, this.value);
             } else {
                 GetUINativeModule().common.setBorderColor(node, (this.value as EdgeColors).left,
