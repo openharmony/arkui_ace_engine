@@ -2991,7 +2991,8 @@ void RosenDecorationPainter::PaintShadow(
     canvas->restore();
 }
 #else
-void RosenDecorationPainter::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas)
+void RosenDecorationPainter::PaintShadow(const RSPath& path, const Shadow& shadow,
+    RSCanvas* canvas, const RSBrush* brush, const RSPen* pen)
 {
     if (!canvas) {
         LOGE("PaintShadow failed, canvas is null.");
@@ -3021,16 +3022,36 @@ void RosenDecorationPainter::PaintShadow(const RSPath& path, const Shadow& shado
         canvas->DrawShadow(drPath, planeParams, lightPos, shadow.GetLightRadius(), ambientColor, spotColor,
             RSShadowFlags::TRANSPARENT_OCCLUDER);
     } else {
-        RSBrush brush;
-        brush.SetColor(spotColor);
-        brush.SetAntiAlias(true);
         RSFilter filter;
         filter.SetMaskFilter(RSRecordingMaskFilter::CreateBlurMaskFilter(
             RSBlurType::NORMAL, ConvertRadiusToSigma(shadow.GetBlurRadius())));
-        brush.SetFilter(filter);
-        canvas->AttachBrush(brush);
+        if (pen) {
+            RSPen shadowPen;
+            shadowPen.SetColor(spotColor);
+            shadowPen.SetAntiAlias(true);
+            shadowPen.SetWidth(pen->GetWidth());
+            shadowPen.SetMiterLimit(pen->GetMiterLimit());
+            shadowPen.SetCapStyle(pen->GetCapStyle());
+            shadowPen.SetJoinStyle(pen->GetJoinStyle());
+            shadowPen.SetAlphaF(pen->GetAlphaF());
+            shadowPen.SetFilter(filter);
+            canvas->AttachPen(shadowPen);
+        }
+        if (brush) {
+            RSBrush shadowBrush;
+            shadowBrush.SetColor(spotColor);
+            shadowBrush.SetAntiAlias(true);
+            shadowBrush.SetAlphaF(brush->GetAlphaF());
+            shadowBrush.SetFilter(filter);
+            canvas->AttachBrush(shadowBrush);
+        }
         canvas->DrawPath(drPath);
-        canvas->DetachBrush();
+        if (pen) {
+            canvas->DetachBrush();
+        }
+        if (brush) {
+            canvas->DetachPen();
+        }
     }
     canvas->Restore();
 }

@@ -812,6 +812,13 @@ RSBitmapFormat ImageProvider::MakeRSBitmapFormatFromPixelMap(const RefPtr<PixelM
 {
     return { PixelFormatToDrawingColorType(pixmap), AlphaTypeToDrawingAlphaType(pixmap) };
 }
+RSImageInfo ImageProvider::MakeRSImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap)
+{
+    RSColorType ct = PixelFormatToDrawingColorType(pixmap);
+    RSAlphaType at = AlphaTypeToDrawingAlphaType(pixmap);
+    std::shared_ptr<RSColorSpace> cs = ColorSpaceToDrawingColorSpace(pixmap);
+    return { pixmap->GetWidth(), pixmap->GetHeight(), ct, at, cs };
+}
 #endif
 
 #ifndef USE_ROSEN_DRAWING
