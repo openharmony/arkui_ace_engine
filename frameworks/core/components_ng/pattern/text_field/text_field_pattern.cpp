@@ -777,6 +777,7 @@ void TextFieldPattern::HandleBlurEvent()
     if (IsNormalInlineState()) {
         if (IsTextArea() && isTextInput_) {
             layoutProperty->UpdateMaxLines(1);
+            layoutProperty->UpdatePlaceholderMaxLines(1);
         }
         inlineSelectAllFlag_ = false;
         inlineFocusState_ = false;
@@ -4674,6 +4675,7 @@ void TextFieldPattern::ApplyInlineStates(bool focusStatus)
     margin.top = CalcLength(inlineState_.padding.top->GetDimension() + inlineState_.margin.top->GetDimension());
     layoutProperty->UpdateMargin(margin);
     if (!IsTextArea()) {
+        layoutProperty->UpdatePlaceholderMaxLines(layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
         layoutProperty->ResetMaxLines();
     }
     needApplyInlineSize_ = true;
