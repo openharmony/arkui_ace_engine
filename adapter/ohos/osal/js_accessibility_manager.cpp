@@ -1830,8 +1830,8 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     return client->SendEvent(eventInfo);
 }
 
-bool JsAccessibilityManager::SendAccessibilitySyncEvent(
-    const AccessibilityEventInfo& eventInfo, std::vector<int32_t>& uiExtensionIdLevelList)
+bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
+    const AccessibilityEventInfo& eventInfo, const std::vector<int32_t>& uiExtensionIdLevelList)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     if (!IsRegister()) {
@@ -1873,6 +1873,20 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     eventInfoNew.SetSource(wrapLevelid + eventInfo.GetViewId());
 #endif
     return client->SendEvent(eventInfoNew);
+}
+
+void JsAccessibilityManager::SendExtensionAccessibilityEvent(
+    const AccessibilityEventInfo& eventInfo, const std::vector<int32_t>& uiExtensionIdLevelList)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), eventInfo, uiExtensionIdLevelList]() {
+                auto jsAccessibilityManager = weak.Upgrade();
+                CHECK_NULL_VOID(jsAccessibilityManager);
+                jsAccessibilityManager->TransferAccessibilityAsyncEvent(eventInfo, uiExtensionIdLevelList);
+        },
+        TaskExecutor::TaskType::BACKGROUND);
 }
 
 void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent)

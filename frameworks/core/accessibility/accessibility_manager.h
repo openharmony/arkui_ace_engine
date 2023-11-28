@@ -98,11 +98,13 @@ public:
         const RefPtr<PipelineBase>& context, const int32_t uiExtensionOffset = 0) = 0;
     virtual bool ExecuteExtensionActionNG(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, const RefPtr<PipelineBase>& context, int32_t uiExtensionOffset) = 0;
-    virtual bool SendAccessibilitySyncEvent(
-        const Accessibility::AccessibilityEventInfo& eventInfo, std::vector<int32_t>& uiExtensionIdLevelList)
+    virtual bool TransferAccessibilityAsyncEvent(
+        const Accessibility::AccessibilityEventInfo& eventInfo, const std::vector<int32_t>& uiExtensionIdLevelList)
     {
         return false;
     }
+    virtual void SendExtensionAccessibilityEvent(
+        const Accessibility::AccessibilityEventInfo& eventInfo, const std::vector<int32_t>& uiExtensionIdLevelList) {}
 #endif
     void SetVersion(AccessibilityVersion version)
     {
