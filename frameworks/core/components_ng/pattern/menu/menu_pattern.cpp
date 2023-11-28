@@ -457,6 +457,10 @@ uint32_t MenuPattern::GetInnerMenuCount() const
     uint32_t depth = 0;
     while (child && depth < MAX_SEARCH_DEPTH) {
         // found component <Menu>
+        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            child = child->GetFrameChildByIndex(0, false);
+            continue;
+        }
         if (child->GetTag() == V2::MENU_ETS_TAG) {
             auto parent = child->GetParent();
             CHECK_NULL_RETURN(parent, 0);
@@ -480,6 +484,10 @@ RefPtr<FrameNode> MenuPattern::GetFirstInnerMenu() const
     auto child = host->GetChildAtIndex(0);
     while (child && depth < MAX_SEARCH_DEPTH) {
         // found component <Menu>
+        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            child = child->GetFrameChildByIndex(0, false);
+            continue;
+        }
         if (child->GetTag() == V2::MENU_ETS_TAG) {
             return AceType::DynamicCast<FrameNode>(child);
         }
