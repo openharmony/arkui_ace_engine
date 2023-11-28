@@ -43,8 +43,17 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme = AceType::Claim(new ClockTheme());
-            theme->defaultSize_ = themeConstants->GetDimension(THEME_CLOCK_DEFAULT_SIZE);
+
+            auto themeStyle = themeConstants->GetThemeStyle();
+            if (!themeStyle) {
+                return theme;
+            }
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_CLOCK, nullptr);
+            if (!pattern) {
+                LOGW("find pattern of clock fail");
+                return theme;
+            }
+            theme->defaultSize_ = pattern->GetAttr<Dimension>("clock_default_size", 0.0_vp);
             return theme;
 
         }
