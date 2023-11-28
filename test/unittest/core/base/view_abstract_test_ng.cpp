@@ -2112,4 +2112,107 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableBlurTest, TestSize.Level1)
     EXPECT_TRUE(callback);
     ViewStackProcessor::GetInstance()->instance = nullptr;
 }
+
+/**
+ * @tc.name: ViewAbstractMonopolizeEvent001
+ * @tc.desc: View_Abstract set MonopolizeEvent true test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractMonopolizeEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and put mainNode, then build some necessary params.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+
+    /**
+     * @tc.steps: step2. set monopolize
+     */
+    ViewAbstract::SetMonopolizeEvents(true);
+
+    /**
+     * @tc.steps: step3. get node in ViewStackProcessor.
+     * @tc.expected: node is not null.
+     */
+    auto rootFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(rootFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step4. get monopolizeEvents value of the node.
+     * @tc.expected: value is equal to true.
+     */
+    EXPECT_EQ(rootFrameNode->GetMonopolizeEvents(), true);
+
+    /**
+     * @tc.steps: step5. finish view stack.
+     */
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: ViewAbstractMonopolizeEvent002
+ * @tc.desc: View_Abstract set MonopolizeEvent false test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractMonopolizeEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and put mainNode, then build some necessary params.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+
+    /**
+     * @tc.steps: step2. set monopolize
+     */
+    ViewAbstract::SetMonopolizeEvents(false);
+
+    /**
+     * @tc.steps: step3. get node in ViewStackProcessor.
+     * @tc.expected: node is not null.
+     */
+    auto rootFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(rootFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step4. get monopolizeEvents value of the node.
+     * @tc.expected: value is equal to true.
+     */
+    EXPECT_EQ(rootFrameNode->GetMonopolizeEvents(), false);
+
+    /**
+     * @tc.steps: step5. finish view stack.
+     */
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: ViewAbstractMonopolizeEvent003
+ * @tc.desc: View_Abstract not set MonopolizeEvent test (use default)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractMonopolizeEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and put mainNode, then build some necessary params.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+
+    /**
+     * @tc.steps: step2. get node in ViewStackProcessor.
+     * @tc.expected: node is not null.
+     */
+    auto rootFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(rootFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. get monopolizeEvents value of the node.
+     * @tc.expected: value is equal to true.
+     */
+    EXPECT_EQ(rootFrameNode->GetMonopolizeEvents(), false);
+
+    /**
+     * @tc.steps: step5. finish view stack.
+     */
+    ViewStackProcessor::GetInstance()->Finish();
+}
 } // namespace OHOS::Ace::NG
