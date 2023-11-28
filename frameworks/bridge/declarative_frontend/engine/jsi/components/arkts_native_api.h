@@ -437,6 +437,20 @@ struct ArkUIGridRowModifierAPI {
 };
 
 struct ArkUIPanelModifierAPI {
+    void (*SetPanelMode)(NodeHandle node, int32_t mode);
+    void (*ResetPanelMode)(NodeHandle node);
+    void (*SetPanelFullHeight)(NodeHandle node, double value, int unit);
+    void (*ResetPanelFullHeight)(NodeHandle node);
+    void (*SetPanelHalfHeight)(NodeHandle node, double value, int unit);
+    void (*ResetPanelHalfHeight)(NodeHandle node);
+    void (*SetPanelMiniHeight)(NodeHandle node, double value, int unit);
+    void (*ResetPanelMiniHeight)(NodeHandle node);
+    void (*SetPanelBackgroundMask)(NodeHandle node, uint32_t color);
+    void (*ResetPanelBackgroundMask)(NodeHandle node);
+    void (*SetPanelType)(NodeHandle node, int32_t type);
+    void (*ResetPanelType)(NodeHandle node);
+    void (*SetPanelCustomHeight)(NodeHandle node, double value, int unit);
+    void (*ResetPanelCustomHeight)(NodeHandle node);
     void (*SetShowCloseIcon)(NodeHandle node, bool value);
     void (*ResetShowCloseIcon)(NodeHandle node);
     void (*SetDragBar)(NodeHandle node, bool value);

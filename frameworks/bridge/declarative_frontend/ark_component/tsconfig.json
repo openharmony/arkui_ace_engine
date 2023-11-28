@@ -1,7 +1,5 @@
 {
     "files": [
-        "src/ArkColor.ts",
-        "src/ArkClassDefine.ts",
         "src/ArkComponent.ts",
         "src/ArkButton.ts",
         "src/ArkLoadingProgress.ts",
@@ -25,6 +23,8 @@
         "src/ArkCounter.ts",
         "src/ArkCheckboxGroup.ts",
         "src/ArkGridCol.ts",
+        "src/ArkColor.ts",
+        "src/ArkClassDefine.ts",
         "src/ArkPanel.ts",
         "src/ArkNavigation.ts",
         "src/ArkRichEditor.ts",

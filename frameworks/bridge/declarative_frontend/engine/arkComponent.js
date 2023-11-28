@@ -390,19 +390,6 @@ class ArkLinearGradientBlur {
             (this.direction === another.direction));
     }
 }
-class ArkBackgroundBlurStyle {
-    constructor() {
-        this.blurStyle = undefined;
-        this.colorMode = undefined;
-        this.adaptiveColor = undefined;
-        this.scale = undefined;
-    }
-    isEqual(another) {
-        return ((this.blurStyle === another.blurStyle) &&
-            (this.colorMode === another.colorMode) && (this.adaptiveColor === another.adaptiveColor) &&
-            (this.scale === another.scale));
-    }
-}
 class ArkFont {
     constructor() {
         this.size = "16fp";
@@ -421,34 +408,19 @@ class ArkFont {
         return this.size === another.size && this.weight === another.weight && this.family === another.family && this.style === another.style;
     }
     parseFontWeight(value) {
-        if (typeof value === 'number') {
-            if (value === 0) {
-                this.weight = "Lighter";
-            }
-            else if (value === 1) {
-                this.weight = "Normal";
-            }
-            else if (value === 2) {
-                this.weight = "Regular";
-            }
-            else if (value === 3) {
-                this.weight = "Medium";
-            }
-            else if (value === 4) {
-                this.weight = "Bold";
-            }
-            else if (value === 5) {
-                this.weight = "Bolder";
-            }
-            else {
-                this.weight = value.toString();
-            }
-        }
-        else if (typeof value === 'string') {
-            this.weight = value;
+        const valueWeightMap = {
+            [0]: 'Lighter',
+            [1]: 'Normal',
+            [2]: 'Regular',
+            [3]: 'Medium',
+            [4]: 'Bold',
+            [5]: 'Bolder'
+        };
+        if (value in valueWeightMap) {
+            this.weight = valueWeightMap[value];
         }
         else {
-            this.weight = "400";
+            this.weight = value.toString();
         }
     }
 }
@@ -513,9 +485,9 @@ class ArkRadioStyle {
         this.indicatorColor = undefined;
     }
     isEqual(another) {
-        return (this.checkedBackgroundColor === another.checkedBackgroundColor
-            && this.uncheckedBorderColor === another.uncheckedBorderColor
-            && this.indicatorColor === another.indicatorColor);
+        return (this.checkedBackgroundColor === another.checkedBackgroundColor &&
+            this.uncheckedBorderColor === another.uncheckedBorderColor &&
+            this.indicatorColor === another.indicatorColor);
     }
 }
 class ArkStarStyle {
@@ -525,9 +497,22 @@ class ArkStarStyle {
         this.secondaryUri = undefined;
     }
     isEqual(another) {
-        return this.backgroundUri === another.backgroundUri
-            && this.foregroundUri === another.foregroundUri
-            && this.secondaryUri === another.secondaryUri;
+        return this.backgroundUri === another.backgroundUri &&
+            this.foregroundUri === another.foregroundUri &&
+            this.secondaryUri === another.secondaryUri;
+    }
+}
+class ArkBackgroundBlurStyle {
+    constructor() {
+        this.blurStyle = undefined;
+        this.colorMode = undefined;
+        this.adaptiveColor = undefined;
+        this.scale = undefined;
+    }
+    isEqual(another) {
+        return ((this.blurStyle === another.blurStyle) &&
+            (this.colorMode === another.colorMode) && (this.adaptiveColor === another.adaptiveColor) &&
+            (this.scale === another.scale));
     }
 }
 class ArkMarkStyle {
@@ -724,6 +709,26 @@ class ArkPadding {
             this.left === another.left);
     }
 }
+class ArkAllowDrop {
+    constructor() {
+        this.allowDropArray = undefined;
+    }
+    isEqual(another) {
+        return this.allowDropArray === another.allowDropArray;
+    }
+}
+var TabBarMode;
+(function (TabBarMode) {
+    TabBarMode[TabBarMode["FIXED"] = 0] = "FIXED";
+    TabBarMode[TabBarMode["SCROLLABLE"] = 1] = "SCROLLABLE";
+    TabBarMode[TabBarMode["FIXED_START"] = 2] = "FIXED_START";
+})(TabBarMode || (TabBarMode = {}));
+;
+class ArkBarMode {
+    convertStrToTabBarMode(value) {
+        return value.toLowerCase() == "fixed" ? TabBarMode.FIXED : TabBarMode.FIXED_START;
+    }
+}
 /// <reference path="./import.ts" />
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function GetUINativeModule() {
@@ -763,9 +768,8 @@ class Modifier {
     }
     applyStage(node) {
         if (this.stageValue === this.value) {
-            if(this.value === undefined)
-            {                
-                this.applyPeer(node, true);                
+            if (this.value === undefined) {
+                this.applyPeer(node, true);
             }
             delete this.stageValue;
             return;
@@ -805,9 +809,12 @@ class ModifierWithKey {
             different = this.checkObjectDiff();
         }
         if (different) {
+            this.value = this.stageValue;
+            this.applyPeer(node, false);
             if (this.stageValue === undefined) {
                 this.applyPeer(node, true);
-            } else {
+            }
+            else {
                 this.value = this.stageValue;
                 this.applyPeer(node, false);
             }
@@ -831,7 +838,7 @@ class BackgroundColorModifier extends ModifierWithKey {
     }
     checkObjectDiff() {
         if (isResource(this.stageValue) && isResource(this.value)) {
-            return isResourceEqual(this.stageValue, this.value);
+            return !isResourceEqual(this.stageValue, this.value);
         }
         else {
             return true;
@@ -908,10 +915,9 @@ class BorderColorModifier extends ModifierWithKey {
             }
         }
     }
-
     checkObjectDiff() {
         if (isResource(this.stageValue) && isResource(this.value)) {
-            return isResourceEqual(this.stageValue, this.value);
+            return !isResourceEqual(this.stageValue, this.value);
         }
         else if (!isResource(this.stageValue) && !isResource(this.value)) {
             return !(this.stageValue.left === this.value.left &&
@@ -1478,15 +1484,60 @@ class VisibilityModifier extends Modifier {
     }
 }
 VisibilityModifier.identity = Symbol('visibility');
+class AccessibilityTextModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetAccessibilityText(node);
+        }
+        else {
+            GetUINativeModule().common.setAccessibilityText(node, this.value);
+        }
+    }
+}
+AccessibilityTextModifier.identity = Symbol("accessibilityText");
+class AllowDropModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetAllowDrop(node);
+        }
+        else {
+            GetUINativeModule().common.setAllowDrop(node, this.value.allowDropArray);
+        }
+    }
+}
+AllowDropModifier.identity = Symbol("allowDrop");
+class AccessibilityLevelModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetAccessibilityLevel(node);
+        }
+        else {
+            GetUINativeModule().common.setAccessibilityLevel(node, this.value);
+        }
+    }
+}
+AccessibilityLevelModifier.identity = Symbol("accessibilityLevel");
+class AccessibilityDescriptionModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().common.resetAccessibilityDescription(node);
+        }
+        else {
+            GetUINativeModule().common.setAccessibilityDescription(node, this.value);
+        }
+    }
+}
+AccessibilityDescriptionModifier.identity = Symbol("accessibilityDescription");
 class DisplayPriorityModifier extends Modifier {
-  applyPeer(node, reset) {
-      if (reset) {
-          GetUINativeModule().common.resetDisplayPriority(node);
-      }
-      else {
-          GetUINativeModule().common.setDisplayPriority(node, this.value);
-      }
-  }
+    applyPeer(node, reset) {
+        //console.log('DisplayPriorityModifier reset = ' + reset);
+        if (reset) {
+            GetUINativeModule().common.resetDisplayPriority(node);
+        }
+        else {
+            GetUINativeModule().common.setDisplayPriority(node, this.value);
+        }
+    }
 }
 DisplayPriorityModifier.identity = Symbol('displayPriority');
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
@@ -2282,13 +2333,13 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     displayPriority(value) {
-      if (isNaN(value)) {
-          modifier(this._modifiers, DisplayPriorityModifier, undefined);
-      }
-      else {
-          modifier(this._modifiers, DisplayPriorityModifier, value);
-      }
-      return this;
+        if (isNaN(value)) {
+            modifier(this._modifiers, DisplayPriorityModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, DisplayPriorityModifier, value);
+        }
+        return this;
     }
     zIndex(value) {
         if (value !== null) {
@@ -2395,7 +2446,10 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     allowDrop(value) {
-        throw new Error("Method not implemented.");
+        let allowDrop = new ArkAllowDrop();
+        allowDrop.allowDropArray = value;
+        modifier(this._modifiers, AllowDropModifier, allowDrop);
+        return this;
     }
     draggable(value) {
         throw new Error("Method not implemented.");
@@ -2524,13 +2578,31 @@ class ArkComponent {
         throw new Error("Method not implemented.");
     }
     accessibilityText(value) {
-        throw new Error("Method not implemented.");
+        if (typeof value === "string") {
+            modifier(this._modifiers, AccessibilityTextModifier, value);
+        }
+        else {
+            modifier(this._modifiers, AccessibilityTextModifier, undefined);
+        }
+        return this;
     }
     accessibilityDescription(value) {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "string") {
+            modifier(this._modifiers, AccessibilityDescriptionModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, AccessibilityDescriptionModifier, value);
+        }
+        return this;
     }
     accessibilityLevel(value) {
-        throw new Error("Method not implemented.");
+        if (typeof value !== "string") {
+            modifier(this._modifiers, AccessibilityLevelModifier, undefined);
+        }
+        else {
+            modifier(this._modifiers, AccessibilityLevelModifier, value);
+        }
+        return this;
     }
     obscured(reasons) {
         throw new Error("Method not implemented.");
@@ -2863,9 +2935,26 @@ class ArkStackComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
     alignContent(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, StackAlignContentModifier, value);
+        }
+        else {
+            modifier(this._modifiers, StackAlignContentModifier, undefined);
+        }
+        return this;
     }
 }
+class StackAlignContentModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().stack.resetAlignContent(node);
+        }
+        else {
+            GetUINativeModule().stack.setAlignContent(node, this.value);
+        }
+    }
+}
+StackAlignContentModifier.identity = Symbol('stackAlignContent');
 // @ts-ignore
 globalThis.Stack.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -2877,6 +2966,17 @@ globalThis.Stack.attributeModifier = function (modifier) {
     component.applyModifierPatch();
 };
 /// <reference path="./import.ts" />
+class ImageObjectFitModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().image.resetObjectFit(node);
+        }
+        else {
+            GetUINativeModule().image.setObjectFit(node, this.value);
+        }
+    }
+}
+ImageObjectFitModifier.identity = Symbol('imageObjectFit');
 class ArkImageComponent extends ArkComponent {
     onGestureJudgeBegin(callback) {
         throw new Error("Method not implemented.");
@@ -2894,7 +2994,13 @@ class ArkImageComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
     objectFit(value) {
-        throw new Error("Method not implemented.");
+        if (value) {
+            modifier(this._modifiers, ImageObjectFitModifier, value);
+        }
+        else {
+            modifier(this._modifiers, ImageObjectFitModifier, undefined);
+        }
+        return this;
     }
     objectRepeat(value) {
         throw new Error("Method not implemented.");
@@ -3212,14 +3318,14 @@ globalThis.Text.attributeModifier = function (modifier) {
 };
 /// <reference path="./import.ts" />
 class TextAreaMaxLinesModifier extends Modifier {
-  applyPeer(node, reset) {
-      if (reset) {
-          GetUINativeModule().textArea.resetMaxLines(node);
-      }
-      else {
-          GetUINativeModule().textArea.setMaxLines(node, this.value);
-      }
-  }
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().textArea.resetMaxLines(node);
+        }
+        else {
+            GetUINativeModule().textArea.setMaxLines(node, this.value);
+        }
+    }
 }
 TextAreaMaxLinesModifier.identity = Symbol('textAreaMaxLines');
 class ArkTextAreaComponent extends ArkComponent {
@@ -3302,16 +3408,16 @@ class ArkTextAreaComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
     maxLines(value) {
-      if (!isNumber(value)) {
-          modifier(this._modifiers, TextAreaMaxLinesModifier, MAX_LINES);
-          return this;
-      }
-      if (Number(value) <= 0) {
-          modifier(this._modifiers, TextAreaMaxLinesModifier, MAX_LINES);
-          return this;
-      }
-      modifier(this._modifiers, TextAreaMaxLinesModifier, Number(value));
-      return this;
+        if (!isNumber(value)) {
+            modifier(this._modifiers, TextAreaMaxLinesModifier, undefined);
+            return this;
+        }
+        if (Number(value) <= 0) {
+            modifier(this._modifiers, TextAreaMaxLinesModifier, undefined);
+            return this;
+        }
+        modifier(this._modifiers, TextAreaMaxLinesModifier, Number(value));
+        return this;
     }
     customKeyboard(value) {
         throw new Error("Method not implemented.");
@@ -4845,7 +4951,7 @@ class EnableDecModifier extends Modifier {
     }
 }
 EnableDecModifier.identity = Symbol("enableDec");
-/// <reference path="./ArkViewStackProcessor.ts" />
+/// <reference path="./import.ts" />
 class CheckboxGroupSelectAllModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -5145,43 +5251,109 @@ class ShowModifier extends Modifier {
     }
 }
 ShowModifier.identity = Symbol("show");
-//@ts-nocheck
+/// <reference path="./import.ts" />
+const TITLE_MODE_RANGE = 2;
+const NAV_BAR_POSITION_RANGE = 1;
+const NAVIGATION_MODE_RANGE = 2;
+const DEFAULT_NAV_BAR_WIDTH = 240;
+const MIN_NAV_BAR_WIDTH_DEFAULT = "0vp";
+const NAVUGATION_TITLE_MODE_DEFAULT = 0;
+const DEFAULT_UNIT = "vp";
 class ArkNavigationComponent extends ArkComponent {
     navBarWidth(value) {
-        throw new Error("Method not implemented.");
+        if (isNumber(value)) {
+            value = value + DEFAULT_UNIT;
+        }
+        if (isString(value)) {
+            modifier(this._modifiers, NavBarWidthModifier, value.toString());
+        }
+        return this;
     }
     navBarPosition(value) {
-        throw new Error("Method not implemented.");
+        if (value >= 0 && value <= NAV_BAR_POSITION_RANGE) {
+            modifier(this._modifiers, NavBarPositionModifier, value);
+        }
+        return this;
     }
     navBarWidthRange(value) {
-        throw new Error("Method not implemented.");
+        if (!value) {
+            return;
+        }
+        if (!!value && (value === null || value === void 0 ? void 0 : value.length) > 0 && !!value[0]) {
+            let min;
+            if (isNumber(value[0])) {
+                min = value[0] + DEFAULT_UNIT;
+            }
+            else {
+                min = value[0].toString();
+            }
+            modifier(this._modifiers, MinNavBarWidthModifier, min);
+        }
+        else {
+            modifier(this._modifiers, MinNavBarWidthModifier, MIN_NAV_BAR_WIDTH_DEFAULT);
+        }
+        if (!!value && (value === null || value === void 0 ? void 0 : value.length) > 1 && !!value[1]) {
+            let max;
+            if (isNumber(value[1])) {
+                max = max + DEFAULT_UNIT;
+            }
+            else {
+                max = value[1].toString();
+            }
+            modifier(this._modifiers, MaxNavBarWidthModifier, max);
+        }
+        else {
+            modifier(this._modifiers, MaxNavBarWidthModifier, MIN_NAV_BAR_WIDTH_DEFAULT);
+        }
+        return this;
     }
     minContentWidth(value) {
-        throw new Error("Method not implemented.");
+        let minContentWidth = 0 + DEFAULT_UNIT;
+        if ((isNumber(value) && Number(value) > 0)) {
+            minContentWidth = value + DEFAULT_UNIT;
+        }
+        if (isString(value)) {
+            minContentWidth = value.toString();
+        }
+        modifier(this._modifiers, MinContentWidthModifier, minContentWidth);
+        return this;
     }
     mode(value) {
-        throw new Error("Method not implemented.");
+        if (!isNumber(value)) {
+            modifier(this._modifiers, ModeModifier, NavigationMode.Auto);
+        }
+        else if (value >= NavigationMode.Stack && value <= NAVIGATION_MODE_RANGE) {
+            modifier(this._modifiers, ModeModifier, value);
+        }
+        return this;
     }
     backButtonIcon(value) {
         throw new Error("Method not implemented.");
     }
     hideNavBar(value) {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, HideNavBarModifier, isBoolean(value) ? value : false);
+        return this;
     }
     title(value) {
         throw new Error("Method not implemented.");
     }
     subTitle(value) {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, SubTitleModifier, value);
+        return this;
     }
     hideTitleBar(value) {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, NavigationHideTitleBarModifier, isBoolean(value) ? value : false);
+        return this;
     }
     hideBackButton(value) {
-        throw new Error("Method not implemented.");
+        modifier(this._modifiers, HideBackButtonModifier, isBoolean(value) ? value : false);
+        return this;
     }
     titleMode(value) {
-        throw new Error("Method not implemented.");
+        if (value >= NAVUGATION_TITLE_MODE_DEFAULT && value <= TITLE_MODE_RANGE) {
+            modifier(this._modifiers, TitleModeModifier, value);
+        }
+        return this;
     }
     menus(value) {
         throw new Error("Method not implemented.");
@@ -5209,6 +5381,72 @@ class ArkNavigationComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
 }
+class MinNavBarWidthModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navigation.resetMinNavBarWidth(node);
+        }
+        else {
+            GetUINativeModule().navigation.setMinNavBarWidth(node, this.value);
+        }
+    }
+}
+MinNavBarWidthModifier.identity = Symbol("minNavBarWidth");
+class MaxNavBarWidthModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navigation.resetMaxNavBarWidth(node);
+        }
+        else {
+            GetUINativeModule().navigation.setMaxNavBarWidth(node, this.value);
+        }
+    }
+}
+MaxNavBarWidthModifier.identity = Symbol("maxNavBarWidth");
+class MinContentWidthModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navigation.resetMinContentWidth(node);
+        }
+        else {
+            GetUINativeModule().navigation.setMinContentWidth(node, this.value);
+        }
+    }
+}
+MinContentWidthModifier.identity = Symbol("minContentWidth");
+class NavBarWidthModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navigation.resetNavBarWidth(node);
+        }
+        else {
+            GetUINativeModule().navigation.setNavBarWidth(node, this.value);
+        }
+    }
+}
+NavBarWidthModifier.identity = Symbol("navBarWidth");
+class NavBarPositionModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navigation.resetNavBarPosition(node);
+        }
+        else {
+            GetUINativeModule().navigation.setNavBarPosition(node, this.value);
+        }
+    }
+}
+NavBarPositionModifier.identity = Symbol("navBarPosition");
+class ModeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navigation.resetMode(node);
+        }
+        else {
+            GetUINativeModule().navigation.setMode(node, this.value);
+        }
+    }
+}
+ModeModifier.identity = Symbol("mode");
 class HideToolBarModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -5220,12 +5458,2864 @@ class HideToolBarModifier extends Modifier {
     }
 }
 HideToolBarModifier.identity = Symbol("hideToolBar");
-//@ts-ignore
+class TitleModeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navigation.resetTitleMode(node);
+        }
+        else {
+            GetUINativeModule().navigation.setTitleMode(node, this.value);
+        }
+    }
+}
+TitleModeModifier.identity = Symbol("titleMode");
+class HideBackButtonModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navigation.resetHideBackButton(node);
+        }
+        else {
+            GetUINativeModule().navigation.setHideBackButton(node, this.value);
+        }
+    }
+}
+HideBackButtonModifier.identity = Symbol("hideBackButton");
+class SubTitleModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navigation.resetSubTitle(node);
+        }
+        else {
+            GetUINativeModule().navigation.setSubTitle(node, this.value);
+        }
+    }
+}
+SubTitleModifier.identity = Symbol("subTitle");
+class NavigationHideTitleBarModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navigation.resetHideTitleBar(node);
+        }
+        else {
+            GetUINativeModule().navigation.setHideTitleBar(node, this.value);
+        }
+    }
+}
+NavigationHideTitleBarModifier.identity = Symbol("hideTitleBar");
+class HideNavBarModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navigation.resetHideNavBar(node);
+        }
+        else {
+            GetUINativeModule().navigation.setHideNavBar(node, this.value);
+        }
+    }
+}
+HideNavBarModifier.identity = Symbol("hideNavBar");
+// @ts-ignore
 globalThis.Navigation.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    var component = this.createOrGetNode(elmtId, () => {
+        return new ArkNavigationComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class RichEditorCopyOptionsModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().richEditor.resetCopyOptions(node);
+        }
+        else {
+            GetUINativeModule().richEditor.setCopyOptions(node, this.value);
+        }
+    }
+}
+RichEditorCopyOptionsModifier.identity = Symbol('richEditorCopyOptions');
+class ArkRichEditorComponent extends ArkComponent {
+    enableDataDetector(enable) {
+        throw new Error('Method not implemented.');
+    }
+    dataDetectorConfig(config) {
+        throw new Error('Method not implemented.');
+    }
+    copyOptions(value) {
+        if (value) {
+            modifier(this._modifiers, RichEditorCopyOptionsModifier, value);
+        }
+        else {
+            modifier(this._modifiers, RichEditorCopyOptionsModifier, undefined);
+        }
+        return this;
+    }
+    onPaste(callback) {
+        throw new Error('Method not implemented.');
+    }
+    onReady(callback) {
+        throw new Error('Method not implemented.');
+    }
+    onSelect(callback) {
+        throw new Error('Method not implemented.');
+    }
+    aboutToIMEInput(callback) {
+        throw new Error('Method not implemented.');
+    }
+    onIMEInputComplete(callback) {
+        throw new Error('Method not implemented.');
+    }
+    aboutToDelete(callback) {
+        throw new Error('Method not implemented.');
+    }
+    onDeleteComplete(callback) {
+        throw new Error('Method not implemented.');
+    }
+    bindSelectionMenu(spanType, content, responseType, options) {
+        throw new Error('Method not implemented.');
+    }
+    customKeyboard(value) {
+        throw new Error('Method not implemented.');
+    }
+}
+// @ts-ignore
+globalThis.RichEditor.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
     let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
     let component = this.createOrGetNode(elmtId, () => {
-        return new ArkNavigationComponent(nativeNode);
+        return new ArkRichEditorComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+const NAV_ROUTE_MODE_RANGE = 2;
+const NAV_ROUTE_MODE_DEFAULT = 0;
+class ArkNavRouterComponent extends ArkComponent {
+    onStateChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    mode(mode) {
+        if (isNumber(mode) && mode >= NAV_ROUTE_MODE_DEFAULT && mode <= NAV_ROUTE_MODE_RANGE) {
+            modifier(this._modifiers, NavRouterModeModifier, mode);
+        }
+        else {
+            modifier(this._modifiers, NavRouterModeModifier, NAV_ROUTE_MODE_DEFAULT);
+        }
+        return this;
+    }
+}
+class NavRouterModeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navRouter.resetMode(node);
+        }
+        else {
+            GetUINativeModule().navRouter.setMode(node, this.value);
+        }
+    }
+}
+NavRouterModeModifier.identity = Symbol("mode");
+// @ts-ignore
+globalThis.NavRouter.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    var component = this.createOrGetNode(elmtId, () => {
+        return new ArkNavRouterComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+var NavigatorType;
+(function (NavigatorType) {
+    NavigatorType[NavigatorType["DEFAULT"] = 0] = "DEFAULT";
+    NavigatorType[NavigatorType["PUSH"] = 1] = "PUSH";
+    NavigatorType[NavigatorType["REPLACE"] = 2] = "REPLACE";
+    NavigatorType[NavigatorType["BACK"] = 3] = "BACK";
+})(NavigatorType || (NavigatorType = {}));
+;
+class ArkNavigatorComponent extends ArkComponent {
+    active(value) {
+        if (isBoolean(value)) {
+            modifier(this._modifiers, ActiveModifier, value);
+        }
+        return this;
+    }
+    type(value) {
+        if (isNumber(value) && value > NavigatorType.DEFAULT && value <= NavigatorType.REPLACE) {
+            modifier(this._modifiers, TypeModifier, value);
+        }
+        else {
+            modifier(this._modifiers, TypeModifier, NavigatorType.DEFAULT);
+        }
+        return this;
+    }
+    target(value) {
+        if (isString(value)) {
+            modifier(this._modifiers, TargetModifier, value);
+        }
+        return this;
+    }
+    params(value) {
+        modifier(this._modifiers, ParamsModifier, JSON.stringify(value));
+        return this;
+    }
+}
+class ParamsModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navigator.resetParams(node);
+        }
+        else {
+            GetUINativeModule().navigator.setParams(node, this.value);
+        }
+    }
+}
+ParamsModifier.identity = Symbol("params");
+class TypeModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navigator.resetType(node);
+        }
+        else {
+            GetUINativeModule().navigator.setType(node, this.value);
+        }
+    }
+}
+TypeModifier.identity = Symbol("type");
+class ActiveModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navigator.resetActive(node);
+        }
+        else {
+            GetUINativeModule().navigator.setActive(node, this.value);
+        }
+    }
+}
+ActiveModifier.identity = Symbol("active");
+class TargetModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().navigator.resetTarget(node);
+        }
+        else {
+            GetUINativeModule().navigator.setTarget(node, this.value);
+        }
+    }
+}
+TargetModifier.identity = Symbol("target");
+// @ts-ignore
+globalThis.Navigator.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    var component = this.createOrGetNode(elmtId, () => {
+        return new ArkNavigatorComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkAlphabetIndexerComponent extends ArkComponent {
+    onSelected(callback) {
+        throw new Error("Method not implemented.");
+    }
+    color(value) {
+        throw new Error("Method not implemented.");
+    }
+    selectedColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    popupColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    selectedBackgroundColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    popupBackground(value) {
+        throw new Error("Method not implemented.");
+    }
+    popupSelectedColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    popupUnselectedColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    popupItemBackgroundColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    usingPopup(value) {
+        throw new Error("Method not implemented.");
+    }
+    selectedFont(value) {
+        throw new Error("Method not implemented.");
+    }
+    popupFont(value) {
+        throw new Error("Method not implemented.");
+    }
+    popupItemFont(value) {
+        throw new Error("Method not implemented.");
+    }
+    itemSize(value) {
+        throw new Error("Method not implemented.");
+    }
+    font(value) {
+        throw new Error("Method not implemented.");
+    }
+    alignStyle(value, offset) {
+        throw new Error("Method not implemented.");
+    }
+    onSelect(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onRequestPopupData(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onPopupSelect(callback) {
+        throw new Error("Method not implemented.");
+    }
+    selected(index) {
+        throw new Error("Method not implemented.");
+    }
+    popupPosition(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.AlphabetIndexer.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkAlphabetIndexerComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="import.ts" />
+class BlankColorModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().blank.resetColor(node);
+        }
+        else {
+            GetUINativeModule().blank.setColor(node, this.value);
+        }
+    }
+}
+BlankColorModifier.identity = Symbol('blankColor');
+class ArkBlankComponent extends ArkComponent {
+    color(value) {
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+            modifier(this._modifiers, BlankColorModifier, arkColor.color);
+        }
+        else {
+            modifier(this._modifiers, BlankColorModifier, undefined);
+        }
+        return this;
+    }
+}
+// @ts-ignore
+globalThis.Blank.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkBlankComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkCalendarPickerComponent extends ArkComponent {
+    edgeAlign(alignType, offset) {
+        throw new Error("Method not implemented.");
+    }
+    textStyle(value) {
+        throw new Error("Method not implemented.");
+    }
+    onChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.CalendarPicker.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkCalendarPickerComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkDataPanelComponent extends ArkComponent {
+    closeEffect(value) {
+        throw new Error("Method not implemented.");
+    }
+    valueColors(value) {
+        throw new Error("Method not implemented.");
+    }
+    trackBackgroundColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    trackShadow(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.DataPanel.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkDataPanelComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkDatePickerComponent extends ArkComponent {
+    lunar(value) {
+        throw new Error("Method not implemented.");
+    }
+    disappearTextStyle(value) {
+        throw new Error("Method not implemented.");
+    }
+    textStyle(value) {
+        throw new Error("Method not implemented.");
+    }
+    selectedTextStyle(value) {
+        throw new Error("Method not implemented.");
+    }
+    onChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onDateChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.DatePicker.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkDatePickerComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkFormComponentComponent extends ArkComponent {
+    moduleName(value) {
+        throw new Error("Method not implemented.");
+    }
+    dimension(value) {
+        throw new Error("Method not implemented.");
+    }
+    allowUpdate(value) {
+        throw new Error("Method not implemented.");
+    }
+    onAcquired(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onError(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onRouter(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onUninstall(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onLoad(callback) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.FormComponent.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkFormComponentComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkGaugeComponent extends ArkComponent {
+    value(value) {
+        throw new Error("Method not implemented.");
+    }
+    startAngle(angle) {
+        throw new Error("Method not implemented.");
+    }
+    endAngle(angle) {
+        throw new Error("Method not implemented.");
+    }
+    colors(colors) {
+        throw new Error("Method not implemented.");
+    }
+    strokeWidth(length) {
+        throw new Error("Method not implemented.");
+    }
+    description(value) {
+        throw new Error("Method not implemented.");
+    }
+    trackShadow(value) {
+        throw new Error("Method not implemented.");
+    }
+    indicator(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Gauge.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkGaugeComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkImageAnimatorComponent extends ArkComponent {
+    images(value) {
+        throw new Error("Method not implemented.");
+    }
+    state(value) {
+        throw new Error("Method not implemented.");
+    }
+    duration(value) {
+        throw new Error("Method not implemented.");
+    }
+    reverse(value) {
+        throw new Error("Method not implemented.");
+    }
+    fixedSize(value) {
+        throw new Error("Method not implemented.");
+    }
+    preDecode(value) {
+        throw new Error("Method not implemented.");
+    }
+    fillMode(value) {
+        throw new Error("Method not implemented.");
+    }
+    iterations(value) {
+        throw new Error("Method not implemented.");
+    }
+    onStart(event) {
+        throw new Error("Method not implemented.");
+    }
+    onPause(event) {
+        throw new Error("Method not implemented.");
+    }
+    onRepeat(event) {
+        throw new Error("Method not implemented.");
+    }
+    onCancel(event) {
+        throw new Error("Method not implemented.");
+    }
+    onFinish(event) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.ImageAnimator.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkImageAnimatorComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ImageSpanObjectFitModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().imageSpan.resetObjectFit(node);
+        }
+        else {
+            GetUINativeModule().imageSpan.setObjectFit(node, this.value);
+        }
+    }
+}
+ImageSpanObjectFitModifier.identity = Symbol('imageSpanObjectFit');
+class ImageSpanVerticalAlignModifier extends Modifier {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().imageSpan.resetVerticalAlign(node);
+        }
+        else {
+            GetUINativeModule().imageSpan.setVerticalAlign(node, this.value);
+        }
+    }
+}
+ImageSpanVerticalAlignModifier.identity = Symbol('imageSpanVerticalAlign');
+class ArkImageSpanComponent extends ArkComponent {
+    objectFit(value) {
+        if (value) {
+            modifier(this._modifiers, ImageSpanObjectFitModifier, value);
+        }
+        else {
+            modifier(this._modifiers, ImageSpanObjectFitModifier, undefined);
+        }
+        return this;
+    }
+    verticalAlign(value) {
+        if (value) {
+            modifier(this._modifiers, ImageSpanVerticalAlignModifier, value);
+        }
+        else {
+            modifier(this._modifiers, ImageSpanVerticalAlignModifier, undefined);
+        }
+        return this;
+    }
+}
+// @ts-ignore
+globalThis.ImageSpan.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkImageSpanComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkMarqueeComponent extends ArkComponent {
+    fontColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontSize(value) {
+        throw new Error("Method not implemented.");
+    }
+    allowScale(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontWeight(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontFamily(value) {
+        throw new Error("Method not implemented.");
+    }
+    onStart(event) {
+        throw new Error("Method not implemented.");
+    }
+    onBounce(event) {
+        throw new Error("Method not implemented.");
+    }
+    onFinish(event) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Marquee.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkMarqueeComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkMenuComponent extends ArkComponent {
+    fontSize(value) {
+        throw new Error("Method not implemented.");
+    }
+    font(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    radius(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Menu.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkMenuComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkMenuItemComponent extends ArkComponent {
+    selected(value) {
+        throw new Error("Method not implemented.");
+    }
+    selectIcon(value) {
+        throw new Error("Method not implemented.");
+    }
+    onChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    contentFont(value) {
+        throw new Error("Method not implemented.");
+    }
+    contentFontColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    labelFont(value) {
+        throw new Error("Method not implemented.");
+    }
+    labelFontColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.MenuItem.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkMenuItemComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkMenuItemGroupComponent extends ArkComponent {
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.MenuItemGroup.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkMenuItemGroupComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkPatternLockComponent extends ArkComponent {
+    sideLength(value) {
+        throw new Error("Method not implemented.");
+    }
+    circleRadius(value) {
+        throw new Error("Method not implemented.");
+    }
+    regularColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    selectedColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    activeColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    pathColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    pathStrokeWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    onPatternComplete(callback) {
+        throw new Error("Method not implemented.");
+    }
+    autoReset(value) {
+        throw new Error("Method not implemented.");
+    }
+    onDotConnect(callback) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.PatternLock.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkPatternLockComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkPluginComponentComponent extends ArkComponent {
+    onComplete(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onError(callback) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.PluginComponent.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkPluginComponentComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkProgressComponent extends ArkComponent {
+    value(value) {
+        throw new Error("Method not implemented.");
+    }
+    color(value) {
+        throw new Error("Method not implemented.");
+    }
+    style(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Progress.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkProgressComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkQRCodeComponent extends ArkComponent {
+    color(value) {
+        throw new Error("Method not implemented.");
+    }
+    contentOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.QRCode.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkQRCodeComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkRemoteWindowComponent extends ArkComponent {
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.RemoteWindow.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkRemoteWindowComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkRichTextComponent extends ArkComponent {
+    onStart(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onComplete(callback) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.RichText.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkRichTextComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkScrollBarComponent extends ArkComponent {
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.ScrollBar.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkScrollBarComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkSearchComponent extends ArkComponent {
+    searchButton(value, option) {
+        throw new Error("Method not implemented.");
+    }
+    fontColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    searchIcon(value) {
+        throw new Error("Method not implemented.");
+    }
+    cancelButton(value) {
+        throw new Error("Method not implemented.");
+    }
+    caretStyle(value) {
+        throw new Error("Method not implemented.");
+    }
+    placeholderColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    placeholderFont(value) {
+        throw new Error("Method not implemented.");
+    }
+    textFont(value) {
+        throw new Error("Method not implemented.");
+    }
+    onSubmit(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onTextSelectionChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onContentScroll(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onCopy(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onCut(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onPaste(callback) {
+        throw new Error("Method not implemented.");
+    }
+    copyOption(value) {
+        throw new Error("Method not implemented.");
+    }
+    maxLength(value) {
+        throw new Error("Method not implemented.");
+    }
+    textAlign(value) {
+        throw new Error("Method not implemented.");
+    }
+    enableKeyboardOnFocus(value) {
+        throw new Error("Method not implemented.");
+    }
+    selectionMenuHidden(value) {
+        throw new Error("Method not implemented.");
+    }
+    customKeyboard(value) {
+        throw new Error("Method not implemented.");
+    }
+    type(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Search.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkSearchComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkSpanComponent extends ArkComponent {
+    font(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontSize(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontStyle(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontWeight(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontFamily(value) {
+        throw new Error("Method not implemented.");
+    }
+    decoration(value) {
+        throw new Error("Method not implemented.");
+    }
+    letterSpacing(value) {
+        throw new Error("Method not implemented.");
+    }
+    textCase(value) {
+        throw new Error("Method not implemented.");
+    }
+    lineHeight(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Span.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkSpanComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkStepperComponent extends ArkComponent {
+    onFinish(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onSkip(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onNext(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onPrevious(callback) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Stepper.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkStepperComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkStepperItemComponent extends ArkComponent {
+    prevLabel(value) {
+        throw new Error("Method not implemented.");
+    }
+    nextLabel(value) {
+        throw new Error("Method not implemented.");
+    }
+    status(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.StepperItem.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkStepperItemComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkTextClockComponent extends ArkComponent {
+    format(value) {
+        throw new Error("Method not implemented.");
+    }
+    onDateChange(event) {
+        throw new Error("Method not implemented.");
+    }
+    fontColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontSize(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontStyle(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontWeight(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontFamily(value) {
+        throw new Error("Method not implemented.");
+    }
+    textShadow(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontFeature(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.TextClock.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkTextClockComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkTextTimerComponent extends ArkComponent {
+    format(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontSize(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontStyle(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontWeight(value) {
+        throw new Error("Method not implemented.");
+    }
+    fontFamily(value) {
+        throw new Error("Method not implemented.");
+    }
+    onTimer(event) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.TextTimer.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkTextTimerComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkWebComponent extends ArkComponent {
+    javaScriptAccess(javaScriptAccess) {
+        throw new Error("Method not implemented.");
+    }
+    fileAccess(fileAccess) {
+        throw new Error("Method not implemented.");
+    }
+    onlineImageAccess(onlineImageAccess) {
+        throw new Error("Method not implemented.");
+    }
+    domStorageAccess(domStorageAccess) {
+        throw new Error("Method not implemented.");
+    }
+    imageAccess(imageAccess) {
+        throw new Error("Method not implemented.");
+    }
+    mixedMode(mixedMode) {
+        throw new Error("Method not implemented.");
+    }
+    zoomAccess(zoomAccess) {
+        throw new Error("Method not implemented.");
+    }
+    geolocationAccess(geolocationAccess) {
+        throw new Error("Method not implemented.");
+    }
+    javaScriptProxy(javaScriptProxy) {
+        throw new Error("Method not implemented.");
+    }
+    password(password) {
+        throw new Error("Method not implemented.");
+    }
+    cacheMode(cacheMode) {
+        throw new Error("Method not implemented.");
+    }
+    darkMode(mode) {
+        throw new Error("Method not implemented.");
+    }
+    forceDarkAccess(access) {
+        throw new Error("Method not implemented.");
+    }
+    mediaOptions(options) {
+        throw new Error("Method not implemented.");
+    }
+    tableData(tableData) {
+        throw new Error("Method not implemented.");
+    }
+    wideViewModeAccess(wideViewModeAccess) {
+        throw new Error("Method not implemented.");
+    }
+    overviewModeAccess(overviewModeAccess) {
+        throw new Error("Method not implemented.");
+    }
+    overScrollMode(mode) {
+        throw new Error("Method not implemented.");
+    }
+    textZoomAtio(textZoomAtio) {
+        throw new Error("Method not implemented.");
+    }
+    textZoomRatio(textZoomRatio) {
+        throw new Error("Method not implemented.");
+    }
+    databaseAccess(databaseAccess) {
+        throw new Error("Method not implemented.");
+    }
+    initialScale(percent) {
+        throw new Error("Method not implemented.");
+    }
+    userAgent(userAgent) {
+        throw new Error("Method not implemented.");
+    }
+    onPageEnd(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onPageBegin(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onProgressChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onTitleReceive(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onGeolocationHide(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onGeolocationShow(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onRequestSelected(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onAlert(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onBeforeUnload(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onConfirm(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onPrompt(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onConsole(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onErrorReceive(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onHttpErrorReceive(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onDownloadStart(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onRefreshAccessedHistory(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onUrlLoadIntercept(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onSslErrorReceive(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onRenderExited(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onShowFileSelector(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onFileSelectorShow(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onResourceLoad(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onFullScreenExit(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onFullScreenEnter(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onScaleChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onHttpAuthRequest(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onInterceptRequest(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onPermissionRequest(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onScreenCaptureRequest(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onContextMenuShow(callback) {
+        throw new Error("Method not implemented.");
+    }
+    mediaPlayGestureAccess(access) {
+        throw new Error("Method not implemented.");
+    }
+    onSearchResultReceive(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onScroll(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onSslErrorEventReceive(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onClientAuthenticationRequest(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onWindowNew(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onWindowExit(callback) {
+        throw new Error("Method not implemented.");
+    }
+    multiWindowAccess(multiWindow) {
+        throw new Error("Method not implemented.");
+    }
+    onInterceptKeyEvent(callback) {
+        throw new Error("Method not implemented.");
+    }
+    webStandardFont(family) {
+        throw new Error("Method not implemented.");
+    }
+    webSerifFont(family) {
+        throw new Error("Method not implemented.");
+    }
+    webSansSerifFont(family) {
+        throw new Error("Method not implemented.");
+    }
+    webFixedFont(family) {
+        throw new Error("Method not implemented.");
+    }
+    webFantasyFont(family) {
+        throw new Error("Method not implemented.");
+    }
+    webCursiveFont(family) {
+        throw new Error("Method not implemented.");
+    }
+    defaultFixedFontSize(size) {
+        throw new Error("Method not implemented.");
+    }
+    defaultFontSize(size) {
+        throw new Error("Method not implemented.");
+    }
+    minFontSize(size) {
+        throw new Error("Method not implemented.");
+    }
+    minLogicalFontSize(size) {
+        throw new Error("Method not implemented.");
+    }
+    blockNetwork(block) {
+        throw new Error("Method not implemented.");
+    }
+    horizontalScrollBarAccess(horizontalScrollBar) {
+        throw new Error("Method not implemented.");
+    }
+    verticalScrollBarAccess(verticalScrollBar) {
+        throw new Error("Method not implemented.");
+    }
+    onTouchIconUrlReceived(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onFaviconReceived(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onPageVisible(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onDataResubmitted(callback) {
+        throw new Error("Method not implemented.");
+    }
+    pinchSmooth(isEnabled) {
+        throw new Error("Method not implemented.");
+    }
+    allowWindowOpenMethod(flag) {
+        throw new Error("Method not implemented.");
+    }
+    onAudioStateChanged(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onFirstContentfulPaint(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onLoadIntercept(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onControllerAttached(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onOverScroll(callback) {
+        throw new Error("Method not implemented.");
+    }
+    javaScriptOnDocumentStart(scripts) {
+        throw new Error("Method not implemented.");
+    }
+    layoutMode(mode) {
+        throw new Error("Method not implemented.");
+    }
+    nestedScroll(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Web.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkWebComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkXComponentComponent extends ArkComponent {
+    onLoad(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onDestroy(event) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.XComponent.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkXComponentComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkBadgeComponent extends ArkComponent {
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Badge.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkBadgeComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkColumnComponent extends ArkComponent {
+    alignItems(value) {
+        throw new Error("Method not implemented.");
+    }
+    justifyContent(value) {
+        throw new Error("Method not implemented.");
+    }
+    pointLight(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Column.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkColumnComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkColumnSplitComponent extends ArkComponent {
+    resizeable(value) {
+        throw new Error("Method not implemented.");
+    }
+    divider(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.ColumnSplit.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkColumnSplitComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkEffectComponentComponent extends ArkComponent {
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.EffectComponent.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkEffectComponentComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkFlexComponent extends ArkComponent {
+    pointLight(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Flex.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkFlexComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkFlowItemComponent extends ArkComponent {
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.FlowItem.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkFlowItemComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkFormLinkComponent extends ArkComponent {
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.FormLink.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkFormLinkComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkGridRowComponent extends ArkComponent {
+    onBreakpointChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    alignItems(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.GridRow.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkGridRowComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkGridComponent extends ArkComponent {
+    columnsTemplate(value) {
+        throw new Error("Method not implemented.");
+    }
+    rowsTemplate(value) {
+        throw new Error("Method not implemented.");
+    }
+    columnsGap(value) {
+        throw new Error("Method not implemented.");
+    }
+    rowsGap(value) {
+        throw new Error("Method not implemented.");
+    }
+    scrollBarWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    scrollBarColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    scrollBar(value) {
+        throw new Error("Method not implemented.");
+    }
+    onScrollBarUpdate(event) {
+        throw new Error("Method not implemented.");
+    }
+    onScrollIndex(event) {
+        throw new Error("Method not implemented.");
+    }
+    cachedCount(value) {
+        throw new Error("Method not implemented.");
+    }
+    editMode(value) {
+        throw new Error("Method not implemented.");
+    }
+    multiSelectable(value) {
+        throw new Error("Method not implemented.");
+    }
+    maxCount(value) {
+        throw new Error("Method not implemented.");
+    }
+    minCount(value) {
+        throw new Error("Method not implemented.");
+    }
+    cellLength(value) {
+        throw new Error("Method not implemented.");
+    }
+    layoutDirection(value) {
+        throw new Error("Method not implemented.");
+    }
+    supportAnimation(value) {
+        throw new Error("Method not implemented.");
+    }
+    onItemDragStart(event) {
+        throw new Error("Method not implemented.");
+    }
+    onItemDragEnter(event) {
+        throw new Error("Method not implemented.");
+    }
+    onItemDragMove(event) {
+        throw new Error("Method not implemented.");
+    }
+    onItemDragLeave(event) {
+        throw new Error("Method not implemented.");
+    }
+    onItemDrop(event) {
+        throw new Error("Method not implemented.");
+    }
+    edgeEffect(value, options) {
+        throw new Error("Method not implemented.");
+    }
+    nestedScroll(value) {
+        throw new Error("Method not implemented.");
+    }
+    enableScrollInteraction(value) {
+        throw new Error("Method not implemented.");
+    }
+    friction(value) {
+        throw new Error("Method not implemented.");
+    }
+    onScroll(event) {
+        throw new Error("Method not implemented.");
+    }
+    onReachStart(event) {
+        throw new Error("Method not implemented.");
+    }
+    onReachEnd(event) {
+        throw new Error("Method not implemented.");
+    }
+    onScrollStart(event) {
+        throw new Error("Method not implemented.");
+    }
+    onScrollStop(event) {
+        throw new Error("Method not implemented.");
+    }
+    onScrollFrameBegin(event) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Grid.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkGridComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkGridItemComponent extends ArkComponent {
+    rowStart(value) {
+        throw new Error("Method not implemented.");
+    }
+    rowEnd(value) {
+        throw new Error("Method not implemented.");
+    }
+    columnStart(value) {
+        throw new Error("Method not implemented.");
+    }
+    columnEnd(value) {
+        throw new Error("Method not implemented.");
+    }
+    forceRebuild(value) {
+        throw new Error("Method not implemented.");
+    }
+    selectable(value) {
+        throw new Error("Method not implemented.");
+    }
+    selected(value) {
+        throw new Error("Method not implemented.");
+    }
+    onSelect(event) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.GridItem.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkGridItemComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkHyperlinkComponent extends ArkComponent {
+    color(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Hyperlink.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkHyperlinkComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkListComponent extends ArkComponent {
+    lanes(value, gutter) {
+        throw new Error("Method not implemented.");
+    }
+    alignListItem(value) {
+        throw new Error("Method not implemented.");
+    }
+    listDirection(value) {
+        throw new Error("Method not implemented.");
+    }
+    scrollBar(value) {
+        throw new Error("Method not implemented.");
+    }
+    edgeEffect(value, options) {
+        throw new Error("Method not implemented.");
+    }
+    contentStartOffset(value) {
+        throw new Error("Method not implemented.");
+    }
+    contentEndOffset(value) {
+        throw new Error("Method not implemented.");
+    }
+    divider(value) {
+        throw new Error("Method not implemented.");
+    }
+    editMode(value) {
+        throw new Error("Method not implemented.");
+    }
+    multiSelectable(value) {
+        throw new Error("Method not implemented.");
+    }
+    cachedCount(value) {
+        throw new Error("Method not implemented.");
+    }
+    chainAnimation(value) {
+        throw new Error("Method not implemented.");
+    }
+    chainAnimationOptions(value) {
+        throw new Error("Method not implemented.");
+    }
+    sticky(value) {
+        throw new Error("Method not implemented.");
+    }
+    scrollSnapAlign(value) {
+        throw new Error("Method not implemented.");
+    }
+    nestedScroll(value) {
+        throw new Error("Method not implemented.");
+    }
+    enableScrollInteraction(value) {
+        throw new Error("Method not implemented.");
+    }
+    friction(value) {
+        throw new Error("Method not implemented.");
+    }
+    onScroll(event) {
+        throw new Error("Method not implemented.");
+    }
+    onScrollIndex(event) {
+        throw new Error("Method not implemented.");
+    }
+    onReachStart(event) {
+        throw new Error("Method not implemented.");
+    }
+    onReachEnd(event) {
+        throw new Error("Method not implemented.");
+    }
+    onScrollStart(event) {
+        throw new Error("Method not implemented.");
+    }
+    onScrollStop(event) {
+        throw new Error("Method not implemented.");
+    }
+    onItemDelete(event) {
+        throw new Error("Method not implemented.");
+    }
+    onItemMove(event) {
+        throw new Error("Method not implemented.");
+    }
+    onItemDragStart(event) {
+        throw new Error("Method not implemented.");
+    }
+    onItemDragEnter(event) {
+        throw new Error("Method not implemented.");
+    }
+    onItemDragMove(event) {
+        throw new Error("Method not implemented.");
+    }
+    onItemDragLeave(event) {
+        throw new Error("Method not implemented.");
+    }
+    onItemDrop(event) {
+        throw new Error("Method not implemented.");
+    }
+    onScrollFrameBegin(event) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.List.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkListComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkListItemComponent extends ArkComponent {
+    sticky(value) {
+        throw new Error("Method not implemented.");
+    }
+    editable(value) {
+        throw new Error("Method not implemented.");
+    }
+    selectable(value) {
+        throw new Error("Method not implemented.");
+    }
+    selected(value) {
+        throw new Error("Method not implemented.");
+    }
+    swipeAction(value) {
+        throw new Error("Method not implemented.");
+    }
+    onSelect(event) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.ListItem.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkListItemComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkListItemGroupComponent extends ArkComponent {
+    divider(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.ListItemGroup.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkListItemGroupComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkRelativeContainerComponent extends ArkComponent {
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.RelativeContainer.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkRelativeContainerComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkRowComponent extends ArkComponent {
+    alignItems(value) {
+        throw new Error("Method not implemented.");
+    }
+    justifyContent(value) {
+        throw new Error("Method not implemented.");
+    }
+    pointLight(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Row.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkRowComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkRowSplitComponent extends ArkComponent {
+    resizeable(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.RowSplit.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkRowSplitComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkSideBarContainerComponent extends ArkComponent {
+    showSideBar(value) {
+        throw new Error("Method not implemented.");
+    }
+    controlButton(value) {
+        throw new Error("Method not implemented.");
+    }
+    showControlButton(value) {
+        throw new Error("Method not implemented.");
+    }
+    onChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    sideBarWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    minSideBarWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    maxSideBarWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    autoHide(value) {
+        throw new Error("Method not implemented.");
+    }
+    sideBarPosition(value) {
+        throw new Error("Method not implemented.");
+    }
+    divider(value) {
+        throw new Error("Method not implemented.");
+    }
+    minContentWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.SideBarContainer.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkSideBarContainerComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkSwiperComponent extends ArkComponent {
+    index(value) {
+        throw new Error("Method not implemented.");
+    }
+    autoPlay(value) {
+        throw new Error("Method not implemented.");
+    }
+    interval(value) {
+        throw new Error("Method not implemented.");
+    }
+    indicator(value) {
+        throw new Error("Method not implemented.");
+    }
+    displayArrow(value, isHoverShow) {
+        throw new Error("Method not implemented.");
+    }
+    loop(value) {
+        throw new Error("Method not implemented.");
+    }
+    duration(value) {
+        throw new Error("Method not implemented.");
+    }
+    vertical(value) {
+        throw new Error("Method not implemented.");
+    }
+    itemSpace(value) {
+        throw new Error("Method not implemented.");
+    }
+    displayMode(value) {
+        throw new Error("Method not implemented.");
+    }
+    cachedCount(value) {
+        throw new Error("Method not implemented.");
+    }
+    displayCount(value) {
+        throw new Error("Method not implemented.");
+    }
+    effectMode(value) {
+        throw new Error("Method not implemented.");
+    }
+    disableSwipe(value) {
+        throw new Error("Method not implemented.");
+    }
+    curve(value) {
+        throw new Error("Method not implemented.");
+    }
+    onChange(event) {
+        throw new Error("Method not implemented.");
+    }
+    indicatorStyle(value) {
+        throw new Error("Method not implemented.");
+    }
+    prevMargin(value) {
+        throw new Error("Method not implemented.");
+    }
+    nextMargin(value) {
+        throw new Error("Method not implemented.");
+    }
+    onAnimationStart(event) {
+        throw new Error("Method not implemented.");
+    }
+    onAnimationEnd(event) {
+        throw new Error("Method not implemented.");
+    }
+    onGestureSwipe(event) {
+        throw new Error("Method not implemented.");
+    }
+    nestedScroll(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Swiper.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkSwiperComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkTabsComponent extends ArkComponent {
+    vertical(value) {
+        throw new Error("Method not implemented.");
+    }
+    barPosition(value) {
+        throw new Error("Method not implemented.");
+    }
+    scrollable(value) {
+        throw new Error("Method not implemented.");
+    }
+    barMode(value, options) {
+        throw new Error("Method not implemented.");
+    }
+    barWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    barHeight(value) {
+        throw new Error("Method not implemented.");
+    }
+    animationDuration(value) {
+        throw new Error("Method not implemented.");
+    }
+    onChange(event) {
+        throw new Error("Method not implemented.");
+    }
+    onTabBarClick(event) {
+        throw new Error("Method not implemented.");
+    }
+    onAnimationStart(handler) {
+        throw new Error("Method not implemented.");
+    }
+    onAnimationEnd(handler) {
+        throw new Error("Method not implemented.");
+    }
+    onGestureSwipe(handler) {
+        throw new Error("Method not implemented.");
+    }
+    fadingEdge(value) {
+        throw new Error("Method not implemented.");
+    }
+    divider(value) {
+        throw new Error("Method not implemented.");
+    }
+    barOverlap(value) {
+        throw new Error("Method not implemented.");
+    }
+    barBackgroundColor(value) {
+        throw new Error("Method not implemented.");
+    }
+    barGridAlign(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Tabs.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkTabsComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkTabContentComponent extends ArkComponent {
+    tabBar(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.TabContent.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkTabContentComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkUIExtensionComponentComponent extends ArkComponent {
+    onRemoteReady(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onReceive(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onResult(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onRelease(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onError(callback) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.UIExtensionComponent.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkUIExtensionComponentComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkWaterFlowComponent extends ArkComponent {
+    columnsTemplate(value) {
+        throw new Error("Method not implemented.");
+    }
+    itemConstraintSize(value) {
+        throw new Error("Method not implemented.");
+    }
+    rowsTemplate(value) {
+        throw new Error("Method not implemented.");
+    }
+    columnsGap(value) {
+        throw new Error("Method not implemented.");
+    }
+    rowsGap(value) {
+        throw new Error("Method not implemented.");
+    }
+    layoutDirection(value) {
+        throw new Error("Method not implemented.");
+    }
+    nestedScroll(value) {
+        throw new Error("Method not implemented.");
+    }
+    enableScrollInteraction(value) {
+        throw new Error("Method not implemented.");
+    }
+    friction(value) {
+        throw new Error("Method not implemented.");
+    }
+    cachedCount(value) {
+        throw new Error("Method not implemented.");
+    }
+    onReachStart(event) {
+        throw new Error("Method not implemented.");
+    }
+    onReachEnd(event) {
+        throw new Error("Method not implemented.");
+    }
+    onScrollFrameBegin(event) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.WaterFlow.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkWaterFlowComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkVideoComponent extends ArkComponent {
+    muted(value) {
+        throw new Error("Method not implemented.");
+    }
+    autoPlay(value) {
+        throw new Error("Method not implemented.");
+    }
+    controls(value) {
+        throw new Error("Method not implemented.");
+    }
+    loop(value) {
+        throw new Error("Method not implemented.");
+    }
+    objectFit(value) {
+        throw new Error("Method not implemented.");
+    }
+    onStart(event) {
+        throw new Error("Method not implemented.");
+    }
+    onPause(event) {
+        throw new Error("Method not implemented.");
+    }
+    onFinish(event) {
+        throw new Error("Method not implemented.");
+    }
+    onFullscreenChange(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onPrepared(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onSeeking(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onSeeked(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onUpdate(callback) {
+        throw new Error("Method not implemented.");
+    }
+    onError(event) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Video.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkVideoComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkCircleComponent extends ArkComponent {
+    stroke(value) {
+        throw new Error("Method not implemented.");
+    }
+    fill(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashOffset(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineCap(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineJoin(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeMiterLimit(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    fillOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    antiAlias(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashArray(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Circle.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkCircleComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkEllipseComponent extends ArkComponent {
+    stroke(value) {
+        throw new Error("Method not implemented.");
+    }
+    fill(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashOffset(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineCap(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineJoin(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeMiterLimit(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    fillOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    antiAlias(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashArray(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Ellipse.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkEllipseComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkLineComponent extends ArkComponent {
+    startPoint(value) {
+        throw new Error("Method not implemented.");
+    }
+    endPoint(value) {
+        throw new Error("Method not implemented.");
+    }
+    stroke(value) {
+        throw new Error("Method not implemented.");
+    }
+    fill(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashOffset(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineCap(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineJoin(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeMiterLimit(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    fillOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    antiAlias(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashArray(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Line.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkLineComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkPolylineComponent extends ArkComponent {
+    points(value) {
+        throw new Error("Method not implemented.");
+    }
+    stroke(value) {
+        throw new Error("Method not implemented.");
+    }
+    fill(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashOffset(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineCap(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineJoin(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeMiterLimit(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    fillOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    antiAlias(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashArray(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Polyline.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkPolylineComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkPolygonComponent extends ArkComponent {
+    points(value) {
+        throw new Error("Method not implemented.");
+    }
+    stroke(value) {
+        throw new Error("Method not implemented.");
+    }
+    fill(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashOffset(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineCap(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineJoin(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeMiterLimit(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    fillOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    antiAlias(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashArray(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Polygon.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkPolygonComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkPathComponent extends ArkComponent {
+    commands(value) {
+        throw new Error("Method not implemented.");
+    }
+    stroke(value) {
+        throw new Error("Method not implemented.");
+    }
+    fill(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashOffset(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineCap(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineJoin(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeMiterLimit(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    fillOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    antiAlias(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashArray(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Path.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkPathComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkRectComponent extends ArkComponent {
+    radiusWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    radiusHeight(value) {
+        throw new Error("Method not implemented.");
+    }
+    radius(value) {
+        throw new Error("Method not implemented.");
+    }
+    stroke(value) {
+        throw new Error("Method not implemented.");
+    }
+    fill(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashOffset(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineCap(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineJoin(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeMiterLimit(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    fillOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    antiAlias(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashArray(value) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Rect.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkRectComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkShapeComponent extends ArkComponent {
+    viewPort(value) {
+        throw new Error("Method not implemented.");
+    }
+    stroke(value) {
+        throw new Error("Method not implemented.");
+    }
+    fill(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashOffset(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeDashArray(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineCap(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeLineJoin(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeMiterLimit(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    fillOpacity(value) {
+        throw new Error("Method not implemented.");
+    }
+    strokeWidth(value) {
+        throw new Error("Method not implemented.");
+    }
+    antiAlias(value) {
+        throw new Error("Method not implemented.");
+    }
+    mesh(value, column, row) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Shape.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkShapeComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+};
+/// <reference path="./import.ts" />
+class ArkCanvasComponent extends ArkComponent {
+    onReady(event) {
+        throw new Error("Method not implemented.");
+    }
+    monopolizeEvents(monopolize) {
+        throw new Error("Method not implemented.");
+    }
+}
+// @ts-ignore
+globalThis.Canvas.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+        return new ArkCanvasComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
