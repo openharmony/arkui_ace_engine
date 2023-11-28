@@ -217,7 +217,8 @@ RefPtr<FocusHub> FocusHub::GetChildMainView()
         }
         auto frameName = child->GetFrameName();
         if (frameName == V2::PAGE_ETS_TAG || frameName == V2::DIALOG_ETS_TAG || frameName == V2::MODAL_PAGE_TAG ||
-            frameName == V2::MENU_ETS_TAG || frameName == V2::SHEET_PAGE_TAG || frameName == V2::POPUP_ETS_TAG) {
+            frameName == V2::MENU_ETS_TAG || frameName == V2::SHEET_PAGE_TAG || frameName == V2::POPUP_ETS_TAG ||
+            frameName == V2::WINDOW_SCENE_ETS_TAG) {
             if (!curFocusMainView && child->IsCurrentFocus()) {
                 curFocusMainView = child;
             }
@@ -248,6 +249,12 @@ RefPtr<FocusHub> FocusHub::GetCurrentMainView()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
+    auto screenNode = pipeline->GetScreenNode();
+    if (screenNode) {
+        auto screenNodeFocusHub = screenNode->GetFocusHub();
+        CHECK_NULL_RETURN(screenNodeFocusHub, nullptr);
+        return screenNodeFocusHub->GetChildMainView();
+    }
     auto rootNode = pipeline->GetRootElement();
     CHECK_NULL_RETURN(rootNode, nullptr);
     auto rootFocusHub = rootNode->GetFocusHub();
@@ -773,21 +780,29 @@ void FocusHub::RequestFocusWithDefaultFocusFirstly()
 {
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus with default focus on node: %{public}s/%{public}d.",
         GetFrameName().c_str(), GetFrameId());
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
     RefPtr<FocusHub> viewScope;
     if (GetFrameName() == V2::MENU_WRAPPER_ETS_TAG) {
         viewScope = GetChildren().front();
     } else {
         viewScope = Claim(this);
     }
-    if (viewScope && viewScope->GetIsViewRootScopeFocused()) {
+    if (!viewScope) {
+        pipeline->AddDirtyDefaultFocus(GetFrameNode());
+        return;
+    }
+
+    auto screenNode = pipeline->GetScreenNode();
+    if (!screenNode || viewScope->GetFrameName() != V2::PAGE_ETS_TAG) {
         auto viewRootScope = viewScope->GetMainViewRootScope();
-        if (viewRootScope) {
+        if (viewRootScope && viewScope->GetIsViewRootScopeFocused()) {
             viewRootScope->SetFocusDependence(FocusDependence::SELF);
         }
     }
-    auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->AddDirtyDefaultFocus(viewScope ? viewScope->GetFrameNode() : GetFrameNode());
+
+    pipeline->AddDirtyDefaultFocus(viewScope->GetFrameNode());
 }
 
 bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
