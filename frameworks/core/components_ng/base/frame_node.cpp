@@ -753,6 +753,10 @@ void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configuration
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    if (configurationChange.defaultFontUpdate) {
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void FrameNode::OnVisibleChange(bool isVisible)
