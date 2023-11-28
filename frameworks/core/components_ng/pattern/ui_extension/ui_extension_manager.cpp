@@ -66,7 +66,7 @@ bool UIExtensionManager::IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pip
 }
 
 bool UIExtensionManager::SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-    std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline)
+    const std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline)
 {
     auto instanceId = pipeline->GetInstanceId();
     auto window = Platform::AceContainer::GetUIWindow(instanceId);

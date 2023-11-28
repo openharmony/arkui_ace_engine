@@ -98,18 +98,9 @@ public:
     void OnAccessibilityEvent(
         const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList) override
     {
-        ContainerScope scope(instanceId_);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [weak = uiExtensionPattern_, &info, uiExtensionIdLevelList]() {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->OnAccessibilityEvent(info, uiExtensionIdLevelList);
-            },
-            TaskExecutor::TaskType::UI);
+        auto pattern = uiExtensionPattern_.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnAccessibilityEvent(info, uiExtensionIdLevelList);
     }
 
 private:
@@ -239,7 +230,6 @@ void UIExtensionPattern::OnConnect()
 void UIExtensionPattern::OnAccessibilityEvent(
     const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList)
 {
-    CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(session_);
     ContainerScope scope(instanceId_);
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
@@ -257,7 +247,7 @@ void UIExtensionPattern::OnAccessibilityEvent(
         auto accessibilityManager = frontend->GetAccessibilityManager();
         CHECK_NULL_VOID(accessibilityManager);
         if (accessibilityManager) {
-            accessibilityManager->SendAccessibilitySyncEvent(info, uiExtensionIdLevelListNew);
+            accessibilityManager->SendExtensionAccessibilityEvent(info, uiExtensionIdLevelListNew);
         }
     }
 }
