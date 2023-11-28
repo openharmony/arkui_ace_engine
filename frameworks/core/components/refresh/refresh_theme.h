@@ -21,6 +21,9 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr int TEXT_FIELD_FONT_WEIGHT = 3;
+} // namespace
 
 /**
  * RefreshTheme should be built using RefreshTheme::Builder.
@@ -40,17 +43,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->loadingDistance_ = themeConstants->GetDimension(THEME_REFRESH_DEFAULT_LOADING_DISTANCE);
-            theme->refreshDistance_ = themeConstants->GetDimension(THEME_REFRESH_DEFAULT_REFRESHING_DISTANCE);
-            theme->maxDistance_ = themeConstants->GetDimension(THEME_REFRESH_DEFAULT_MAX_DISTANCE);
-            theme->progressDistance_ = themeConstants->GetDimension(THEME_REFRESH_DEFAULT_PROGRESS_DISTANCE);
-            theme->progressDiameter_ = themeConstants->GetDimension(THEME_REFRESH_DEFAULT_PROGRESS_DIAMETER);
-            theme->showTimeDistance_ = themeConstants->GetDimension(THEME_REFRESH_DEFAULT_SHOWTIME_DISTANCE);
-            theme->textStyle_.SetFontSize(themeConstants->GetDimension(THEME_REFRESH_DEFAULT_FONTSIZE));
-            theme->textStyle_.SetTextColor(themeConstants->GetColor(THEME_REFRESH_DEFAULT_TEXT_COLOR));
-            theme->textStyle_.SetFontWeight(FontWeight(themeConstants->GetInt(THEME_TEXTFIELD_FONT_WEIGHT)));
-            theme->progressColor_ = themeConstants->GetColor(THEME_REFRESH_DEFAULT_PROGRESS_COLOR);
-            theme->backgroundColor_ = themeConstants->GetColor(THEME_REFRESH_DEFAULT_BACKGROUND_COLOR);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -62,13 +54,21 @@ public:
             }
             auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_REFRESH, nullptr);
             if (!pattern) {
-                LOGW("find pattern of search fail");
+                LOGW("find pattern of refresh fail");
                 return;
             }
             theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_vp));
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK));
             theme->progressColor_ = pattern->GetAttr<Color>("progress_color", Color::BLACK);
             theme->backgroundColor_ = pattern->GetAttr<Color>("progress_bg_color", Color::WHITE);
+            theme->loadingDistance_ = pattern->GetAttr<Dimension>("default_loading_distance", 16.0_vp);
+            theme->refreshDistance_ = pattern->GetAttr<Dimension>("default_refreshing_distance", 64.0_vp);
+            theme->maxDistance_ = pattern->GetAttr<Dimension>("default_max_distance", 128.0_vp);
+            theme->progressDistance_ = pattern->GetAttr<Dimension>("default_progress_distance", 16.0_vp);
+            theme->progressDiameter_ = pattern->GetAttr<Dimension>("default_progress_diameter", 32.0_vp);
+            theme->showTimeDistance_ = pattern->GetAttr<Dimension>("default_showtime_distance", 96.0_vp);
+            theme->textStyle_.SetFontWeight(FontWeight(pattern->GetAttr<int>("textfield_font_weight",
+                TEXT_FIELD_FONT_WEIGHT)));
         }
     };
 
