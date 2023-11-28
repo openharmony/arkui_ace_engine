@@ -273,8 +273,8 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boun
             auto dx = contentRect_.GetX() - handleRect.GetX();
             textRect.SetOffset(OffsetF(textRect.GetX() + dx, textRect.GetY()));
             handleRect.SetOffset(OffsetF(handleRect.GetX() + dx, handleRect.GetY()));
-        } else if (handleRect.GetX() > contentRightBoundary) {
-            auto dx = handleRect.GetX() - contentRightBoundary;
+        } else if (handleRect.GetX() + handleRect.Width() > contentRightBoundary) {
+            auto dx = handleRect.GetX() + handleRect.Width() - contentRightBoundary;
             textRect.SetOffset(OffsetF(textRect.GetX() - dx, textRect.GetY()));
             handleRect.SetOffset(OffsetF(handleRect.GetX() - dx, handleRect.GetY()));
         }
