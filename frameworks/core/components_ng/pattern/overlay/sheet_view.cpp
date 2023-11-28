@@ -81,7 +81,9 @@ RefPtr<FrameNode> SheetView::CreateScrollNode()
     CHECK_NULL_RETURN(props, nullptr);
     props->UpdateScrollEnabled(false);
     props->UpdateAxis(Axis::VERTICAL);
-    props->UpdateEdgeEffect(EdgeEffect::SPRING);
+    auto pattern = scroll->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->SetEdgeEffect(EdgeEffect::SPRING, pattern->GetAlwaysEnabled());
     auto layoutProps = scroll->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProps, nullptr);
     layoutProps->UpdateAlignment(Alignment::TOP_CENTER);

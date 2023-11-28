@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,9 @@ public:
     virtual RefPtr<ScrollControllerBase> CreateScrollController() = 0;
     virtual void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) = 0;
     virtual void SetListDirection(Axis axis) = 0;
-    virtual void SetScrollBar(Ace::DisplayMode scrollBar) = 0;
+    virtual void SetScrollBar(DisplayMode scrollBar) = 0;
+    virtual void SetScrollBarColor(const std::string& value) = 0;
+    virtual void SetScrollBarWidth(const std::string& value) = 0;
     virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) = 0;
     virtual void SetEditMode(bool editMode) = 0;
     virtual void SetDivider(const V2::ItemDivider& divider) = 0;
@@ -76,6 +78,8 @@ public:
     virtual void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) = 0;
     virtual void SetOnItemDrop(OnItemDropFunc&& onItemDrop) = 0;
     virtual void SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign) {};
+
+    virtual DisplayMode GetDisplayMode() const = 0;
 
 private:
     static std::unique_ptr<ListModel> instance_;

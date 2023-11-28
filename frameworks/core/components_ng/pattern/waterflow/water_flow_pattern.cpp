@@ -52,15 +52,18 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
     if (GetScrollEdgeEffect()) {
         // over scroll in drag update from normal to over scroll.
         float overScroll = 0.0f;
-        if (layoutInfo_.itemStart_ && delta > 0) {
+        if (layoutInfo_.itemStart_) {
             overScroll = layoutInfo_.currentOffset_ + delta;
         }
-        if (layoutInfo_.offsetEnd_ && delta < 0) {
+        if (layoutInfo_.offsetEnd_) {
             overScroll = GetMainContentSize() - (layoutInfo_.GetMaxMainHeight() + layoutInfo_.currentOffset_ - delta);
         }
         if (source == SCROLL_FROM_UPDATE) {
             auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             delta *= friction;
+        }
+        if (IsOutOfBoundary()) {
+            HandleScrollBarOutBoundary(overScroll);
         }
     } else {
         if (layoutInfo_.itemStart_ && delta > 0) {
@@ -80,7 +83,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
 
 bool WaterFlowPattern::IsScrollable() const
 {
-    return !(IsAtTop() && IsAtBottom() &&  !GetAlwaysEnabled());
+    return !(IsAtTop() && IsAtBottom() && !GetAlwaysEnabled());
 }
 bool WaterFlowPattern::IsAtTop() const
 {
@@ -130,7 +133,19 @@ OverScrollOffset WaterFlowPattern::GetOverScrollOffset(double delta) const
     return offset;
 }
 
-void WaterFlowPattern::UpdateScrollBarOffset() {};
+void WaterFlowPattern::UpdateScrollBarOffset()
+{
+    if (!GetScrollBar() && !GetScrollBarProxy()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    auto viewSize = geometryNode->GetFrameSize();
+    UpdateScrollBarRegion(-layoutInfo_.currentOffset_,
+        NearZero(layoutInfo_.maxHeight_) ? layoutInfo_.GetMaxMainHeight() : layoutInfo_.maxHeight_,
+        Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
+};
 
 RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
 {
@@ -146,6 +161,11 @@ RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
         contentModifier_ = AceType::MakeRefPtr<WaterFlowContentModifier>();
     }
     paint->SetContentModifier(contentModifier_);
+
+    paint->SetScrollBar(GetScrollBar());
+    CreateScrollBarOverlayModifier();
+    paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
+
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
@@ -163,6 +183,12 @@ void WaterFlowPattern::OnModifyDone()
         InitScrollableEvent();
     }
     SetEdgeEffect();
+
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetScrollBarProperty()) {
+        SetScrollBar(paintProperty->GetScrollBarProperty());
+    }
     SetAccessibilityAction();
 }
 
@@ -208,7 +234,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
     layoutInfo_ = std::move(layoutInfo);
     layoutInfo_.UpdateStartIndex();
-
+    UpdateScrollBarOffset();
     CheckScrollable();
 
     auto property = host->GetLayoutProperty();
@@ -300,19 +326,6 @@ void WaterFlowPattern::ScrollPage(bool reverse)
     UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
 
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-}
-
-void WaterFlowPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
-{
-    json->Put("friction", GetFriction());
-    auto edgeEffect = GetEdgeEffect();
-    if (edgeEffect == EdgeEffect::SPRING) {
-        json->Put("edgeEffect", "EdgeEffect.Spring");
-    } else if (edgeEffect == EdgeEffect::FADE) {
-        json->Put("edgeEffect", "EdgeEffect.Fade");
-    } else {
-        json->Put("edgeEffect", "EdgeEffect.None");
-    }
 }
 
 std::string WaterFlowPattern::ProvideRestoreInfo()

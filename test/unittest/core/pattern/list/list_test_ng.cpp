@@ -157,7 +157,7 @@ protected:
     RefPtr<ListPattern> pattern_;
     RefPtr<ListEventHub> eventHub_;
     RefPtr<ListLayoutProperty> layoutProperty_;
-    RefPtr<ListPaintProperty> paintProperty_;
+    RefPtr<ScrollablePaintProperty> paintProperty_;
     RefPtr<ListAccessibilityProperty> accessibilityProperty_;
 };
 
@@ -213,7 +213,7 @@ void ListTestNg::GetInstance()
     pattern_ = frameNode_->GetPattern<ListPattern>();
     eventHub_ = frameNode_->GetEventHub<ListEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<ListLayoutProperty>();
-    paintProperty_ = frameNode_->GetPaintProperty<ListPaintProperty>();
+    paintProperty_ = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ListAccessibilityProperty>();
 }
 
@@ -724,7 +724,6 @@ HWTEST_F(ListTestNg, ListLayoutProperty001, TestSize.Level1)
     EXPECT_TRUE(json->GetBool("editMode"));
     EXPECT_TRUE(json->GetBool("chainAnimation"));
     EXPECT_EQ(json->GetString("divider"), "");
-    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect.None");
     EXPECT_EQ(json->GetString("lanes"), "3");
     EXPECT_EQ(Dimension::FromString(json->GetString("laneMinLength")), Dimension(40));
     EXPECT_EQ(Dimension::FromString(json->GetString("laneMaxLength")), Dimension(60));
@@ -738,7 +737,6 @@ HWTEST_F(ListTestNg, ListLayoutProperty001, TestSize.Level1)
      * @tc.expected: The json value is correct
      */
     layoutProperty_->UpdateListDirection(Axis::HORIZONTAL);
-    layoutProperty_->UpdateEdgeEffect(EdgeEffect::FADE);
     layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::END);
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::FOOTER);
     layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
@@ -746,7 +744,6 @@ HWTEST_F(ListTestNg, ListLayoutProperty001, TestSize.Level1)
     json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json);
     EXPECT_EQ(json->GetString("listDirection"), "Axis.Horizontal");
-    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect.Fade");
     EXPECT_EQ(json->GetString("alignListItem"), "ListItemAlign.End");
     EXPECT_EQ(json->GetString("sticky"), "StickyStyle.Footer");
     EXPECT_EQ(json->GetString("scrollSnapAlign"), "ScrollSnapAlign.CENTER");
@@ -760,13 +757,11 @@ HWTEST_F(ListTestNg, ListLayoutProperty001, TestSize.Level1)
      * @tc.steps: step3. Change some property, Call ToJsonValue()
      * @tc.expected: The json value is changed
      */
-    layoutProperty_->UpdateEdgeEffect(EdgeEffect::SPRING);
     layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::START);
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::BOTH);
     layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::END);
     json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json);
-    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect.Spring");
     EXPECT_EQ(json->GetString("alignListItem"), "ListItemAlign.Start");
     EXPECT_EQ(json->GetString("sticky"), "StickyStyle.Header | StickyStyle.Footer");
     EXPECT_EQ(json->GetString("scrollSnapAlign"), "ScrollSnapAlign.END");

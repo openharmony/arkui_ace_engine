@@ -45,12 +45,18 @@ class ScrollablePattern : public NestableScrollContainer {
 
 public:
     ScrollablePattern() = default;
-    ScrollablePattern(bool alwaysEnabled) : edgeEffectAlwaysEnabled_(alwaysEnabled) {}
+    ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
+        : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
+    {}
 
     bool IsAtomicNode() const override
     {
         return false;
     }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     // scrollable
     Axis GetAxis() const override
@@ -111,7 +117,7 @@ public:
             scrollableEvent_->SetAxis(axis_);
         }
     }
-    void SetScrollableAxis(Axis axis);
+
     RefPtr<GestureEventHub> GetGestureHub();
     RefPtr<InputEventHub> GetInputHub();
 
@@ -374,7 +380,12 @@ public:
     {
         edgeEffectAlwaysEnabled_ = alwaysEnabled;
     }
+
 protected:
+    virtual DisplayMode GetDefaultScrollBarDisplayMode() const
+    {
+        return DisplayMode::AUTO;
+    }
     RefPtr<ScrollBar> GetScrollBar() const
     {
         return scrollBar_;

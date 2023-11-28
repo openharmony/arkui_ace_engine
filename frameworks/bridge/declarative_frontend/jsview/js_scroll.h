@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,8 @@ public:
     static void OnScrollEndCallback(const JSCallbackInfo& args);
     static void OnScrollStartCallback(const JSCallbackInfo& args);
     static void OnScrollStopCallback(const JSCallbackInfo& args);
+    static void ReachStartCallback(const JSCallbackInfo& args);
+    static void ReachEndCallback(const JSCallbackInfo& args);
     static void SetScrollBarColor(const std::string& color);
     static void SetScrollBarWidth(const JSCallbackInfo& args);
     static void SetScrollBar(const JSCallbackInfo& args);

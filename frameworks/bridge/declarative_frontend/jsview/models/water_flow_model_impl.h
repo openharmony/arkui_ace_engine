@@ -52,6 +52,10 @@ public:
     void SetFriction(double friction) override {};
     void SetCachedCount(int32_t value) override {};
     void SetEdgeEffect(EdgeEffect /* edgeEffect */, bool /* alwaysEnabled */) override {};
+
+    void SetScrollBarMode(DisplayMode /* value */) override {};
+    void SetScrollBarColor(const std::string& /* value */) override {};
+    void SetScrollBarWidth(const std::string& /* value */) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WATER_FLOW_MODEL_IMPL_H

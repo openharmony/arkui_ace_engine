@@ -130,8 +130,7 @@ void GridPattern::OnModifyDone()
         InitScrollableEvent();
     }
 
-    auto edgeEffect = gridLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
-    SetEdgeEffect(edgeEffect);
+    SetEdgeEffect();
 
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -1245,10 +1244,9 @@ void GridPattern::ScrollBy(float offset)
 
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    Pattern::ToJsonValue(json);
+    ScrollablePattern::ToJsonValue(json);
     json->Put("multiSelectable", multiSelectable_ ? "true" : "false");
     json->Put("supportAnimation", supportAnimation_ ? "true" : "false");
-    json->Put("friction", GetFriction());
 }
 
 void GridPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
@@ -1455,16 +1453,13 @@ void GridPattern::UpdateScrollBarOffset()
     UpdateScrollBarRegion(offset, estimatedHeight, Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 }
 
-RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
+DisplayMode GridPattern::GetDefaultScrollBarDisplayMode() const
 {
     auto defaultDisplayMode = DisplayMode::OFF;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         defaultDisplayMode = DisplayMode::AUTO;
     }
-    auto property = MakeRefPtr<ScrollablePaintProperty>();
-    // default "scrollBar" attribute of Grid is BarState.Off
-    property->UpdateScrollBarMode(defaultDisplayMode);
-    return property;
+    return defaultDisplayMode;
 }
 
 int32_t GridPattern::GetOriginalIndex() const

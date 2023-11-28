@@ -27,6 +27,22 @@ void ScrollableModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetEdgeEffect(edgeEffect, alwaysEnabled);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void ScrollableModelNG::SetScrollBarMode(DisplayMode value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, value);
+}
+
+void ScrollableModelNG::SetScrollBarColor(const std::string& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, Color::FromString(value));
+}
+
+void ScrollableModelNG::SetScrollBarWidth(const std::string& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
 }
 
 void ScrollableModelNG::SetOnScroll(OnScrollEvent&& onScroll)
