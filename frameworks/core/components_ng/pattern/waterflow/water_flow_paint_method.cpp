@@ -57,9 +57,6 @@ void WaterFlowPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(scrollBarOverlayModifier);
     auto scrollBar = scrollBar_.Upgrade();
     CHECK_NULL_VOID(scrollBar);
-    if (!scrollBar || !scrollBar->NeedPaint()) {
-        return;
-    }
     if (scrollBar->GetPositionModeUpdate()) {
         scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
     }
