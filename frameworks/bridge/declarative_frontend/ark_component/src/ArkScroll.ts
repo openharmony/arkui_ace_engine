@@ -53,8 +53,8 @@ class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
 // @ts-ignore
 globalThis.Scroll.attributeModifier = function(modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () =>
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () =>
     {
         return new ArkScrollComponent(nativeNode);
     });

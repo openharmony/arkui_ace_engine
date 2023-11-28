@@ -79,7 +79,7 @@ class ArkShadow {
             isResource(options.offsetX) || isResource(options.offsetY)) {
             return false;
         }
-        var arkColor = new ArkColor();
+        let arkColor = new ArkColor();
         this.radius = options.radius
         this.type = options.type
         if (arkColor.parseColorValue(options.color)) {
@@ -354,7 +354,7 @@ class ArkLinearGradientBlur {
 
 class ArkFont implements Equable {
     size: string | number | Resource;
-    weight: string;
+    weight: string | number ;
     family: string | Resource | undefined;
     style: number | undefined;
 
@@ -791,6 +791,40 @@ class ArkGridColColumnOption implements Equable {
 		    (this.lg === another.lg) && (this.xl === another.xl) && (this.xxl === another.xxl);
     }
 }
+class ArkConstraintSizeOptions {
+  minWidth?: string | number | undefined;
+  maxWidth?: string | number | undefined;
+  minHeight?: string | number | undefined;
+  maxHeight?: string | number | undefined;
+
+  constructor() {
+    this.minWidth = undefined;
+    this.maxWidth = undefined;
+    this.minHeight = undefined;
+    this.maxHeight = undefined;
+  }
+
+  isEqual(another: ArkConstraintSizeOptions): boolean {
+    return (this.minWidth === another.minWidth) &&
+      (this.maxWidth === another.maxWidth) &&
+      (this.minHeight === another.minHeight) &&
+      (this.maxHeight === another.maxHeight);
+  }
+}
+
+class ArkSize {
+  width: string | number | undefined;
+  height: string | number | undefined;
+
+  constructor() {
+    this.width = undefined;
+    this.height = undefined;
+  }
+
+  isEqual(another: ArkSize): boolean {
+    return (this.width === another.width) && (this.height === another.height);
+  }
+}
 
 class ArkPadding implements Equable {
   top: string | number | undefined;
@@ -908,4 +942,204 @@ class ArkResponseRegion {
     isEqual(another: ArkResponseRegion): boolean {
         return (this.responseRegion === another.responseRegion);
     }
+}
+class ArkAlignRules implements Equable {
+  left: string | undefined;
+  middle: string | undefined;
+  right: string | undefined;
+  top: string | undefined;
+  center: string | undefined;
+  bottom: string | undefined;
+  constructor() {
+    this.left = undefined;
+    this.middle = undefined;
+    this.right = undefined;
+    this.top = undefined;
+    this.center = undefined;
+    this.bottom = undefined;
+  }
+  isEqual(another: ArkAlignRules) {
+    return (this.left === another.left &&
+      this.middle === another.middle &&
+      this.right === another.right &&
+      this.top === another.top &&
+      this.center === another.center &&
+      this.bottom === another.bottom);
+  }
+}
+
+class ArkSafeAreaExpandOpts {
+  type: string | number | undefined = undefined;
+  edges: string | number | undefined = undefined;
+  isEqual(another: ArkColumnSplitDividerStyle): boolean {
+    return false;
+  }
+}
+
+class ArkSideBarDividerStyle {
+  strokeWidth: number | string;
+  color?: string | number;
+  startMargin?: string | number;
+  endMargin?: string | number;
+  constructor() {
+    this.startMargin = 0;
+    this.endMargin = 0;
+  }
+  isEqual(another: ArkSideBarDividerStyle): boolean {
+    return (this.strokeWidth === another.strokeWidth) && (this.color === another.color) && (this.startMargin === another.startMargin) && (this.endMargin === another.endMargin);
+  }
+}
+
+class ArkColumnSplitDividerStyle implements Equable {
+  startMargin?: string;
+  endMargin?: string;
+  constructor() {
+    this.startMargin = '0';
+    this.endMargin = '0';
+  }
+  isEqual(another: ArkColumnSplitDividerStyle): boolean {
+    return false;
+  }
+}
+
+class ArkButtonStyle {
+  left?: number;
+  top?: number;
+  width?: number;
+  height?: number;
+  icons?: {
+    shown?: string;
+    hidden?: string;
+    switching?: string;
+  }
+  constructor() {
+    this.left = 16;
+    this.top = 48;
+    this.width = 24;
+    this.height = 24;
+    this.icons = {
+      shown: undefined,
+      hidden: undefined,
+      switching: undefined
+    }
+  }
+  isEqual(another: ArkButtonStyle): boolean {
+    return (this.left === another.left) && (this.top === another.top) && (this.width === another.width)
+      && (this.height === another.height) && (this.icons === another.icons);
+  }
+}
+
+class ArkShadowInfoToArray {
+  radius: (number | string)[];
+  color: (Color | string | Resource | ColoringStrategy)[];
+  offsetX: (number | string)[];
+  offsetY: (number | string)[];
+  fill: boolean[];
+  constructor() {
+    this.radius = [];
+    this.color = [];
+    this.offsetX = [];
+    this.offsetX = [];
+    this.offsetY = [];
+    this.fill = [];
+  }
+  isEqual(another: ArkShadowInfoToArray): boolean {
+    return (this.radius === another.radius) && (this.color === another.color) && (this.offsetX === another.offsetX) && (this.offsetY === another.offsetY) && (this.fill === another.fill);
+  }
+}
+class ArkPasswordIcon implements Equable {
+  onIconSrc: string | undefined;
+  offIconSrc: string | undefined;
+  constructor() {
+    this.onIconSrc = undefined;
+    this.offIconSrc = undefined;
+  }
+  isEqual(another: ArkPasswordIcon): boolean {
+    return (this.onIconSrc === another.onIconSrc) &&
+      (this.offIconSrc === another.offIconSrc);
+  }
+}
+class ArkCaretStyle implements Equable {
+  width: string | number | undefined;
+  color: number | undefined;
+  constructor() {
+    this.width = undefined;
+    this.color = undefined;
+  }
+  isEqual(another: ArkCaretStyle): boolean {
+    return (this.width === another.width) &&
+      (this.color === another.color);
+  }
+}
+class ArkIconOptions implements Equable {
+  size: string | number | undefined;
+  color: number | undefined;
+  src: string | undefined;
+  constructor() {
+    this.size = undefined;
+    this.color = undefined;
+    this.src = undefined;
+  }
+  isEqual(another: ArkIconOptions): boolean {
+    return (this.size === another.color) &&
+      (this.color === another.color) &&
+      (this.src === another.src);
+  }
+}
+class ArkSearchButton implements Equable {
+  value: string | undefined;
+  fontSize: string | number | undefined;
+  fontColor: number | undefined;
+  constructor() {
+    this.value = undefined;
+    this.fontSize = undefined;
+    this.fontColor = undefined;
+  }
+  isEqual(another: ArkSearchButton): boolean {
+    return (this.value === another.value) &&
+      (this.fontSize === another.fontSize) &&
+      (this.fontColor === another.fontColor);
+  }
+}
+class ArkCancelButton implements Equable {
+  style: CancelButtonStyle | undefined;
+  color: number | undefined;
+  size: string | number | undefined;
+  src: string | undefined
+  constructor() {
+    this.style = undefined;
+    this.color = undefined;
+    this.size = undefined;
+    this.src = undefined;
+  }
+  isEqual(another: ArkCancelButton): boolean {
+    return (this.style === another.style) &&
+      (this.color === another.color) &&
+      (this.size === another.size) &&
+      (this.src === another.src);
+  }
+}
+class ArkImageFrameInfoToArray implements Equable {
+  arrSrc: Array<string> | undefined;
+  arrWidth: Array<number | string> | undefined;
+  arrHeight: Array<number | string> | undefined;
+  arrTop: Array<number | string> | undefined;
+  arrLeft: Array<number | string> | undefined;
+  arrDuration: Array<number> | undefined;
+  constructor() {
+    this.arrSrc = [];
+    this.arrWidth = [];
+    this.arrHeight = [];
+    this.arrTop = [];
+    this.arrLeft = [];
+    this.arrDuration = [];
+  }
+  isEqual(another: ArkImageFrameInfoToArray): boolean {
+    return (this.arrSrc.toString() === another.arrSrc.toString()) &&
+      (this.arrWidth.toString() === another.arrWidth.toString()) &&
+      (this.arrHeight.toString() === another.arrHeight.toString()) &&
+      (this.arrTop.toString() === another.arrTop.toString()) &&
+      (this.arrLeft.toString() === another.arrLeft.toString()) &&
+      (this.arrDuration.toString() === another.arrDuration.toString());
+  }
 }

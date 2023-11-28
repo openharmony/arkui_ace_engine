@@ -64,8 +64,8 @@ class RadioStyleModifier extends Modifier<ArkRadioStyle> {
 // @ts-ignore
 globalThis.Radio.attributeModifier = function(modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () =>
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () =>
     {
         return new ArkRadioComponent(nativeNode);
     });

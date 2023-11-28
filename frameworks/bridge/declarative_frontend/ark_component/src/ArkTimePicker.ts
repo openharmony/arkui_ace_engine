@@ -47,8 +47,8 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
 // @ts-ignore
 globalThis.TimePicker.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, ()=> {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, ()=> {
       return new ArkTimePickerComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);

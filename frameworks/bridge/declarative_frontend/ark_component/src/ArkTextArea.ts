@@ -1,5 +1,25 @@
-
 /// <reference path="./import.ts" />
+class TextAreaFontStyleModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textAreaFontStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetFontStyle(node);
+    } else {
+      GetUINativeModule().textArea.setFontStyle(node, this.value!);
+    }
+  }
+}
+
+class TextAreaCopyOptionModifier extends Modifier<CopyOptions> {
+  static identity: Symbol = Symbol('textAreaCopyOption');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetCopyOption(node);
+    } else {
+      GetUINativeModule().textArea.setCopyOption(node, this.value!);
+    }
+  }
+}
 
 class TextAreaMaxLinesModifier extends Modifier<number | undefined> {
   static identity: Symbol = Symbol('textAreaMaxLines');
@@ -11,85 +31,334 @@ class TextAreaMaxLinesModifier extends Modifier<number | undefined> {
     }
   }
 }
-class ArkTextAreaComponent extends ArkComponent implements TextAreaAttribute {
-    onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-        throw new Error("Method not implemented.");
+
+class TextAreaFontSizeModifier extends Modifier<string | number> {
+  static identity: Symbol = Symbol('textAreaFontSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetFontSize(node);
+    } else {
+      GetUINativeModule().textArea.setFontSize(node, this.value!);
     }
-    type(value: TextAreaType): this{
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextAreaPlaceholderColorModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textAreaPlaceholderColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetPlaceholderColor(node);
+    } else {
+      GetUINativeModule().textArea.setPlaceholderColor(node, this.value!);
     }
-    placeholderColor(value: ResourceColor): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextAreaFontColorModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textAreaFontColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetFontColor(node);
+    } else {
+      GetUINativeModule().textArea.setFontColor(node, this.value!);
     }
-    placeholderFont(value: Font): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextAreaFontWeightModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textAreaFontWeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetFontWeight(node);
+    } else {
+      GetUINativeModule().textArea.setFontWeight(node, this.value!);
     }
-    textAlign(value: TextAlign): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextAreaBarStateModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textAreaBarState');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetBarState(node);
+    } else {
+      GetUINativeModule().textArea.setBarState(node, this.value!);
     }
-    caretColor(value: ResourceColor): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextAreaEnableKeyboardOnFocusModifier extends Modifier<boolean> {
+  static identity: Symbol = Symbol('textAreaEnableKeyboardOnFocus');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetEnableKeyboardOnFocus(node);
+    } else {
+      GetUINativeModule().textArea.setEnableKeyboardOnFocus(node, this.value!);
     }
-    fontColor(value: ResourceColor): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextAreaFontFamilyModifier extends Modifier<string> {
+  static identity: Symbol = Symbol('textAreaFontFamily');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetFontFamily(node);
+    } else {
+      GetUINativeModule().textArea.setFontFamily(node, this.value!);
     }
-    fontSize(value: Length): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextAreaCaretColorModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textAreaCaretColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetCaretColor(node);
+    } else {
+      GetUINativeModule().textArea.setCaretColor(node, this.value!);
     }
-    fontStyle(value: FontStyle): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextAreaMaxLengthModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textAreaMaxLength');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetMaxLength(node);
+    } else {
+      GetUINativeModule().textArea.setMaxLength(node, this.value!);
     }
-    fontWeight(value: any): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextAreaStyleModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textAreaStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetStyle(node);
+    } else {
+      GetUINativeModule().textArea.setStyle(node, this.value!);
     }
-    fontFamily(value: ResourceStr): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextAreaSelectionMenuHiddenModifier extends Modifier<boolean> {
+  static identity: Symbol = Symbol('textAreaSelectionMenuHidden');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetSelectionMenuHidden(node);
+    } else {
+      GetUINativeModule().textArea.setSelectionMenuHidden(node, this.value!);
     }
-    inputFilter(value: ResourceStr, error?: ((value: string) => void) | undefined): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextAreaPlaceholderFontModifier extends Modifier<ArkFont> {
+  static identity: Symbol = Symbol('textAreaPlaceholderFont');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetPlaceholderFont(node);
+    } else {
+      GetUINativeModule().textArea.setPlaceholderFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
-    onChange(callback: (value: string) => void): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextAreaTextAlignModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textAreaTextAlign');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetTextAlign(node);
+    } else {
+      GetUINativeModule().textArea.setTextAlign(node, this.value!);
     }
-    onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextAreaShowCounterModifier extends Modifier<boolean> {
+  static identity: Symbol = Symbol('textAreaShowCounter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetShowCounter(node);
+    } else {
+      GetUINativeModule().textArea.setShowCounter(node, this.value!);
     }
-    onContentScroll(callback: (totalOffsetX: number, totalOffsetY: number) => void): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
+  type(value: TextAreaType): TextAreaAttribute {
+    throw new Error('Method not implemented.');
+  }
+  placeholderColor(value: ResourceColor): TextAreaAttribute {
+    let arkColor = new ArkColor();
+    if (arkColor.parseColorValue(value)) {
+      modifier(this._modifiers, TextAreaPlaceholderColorModifier, arkColor.color);
     }
-    onEditChange(callback: (isEditing: boolean) => void): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  placeholderFont(value: Font): TextAreaAttribute {
+    let arkValue: ArkFont = new ArkFont();
+    if (isLengthType(value.size)) {
+      arkValue.size = <string | number>value.size;
     }
-    onCopy(callback: (value: string) => void): this {
-        throw new Error("Method not implemented.");
+    if (isLengthType(value.weight)) {
+      arkValue.weight = value.weight;
     }
-    onCut(callback: (value: string) => void): this {
-        throw new Error("Method not implemented.");
+    if (isString(value.family)) {
+      arkValue.family = <string>value.family;
     }
-    onPaste(callback: (value: string) => void): this {
-        throw new Error("Method not implemented.");
+    if (value.style in FontStyle) {
+      arkValue.style = value.style;
     }
-    copyOption(value: CopyOptions): this {
-        throw new Error("Method not implemented.");
+    modifier(this._modifiers, TextAreaPlaceholderFontModifier, arkValue);
+    return this;
+  }
+
+
+  textAlign(value: TextAlign): TextAreaAttribute {
+    if (value) {
+      modifier(this._modifiers, TextAreaTextAlignModifier, value);
+    } else {
+      modifier(this._modifiers, TextAreaTextAlignModifier, TextAlign.Start);
     }
-    enableKeyboardOnFocus(value: boolean): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  caretColor(value: ResourceColor): TextAreaAttribute {
+    let arkColor = new ArkColor();
+    if (arkColor.parseColorValue(value)) {
+      modifier(this._modifiers, TextAreaCaretColorModifier, arkColor.color);
     }
-    maxLength(value: number): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  fontColor(value: ResourceColor): TextAreaAttribute {
+    let arkColor = new ArkColor();
+    if (arkColor.parseColorValue(value)) {
+      modifier(this._modifiers, TextAreaFontColorModifier, arkColor.color);
     }
-    showCounter(value: boolean): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  fontSize(value: Length): TextAreaAttribute {
+    if (isLengthType(value)) {
+      modifier(this._modifiers, TextAreaFontSizeModifier, <string | number>value);
+    } else {
+      modifier(this._modifiers, TextAreaFontSizeModifier, 16);
     }
-    style(value: TextContentStyle): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  fontStyle(value: FontStyle): TextAreaAttribute {
+    let arkValue = FontStyle.Normal;
+    if (value) {
+      arkValue = value;
     }
-    barState(value: BarState): this {
-        throw new Error("Method not implemented.");
+    modifier(this._modifiers, TextAreaFontStyleModifier, arkValue);
+    return this;
+  }
+  fontWeight(value: number | FontWeight | string): TextAreaAttribute {
+    if (!isLengthType(value)) {
+      modifier(this._modifiers, TextAreaFontWeightModifier, undefined);
+    } else {
+      modifier(this._modifiers, TextAreaFontWeightModifier, value);
     }
-    selectionMenuHidden(value: boolean): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  fontFamily(value: ResourceStr): TextAreaAttribute {
+    let arkValue = 'HarmonyOS Sans';
+    if (isString(value)) {
+      arkValue = <string>value;
     }
+    modifier(this._modifiers, TextAreaFontFamilyModifier, arkValue);
+    return this;
+  }
+  inputFilter(value: ResourceStr, error?: (value: string) => void): TextAreaAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onChange(callback: (value: string) => void): TextAreaAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): TextAreaAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onContentScroll(callback: (totalOffsetX: number, totalOffsetY: number) => void): TextAreaAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onEditChange(callback: (isEditing: boolean) => void): TextAreaAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onCopy(callback: (value: string) => void): TextAreaAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onCut(callback: (value: string) => void): TextAreaAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onPaste(callback: (value: string) => void): TextAreaAttribute {
+    throw new Error('Method not implemented.');
+  }
+  copyOption(value: CopyOptions): TextAreaAttribute {
+    if (value === undefined) {
+      value = CopyOptions.LocalDevice;
+      modifier(this._modifiers, TextAreaCopyOptionModifier, value);
+    }
+    let copyOptions = CopyOptions.None;
+    if (isNumber(value)) {
+      copyOptions = value;
+    }
+    modifier(this._modifiers, TextAreaCopyOptionModifier, copyOptions);
+    return this;
+  }
+
+  enableKeyboardOnFocus(value: boolean): TextAreaAttribute {
+    if (value === undefined) {
+      return this;
+    }
+    if (isUndefined(value) || !isBoolean(value)) {
+      modifier(this._modifiers, TextAreaEnableKeyboardOnFocusModifier, true);
+      return this;
+    }
+    modifier(this._modifiers, TextAreaEnableKeyboardOnFocusModifier, Boolean(value));
+    return this;
+  }
+
+  maxLength(value: number): TextAreaAttribute {
+    if (!value || isNaN(value)) {
+      modifier(this._modifiers, TextAreaMaxLengthModifier, undefined);
+      return this;
+    }
+    modifier(this._modifiers, TextAreaMaxLengthModifier, value);
+    return this;
+  }
+  showCounter(value: boolean): TextAreaAttribute {
+    let showCounter = false;
+    if (isBoolean(value)) {
+      showCounter = value;
+    }
+    modifier(this._modifiers, TextAreaShowCounterModifier, showCounter);
+    return this;
+  }
+  style(value: TextContentStyle): TextAreaAttribute {
+    if (value) {
+      modifier(this._modifiers, TextAreaStyleModifier, value);
+    } else {
+      modifier(this._modifiers, TextAreaStyleModifier, undefined);
+    }
+    return this;
+  }
+  barState(value: BarState): TextAreaAttribute {
+    if (value === null || value === undefined || !isNumber(value)) {
+      modifier(this._modifiers, TextAreaBarStateModifier, BarState.Auto);
+      return this;
+    }
+    modifier(this._modifiers, TextAreaBarStateModifier, value);
+    return this;
+  }
+  selectionMenuHidden(value: boolean): TextAreaAttribute {
+    let selectionMenuHidden = false;
+    if (isBoolean(value)) {
+      selectionMenuHidden = value;
+    }
+    modifier(this._modifiers, TextAreaSelectionMenuHiddenModifier, selectionMenuHidden);
+    return this;
+  }
   maxLines(value: number): TextAreaAttribute {
     if (!isNumber(value)) {
       modifier(this._modifiers, TextAreaMaxLinesModifier, undefined);
@@ -102,19 +371,19 @@ class ArkTextAreaComponent extends ArkComponent implements TextAreaAttribute {
     modifier(this._modifiers, TextAreaMaxLinesModifier, Number(value));
     return this;
   }
-
-    customKeyboard(value: CustomBuilder): this {
-        throw new Error("Method not implemented.");
-    }
+  customKeyboard(value: CustomBuilder): TextAreaAttribute {
+    throw new Error('Method not implemented.');
+  }
 }
 // @ts-ignore
-globalThis.TextArea.attributeModifier = function(modifier) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () =>
-    {
-        return new ArkTextAreaComponent(nativeNode);
-    });
-    modifier.applyNormalAttribute(component);
-    component.applyModifierPatch();
+globalThis.TextArea.attributeModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkTextAreaComponent(nativeNode);
+  });
+  modifier.applyNormalAttribute(component);
+  component.applyModifierPatch();
+
 }

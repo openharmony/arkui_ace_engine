@@ -77,8 +77,8 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
 // @ts-ignore
 globalThis.Rating.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, ()=> {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, ()=> {
       return new ArkRatingComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);

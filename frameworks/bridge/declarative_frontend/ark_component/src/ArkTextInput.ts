@@ -1,144 +1,550 @@
-
 /// <reference path="./import.ts" />
-class ArkTextInputComponent extends ArkComponent implements TextInputAttribute {
-    cancelButton(value: { style?: CancelButtonStyle; icon?: IconOptions; }): this {
-        throw new Error("Method not implemented.");
+class TextInputStyleModifier extends Modifier<TextInputStyle | TextContentStyle> {
+  static identity: Symbol = Symbol('textInputStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetStyle(node);
+    } else {
+      GetUINativeModule().textInput.setStyle(node, this.value!);
     }
-    onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-        throw new Error("Method not implemented.");
+  }
+}
+class TextInputMaxLengthModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textInputMaxLength');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetMaxLength(node);
+    } else {
+      GetUINativeModule().textInput.setMaxLength(node, this.value!);
     }
-    selectAll(value: boolean): this {
-        throw new Error("Method not implemented.");
+  }
+}
+class TextInputMaxLinesModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textInputMaxLines');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetMaxLines(node);
+    } else {
+      GetUINativeModule().textInput.setMaxLines(node, this.value!);
     }
-    enableAutoFill(value: boolean): this {
-        throw new Error("Method not implemented.");
+  }
+}
+class TextInputShowPasswordIconModifier extends Modifier<boolean> {
+  static identity: Symbol = Symbol('textInputShowPasswordIcon');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetShowPasswordIcon(node);
+    } else {
+      GetUINativeModule().textInput.setShowPasswordIcon(node, this.value!);
     }
-    passwordRules(value: string): this {
-        throw new Error("Method not implemented.");
+  }
+}
+class TextInputTextAlignModifier extends Modifier<TextAlign> {
+  static identity: Symbol = Symbol('textInputTextAlign');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetTextAlign(node);
+    } else {
+      GetUINativeModule().textInput.setTextAlign(node, this.value!);
     }
-    showCounter(value: boolean): this {
-        throw new Error("Method not implemented.");
+  }
+}
+class TextInputPlaceholderFontModifier extends Modifier<ArkFont> {
+  static identity: Symbol = Symbol('textInputPlaceholderFont');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetPlaceholderFont(node);
+    } else {
+      GetUINativeModule().textInput.setPlaceholderFont(node, this.value.size,
+        this.value.weight, this.value.family, this.value.style);
     }
-    type(value: InputType): this {
-        throw new Error("Method not implemented.");
+  }
+}
+class TextInputPlaceholderColorModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textInputPlaceholderColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetPlaceholderColor(node);
+    } else {
+      GetUINativeModule().textInput.setPlaceholderColor(node, this.value!);
     }
-    placeholderColor(value: ResourceColor): this {
-        throw new Error("Method not implemented.");
+  }
+}
+class TextInputPasswordIconModifier extends Modifier<ArkPasswordIcon> {
+  static identity: Symbol = Symbol('textInputPasswordIcon');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetPasswordIcon(node);
+    } else {
+      GetUINativeModule().textInput.setPasswordIcon(node,
+        this.value.onIconSrc, this.value.offIconSrc);
     }
-    placeholderFont(value?: any): this {
-        throw new Error("Method not implemented.");
+  }
+}
+class TextInputSelectedBackgroundColorModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textInputSelectedBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetSelectedBackgroundColor(node);
+    } else {
+      GetUINativeModule().textInput.setSelectedBackgroundColor(node, this.value!);
     }
-    enterKeyType(value: EnterKeyType): this {
-        throw new Error("Method not implemented.");
+  }
+}
+class TextInputSelectionMenuHiddenModifier extends Modifier<boolean> {
+  static identity: Symbol = Symbol('textInputSelectionMenuHidden');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetSelectionMenuHidden(node);
+    } else {
+      GetUINativeModule().textInput.setSelectionMenuHidden(node, this.value!);
     }
-    caretColor(value: ResourceColor): this {
-        throw new Error("Method not implemented.");
+  }
+}
+class TextInputShowUnderlineModifier extends Modifier<boolean> {
+  static identity: Symbol = Symbol('textInputShowUnderLine');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetShowUnderline(node);
+    } else {
+      GetUINativeModule().textInput.setShowUnderline(node, this.value!);
     }
-    onEditChanged(callback: (isEditing: boolean) => void): this {
-        throw new Error("Method not implemented.");
+  }
+}
+class TextInputShowErrorModifier extends Modifier<string | undefined> {
+  static identity: Symbol = Symbol('textInputShowError');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetShowError(node);
+    } else {
+      GetUINativeModule().textInput.setShowError(node, this.value!);
     }
-    onEditChange(callback: (isEditing: boolean) => void): this {
-        throw new Error("Method not implemented.");
+  }
+}
+class TextInputTypeModifier extends Modifier<InputType> {
+  static identity: Symbol = Symbol('textInputType');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetType(node);
+    } else {
+      GetUINativeModule().textInput.setType(node, this.value!);
     }
-    onSubmit(callback: (enterKey: EnterKeyType) => void): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextInputCaretPositionModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textInputCaretPosition');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetCaretPosition(node);
+    } else {
+      GetUINativeModule().textInput.setCaretPosition(node, this.value);
     }
-    onChange(callback: (value: string) => void): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextInputCopyOptionModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textInputCopyOption');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetCopyOption(node);
+    } else {
+      GetUINativeModule().textInput.setCopyOption(node, this.value);
     }
-    onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextInputEnableKeyboardOnFocusModifier extends Modifier<boolean> {
+  static identity: Symbol = Symbol('textInputEnableKeyboardOnFocus');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetEnableKeyboardOnFocus(node);
+    } else {
+      GetUINativeModule().textInput.setEnableKeyboardOnFocus(node, this.value);
     }
-    onContentScroll(callback: (totalOffsetX: number, totalOffsetY: number) => void): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextInputCaretStyleModifier extends Modifier<string | number> {
+  static identity: Symbol = Symbol('textInputCaretStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetCaretStyle(node);
+    } else {
+      GetUINativeModule().textInput.setCaretStyle(node, this.value);
     }
-    maxLength(value: number): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextInputEnterKeyTypeModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textInputEnterKeyType');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetEnterKeyType(node);
+    } else {
+      GetUINativeModule().textInput.setEnterKeyType(node, this.value);
     }
-    fontColor(value: ResourceColor): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextInputBarStateModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textInputBarState');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetBarState(node);
+    } else {
+      GetUINativeModule().textInput.setBarState(node, this.value);
     }
-    fontSize(value: Length): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextInputCaretColorModifier extends Modifier<number | string | undefined> {
+  static identity: Symbol = Symbol('textinputCaretColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetCaretColor(node);
+    } else {
+      GetUINativeModule().textInput.setCaretColor(node, this.value);
     }
-    fontStyle(value: FontStyle): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextInputFontColorModifier extends Modifier<number | string> {
+  static identity: Symbol = Symbol('textInputFontColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetFontColor(node);
+    } else {
+      GetUINativeModule().textInput.setFontColor(node, this.value);
     }
-    fontWeight(value: any): this {
-        throw new Error("Method not implemented.");
+  }
+}
+class TextInputFontSizeModifier extends Modifier<number | string> {
+  static identity: Symbol = Symbol('textInputFontSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetFontSize(node);
+    } else {
+      GetUINativeModule().textInput.setFontSize(node, this.value!);
     }
-    fontFamily(value: ResourceStr): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextInputFontStyleModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('textInputFontStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetFontStyle(node);
+    } else {
+      GetUINativeModule().textInput.setFontStyle(node, this.value!);
     }
-    inputFilter(value: ResourceStr, error?: ((value: string) => void) | undefined): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextInputFontWeightModifier extends Modifier<number | string> {
+  static identity: Symbol = Symbol('textInputFontWeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetFontWeight(node);
+    } else {
+      GetUINativeModule().textInput.setFontWeight(node, this.value!);
     }
-    onCopy(callback: (value: string) => void): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class TextInputFontFamilyModifier extends Modifier<string> {
+  static identity: Symbol = Symbol('textInputFontFamily');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textInput.resetFontFamily(node);
+    } else {
+      GetUINativeModule().textInput.setFontFamily(node, this.value!);
     }
-    onCut(callback: (value: string) => void): this {
-        throw new Error("Method not implemented.");
+  }
+}
+
+class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute>{
+  cancelButton(value: { style?: CancelButtonStyle, icon?: IconOptions }): TextInputAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
+    throw new Error("Method not implemented.");
+  }
+  selectAll(value: boolean): TextInputAttribute {
+    throw new Error('Method not implemented.')
+  }
+  enableAutoFill(value: boolean): TextInputAttribute {
+    throw new Error('Method not implemented.')
+  }
+  passwordRules(value: string): TextInputAttribute {
+    throw new Error('Method not implemented.')
+  }
+  showCounter(value: boolean): TextInputAttribute {
+    throw new Error('Method not implemented.');
+  }
+
+  type(value: InputType): TextInputAttribute {
+    if (value) {
+      modifier(this._modifiers, TextInputTypeModifier, value);
+    } else {
+      modifier(this._modifiers, TextInputTypeModifier, undefined);
     }
-    onPaste(callback: (value: string) => void): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  placeholderColor(value: ResourceColor): TextInputAttribute {
+    let arkColor = new ArkColor();
+    if (arkColor.parseColorValue(value)) {
+      modifier(this._modifiers, TextInputPlaceholderColorModifier, arkColor.color);
+    } else {
+      modifier(this._modifiers, TextInputPlaceholderColorModifier, undefined);
     }
-    copyOption(value: CopyOptions): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  placeholderFont(value?: Font): TextInputAttribute {
+    let arkValue: ArkFont = new ArkFont();
+    if (isLengthType(value.size)) {
+      arkValue.size = <string | number>value.size;
     }
-    showPasswordIcon(value: boolean): this {
-        throw new Error("Method not implemented.");
+    if (isLengthType(value.weight)) {
+      arkValue.weight = value.weight;
     }
-    textAlign(value: TextAlign): this {
-        throw new Error("Method not implemented.");
+    if (isString(value.family)) {
+      arkValue.family = <string>value.family;
     }
-    style(value: any): this {
-        throw new Error("Method not implemented.");
+    if (value.style in FontStyle) {
+      arkValue.style = value.style;
     }
-    caretStyle(value: CaretStyle): this {
-        throw new Error("Method not implemented.");
+    modifier(this._modifiers, TextInputPlaceholderFontModifier, arkValue);
+    return this;
+  }
+  enterKeyType(value: EnterKeyType): TextInputAttribute {
+    if (value) {
+      modifier(this._modifiers, TextInputEnterKeyTypeModifier, value);
+    } else {
+      modifier(this._modifiers, TextInputEnterKeyTypeModifier, EnterKeyType.Done);
     }
-    selectedBackgroundColor(value: ResourceColor): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  caretColor(value: ResourceColor): TextInputAttribute {
+    if (isNumber(value) || isString(value)) {
+      modifier(this._modifiers, TextInputCaretColorModifier, <string | number>value);
+    } else {
+      modifier(this._modifiers, TextInputCaretColorModifier, undefined);
     }
-    caretPosition(value: number): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  onEditChanged(callback: (isEditing: boolean) => void): TextInputAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onEditChange(callback: (isEditing: boolean) => void): TextInputAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onSubmit(callback: (enterKey: EnterKeyType) => void): TextInputAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onChange(callback: (value: string) => void): TextInputAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): TextInputAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onContentScroll(callback: (totalOffsetX: number, totalOffsetY: number) => void): TextInputAttribute {
+    throw new Error('Method not implemented.');
+  }
+  maxLength(value: number): TextInputAttribute {
+    if (!isNumber(value) || value === undefined || value === null) {
+      modifier(this._modifiers, TextInputMaxLengthModifier, undefined);
+    } else {
+      modifier(this._modifiers, TextInputMaxLengthModifier, value);
     }
-    enableKeyboardOnFocus(value: boolean): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  fontColor(value: ResourceColor): TextInputAttribute {
+    let arkColor: ArkColor = new ArkColor();
+    if (arkColor.parseColorValue(value)) {
+      modifier(this._modifiers, TextInputFontColorModifier, arkColor.color);
+    } else {
+      modifier(this._modifiers, TextInputFontColorModifier, undefined);
     }
-    passwordIcon(value: PasswordIcon): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  fontSize(value: Length): TextInputAttribute {
+    if (isLengthType(value)) {
+      let arkValue: number | string = <number | string>value;
+      modifier(this._modifiers, TextInputFontSizeModifier, arkValue);
+    } else {
+      modifier(this._modifiers, TextInputFontSizeModifier, undefined);
     }
-    showError(value?: string | undefined): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  fontStyle(value: FontStyle): TextInputAttribute {
+    if (!(value in FontStyle)) {
+      value = FontStyle.Normal;
     }
-    showUnit(value: CustomBuilder): this {
-        throw new Error("Method not implemented.");
+    modifier(this._modifiers, TextInputFontStyleModifier, value);
+    return this;
+  }
+  fontWeight(value: number | FontWeight | string): TextInputAttribute {
+    if (!isLengthType(value)) {
+      modifier(this._modifiers, TextInputFontWeightModifier, undefined);
+    } else {
+      modifier(this._modifiers, TextInputFontWeightModifier, value);
     }
-    showUnderline(value: boolean): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  fontFamily(value: ResourceStr): TextInputAttribute {
+    if (!(isString(value))) {
+      value = 'HarmonyOS Sans'
     }
-    selectionMenuHidden(value: boolean): this {
-        throw new Error("Method not implemented.");
+    let arkValue: number | string = <number | string>value;
+    modifier(this._modifiers, TextInputFontFamilyModifier, arkValue);
+    return this;
+  }
+  inputFilter(value: ResourceStr, error?: (value: string) => void): TextInputAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onCopy(callback: (value: string) => void): TextInputAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onCut(callback: (value: string) => void): TextInputAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onPaste(callback: (value: string) => void): TextInputAttribute {
+    throw new Error('Method not implemented.');
+  }
+  copyOption(value: CopyOptions): TextInputAttribute {
+    if (!(value in CopyOptions)) {
+      value = CopyOptions.LocalDevice;
     }
-    barState(value: BarState): this {
-        throw new Error("Method not implemented.");
+    modifier(this._modifiers, TextInputCopyOptionModifier, value);
+    return this;
+  }
+
+  showPasswordIcon(value: boolean): TextInputAttribute {
+    if (isBoolean(value)) {
+      modifier(this._modifiers, TextInputShowPasswordIconModifier, value);
+    } else {
+      modifier(this._modifiers, TextInputShowPasswordIconModifier, undefined);
     }
-    maxLines(value: number): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  textAlign(value: TextAlign): TextInputAttribute {
+    if (value) {
+      modifier(this._modifiers, TextInputTextAlignModifier, value);
+    } else {
+      modifier(this._modifiers, TextInputTextAlignModifier, undefined);
     }
-    customKeyboard(value: CustomBuilder): this {
-        throw new Error("Method not implemented.");
+    return this;
+  }
+  style(value: TextInputStyle | TextContentStyle): TextInputAttribute {
+    if (value) {
+      modifier(this._modifiers, TextInputStyleModifier, value);
+    } else {
+      modifier(this._modifiers, TextInputStyleModifier, undefined);
     }
+    return this;
+  }
+
+  caretStyle(value: CaretStyle) {
+    if (isUndefined(value)) {
+      modifier(this._modifiers, TextInputCaretStyleModifier, undefined);
+    } else if (isObject(value)) {
+      if ((value.width !== undefined) && ((isNumber(value.width)) || (isString(value.width)))) {
+        modifier(this._modifiers, TextInputCaretStyleModifier, <string | number>value.width);
+      } else {
+        modifier(this._modifiers, TextInputCaretStyleModifier, undefined);
+      }
+    }
+    return this;
+  }
+  selectedBackgroundColor(value: ResourceColor): TextInputAttribute {
+    let arkColor = new ArkColor();
+    if (arkColor.parseColorValue(value)) {
+      modifier(this._modifiers, TextInputSelectedBackgroundColorModifier, arkColor.color);
+    } else {
+      modifier(this._modifiers, TextInputSelectedBackgroundColorModifier, undefined);
+    }
+    return this;
+  }
+  caretPosition(value: number): TextInputAttribute {
+    modifier(this._modifiers, TextInputCaretPositionModifier, value);
+    return this;
+  }
+  enableKeyboardOnFocus(value: boolean): TextInputAttribute {
+    modifier(this._modifiers, TextInputEnableKeyboardOnFocusModifier, value);
+    return this;
+  }
+  passwordIcon(value: PasswordIcon): TextInputAttribute {
+    let passwordIcon: ArkPasswordIcon = new ArkPasswordIcon();
+    if (!value ||
+      (!isString(value.onIconSrc) && !isString(value.onIconSrc))) {
+      passwordIcon.offIconSrc = <string>value.offIconSrc;
+      passwordIcon.onIconSrc = <string>value.onIconSrc;
+      modifier(this._modifiers, TextInputPasswordIconModifier, passwordIcon);
+      return this;
+    } else {
+      modifier(this._modifiers, TextInputPasswordIconModifier, undefined);
+    }
+    return this;
+  }
+  showError(value: string | undefined): TextInputAttribute {
+    if (isString(value)) {
+      modifier(this._modifiers, TextInputShowErrorModifier, value);
+    } else {
+      modifier(this._modifiers, TextInputShowErrorModifier, undefined);
+    }
+    return this;
+  }
+  showUnit(event: () => void): TextInputAttribute {
+    throw new Error('Method not implemented.');
+  }
+  showUnderline(value: boolean): TextInputAttribute {
+    if (isBoolean(value)) {
+      modifier(this._modifiers, TextInputShowUnderlineModifier, value);
+    } else {
+      modifier(this._modifiers, TextInputShowUnderlineModifier, undefined);
+    }
+    return this;
+  }
+  selectionMenuHidden(value: boolean): TextInputAttribute {
+    if (isBoolean(value)) {
+      modifier(this._modifiers, TextInputSelectionMenuHiddenModifier, value);
+    } else {
+      modifier(this._modifiers, TextInputSelectionMenuHiddenModifier, undefined);
+    }
+
+    return this;
+  }
+  barState(value: BarState): TextInputAttribute {
+    if (value) {
+      modifier(this._modifiers, TextInputBarStateModifier, value);
+    } else {
+      modifier(this._modifiers, TextInputBarStateModifier, undefined);
+    }
+    return this;
+  }
+
+
+  maxLines(value: number): TextInputAttribute {
+    if (typeof value === "number") {
+      modifier(this._modifiers, TextInputMaxLinesModifier, value);
+    } else {
+      modifier(this._modifiers, TextInputMaxLinesModifier, undefined);
+    }
+    return this;
+  }
+  customKeyboard(event: () => void): TextInputAttribute {
+    throw new Error('Method not implemented.');
+  }
 }
 // @ts-ignore
-globalThis.TextInput.attributeModifier = function(modifier) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () =>
-    {
-        return new ArkTextInputComponent(nativeNode);
-    });
-    modifier.applyNormalAttribute(component);
-    component.applyModifierPatch();
+globalThis.TextInput.attributeModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkTextInputComponent(nativeNode);
+  });
+  modifier.applyNormalAttribute(component);
+  component.applyModifierPatch();
+
 }
