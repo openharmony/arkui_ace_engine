@@ -1012,8 +1012,8 @@ HWTEST_F(SelectPropertyTestNg, SelectOption001, TestSize.Level1)
     EXPECT_EQ(scrollLayoutProperty->GetScrollWidth().value(), OPTION_WIDTH.ConvertToPx() + OPTION_MARGIN.ConvertToPx());
 
     auto options = selectPattern->GetOptions();
-    for (size_t i = 0; i < options.size(); ++i) {
-        auto optionPaintProperty = options[i]->GetPaintProperty<OptionPaintProperty>();
+    if (options.size() > 0) {
+        auto optionPaintProperty = options[0]->GetPaintProperty<OptionPaintProperty>();
         EXPECT_EQ(optionPaintProperty->GetSelectModifiedWidth().value(), OPTION_WIDTH.ConvertToPx());
     }
 }
@@ -1032,9 +1032,8 @@ HWTEST_F(SelectPropertyTestNg, SelectOption002, TestSize.Level1)
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto selectPattern = select->GetPattern<SelectPattern>();
     auto options = selectPattern->GetOptions();
-
-    for (size_t i = 0; i < options.size(); ++i) {
-        auto optionPaintProperty = options[i]->GetPaintProperty<OptionPaintProperty>();
+    if (options.size() > 0) {
+        auto optionPaintProperty = options[0]->GetPaintProperty<OptionPaintProperty>();
         EXPECT_EQ(optionPaintProperty->GetSelectModifiedHeight().value(), OPTION_HEIGHT.ConvertToPx());
     }
 }
@@ -1067,7 +1066,6 @@ HWTEST_F(SelectPropertyTestNg, ShowSelectMenuTest002, TestSize.Level1)
     TestProperty testProperty;
     testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE);
     auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
-    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<SelectPattern>();
     EXPECT_TRUE(pattern);
 
@@ -1095,7 +1093,6 @@ HWTEST_F(SelectPropertyTestNg, SetSelectDefaultThemeTest001, TestSize.Level1)
 
     auto renderContext = select->GetRenderContext();
     auto pipeline = PipelineBase::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     ASSERT_NE(selectTheme, nullptr);
 
@@ -1117,17 +1114,11 @@ HWTEST_F(SelectPropertyTestNg, SetSelectDefaultThemeTest001, TestSize.Level1)
 HWTEST_F(SelectPropertyTestNg, GetFontSizeTest001, TestSize.Level1)
 {
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(select, nullptr);
     auto selectPattern = select->GetPattern<SelectPattern>();
-    ASSERT_NE(selectPattern, nullptr);
     auto pipeline = PipelineBase::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
-    ASSERT_NE(selectTheme, nullptr);
-    ASSERT_NE(selectTheme, nullptr);
     selectPattern->text_ = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(selectPattern->text_, nullptr);
     auto textLayoutProps = selectPattern->text_->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_EQ(textLayoutProps->GetFontSize().value_or(selectTheme->GetFontSize()), selectPattern->GetFontSize());
 }

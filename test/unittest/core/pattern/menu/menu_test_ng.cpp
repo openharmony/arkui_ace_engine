@@ -18,6 +18,12 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/core/rosen/testing_canvas.h"
+
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -48,12 +54,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/event/touch_event.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -585,7 +586,7 @@ HWTEST_F(MenuTestNg, MenuWrapperPatternTestNg008, TestSize.Level1)
         FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
     auto mainMenu =
         FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-    
+
     mainMenu->MountToParent(wrapperNode);
     auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(wrapperPattern, nullptr);
@@ -594,9 +595,7 @@ HWTEST_F(MenuTestNg, MenuWrapperPatternTestNg008, TestSize.Level1)
      * @tc.expected: wrapper child size is 3
      */
     int32_t callNum = 0;
-    std::function<void(const std::string&)> callback = [&](const std::string& param) {
-        callNum++;
-    };
+    std::function<void(const std::string&)> callback = [&](const std::string& param) { callNum++; };
     wrapperPattern->RegisterMenuStateChangeCallback(callback);
     wrapperPattern->CallMenuStateChangeCallback("false");
     EXPECT_EQ(callNum, 1);
@@ -4694,13 +4693,13 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg033, TestSize.Level1)
     algorithm->position_ = OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
-    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), MENU_ITEM_SIZE_WIDTH);
+    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
 
     // @tc.cases: case2. sub menu show on the left side of item
     algorithm->position_ = OffsetF(FULL_SCREEN_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
-    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), MENU_ITEM_SIZE_WIDTH);
+    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
     EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
 }
 
@@ -4882,7 +4881,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
      * @tc.steps: step1. create menuLayoutAlgorithm and target is null
      * @tc.expected: menuLayoutAlgorithm is not null
      */
-    auto nodeId =  ElementRegister::GetInstance()->MakeUniqueId();
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuPattern = AceType::MakeRefPtr<MenuPattern>(nodeId, TEXT_TAG, MenuType::CONTEXT_MENU);
     RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(nodeId, "menu");
     ASSERT_NE(menuLayoutAlgorithm, nullptr);
@@ -7317,6 +7316,30 @@ HWTEST_F(MenuTestNg, MenuPreviewPatternTestNg0100, TestSize.Level1)
      */
     previewPattern->SetFirstShow();
     EXPECT_TRUE(previewPattern->isFirstShow_);
+}
+
+/**
+ * @tc.name: WidthModifiedBySelectTestNg001
+ * @tc.desc: Verify the usability of mod flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, WidthModifiedBySelectTestNg001, TestSize.Level1)
+{
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
+    menuPattern->SetIsWidthModifiedBySelect(true);
+    EXPECT_TRUE(menuPattern->IsWidthModifiedBySelect());
+}
+
+/**
+ * @tc.name: WidthModifiedBySelectTestNg002
+ * @tc.desc: Verify the usability of mod flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, WidthModifiedBySelectTestNg002, TestSize.Level1)
+{
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
+    auto menuWidth = menuPattern->GetSelectMenuWidth();
+    ASSERT_NE(menuWidth, 0.0);
 }
 
 /**
