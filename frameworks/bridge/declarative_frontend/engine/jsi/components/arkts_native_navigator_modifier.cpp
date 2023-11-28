@@ -20,7 +20,7 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-void SetTarget(NodeHandle node, char* value)
+void SetTarget(NodeHandle node, const char* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -64,7 +64,7 @@ void ResetActive(NodeHandle node)
     NavigatorModelNG::SetActive(frameNode, false);
 }
 
-void SetParams(NodeHandle node, char* value)
+void SetParams(NodeHandle node, const char* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

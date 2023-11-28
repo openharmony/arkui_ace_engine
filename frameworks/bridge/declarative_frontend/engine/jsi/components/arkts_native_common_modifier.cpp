@@ -1747,7 +1747,7 @@ void ResetAccessibilityText(NodeHandle node)
     ViewAbstractModelNG::SetAccessibilityText(frameNode, "");
 }
 
-void SetAllowDrop(NodeHandle node, char** allowDropCharArray, int32_t length)
+void SetAllowDrop(NodeHandle node, const char** allowDropCharArray, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

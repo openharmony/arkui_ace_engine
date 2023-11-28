@@ -2529,18 +2529,14 @@ ArkUINativeModuleValue CommonBridge::SetAllowDrop(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Local<panda::ArrayRef> allowDropArray = static_cast<Local<panda::ArrayRef>>(secondArg);
-    char* allowDropCharArray[allowDropArray->Length(vm)];
+    std::vector<std::string> keepStr;
+    std::vector<const char*> strList;
     for (size_t i = 0; i < allowDropArray->Length(vm); i++) {
         Local<JSValueRef> objValue = allowDropArray->GetValueAt(vm, secondArg, i);
-        std::string strValue = objValue->ToString(vm)->ToString();
-        allowDropCharArray[i] = new char[strValue.size() + 1];
-        std::strcpy(allowDropCharArray[i], strValue.c_str());
+        keepStr.push_back(objValue->ToString(vm)->ToString());
+        strList.push_back(keepStr[i].c_str());
     }
-    GetArkUIInternalNodeAPI()->GetCommonModifier().SetAllowDrop(
-        nativeNode, allowDropCharArray, static_cast<int32_t>(allowDropArray->Length(vm)));
-    for (auto item : allowDropCharArray) {
-        delete item;
-    }
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetAllowDrop(nativeNode, strList.data(), strList.size());
     return panda::JSValueRef::Undefined(vm);
 }
 
