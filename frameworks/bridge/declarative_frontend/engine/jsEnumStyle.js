@@ -2126,3 +2126,12 @@ var ImageAnalyzerType;
   ImageAnalyzerType[ImageAnalyzerType["SUBJECT"] = 0] = "SUBJECT";
   ImageAnalyzerType[ImageAnalyzerType["TEXT"] = 1] = "TEXT";
 })(ImageAnalyzerType || (ImageAnalyzerType = {}));
+
+function wrapBuilder(builder) {
+    return new WrappedBuilder(builder);
+}
+class WrappedBuilder {
+    constructor(builder) {
+        this.builder = builder;
+    }
+}
