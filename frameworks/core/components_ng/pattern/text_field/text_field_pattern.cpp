@@ -704,30 +704,106 @@ void TextFieldPattern::HandleExtendAction(int32_t action)
     }
 }
 
-void TextFieldPattern::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
+void TextFieldPattern::CursorMove(CaretMoveIntent direction)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleSelect, current caret position %{public}d",
-        selectController_->GetCaretIndex());
-    KeyCode code = static_cast<KeyCode>(keyCode);
-    switch (code) {
-        case KeyCode::KEY_DPAD_LEFT: {
+    switch (direction) {
+        case CaretMoveIntent::Left: {
+            CursorMoveLeft();
+            break;
+        }
+        case CaretMoveIntent::Right: {
+            CursorMoveRight();
+            break;
+        }
+        case CaretMoveIntent::Up: {
+            CursorMoveUp();
+            break;
+        }
+        case CaretMoveIntent::Down: {
+            CursorMoveDown();
+            break;
+        }
+        case CaretMoveIntent::LineBegin: {
+            CursorMoveLineBegin();
+            break;
+        }
+        case CaretMoveIntent::LineEnd: {
+            CursorMoveLineEnd();
+            break;
+        }
+        case CaretMoveIntent::LeftWord: {
+            CursorMoveLeftWord();
+            break;
+        }
+        case CaretMoveIntent::RightWord: {
+            CursorMoveRightWord();
+            break;
+        }
+        case CaretMoveIntent::ParagraghBegin: {
+            CursorMoveToParagraphBegin();
+            break;
+        }
+        case CaretMoveIntent::ParagraghEnd: {
+            CursorMoveToParagraphEnd();
+            break;
+        }
+        case CaretMoveIntent::Home: {
+            CursorMoveHome();
+            break;
+        }
+        case CaretMoveIntent::End: {
+            CursorMoveEnd();
+            break;
+        }
+    }
+}
+
+void TextFieldPattern::HandleSelect(CaretMoveIntent direction)
+{
+    switch (direction) {
+        case CaretMoveIntent::Left: {
             HandleSelectionLeft();
             break;
         }
-        case KeyCode::KEY_DPAD_RIGHT: {
+        case CaretMoveIntent::Right: {
             HandleSelectionRight();
             break;
         }
-        case KeyCode::KEY_DPAD_UP: {
+        case CaretMoveIntent::Up: {
             HandleSelectionUp();
             break;
         }
-        case KeyCode::KEY_DPAD_DOWN: {
+        case CaretMoveIntent::Down: {
             HandleSelectionDown();
             break;
         }
-        default: {
+        case CaretMoveIntent::LineBegin: {
+            HandleSelectionLineBegin();
             break;
+        }
+        case CaretMoveIntent::LineEnd: {
+            HandleSelectionLineEnd();
+            break;
+        }
+        case CaretMoveIntent::LeftWord: {
+            HandleSelectionLeftWord();
+            break;
+        }
+        case CaretMoveIntent::RightWord: {
+            HandleSelectionRightWord();
+            break;
+        }
+        case CaretMoveIntent::Home: {
+            HandleSelectionHome();
+            break;
+        }
+        case CaretMoveIntent::End: {
+            HandleSelectionEnd();
+            break;
+        }
+        // SelectionParagraghBegin/SelectionParagraghEnd not supported yet
+        default: {
+            LOGW("Unsupported select operation for text field");
         }
     }
 }
@@ -822,19 +898,22 @@ void TextFieldPattern::HandleBlurEvent()
 
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 {
-    if (event.code == KeyCode::KEY_ESCAPE) {
-        CloseSelectOverlay(true);
-    }
-    if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
+    return TextInputClient::HandleKeyEvent(event);
+}
+
+bool TextFieldPattern::HandleOnEscape()
+{
+    CloseSelectOverlay(true);
+    return false;
+}
+
+bool TextFieldPattern::HandleOnTab(bool backward)
+{
+    if (isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
         isFocusedBeforeClick_ = false;
         HandleOnSelectAll(true);
     }
-    auto context = PipelineContext::GetCurrentContext();
-    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
-    CHECK_NULL_RETURN(textFieldManager, false);
-    auto keyEventHandler = textFieldManager->GetKeyEventHandler();
-    keyEventHandler->UpdateWeakPattern(AceType::WeakClaim(this));
-    return keyEventHandler->HandleKeyEvent(event);
+    return backward ? UpdateFocusBackward() : UpdateFocusForward();
 }
 
 void TextFieldPattern::HandleOnUndoAction()

@@ -22,8 +22,42 @@
 #include "base/utils/string_utils.h"
 #include "core/common/ime/text_editing_value.h"
 #include "core/common/ime/text_input_action.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
+
+constexpr uint32_t KEY_NULL = 0;
+constexpr uint32_t KEY_ALT = 1 << 0;
+constexpr uint32_t KEY_SHIFT = 1 << 1;
+constexpr uint32_t KEY_CTRL = 1 << 2;
+constexpr uint32_t KEY_META = 1 << 3;
+
+enum class CaretMoveIntent {
+    Left,
+    Right,
+    Up,
+    Down,
+    LeftWord,
+    RightWord,
+    ParagraghBegin,
+    ParagraghEnd,
+    LineBegin,
+    LineEnd,
+    Home,
+    End,
+};
+
+struct KeyComb final {
+    KeyCode code;
+    int32_t modKeyFlags;
+
+    KeyComb(KeyCode code, int32_t modKeyFlags = KEY_NULL) : code(code), modKeyFlags(modKeyFlags) {};
+
+    bool operator<(const KeyComb& other) const
+    {
+        return code == other.code ? modKeyFlags < other.modKeyFlags : code < other.code;
+    }
+};
 
 class TextInputClient : public virtual AceType {
     DECLARE_ACE_TYPE(TextInputClient, AceType);
@@ -58,25 +92,6 @@ public:
     virtual void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) {}
     virtual void HandleExtendAction(int32_t action) {}
 
-    virtual bool CursorMoveLeft()
-    {
-        return false;
-    }
-    virtual bool CursorMoveUp()
-    {
-        return false;
-    }
-    virtual bool CursorMoveRight()
-    {
-        return false;
-    }
-    virtual bool CursorMoveDown()
-    {
-        return false;
-    }
-
-    virtual void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip) {}
-
 #if defined(IOS_PLATFORM)
     virtual const TextEditingValue& GetInputEditingValue() const
     {
@@ -110,6 +125,38 @@ public:
     {
         instanceId_ = instanceId;
     }
+
+    bool HandleKeyEvent(const KeyEvent& keyEvent);
+
+    virtual bool HandleOnEscape()
+    {
+        return false;
+    }
+
+    virtual bool HandleOnTab(bool backward)
+    {
+        return false;
+    }
+
+    virtual void CursorMove(CaretMoveIntent direction) {}
+
+    virtual void HandleSelect(CaretMoveIntent direction) {}
+
+    virtual void HandleOnSelectAll() {}
+
+    virtual void HandleOnCopy() {}
+
+    virtual void HandleOnCut() {}
+
+    virtual void HandleOnPaste() {}
+
+    virtual void HandleOnUndoAction() {}
+
+    virtual void HandleOnRedoAction() {}
+
+    static std::map<KeyComb, std::function<bool(TextInputClient*)>> functionKeys_;
+
+    static std::map<KeyComb, std::function<void(TextInputClient*)>> keyboardShortCuts_;
 
 protected:
     int32_t instanceId_ = -1;
