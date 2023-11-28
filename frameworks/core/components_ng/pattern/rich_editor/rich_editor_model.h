@@ -129,6 +129,7 @@ struct UpdateSpanStyle {
     std::optional<ImageFit> updateImageFit = std::nullopt;
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp = std::nullopt;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
+    bool hasResourceFontColor = false;
 };
 
 struct UpdateParagraphStyle {
@@ -157,6 +158,7 @@ struct TextSpanOptions : SpanOptionBase {
     std::optional<TextStyle> style;
     std::optional<UpdateParagraphStyle> paraStyle;
     UserGestureOptions userGestureOption;
+    bool hasResourceFontColor = false;
 };
 
 class ACE_EXPORT RichEditorControllerBase : public AceType {
