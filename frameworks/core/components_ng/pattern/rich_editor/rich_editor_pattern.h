@@ -153,6 +153,8 @@ public:
     void DeleteBackward(int32_t length = 0) override;
     void DeleteForward(int32_t length) override;
     void SetInputMethodStatus(bool keyboardShown) override;
+    bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
+    void HandleClickAISpanEvent(GestureEvent& info);
     void NotifyKeyboardClosedByUser() override
     {
         FocusHub::LostFocusToViewRoot();

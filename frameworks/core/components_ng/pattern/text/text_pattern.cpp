@@ -615,7 +615,7 @@ void TextPattern::HandleSpanSingleClickEvent(
     }
 }
 
-bool TextPattern::ClickAISpan(PointF textOffset, const AISpan& aiSpan)
+bool TextPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSpan)
 {
     std::vector<RectF> aiRects;
     paragraph_->GetRectsForRange(aiSpan.start, aiSpan.end, aiRects);
@@ -628,9 +628,12 @@ bool TextPattern::ClickAISpan(PointF textOffset, const AISpan& aiSpan)
     return false;
 }
 
-void TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan)
+void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
+    const ShowSelectOverlayFunc& showSelectOverlayFunc)
+
 {
-    auto onClickMenu = [aiSpan, weak = WeakClaim(this)](const std::string& action) {
+    onClickMenu_ = [aiSpan, weak = WeakClaim(this), calculateHandleFunc, showSelectOverlayFunc]
+        (const std::string& action) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->copyOption_ == CopyOptions::None) {
@@ -641,13 +644,28 @@ void TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan)
             pattern->HandleOnCopy();
         } else if (action == std::string(SELECT_ACTION)) {
             pattern->textSelector_.Update(aiSpan.start, aiSpan.end);
-            pattern->CalculateHandleOffsetAndShowOverlay();
-            pattern->ShowSelectOverlay(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle, true);
+            if (calculateHandleFunc == nullptr) {
+                pattern->CalculateHandleOffsetAndShowOverlay();
+            } else {
+                calculateHandleFunc();
+            }
+            if (showSelectOverlayFunc == nullptr) {
+                pattern->ShowSelectOverlay(pattern->textSelector_.firstHandle,
+                    pattern->textSelector_.secondHandle, true);
+            } else {
+                showSelectOverlayFunc(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle);
+            }
             auto frameNode = pattern->GetHost();
             CHECK_NULL_VOID(frameNode);
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     };
+}
+
+void TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
+    const ShowSelectOverlayFunc& showSelectOverlayFunc)
+{
+    SetOnClickMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
@@ -657,6 +675,11 @@ void TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan)
     auto baseOffset = textSelector_.baseOffset;
     auto destinationOffset = textSelector_.destinationOffset;
     textSelector_.Update(aiSpan.start, aiSpan.end);
+    if (calculateHandleFunc == nullptr) {
+        CalculateHandleOffsetAndShowOverlay();
+    } else {
+        calculateHandleFunc();
+    }
     CalculateHandleOffsetAndShowOverlay();
     RectF handleBound = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
     textSelector_.Update(baseOffset, destinationOffset);
@@ -675,7 +698,7 @@ void TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan)
         TAG_LOGI(AceLogTag::ACE_TEXT, "Menu option is empty");
         return;
     }
-    DataDetectorMgr::GetInstance().ShowUIExtensionMenu(paramaters, safeArea, onClickMenu, menuOptions, GetHost());
+    DataDetectorMgr::GetInstance().ShowUIExtensionMenu(paramaters, safeArea, onClickMenu_, menuOptions, GetHost());
 }
 
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)

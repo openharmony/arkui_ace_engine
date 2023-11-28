@@ -145,4 +145,24 @@ void RichEditorModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions& copyOpt
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOptions, frameNode);
 }
+
+void RichEditorModelNG::SetTextDetectEnable(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTextDetectEnable(value);
+}
+
+void RichEditorModelNG::SetTextDetectConfig(const std::string& value,
+    std::function<void(const std::string&)>&& onResult)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTextDetectTypes(value);
+    pattern->SetOnResult(std::move(onResult));
+}
 } // namespace OHOS::Ace::NG

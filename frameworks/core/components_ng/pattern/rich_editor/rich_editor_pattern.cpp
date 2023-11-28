@@ -163,6 +163,9 @@ void RichEditorPattern::OnModifyDone()
     HandleEnabled();
     ProcessInnerPadding();
     InitScrollablePattern();
+    if (textDetectEnable_ && (aiDetectTypesChanged_ || !aiDetectInitialized_)) {
+        TextPattern::StartAITask();
+    }
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (host->IsDraggable()) {
         InitDragDropEvent();
@@ -1206,7 +1209,7 @@ void RichEditorPattern::StartTwinkling()
     caretVisible_ = true;
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     ScheduleCaretTwinkling();
 }
 
@@ -1223,8 +1226,8 @@ void RichEditorPattern::StopTwinkling()
     caretTwinklingTask_.Cancel();
     if (caretVisible_) {
         caretVisible_ = false;
-        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void RichEditorPattern::HandleClickEvent(GestureEvent& info)
@@ -1249,6 +1252,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     hasClicked_ = true;
     lastClickTimeStamp_ = info.GetTimeStamp();
 
+    HandleClickAISpanEvent(info);
     HandleUserClickEvent(info);
     if (textSelector_.IsValid() && !isMouseSelect_) {
         CloseSelectOverlay();
@@ -1341,6 +1345,48 @@ bool RichEditorPattern::HandleUserGestureEvent(
     return false;
 }
 
+void RichEditorPattern::HandleClickAISpanEvent(GestureEvent& info)
+{
+    if (!textDetectEnable_ || aiSpanMap_.empty()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bool isClickOnAISpan = false;
+    PointF textOffset = { info.GetLocalLocation().GetX() - GetTextRect().GetX(),
+        info.GetLocalLocation().GetY() - GetTextRect().GetY() };
+    for (const auto& kv : aiSpanMap_) {
+        auto& aiSpan = kv.second;
+        isClickOnAISpan = ClickAISpan(textOffset, aiSpan);
+        if (isClickOnAISpan) {
+            return;
+        }
+    }
+}
+
+bool RichEditorPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSpan)
+{
+    auto calculateHandleFunc = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CalculateHandleOffsetAndShowOverlay();
+    };
+    auto showSelectOverlayFunc = [weak = WeakClaim(this)](const RectF& firstHandle, const RectF& secondHandle) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ShowSelectOverlay(firstHandle, secondHandle);
+    };
+
+    std::vector<RectF> aiRects = paragraphs_.GetRects(aiSpan.start, aiSpan.end);
+    for (auto&& rect : aiRects) {
+        if (rect.IsInRegion(textOffset)) {
+            ShowUIExtensionMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
+            return true;
+        }
+    }
+    return false;
+}
+
 bool RichEditorPattern::HandleUserClickEvent(GestureEvent& info)
 {
     auto clickFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool {
@@ -1394,12 +1440,14 @@ void RichEditorPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     auto focusTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->textDetectEnable_ = false;
         pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->textDetectEnable_ = true;
         pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(blurTask);

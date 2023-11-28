@@ -46,6 +46,8 @@
 
 namespace OHOS::Ace::NG {
 enum class Status {DRAGGING, ON_DROP, NONE };
+using CalculateHandleFunc = std::function<void()>;
+using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
 // TextPattern is the base class for text render node to perform paint text.
 class TextPattern : public ScrollablePattern, public TextDragBase, public TextBase {
     DECLARE_ACE_TYPE(TextPattern, ScrollablePattern, TextDragBase, TextBase);
@@ -444,6 +446,7 @@ public:
 
 protected:
     virtual void HandleOnCopy();
+    virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
     void InitMouseEvent();
     void ResetSelection();
     void RecoverSelection();
@@ -456,8 +459,10 @@ protected:
         GestureEvent& info, RectF textContentRect, PointF textOffset, bool& isClickOnSpan, bool& isClickOnAISpan);
     void HandleDoubleClickEvent(GestureEvent& info);
     void InitTextDetect(int32_t startPos, std::string detectText);
-    void ShowUIExtensionMenu(const AISpan& aiSpan);
-    bool ClickAISpan(PointF textOffset, const AISpan& aiSpan);
+    void ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
+        const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
+    void SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
+        const ShowSelectOverlayFunc& showSelectOverlayFunc);
     void ParseAIResult(const TextDataDetectResult& result, int32_t startPos);
     void ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos,
         bool isMenuOption = false);
@@ -512,6 +517,7 @@ protected:
     std::optional<TextDataDetectResult> textDetectResult_;
     std::unordered_map<std::string, std::vector<std::string>> aiMenuOptionsMap_;
     std::function<void(const std::string&)> onResult_;
+    std::function<void(const std::string&)> onClickMenu_;
     std::map<int32_t, AISpan> aiSpanMap_;
     CancelableCallback<void()> aiDetectDelayTask_;
 
