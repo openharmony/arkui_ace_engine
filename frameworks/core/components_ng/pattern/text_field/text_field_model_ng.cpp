@@ -70,7 +70,6 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textFieldTheme);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
-    textfieldPaintProperty->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
     auto renderContext = frameNode->GetRenderContext();
@@ -492,6 +491,7 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
     }
 
     NG::ViewAbstract::SetBackgroundColor(color);
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color);
 }
 
 void TextFieldModelNG::SetHeight(const Dimension& value) {}
