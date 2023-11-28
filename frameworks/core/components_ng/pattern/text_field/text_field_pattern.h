@@ -141,6 +141,12 @@ public:
     TextFieldPattern();
     ~TextFieldPattern() override;
 
+    // TextField needs softkeyboard, override function.
+    bool NeedSoftKeyboard() const override
+    {
+        return true;
+    }
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -172,17 +178,15 @@ public:
         }
     }
 
-    bool NeedSoftKeyboard() const override
-    {
-        return true;
-    }
-
     void OnModifyDone() override;
     void UpdateSelectionOffset();
     void CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
     int32_t ConvertTouchOffsetToCaretPositionNG(const Offset& localOffset);
+
+    // Obtain the systemWindowsId when switching between windows
+    uint32_t GetSCBSystemWindowId();
 
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);

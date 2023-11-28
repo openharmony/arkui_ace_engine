@@ -43,6 +43,7 @@ public:
         return false;
     }
 
+    // search pattern needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
         return true;

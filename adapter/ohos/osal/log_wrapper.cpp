@@ -111,6 +111,7 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_DATE_PICKER, "AceDatePicker" },
     { AceLogTag::ACE_TEXT_PICKER, "AceTextPicker" },
     { AceLogTag::ACE_AUTO_FILL, "AceAutoFill" },
+    { AceLogTag::ACE_KEYBOARD, "AceKeyboard" },
     { AceLogTag::ACE_UIEVENT, "UIEvent" },
 };
 

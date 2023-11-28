@@ -85,6 +85,15 @@ class RichEditorPattern : public TextPattern, public TextInputClient {
 public:
     RichEditorPattern();
     ~RichEditorPattern() override;
+
+    // RichEditor needs softkeyboard, override function.
+    bool NeedSoftKeyboard() const override
+    {
+        return true;
+    }
+
+    uint32_t GetSCBSystemWindowId();
+    
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<RichEditorEventHub>();
@@ -120,11 +129,6 @@ public:
     long long GetTimestamp() const
     {
         return timestamp_;
-    }
-
-    bool NeedSoftKeyboard() const override
-    {
-        return true;
     }
 
     void ResetBeforePaste();

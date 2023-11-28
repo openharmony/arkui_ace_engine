@@ -31,6 +31,11 @@ SystemWindowScene::SystemWindowScene(const sptr<Rosen::Session>& session) : sess
     };
 }
 
+sptr<Rosen::Session> SystemWindowScene::GetSession()
+{
+    return session_;
+}
+
 void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 {
     Rosen::WSRect windowRect {

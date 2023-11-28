@@ -30,6 +30,10 @@
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#endif
+
 namespace OHOS::Ace::NG {
 
 RefPtr<FrameNode> FocusHub::GetFrameNode() const
@@ -1115,7 +1119,17 @@ void FocusHub::OnFocusNode()
     }
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
+#if defined (ENABLE_STANDARD_INPUT)
+    // If focus pattern does not need softkeyboard, close it.
+#ifdef WINDOW_SCENE_SUPPORTED
+    WindowSceneHelper::IsWindowSceneCloseKeyboard(focusType_ == FocusType::NODE, frameNode);
+#else
+    WindowSceneHelper::IsCloseKeyboard(focusType_ == FocusType::NODE, frameNode);
+#endif
+#endif
+
     frameNode->OnAccessibilityEvent(AccessibilityEventType::FOCUS);
+
     CHECK_NULL_VOID(pipeline);
     if (frameNode->GetFocusType() == FocusType::NODE) {
         pipeline->SetFocusNode(frameNode);
