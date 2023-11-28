@@ -49,6 +49,15 @@ constexpr int NUM_14 = 14;
 constexpr int NUM_15 = 15;
 constexpr int DEFAULT_LENGTH = 4;
 constexpr double ROUND_UNIT = 360.0;
+constexpr TextDirection DEFAULT_COMMON_DIRECTION = TextDirection::AUTO;
+constexpr int32_t DEFAULT_COMMON_LAYOUTWEIGHT = 0;
+constexpr int32_t MAX_ALIGN_VALUE = 8;
+constexpr int32_t DEFAULT_GRIDSPAN = 1;
+constexpr uint32_t DEFAULT_ALIGN_VALUE = 2;
+constexpr uint32_t DEFAULT_ALIGN_RULES_SIZE = 6;
+constexpr uint8_t DEFAULT_SAFE_AREA_TYPE = 0b111;
+constexpr uint8_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
+constexpr Dimension DEFAULT_FLEX_BASIS { 0.0, DimensionUnit::AUTO };
 constexpr int32_t DEFAULT_DISPLAY_PRIORITY = 0;
 constexpr int32_t DEFAULT_ID = 0;
 
@@ -1786,6 +1795,376 @@ void ResetAccessibilityLevel(NodeHandle node)
     ViewAbstractModelNG::SetAccessibilityImportance(frameNode, "");
 }
 
+void SetDirection(NodeHandle node, int32_t direction)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLayoutDirection(frameNode, static_cast<TextDirection>(direction));
+}
+
+void ResetDirection(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLayoutDirection(frameNode, DEFAULT_COMMON_DIRECTION);
+}
+
+void SetLayoutWeight(NodeHandle node, int32_t layoutWeight)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLayoutWeight(frameNode, layoutWeight);
+}
+
+void ResetLayoutWeight(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLayoutWeight(frameNode, DEFAULT_COMMON_LAYOUTWEIGHT);
+}
+
+void SetMinWidth(NodeHandle node, const struct StringAndDouble *minWidth)
+{
+    CHECK_NULL_VOID(minWidth);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension result;
+    if (minWidth->valueStr != nullptr) {
+        result = StringUtils::StringToCalcDimension(std::string(minWidth->valueStr), true, DimensionUnit::VP);
+    } else {
+        result = CalcDimension(minWidth->value, DimensionUnit::VP);
+    }
+    ViewAbstract::SetMinWidth(frameNode, CalcLength(result));
+}
+
+void ResetMinWidth(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetMinSize(frameNode, true);
+}
+
+void SetMaxWidth(NodeHandle node, const struct StringAndDouble* maxWidth)
+{
+    CHECK_NULL_VOID(maxWidth);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension result;
+    if (maxWidth->valueStr != nullptr) {
+        result = StringUtils::StringToCalcDimension(std::string(maxWidth->valueStr), true, DimensionUnit::VP);
+    } else {
+        result = CalcDimension(maxWidth->value, DimensionUnit::VP);
+    }
+    ViewAbstract::SetMaxWidth(frameNode, CalcLength(result));
+}
+
+void ResetMaxWidth(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetMaxSize(frameNode, true);
+}
+
+void SetMinHeight(NodeHandle node, const struct StringAndDouble* minHeight)
+{
+    CHECK_NULL_VOID(minHeight);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension result;
+    if (minHeight->valueStr != nullptr) {
+        result = StringUtils::StringToCalcDimension(std::string(minHeight->valueStr), true, DimensionUnit::VP);
+    } else {
+        result = CalcDimension(minHeight->value, DimensionUnit::VP);
+    }
+    ViewAbstract::SetMinHeight(frameNode, CalcLength(result));
+}
+
+void ResetMinHeight(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetMinSize(frameNode, false);
+}
+
+void SetMaxHeight(NodeHandle node, const struct StringAndDouble* maxHeight)
+{
+    CHECK_NULL_VOID(maxHeight);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension result;
+    if (maxHeight->valueStr != nullptr) {
+        result = StringUtils::StringToCalcDimension(std::string(maxHeight->valueStr), true, DimensionUnit::VP);
+    } else {
+        result = CalcDimension(maxHeight->value, DimensionUnit::VP);
+    }
+    ViewAbstract::SetMaxHeight(frameNode, CalcLength(result));
+}
+
+void ResetMaxHeight(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetMaxSize(frameNode, false);
+}
+
+void SetSize(NodeHandle node, const double* number, const int8_t* unit, const char** calc)
+{
+    CHECK_NULL_VOID(number);
+    CHECK_NULL_VOID(unit);
+    int widthIndex = 0, heightIndex = 1;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (*(unit + widthIndex) == static_cast<int8_t>(DimensionUnit::CALC) && *(calc + widthIndex) != nullptr) {
+        ViewAbstract::SetWidth(frameNode, CalcLength(std::string(*(calc + widthIndex))));
+    } else {
+        ViewAbstract::SetWidth(
+            frameNode, CalcLength(*(number + widthIndex), static_cast<DimensionUnit>(*(unit + widthIndex))));
+    }
+    if (*(unit + heightIndex) == static_cast<int8_t>(DimensionUnit::CALC) && *(calc + heightIndex) != nullptr) {
+        ViewAbstract::SetHeight(frameNode, CalcLength(std::string(*(calc + heightIndex))));
+    } else {
+        ViewAbstract::SetHeight(
+            frameNode, CalcLength(*(number + heightIndex), static_cast<DimensionUnit>(*(unit + heightIndex))));
+    }
+}
+
+void ResetSize(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetWidth(frameNode, CalcLength(0.0, DimensionUnit::VP));
+    ViewAbstract::SetHeight(frameNode, CalcLength(0.0, DimensionUnit::VP));
+}
+
+void ClearWidthOrHeight(NodeHandle node, bool isWidth)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearWidthOrHeight(frameNode, isWidth);
+}
+
+void SetAlignSelf(NodeHandle node, int32_t value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (value >= 0 && value <= MAX_ALIGN_VALUE) {
+        ViewAbstract::SetAlignSelf(frameNode, static_cast<FlexAlign>(value));
+    } else {
+        ViewAbstract::SetAlignSelf(frameNode, FlexAlign::AUTO);
+    }
+}
+
+void ResetAlignSelf(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetAlignSelf(frameNode, FlexAlign::AUTO);
+}
+
+void SetAspectRatio(NodeHandle node, double value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    double result = value;
+    if (LessOrEqual(result, 0.0)) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            ViewAbstract::ResetAspectRatio(frameNode);
+            return;
+        } else {
+            result = 1.0;
+        }
+    }
+
+    ViewAbstract::SetAspectRatio(frameNode, static_cast<float>(result));
+}
+
+void ResetAspectRatio(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        ViewAbstract::ResetAspectRatio(frameNode);
+    } else {
+        ViewAbstract::SetAspectRatio(frameNode, static_cast<float>(1.0));
+    }
+}
+
+void SetFlexGrow(NodeHandle node, double value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    double result = value;
+    if (result < 0.0) {
+        result = 0.0;
+    }
+    ViewAbstract::SetFlexGrow(frameNode, static_cast<float>(result));
+}
+
+void ResetFlexGrow(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetFlexGrow(static_cast<float>(0.0));
+}
+
+void SetFlexShrink(NodeHandle node, double value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (value < 0.0) {
+        ViewAbstract::ResetFlexShrink(frameNode);
+        return;
+    }
+    ViewAbstract::SetFlexShrink(frameNode, static_cast<float>(value));
+}
+
+void ResetFlexShrink(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetFlexShrink(frameNode);
+}
+
+void SetGridOffset(NodeHandle node, int32_t offset)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetGrid(frameNode, std::nullopt, offset, GridSizeType::UNDEFINED);
+}
+
+void ResetGridOffset(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetGrid(frameNode, std::nullopt, DEFAULT_GRID_OFFSET, GridSizeType::UNDEFINED);
+}
+
+void SetGridSpan(NodeHandle node, int32_t value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetGrid(frameNode, value, std::nullopt);
+}
+
+void ResetGridSpan(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetGrid(frameNode, DEFAULT_GRIDSPAN, std::nullopt);
+}
+
+void SetExpandSafeArea(NodeHandle node, const char* typeStr, const char* edgesStr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::SafeAreaExpandOpts opts {
+        .type = NG::SAFE_AREA_TYPE_ALL,
+        .edges = NG::SAFE_AREA_EDGE_ALL
+    };
+    uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
+    uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
+    std::string safeAreaTypeStr = std::string(typeStr);
+    std::string safeAreaEdgeStr = std::string(edgesStr);
+    std::string delimiter = "|";
+    size_t pos = 0;
+    std::string type;
+    std::string edges;
+    while ((pos = safeAreaTypeStr.find(delimiter)) != std::string::npos) {
+        type = safeAreaTypeStr.substr(0, pos);
+        safeAreaType |= StringUtils::StringToInt(type);
+        safeAreaTypeStr.erase(0, pos + delimiter.length());
+    }
+    safeAreaType |= StringUtils::StringToInt(safeAreaTypeStr);
+    while ((pos = safeAreaEdgeStr.find(delimiter)) != std::string::npos) {
+        edges = safeAreaEdgeStr.substr(0, pos);
+        safeAreaEdge |= StringUtils::StringToInt(edges);
+        safeAreaEdgeStr.erase(0, pos + delimiter.length());
+    }
+    safeAreaEdge |= StringUtils::StringToInt(safeAreaEdgeStr);
+    opts.type = safeAreaType;
+    opts.edges = safeAreaEdge;
+    ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
+}
+
+void ResetExpandSafeArea(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::SafeAreaExpandOpts opts;
+    opts.type = DEFAULT_SAFE_AREA_TYPE;
+    opts.edges = DEFAULT_SAFE_AREA_EDGE;
+    ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
+}
+
+void SetFlexBasis(NodeHandle node, const struct StringAndDouble* flexBasisValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension result;
+    if (flexBasisValue->valueStr != nullptr) {
+        result = StringUtils::StringToDimensionWithUnit(std::string(flexBasisValue->valueStr), DimensionUnit::VP);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            // flexbasis don't support percent case.
+            if (result.Unit() == DimensionUnit::PERCENT) {
+                result.SetUnit(DimensionUnit::AUTO);
+            }
+        }
+    } else {
+        result = Dimension(flexBasisValue->value, DimensionUnit::VP);
+    }
+    ViewAbstract::SetFlexBasis(frameNode, result);
+}
+
+void ResetFlexBasis(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetFlexBasis(frameNode, DEFAULT_FLEX_BASIS);
+}
+
+void SetAlignRules(NodeHandle node, char** anchors, int8_t* direction, int32_t length)
+{
+    CHECK_NULL_VOID(anchors);
+    CHECK_NULL_VOID(direction);
+    if (length != DEFAULT_ALIGN_RULES_SIZE) {
+        return;
+    }
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::map<AlignDirection, AlignRule> rulesMap;
+    for (int index = 0; index < length; index++) {
+        AlignRule alignRule;
+        alignRule.anchor = std::string(*(anchors + index) == nullptr ? "" : *(anchors + index));
+        if (index < DIRECTION_RANGE) {
+            alignRule.horizontal = static_cast<HorizontalAlign>(*(direction + index));
+        } else {
+            alignRule.vertical = static_cast<VerticalAlign>(*(direction + index));
+        }
+        rulesMap[static_cast<AlignDirection>(index)] = alignRule;
+    }
+    ViewAbstract::SetAlignRules(frameNode, rulesMap);
+}
+
+void ResetAlignRules(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const char* keys[] = { "left", "middle", "right", "top", "center", "bottom" };
+    std::map<AlignDirection, AlignRule> alignRules;
+    for (uint32_t i = 0; i < sizeof(keys) / sizeof(const char *); i++) {
+        AlignRule alignRule;
+        alignRule.anchor = "__container__";
+        alignRule.horizontal = static_cast<HorizontalAlign>(DEFAULT_ALIGN_VALUE);
+        alignRule.vertical = static_cast<VerticalAlign>(DEFAULT_ALIGN_VALUE);
+        alignRules[static_cast<AlignDirection>(i)] = alignRule;
+    }
+    ViewAbstract::SetAlignRules(frameNode, alignRules);
+}
+
 void SetAccessibilityDescription(NodeHandle node, const char* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1975,6 +2354,12 @@ ArkUICommonModifierAPI GetCommonModifier()
         SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
         SetVisibility, ResetVisibility, SetAccessibilityText, ResetAccessibilityText,
         SetAllowDrop, ResetAllowDrop, SetAccessibilityLevel, ResetAccessibilityLevel,
+        SetDirection, ResetDirection, SetLayoutWeight, ResetLayoutWeight,
+        SetMinWidth, ResetMinWidth, SetMaxWidth, ResetMaxWidth, SetMinHeight, ResetMinHeight, SetMaxHeight,
+        ResetMaxHeight, SetSize, ResetSize, ClearWidthOrHeight, SetAlignSelf, ResetAlignSelf,
+        SetAspectRatio, ResetAspectRatio, SetFlexGrow, ResetFlexGrow, SetFlexShrink, ResetFlexShrink,
+        SetGridOffset, ResetGridOffset, SetGridSpan, ResetGridSpan, SetExpandSafeArea, ResetExpandSafeArea,
+        SetFlexBasis, ResetFlexBasis, SetAlignRules, ResetAlignRules,
         SetAccessibilityDescription, ResetAccessibilityDescription, SetId, ResetId, SetKey, ResetKey, SetRestoreId,
         ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured, ResetObscured, SetResponseRegion, ResetResponseRegion,
         SetMouseResponseRegion, ResetMouseResponseRegion };
