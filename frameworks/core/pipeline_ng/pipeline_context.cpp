@@ -730,6 +730,7 @@ void PipelineContext::SetupRootElement()
         auto overlay = weakOverlayManger.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->HideAllMenus();
+        SubwindowManager::GetInstance()->HideMenuNG(false);
         overlay->HideCustomPopups();
     };
     rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
