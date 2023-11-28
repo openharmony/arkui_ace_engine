@@ -1253,7 +1253,15 @@ var SheetSize;
 (function (SheetSize) {
   SheetSize['MEDIUM'] = "MEDIUM";
   SheetSize['LARGE'] = "LARGE";
+  SheetSize['FIT_CONTENT'] = "FIT_CONTENT";
 })(SheetSize || (SheetSize = {}));
+
+var SheetType;
+(function (SheetType) {
+  SheetType[SheetType["BOTTOM"] = 0] = "BOTTOM";
+  SheetType[SheetType["CENTER"] = 1] = "CENTER";
+  SheetType[SheetType["POPUP"] = 2] = "POPUP";
+})(SheetType || (SheetType = {}));
 
 var FunctionKey;
 (function (FunctionKey) {

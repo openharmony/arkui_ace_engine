@@ -222,8 +222,10 @@ public:
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear) override {}
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear) override {}
+        std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
+        std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& shouldDismiss) override {}
+    void DismissSheet() override {}
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;

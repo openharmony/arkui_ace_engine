@@ -75,6 +75,8 @@ const char THEME_PATTERN_FORM[] = "form_pattern";
 const char THEME_PATTERN_SIDE_BAR[] = "side_bar_pattern";
 const char THEME_PATTERN_PATTERN_LOCK[] = "pattern_lock_pattern";
 const char THEME_PATTERN_GAUGE[] = "gauge_pattern";
+const char THEME_PATTERN_SHEET[] = "sheet_pattern";
+
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";

@@ -120,6 +120,14 @@ public:
     static void ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle);
     static void JsBindSheet(const JSCallbackInfo& info);
     static void ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
+    static bool ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents);
+    static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
+    static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
+    static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
+        std::function<void()>& onDisappear, std::function<void()>& shouldDismiss);
+    static void ParseSheetTitle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle,
+        std::function<void()>& titleBuilderFunction);
+    static panda::Local<panda::JSValueRef> JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo);
     static void ParseOverlayCallback(
         const JSRef<JSObject>& paramObj, std::function<void()>& onAppear, std::function<void()>& onDisappear);
     static void JsBorderColor(const JSCallbackInfo& info);
