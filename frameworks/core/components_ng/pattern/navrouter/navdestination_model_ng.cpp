@@ -104,6 +104,9 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto backButtonNode =
         FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<ButtonPattern>());
+    auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(buttonPattern);
+    buttonPattern->SetSkipColorConfigurationUpdate();
     titleBarNode->AddChild(backButtonNode);
     titleBarNode->SetBackButton(backButtonNode);
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();

@@ -833,6 +833,9 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
         auto backButtonNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
         CHECK_NULL_VOID(backButtonNode);
+        auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
+        CHECK_NULL_VOID(buttonPattern);
+        buttonPattern->SetSkipColorConfigurationUpdate();
         auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(backButtonLayoutProperty);
         backButtonLayoutProperty->UpdateUserDefinedIdealSize(
