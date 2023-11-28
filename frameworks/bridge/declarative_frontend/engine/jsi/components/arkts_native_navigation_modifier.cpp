@@ -146,7 +146,7 @@ void ResetHideNavBar(NodeHandle node)
     NavigationModelNG::SetHideNavBar(frameNode, false);
 }
 
-void SetSubtitle(NodeHandle node, char* subtitle)
+void SetSubtitle(NodeHandle node, const char* subtitle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

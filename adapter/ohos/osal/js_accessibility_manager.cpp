@@ -1076,6 +1076,8 @@ static void UpdateWebAccessibilityElementInfo(
 {
     nodeInfo.SetContent(node.content);
     nodeInfo.SetHint(node.hint);
+    nodeInfo.SetHinting(node.hinting);
+    nodeInfo.SetDescriptionInfo(node.descriptionInfo);
     nodeInfo.SetChecked(node.checked);
     nodeInfo.SetSelected(node.selected);
     nodeInfo.SetPassword(node.password);
@@ -1104,6 +1106,7 @@ static void UpdateWebAccessibilityElementInfo(
         nodeInfo.SetScrollable(node.scrollable);
         nodeInfo.SetEditable(node.editable);
         nodeInfo.SetDeletable(node.deletable);
+        nodeInfo.SetClickable(node.clickable);
         auto supportAceActions = node.actions;
         for (auto it = supportAceActions.begin(); it != supportAceActions.end(); ++it) {
             AccessibleAction action(ConvertAceAction(static_cast<AceAction>(*it)), "web");
@@ -1126,7 +1129,6 @@ void UpdateWebAccessibilityElementInfo(const NWeb::NWebAccessibilityNodeInfo& no
     nodeInfo.SetFocused(node.focused);
     nodeInfo.SetAccessibilityFocus(node.accessibilityFocus);
     nodeInfo.SetVisible(node.visible);
-    nodeInfo.SetClickable(node.clickable);
     if (node.visible) {
         auto left = node.rectX + commonProperty.windowLeft;
         auto top = node.rectY + commonProperty.windowTop;

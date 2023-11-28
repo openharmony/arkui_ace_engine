@@ -39,6 +39,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_select_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_stack_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_slider_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_span_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_textpicker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_timepicker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rich_editor_modifier.h"
@@ -94,6 +95,7 @@ static struct ArkUINodeAPI impl = {
     GetNavRouterModifier,
     GetPatternLockModifier,
     GetColumnSplitModifier,
+    GetSpanModifier,
     GetImageAnimatorModifier,
 };
 

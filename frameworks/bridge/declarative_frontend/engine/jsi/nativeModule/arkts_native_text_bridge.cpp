@@ -722,9 +722,11 @@ ArkUINativeModuleValue TextBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
             weight = thirdArg->ToString(vm)->ToString();
         }
     }
+    std::string str;
     const char* family = nullptr;
     if (!forthArg->IsNull()) {
-        family = forthArg->ToString(vm)->ToString().c_str();
+        str = forthArg->ToString(vm)->ToString();
+        family = str.c_str();
     }
     int32_t style = static_cast<int32_t>(DEFAULT_FONT_STYLE);
     if (fifthArg->IsInt()) {

@@ -126,11 +126,8 @@ ArkUINativeModuleValue NavigationBridge::SetSubtitle(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    std::string value = secondArg->ToString(vm)->ToString();
-    int charLength = strlen(value.c_str()) + 1;
-    char* val = new char[charLength];
-    std::strcpy(val, value.c_str());
-    GetArkUIInternalNodeAPI()->GetNavigationModifier().SetSubtitle(nativeNode, val);
+    std::string subtitle = secondArg->ToString(vm)->ToString();
+    GetArkUIInternalNodeAPI()->GetNavigationModifier().SetSubtitle(nativeNode, subtitle.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 

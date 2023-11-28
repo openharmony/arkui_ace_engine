@@ -1095,7 +1095,6 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
 #endif // ENABLE_DRAG_FRAMEWORK
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 std::string DragDropManager::GetExtraInfo()
 {
     return extraInfo_;
@@ -1111,6 +1110,7 @@ void DragDropManager::ClearExtraInfo()
     extraInfo_.clear();
 }
 
+#ifdef ENABLE_DRAG_FRAMEWORK
 bool DragDropManager::IsMsdpDragging() const
 {
     DragState dragState;

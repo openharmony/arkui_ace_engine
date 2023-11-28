@@ -24,11 +24,8 @@ ArkUINativeModuleValue NavigatorBridge::SetTarget(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    std::string value = secondArg->ToString(vm)->ToString();
-    int charLength = strlen(value.c_str()) + 1;
-    char* target = new char[charLength];
-    std::strcpy(target, value.c_str());
-    GetArkUIInternalNodeAPI()->GetNavigatorModifier().SetTarget(nativeNode, target);
+    std::string target = secondArg->ToString(vm)->ToString();
+    GetArkUIInternalNodeAPI()->GetNavigatorModifier().SetTarget(nativeNode, target.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -93,11 +90,8 @@ ArkUINativeModuleValue NavigatorBridge::SetParams(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    std::string value = secondArg->ToString(vm)->ToString();
-    int charLength = strlen(value.c_str()) + 1;
-    char* val = new char[charLength];
-    std::strcpy(val, value.c_str());
-    GetArkUIInternalNodeAPI()->GetNavigatorModifier().SetParams(nativeNode, val);
+    std::string params = secondArg->ToString(vm)->ToString();
+    GetArkUIInternalNodeAPI()->GetNavigatorModifier().SetParams(nativeNode, params.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 

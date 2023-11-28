@@ -49,6 +49,7 @@ void DragDropProxy::OnDragStart(
         info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY());
     manager->OnDragStart(point, frameNode);
     manager->OnDragMove(pointerEvent, extraInfo);
+    manager->SetExtraInfo(extraInfo);
 #ifndef ENABLE_DRAG_FRAMEWORK
     manager->AddDataToClipboard(extraInfo);
 #endif // ENABLE_DRAG_FRAMEWORK
