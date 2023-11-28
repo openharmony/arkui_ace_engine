@@ -26,6 +26,7 @@
 
 namespace OHOS::Ace {
 namespace {
+constexpr float MAX_TIME = 1000000000.0f;
 
 int32_t g_controllerId = 0;
 int32_t AllocControllerId()
@@ -544,7 +545,7 @@ void Animator::Finish()
     LOGD("animation finish. id: %{public}d", controllerId_);
     if (motion_) {
         // Notify motion with big time to let motion end in final state.
-        motion_->OnTimestampChanged(static_cast<float>(INT_MAX), 0.0f, false);
+        motion_->OnTimestampChanged(MAX_TIME, 0.0f, false);
         Stop();
         return;
     }
@@ -576,7 +577,7 @@ void Animator::Cancel()
     }
     if (motion_) {
         // Notify motion with big time to let motion end in final state.
-        motion_->OnTimestampChanged(static_cast<float>(INT_MAX), 0.0f, false);
+        motion_->OnTimestampChanged(MAX_TIME, 0.0f, false);
     }
     if (scheduler_ && scheduler_->IsActive()) {
         scheduler_->Stop();
