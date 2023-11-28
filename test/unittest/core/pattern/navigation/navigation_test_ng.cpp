@@ -1221,7 +1221,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     navigationLayoutAlgorithm->navigationMode_ = NavigationMode::SPLIT;
     layout->propHideNavBar_ = true;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    ASSERT_FALSE(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_.has_value());
+    EXPECT_EQ(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_.value(), VisibleType::INVISIBLE);
 }
 
 /**
