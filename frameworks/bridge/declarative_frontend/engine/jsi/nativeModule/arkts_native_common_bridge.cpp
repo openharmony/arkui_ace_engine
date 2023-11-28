@@ -2553,4 +2553,198 @@ ArkUINativeModuleValue CommonBridge::ResetAllowDrop(ArkUIRuntimeCallInfo* runtim
     GetArkUIInternalNodeAPI()->GetCommonModifier().ResetAllowDrop(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue CommonBridge::SetId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    std::string stringValue = secondArg->ToString(vm)->ToString();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetId(nativeNode, stringValue.c_str());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetId(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetKey(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    std::string stringValue = secondArg->ToString(vm)->ToString();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetKey(nativeNode, stringValue.c_str());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetKey(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetKey(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetRestoreId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    uint32_t value = secondArg->Uint32Value(vm);
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetRestoreId(nativeNode, value);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetRestoreId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetRestoreId(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetTabIndex(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    int32_t index = secondArg->Int32Value(vm);
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetTabIndex(nativeNode, index);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetTabIndex(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetTabIndex(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetObscured(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+
+    if (secondArg->IsUndefined() || !secondArg->IsArray(vm)) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetObscured(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(secondArg);
+    int32_t length = transArray->Length(vm);
+    int32_t reasonArray[length];
+
+    for (int32_t i = 0; i < length; i++) {
+        Local<JSValueRef> value = transArray->GetValueAt(vm, secondArg, i);
+        reasonArray[i] = value->Int32Value(vm);
+    }
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetObscured(nativeNode, reasonArray, length);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetObscured(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetObscured(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+
+    if (secondArg->IsUndefined() || !secondArg->IsArray(vm)) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetResponseRegion(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(secondArg);
+    int32_t length = transArray->Length(vm);
+    double regionArray[length];
+
+    for (int32_t i = 0; i < length; i++) {
+        Local<JSValueRef> value = transArray->GetValueAt(vm, secondArg, i);
+        CalcDimension result =
+            StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::VP);
+        regionArray[i] = result.Value();
+    }
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetResponseRegion(nativeNode, regionArray, length);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetResponseRegion(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetMouseResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+
+    if (secondArg->IsUndefined() || !secondArg->IsArray(vm)) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetMouseResponseRegion(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(secondArg);
+    int32_t length = transArray->Length(vm);
+    double regionArray[length];
+
+    for (int32_t i = 0; i < length; i++) {
+        Local<JSValueRef> value = transArray->GetValueAt(vm, secondArg, i);
+        CalcDimension result =
+            StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::VP);
+        regionArray[i] = result.Value();
+    }
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetMouseResponseRegion(nativeNode, regionArray, length);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetMouseResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetMouseResponseRegion(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

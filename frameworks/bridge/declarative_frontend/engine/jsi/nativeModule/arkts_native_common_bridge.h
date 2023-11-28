@@ -145,6 +145,20 @@ public:
     static ArkUINativeModuleValue ResetAccessibilityLevel(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetAccessibilityDescription(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetAccessibilityDescription(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetId(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetId(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetKey(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetKey(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetRestoreId(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetRestoreId(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetTabIndex(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTabIndex(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetObscured(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetObscured(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetMouseResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetMouseResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

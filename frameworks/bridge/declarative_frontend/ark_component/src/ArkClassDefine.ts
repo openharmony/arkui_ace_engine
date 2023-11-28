@@ -791,6 +791,7 @@ class ArkGridColColumnOption implements Equable {
 		    (this.lg === another.lg) && (this.xl === another.xl) && (this.xxl === another.xxl);
     }
 }
+
 class ArkPadding implements Equable {
   top: string | number | undefined;
   right: string | number | undefined;
@@ -830,5 +831,81 @@ enum TabBarMode {
 class ArkBarMode {
     convertStrToTabBarMode(value: string): number {
         return value.toLowerCase() == "fixed" ? TabBarMode.FIXED : TabBarMode.FIXED_START;
+    }
+}
+
+class ArkObscured {
+    reasons: number[];
+
+    constructor() {
+        this.reasons = undefined;
+    }
+
+    parseReasonsArray(reasonObject: object) {
+        if (Array.isArray(reasonObject)) {
+            for (let i = 0; i < reasonObject.length; i++) {
+                this.reasons.push(reasonObject[i]);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    isEqual(another: ArkObscured): boolean {
+        return (this.reasons === another.reasons);
+    }
+}
+
+class ArkResponseRegion {
+    responseRegion: string[];
+
+    constructor() {
+        this.responseRegion = undefined;
+    }
+
+    isObject(region: object) {
+        return region !== null && !Array.isArray(region) &&
+            typeof region === 'object';
+    }
+
+    parseRegionValue(value: object) {
+        if (Array.isArray(value)) {
+            return this.parseArrayList(value);
+        } else if (this.isObject(value)) {
+            return this.parseArray(value);
+        } else if (value === undefined) {
+            this.responseRegion = [];
+            return true;
+        }
+        return false;
+    }
+
+    parseArray(regionObject: object) {
+        if (this.isObject(regionObject)) {
+            let x = regionObject["x"].toString();
+            let y = regionObject["y"].toString();
+            let width = regionObject["width"].toString();
+            let height = regionObject["height"].toString();
+            this.responseRegion.push(x);
+            this.responseRegion.push(y);
+            this.responseRegion.push(width);
+            this.responseRegion.push(height);
+            return true;
+        }
+        return false;
+    }
+
+    parseArrayList(regionObject: object) {
+        if (Array.isArray(regionObject)) {
+            for (let i = 0; i < regionObject.length; i++) {
+                this.parseArray(regionObject[i]);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    isEqual(another: ArkResponseRegion): boolean {
+        return (this.responseRegion === another.responseRegion);
     }
 }
