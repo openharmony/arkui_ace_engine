@@ -130,7 +130,7 @@ HWTEST_F(AppBarTestNg, Test003, TestSize.Level1)
     auto test = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
     SystemProperties::SetExtSurfaceEnabled(true);
     auto frameNode = AppBarView::Create(test);
-    AppBarView::BindContentCover(0);
+    AppBarView::BindContentCover(nullptr);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetChildren().size(), 3);
     auto titleBar = frameNode->GetChildAtIndex(0);

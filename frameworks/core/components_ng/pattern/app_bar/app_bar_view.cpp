@@ -162,8 +162,7 @@ RefPtr<FrameNode> AppBarView::BuildFaButton()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-    auto buttonId = buttonNode->GetId();
-    auto clickCallback = [pipeline, appBarTheme, buttonId](GestureEvent& info) {
+    auto clickCallback = [pipeline, appBarTheme, buttonNode](GestureEvent& info) {
 #ifdef PREVIEW
         LOGW("[Engine Log] Unable to show the SharePanel in the Previewer. Perform this operation on the "
              "emulator or a real device instead.");
@@ -176,7 +175,7 @@ RefPtr<FrameNode> AppBarView::BuildFaButton()
                 appBarTheme->GetBundleName().c_str(), appBarTheme->GetAbilityName().c_str());
             pipeline->FireSharePanelCallback(appBarTheme->GetBundleName(), appBarTheme->GetAbilityName());
         } else {
-            BindContentCover(buttonId);
+            BindContentCover(buttonNode);
         }
 #endif
     };
@@ -238,7 +237,7 @@ RefPtr<FrameNode> AppBarView::BuildIconButton(
     return buttonNode;
 }
 
-void AppBarView::BindContentCover(int32_t targetId)
+void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode)
 {
     if (OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName().empty()) {
         LOGE("UIExtension BundleName is empty.");
@@ -257,13 +256,13 @@ void AppBarView::BindContentCover(int32_t targetId)
     }
     NG::ModalStyle modalStyle;
     modalStyle.modalTransition = NG::ModalTransition::NONE;
-    auto buildNodeFunc = [targetId, overlayManager, &modalStyle, &stageAbilityName]() -> RefPtr<UINode> {
-        auto onRelease = [overlayManager, &modalStyle, targetId](int32_t releaseCode) {
-            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
+    auto buildNodeFunc = [targetNode, overlayManager, &modalStyle, &stageAbilityName]() -> RefPtr<UINode> {
+        auto onRelease = [overlayManager, &modalStyle, targetNode](int32_t releaseCode) {
+            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetNode);
         };
-        auto onError = [overlayManager, &modalStyle, targetId](
+        auto onError = [overlayManager, &modalStyle, targetNode](
                            int32_t code, const std::string& name, const std::string& message) {
-            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
+            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetNode);
         };
 
         // Create parameters of UIExtension.
@@ -295,7 +294,7 @@ void AppBarView::BindContentCover(int32_t targetId)
         uiExtNode->MarkModifyDone();
         return uiExtNode;
     };
-    overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, targetId);
+    overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, targetNode);
 }
 
 void AppBarView::SetVisible(bool visible)
