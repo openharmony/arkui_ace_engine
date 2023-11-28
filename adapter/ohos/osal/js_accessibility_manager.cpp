@@ -1799,23 +1799,25 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     eventInfo.SetItemCounts(static_cast<int>(accessibilityEvent.itemCount));
     eventInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
+#ifdef WINDOW_SCENE_SUPPORTED
     auto pipeline = context_.Upgrade();
-    CHECK_NULL_RETURN(pipeline, false);
-    RefPtr<NG::PipelineContext> ngPipeline;
-    ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
-    CHECK_NULL_RETURN(ngPipeline, false);
+    CHECK_NULL_RETURN(pipeline, client->SendEvent(eventInfo));
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(ngPipeline, client->SendEvent(eventInfo));
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
-    CHECK_NULL_RETURN(uiExtensionManager, false);
+    CHECK_NULL_RETURN(uiExtensionManager, client->SendEvent(eventInfo));
     if (uiExtensionManager->IsWindowTypeUIExtension(pipeline)) {
         std::vector<int32_t> uiExtensionIdLevelList;
         return uiExtensionManager->SendAccessibilityEventInfo(eventInfo, uiExtensionIdLevelList, pipeline);
     }
+#endif
     return client->SendEvent(eventInfo);
 }
 
 bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     const AccessibilityEventInfo& eventInfo, std::vector<int32_t>& uiExtensionIdLevelList)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
     if (!IsRegister()) {
         return false;
     }
@@ -1853,6 +1855,7 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     }
     AccessibilityEventInfo eventInfoNew = eventInfo;
     eventInfoNew.SetSource(wrapLevelid + eventInfo.GetViewId());
+#endif
     return client->SendEvent(eventInfoNew);
 }
 
