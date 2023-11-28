@@ -41,6 +41,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_split_bridge.h"
 
 
 namespace OHOS::Ace::NG {
@@ -754,6 +755,17 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockSelectedColor));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "patternLock"), patternLock);
 
+    auto columnSplit = panda::ObjectRef::New(vm);
+    columnSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::SetDivider));
+    columnSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::ResetDivider));
+    columnSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResizeable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::SetResizeable));
+    columnSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResizeable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::ResetResizeable));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "columnSplit"), columnSplit);
+    
     RegisterButtonAttributes(object, vm);
     RegisterToggleAttributes(object, vm);
     RegisterDividerAttributes(object, vm);

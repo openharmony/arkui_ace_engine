@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_SPLIT_LINEAR_SPLIT_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_SPLIT_LINEAR_SPLIT_MODEL_NG_H
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model.h"
 
 namespace OHOS::Ace::NG {
@@ -25,6 +26,9 @@ public:
     void Create(SplitType splitType) override;
     void SetResizeable(NG::SplitType splitType, bool resizeable) override;
     void SetDivider(NG::SplitType splitType, const NG::ItemDivider& divider) override;
+
+    static void SetResizeable(FrameNode* frameNode, NG::SplitType splitType, bool resizeable);
+    static void SetDivider(FrameNode* frameNode, NG::SplitType splitType, const NG::ItemDivider& divider);
 };
 
 } // namespace OHOS::Ace::NG
