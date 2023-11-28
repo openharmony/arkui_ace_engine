@@ -767,8 +767,6 @@ void TitleBarPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
-    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_TOP, .type = SAFE_AREA_TYPE_SYSTEM };
-    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
 void TitleBarPattern::ResetAssociatedScroll()
