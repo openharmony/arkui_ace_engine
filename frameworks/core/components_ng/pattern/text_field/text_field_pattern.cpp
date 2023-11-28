@@ -83,6 +83,9 @@
 #include "core/common/udmf/udmf_client.h"
 #endif
 
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#endif
 namespace OHOS::Ace::NG {
 namespace {
 // need to be moved to TextFieldTheme
@@ -786,6 +789,10 @@ void TextFieldPattern::HandleBlurEvent()
     needToRequestKeyboardInner_ = false;
     isFocusedBeforeClick_ = false;
     StopTwinkling();
+    if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
+        CloseKeyboard(true);
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "TextFieldPattern Blur, Close CustomKeyboard.");
+    }
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
     auto cleanNodeResponseArea = DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
@@ -2645,6 +2652,17 @@ TextInputAction TextFieldPattern::GetDefaultTextInputAction()
     return defaultTextInputAction;
 }
 
+#ifdef WINDOW_SCENE_SUPPORTED
+uint32_t TextFieldPattern::GetSCBSystemWindowId()
+{
+    RefPtr<FrameNode> frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, {});
+    auto focusSystemWindowId = WindowSceneHelper::GetFocusSystemWindowId(frameNode);
+    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "TextField Find SCBSystemWindowId End,(%{public}u).", focusSystemWindowId);
+    return focusSystemWindowId;
+}
+#endif
+
 // todo 代整改
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
@@ -2676,6 +2694,17 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             "RequestKeyboard set calling window id:%{public}u"
             "inputType: %{public}d",
             textConfig.windowId, textConfig.inputAttribute.inputPattern);
+#ifdef WINDOW_SCENE_SUPPORTED
+        auto systemWindowId = GetSCBSystemWindowId();
+        if (systemWindowId) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+                "windowId From %{public}u to %{public}u.", textConfig.windowId, systemWindowId);
+            textConfig.windowId = systemWindowId;
+        }
+#endif
+        TAG_LOGI(
+            AceLogTag::ACE_KEYBOARD, "RequestKeyboard set calling window id:%{public}u"
+            "inputType: %{public}d", textConfig.windowId, textConfig.inputAttribute.inputPattern);
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
 #else
         if (!HasConnection()) {
@@ -2772,6 +2801,19 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
 
 bool TextFieldPattern::RequestCustomKeyboard()
 {
+#if defined(ENABLE_STANDARD_INPUT)
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->Close();
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "TextField Request CustomKeyboard, Close Softkeyboard Successfully.");
+    }
+#else
+    if (HasConnection()) {
+        connection_->Close(GetInstanceId());
+        connection_ = nullptr;
+    }
+#endif
+
     if (isCustomKeyboardAttached_) {
         return true;
     }

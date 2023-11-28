@@ -428,6 +428,7 @@ public:
     {
         return focusStyleType_;
     }
+
     void SetFocusPaintParamsPtr(const std::unique_ptr<FocusPaintParam>& paramsPtr)
     {
         CHECK_NULL_VOID(paramsPtr);

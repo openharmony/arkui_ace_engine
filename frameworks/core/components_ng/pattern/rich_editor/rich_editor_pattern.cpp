@@ -66,6 +66,10 @@
 #include "core/common/udmf/udmf_client.h"
 #endif
 
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#endif
+
 namespace OHOS::Ace::NG {
 namespace {
 const std::string NEWLINE = "\n";
@@ -1402,6 +1406,12 @@ void RichEditorPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 void RichEditorPattern::HandleBlurEvent()
 {
     StopTwinkling();
+    // The pattern handles blurevent, Need to close the softkeyboard first.
+    if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "RichEditorPattern Blur, Close SoftKeyBoard.");
+        CloseKeyboard(true);
+    }
+
     if (textSelector_.IsValid()) {
         CloseSelectOverlay();
         ResetSelection();
@@ -1862,6 +1872,17 @@ bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartT
 }
 
 #if defined(ENABLE_STANDARD_INPUT)
+#ifdef WINDOW_SCENE_SUPPORTED
+uint32_t RichEditorPattern::GetSCBSystemWindowId()
+{
+    RefPtr<FrameNode> frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, {});
+    auto focusSystemWindowId = WindowSceneHelper::GetFocusSystemWindowId(frameNode);
+    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "RichEditor Find SCBSystemWindowId End, (%{public}d).", focusSystemWindowId);
+    return focusSystemWindowId;
+}
+#endif
+
 bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
 {
     auto context = PipelineContext::GetCurrentContext();
@@ -1880,7 +1901,15 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
     CHECK_NULL_RETURN(miscTextConfig.has_value(), false);
     TAG_LOGI(
         AceLogTag::ACE_RICH_TEXT, "RequestKeyboard set calling window id is : %{public}u", miscTextConfig->windowId);
-    inputMethod->Attach(richEditTextChangeListener_, needShowSoftKeyboard, miscTextConfig.value());
+    MiscServices::TextConfig textconfig = miscTextConfig.value();
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto systemWindowId = GetSCBSystemWindowId();
+    if (systemWindowId) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "windowid(%{public}u->%{public}u.", miscTextConfig->windowId, systemWindowId);
+        miscTextConfig->windowId = systemWindowId;
+    }
+#endif
+    inputMethod->Attach(richEditTextChangeListener_, needShowSoftKeyboard, textconfig);
     if (context) {
         inputMethod->SetCallingWindow(context->GetWindowId());
     }
@@ -2000,6 +2029,19 @@ bool RichEditorPattern::HasConnection() const
 
 bool RichEditorPattern::RequestCustomKeyboard()
 {
+#if defined(ENABLE_STANDARD_INPUT)
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->Close();
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "RichEditor Request CustomKeyboard, Close Softkeyboard Successfully.");
+    }
+#else
+    if (HasConnection()) {
+        connection_->Close(GetInstanceId());
+        connection_ = nullptr;
+    }
+#endif
+
     if (isCustomKeyboardAttached_) {
         return true;
     }

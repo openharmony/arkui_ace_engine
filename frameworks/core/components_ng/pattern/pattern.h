@@ -80,6 +80,7 @@ public:
         return true;
     }
 
+    // The pattern needs softkeyboard is like search, rich editor, text area, text field pattern.
     virtual bool NeedSoftKeyboard() const
     {
         return false;
