@@ -513,8 +513,40 @@ struct ArkUIRichEditorModifierAPI {
 };
 
 struct ArkUIImageModifierAPI {
+    void (*SetCopyOption)(NodeHandle node, int32_t copyOption);
+    void (*ResetCopyOption)(NodeHandle node);
+    void (*SetAutoResize)(NodeHandle node, bool autoResize);
+    void (*ResetAutoResize)(NodeHandle node);
+    void (*SetObjectRepeat)(NodeHandle node, int32_t imageRepeat);
+    void (*ResetObjectRepeat)(NodeHandle node);
+    void (*SetRenderMode)(NodeHandle node, int32_t imageRenderMode);
+    void (*ResetRenderMode)(NodeHandle node);
+    void (*SetSyncLoad)(NodeHandle node, bool syncLoadValue);
+    void (*ResetSyncLoad)(NodeHandle node);
     void (*SetObjectFit)(NodeHandle node, int32_t objectFitNumber);
     void (*ResetObjectFit)(NodeHandle node);
+    void (*SetFitOriginalSize)(NodeHandle node, bool fitOriginalSizeValue);
+    void (*ResetFitOriginalSize)(NodeHandle node);
+    void (*SetSourceSize)(NodeHandle node, double width, double height);
+    void (*ResetSourceSize)(NodeHandle node);
+    void (*SetMatchTextDirection)(NodeHandle node, uint32_t value);
+    void (*ResetMatchTextDirection)(NodeHandle node);
+    void (*SetFillColor)(NodeHandle node, uint32_t value);
+    void (*ResetFillColor)(NodeHandle node);
+    void (*SetAlt)(NodeHandle node, const char *value);
+    void (*ResetAlt)(NodeHandle node);
+    void (*SetImageInterpolation)(NodeHandle node, int32_t value);
+    void (*ResetImageInterpolation)(NodeHandle node);
+    void (*SetColorFilter)(NodeHandle node, float *array, int length);
+    void (*ResetColorFilter)(NodeHandle node);
+    void (*SetImageSyncLoad)(NodeHandle node, bool syncLoadValue);
+    void (*ResetImageSyncLoad)(NodeHandle node);
+    void (*SetImageObjectFit)(NodeHandle node, int32_t objectFitNumber);
+    void (*ResetImageObjectFit)(NodeHandle node);
+    void (*SetImageFitOriginalSize)(NodeHandle node, bool fitOriginalSizeValue);
+    void (*ResetImageFitOriginalSize)(NodeHandle node);
+    void (*SetImageDraggable)(NodeHandle node, bool value);
+    void (*ResetImageDraggable)(NodeHandle node);
 };
 
 struct ArkUIVideoModifierAPI {
