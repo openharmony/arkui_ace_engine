@@ -212,8 +212,10 @@ void SubMenuLayoutAlgorithm::ModifySubMenuWrapper(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    bool isMainContextMenu = menuPattern->GetMainMenuPattern()->IsContextMenu();
-    if (isMainContextMenu && !expandDisplay) {
+    auto mainMenuPattern = menuPattern->GetMainMenuPattern();
+    CHECK_NULL_VOID(mainMenuPattern);
+    auto isContextMenu = mainMenuPattern->IsContextMenu();
+    if (isContextMenu && !expandDisplay) {
         wrapperSize_ = SizeF(windowGlobalRect.Width(), windowGlobalRect.Height() - bottom);
     } else {
         wrapperSize_ = SizeF(wrapperSize_.Width(), wrapperSize_.Height());
@@ -222,7 +224,9 @@ void SubMenuLayoutAlgorithm::ModifySubMenuWrapper(LayoutWrapper* layoutWrapper)
 
 void SubMenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
 {
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto pipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);

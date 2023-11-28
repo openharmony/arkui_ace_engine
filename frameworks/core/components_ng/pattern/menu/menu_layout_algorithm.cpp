@@ -338,7 +338,10 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     // currently using click point as menu position
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
     auto targetSize = props->GetTargetSizeValue(SizeF());
     position_ = props->GetMenuOffset().value_or(OffsetF());
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
@@ -404,7 +407,9 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
 
 void MenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
 {
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -432,6 +437,7 @@ void MenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
 void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, OffsetF& position)
 {
     auto menu = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menu);
     auto wrapper = AceType::DynamicCast<FrameNode>(menu->GetParent());
     CHECK_NULL_VOID(wrapper);
 
@@ -1473,7 +1479,10 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
 {
     RefPtr<GridColumnInfo> columnInfo;
     columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
     if (menuPattern && menuPattern->IsSelectOverlayExtensionMenu()) {
         columnInfo->GetParent()->BuildColumnWidth();
     } else {
@@ -1494,10 +1503,14 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
 
 void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
 {
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    bool isSubMenu = menuPattern->IsSubMenu() || menuPattern->IsSelectOverlaySubMenu();
-    bool isContextMenu = menuPattern->GetMainMenuPattern()->IsContextMenu();
+    auto isSubMenu = menuPattern->IsSubMenu() || menuPattern->IsSelectOverlaySubMenu();
+    auto mainMenuPattern = menuPattern->GetMainMenuPattern();
+    CHECK_NULL_VOID(mainMenuPattern);
+    auto isContextMenu = mainMenuPattern->IsContextMenu();
     if (isContextMenu && isSubMenu && !hierarchicalParameters_) {
         auto pipelineContext = GetCurrentPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
@@ -1527,7 +1540,9 @@ LayoutConstraintF MenuLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* layo
 
 void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
 {
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto options = menuPattern->GetOptions();
     if (options.empty()) {
