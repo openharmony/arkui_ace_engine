@@ -109,6 +109,10 @@ RichEditorSelection RichEditorController::GetSelectionSpansInfo()
     if (richEditorPattern) {
         auto start = std::max(richEditorPattern->GetTextSelector().GetTextStart(), 0);
         auto end = std::max(richEditorPattern->GetTextSelector().GetTextEnd(), 0);
+        if (start == end) {
+            start = richEditorPattern->GetCaretPosition();
+            end = richEditorPattern->GetCaretPosition();
+        }
         value = richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::ONSELECT);
     }
     return value;

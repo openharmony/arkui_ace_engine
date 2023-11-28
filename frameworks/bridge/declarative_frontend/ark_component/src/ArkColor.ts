@@ -1,4 +1,3 @@
-
 /// <reference path="./import.ts" />
 const COLOR_WITH_MAGIC = /#[0-9A-Fa-f]{6,8}/;
 const COLOR_WITH_MAGIC_MINI = /#[0-9A-Fa-f]{3,4}/;

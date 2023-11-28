@@ -191,6 +191,9 @@ public:
     JsiRef<JsiValue> ToJsonObject(const char* value) const;
 
     template<typename T>
+    T GetPropertyValue(const char* prop, T defaultValue) const;
+
+    template<typename T>
     void SetProperty(const char* prop, const T value) const;
     void SetPropertyJsonObject(const char* prop, const char* value) const;
     void SetPropertyObject(const char* prop, JsiRef<JsiValue> value) const;

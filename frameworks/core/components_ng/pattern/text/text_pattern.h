@@ -329,7 +329,7 @@ public:
         return isCustomFont_;
     }
     void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
-    void CheckHandles(SelectHandleInfo& handleInfo);
+    virtual void CheckHandles(SelectHandleInfo& handleInfo);
     OffsetF GetDragUpperLeftCoordinates() override;
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
 
@@ -394,6 +394,12 @@ public:
         return textForAI_;
     }
 
+    void ResetDragOption() override
+    {
+        CloseSelectOverlay();
+        ResetSelection();
+    }
+
 protected:
     virtual void HandleOnCopy();
     void InitMouseEvent();
@@ -407,7 +413,7 @@ protected:
     void HandleDoubleClickEvent(GestureEvent& info);
     void InitTextDetect(int32_t startPos, std::string detectText);
     void ShowUIExtensionMenu(AISpan aiSpan);
-    bool ClickAISpan(GestureEvent& info, PointF textOffset);
+    bool ClickAISpan(GestureEvent& info, PointF textOffset, AISpan aiSpan);
     void ParseAIResult(const TextDataDetectResult& result, int32_t startPos);
     void ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos,
         bool isMenuOption = false);
@@ -449,7 +455,6 @@ protected:
     std::vector<RectF> dragBoxes_;
 
     // properties for AI
-    bool hasChildren_ = false;
     bool textDetectEnable_ = false;
     bool aiDetectInitialized_ = false;
     bool aiDetectTypesChanged_ = false;

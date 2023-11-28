@@ -627,7 +627,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest008, TestSize.Level1)
     pattern->choosePoint_.push_back(PatternLockCell(1, 1));
     pattern->isMoveEventValid_ = false;
     TouchLocationInfo locationInfo(0);
-    locationInfo.SetLocalLocation(offset);
+    locationInfo.SetGlobalLocation(offset);
     pattern->isMoveEventValid_ = true;
     pattern->OnTouchDown(locationInfo);
     EXPECT_EQ(pattern->cellCenter_.GetX(), offset.GetX());
@@ -665,7 +665,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest009, TestSize.Level1)
     float offsetY = 1.0f;
     Offset offset(offsetX, offsetY);
     TouchLocationInfo locationInfoTouchDown(0);
-    locationInfoTouchDown.SetLocalLocation(offset);
+    locationInfoTouchDown.SetGlobalLocation(offset);
     locationInfoTouchDown.SetTouchType(TouchType::DOWN);
     TouchEventInfo touchEventInfoTouchDown("onTouchDown");
     touchEventInfoTouchDown.AddChangedTouchLocationInfo(std::move(locationInfoTouchDown));
@@ -1110,13 +1110,10 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest016, TestSize.Level1)
      * @tc.steps: step3. Set PatternLock pattern variables and call CreateNodePaintMethod.
      * @tc.expected: step3. Check the PatternLock paintMethod cellCenter_ value.
      */
-    auto geometryNode = frameNode->GetGeometryNode();
-    geometryNode->SetFrameOffset(OffsetF(CONTENT_OFFSET_FLOAT, CONTENT_OFFSET_FLOAT));
     pattern->globalTouchPoint_ = OffsetF(TOUCHPOINT_OFFSET_FLOAT, TOUCHPOINT_OFFSET_FLOAT);
     auto paintMethod = AceType::DynamicCast<PatternLockPaintMethod>(pattern->CreateNodePaintMethod());
     ASSERT_NE(paintMethod, nullptr);
-    EXPECT_EQ(paintMethod->cellCenter_,
-        OffsetF(TOUCHPOINT_OFFSET_FLOAT - CONTENT_OFFSET_FLOAT, TOUCHPOINT_OFFSET_FLOAT - CONTENT_OFFSET_FLOAT));
+    EXPECT_EQ(paintMethod->cellCenter_, OffsetF(TOUCHPOINT_OFFSET_FLOAT, TOUCHPOINT_OFFSET_FLOAT));
 }
 
 /**
@@ -1146,8 +1143,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest017, TestSize.Level1)
      */
     pattern->globalTouchPoint_ = OffsetF(TOUCHPOINT_OFFSET_FLOAT, TOUCHPOINT_OFFSET_FLOAT);
     pattern->CalculateCellCenter();
-    EXPECT_EQ(pattern->cellCenter_,
-        OffsetF(TOUCHPOINT_OFFSET_FLOAT - CONTENT_OFFSET_FLOAT, TOUCHPOINT_OFFSET_FLOAT - CONTENT_OFFSET_FLOAT));
+    EXPECT_EQ(pattern->cellCenter_, OffsetF(TOUCHPOINT_OFFSET_FLOAT, TOUCHPOINT_OFFSET_FLOAT));
 
     /**
      * @tc.steps: step4. Set PatternLock pattern variables and call CalculateCellCenter.

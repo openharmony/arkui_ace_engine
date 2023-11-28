@@ -1309,7 +1309,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerOnDragMoveTest001, TestSize.Level
      * @tc.steps: step1. construct a DragDropManager
      */
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    Point point;
+    PointerEvent point;
 
     /**
      * @tc.steps: step2. call OnDragStart

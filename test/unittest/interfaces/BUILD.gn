@@ -26,6 +26,7 @@ ohos_unittest("ui_content_test") {
   module_out_path = "$interface_test_output_path/inner_api"
 
   sources = [
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/interfaces/inner_api/ace/ui_content.cpp",
     "ui_content_test.cpp",
   ]
@@ -68,6 +69,8 @@ ohos_unittest("form_render_test") {
     "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
   sources = [
+    "$ace_root/frameworks/core/common/container_scope.cpp",
+
     # mock
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/test/mock/core/pipeline/mock_pipeline_base.cpp",

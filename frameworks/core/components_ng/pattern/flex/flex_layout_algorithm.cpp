@@ -240,7 +240,6 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
 void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, const SizeF& realSize)
 {
     if (!magicNodes_.empty()) {
-        LOGD("second measure feature, only update child layout constraint");
         const auto& childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         for (auto& [index, children] : magicNodes_) {
             for (auto& item : children) {
@@ -841,7 +840,6 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                                                                                : Axis::VERTICAL;
     auto realSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), axis, measureType).ConvertToSizeT();
     if (children.empty()) {
-        LOGD("layoutWrapper children is empty");
         layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
         return;
     }
@@ -879,9 +877,6 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     selfAdaptive_ = isLinearLayoutFeature_;
     if (!isInfiniteLayout_) {
         isInfiniteLayout_ = mainAxisInf;
-    }
-    if (isInfiniteLayout_) {
-        LOGD("The main axis size is not defined or infinity, disallow flex and weight mode");
     }
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto horizontalPadding = padding.left.value_or(0.0f) + padding.right.value_or(0.0f);
@@ -950,7 +945,6 @@ void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild(false);
     if (children.empty()) {
-        LOGD("FlexLayoutAlgorithm::GetTotalAllocatedSize, children is empty");
         allocatedSize_ = 0.0f;
         return;
     }
@@ -986,7 +980,6 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild(false);
     if (children.empty()) {
-        LOGD("FlexLayoutAlgorithm::Layout, children is empty");
         return;
     }
     auto layoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -1051,17 +1044,11 @@ void FlexLayoutAlgorithm::CalculateSpace(float remainSpace, float& frontSpace, f
         default:
             break;
     }
-    LOGD("CalculateSpace remainSpace %{public}f, end front space is %{public}f, between space is %{public}f, remain "
-         "space is %{public}f",
-        remainSpace, frontSpace, betweenSpace, remainSpace);
 }
 
 void FlexLayoutAlgorithm::PlaceChildren(
     LayoutWrapper* layoutWrapper, float frontSpace, float betweenSpace, const OffsetF& paddingOffset)
 {
-    LOGD("Place children, mainSize %{public}f, crossSize %{public}f, direction %{public}d, frontSpace %{public}f, "
-         "betweenSpace %{public}f",
-        mainAxisSize_, crossAxisSize_, direction_, frontSpace, betweenSpace);
     float childMainPos = IsStartTopLeft(direction_, textDir_) ? frontSpace : mainAxisSize_ - frontSpace;
     float childCrossPos = 0.0f;
     const auto& children = layoutWrapper->GetAllChildrenWithBuild(false);
@@ -1121,8 +1108,6 @@ void FlexLayoutAlgorithm::PlaceChildren(
             child->GetGeometryNode()->SetMarginFrameOffset(offset + paddingOffset);
             childMainPos += GetChildMainAxisSize(child) + betweenSpace;
         }
-        LOGD("Child %{public}s has margin frame offset %{public}s", child->GetHostTag().c_str(),
-            child->GetGeometryNode()->GetMarginFrameOffset().ToString().c_str());
     }
 }
 

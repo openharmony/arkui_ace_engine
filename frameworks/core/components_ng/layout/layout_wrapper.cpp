@@ -19,6 +19,7 @@
 
 #include "base/log/ace_checker.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -161,8 +162,26 @@ void LayoutWrapper::ExpandSafeArea()
     }
     // restore to local offset
     frame -= parentGlobalOffset;
+    auto diff = geometryNode->GetFrameOffset() - frame.GetOffset();
+    if (!diff.NonOffset()) {
+        // children's position should remain the same.
+        AdjustChildren(diff);
+    }
     geometryNode->SetFrameOffset(frame.GetOffset());
     geometryNode->SetFrameSize(frame.GetSize());
+}
+
+void LayoutWrapper::AdjustChildren(const OffsetF& offset)
+{
+    for (const auto& childUI : GetHostNode()->GetChildren()) {
+        auto child = DynamicCast<FrameNode>(childUI);
+        if (!child) {
+            continue;
+        }
+        auto childGeo = child->GetGeometryNode();
+        childGeo->SetFrameOffset(childGeo->GetFrameOffset() + offset);
+        child->ForceSyncGeometryNode();
+    }
 }
 
 void LayoutWrapper::ExpandIntoKeyboard()
@@ -195,7 +214,8 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
         if (layoutProperty->GetCalcLayoutConstraint()) {
             idealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
         }
-        constraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(), idealSize);
+        auto greaterThanApiTen = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
+        constraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(), idealSize, greaterThanApiTen);
     }
 
     auto&& insets = layoutProperty->GetSafeAreaInsets();

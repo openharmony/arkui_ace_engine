@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -298,7 +299,7 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     for (auto kv : pattern->GetAISpanMap()) {
         auto aiSpan = kv.second;
         if (aiSpan.start <= preEnd) {
-            LOGD("Error prediction");
+            TAG_LOGI(AceLogTag::ACE_TEXT, "Error prediction");
             continue;
         }
         if (preEnd < aiSpan.start) {
@@ -321,6 +322,9 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
 bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper)
 {
     auto paraStyle = GetParagraphStyle(textStyle, content);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spanItemChildren_.empty()) {
+        paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
+    }
     paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_RETURN(paragraph_, false);
     paragraph_->PushStyle(textStyle);
@@ -358,7 +362,7 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, c
     return ret;
 }
 
-OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper) const
+OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
 {
     OffsetF contentOffset(0.0, 0.0);
     CHECK_NULL_RETURN(layoutWrapper, contentOffset);
@@ -382,15 +386,10 @@ OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper) cons
     return contentOffset;
 }
 
-OffsetF TextLayoutAlgorithm::GetTextRectOffset(LayoutWrapper* layoutWrapper) const
-{
-    return GetContentOffset(layoutWrapper);
-}
-
 void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto textOffset = GetTextRectOffset(layoutWrapper);
+    auto contentOffset = GetContentOffset(layoutWrapper);
     std::vector<int32_t> placeholderIndex;
     for (const auto& child : spanItemChildren_) {
         if (!child) {
@@ -416,15 +415,17 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         if (index >= placeholderIndex.size() ||
             (index >= rectsForPlaceholders.size() && child->GetHostTag() != V2::PLACEHOLDER_SPAN_ETS_TAG)) {
-            return;
+            child->SetActive(false);
+            continue;
         }
+        child->SetActive(true);
         auto rect = rectsForPlaceholders.at(index);
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
             ++index;
             continue;
         }
-        geometryNode->SetMarginFrameOffset(textOffset + OffsetF(rect.Left(), rect.Top()));
+        geometryNode->SetMarginFrameOffset(contentOffset + OffsetF(rect.Left(), rect.Top()));
         child->Layout();
         ++index;
     }
@@ -436,7 +437,6 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
-    auto contentOffset = GetContentOffset(layoutWrapper);
     pattern->InitSpanImageLayout(placeholderIndex, rectsForPlaceholders, contentOffset);
 #endif
 }

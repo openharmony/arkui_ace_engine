@@ -416,13 +416,14 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
         LOGI("GeometryTransition: follow started, node %{public}d to %{public}d", outNode->GetId(), holder_->GetId());
     } else {
         auto inNode = inNode_.Upgrade();
-        CHECK_NULL_RETURN(inNode && holder_, false);
+        CHECK_NULL_RETURN(inNode && inNode->GetGeometryNode() && holder_, false);
         auto parent = holder_->GetParent();
         CHECK_NULL_RETURN(parent, false);
         parent->ReplaceChild(holder_, inNode);
         parent->RemoveDisappearingChild(inNode);
         inNode->SetLayoutPriority(0);
         inNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        inNode->GetGeometryNode()->SetFrameSize(SizeF());
         hasInAnim_ = false;
         LOGI("GeometryTransition: follow ended, node %{public}d to %{public}d", holder_->GetId(), inNode->GetId());
         holder_ = nullptr;

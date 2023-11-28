@@ -93,7 +93,7 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             continue;
         }
         // can place current child at current row
-        if (mainLengthLimit_ >= currentMainLength + GetItemMainAxisLength(item->GetGeometryNode())) {
+        if (GreatOrEqual(mainLengthLimit_, currentMainLength + GetItemMainAxisLength(item->GetGeometryNode()))) {
             currentMainLength += GetItemMainAxisLength(item->GetGeometryNode());
             currentMainLength += spacing;
             currentCrossLength = std::max(currentCrossLength, GetItemCrossAxisLength(item->GetGeometryNode()));
@@ -199,7 +199,6 @@ void WrapLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
-        LOGE("WrapLayoutAlgorithm::Layout, children is empty");
         return;
     }
     OffsetF startPosition;
@@ -285,7 +284,7 @@ void WrapLayoutAlgorithm::AddPaddingToStartPosition(OffsetF& startPosition) cons
                 startPosition.AddY(isFlexReverse_ ? -padding_.bottom.value_or(0.0f) : padding_.bottom.value_or(0.0f));
                 break;
             default:
-                LOGW("Unknown direction");
+                break;
         }
     } else {
         switch (direction_) {
@@ -304,7 +303,7 @@ void WrapLayoutAlgorithm::AddPaddingToStartPosition(OffsetF& startPosition) cons
                 startPosition.AddY(-padding_.bottom.value_or(0.0f));
                 break;
             default:
-                LOGW("Unknown direction");
+                break;
         }
     }
 }
@@ -340,7 +339,6 @@ void WrapLayoutAlgorithm::LayoutWholeWrap(
 {
     auto contentNum = static_cast<int32_t>(contentList_.size());
     if (contentNum == 0) {
-        LOGW("no content in wrap");
         return;
     }
 
@@ -362,12 +360,10 @@ void WrapLayoutAlgorithm::LayoutWholeWrap(
     // no need to set alignment_.
     if ((!isHorizontal_ && hasIdealWidth_ && crossLengthLimit_ <= totalCrossLength_) ||
         (!isHorizontal_ && !hasIdealWidth_)) {
-        LOGD("Cross axis size does not support alignContent, use start");
         return;
     }
     if ((isHorizontal_ && hasIdealHeight_ && crossLengthLimit_ <= totalCrossLength_) ||
         (isHorizontal_ && !hasIdealHeight_)) {
-        LOGD("Cross axis size does not support alignContent, use start");
         return;
     }
     auto crossAxisRemainSpace = crossLengthLimit_ - totalCrossLength_;
@@ -417,7 +413,6 @@ void WrapLayoutAlgorithm::LayoutWholeWrap(
             break;
         }
         default: {
-            LOGE("Wrap::alignment setting error.");
             break;
         }
     }
@@ -467,7 +462,6 @@ void WrapLayoutAlgorithm::TraverseContent(const OffsetF& startPosition, const Of
         }
     }
     for (const auto& content : contentList_) {
-        LOGD("Content position %{public}s", contentPosition.ToString().c_str());
         LayoutContent(content, contentPosition);
         if (isHorizontal_) {
             contentPosition.AddY(content.crossLength + contentSpace + spaceBetween);
@@ -518,7 +512,6 @@ float WrapLayoutAlgorithm::CalcItemCrossAxisOffset(
             break;
         }
         default: {
-            LOGW("Unknown alignment, use start alignment");
             if (isHorizontal_) {
                 return contentOffset.GetY();
             }
@@ -567,7 +560,6 @@ void WrapLayoutAlgorithm::CalcItemMainAxisStartAndSpaceBetween(
             break;
         }
         default: {
-            LOGE("Wrap::alignment setting error.");
             break;
         }
     }
@@ -577,7 +569,6 @@ void WrapLayoutAlgorithm::LayoutContent(const ContentInfo& content, const Offset
 {
     int32_t itemNum = content.count;
     if (itemNum == 0) {
-        LOGW("No item in current content struct");
         return;
     }
     OffsetF contentStartPosition(position.GetX(), position.GetY());
@@ -616,7 +607,6 @@ void WrapLayoutAlgorithm::LayoutContent(const ContentInfo& content, const Offset
             contentStartPosition.AddY(isReverse ? -contentMainAxisSpan : contentMainAxisSpan);
         }
         itemWrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
-        LOGD("Node %{public}s offset %{public}s", itemWrapper->GetHostTag().c_str(), offset.ToString().c_str());
     }
 }
 

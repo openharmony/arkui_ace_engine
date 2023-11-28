@@ -28,6 +28,7 @@ constexpr int32_t ANGLE_0 = 0;
 constexpr int32_t ANGLE_90 = 90;
 constexpr int32_t ANGLE_180 = 180;
 constexpr int32_t ANGLE_270 = 270;
+constexpr double SIZE_DIVIDE = 2.0;
 } // namespace
 
 SourceTool GetSourceTool(int32_t orgToolType)
@@ -265,6 +266,10 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
 #ifdef SECURITY_COMPONENT_ENABLE
     events.enhanceData = pointerEvent->GetEnhanceData();
 #endif
+    auto sourceTool = GetSourceTool(item.GetToolType());
+    if (events.sourceType == SourceType::TOUCH && sourceTool == SourceTool::PEN) {
+        events.id = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
+    }
     LOGD("ConvertMouseEvent: id: %{public}d (x,y): (%{public}f,%{public}f). Button: %{public}d. Action: %{public}d. "
          "DeviceType: %{public}d. PressedButton: %{public}d. Time: %{public}lld",
         events.id, events.x, events.y, events.button, events.action, events.sourceType, events.pressedButtons,
@@ -352,6 +357,25 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     }
     LOGD("ConvertKeyEvent: KeyCode: %{private}d. KeyAction: %{public}d. PressedCodes: %{private}s. Time: %{public}lld",
         event.code, event.action, pressedKeyStr.c_str(), (long long)(keyEvent->GetActionTime()));
+}
+
+void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, PointerEvent& event)
+{
+    event.rawPointerEvent = pointerEvent;
+    event.pointerId = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    event.pressed = pointerItem.IsPressed();
+    event.windowX = pointerItem.GetWindowX();
+    event.windowY = pointerItem.GetWindowY();
+    event.displayX = pointerItem.GetDisplayX();
+    event.displayY = pointerItem.GetDisplayY();
+    event.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / SIZE_DIVIDE;
+    event.force = static_cast<float>(pointerItem.GetPressure());
+    event.deviceId = pointerItem.GetDeviceId();
+    event.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
+    event.sourceTool = GetSourceTool(pointerItem.GetToolType());
+    event.targetWindowId = pointerItem.GetTargetWindowId();
 }
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

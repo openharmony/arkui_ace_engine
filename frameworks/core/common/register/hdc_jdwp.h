@@ -24,7 +24,7 @@ class HdcJdwpSimulator;
 
 class HdcJdwpSimulator {
 public:
-    explicit HdcJdwpSimulator(string pkgName);
+    explicit HdcJdwpSimulator(string processName, string pkgName, bool isDebug, Callback cb);
     ~HdcJdwpSimulator();
     bool Connect();
     void Disconnect();
@@ -40,13 +40,25 @@ private:
     struct JsMsgHeader {
         uint32_t msgLen;
         uint32_t pid;
+        uint8_t isDebug; // 1:debug 0:release
     };
     void *MallocContext();
     static bool ConnectJpid(void *param);
     static bool SendToJpid(int fd, const uint8_t *buf, const int bufLen);
     HCtxJdwpSimulator ctxPoint_;
+    string processName_;
     string pkgName_;
-    bool disconnectFlag_;
+    bool isDebug_;
+    Callback cb_;
+    int cfd_;
+    std::atomic<bool> disconnectFlag_;
+
+    static int32_t Bytes2Int(uint8_t b[]);
+    std::thread readThread_;
+    static void ReadWork(void *param);
+    void Read();
+    void ReadStart();
+    void TidCallback(std::string id, int fd);
 };
 } // namespace OHOS::Ace
 #endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_REGISTER_HDC_JDWP_H

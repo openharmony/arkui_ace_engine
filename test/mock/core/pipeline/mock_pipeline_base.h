@@ -43,7 +43,7 @@ public:
     MOCK_METHOD1(OnMouseEvent, void(const MouseEvent& event));
     MOCK_METHOD1(OnAxisEvent, void(const AxisEvent& event));
     MOCK_CONST_METHOD1(OnRotationEvent, bool(const RotationEvent& event));
-    MOCK_METHOD3(OnDragEvent, void(int32_t x, int32_t y, DragEventAction action));
+    MOCK_METHOD2(OnDragEvent, void(const PointerEvent& pointerEvent, DragEventAction action));
     MOCK_METHOD1(OnIdle, void(int64_t deadline));
     MOCK_METHOD1(SetBuildAfterCallback, void(const std::function<void()>& callback));
     MOCK_METHOD1(FlushAnimation, void(uint64_t nanoTimestamp));
@@ -103,9 +103,12 @@ public:
     MOCK_METHOD0(GetStoredNodeInfo, std::unique_ptr<JsonValue>());
     MOCK_METHOD1(UpdateSystemSafeArea, void(const SafeAreaInsets& systemSafeArea));
     MOCK_METHOD1(UpdateCutoutSafeArea, void(const SafeAreaInsets& cutoutSafeArea));
+    MOCK_CONST_METHOD0(GetSafeArea, SafeAreaInsets());
     MOCK_METHOD0(NotifyConfigurationChange, void());
     MOCK_CONST_METHOD0(GetTaskExecutor, RefPtr<TaskExecutor>());
+    MOCK_METHOD0(GetCurrentExtraInfo, std::string());
     MOCK_METHOD1(SetIsFocusActive, bool(bool isFocusActive));
+    MOCK_METHOD0(NeedSoftKeyboard, bool());
     MOCK_METHOD1(SetCursor, void(int32_t cursorValue));
     MOCK_METHOD0(RestoreDefault, void());
 

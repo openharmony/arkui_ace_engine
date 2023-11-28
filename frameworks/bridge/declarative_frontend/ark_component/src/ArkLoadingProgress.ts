@@ -1,10 +1,13 @@
 
 /// <reference path="./import.ts" />
 class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgressAttribute {
-    color(value: ResourceColor): LoadingProgressAttribute {
+    onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
         throw new Error("Method not implemented.");
     }
-    enableLoading(value: boolean): LoadingProgressAttribute {
+    color(value: ResourceColor): this {
+        throw new Error("Method not implemented.");
+    }
+    enableLoading(value: boolean): this {
         throw new Error("Method not implemented.");
     }
 }

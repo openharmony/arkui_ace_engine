@@ -108,6 +108,7 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
         auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
         if (recognizer) {
             recognizer->BeginReferee(touchId);
+            recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
             recognizer->SetTargetComponent(targetComponent);
             if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
                 auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
@@ -211,6 +212,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             for (const auto& groupRecognizer : groupRecognizers) {
                 if (groupRecognizer) {
                     groupRecognizer->SetCoordinateOffset(offset);
+                    groupRecognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
                     groupRecognizer->SetTargetComponent(targetComponent);
                 }
             }
@@ -624,6 +626,7 @@ std::function<void()> GestureEventHub::GetMousePixelMapCallback(const GestureEve
         }
         InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         dragDropManager->SetIsDragWindowShow(true);
+        dragDropManager->SetPreviewRect(Rect(pixelMapOffset.GetX(), pixelMapOffset.GetY(), width, height));
     };
     return callback;
 }
@@ -749,6 +752,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
+    pattern->ResetDragOption();
     if (pattern->GetDragRecordSize() >= 0) {
         recordsSize = pattern->GetDragRecordSize();
     } else if (unifiedData) {
@@ -809,6 +813,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         return;
     }
     dragDropManager->SetDraggingPointer(info.GetPointerId());
+    dragDropManager->SetPreviewRect(Rect(pixelMapOffset.GetX(), pixelMapOffset.GetY(), width, height));
     dragDropManager->ResetRecordSize(static_cast<uint32_t>(recordsSize));
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
@@ -1181,6 +1186,16 @@ bool GestureEventHub::IsAccessibilityLongClickable()
         }
     }
     return ret;
+}
+
+bool GestureEventHub::GetMonopolizeEvents() const
+{
+    return monopolizeEvents_;
+}
+
+void GestureEventHub::SetMonopolizeEvents(bool monopolizeEvents)
+{
+    monopolizeEvents_ = monopolizeEvents;
 }
 
 void GestureEventHub::ClearUserOnClick()

@@ -132,9 +132,6 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
     CHECK_NULL_RETURN(focusHub, nullptr);
     focusHub->SetFocusType(FocusType::NODE);
     focusHub->SetFocusStyleType(FocusStyleType::CUSTOM_REGION);
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    pipeline->SetIsFocusActive(true);
     return pattern->GetTextFieldController();
 };
 
@@ -461,6 +458,15 @@ void TextFieldModelNG::SetShowCounter(bool value)
     }
 }
 
+void TextFieldModelNG::SetCounterType(int32_t value)
+{
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SetCounter, value);
+}
+
 void TextFieldModelNG::SetBarState(OHOS::Ace::DisplayMode value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, DisplayMode, value);
@@ -605,5 +611,10 @@ void TextFieldModelNG::SetCancelIconColor(const Color& iconColor)
 void TextFieldModelNG::SetSelectAllValue(bool isSelectAllValue)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue);
+}
+
+void TextFieldModelNG::SetMaxViewLines(FrameNode* frameNode, uint32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxViewLines, value, frameNode);
 }
 } // namespace OHOS::Ace::NG

@@ -59,6 +59,8 @@ public:
         bubbleMethod->SetChildOffset(childOffset_);
         bubbleMethod->SetChildSize(childSize_);
         bubbleMethod->SetShowArrow(showArrow_);
+        bubbleMethod->SetClipPath(clipPath_);
+        bubbleMethod->SetClipFrameNode(clipFrameNode_);
         return bubbleMethod;
     }
 
@@ -117,6 +119,11 @@ public:
         transitionStatus_ = transitionStatus;
     }
 
+    TransitionStatus GetTransitionStatus() const
+    {
+        return transitionStatus_;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -172,6 +179,9 @@ private:
 
     bool isCustomPopup_ = false;
     RefPtr<FrameNode> messageNode_;
+
+    std::string clipPath_;
+    RefPtr<FrameNode> clipFrameNode_;
     ACE_DISALLOW_COPY_AND_MOVE(BubblePattern);
 };
 } // namespace OHOS::Ace::NG

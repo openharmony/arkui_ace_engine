@@ -39,6 +39,7 @@ ohos_unittest("canvas_renderer_test_ng") {
   defines = [ "ENABLE_DRAG_FRAMEWORK" ]
 
   sources += [
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
     "$ace_root/test/mock/adapter/mock_ace_application_info.cpp",
     "$ace_root/test/mock/adapter/mock_ace_container.cpp",

@@ -298,7 +298,8 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         if (jumpIndex < 0 || jumpIndex >= totalItemCount_) {
             jumpIndex = 0;
         }
-        if (scrollAlign_ == ScrollAlign::CENTER || scrollAlign_ == ScrollAlign::START) {
+        if (scrollAlign_ == ScrollAlign::CENTER || scrollAlign_ == ScrollAlign::START ||
+            scrollAlign_ == ScrollAlign::AUTO) {
             startIndex = jumpIndex;
         } else if (scrollAlign_ == ScrollAlign::END) {
             endIndex = jumpIndex;
@@ -335,6 +336,9 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
     } else if (scrollAlign_ == ScrollAlign::END) {
         endIndex = GetLanesCeil(endIndex);
         MeasureEnd(layoutWrapper, layoutConstraint, endIndex);
+    } else if (scrollAlign_ == ScrollAlign::AUTO) {
+        startIndex = GetLanesFloor(startIndex);
+        MeasureAuto(layoutWrapper, layoutConstraint, startIndex);
     } else if (forwardLayout_) {
         startIndex = GetLanesFloor(startIndex);
         TAG_LOGD(AceLogTag::ACE_LIST, "ListItem startIndex:%{public}d, startPos:%{public}f", startIndex, startPos);
@@ -383,6 +387,31 @@ std::pair<float, float> ListItemGroupLayoutAlgorithm::GetItemGroupPosition(int32
         }
     }
     return { 0.0f, 0.0f };
+}
+
+float ListItemGroupLayoutAlgorithm::GetItemHeight(int32_t index)
+{
+    auto it = itemPosition_.find(index);
+    if (it != itemPosition_.end()) {
+        return it->second.second - it->second.first;
+    }
+    return 0.0f;
+}
+
+int32_t ListItemGroupLayoutAlgorithm::MeasureALineAuto(LayoutWrapper* layoutWrapper,
+    const LayoutConstraintF& layoutConstraint, int32_t currentIndex)
+{
+    auto wrapper = GetListItem(layoutWrapper, currentIndex);
+    if (!wrapper) {
+        return 0;
+    }
+    {
+        ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
+        wrapper->Measure(layoutConstraint);
+    }
+    float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
+    itemPosition_[currentIndex] = { 0.0f, mainLen };
+    return 1;
 }
 
 int32_t ListItemGroupLayoutAlgorithm::MeasureALineCenter(LayoutWrapper* layoutWrapper,
@@ -515,6 +544,16 @@ void ListItemGroupLayoutAlgorithm::MeasureCenter(LayoutWrapper* layoutWrapper,
         pos.second.second = currentStartPos + len;
         currentStartPos = pos.second.second + spaceWidth_;
     }
+}
+
+void ListItemGroupLayoutAlgorithm::MeasureAuto(LayoutWrapper* layoutWrapper,
+    const LayoutConstraintF& layoutConstraint, int32_t startIndex)
+{
+    if (MeasureALineAuto(layoutWrapper, layoutConstraint, startIndex) == 0) {
+        return;
+    }
+
+    totalMainSize_ = GetEndPosition() - GetStartPosition() + headerMainSize_ + footerMainSize_;
 }
 
 void ListItemGroupLayoutAlgorithm::MeasureStart(LayoutWrapper* layoutWrapper,

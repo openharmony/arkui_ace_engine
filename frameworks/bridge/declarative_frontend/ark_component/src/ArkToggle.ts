@@ -1,9 +1,12 @@
 /// <reference path="./import.ts" />
 class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
-    onChange(callback: (isOn: boolean) => void): ToggleAttribute {
+    onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
         throw new Error("Method not implemented.");
     }
-    selectedColor(value: number | undefined): ToggleAttribute {
+    onChange(callback: (isOn: boolean) => void): this {
+        throw new Error("Method not implemented.");
+    }
+    selectedColor(value: number | undefined): this {
         var arkColor = new ArkColor();
         if (arkColor.parseColorValue(value)) {
             modifier(this._modifiers, ToggleSelectedColorModifier, arkColor.color);
@@ -12,7 +15,7 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
         }
         return this;
     }
-    switchPointColor(value: number | undefined): ToggleAttribute {
+    switchPointColor(value: number | undefined): this {
         var arkColor = new ArkColor();
         if (arkColor.parseColorValue(value)) {
             modifier(this._modifiers, ToggleSwitchPointColorModifier, arkColor.color);
@@ -26,9 +29,9 @@ class ToggleSelectedColorModifier extends Modifier<number | undefined> {
     static identity = Symbol("toggleSelectedColor");
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
-            globalThis.getArkUINativeModule().toggle.resetSelectedColor(node);
+            GetUINativeModule().toggle.resetSelectedColor(node);
         } else {
-            globalThis.getArkUINativeModule().toggle.setSelectedColor(node, this.value);
+            GetUINativeModule().toggle.setSelectedColor(node, this.value);
         }
     }
 }
@@ -36,9 +39,9 @@ class ToggleSwitchPointColorModifier extends Modifier<number | undefined> {
     static identity = Symbol("toggleSwitchPointColor");
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
-            globalThis.getArkUINativeModule().toggle.resetSwitchPointColor(node);
+            GetUINativeModule().toggle.resetSwitchPointColor(node);
         } else {
-            globalThis.getArkUINativeModule().toggle.setSwitchPointColor(node, this.value);
+            GetUINativeModule().toggle.setSwitchPointColor(node, this.value);
         }
     }
 }

@@ -114,7 +114,7 @@ void ToggleButtonPattern::SetAccessibilityAction()
     accessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->UpdateSelectStatus(false);
+        pattern->UpdateSelectStatus(true);
     });
 
     accessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
@@ -257,7 +257,9 @@ void ToggleButtonPattern::InitButtonAndText()
         layoutProperty->UpdateFontSize(textLayoutProperty->GetFontSizeValue(textFontSize_));
     }
     layoutProperty->UpdateLabel(textLayoutProperty->GetContentValue(""));
-    textLayoutProperty->UpdateTextColor(textColor_);
+    if (!textLayoutProperty->GetTextColor().has_value()) {
+        textLayoutProperty->UpdateTextColor(textColor_);
+    }
 
     if (!textLayoutProperty->GetMarginProperty()) {
         MarginProperty margin;

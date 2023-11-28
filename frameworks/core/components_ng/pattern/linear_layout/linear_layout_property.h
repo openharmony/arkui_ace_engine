@@ -102,13 +102,10 @@ public:
         UpdateSpace(Dimension::FromString(json->GetString("space")));
         auto alignItems = json->GetString("alignItems");
         auto pos = alignItems.find('.');
-        LOGD("UITree alignItems=%{public}s", alignItems.c_str());
         if (pos != std::string::npos) {
             ++pos;
             alignItems = alignItems.substr(pos, alignItems.length() - pos);
             UpdateCrossAxisAlign(uMap.count(alignItems) ? uMap.at(alignItems) : FlexAlign::CENTER);
-        } else {
-            LOGE("UITree |ERROR| invalid %{public}s", alignItems.c_str());
         }
         UpdateMainAxisAlign(V2::ConvertStringToFlexAlign(json->GetString("justifyContent")));
 

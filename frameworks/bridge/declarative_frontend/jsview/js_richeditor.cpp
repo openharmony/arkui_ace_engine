@@ -18,6 +18,8 @@
 #include <optional>
 #include <string>
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -602,10 +604,12 @@ void JSRichEditor::SetOnPaste(const JSCallbackInfo& info)
     CHECK_NULL_VOID(info[0]->IsFunction());
     auto jsTextFunc = AceType::MakeRefPtr<JsCitedEventFunction<NG::TextCommonEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), CreateJSTextCommonEvent);
-
-    auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc)](NG::TextCommonEvent& info) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                       NG::TextCommonEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info);
     };
     RichEditorModel::GetInstance()->SetOnPaste(std::move(onPaste));
@@ -734,6 +738,22 @@ void JSRichEditorController::ParseJsTextStyle(
         style.SetFontFamilies(family);
     }
     ParseTextDecoration(styleObject, style, updateSpanStyle);
+    ParseTextShadow(styleObject, style, updateSpanStyle);
+}
+
+void JSRichEditorController::ParseTextShadow(
+    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
+{
+    auto shadowObject = styleObject->GetProperty("textShadow");
+    if (shadowObject->IsNull()) {
+        return;
+    }
+    std::vector<Shadow> shadows;
+    ParseTextShadowFromShadowObject(shadowObject, shadows);
+    if (!shadows.empty()) {
+        updateSpanStyle.updateTextShadows = shadows;
+        style.SetTextShadows(shadows);
+    }
 }
 
 void JSRichEditorController::ParseTextDecoration(
@@ -1228,6 +1248,12 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
             JSContainerBase::ParseJsDimensionVp(widthVal, width);
             JSContainerBase::ParseJsDimensionVp(heightVal, height);
             style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), height.ConvertToPx());
+        } else if (sizeVal->IsUndefined()) {
+            std::string resWidthStr;
+            if (JSContainerBase::ParseJsString(lm, resWidthStr)) {
+                Dimension resWidth = Dimension::FromString(resWidthStr);
+                style.leadingMargin->size = NG::SizeF(resWidth.Value(), 0.0);
+            }
         }
     } else if (!lm->IsNull()) {
         // [Dimension]

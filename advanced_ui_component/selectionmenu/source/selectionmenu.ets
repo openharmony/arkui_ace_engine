@@ -103,6 +103,7 @@ struct SelectionMenuComponent {
   @BuilderParam builder: CustomBuilder = this.CloserFun
   @State showExpandedMenuOptions: boolean = false
   @State showCustomerIndex: number = -1
+  @State customerChange: boolean = false
   @State cutAndCopyEnable: boolean = false
   @State pasteEnable: boolean = false
   @State visibilityValue: Visibility = Visibility.Visible
@@ -121,6 +122,8 @@ struct SelectionMenuComponent {
       } else {
         this.visibilityValue = Visibility.Visible
       }
+    } else if (this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
+      this.showExpandedMenuOptions = true
     }
     let sysBoard = pasteboard.getSystemPasteboard()
     if (sysBoard && sysBoard.hasDataSync()) {
@@ -243,6 +246,13 @@ struct SelectionMenuComponent {
     })
   }
 
+  measureButtonWidth(): number {
+    if (this.editorMenuOptions && this.editorMenuOptions.length < 5) {
+      return (this.theme.defaultMenuWidth - this.theme.expandedOptionPadding * 2 - this.theme.editorOptionMargin * 2 * this.editorMenuOptions.length) / this.editorMenuOptions.length
+    }
+    return this.theme.buttonSize
+  }
+
   @Builder
   IconPanel() {
     Flex({ wrap: FlexWrap.Wrap }) {
@@ -254,6 +264,7 @@ struct SelectionMenuComponent {
               .height(this.theme.imageSize)
               .fillColor(this.theme.imageFillColor)
               .focusable(true)
+              .draggable(false)
           }
           .type(ButtonType.Normal)
           .margin(this.theme.editorOptionMargin)
@@ -263,15 +274,19 @@ struct SelectionMenuComponent {
               this.builder = item.builder
               this.showCustomerIndex = index
               this.showExpandedMenuOptions = false
+              this.customerChange = !this.customerChange
             } else {
               this.showCustomerIndex = -1
+              if (!this.controller) {
+                this.showExpandedMenuOptions = true
+              }
             }
             if (item.action) {
               item.action()
             }
           })
           .borderRadius(this.theme.iconBorderRadius)
-          .width(this.theme.buttonSize)
+          .width(this.measureButtonWidth())
           .height(this.theme.buttonSize)
         })
       }
@@ -350,36 +365,36 @@ struct SelectionMenuComponent {
                     this.visibilityValue = Visibility.None
                   }
                 })
-              MenuItem({ startIcon: this.theme.shareIcon, content: "分享", labelInfo: "" })
-                .enabled(false)
-              MenuItem({ startIcon: this.theme.translateIcon, content: "翻译", labelInfo: "" })
-                .enabled(false)
-              MenuItem({ startIcon: this.theme.searchIcon, content: "搜索", labelInfo: "" })
-                .enabled(false)
+              if (this.showExpandedMenuOptions) {
+                MenuItem({ startIcon: this.theme.shareIcon, content: "分享", labelInfo: "" })
+                  .enabled(false)
+                MenuItem({ startIcon: this.theme.translateIcon, content: "翻译", labelInfo: "" })
+                  .enabled(false)
+                MenuItem({ startIcon: this.theme.searchIcon, content: "搜索", labelInfo: "" })
+                  .enabled(false)
+              }
             }
           }
-          if (this.controller && !this.showExpandedMenuOptions && this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
+          if (this.controller && !this.showExpandedMenuOptions) {
             MenuItem({ content: "更多", endIcon: this.theme.arrowDownIcon })
               .onClick(() => {
                 this.showExpandedMenuOptions = true
               })
-          } else {
-            if (this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
-              ForEach(this.expandedMenuOptions, (expandedMenuOptionItem: ExpandedMenuOptions, index) => {
-                MenuItem({
-                  startIcon: expandedMenuOptionItem.startIcon,
-                  content: expandedMenuOptionItem.content,
-                  endIcon: expandedMenuOptionItem.endIcon,
-                  labelInfo: expandedMenuOptionItem.labelInfo,
-                  builder: expandedMenuOptionItem.builder
-                })
-                  .onClick(() => {
-                    if (expandedMenuOptionItem.action) {
-                      expandedMenuOptionItem.action()
-                    }
-                  })
+          } else if (this.showExpandedMenuOptions && this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
+            ForEach(this.expandedMenuOptions, (expandedMenuOptionItem: ExpandedMenuOptions, index) => {
+              MenuItem({
+                startIcon: expandedMenuOptionItem.startIcon,
+                content: expandedMenuOptionItem.content,
+                endIcon: expandedMenuOptionItem.endIcon,
+                labelInfo: expandedMenuOptionItem.labelInfo,
+                builder: expandedMenuOptionItem.builder
               })
-            }
+                .onClick(() => {
+                  if (expandedMenuOptionItem.action) {
+                    expandedMenuOptionItem.action()
+                  }
+                })
+            })
           }
         }
         .onVisibleAreaChange([0.0, 1.0], () => {
@@ -402,7 +417,11 @@ struct SelectionMenuComponent {
         .clip(true)
         .width('100%')
       } else if (this.showCustomerIndex > -1 && this.builder) {
-        this.builder()
+        if (this.customerChange) {
+          this.builder()
+        } else {
+          this.builder()
+        }
       }
     }
     .width(this.theme.defaultMenuWidth)

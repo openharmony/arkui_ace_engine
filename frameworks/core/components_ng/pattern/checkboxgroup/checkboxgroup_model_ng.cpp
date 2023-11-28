@@ -118,4 +118,47 @@ void CheckBoxGroupModelNG::SetResponseRegion(const std::vector<DimensionRect>& r
     CHECK_NULL_VOID(pattern);
     pattern->SetIsUserSetResponseRegion(true);
 }
+
+void CheckBoxGroupModelNG::SetSelectAll(FrameNode* frameNode, bool isSelected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    pattern->SetUpdateFlag(true);
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, isSelected);
+}
+
+void CheckBoxGroupModelNG::SetSelectedColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor, color, frameNode);
+}
+
+void CheckBoxGroupModelNG::SetUnSelectedColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor, color, frameNode);
+}
+
+void CheckBoxGroupModelNG::SetCheckMarkColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColor, color, frameNode);
+}
+
+void CheckBoxGroupModelNG::SetCheckMarkSize(FrameNode* frameNode, const Dimension& size)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkSize, size, frameNode);
+}
+
+void CheckBoxGroupModelNG::SetCheckMarkWidth(FrameNode* frameNode, const Dimension& width)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkWidth, width, frameNode);
+}
+
+void CheckBoxGroupModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
+{
+    NG::ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
+}
+
+void CheckBoxGroupModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
+{
+    NG::ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
+}
 } // namespace OHOS::Ace::NG

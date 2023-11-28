@@ -100,6 +100,34 @@ int32_t Resource::GetIntParam(const std::string& param, const std::string& name)
     return result;
 }
 
+void Resource::GetFloatArrayParam(const std::string& param, const std::string& name, std::vector<float>& matrix) const
+{
+    size_t len = name.length();
+    size_t pos = param.find(name);
+    matrix.clear();
+    if (pos == std::string::npos) {
+        return;
+    }
+    std::string data = param.substr(pos + 1 + len);
+    pos = data.find("[");
+    if (pos == std::string::npos) {
+        return;
+    }
+    do {
+        std::stringstream ss;
+        ss << data.substr(pos + 1);
+        float tmp = 0;
+        ss >> tmp;
+        matrix.emplace_back(tmp);
+        data = data.substr(pos + 1);
+        pos = data.find(",");
+        if (pos == std::string::npos) {
+            return;
+        }
+    } while (1);
+    return;
+}
+
 std::map<std::string, std::string> Resource::ParseMapFromString(const std::string& param)
 {
     size_t equalsLen = sizeof(PARAM_EQUALS) - 1;
@@ -200,6 +228,31 @@ void Resource::CallResRegisterMethod(
             callback(result);
         }
     });
+}
+
+void Resource::CallSyncResRegisterMethod(
+    const Method& method, const std::string& param, const std::function<void(std::string&)>& callback)
+{
+    if (method.empty()) {
+        return;
+    }
+
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("fail to get context to call res register method");
+        return;
+    }
+
+    auto resRegister = context->GetPlatformResRegister();
+    std::string result;
+    if (!resRegister) {
+        LOGE("fail to get resRegister to call res register method");
+        return;
+    }
+    resRegister->OnMethodCall(method, param, result);
+    if (callback) {
+        callback(result);
+    }
 }
 
 } // namespace OHOS::Ace

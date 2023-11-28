@@ -27,6 +27,7 @@ void JsBindFormViews(
     BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload = false);
 
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj);
+void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj);
 
 RefPtr<FrontendDelegate> JsGetFrontendDelegate();
 

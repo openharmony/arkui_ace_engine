@@ -227,6 +227,8 @@ extern const char INLINE_RADIUS_SIZE[];
 extern const char INLINE_BG_COLOR[];
 extern const char INLINE_BORDER_COLOR[];
 extern const char DISABLE_UNDERLINE_ALPHA[];
+extern const char DEFAULT_COUNTER_COLOR[];
+extern const char OVER_COUNTER_COLOR[];
 
 // linear split attributes
 extern const char LINEAR_SPLIT_CHILD_MIN_SIZE[];

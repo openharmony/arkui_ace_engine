@@ -19,6 +19,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
@@ -198,6 +199,21 @@ void FrontendDelegateDeclarativeNG::RunPage(
             if (manifestParser->GetMinPlatformVersion() > 0) {
                 pipeline->SetMinPlatformVersion(manifestParser->GetMinPlatformVersion());
             }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarativeNG::RunPage(
+    const std::shared_ptr<std::vector<uint8_t>>& content,  const std::string& params, const std::string& profile)
+{
+    ACE_SCOPED_TRACE("FrontendDelegateDeclarativeNG::RunPage %zu", content->size());
+    taskExecutor_->PostTask(
+        [delegate = Claim(this), weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), content,
+            params]() {
+            auto pageRouterManager = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageRouterManager->RunPage(content, params);
+            auto pipeline = delegate->GetPipelineContext();
         },
         TaskExecutor::TaskType::JS);
 }
@@ -626,6 +642,8 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
         .buttons = buttons,
         .maskRect = dialogAttr.maskRect,
     };
@@ -646,6 +664,8 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
         .buttons = buttons,
         .onStatusChanged = std::move(onStatusChanged),
         .maskRect = dialogAttr.maskRect,
@@ -859,9 +879,24 @@ void FrontendDelegateDeclarativeNG::ShowDialogInner(DialogProperties& dialogProp
             [callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); }, TaskExecutor::TaskType::JS);
     };
     auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
+        RefPtr<NG::FrameNode> dialog;
         CHECK_NULL_VOID(overlayManager);
         LOGI("Begin to show dialog ");
-        overlayManager->ShowDialog(dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+        if (dialogProperties.isShowInSubWindow) {
+            dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, nullptr);
+            CHECK_NULL_VOID(dialog);
+            if (dialogProperties.isModal) {
+                DialogProperties Maskarg;
+                Maskarg.isMask = true;
+                Maskarg.autoCancel = dialogProperties.autoCancel;
+                auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
+                CHECK_NULL_VOID(mask);
+            }
+        } else {
+            dialog = overlayManager->ShowDialog(
+                dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+            CHECK_NULL_VOID(dialog);
+        }
     };
     MainWindowOverlay(std::move(task));
     return;

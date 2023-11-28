@@ -70,12 +70,16 @@ class JSViewAbstract {
 public:
     static void GetAngle(
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
+    static void GetJsAngle(
+        const std::string& key, const JSRef<JSVal>& jsValue, std::optional<float>& angle);
     static void CheckAngle(std::optional<float>& angle);
     static void GetPerspective(const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, float& perspective);
+    static void GetJsPerspective(const std::string& key, const JSRef<JSVal>& jsValue, float& perspective);
     static void GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
     static void GetFractionStops(
-        std::vector<std::pair<float, float>>& fractionStops, const std::unique_ptr<JsonValue>& array);
+        std::vector<std::pair<float, float>>& fractionStops, const JSRef<JSVal>& array);
     static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
+    static void NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops);
 
     static void JsScale(const JSCallbackInfo& info);
     static void SetDefaultScale();
@@ -94,6 +98,7 @@ public:
     static void SetDefaultTransform();
     static void JsTransition(const JSCallbackInfo& info);
     static NG::TransitionOptions ParseTransition(std::unique_ptr<JsonValue>& transitionArgs);
+    static NG::TransitionOptions ParseJsTransition(const JSRef<JSVal>& transitionArgs);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
@@ -168,6 +173,12 @@ public:
     static void JsHitTestBehavior(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
 
+    // outer border
+    static void ParseOuterBorderColor(const JSRef<JSVal>& args);
+    static void ParseOuterBorderWidth(const JSRef<JSVal>& args);
+    static void ParseOuterBorderRadius(const JSRef<JSVal>& args);
+    static void ParseOuterBorderStyle(const JSRef<JSVal>& args);
+
     // response region
     static void JsResponseRegion(const JSCallbackInfo& info);
     static bool ParseJsResponseRegionArray(const JSRef<JSVal>& jsValue, std::vector<DimensionRect>& result);
@@ -210,7 +221,7 @@ public:
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static void GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow);
-    static bool ParseJsonResource(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result);
+    static bool ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseDataDetectorConfig(const JSCallbackInfo& info, std::string& types,
         std::function<void(const std::string&)>& onResult);
     static bool ParseInvertProps(const JSRef<JSVal>& jsValue, InvertVariant& invert);

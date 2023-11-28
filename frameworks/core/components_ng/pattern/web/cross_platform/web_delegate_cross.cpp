@@ -14,7 +14,6 @@
  */
 
 #include "web_delegate_cross.h"
-#include "web_object_event.h"
 
 #include "bridge/js_frontend/frontend_delegate_impl.h"
 
@@ -90,10 +89,16 @@ constexpr char WEB_EVENT_ROUTERPUSH[] = "routerPush";
 constexpr char WEB_EVENT_GEOHIDEPERMISSION[] = "onGeoHidePermission";
 constexpr char WEB_EVENT_GEOPERMISSION[] = "onGeoPermission";
 constexpr char WEB_EVENT_COMMONDIALOG[] = "onCommonDialog";
+constexpr char WEB_EVENT_ONALERT[] = "onAlert";
+constexpr char WEB_EVENT_ONCONFIRM[] = "onConfirm";
+constexpr char WEB_EVENT_ONPROMPT[] = "onPrompt";
 constexpr char WEB_EVENT_CONSOLEMESSAGE[] = "onConsoleMessage";
 constexpr char WEB_EVENT_ERRORRECEIVE[] = "onErrorReceive";
 constexpr char WEB_EVENT_ONSHOWFILECHOOSER[] = "onShowFileChooser";
 constexpr char WEB_EVENT_ONHTTPERRORRECEIVE[] = "onHttpErrorReceive";
+constexpr char WEB_EVENT_ONPAGEVISIBLE[] = "onPageVisible";
+constexpr char WEB_EVENT_ONHTTPAUTHREQUEST[] = "onHttpAuthRequest";
+constexpr char WEB_EVENT_ONPERMISSIONREQUEST[] = "onPermissionRequest";
 
 constexpr char WEB_CREATE[] = "web";
 constexpr char NTC_PARAM_WEB[] = "web";
@@ -140,6 +145,12 @@ const char WEB_RESULT_FAIL[] = "fail";
 
 constexpr int FONT_MIN_SIZE = 1;
 constexpr int FONT_MAX_SIZE = 72;
+constexpr int RESOURCESID_ONE = 1;
+constexpr int RESOURCESID_TWO = 2;
+constexpr int RESOURCESID_THREE = 3;
+
+const std::string RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
+const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 }
 
 std::map<std::string, std::string> WebResourceRequsetImpl::GetRequestHeader() const
@@ -190,7 +201,7 @@ std::string WebResourceResponseImpl::GetEncoding() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetResourceResponseObject();
     if (!obj) {
-        LOGE("WebObjectEventManager get WebResourceResponseImpl encoding failed");
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceResponseImpl encoding failed");
         return std::string();
     }
     return obj->GetEncoding(object_);
@@ -200,7 +211,7 @@ std::string WebResourceResponseImpl::GetMimeType() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetResourceResponseObject();
     if (!obj) {
-        LOGE("WebObjectEventManager get WebResourceResponseImpl mimeType failed");
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceResponseImpl mimeType failed");
         return std::string();
     }
     return obj->GetMimeType(object_);
@@ -215,7 +226,7 @@ int WebResourceResponseImpl::GetStatusCode() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetResourceResponseObject();
     if (!obj) {
-        LOGE("WebObjectEventManager get WebResourceResponseImpl statusCode failed");
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceResponseImpl statusCode failed");
         return 0;
     }
     return obj->GetStatusCode(object_);
@@ -243,7 +254,7 @@ double WebOffsetImpl::GetX() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetScrollObject();
     if (!obj) {
-        LOGE("WebObjectEventManager get WebOffsetImpl X failed");
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebOffsetImpl X failed");
         return 0.0;
     }
     return obj->GetX(object_);
@@ -253,7 +264,7 @@ double WebOffsetImpl::GetY() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetScrollObject();
     if (!obj) {
-        LOGE("WebObjectEventManager get WebOffsetImpl Y failed");
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebOffsetImpl Y failed");
         return 0.0;
     }
     return obj->GetY(object_);
@@ -263,7 +274,7 @@ std::string WebConsoleMessage::GetMessage() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetConsoleMessageObject();
     if (!obj) {
-        LOGE("WebObjectEventManager get WebConsoleMessage Message failed");
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebConsoleMessage Message failed");
         return std::string();
     }
     return obj->GetMessage(object_);
@@ -273,7 +284,7 @@ int WebConsoleMessage::GetMessageLevel() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetConsoleMessageObject();
     if (!obj) {
-        LOGE("WebObjectEventManager get WebConsoleMessage MessageLevel failed");
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebConsoleMessage MessageLevel failed");
         return 0;
     }
     return obj->GetMessageLevel(object_);
@@ -293,7 +304,7 @@ float WebScaleChangeImpl::GetNewScale() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetScaleChangeObject();
     if (!obj) {
-        LOGE("WebObjectEventManager get WebScaleChangeImpl newScale failed");
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebScaleChangeImpl newScale failed");
         return 0.0f;
     }
     return obj->GetNewScale(object_);
@@ -303,10 +314,312 @@ float WebScaleChangeImpl::GetOldScale() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetScaleChangeObject();
     if (!obj) {
-        LOGE("WebObjectEventManager get WebScaleChangeImpl oldScale failed");
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebScaleChangeImpl oldScale failed");
         return 0.0f;
     }
     return obj->GetOldScale(object_);
+}
+
+std::string WebCommonDialogImpl::GetUrl() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetCommonDialogObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebCommonDialogImpl url failed");
+        return std::string();
+    }
+    return obj->GetUrl(object_);
+}
+
+std::string WebCommonDialogImpl::GetMessage() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetCommonDialogObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebCommonDialogImpl message failed");
+        return std::string();
+    }
+    return obj->GetMessage(object_);
+}
+
+std::string WebCommonDialogImpl::GetValue() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetCommonDialogObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebCommonDialogImpl value failed");
+        return std::string();
+    }
+    return obj->GetValue(object_);
+}
+
+void PermissionRequestImpl::SetOrigin()
+{
+    auto obj = WebObjectEventManager::GetInstance().GetPermissionRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get PermissionRequestImpl origin failed");
+        return;
+    }
+    origin_ = obj->GetOrigin(object_);
+}
+
+void PermissionRequestImpl::SetResources()
+{
+    auto obj = WebObjectEventManager::GetInstance().GetPermissionRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get PermissionRequestImpl resources failed");
+        return;
+    }
+    int resourcesId = obj->GetResourcesId(object_);
+    if (resourcesId == RESOURCESID_ONE) {
+        resources_.push_back(RESOURCE_VIDEO_CAPTURE);
+    } else if (resourcesId == RESOURCESID_TWO) {
+        resources_.push_back(RESOURCE_AUDIO_CAPTURE);
+    } else if (resourcesId == RESOURCESID_THREE) {
+        resources_.push_back(RESOURCE_VIDEO_CAPTURE);
+        resources_.push_back(RESOURCE_AUDIO_CAPTURE);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get error type");
+    }
+}
+
+std::string PermissionRequestImpl::GetOrigin() const
+{
+    return origin_;
+}
+
+std::vector<std::string> PermissionRequestImpl::GetResources() const
+{
+    return resources_;
+}
+
+void PermissionRequestImpl::Grant(std::vector<std::string>& resources) const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetPermissionRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager PermissionRequestObject grant failed");
+        return;
+    }
+    int resourcesId = 0;
+    for (auto res : resources) {
+        if (res == RESOURCE_VIDEO_CAPTURE) {
+            resourcesId |= RESOURCESID_ONE;
+        } else if (res == RESOURCE_AUDIO_CAPTURE) {
+            resourcesId |= RESOURCESID_TWO;
+        }
+    }
+    if (resourcesId != 0) {
+        obj->Grant(object_, resourcesId, index_);
+    }
+}
+
+void PermissionRequestImpl::Deny() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetPermissionRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager PermissionRequestObject Deny failed");
+        return;
+    }
+    obj->Deny(object_, index_);
+}
+
+std::string WebAuthRequestImpl::GetHost() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetHttpAuthRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebAuthRequestImpl host failed");
+        return std::string();
+    }
+    return obj->GetHost(object_);
+}
+
+std::string WebAuthRequestImpl::GetRealm() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetHttpAuthRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebAuthRequestImpl realm failed");
+        return std::string();
+    }
+    return obj->GetRealm(object_);
+}
+
+std::string WebDownloadResponseImpl::GetUrl() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetDownloadResponseObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebDownloadResponseImpl Url failed");
+        return std::string();
+    }
+    return obj->GetUrl(object_);
+}
+
+std::string WebDownloadResponseImpl::GetMimetype() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetDownloadResponseObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebDownloadResponseImpl mimetype failed");
+        return std::string();
+    }
+    return obj->GetMimetype(object_);
+}
+
+long WebDownloadResponseImpl::GetContentLength() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetDownloadResponseObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebDownloadResponseImpl contentLength failed");
+        return 0;
+    }
+    return obj->GetContentLength(object_);
+}
+
+std::string WebDownloadResponseImpl::GetUserAgent() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetDownloadResponseObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebDownloadResponseImpl userAgent failed");
+        return std::string();
+    }
+    return obj->GetUserAgent(object_);
+}
+
+std::string WebDownloadResponseImpl::GetContentDisposition() const
+{
+    return "ContentDisposition";
+}
+
+void DialogResult::Confirm(const std::string& promptResult)
+{
+    auto obj = WebObjectEventManager::GetInstance().GetCommonDialogObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager DialogResult prompt Confirm failed");
+        return;
+    }
+    if (dialogEventType_ == DialogEventType::DIALOG_EVENT_PROMPT) {
+        obj->Confirm(object_, promptResult, index_);
+    }
+}
+
+void DialogResult::Confirm()
+{
+    auto obj = WebObjectEventManager::GetInstance().GetCommonDialogObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager DialogResult Confirm failed");
+        return;
+    }
+    obj->Confirm(object_, index_);
+}
+
+void DialogResult::Cancel()
+{
+    auto obj = WebObjectEventManager::GetInstance().GetCommonDialogObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager DialogResult Cancel failed");
+        return;
+    }
+    obj->Cancel(object_, index_);
+}
+
+bool WebAuthResult::Confirm(std::string& userName, std::string& pwd)
+{
+    auto obj = WebObjectEventManager::GetInstance().GetHttpAuthRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager WebAuthResult confirm failed");
+        return false;
+    }
+    return obj->Confirm(object_, userName, pwd, index_);
+}
+
+bool WebAuthResult::IsHttpAuthInfoSaved()
+{
+    auto obj = WebObjectEventManager::GetInstance().GetHttpAuthRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager WebAuthResult isHttpAuthInfoSaved failed");
+        return false;
+    }
+    return obj->IsHttpAuthInfoSaved(object_, index_);
+}
+
+void WebAuthResult::Cancel()
+{
+    auto obj = WebObjectEventManager::GetInstance().GetHttpAuthRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager WebAuthResult cancel failed");
+        return;
+    }
+    obj->Cancel(object_, index_);
+}
+
+std::string WebFileChooserImpl::GetTitle() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetFileChooserObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebFileChooserImpl title failed");
+        return std::string();
+    }
+    return obj->GetTitle(object_);
+}
+
+int WebFileChooserImpl::GetMode() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetFileChooserObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebFileChooserImpl title failed");
+        return 0;
+    }
+    return obj->GetMode(object_);
+}
+
+std::string WebFileChooserImpl::GetDefaultFileName() const
+{
+    return "DefaultFileName";
+}
+
+std::vector<std::string> WebFileChooserImpl::GetAcceptType() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetFileChooserObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebFileChooserImpl acceptType failed");
+        return std::vector<std::string>();
+    }
+    return obj->GetAcceptType(object_);
+}
+
+bool WebFileChooserImpl::IsCapture() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetFileChooserObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebFileChooserImpl title failed");
+        return false;
+    }
+    return obj->IsCapture(object_);
+}
+
+void WebFileSelectorResult::HandleFileList(std::vector<std::string>& fileList)
+{
+    auto obj = WebObjectEventManager::GetInstance().GetFileChooserObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebFileChooserImpl FileSelectorResultCallback failed");
+        return;
+    }
+    obj->HandleFileList(object_, fileList, index_);
+}
+
+std::string WebGeolocationImpl::GetOrigin() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetGeolocationObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebFileChooserImpl FileSelectorResultCallback failed");
+        return nullptr;
+    }
+    return obj->GetOrigin(object_);
+}
+
+void Geolocation::Invoke(const std::string& origin, const bool& allow, const bool& retain)
+{
+    auto obj = WebObjectEventManager::GetInstance().GetGeolocationObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebFileChooserImpl FileSelectorResultCallback failed");
+        return;
+    }
+    obj->Invoke(index_, origin, allow, retain);
 }
 
 WebDelegateCross::~WebDelegateCross()
@@ -426,6 +739,20 @@ void WebDelegateCross::RegisterWebEvent()
             delegate->OnReceivedTitle(param);
         }
     });
+    resRegister->RegisterEvent(
+        MakeEventHash(WEB_EVENT_ONPAGEVISIBLE), [weak = WeakClaim(this)](const std::string& param) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->OnPageVisible(param);
+            }
+        });
+    resRegister->RegisterEvent(
+        MakeEventHash(WEB_EVENT_GEOHIDEPERMISSION), [weak = WeakClaim(this)](const std::string& param) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->OnGeolocationPermissionsHidePrompt();
+            }
+        });
 }
 
 void WebDelegateCross::RegisterWebObjectEvent()
@@ -471,6 +798,68 @@ void WebDelegateCross::RegisterWebObjectEvent()
             auto delegate = weak.Upgrade();
             if (delegate) {
                 return delegate->OnLoadIntercept(object);
+            }
+            return false;
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEvent(
+        MakeEventHash(WEB_EVENT_DOWNLOADSTART), [weak = WeakClaim(this)](const std::string& param, void* object) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->OnDownloadStart(object);
+            }
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEventWithBoolReturn(MakeEventHash(WEB_EVENT_ONSHOWFILECHOOSER),
+        [weak = WeakClaim(this)](const std::string& param, void* object) -> bool {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->OnShowFileChooser(object);
+            }
+            return false;
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEvent(
+        MakeEventHash(WEB_EVENT_GEOPERMISSION), [weak = WeakClaim(this)](const std::string& param, void* object) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->OnGeolocationPermissionsShowPrompt(object);
+            }
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEventWithBoolReturn(
+        MakeEventHash(WEB_EVENT_ONALERT), [weak = WeakClaim(this)](const std::string& param, void* object) -> bool {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->OnCommonDialog(object, DialogEventType::DIALOG_EVENT_ALERT);
+            }
+            return false;
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEventWithBoolReturn(
+        MakeEventHash(WEB_EVENT_ONCONFIRM), [weak = WeakClaim(this)](const std::string& param, void* object) -> bool {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->OnCommonDialog(object, DialogEventType::DIALOG_EVENT_CONFIRM);
+            }
+            return false;
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEventWithBoolReturn(
+        MakeEventHash(WEB_EVENT_ONPROMPT), [weak = WeakClaim(this)](const std::string& param, void* object) -> bool {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->OnCommonDialog(object, DialogEventType::DIALOG_EVENT_PROMPT);
+            }
+            return false;
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEventWithBoolReturn(MakeEventHash(WEB_EVENT_ONPERMISSIONREQUEST),
+        [weak = WeakClaim(this)](const std::string& param, void* object) -> bool {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->OnPermissionRequest(object);
+            }
+            return false;
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEventWithBoolReturn(MakeEventHash(WEB_EVENT_ONHTTPAUTHREQUEST),
+        [weak = WeakClaim(this)](const std::string& param, void* object) -> bool {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->OnHttpAuthRequest(object);
             }
             return false;
         });
@@ -812,6 +1201,7 @@ bool WebDelegateCross::OnConsoleMessage(void* object)
         TaskExecutor::TaskType::JS);
     return result;
 }
+
 bool WebDelegateCross::OnLoadIntercept(void* object)
 {
     ContainerScope scope(instanceId_);
@@ -847,6 +1237,248 @@ bool WebDelegateCross::OnLoadIntercept(void* object)
         },
         TaskExecutor::TaskType::JS);
     return result;
+}
+
+void WebDelegateCross::OnPageVisible(const std::string& param)
+{
+    ContainerScope scope(instanceId_);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), param]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnPageVisible = webEventHub->GetOnPageVisibleEvent();
+                CHECK_NULL_VOID(propOnPageVisible);
+                auto eventParam = std::make_shared<PageVisibleEvent>(param);
+                propOnPageVisible(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void WebDelegateCross::OnDownloadStart(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(object);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto webDownloadResponse = AceType::MakeRefPtr<WebDownloadResponseImpl>(object);
+    CHECK_NULL_VOID(webDownloadResponse);
+    auto url = webDownloadResponse->GetUrl();
+    auto userAgent = webDownloadResponse->GetUserAgent();
+    auto contentDisposition = webDownloadResponse->GetContentDisposition();
+    auto mimetype = webDownloadResponse->GetMimetype();
+    auto contentLength = webDownloadResponse->GetContentLength();
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), url, userAgent, contentDisposition, mimetype, contentLength]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnDownloadStart = webEventHub->GetOnDownloadStartEvent();
+                CHECK_NULL_VOID(propOnDownloadStart);
+                auto eventParam =
+                    std::make_shared<DownloadStartEvent>(url, userAgent, contentDisposition, mimetype, contentLength);
+                propOnDownloadStart(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+bool WebDelegateCross::OnCommonDialog(void* object, DialogEventType dialogEventType)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_RETURN(object, false);
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto webCommonDialog = AceType::MakeRefPtr<WebCommonDialogImpl>(object);
+    CHECK_NULL_RETURN(webCommonDialog, false);
+    auto url = webCommonDialog->GetUrl();
+    auto message = webCommonDialog->GetMessage();
+    auto value = dialogEventType == DialogEventType::DIALOG_EVENT_PROMPT ? webCommonDialog->GetValue() : "";
+    auto dialogResult = AceType::MakeRefPtr<DialogResult>(object, dialogEventType);
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), url, message, value, dialogResult, dialogEventType, &result]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto eventParam = std::make_shared<WebDialogEvent>(url, message, value, dialogEventType, dialogResult);
+                result = webEventHub->FireOnCommonDialogEvent(eventParam, dialogEventType);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS);
+    return result;
+}
+
+bool WebDelegateCross::OnPermissionRequest(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_RETURN(object, false);
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto webPermissionRequest = AceType::MakeRefPtr<PermissionRequestImpl>(object);
+    webPermissionRequest->SetOrigin();
+    webPermissionRequest->SetResources();
+    CHECK_NULL_RETURN(webPermissionRequest, false);
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), webPermissionRequest, &result]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnPermissionRequest = webEventHub->GetOnPermissionRequestEvent();
+                CHECK_NULL_VOID(propOnPermissionRequest);
+                auto eventParam = std::make_shared<WebPermissionRequestEvent>(webPermissionRequest);
+                propOnPermissionRequest(eventParam);
+                result = true;
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS);
+    return result;
+}
+
+bool WebDelegateCross::OnHttpAuthRequest(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_RETURN(object, false);
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto webHttpAuthRequest = AceType::MakeRefPtr<WebAuthRequestImpl>(object);
+    CHECK_NULL_RETURN(webHttpAuthRequest, false);
+    auto host = webHttpAuthRequest->GetHost();
+    auto realm = webHttpAuthRequest->GetRealm();
+    auto authResult = AceType::MakeRefPtr<WebAuthResult>(object);
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), host, realm, authResult, &result]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnHttpAuthRequest = webEventHub->GetOnHttpAuthRequestEvent();
+                CHECK_NULL_VOID(propOnHttpAuthRequest);
+                auto eventParam = std::make_shared<WebHttpAuthEvent>(authResult, host, realm);
+                result = propOnHttpAuthRequest(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS);
+    return result;
+}
+
+bool WebDelegateCross::OnShowFileChooser(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_RETURN(object, false);
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool isAllowed = false;
+    auto webFileChooser = AceType::MakeRefPtr<WebFileChooserImpl>(object);
+    CHECK_NULL_RETURN(webFileChooser, false);
+    auto title = webFileChooser->GetTitle();
+    auto mode = webFileChooser->GetMode();
+    auto defaultFileName = webFileChooser->GetDefaultFileName();
+    auto acceptType = webFileChooser->GetAcceptType();
+    auto isCapture = webFileChooser->IsCapture();
+    auto param = AceType::MakeRefPtr<FileSelectorParam>(title, mode, defaultFileName, acceptType, isCapture);
+    auto result = AceType::MakeRefPtr<WebFileSelectorResult>(object);
+    bool postTask = context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), param, result, &isAllowed]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnFileSelectorShow = webEventHub->GetOnFileSelectorShowEvent();
+                CHECK_NULL_VOID(propOnFileSelectorShow);
+                auto eventParam = std::make_shared<FileSelectorEvent>(param, result);
+                CHECK_NULL_VOID(eventParam);
+                isAllowed = propOnFileSelectorShow(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS);
+    return isAllowed;
+}
+
+void WebDelegateCross::OnGeolocationPermissionsShowPrompt(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(object);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto webGeolocationImpl = AceType::MakeRefPtr<WebGeolocationImpl>(object);
+    CHECK_NULL_VOID(webGeolocationImpl);
+    auto origin = webGeolocationImpl->GetOrigin();
+    auto callback = AceType::MakeRefPtr<Geolocation>(object);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), origin, callback]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnGeolocationShow = webEventHub->GetOnGeolocationShowEvent();
+                CHECK_NULL_VOID(propOnGeolocationShow);
+                auto eventParam = std::make_shared<LoadWebGeolocationShowEvent>(origin, callback);
+                propOnGeolocationShow(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void WebDelegateCross::OnGeolocationPermissionsHidePrompt()
+{
+    ContainerScope scope(instanceId_);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnGeolocationHide = webEventHub->GetOnGeolocationHideEvent();
+                CHECK_NULL_VOID(propOnGeolocationHide);
+                auto eventParam = std::make_shared<LoadWebGeolocationHideEvent>("");
+                propOnGeolocationHide(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegateCross::UpdateUserAgent(const std::string& userAgent) {}
@@ -1034,5 +1666,10 @@ void WebDelegateCross::SetBoundsOrResize(const Size& drawSize, const Offset& off
                 << offset.GetY() * viewScale;
     std::string param = paramStream.str();
     CallResRegisterMethod(updateLayoutMethod_, param, nullptr);
+}
+
+void WebDelegateCross::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    // cross platform is not support now;
 }
 }

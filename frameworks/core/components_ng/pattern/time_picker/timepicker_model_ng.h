@@ -36,6 +36,14 @@ public:
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(TimeChangeEvent&& onChange) override;
 
+    static void SetDisappearTextStyle(
+        FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
+    static void SetNormalTextStyle(
+        FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
+    static void SetSelectedTextStyle(
+        FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();

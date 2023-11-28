@@ -51,6 +51,8 @@ private:
     double initialAngle_ = 0.0;
     double currentAngle_ = 0.0;
     double resultAngle_ = 0.0;
+    double lastAngle_ = 0.0;
+    bool angleSignChanged_ = false;
     TimeStamp time_;
 };
 

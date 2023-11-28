@@ -951,7 +951,8 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
     if (debugVersion) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    auto&& initWorkerFunc = [weakInstance, libraryPath](NativeEngine* nativeEngine) {
+    auto&& initWorkerFunc = [weakInstance, libraryPath, debugVersion, instanceId = instanceId_](
+                                NativeEngine* nativeEngine) {
         if (nativeEngine == nullptr) {
             return;
         }
@@ -971,7 +972,8 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         };
         bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
         panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode };
-        panda::JSNApi::StartDebugger(vm, debugOption, gettid(), workerPostTask);
+        JSNApi::NotifyDebugMode(gettid(), vm, libraryPath.c_str(), debugOption, instanceId, workerPostTask,
+            debugVersion, debugMode);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
 
@@ -1045,6 +1047,16 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
     const std::string& abcPath = fileName;
 #endif
     if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath, needUpdate_)) {
+        return false;
+    }
+    return true;
+}
+
+bool JsiDeclarativeEngine::ExecuteJs(const uint8_t* content, int32_t size)
+{
+    auto runtime = engineInstance_->GetJsRuntime();
+    CHECK_NULL_RETURN(runtime, false);
+    if (!runtime->EvaluateJsCode(content, size)) {
         return false;
     }
     return true;
@@ -1331,6 +1343,23 @@ bool JsiDeclarativeEngine::LoadPageSource(
     }
 #endif
     return ExecuteAbc(urlName.value());
+}
+
+bool JsiDeclarativeEngine::LoadPageSource(
+    const std::shared_ptr<std::vector<uint8_t>>& content,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
+{
+    ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadPageSource");
+    LOGI("JsiDeclarativeEngine LoadJs by buffer");
+    ACE_DCHECK(engineInstance_);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto runtime = engineInstance_->GetJsRuntime();
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (!arkRuntime->EvaluateJsCode(content->data(), content->size())) {
+        return false;
+    }
+    return true;
 }
 
 void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,

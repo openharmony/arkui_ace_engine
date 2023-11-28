@@ -77,12 +77,15 @@ public:
     }
 
     bool SetIsFullScreen(bool value);
+    bool SetIsNeedAvoidWindow(bool value);
     bool SetIgnoreSafeArea(bool value);
     bool SetKeyBoardAvoidMode(bool value);
 
 private:
-    // app window is full screen 
+    // app window is full screen
     bool isFullScreen_ = false;
+    // windowMode which need to avoid
+    bool isNeedAvoidWindow_ = false;
     bool ignoreSafeArea_ = false;
 
     // when keyboard is up, compress page instead of offsetting.

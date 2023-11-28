@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -69,15 +70,17 @@ public:
 
     virtual void FlushTasks() {}
 
-    virtual bool FlushCustomAnimation(uint64_t timeStamp)
-    {
-        return false;
-    }
-
     virtual std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const
     {
         return nullptr;
     }
+
+    virtual bool FlushAnimation(uint64_t timeStamp)
+    {
+        return false;
+    }
+
+    virtual void FlushModifier() {}
 
     void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
 
@@ -136,10 +139,32 @@ public:
         return 0;
     };
 
+    void SetCursor(MouseFormat cursor)
+    {
+        cursor_ = cursor;
+    }
+
+    MouseFormat GetCursor() const
+    {
+        return cursor_;
+    }
+
+    void SetUserSetCursor(bool isUserSetCursor)
+    {
+        isUserSetCursor_ = isUserSetCursor;
+    }
+
+    bool IsUserSetCursor() const
+    {
+        return isUserSetCursor_;
+    }
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
     double density_ = 1.0;
+    MouseFormat cursor_ = MouseFormat::DEFAULT;
+    bool isUserSetCursor_ = false;
 
     struct VsyncCallback {
         AceVsyncCallback callback_ = nullptr;

@@ -101,6 +101,12 @@ ACE_EXPORT extern const char RICH_EDITOR_DRAG_ETS_TAG[];
 ACE_EXPORT extern const char STACK_COMPONENT_TAG[];
 ACE_EXPORT extern const char STACK_ETS_TAG[];
 
+// folderStack
+ACE_EXPORT extern const char FOLDER_STACK_COMPONENT_TAG[];
+ACE_EXPORT extern const char FOLDER_STACK_ETS_TAG[];
+ACE_EXPORT extern const char HOVER_STACK_ETS_TAG[];
+ACE_EXPORT extern const char CONTROL_PARTS_STACK_ETS_TAG[];
+
 // swiper
 ACE_EXPORT extern const char SWIPER_COMPONENT_TAG[];
 ACE_EXPORT extern const char SWIPER_ETS_TAG[];

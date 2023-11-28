@@ -32,6 +32,10 @@
 #define private public
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -47,12 +51,8 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/property/measure_property.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/unittest/core/pattern/test_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -75,7 +75,7 @@ protected:
     void Create(const std::function<void(WaterFlowModelNG)>& callback = nullptr);
     void CreateWithItem(const std::function<void(WaterFlowModelNG)>& callback = nullptr);
     static void CreateItem(int32_t number = 10);
-    void UpdateCurrentOffset(float offset);
+    void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void MouseSelect(Offset start, Offset end);
     void MouseSelectRelease();
     static std::function<void()> GetDefaultHeaderBuilder();
@@ -161,9 +161,9 @@ void WaterFlowTestNg::CreateItem(int32_t number)
     }
 }
 
-void WaterFlowTestNg::UpdateCurrentOffset(float offset)
+void WaterFlowTestNg::UpdateCurrentOffset(float offset, int32_t source)
 {
-    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(offset, source);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
 }
 
@@ -924,6 +924,123 @@ HWTEST_F(WaterFlowTestNg, Callback001, TestSize.Level1)
     UpdateCurrentOffset(ITEM_HEIGHT * 0.5);
     UpdateCurrentOffset(ITEM_HEIGHT * 2);
     EXPECT_TRUE(isReachStartCalled);
+}
+
+/**
+ * @tc.name: onScroll
+ * @tc.desc: Test onScroll event
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OnScroll001, TestSize.Level1)
+{
+    CalcDimension scrollOffset;
+    ScrollState scrollState = ScrollState::IDLE;
+    auto onScroll = [&scrollOffset, &scrollState](CalcDimension offset, ScrollState state) {
+        scrollOffset = offset;
+        scrollState = state;
+    };
+    CreateWithItem([onScroll](WaterFlowModelNG model) {
+        model.SetOnScroll(onScroll);
+    });
+
+    /**
+     * @tc.steps: step1. finger moves up
+     * @tc.expected: Trigger onScroll with SCROLL state
+     */
+    UpdateCurrentOffset(-ITEM_HEIGHT);
+    EXPECT_EQ(scrollOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(scrollState, ScrollState::SCROLL);
+
+    /**
+     * @tc.steps: step2. fling
+     * @tc.expected: Trigger onScroll with FLING state
+     */
+    UpdateCurrentOffset(-1, SCROLL_FROM_ANIMATION);
+    EXPECT_EQ(scrollOffset.Value(), 1);
+    EXPECT_EQ(scrollState, ScrollState::FLING);
+
+    /**
+     * @tc.steps: step3. stop
+     * @tc.expected: Trigger onScroll with IDLE state
+     */
+    pattern_->OnAnimateStop();
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
+    EXPECT_EQ(scrollOffset.Value(), 0);
+    EXPECT_EQ(scrollState, ScrollState::IDLE);
+}
+
+/**
+ * @tc.name: onScrollIndex
+ * @tc.desc: Test onScrollIndex event
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, onScrollIndex001, TestSize.Level1)
+{
+    int32_t firstIndex = -1;
+    int32_t lastIndex = -1;
+    auto onScrollIndex = [&firstIndex, &lastIndex](int32_t first, int32_t last) {
+        firstIndex = first;
+        lastIndex = last;
+    };
+    // 10 items total, 8 items showed
+    CreateWithItem([onScrollIndex](WaterFlowModelNG model) {
+        model.SetOnScrollIndex(onScrollIndex);
+    });
+
+    /**
+     * @tc.steps: step0. event on first layout
+     * @tc.expected: Trigger onScrollIndex
+     */
+    EXPECT_EQ(firstIndex, 0);
+    EXPECT_EQ(lastIndex, 7);
+
+    /**
+     * @tc.steps: step1. finger move up, offset less than one item height
+     * @tc.expected: last item changed, trigger onScrollIndex
+     */
+    UpdateCurrentOffset(-ITEM_HEIGHT / 2);
+    EXPECT_EQ(firstIndex, 0);
+    EXPECT_EQ(lastIndex, 8);
+
+    /**
+     * @tc.steps: step2. finger move up, offset more than one item height
+     * @tc.expected: first and last item changed, trigger onScrollIndex
+     */
+    UpdateCurrentOffset(-ITEM_HEIGHT);
+    EXPECT_EQ(firstIndex, 1);
+    EXPECT_EQ(lastIndex, 9);
+}
+
+/**
+ * @tc.name: onScrollStart and onScrollStop
+ * @tc.desc: Verify onScrollStart and onScrollStop event
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OnScrollStart001, TestSize.Level1)
+{
+    bool isScrollStartCalled = false;
+    bool isScrollStopCalled = false;
+    auto scrollStart = [&isScrollStartCalled]() { isScrollStartCalled = true; };
+    auto scrollStop = [&isScrollStopCalled]() { isScrollStopCalled = true; };
+    Create([scrollStart, scrollStop](WaterFlowModelNG model) {
+        model.SetOnScrollStart(scrollStart);
+        model.SetOnScrollStop(scrollStop);
+    });
+
+    /**
+     * @tc.steps: step1. pan start
+     * @tc.expected: trigger onScrollStart
+     */
+    pattern_->OnScrollCallback(0, SCROLL_FROM_START);
+    EXPECT_TRUE(isScrollStartCalled);
+
+    /**
+     * @tc.steps: step2. OnScrollEnd
+     * @tc.expected: trigger onScrollStop
+     */
+    pattern_->OnScrollEndCallback();
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
+    EXPECT_TRUE(isScrollStopCalled);
 }
 
 /**

@@ -1,85 +1,109 @@
 
 /// <reference path="./import.ts" />
+
+class TextAreaMaxLinesModifier extends Modifier<number | undefined> {
+  static identity: Symbol = Symbol('textAreaMaxLines');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textArea.resetMaxLines(node);
+    } else {
+      GetUINativeModule().textArea.setMaxLines(node, this.value!);
+    }
+  }
+}
 class ArkTextAreaComponent extends ArkComponent implements TextAreaAttribute {
-    type(value: TextAreaType): TextAreaAttribute{
+    onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
         throw new Error("Method not implemented.");
     }
-    placeholderColor(value: ResourceColor): TextAreaAttribute {
+    type(value: TextAreaType): this{
         throw new Error("Method not implemented.");
     }
-    placeholderFont(value: Font): TextAreaAttribute {
+    placeholderColor(value: ResourceColor): this {
         throw new Error("Method not implemented.");
     }
-    textAlign(value: TextAlign): TextAreaAttribute {
+    placeholderFont(value: Font): this {
         throw new Error("Method not implemented.");
     }
-    caretColor(value: ResourceColor): TextAreaAttribute {
+    textAlign(value: TextAlign): this {
         throw new Error("Method not implemented.");
     }
-    fontColor(value: ResourceColor): TextAreaAttribute {
+    caretColor(value: ResourceColor): this {
         throw new Error("Method not implemented.");
     }
-    fontSize(value: Length): TextAreaAttribute {
+    fontColor(value: ResourceColor): this {
         throw new Error("Method not implemented.");
     }
-    fontStyle(value: FontStyle): TextAreaAttribute {
+    fontSize(value: Length): this {
         throw new Error("Method not implemented.");
     }
-    fontWeight(value: any): TextAreaAttribute {
+    fontStyle(value: FontStyle): this {
         throw new Error("Method not implemented.");
     }
-    fontFamily(value: ResourceStr): TextAreaAttribute {
+    fontWeight(value: any): this {
         throw new Error("Method not implemented.");
     }
-    inputFilter(value: ResourceStr, error?: ((value: string) => void) | undefined): TextAreaAttribute {
+    fontFamily(value: ResourceStr): this {
         throw new Error("Method not implemented.");
     }
-    onChange(callback: (value: string) => void): TextAreaAttribute {
+    inputFilter(value: ResourceStr, error?: ((value: string) => void) | undefined): this {
         throw new Error("Method not implemented.");
     }
-    onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): TextAreaAttribute {
+    onChange(callback: (value: string) => void): this {
         throw new Error("Method not implemented.");
     }
-    onContentScroll(callback: (totalOffsetX: number, totalOffsetY: number) => void): TextAreaAttribute {
+    onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): this {
         throw new Error("Method not implemented.");
     }
-    onEditChange(callback: (isEditing: boolean) => void): TextAreaAttribute {
+    onContentScroll(callback: (totalOffsetX: number, totalOffsetY: number) => void): this {
         throw new Error("Method not implemented.");
     }
-    onCopy(callback: (value: string) => void): TextAreaAttribute {
+    onEditChange(callback: (isEditing: boolean) => void): this {
         throw new Error("Method not implemented.");
     }
-    onCut(callback: (value: string) => void): TextAreaAttribute {
+    onCopy(callback: (value: string) => void): this {
         throw new Error("Method not implemented.");
     }
-    onPaste(callback: (value: string) => void): TextAreaAttribute {
+    onCut(callback: (value: string) => void): this {
         throw new Error("Method not implemented.");
     }
-    copyOption(value: CopyOptions): TextAreaAttribute {
+    onPaste(callback: (value: string) => void): this {
         throw new Error("Method not implemented.");
     }
-    enableKeyboardOnFocus(value: boolean): TextAreaAttribute {
+    copyOption(value: CopyOptions): this {
         throw new Error("Method not implemented.");
     }
-    maxLength(value: number): TextAreaAttribute {
+    enableKeyboardOnFocus(value: boolean): this {
         throw new Error("Method not implemented.");
     }
-    showCounter(value: boolean): TextAreaAttribute {
+    maxLength(value: number): this {
         throw new Error("Method not implemented.");
     }
-    style(value: TextContentStyle): TextAreaAttribute {
+    showCounter(value: boolean): this {
         throw new Error("Method not implemented.");
     }
-    barState(value: BarState): TextAreaAttribute {
+    style(value: TextContentStyle): this {
         throw new Error("Method not implemented.");
     }
-    selectionMenuHidden(value: boolean): TextAreaAttribute {
+    barState(value: BarState): this {
         throw new Error("Method not implemented.");
     }
-    maxLines(value: number): TextAreaAttribute {
+    selectionMenuHidden(value: boolean): this {
         throw new Error("Method not implemented.");
     }
-    customKeyboard(value: CustomBuilder): TextAreaAttribute {
+  maxLines(value: number): TextAreaAttribute {
+    if (!isNumber(value)) {
+      modifier(this._modifiers, TextAreaMaxLinesModifier, undefined);
+      return this;
+    }
+    if (Number(value) <= 0) {
+      modifier(this._modifiers, TextAreaMaxLinesModifier, undefined);
+      return this;
+    }
+    modifier(this._modifiers, TextAreaMaxLinesModifier, Number(value));
+    return this;
+  }
+
+    customKeyboard(value: CustomBuilder): this {
         throw new Error("Method not implemented.");
     }
 }

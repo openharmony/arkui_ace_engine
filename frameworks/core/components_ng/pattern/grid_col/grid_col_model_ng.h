@@ -27,6 +27,9 @@ public:
     void SetSpan(const RefPtr<V2::GridContainerSize>& span) override;
     void SetOffset(const RefPtr<V2::GridContainerSize>& offset) override;
     void SetOrder(const RefPtr<V2::GridContainerSize>& order) override;
+    static void SetSpan(FrameNode* frameNode, const RefPtr<V2::GridContainerSize>& span);
+    static void SetOffset(FrameNode* frameNode, const RefPtr<V2::GridContainerSize>& offset);
+    static void SetOrder(FrameNode* frameNode, const RefPtr<V2::GridContainerSize>& order);
 };
 } // namespace OHOS::Ace::NG
 

@@ -24,6 +24,7 @@
 #include "runtime.h"
 #include "ui_content.h"
 #include "event_handler.h"
+#include "form_constants.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -68,6 +69,7 @@ private:
     float width_ = 0.0f;
     float height_ = 0.0f;
     std::string backgroundColor_;
+    AppExecFwk::Constants::RenderingMode renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
     std::vector<std::string> cachedInfos_;
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;

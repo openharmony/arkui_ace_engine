@@ -27,6 +27,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/lru/count_limit_lru.h"
 
 namespace OHOS::Ace {
     
@@ -37,13 +38,6 @@ namespace NG {
 class ImageObject;
 class ImageData;
 } // namespace NG
-
-template<typename T>
-struct CacheNode {
-    CacheNode(std::string key, const T& obj) : cacheKey(std::move(key)), cacheObj(obj) {}
-    std::string cacheKey;
-    T cacheObj;
-};
 
 class ACE_EXPORT ImageCache : public AceType {
     DECLARE_ACE_TYPE(ImageCache, AceType);
@@ -95,14 +89,6 @@ public:
 
 private:
     bool ProcessImageDataCacheInner(size_t dataSize);
-    template<typename T>
-    static void CacheWithCountLimitLRU(const std::string& key, const T& cacheObj, std::list<CacheNode<T>>& cacheList,
-        std::unordered_map<std::string, typename std::list<CacheNode<T>>::iterator>& cache,
-        const std::atomic<size_t>& capacity);
-
-    template<typename T>
-    static T GetCacheObjWithCountLimitLRU(const std::string& key, std::list<CacheNode<T>>& cacheList,
-        std::unordered_map<std::string, typename std::list<CacheNode<T>>::iterator>& cache);
 
     std::atomic<size_t> capacity_ = 0; // by default memory cache can store 0 images.
     mutable std::mutex imageCacheMutex_;

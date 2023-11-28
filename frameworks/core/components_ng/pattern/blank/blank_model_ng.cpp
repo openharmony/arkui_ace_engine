@@ -77,4 +77,9 @@ void BlankModelNG::SetColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(BlankPaintProperty, Color, color);
 }
+
+void BlankModelNG::SetColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(BlankPaintProperty, Color, color, frameNode);
+}
 } // namespace OHOS::Ace::NG

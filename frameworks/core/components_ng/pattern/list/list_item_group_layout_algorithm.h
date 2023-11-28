@@ -174,6 +174,8 @@ public:
         return footerMainSize_;
     }
 
+    float GetItemHeight(int32_t index);
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -200,6 +202,8 @@ private:
         int32_t& currentIndex, float endPos, float& startPos);
     int32_t MeasureALineCenter(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t currentIndex);
+    int32_t MeasureALineAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        int32_t currentIndex);
     void MeasureForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t startIndex, float startPos);
     void MeasureBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
@@ -207,6 +211,7 @@ private:
     void MeasureCenter(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureStart(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureEnd(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
+    void MeasureAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty);
     bool NeedMeasureItem() const;
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,

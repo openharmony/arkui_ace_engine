@@ -145,6 +145,9 @@ protected:
     std::optional<bool> skipMeasureContent_;
     std::optional<bool> needForceMeasureAndLayout_;
 
+private:
+    void AdjustChildren(const OffsetF& offset);
+
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };
 } // namespace OHOS::Ace::NG

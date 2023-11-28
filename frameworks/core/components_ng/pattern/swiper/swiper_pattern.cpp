@@ -294,6 +294,15 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     auto oldIndex = GetLoopIndex(oldIndex_);
     if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != TotalCount()) {
         oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
+        if (HasIndicatorNode()) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto indicatorNode = DynamicCast<FrameNode>(
+                host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
+            if (indicatorNode && indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+                indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
+        }
     }
     if (userSetCurrentIndex < 0 || userSetCurrentIndex >= TotalCount()) {
         currentIndex_ = 0;
@@ -2690,7 +2699,7 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
                 return;
             }
             if (!swiper->IsLoop() &&
-                swiper->GetLoopIndex(swiper->currentIndex_ + 1) > (childrenSize - displayCount)) {
+                swiper->GetLoopIndex(swiper->currentIndex_) + 1 > (childrenSize - displayCount)) {
                 return;
             }
             swiper->targetIndex_ = swiper->currentIndex_ + 1;
@@ -2864,7 +2873,7 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
                     for (auto index : forEachIndexSet) {
                         auto childNode = forEachNode->GetChildAtIndex(index);
                         CHECK_NULL_VOID(childNode);
-                        childNode->Build();
+                        childNode->Build(nullptr);
                     }
                 },
                 TaskExecutor::TaskType::UI);
@@ -3376,6 +3385,16 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
     if (source == SCROLL_FROM_ANIMATION && AnimationRunning()) {
         // deny conflicting animation from child
         return { offset, false };
+    }
+    // mouse scroll triggers showNext / showPrev instead of updating offset
+    if (source == SCROLL_FROM_AXIS) {
+        auto targetBfr = targetIndex_;
+        (offset > 0) ? ShowPrevious() : ShowNext();
+        if (targetBfr == targetIndex_) {
+            // unchanged targetIndex_ implies Swiper has reached the edge and the mouse scroll isn't consumed.
+            return { offset, true };
+        }
+        return { 0.0f, false };
     }
     auto parent = parent_.Upgrade();
     if (!parent || !enableNestedScroll_) {

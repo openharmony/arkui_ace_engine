@@ -45,18 +45,29 @@ class ScrollablePattern : public NestableScrollContainer {
 
 public:
     ScrollablePattern() = default;
-    ScrollablePattern(bool alwaysEnabled) : edgeEffectAlwaysEnabled_(alwaysEnabled) {}
+    ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
+        : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
+    {}
 
     bool IsAtomicNode() const override
     {
         return false;
     }
 
+    RefPtr<PaintProperty> CreatePaintProperty() override;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
     // scrollable
     Axis GetAxis() const override
     {
         return axis_;
     }
+
+    virtual bool IsReverse() const
+    {
+        return false;
+    };
 
     virtual bool ShouldDelayChildPressedState() const override
     {
@@ -90,7 +101,8 @@ public:
         return scrollableEvent_;
     }
     virtual bool OnScrollCallback(float offset, int32_t source);
-    virtual void OnScrollStartCallback() {};
+    virtual void OnScrollStartCallback();
+    virtual void FireOnScrollStart();
     bool ScrollableIdle()
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
@@ -105,7 +117,7 @@ public:
             scrollableEvent_->SetAxis(axis_);
         }
     }
-    void SetScrollableAxis(Axis axis);
+
     RefPtr<GestureEventHub> GetGestureHub();
     RefPtr<InputEventHub> GetInputHub();
 
@@ -116,7 +128,7 @@ public:
     }
     void SetEdgeEffect(EdgeEffect edgeEffect);
     void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> edgeEffect);
-    bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size);
+    bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size, bool reverse = false);
     virtual void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
     bool IsRestrictBoundary()
     {
@@ -293,7 +305,7 @@ public:
 
     void SetScrollSource(int32_t scrollSource)
     {
-        if (scrollSource == SCROLL_FROM_JUMP) {
+        if (scrollSource == SCROLL_FROM_JUMP || scrollSource == SCROLL_FROM_FOCUS_JUMP) {
             if (scrollBar_ && scrollBar_->IsScrollable() && scrollBarOverlayModifier_) {
                 scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
                 scrollBar_->ScheduleDisappearDelayTask();
@@ -308,6 +320,8 @@ public:
     {
         return scrollSource_;
     }
+
+    ScrollState GetScrollState() const;
 
     static float CalculateFriction(float gamma)
     {
@@ -346,6 +360,17 @@ public:
         return Rect();
     };
 
+    void SetEdgeEffect()
+    {
+        SetEdgeEffect(edgeEffect_);
+    }
+
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+    {
+        edgeEffect_ = edgeEffect;
+        edgeEffectAlwaysEnabled_ = alwaysEnabled;
+    }
+
     bool GetAlwaysEnabled() const
     {
         return edgeEffectAlwaysEnabled_;
@@ -355,7 +380,12 @@ public:
     {
         edgeEffectAlwaysEnabled_ = alwaysEnabled;
     }
+
 protected:
+    virtual DisplayMode GetDefaultScrollBarDisplayMode() const
+    {
+        return DisplayMode::AUTO;
+    }
     RefPtr<ScrollBar> GetScrollBar() const
     {
         return scrollBar_;
@@ -365,6 +395,12 @@ protected:
         return scrollBarProxy_;
     }
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
+
+    EdgeEffect GetEdgeEffect() const;
+
+    virtual void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const;
+
+    virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, bool withPerf);
 
     // select with mouse
     struct ItemSelectedStatus {
@@ -408,6 +444,8 @@ protected:
     // just for hold ScrollableController
     RefPtr<ScrollableController> positionController_;
 
+    bool scrollStop_ = false;
+
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -437,6 +475,7 @@ private:
     float GetOutOfScrollableOffset() const;
     float GetOffsetWithLimit(float offset) const;
     void LimitMouseEndOffset();
+    void UpdateBorderRadius();
 
     bool ProcessAssociatedScroll(double offset, int32_t source);
 
@@ -455,8 +494,6 @@ private:
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
-
-    EdgeEffect GetEdgeEffect() const;
 
     void SetCanOverScroll(bool val);
     bool GetCanOverScroll() const;
@@ -518,6 +555,7 @@ private:
     enum SelectDirection { SELECT_DOWN, SELECT_UP, SELECT_NONE };
     SelectDirection selectDirection_ = SELECT_NONE;
     bool mousePressed_ = false;
+    bool canMultiSelect_ = false;
     OffsetF mouseEndOffset_;
     OffsetF mousePressOffset_;
     OffsetF lastMouseStart_;
@@ -528,6 +566,8 @@ private:
     RefPtr<NavBarPattern> navBarPattern_;
 
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
+
+    EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool edgeEffectAlwaysEnabled_ = false;
 };
 } // namespace OHOS::Ace::NG

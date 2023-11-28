@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #include "bridge/declarative_frontend/jsview/models/xcomponent_model_impl.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 
@@ -153,9 +154,12 @@ void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onLoad = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& xcomponentId) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onLoad = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                      const std::string& xcomponentId) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("XComponent.onLoad");
+        PipelineContext::SetCallBackNode(node);
         std::vector<std::string> keys = { "load", xcomponentId };
         func->ExecuteNew(keys, "");
     };
@@ -168,9 +172,11 @@ void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onDestroy = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDestroy = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("XComponent.onDestroy");
+        PipelineContext::SetCallBackNode(node);
         std::vector<std::string> keys = { "destroy" };
         func->Execute(keys, "");
     };

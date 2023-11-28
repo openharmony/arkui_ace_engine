@@ -31,6 +31,7 @@ public:
     void SetOnTimer(std::function<void(const std::string, const std::string)>&& onChange) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
+    void SetTextShadow(const std::vector<Shadow>& value) override {};
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;

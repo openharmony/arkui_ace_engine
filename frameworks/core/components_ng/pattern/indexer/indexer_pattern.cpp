@@ -723,9 +723,9 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
     divider.color = indexerTheme->GetPopupSeparateColor();
     listLayoutProperty->UpdateDivider(divider);
     listLayoutProperty->UpdateListDirection(Axis::VERTICAL);
-    auto listPaintProperty = listNode->GetPaintProperty<ListPaintProperty>();
+    auto listPaintProperty = listNode->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(listPaintProperty);
-    listPaintProperty->UpdateBarDisplayMode(DisplayMode::OFF);
+    listPaintProperty->UpdateScrollBarMode(DisplayMode::OFF);
     auto listRenderContext = listNode->GetRenderContext();
     CHECK_NULL_VOID(listRenderContext);
     listRenderContext->SetClipToBounds(true);
@@ -760,9 +760,10 @@ void IndexerPattern::UpdateBubbleListItem(
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto popupSelectedTextColor = paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupDefaultColor());
+    auto popupSelectedTextColor =
+        paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupSelectedTextColor());
     auto popupUnselectedTextColor =
-        paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetDefaultTextColor());
+        paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetPopupUnselectedTextColor());
     auto popupItemTextFontSize =
         layoutProperty->GetFontSize().value_or(indexerTheme->GetPopupTextStyle().GetFontSize());
     auto popupItemTextFontWeight =
@@ -815,9 +816,10 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto popupSelectedTextColor = paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupDefaultColor());
+    auto popupSelectedTextColor =
+        paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupSelectedTextColor());
     auto popupUnselectedTextColor =
-        paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetDefaultTextColor());
+        paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetPopupUnselectedTextColor());
     auto popupItemBackground =
         paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
     auto listNode = popupNode_->GetLastChild();

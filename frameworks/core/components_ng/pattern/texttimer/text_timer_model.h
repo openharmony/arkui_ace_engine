@@ -39,6 +39,7 @@ public:
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
     virtual void SetOnTimer(std::function<void(const std::string, const std::string)>&& onChange) = 0;
+    virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
 
 private:
     static std::unique_ptr<TextTimerModel> instance_;

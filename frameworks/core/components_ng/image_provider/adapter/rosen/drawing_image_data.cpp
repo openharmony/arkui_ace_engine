@@ -65,7 +65,7 @@ std::shared_ptr<RSData> DrawingImageData::GetRSData() const
 RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const std::optional<Color>& svgFillColor)
 {
     CHECK_NULL_RETURN(rsData_, nullptr);
-    auto skData = rsData_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto skData = SkData::MakeWithoutCopy(rsData_->GetData(), data_->GetSize());
     const auto svgStream = std::make_unique<SkMemoryStream>(skData);
     CHECK_NULL_RETURN(svgStream, nullptr);
     if (SystemProperties::GetSvgMode() <= 0) {
@@ -91,8 +91,9 @@ RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const std::optional<Color>& svgF
 
 std::pair<SizeF, int32_t> DrawingImageData::Parse() const
 {
-    CHECK_NULL_RETURN(GetRSData(), {});
-    auto skData = GetRSData()->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto rsData = GetRSData();
+    CHECK_NULL_RETURN(rsData, {});
+    auto skData = SkData::MakeWithoutCopy(rsData->GetData(), data_->GetSize());
     auto codec = SkCodec::MakeFromData(skData);
     CHECK_NULL_RETURN(codec, {});
     SizeF imageSize;

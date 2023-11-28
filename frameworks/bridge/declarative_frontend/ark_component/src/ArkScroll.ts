@@ -1,49 +1,52 @@
 
 /// <reference path="./import.ts" />
 class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
-    scrollable(value: ScrollDirection): ScrollAttribute {
+    onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
         throw new Error("Method not implemented.");
     }
-    onScroll(event: (xOffset: number, yOffset: number) => void): ScrollAttribute {
+    scrollable(value: ScrollDirection): this {
         throw new Error("Method not implemented.");
     }
-    onScrollEdge(event: (side: Edge) => void): ScrollAttribute {
+    onScroll(event: (xOffset: number, yOffset: number) => void): this {
         throw new Error("Method not implemented.");
     }
-    onScrollStart(event: () => void): ScrollAttribute {
+    onScrollEdge(event: (side: Edge) => void): this {
         throw new Error("Method not implemented.");
     }
-    onScrollEnd(event: () => void): ScrollAttribute {
+    onScrollStart(event: () => void): this {
         throw new Error("Method not implemented.");
     }
-    onScrollStop(event: () => void): ScrollAttribute {
+    onScrollEnd(event: () => void): this {
         throw new Error("Method not implemented.");
     }
-    scrollBar(barState: BarState): ScrollAttribute {
+    onScrollStop(event: () => void): this {
         throw new Error("Method not implemented.");
     }
-    scrollBarColor(color: any): ScrollAttribute {
+    scrollBar(barState: BarState): this {
         throw new Error("Method not implemented.");
     }
-    scrollBarWidth(value: string | number): ScrollAttribute {
+    scrollBarColor(color: any): this {
         throw new Error("Method not implemented.");
     }
-    edgeEffect(edgeEffect: EdgeEffect): ScrollAttribute {
+    scrollBarWidth(value: string | number): this {
         throw new Error("Method not implemented.");
     }
-    onScrollFrameBegin(event: (offset: number, state: ScrollState) => { offsetRemain: number; }): ScrollAttribute {
+    edgeEffect(edgeEffect: EdgeEffect): this {
         throw new Error("Method not implemented.");
     }
-    nestedScroll(value: NestedScrollOptions): ScrollAttribute {
+    onScrollFrameBegin(event: (offset: number, state: ScrollState) => { offsetRemain: number; }): this {
         throw new Error("Method not implemented.");
     }
-    enableScrollInteraction(value: boolean): ScrollAttribute {
+    nestedScroll(value: NestedScrollOptions): this {
         throw new Error("Method not implemented.");
     }
-    friction(value: any): ScrollAttribute {
+    enableScrollInteraction(value: boolean): this {
         throw new Error("Method not implemented.");
     }
-    scrollSnap(value: ScrollSnapOptions): ScrollAttribute {
+    friction(value: any): this {
+        throw new Error("Method not implemented.");
+    }
+    scrollSnap(value: ScrollSnapOptions): this {
         throw new Error("Method not implemented.");
     }
 }

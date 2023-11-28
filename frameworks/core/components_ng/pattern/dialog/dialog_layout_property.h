@@ -23,6 +23,7 @@
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
+constexpr Dimension PORTRAIT_BOTTOM_SECURITY = 96.0_vp;
 class ACE_EXPORT DialogLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(DialogLayoutProperty, LayoutProperty);
 
@@ -40,6 +41,7 @@ public:
         props->propUseCustomStyle_ = CloneUseCustomStyle();
         props->propAutoCancel_ = CloneAutoCancel();
         props->propShowInSubWindow_ = CloneShowInSubWindow();
+        props->propIsModal_ = CloneIsModal();
         props->propDialogButtonDirection_ = CloneDialogButtonDirection();
         return props;
     }
@@ -53,6 +55,7 @@ public:
         ResetUseCustomStyle();
         ResetAutoCancel();
         ResetShowInSubWindow();
+        ResetIsModal();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DialogAlignment, DialogAlignment, PROPERTY_UPDATE_MEASURE);
@@ -61,6 +64,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UseCustomStyle, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoCancel, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowInSubWindow, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsModal, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DialogButtonDirection, DialogButtonDirection, PROPERTY_UPDATE_MEASURE);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -79,6 +83,7 @@ public:
         json->Put("customStyle", propUseCustomStyle_.value_or(false) ? "true" : "false");
         json->Put("autoCancel", propAutoCancel_.value_or(true) ? "true" : "false");
         json->Put("showInSubWindow", propShowInSubWindow_.value_or(false) ? "true" : "false");
+        json->Put("isModal", propIsModal_.value_or(false) ? "true" : "false");
         json->Put("buttonDirection", DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(
                                          propDialogButtonDirection_.value_or(DialogButtonDirection::AUTO))
                                          .c_str());

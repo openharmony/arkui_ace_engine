@@ -41,7 +41,13 @@ void WaterFlowLayoutInfo::UpdateStartIndex()
     int32_t tempStartIndex = -1;
     for (const auto& crossItems : waterFlowItems_) {
         for (const auto& iter : crossItems.second) {
-            if (GreatOrEqual(iter.second.first + iter.second.second + currentOffset_, 0.0f)) {
+            if (GreatNotEqual(iter.second.first + iter.second.second + currentOffset_, 0.0f)) {
+                tempStartIndex = tempStartIndex != -1 ? std::min(tempStartIndex, iter.first) : iter.first;
+                break;
+            }
+            // FlowItem that have not been loaded at the beginning of each cross need to be selected as startIndex_ for
+            // the ClearCache later.
+            if (NearZero(iter.second.first + iter.second.second) && NearZero(currentOffset_)) {
                 tempStartIndex = tempStartIndex != -1 ? std::min(tempStartIndex, iter.first) : iter.first;
                 break;
             }

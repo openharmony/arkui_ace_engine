@@ -43,7 +43,7 @@ public:
           moduleName_(moduleName) {};
     ~ResourceObject() = default;
 
-    uint32_t GetId() const
+    int32_t GetId() const
     {
         return id_;
     }

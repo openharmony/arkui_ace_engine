@@ -18,6 +18,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/pattern/stack/stack_model.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -29,7 +30,7 @@ public:
     void SetAlignment(Alignment align) override;
     void SetHasHeight() override {}
     void SetHasWidth() override {}
-
+    static void SetAlignment(FrameNode* frameNode, Alignment align);
 private:
     void Create() override;
 };

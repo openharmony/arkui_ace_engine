@@ -48,8 +48,6 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    RefPtr<PaintProperty> CreatePaintProperty() override;
-
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
@@ -61,6 +59,8 @@ public:
     {
         return isConfigScrollable_;
     }
+
+    DisplayMode GetDefaultScrollBarDisplayMode() const override;
 
     void SetMultiSelectable(bool multiSelectable)
     {
@@ -184,8 +184,6 @@ public:
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
 
-    bool OnScrollCallback(float offset, int32_t source) override;
-
     int32_t GetOriginalIndex() const;
     int32_t GetCrossCount() const;
     int32_t GetChildrenCount() const;
@@ -201,7 +199,8 @@ public:
     Rect GetItemRect(int32_t index) const override;
 
 private:
-    float GetMainGap();
+    float GetEndOffset();
+    float GetMainGap() const;
     float GetAllDelta();
     void CheckRestartSpring();
     void CheckScrollable();
@@ -237,8 +236,8 @@ private:
     void ProcessEvent(bool indexChanged, float finalOffset);
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
-    void OnScrollStartCallback() override;
-    void FireOnScrollStart();
+
+    void FireOnScrollStart() override;
     void InitScrollableEvent();
 
     int32_t CalcIntersectAreaInTargetDirectionShadow(GridItemIndexInfo itemIndexInfo, bool isFindInMainAxis);
@@ -247,7 +246,6 @@ private:
     void ResetAllDirectionsStep();
 
     float animatorOffset_ = 0.0f;
-    bool scrollStop_ = false;
     bool initialIndex_ = false;
     float prevHeight_ = 0;
     float currentHeight_ = 0;

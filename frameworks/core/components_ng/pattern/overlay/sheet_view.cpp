@@ -18,19 +18,21 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_property.h"
+#include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -62,8 +64,30 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, RefPtr<FrameNode>
     dragBarLayoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     dragBarNode->MountToParent(sheetNode, 0);
     dragBarNode->MarkModifyDone();
-    sheetNode->AddChild(builder);
+    auto scrollNode = CreateScrollNode();
+    CHECK_NULL_RETURN(scrollNode, nullptr);
+    builder->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
     sheetNode->MarkModifyDone();
     return sheetNode;
+}
+
+RefPtr<FrameNode> SheetView::CreateScrollNode()
+{
+    auto scroll = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    CHECK_NULL_RETURN(scroll, nullptr);
+    auto props = scroll->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_RETURN(props, nullptr);
+    props->UpdateScrollEnabled(false);
+    props->UpdateAxis(Axis::VERTICAL);
+    auto pattern = scroll->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->SetEdgeEffect(EdgeEffect::SPRING, pattern->GetAlwaysEnabled());
+    auto layoutProps = scroll->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProps, nullptr);
+    layoutProps->UpdateAlignment(Alignment::TOP_CENTER);
+    scroll->MarkModifyDone();
+    return scroll;
 }
 } // namespace::OHOS::Ace::NG

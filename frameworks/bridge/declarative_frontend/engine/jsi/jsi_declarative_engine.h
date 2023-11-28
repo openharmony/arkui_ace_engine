@@ -182,11 +182,12 @@ public:
     }
 #endif
 
-// ArkTsCard start
+    // ArkTsCard start
     static void PreloadAceModuleCard(void* runtime, const std::unordered_set<std::string>& formModuleList);
     static void ReloadAceModuleCard(void* runtime, const std::unordered_set<std::string>& formModuleList);
-// ArkTsCard end
+    // ArkTsCard end
     static bool IsPlugin();
+
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -197,8 +198,8 @@ private:
     void InitJsContextModuleObject();
     void InitGroupJsBridge();
     static shared_ptr<JsRuntime> InnerGetCurrentRuntime();
-    shared_ptr<JsValue> CallGetUIContextFunc(const shared_ptr<JsRuntime>& runtime,
-        const std::vector<shared_ptr<JsValue>>& argv);
+    shared_ptr<JsValue> CallGetUIContextFunc(
+        const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
     std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
     static std::map<std::string, std::string> mediaResourceFileMap_;
@@ -247,8 +248,8 @@ public:
 #if !defined(PREVIEW)
     bool IsModule();
 
-    void LoadJsWithModule(std::string& urlName,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
+    void LoadJsWithModule(
+        std::string& urlName, const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
 
     void LoadPluginJsWithModule(std::string& urlName);
 
@@ -258,6 +259,8 @@ public:
 
     // Load the je file of the page in NG structure..
     bool LoadPageSource(const std::string& url,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
+    bool LoadPageSource(const std::shared_ptr<std::vector<uint8_t>>& content,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
 
     bool LoadCard(const std::string& url, int64_t cardId) override;
@@ -330,8 +333,7 @@ public:
 
     void SetContext(int32_t instanceId, NativeReference* context) override;
 
-    void SetErrorEventHandler(
-        std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
+    void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
@@ -397,11 +399,12 @@ public:
     bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
     std::string SearchRouterRegisterMap(const std::string& pageName) override;
     bool UpdateRootComponent() override;
-    bool LoadPluginComponent(const std::string &url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
+    bool LoadPluginComponent(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
     static void SetEntryObject(const panda::Global<panda::ObjectRef>& obj)
     {
         obj_ = obj;
     }
+    bool ExecuteJs(const uint8_t* content, int32_t size) override;
 
 private:
     bool CallAppFunc(const std::string& appFuncName);

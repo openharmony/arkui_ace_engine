@@ -74,8 +74,8 @@ public:
 
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
-    void OnDragMove(const Point& point, const std::string& extraInfo);
-    void OnDragEnd(const Point& point, const std::string& extraInfo);
+    void OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo);
+    void OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
@@ -153,6 +153,16 @@ public:
         return isDragWindowShow_;
     }
 
+    void SetPreviewRect(const Rect& rect)
+    {
+        previewRect_ = rect;
+    }
+
+    Rect GetPreviewRect() const
+    {
+        return previewRect_;
+    }
+
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
         std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
 
@@ -227,6 +237,8 @@ private:
     void PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode);
     void FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
         RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
+    void NotifyDragFrameNode(
+        const Point& point, const DragEventType& dragEventType, const DragRet& dragRet = DragRet::DRAG_DEFAULT);
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;

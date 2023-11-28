@@ -34,6 +34,8 @@ public:
     void SetBackgroundColor(const Color& value) override;
     void SetEnableDec(bool enableDec) override;
     void SetEnableInc(bool enableInc) override;
+    static void SetEnableDec(FrameNode* frameNode, bool enableDec);
+    static void SetEnableInc(FrameNode* frameNode, bool enableInc);
 
 private:
     RefPtr<FrameNode> CreateButtonChild(

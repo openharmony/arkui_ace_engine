@@ -140,4 +140,9 @@ void RichEditorModelNG::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& f
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPaste(std::move(func));
 }
+
+void RichEditorModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOptions, frameNode);
+}
 } // namespace OHOS::Ace::NG

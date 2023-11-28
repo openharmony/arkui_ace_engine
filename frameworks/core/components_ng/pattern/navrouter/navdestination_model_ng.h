@@ -29,11 +29,12 @@ public:
     void SetSubtitle(const std::string& subtitle) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
     void SetTitleHeight(int32_t height) override;
-    void SetTitleHeight(const Dimension& titleHeight) override;
+    void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) override;
     void SetOnShown(std::function<void()>&& onShow) override;
     void SetOnHidden(std::function<void()>&& onHidden) override;
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
     RefPtr<AceType> CreateEmpty() override;
+    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar);
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

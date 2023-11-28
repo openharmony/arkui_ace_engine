@@ -22,12 +22,13 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <securec.h>
 #include <string>
+#include <thread>
+
+#include <securec.h>
 #include <sys/un.h>
 #include <unistd.h>
 #include <uv.h>
-#include <vector>
 
 using std::string;
 using std::vector;
@@ -37,4 +38,6 @@ enum class RetErrCode {
     ERR_BUF_ALLOC = -2,
 };
 const string HANDSHAKE_MESSAGE = "OHOS HDC-HELLO";
+// str one of ark:pid@com.xxx.xxxx, ark:pid@Debugger, ark:pid@tid@Debugger
+using Callback = std::function<void(int fd, std::string str)>;
 #endif // end HDC_TEST

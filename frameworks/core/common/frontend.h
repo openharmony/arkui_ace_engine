@@ -112,6 +112,7 @@ public:
     virtual void GetStageSourceMap(std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const {}
 
     virtual void RunPage(const std::string& content, const std::string& params) = 0;
+    virtual void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params) {};
 
     virtual void RunPageByNamedRouter(const std::string& name) {}
 

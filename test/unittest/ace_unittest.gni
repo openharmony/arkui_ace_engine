@@ -161,6 +161,36 @@ template("ace_unittest") {
       external_deps += ace_external_deps
       external_deps += flutter_external_deps
     }
+  } else if (type == "pipeline") {
+    ohos_unittest(ace_unittest_name) {
+      module_out_path = "ace_engine/${module_output}"
+      sources = []
+      sources += invoker.sources
+      sources += flutter_sources
+
+      deps = ace_unittest_deps
+      deps += [
+        "$ace_root/frameworks/core/components/theme:build_theme_code",
+        "$ace_root/test/unittest:ace_base",
+        "$ace_root/test/unittest:ace_components_base",
+        "$ace_root/test/unittest:ace_components_event",
+        "$ace_root/test/unittest:ace_components_gestures",
+        "$ace_root/test/unittest:ace_components_layout",
+        "$ace_root/test/unittest:ace_components_pattern",
+        "$ace_root/test/unittest:ace_components_property",
+        "$ace_root/test/unittest:ace_components_render",
+        "$ace_root/test/unittest:ace_components_syntax",
+        "$ace_root/test/unittest:ace_core_animation",
+        "$ace_root/test/unittest:ace_core_extra",
+      ]
+
+      configs = []
+      configs = ace_unittest_config
+
+      external_deps = []
+      external_deps += ace_external_deps
+      external_deps += flutter_external_deps
+    }
   } else {
     assert(false)
   }

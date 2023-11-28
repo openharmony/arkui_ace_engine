@@ -28,6 +28,9 @@ const std::string DIGIT_WHITE_LIST = "[0-9]";
 const std::string PHONE_WHITE_LIST = R"([\d\-\+\*\#]+)";
 const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
+// when do ai analaysis, we should list the left and right of the string
+constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
+constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
 } // namespace
 
 std::string ContentController::PreprocessString(int32_t startIndex, int32_t endIndex, const std::string& value)
@@ -44,8 +47,15 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
         content_.find('@') != std::string::npos && value.find('@') != std::string::npos &&
         GetSelectedValue(startIndex, endIndex).find('@') == std::string::npos) {
         tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [](char c) { return c == '@'; }), tmp.end());
-        return tmp;
     }
+    auto wideText = GetWideText();
+    auto wideTmp = StringUtils::ToWstring(tmp);
+    auto maxLength = static_cast<uint32_t>(textField->GetMaxLength());
+    auto curLength = static_cast<uint32_t>(wideText.length());
+    auto addLength = static_cast<uint32_t>(wideTmp.length());
+    auto delLength = static_cast<uint32_t>(std::abs(endIndex - startIndex));
+    addLength = std::min(addLength, maxLength - curLength + delLength);
+    tmp = StringUtils::ToString(wideTmp.substr(0, addLength));
     return tmp;
 }
 
@@ -264,4 +274,13 @@ std::string ContentController::GetValueAfterIndex(int32_t index)
 {
     return StringUtils::ToString(GetWideText().substr(index, GetWideText().length() - index));
 }
+
+std::string ContentController::GetSelectedLimitValue(int32_t& index, int32_t& startIndex)
+{
+    startIndex = index - AI_TEXT_RANGE_LEFT;
+    int32_t endIndex = index + AI_TEXT_RANGE_RIGHT;
+    FormatIndex(startIndex, endIndex);
+    index = index - startIndex;
+    return GetSelectedValue(startIndex, endIndex);
+};
 } // namespace OHOS::Ace::NG
