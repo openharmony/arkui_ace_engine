@@ -277,7 +277,7 @@ public:
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
-    void OnColorConfigurationUpdate() override {}
+    void OnColorConfigurationUpdate() override;
     bool IsDisabled() const;
     float GetLineHeight() const override;
     std::vector<RectF> GetTextBoxes() override;

@@ -698,6 +698,7 @@ void JSRichEditorController::ParseJsTextStyle(
     if (!fontColor->IsNull() && JSContainerBase::ParseJsColor(fontColor, textColor)) {
         updateSpanStyle.updateTextColor = textColor;
         style.SetTextColor(textColor);
+        updateSpanStyle.hasResourceFontColor = fontColor->IsObject();
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
@@ -952,6 +953,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsTextStyle(styleObject, style, updateSpanStyle_);
             options.style = style;
+            options.hasResourceFontColor = updateSpanStyle_.hasResourceFontColor;
         }
         auto paraStyle = spanObject->GetProperty("paragraphStyle");
         auto paraStyleObj = JSRef<JSObject>::Cast(paraStyle);
