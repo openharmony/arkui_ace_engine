@@ -63,6 +63,7 @@
 #include "bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "bridge/declarative_frontend/jsview/js_environment.h"
 #include "bridge/declarative_frontend/jsview/js_flex_impl.h"
+#include "bridge/declarative_frontend/jsview/js_folder_stack.h"
 #include "bridge/declarative_frontend/jsview/js_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_form_link.h"
 #include "bridge/declarative_frontend/jsview/js_gauge.h"
@@ -492,6 +493,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Row", JSRow::JSBind },
     { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
+    { "FolderStack", JSFolderStack::JSBind},
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "If", JSIfElse::JSBind },
@@ -568,6 +570,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GridContainer", JSGridContainer::JSBind },
     { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
+    { "FolderStack", JSFolderStack::JSBind},
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
