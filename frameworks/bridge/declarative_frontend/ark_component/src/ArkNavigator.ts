@@ -84,8 +84,8 @@ class TargetModifier extends Modifier<string> {
 // @ts-ignore
 globalThis.Navigator.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkNavigatorComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);

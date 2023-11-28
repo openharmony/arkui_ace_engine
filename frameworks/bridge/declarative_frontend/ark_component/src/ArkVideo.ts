@@ -1,57 +1,133 @@
 /// <reference path="./import.ts" />
-class ArkVideoComponent extends ArkComponent implements VideoAttribute {
-  muted(value: boolean): this {
-    throw new Error("Method not implemented.");
+
+class VideoObjectFitModifier extends Modifier<ImageFit> {
+  static identity: Symbol = Symbol('videoObjectFit');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().video.resetObjectFit(node);
+    } else {
+      GetUINativeModule().video.setObjectFit(node, this.value!);
+    }
   }
-  autoPlay(value: boolean): this {
-    throw new Error("Method not implemented.");
+}
+class VideoAutoPlayModifier extends Modifier<boolean> {
+  static identity: Symbol = Symbol('videoAutoPlayr');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().video.resetAutoPlay(node);
+    } else {
+      GetUINativeModule().video.setAutoPlay(node, this.value!);
+    }
   }
-  controls(value: boolean): this {
-    throw new Error("Method not implemented.");
+}
+class VideoControlsModifier extends Modifier<boolean> {
+  static identity: Symbol = Symbol('videoControls');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().video.resetControls(node);
+    } else {
+      GetUINativeModule().video.setControls(node, this.value!);
+    }
   }
-  loop(value: boolean): this {
-    throw new Error("Method not implemented.");
+}
+class VideoLoopModifier extends Modifier<boolean> {
+  static identity: Symbol = Symbol('videoLoop');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().video.resetLoop(node);
+    } else {
+      GetUINativeModule().video.setLoop(node, this.value!);
+    }
   }
-  objectFit(value: ImageFit): this {
-    throw new Error("Method not implemented.");
+}
+class VideoMutedModifier extends Modifier<boolean> {
+  static identity: Symbol = Symbol('videoMuted');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().video.resetMuted(node);
+    } else {
+      GetUINativeModule().video.setMuted(node, this.value!);
+    }
   }
-  onStart(event: () => void): this {
-    throw new Error("Method not implemented.");
+}
+class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
+  muted(value: boolean): VideoAttribute {
+    let muted = false;
+    if (isBoolean(value)) {
+      muted = value;
+    }
+    modifier(this._modifiers, VideoMutedModifier, muted);
+    return this;
   }
-  onPause(event: () => void): this {
-    throw new Error("Method not implemented.");
+  autoPlay(value: boolean): VideoAttribute {
+    let autoPlay = false;
+    if (isBoolean(value)) {
+      autoPlay = value;
+    }
+    modifier(this._modifiers, VideoAutoPlayModifier, autoPlay);
+    return this;
   }
-  onFinish(event: () => void): this {
-    throw new Error("Method not implemented.");
+  controls(value: boolean): VideoAttribute {
+    let controls = true;
+    if (isBoolean(value)) {
+      controls = value;
+    }
+    modifier(this._modifiers, VideoControlsModifier, controls);
+    return this;
   }
-  onFullscreenChange(callback: (event: { fullscreen: boolean; }) => void): this {
-    throw new Error("Method not implemented.");
+  loop(value: boolean): VideoAttribute {
+    let loop = false;
+    if (isBoolean(value)) {
+      loop = value;
+    }
+    modifier(this._modifiers, VideoLoopModifier, loop);
+    return this;
   }
-  onPrepared(callback: (event: { duration: number; }) => void): this {
-    throw new Error("Method not implemented.");
+  objectFit(value: ImageFit): VideoAttribute {
+    if (value) {
+      modifier(this._modifiers, VideoObjectFitModifier, value);
+    } else {
+      modifier(this._modifiers, VideoObjectFitModifier, undefined);
+    }
+    return this;
   }
-  onSeeking(callback: (event: { time: number; }) => void): this {
-    throw new Error("Method not implemented.");
+  onStart(callback: () => void): VideoAttribute {
+    throw new Error('Method not implemented.');
   }
-  onSeeked(callback: (event: { time: number; }) => void): this {
-    throw new Error("Method not implemented.");
+  onPause(callback: () => void): VideoAttribute {
+    throw new Error('Method not implemented.');
   }
-  onUpdate(callback: (event: { time: number; }) => void): this {
-    throw new Error("Method not implemented.");
+  onFinish(event: () => void): VideoAttribute {
+    throw new Error('Method not implemented.');
   }
-  onError(event: () => void): this {
-    throw new Error("Method not implemented.");
+  onFullscreenChange(callback: (event: { fullscreen: boolean}) => void): VideoAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onPrepared(callback: (event: { duration: number }) => void): VideoAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onSeeking(callback: (event: { time: number }) => void): VideoAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onSeeked(callback: (event: { time: number }) => void): VideoAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onUpdate(callback: (event: { time: number }) => void): VideoAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onError(callback: () => void): VideoAttribute {
+    throw new Error('Method not implemented.');
   }
   monopolizeEvents(monopolize: boolean): this {
     throw new Error("Method not implemented.");
   }
 }
-
 // @ts-ignore
 globalThis.Video.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, ()=> {
+
+  let component = this.createOrGetNode(elmtId, () => {
     return new ArkVideoComponent(nativeNode);
   });
   modifier.applyNormalAttribute(component);

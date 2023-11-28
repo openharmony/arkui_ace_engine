@@ -91,6 +91,8 @@
         "src/ArkRect.ts",
         "src/ArkShape.ts",
         "src/ArkCanvas.ts",
+    "src/ArkGridContainer.ts",
+    "src/ArkWindowScene.ts",
     ],
 
     "compilerOptions": {

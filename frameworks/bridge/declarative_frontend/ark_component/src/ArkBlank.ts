@@ -1,4 +1,4 @@
-/// <reference path="import.ts" />
+/// <reference path="./import.ts" />
 
 class BlankColorModifier extends Modifier<number | undefined> {
   static identity: Symbol = Symbol('blankColor');
@@ -23,6 +23,7 @@ class ArkBlankComponent extends ArkComponent implements CommonMethod<BlankAttrib
   }
 }
 
+// @ts-ignore
 globalThis.Blank.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);

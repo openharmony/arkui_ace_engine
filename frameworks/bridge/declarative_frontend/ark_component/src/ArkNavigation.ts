@@ -284,8 +284,8 @@ class HideNavBarModifier extends Modifier<boolean> {
 // @ts-ignore
 globalThis.Navigation.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () => {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkNavigationComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);

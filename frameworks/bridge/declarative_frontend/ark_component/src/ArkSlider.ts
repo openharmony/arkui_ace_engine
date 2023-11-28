@@ -129,8 +129,8 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
 // @ts-ignore
 globalThis.Slider.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, ()=> {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, ()=> {
       return new ArkSliderComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);

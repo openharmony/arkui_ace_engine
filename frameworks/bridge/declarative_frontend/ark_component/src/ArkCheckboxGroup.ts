@@ -27,7 +27,7 @@ class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAtt
         return this;
     }
     mark(value: MarkStyle): this {
-        var arkMarkStyle = new ArkMarkStyle();
+        let arkMarkStyle = new ArkMarkStyle();
         if (arkMarkStyle.parseMarkStyle(value)) {
             modifier(this._modifiers, CheckboxGroupMarkModifier, arkMarkStyle);
         } else {

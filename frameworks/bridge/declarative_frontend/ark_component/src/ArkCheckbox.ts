@@ -54,8 +54,8 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
 // @ts-ignore
 globalThis.Checkbox.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () =>
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () =>
     {
         return new ArkCheckboxComponent(nativeNode);
     });

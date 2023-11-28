@@ -898,10 +898,87 @@ class AccessibilityDescriptionModifier extends Modifier<string> {
     }
 }
 
+
+class DirectionModifier extends Modifier<string> {
+  static identity: Symbol = Symbol('direction');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetDirection(node);
+    } else {
+      GetUINativeModule().common.setDirection(node, this.value!);
+    }
+  }
+}
+class AlignRulesModifier extends Modifier<ArkAlignRules> {
+  static identity: Symbol = Symbol('alignRules');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetAlignRules(node);
+    } else {
+      GetUINativeModule().common.setAlignRules(node, this.value.left,
+        this.value.middle, this.value.right, this.value.top, this.value.center, this.value.bottom);
+    }
+  }
+}
+
+class ExpandSafeAreaModifier extends Modifier<ArkSafeAreaExpandOpts | undefined> {
+  static identity: Symbol = Symbol('expandSafeArea');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetExpandSafeArea(node);
+    } else {
+      GetUINativeModule().common.setExpandSafeArea(node, this.value.type, this.value.edges);
+    }
+  }
+}
+
+class GridSpanModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('gridSpan');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetGridSpan(node);
+    } else {
+      GetUINativeModule().common.setGridSpan(node, this.value!);
+    }
+  }
+}
+
+class GridOffsetModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('gridOffset');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetGridOffset(node);
+    } else {
+      GetUINativeModule().common.setGridOffset(node, this.value!);
+    }
+  }
+}
+
+class AlignSelfModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('alignSelf');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetAlignSelf(node);
+    } else {
+      GetUINativeModule().common.setAlignSelf(node, this.value!);
+    }
+  }
+}
+
+class SizeModifier extends Modifier<ArkSize> {
+  static identity: Symbol = Symbol('size');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetSize(node);
+    } else {
+      GetUINativeModule().common.setSize(node, this.value.width, this.value.height);
+    }
+  }
+}
+
 class DisplayPriorityModifier extends Modifier<number> {
   static identity: Symbol = Symbol('displayPriority');
   applyPeer(node: KNode, reset: boolean): void {
-    //console.log('DisplayPriorityModifier reset = ' + reset);
     if (reset) {
       GetUINativeModule().common.resetDisplayPriority(node);
     } else {
@@ -993,6 +1070,72 @@ class ResponseRegionModifier extends Modifier<ArkResponseRegion> {
         }
     }
 }
+class FlexGrowModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('flexGrow');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetFlexGrow(node);
+    } else {
+      GetUINativeModule().common.setFlexGrow(node, this.value!);
+    }
+  }
+}
+
+class FlexShrinkModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('flexShrink');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetFlexShrink(node);
+    } else {
+      GetUINativeModule().common.setFlexShrink(node, this.value!);
+    }
+  }
+}
+
+class AspectRatioModifier extends Modifier<number> {
+  static identity: Symbol = Symbol('aspectRatio');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetAspectRatio(node);
+    } else {
+      GetUINativeModule().common.setAspectRatio(node, this.value!);
+    }
+  }
+}
+
+class ConstraintSizeModifier extends Modifier<ArkConstraintSizeOptions> {
+  static identity: Symbol = Symbol('constraintSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetConstraintSize(node);
+    } else {
+      GetUINativeModule().common.setConstraintSize(node, this.value.minWidth,
+        this.value.maxWidth, this.value.minHeight, this.value.maxHeight);
+    }
+  }
+}
+
+class FlexBasisModifier extends Modifier<number | string> {
+  static identity: Symbol = Symbol('flexBasis');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetFlexBasis(node);
+    } else {
+      GetUINativeModule().common.setFlexBasis(node, this.value!);
+    }
+  }
+}
+
+class LayoutWeightModifier extends Modifier<number | string> {
+  static identity: Symbol = Symbol('layoutWeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().common.resetLayoutWeight(node);
+    } else {
+      GetUINativeModule().common.setLayoutWeight(node, this.value!);
+    }
+  }
+}
 
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
@@ -1008,7 +1151,7 @@ const isLengthType = (val: any) => typeof val === 'string' || typeof val === 'nu
 const lessThenFunction = (val1: number, val2: number) => (val1 - val2) < 0.001
 
 function CheckJSCallbackInfo(value: any, checklist: any[]) {
-    var typeVerified = false;
+    let typeVerified = false;
     checklist.forEach(function (infoType) {
         switch (infoType) {
             case JSCallbackInfoType.STRING:
@@ -1121,9 +1264,48 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         return this;
     }
 
-    expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
-        throw new Error("Method not implemented.");
+  expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
+    let opts = new ArkSafeAreaExpandOpts();
+    opts.type = SAFE_AREA_TYPE_ALL;
+    opts.edges = SAFE_AREA_EDGE_ALL;
+
+    if (types && types.length > 0) {
+      let safeAreaType: string | number = '';
+      for (let param of types) {
+        if (!isNumber(param) || param >= SAFE_AREA_TYPE_LIMIT) {
+          safeAreaType = SAFE_AREA_TYPE_ALL;
+          break;
+        }
+        if (safeAreaType) {
+          safeAreaType += '|';
+        } else {
+          safeAreaType += param.toString();
+        }
+      }
+      opts.type = safeAreaType;
     }
+    if (edges && edges.length > 0) {
+      let safeAreaEdge: string | number = '';
+      for (let param of edges) {
+        if (!isNumber(param) || param >= SAFE_AREA_EDGE_LIMIT) {
+          safeAreaEdge = SAFE_AREA_EDGE_ALL;
+          break;
+        }
+        if (safeAreaEdge) {
+          safeAreaEdge += '|';
+        } else {
+          safeAreaEdge += param.toString();
+        }
+      }
+      opts.edges = safeAreaEdge;
+    }
+    if (opts.type === SAFE_AREA_TYPE_ALL && opts.edges === SAFE_AREA_EDGE_ALL) {
+      // modifier(this._modifiers, ExpandSafeAreaModifier, undefined);
+    } else {
+      modifier(this._modifiers, ExpandSafeAreaModifier, opts);
+    }
+    return this;
+  }
 
     responseRegion(value: Array<Rectangle> | Rectangle): this {
         let arkResponseRegion = new ArkResponseRegion();
@@ -1145,13 +1327,47 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         return this;
     }
 
-    size(value: SizeOptions): this {
-        throw new Error("Method not implemented.");
+  size(value: SizeOptions): this {
+    let arkValue: ArkSize = new ArkSize();
+    if (!value || (!isLengthType(value.width) && !isLengthType(value.height))) {
+      modifier(this._modifiers, SizeModifier, undefined);
     }
 
-    constraintSize(value: ConstraintSizeOptions): this {
-        throw new Error("Method not implemented.");
+    if (value.width && isLengthType(value.width)) {
+      arkValue.width = <string | number>value.width;
     }
+    if (value.height && isLengthType(value.height)) {
+      arkValue.height = <string | number>value.height;
+    }
+    modifier(this._modifiers, SizeModifier, arkValue);
+
+    return this;
+  }
+
+  constraintSize(value: ConstraintSizeOptions): this {
+    let arkValue: ArkConstraintSizeOptions = new ArkConstraintSizeOptions();
+
+    if (!value ||
+      (!isLengthType(value.minWidth) && !isLengthType(value.maxWidth) &&
+        !isLengthType(value.minHeight) && !isLengthType(value.maxHeight))) {
+      modifier(this._modifiers, ConstraintSizeModifier, undefined);
+      return this;
+    }
+    if (value.minWidth && isLengthType(value.minWidth)) {
+      arkValue.minWidth = <string | number>value?.minWidth;
+    }
+    if (value.maxWidth && isLengthType(value.maxWidth)) {
+      arkValue.maxWidth = <string | number>value?.maxWidth;
+    }
+    if (value.minHeight && isLengthType(value.minHeight)) {
+      arkValue.minHeight = <string | number>value?.minHeight;
+    }
+    if (value.maxHeight && isLengthType(value.maxHeight)) {
+      arkValue.maxHeight = <string | number>value?.maxHeight;
+    }
+    modifier(this._modifiers, ConstraintSizeModifier, arkValue);
+    return this;
+  }
 
     touchable(value: boolean): this {
         if (typeof value === 'boolean') {
@@ -1171,9 +1387,17 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         return this;
     }
 
-    layoutWeight(value: number | string): this {
-        throw new Error("Method not implemented.");
+  layoutWeight(value: number | string): this {
+    if (isNumber(value)) {
+      modifier(this._modifiers, LayoutWeightModifier, value);
     }
+    else if (isString(value) && !isNaN(Number(value))) {
+      modifier(this._modifiers, LayoutWeightModifier, parseInt(value.toString()));
+    } else {
+      modifier(this._modifiers, LayoutWeightModifier, 0);
+    }
+    return this;
+  }
 
   padding(value: Padding | Length): this {
     let arkValue = new ArkPadding();
@@ -1243,7 +1467,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this {
-        var arkBackgroundImage = new ArkBackgroundImage()
+        let arkBackgroundImage = new ArkBackgroundImage()
         if (isString(src)) {
             arkBackgroundImage.src = src
         }
@@ -1259,7 +1483,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
             modifier(this._modifiers, BackgroundImageSizeModifier, undefined);
             return this
         }
-        var arkBackgroundImageSize = new ArkBackgroundImageSize()
+        let arkBackgroundImageSize = new ArkBackgroundImageSize()
         if (isNumber(value)) {
             arkBackgroundImageSize.imageSize = value
         } else {
@@ -1279,7 +1503,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
             modifier(this._modifiers, BackgroundImagePositionModifier, undefined);
             return this
         }
-        var arkBackgroundImagePosition = new ArkBackgroundImagePosition()
+        let arkBackgroundImagePosition = new ArkBackgroundImagePosition()
         if (isNumber(value)) {
             arkBackgroundImagePosition.alignment = value
         } else {
@@ -1319,12 +1543,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     opacity(value: number | Resource): this {
-        var opacityDefault = 0.0;
+        let opacityDefault = 0.0;
         if(isResource(value)){
             modifier(this._modifiers, OpacityModifier, opacityDefault);
             return this;
         }
-        var checklist = [JSCallbackInfoType.OBJECT, JSCallbackInfoType.NUMBER, JSCallbackInfoType.STRING];
+        let checklist = [JSCallbackInfoType.OBJECT, JSCallbackInfoType.NUMBER, JSCallbackInfoType.STRING];
         if (!CheckJSCallbackInfo(value, checklist)) {
             modifier(this._modifiers, OpacityModifier, 1.0);
         }
@@ -1341,7 +1565,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     border(value: BorderOptions): this {
-        var arkBorder = new ArkBorder()
+        let arkBorder = new ArkBorder()
         if(!isResource(value?.width) && !isUndefined(value?.width) &&  value?.width !== null)
         {
             if (isNumber(value.width)) {
@@ -1370,7 +1594,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
             }
         }
         if (!isResource(value?.color) && !isUndefined(value?.color) && value?.color !== null) {
-            var arkColor = new ArkColor();
+            let arkColor = new ArkColor();
             if (isNumber(value.color)) {
                 arkColor.parseColorValue(Number(value.color))
                 arkBorder.arkColor.leftColor = arkColor.color
@@ -1431,7 +1655,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
             }
         }
         if (!isUndefined(value?.style) && value?.style !== null) {
-            var arkBorderStyle = new ArkBorderStyle();
+            let arkBorderStyle = new ArkBorderStyle();
             if (arkBorderStyle.parseBorderStyle(value.style)) {
                 if (!isUndefined(arkBorderStyle.style)) {
                     arkBorder.arkStyle.top = arkBorderStyle.style
@@ -1451,7 +1675,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     borderStyle(value: BorderStyle | EdgeStyles): this {
-        var arkBorderStyle = new ArkBorderStyle();
+        let arkBorderStyle = new ArkBorderStyle();
         if (arkBorderStyle.parseBorderStyle(value)) {
             modifier(this._modifiers, BorderStyleModifier, arkBorderStyle);
         } else {
@@ -1461,7 +1685,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     borderWidth(value: Length | EdgeWidths): this {
-        var borderWidth = new ArkBorderWidth()
+        let borderWidth = new ArkBorderWidth()
         if( isResource(value) || isUndefined(value))
         {
             modifier(this._modifiers, BorderWidthModifier, undefined);
@@ -1496,7 +1720,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
             return this;
         }
 
-        var borderRadius = new ArkBorderRadius
+        let borderRadius = new ArkBorderRadius
         if (typeof value === "number" || typeof value === "string") {
             borderRadius.topLeft = value
             borderRadius.topRight = value
@@ -1685,7 +1909,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     colorBlend(value: Color | string | Resource): this {
-        var arkColor = new ArkColor();
+        let arkColor = new ArkColor();
         if (arkColor.parseColorValue(value)) {
             modifier(this._modifiers, ColorBlendModifier, arkColor.color);
         } else {
@@ -1755,7 +1979,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     translate(value: TranslateOptions): this {
-        var arkTranslate = new ArkTranslate()
+        let arkTranslate = new ArkTranslate()
         if (isNumber(value?.x) || isString(value?.x)) {
             arkTranslate.x = value.x
         }
@@ -1770,7 +1994,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     scale(value: ScaleOptions): this {
-        var arkScale = new ArkScale()
+        let arkScale = new ArkScale()
         if (isNumber(value?.x)) {
             arkScale.x = value?.x
         }
@@ -1789,17 +2013,26 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         modifier(this._modifiers, ScaleModifier, arkScale);
         return this;
     }
-
-    gridSpan(value: number): this {
-        throw new Error("Method not implemented.");
+  gridSpan(value: number): this {
+    if (value === null || value === undefined) {
+      modifier(this._modifiers, GridSpanModifier, undefined);
+    } else {
+      modifier(this._modifiers, GridSpanModifier, value);
     }
+    return this;
+  }
 
-    gridOffset(value: number): this {
-        throw new Error("Method not implemented.");
+  gridOffset(value: number): this {
+    if (value === null || value === undefined) {
+      modifier(this._modifiers, GridOffsetModifier, undefined);
+    } else {
+      modifier(this._modifiers, GridOffsetModifier, value);
     }
+    return this;
+  }
 
     rotate(value: RotateOptions): this {
-        var arkRotate = new ArkRotate()
+        let arkRotate = new ArkRotate()
         if ( isNumber(value?.x)){
             arkRotate.x = value?.x
         }
@@ -1859,21 +2092,41 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-    flexGrow(value: number): this {
-        throw new Error("Method not implemented.");
+  flexGrow(value: number): this {
+    if (isNaN(value) || value < 0.0) {
+      modifier(this._modifiers, FlexGrowModifier, undefined);
+    } else {
+      modifier(this._modifiers, FlexGrowModifier, value);
     }
+    return this;
+  }
 
-    flexShrink(value: number): this {
-        throw new Error("Method not implemented.");
+  flexShrink(value: number): this {
+    if (isNaN(value) || value < 0.0) {
+      modifier(this._modifiers, FlexShrinkModifier, undefined);
+    } else {
+      modifier(this._modifiers, FlexShrinkModifier, value);
     }
+    return this;
+  }
 
-    flexBasis(value: number | string): this {
-        throw new Error("Method not implemented.");
+  flexBasis(value: number | string): this {
+    if (isLengthType(value)) {
+      modifier(this._modifiers, FlexBasisModifier, value);
+    } else {
+      modifier(this._modifiers, FlexBasisModifier, undefined);
     }
+    return this;
+  }
 
-    alignSelf(value: ItemAlign): this {
-        throw new Error("Method not implemented.");
+  alignSelf(value: ItemAlign): this {
+    if (value) {
+      modifier(this._modifiers, AlignSelfModifier, value);
+    } else {
+      modifier(this._modifiers, AlignSelfModifier, ItemAlign.Auto);
     }
+    return this;
+  }
 
   displayPriority(value: number): this {
     if (isNaN(value)) {
@@ -1886,7 +2139,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
     zIndex(value: number): this {
         if (value !== null) {
-            var zIndex = 0;
+            let zIndex = 0;
             if (typeof (value) === "number") {
                 zIndex = value;
             }
@@ -1899,9 +2152,17 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         throw new Error("Method not implemented.");
     }
 
-    direction(value: Direction): this {
-        throw new Error("Method not implemented.");
+  direction(value: Direction): this {
+    let direction: string = '';
+    switch (value) {
+      case 0: direction = 'Ltr'; break;
+      case 1: direction = 'Rtl'; break;
+      case 2:
+      default: direction = 'Auto'; break;
     }
+    modifier(this._modifiers, DirectionModifier, direction);
+    return this;
+  }
 
     align(value: Alignment): this {
         if (isNumber(value)) {
@@ -1918,7 +2179,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
             return this;
         }
         if (isNumber(value?.x) || isString(value?.x) || isNumber(value?.y) || isString(value?.y)){
-            var position = new ArkPosition();
+            let position = new ArkPosition();
             position.x = value?.x
             position.y = value?.y
             modifier(this._modifiers, PositionModifier, position);
@@ -1974,13 +2235,85 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         throw new Error("Method not implemented.");
     }
 
-    alignRules(value: AlignRuleOption): this {
-        throw new Error("Method not implemented.");
+  alignRules(value: AlignRuleOption): this {
+    if (!isObject(value) || JSON.stringify(value) === '{}') {
+      modifier(this._modifiers, AlignRulesModifier, undefined);
+      return this;
     }
+    let keys: string[] = ['left', 'middle', 'right', 'top', 'center', 'bottom'];
+    let arkValue = new ArkAlignRules();
+    for (let i = 0; i < keys.length; i++) {
+      let rule = value[keys[i]];
+      let alignRule: string = '';
+      if (isObject(rule)) {
+        let alignSign = false;
+        let anchorSign = false;
+        let align = rule.align;
+        let anchor = rule.anchor;
+        if (isString(anchor)) {
+          anchorSign = true;
+        }
+        if (i < DIRECTION_RANGE) {
+          if (align in HorizontalAlign) {
+            alignSign = true;
+          }
+        } else {
+          if (align in VerticalAlign) {
+            alignSign = true;
+          }
+        }
+        if (!alignSign && !anchorSign) {
+          alignRule += '';
+        } else if (!anchorSign) {
+          alignRule += align.toString();
+          alignRule += '|';
+          alignRule += '__container__';
+        } else if (!alignSign) {
+          alignRule += '2';
+          alignRule += '|';
+          alignRule += anchor;
+        } else {
+          alignRule += align.toString();
+          alignRule += '|';
+          alignRule += anchor;
+        }
+      } else {
+        alignRule += '';
+      }
+      switch (keys[i]) {
+        case 'left':
+          arkValue.left = alignRule;
+          break;
+        case 'middle':
+          arkValue.middle = alignRule;
+          break;
+        case 'right':
+          arkValue.right = alignRule;
+          break;
+        case 'top':
+          arkValue.top = alignRule;
+          break;
+        case 'center':
+          arkValue.center = alignRule;
+          break;
+        case 'bottom':
+          arkValue.bottom = alignRule;
+          break;
+      }
+    }
+    modifier(this._modifiers, AlignRulesModifier, arkValue);
+    return this;
+  }
 
-    aspectRatio(value: number): this {
-        throw new Error("Method not implemented.");
+  aspectRatio(value: number): this {
+
+    if (isNaN(value) || lessThenFunction(value, 0.0)) {
+      modifier(this._modifiers, AspectRatioModifier, undefined);
+    } else {
+      modifier(this._modifiers, AspectRatioModifier, value);
     }
+    return this;
+  }
 
     clickEffect(value: ClickEffect | null): this {
         throw new Error("Method not implemented.");
@@ -2079,7 +2412,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     shadow(value: ShadowOptions | ShadowStyle): this {
-        var arkShadow = new ArkShadow();
+        let arkShadow = new ArkShadow();
         if (arkShadow.parseShadowValue(value)) {
             modifier(this._modifiers, ShadowModifier, arkShadow);
         } else {
