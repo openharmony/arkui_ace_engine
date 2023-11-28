@@ -35,6 +35,12 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
+#include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/common/app_bar_helper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -594,5 +600,4 @@ HWTEST_F(AppBarTestNg, SetRowColor002, TestSize.Level1)
     appBar->SetRowColor(NonColor);
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), originColor);
 }
-
 } // namespace OHOS::Ace::NG
