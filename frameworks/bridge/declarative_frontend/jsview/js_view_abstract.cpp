@@ -765,10 +765,10 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
             popupParam->SetArrowOffset(offset);
         }
     }
-    auto arrowPosition = popupObj->GetProperty("arrowPosition");
-    if (arrowPosition->IsString()) {
+    auto arrowPointPosition = popupObj->GetProperty("arrowPointPosition");
+    if (arrowPointPosition->IsString()) {
         char* pEnd = nullptr;
-        std::strtod(arrowPosition->ToString().c_str(), &pEnd);
+        std::strtod(arrowPointPosition->ToString().c_str(), &pEnd);
         if (pEnd != nullptr) {
             if (std::strcmp(pEnd, "Start") == 0) {
                 offset = ARROW_ZERO_PERCENT_VALUE;
@@ -998,10 +998,10 @@ void ParseCustomPopupParam(
     if (JSViewAbstract::ParseJsDimensionVp(arrowOffset, offset)) {
         popupParam->SetArrowOffset(offset);
     }
-    auto arrowPosition = popupObj->GetProperty("arrowPosition");
-    if (arrowPosition->IsString()) {
+    auto arrowPointPosition = popupObj->GetProperty("arrowPointPosition");
+    if (arrowPointPosition->IsString()) {
         char* pEnd = nullptr;
-        std::strtod(arrowPosition->ToString().c_str(), &pEnd);
+        std::strtod(arrowPointPosition->ToString().c_str(), &pEnd);
         if (pEnd != nullptr) {
             if (std::strcmp(pEnd, "Start") == 0) {
                 offset = ARROW_ZERO_PERCENT_VALUE;
