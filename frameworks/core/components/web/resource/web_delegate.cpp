@@ -4336,6 +4336,13 @@ void WebDelegate::OnAccessibilityEvent(int32_t accessibilityId, AccessibilityEve
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     AccessibilityEvent event;
+    if (accessibilityId <= 0) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webNode = webPattern->GetHost();
+        CHECK_NULL_VOID(webNode);
+        accessibilityId = webNode->GetAccessibilityId();
+    }
     event.nodeId = accessibilityId;
     event.type = eventType;
     context->SendEventToAccessibility(event);
