@@ -950,16 +950,18 @@ void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
         if (!IsItemSelected(info)) {
             ClearMultiSelect();
             ClearInvisibleItemsSelectedStatus();
+
+            mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+            lastMouseStart_ = mouseStartOffset_;
+            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+            mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+            totalOffsetOfMousePressed_ = mousePressOffset_.GetMainOffset(axis_) + GetTotalOffset();
+            canMultiSelect_ = true;
         }
-        mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-        lastMouseStart_ = mouseStartOffset_;
-        mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-        mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-        totalOffsetOfMousePressed_ = mousePressOffset_.GetMainOffset(axis_) + GetTotalOffset();
         mousePressed_ = true;
         // do not select when click
     } else if (info.GetAction() == MouseAction::MOVE) {
-        if (!mousePressed_) {
+        if (!mousePressed_ || !canMultiSelect_) {
             return;
         }
         lastMouseMove_ = info;
@@ -1029,6 +1031,7 @@ void ScrollablePattern::OnMouseRelease()
     lastMouseStart_.Reset();
     mouseEndOffset_.Reset();
     mousePressed_ = false;
+    canMultiSelect_ = false;
     ClearSelectedZone();
     itemToBeSelected_.clear();
     lastMouseMove_.SetLocalLocation(Offset::Zero());
