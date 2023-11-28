@@ -2868,7 +2868,8 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto inputValue = textFieldLayoutProperty->GetSetCounterValue(-1);
     auto passwordResponse = DynamicCast<PasswordResponseArea>(pattern->GetResponseArea());
-    if (!passwordResponse && originLength == maxlength && !IsSelected() &&
+    bool noDeleteOperation = deleteBackwardOperations_.empty() && deleteForwardOperations_.empty();
+    if (!passwordResponse && originLength == maxlength && noDeleteOperation && !IsSelected() &&
         textFieldLayoutProperty->GetShowCounterValue(false) && inputValue != INVAILD_VALUE) {
         counterChange_ = true;
         HandleCounterBorder();
