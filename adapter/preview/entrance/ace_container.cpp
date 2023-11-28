@@ -689,21 +689,37 @@ void AceContainer::AddAssetPath(
 {
     auto container = GetContainerInstance(instanceId);
     CHECK_NULL_VOID(container);
-
-    if (!container->assetManager_) {
-        RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-        container->assetManager_ = flutterAssetManager;
-        if (container->frontend_) {
-            container->frontend_->SetAssetManager(flutterAssetManager);
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        if (!container->assetManager_) {
+            RefPtr<AssetManagerImpl> assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+            container->assetManager_ = assetManagerImpl;
+            if (container->frontend_) {
+                container->frontend_->SetAssetManager(assetManagerImpl);
+            }
         }
-    }
+        if (!packagePath.empty()) {
+            auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+            if (fileAssetProvider->Initialize(packagePath, paths)) {
+                LOGI("Push AssetProvider to queue.");
+                container->assetManager_->PushBack(std::move(fileAssetProvider));
+            }
+        }
+    } else {
+        if (!container->assetManager_) {
+            RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+            container->assetManager_ = flutterAssetManager;
+            if (container->frontend_) {
+                container->frontend_->SetAssetManager(flutterAssetManager);
+            }
+        }
 
-    for (const auto& path : paths) {
-        LOGD("Current path is: %{private}s", path.c_str());
-        auto dirAssetProvider = AceType::MakeRefPtr<DirAssetProvider>(
-            path, std::make_unique<flutter::DirectoryAssetBundle>(
-                      fml::OpenDirectory(path.c_str(), false, fml::FilePermission::kRead)));
-        container->assetManager_->PushBack(std::move(dirAssetProvider));
+        for (const auto& path : paths) {
+            LOGD("Current path is: %{private}s", path.c_str());
+            auto dirAssetProvider = AceType::MakeRefPtr<DirAssetProvider>(
+                path, std::make_unique<flutter::DirectoryAssetBundle>(
+                          fml::OpenDirectory(path.c_str(), false, fml::FilePermission::kRead)));
+            container->assetManager_->PushBack(std::move(dirAssetProvider));
+        }
     }
 }
 #else
