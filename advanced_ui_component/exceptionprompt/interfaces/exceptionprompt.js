@@ -29,7 +29,7 @@ export class ExceptionPrompt extends ViewPU {
         this.__ShowStatus = new ObservedPropertySimplePU(!1, this, "ShowStatus");
         this.__OpacityNum = new ObservedPropertySimplePU(.15, this, "OpacityNum");
         this.__HEIGHT = new ObservedPropertySimplePU(80, this, "HEIGHT");
-        this.__BORDER_RADIUS = new ObservedPropertySimplePU(12, this, "BORDER_RADIUS");
+        this.__BORDER_RADIUS = new ObservedPropertySimplePU(16, this, "BORDER_RADIUS");
         this.__BG_OPACITY = new ObservedPropertySimplePU(1, this, "BG_OPACITY");
         this.__state = new ObservedPropertySimplePU(!1, this, "state");
         this.__ErrorDefaultObj = new ObservedPropertyObjectPU({
@@ -52,7 +52,7 @@ export class ExceptionPrompt extends ViewPU {
             void 0 !== t.HardwareStatus ? this.__HardwareStatus.set(t.HardwareStatus) : this.__HardwareStatus.set(!0);
             void 0 !== t.Icon ? this.__Icon.set(t.Icon) : this.__Icon.set("");
             void 0 !== t.TipContent ? this.__TipContent.set(t.TipContent) : this.__TipContent.set("");
-            void 0 !== t.ContentText ? this.__ContentText.set(t.ContentText) : this.__ContentText.set("xxx");
+            void 0 !== t.ContentText ? this.__ContentText.set(t.ContentText) : this.__ContentText.set("");
             void 0 !== t.ThemeColorStatus ? this.__ThemeColorStatus.set(t.ThemeColorStatus) : this.__ThemeColorStatus.set(!0);
         void 0 !== t.ShowStatus && (this.ShowStatus = t.ShowStatus);
         void 0 !== t.OpacityNum && (this.OpacityNum = t.OpacityNum);
@@ -239,12 +239,12 @@ export class ExceptionPrompt extends ViewPU {
                 this.ShowStatus = !1;
                 setTimeout((() => {
                     this.text = this.ErrorDefaultObj[this.Type];
-                    4 === this.Type && (this.text = `无法获取${this.ContentText}，请点击重试`);
+                    4 === this.Type && (this.text = `无法获取${this.ContentText || ""}，请点击重试`);
                     this.ShowStatus = !0
                 }), 200)
             } else {
                 this.text = this.ErrorDefaultObj[this.Type];
-                4 === this.Type && (this.text = `无法获取${this.ContentText}，请点击重试`);
+                4 === this.Type && (this.text = `无法获取${this.ContentText || ""}，请点击重试`);
                 this.ShowStatus = !0
             }
         } else this.ShowStatus = !1
@@ -255,9 +255,10 @@ export class ExceptionPrompt extends ViewPU {
             ViewStackProcessor.StartGetAccessRecordingFor(t);
             Column.create();
             Column.width("100%");
-            Column.height(48);
+            Column.height(3 === this.Type || 4 === this.Type || this.text.length < 8 ? 48 : 58);
             Column.position({ y: this.HEIGHT });
             Column.zIndex(999);
+            Column.opacity(.92);
             e || Column.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -393,7 +394,7 @@ export class ExceptionPrompt extends ViewPU {
                     ViewStackProcessor.StartGetAccessRecordingFor(t);
                     Flex.create({ alignItems: ItemAlign.Center, justifyContent: FlexAlign.End });
                     Flex.margin({ left: 16 });
-                    Flex.width(this.state ? 130 : 0);
+                    Flex.width(this.state ? 120 : 0);
                     Flex.height("100%");
                     Flex.onClick((() => {
                         this.ConfigureNetworkFunction()
@@ -418,6 +419,7 @@ export class ExceptionPrompt extends ViewPU {
                         bundleName: "",
                         moduleName: ""
                     });
+                    Text.width(65);
                     e || Text.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
@@ -426,8 +428,8 @@ export class ExceptionPrompt extends ViewPU {
                     ViewStackProcessor.StartGetAccessRecordingFor(t);
                     Image.create(RIGHT_ICON);
                     Image.margin({ left: 4 });
-                    Image.width(15);
-                    Image.height(24);
+                    Image.width("15vp");
+                    Image.height("24vp");
                     Image.fillColor({
                         id: -1,
                         type: 10001,

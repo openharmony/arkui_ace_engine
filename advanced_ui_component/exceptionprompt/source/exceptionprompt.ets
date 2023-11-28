@@ -22,16 +22,14 @@ export struct ExceptionPrompt {
   @Prop HardwareStatus?: boolean = true //网络硬件打开状态
   @Prop Icon?: string = '' //异常提示图标
   @Prop TipContent?: string = '' //提示文字内容
-  @Prop ContentText?: string = 'xxx' //无法获取的文字内容
+  @Prop ContentText?: string = '' //无法获取的文字内容
   @Prop @Watch('OpacityStatusChange') ThemeColorStatus?: boolean = true //默认浅色背景true  false：深色背景
   @State ShowStatus: boolean = false //异常提示显隐
   @State OpacityNum: number = 0.15 //背景第一层的不透明度
   @State HEIGHT: number = 80 //提示框到顶部的距离
-  @State BORDER_RADIUS: number = 12 //提示框的圆角值
-  // @State DURATION: number = 1500 //animateTo的duration时间值
+  @State BORDER_RADIUS: number = 16 //提示框的圆角值
   @State BG_OPACITY: number = 1
   @State state: boolean = false
-  // @State icons?:string=$r('app.media.ic_public_arrow_right1')
   @State ErrorDefaultObj: Object = {
     1: '网络未连接',
     2: '网络连接不稳定，请点击重试',
@@ -77,14 +75,14 @@ export struct ExceptionPrompt {
         setTimeout(() => {
           this.text = this.ErrorDefaultObj[this.Type]
           if (this.Type === 4) {
-            this.text = `无法获取${this.ContentText}，请点击重试`
+            this.text = `无法获取${this.ContentText || ''}，请点击重试`
           }
           this.ShowStatus = true
         }, End_DURATION)
       } else {
         this.text = this.ErrorDefaultObj[this.Type]
         if (this.Type === 4) {
-          this.text = `无法获取${this.ContentText}，请点击重试`
+          this.text = `无法获取${this.ContentText || ''}，请点击重试`
         }
         this.ShowStatus = true
       }
@@ -124,7 +122,6 @@ export struct ExceptionPrompt {
               .fontSize($r('sys.float.ohos_id_text_size_body1'))
               .fontColor($r('sys.color.ohos_id_color_warning'))
               .margin({ left: 16 })
-
           }
           .width('100%')
           .height('100%')
@@ -134,14 +131,15 @@ export struct ExceptionPrompt {
               Text('设置网络')
                 .fontSize($r('sys.float.ohos_id_text_size_body2'))
                 .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+                .width(65)
               Image(RIGHT_ICON)
                 .margin({ left: 4 })
-                .width(15)
-                .height(24)
+                .width('15vp')
+                .height('24vp')
                 .fillColor($r('sys.color.ohos_id_color_tertiary'))
             }
             .margin({ left: 16 })
-            .width(this.state ? 130 : 0)
+            .width(this.state ? 120 : 0)
             .height('100%')
             .onClick(() => {
               // 点击设置网络，打开设置网络弹出框
@@ -171,9 +169,9 @@ export struct ExceptionPrompt {
       .animation({ duration: 250 })
     }
     .width('100%')
-    .height(48)
+    .height((this.Type === 3 || this.Type === 4) || this.text.length < 8 ? 48 : 58)
     .position({ y: this.HEIGHT })
     .zIndex(999)
-
+    .opacity(0.92)
   }
 }
