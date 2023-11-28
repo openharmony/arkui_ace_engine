@@ -1453,7 +1453,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         auto pattern = overlay->GetPattern();
         if (InstanceOf<ToastPattern>(pattern)) {
             // still have nodes on root expect stage and toast node.
-            if (overlay->GetChildren().size() > 2) {
+            if (rootNode->GetChildren().size() > 2) {
                 // If the current node is a toast, the last second overlay's node should be processed.
                 overlay = DynamicCast<FrameNode>(rootNode->GetChildAtIndex(rootNode->GetChildren().size() - 2));
                 CHECK_NULL_RETURN(overlay, false);
