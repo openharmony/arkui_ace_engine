@@ -229,7 +229,7 @@ void NavDestinationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_ALL, .type = SAFE_AREA_TYPE_SYSTEM };
+    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
