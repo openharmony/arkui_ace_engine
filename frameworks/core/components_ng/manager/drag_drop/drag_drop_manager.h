@@ -87,6 +87,9 @@ public:
     void RestoreClipboardData();
     void DestroyDragWindow();
     void CancelItemDrag();
+    std::string GetExtraInfo();
+    void SetExtraInfo(const std::string& extraInfo);
+    void ClearExtraInfo();
 #ifdef ENABLE_DRAG_FRAMEWORK
     void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const bool isCopy);
     void RequireSummary();
@@ -100,9 +103,6 @@ public:
     Rect GetDragWindowRect(const Point& point);
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
     void UpdatePixelMapPosition(int32_t globalX, int32_t globalY);
-    std::string GetExtraInfo();
-    void SetExtraInfo(const std::string& extraInfo);
-    void ClearExtraInfo();
     bool IsMsdpDragging() const;
 #endif // ENABLE_DRAG_FRAMEWORK
     void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const Point& point);
