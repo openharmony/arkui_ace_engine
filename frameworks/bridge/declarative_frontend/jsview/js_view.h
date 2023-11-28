@@ -326,8 +326,6 @@ public:
         recycleCustomNode_.Reset();
     }
 
-    void JsInvalidateLayout();
-
     bool isFullUpdate() const override
     {
         return false;

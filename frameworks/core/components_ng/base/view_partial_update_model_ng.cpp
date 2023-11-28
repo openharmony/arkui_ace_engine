@@ -96,17 +96,4 @@ void ViewPartialUpdateModelNG::FinishUpdate(
     NG::ViewStackProcessor::GetInstance()->FlushRerenderTask();
 }
 
-void ViewPartialUpdateModelNG::InvalidateLayout(const WeakPtr<AceType>& node)
-{
-    auto weakNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(node);
-    auto customNode = weakNode.Upgrade();
-    if (customNode) {
-        customNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
-
-    auto parentNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetParent());
-    if (parentNode && parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
-        parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
-}
 } // namespace OHOS::Ace::NG

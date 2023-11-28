@@ -24,7 +24,6 @@
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/custom/custom_measure_layout_param.h"
 
 namespace OHOS::Ace::NG {
 
@@ -54,13 +53,14 @@ public:
         return std::nullopt;
     }
 
-    RefPtr<MeasureLayoutParam> GetMeasureLayoutParam()
+    RefPtr<UINode> MoveBuildItem()
     {
-        return children_;
+        return std::move(buildItem_);
     }
+
 private:
     RenderFunction renderFunction_;
-    RefPtr<MeasureLayoutParam> children_;
+    RefPtr<UINode> buildItem_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CustomNodeLayoutAlgorithm);
 };
