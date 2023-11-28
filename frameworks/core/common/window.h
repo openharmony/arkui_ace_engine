@@ -81,6 +81,11 @@ public:
 
     virtual void FlushModifier() {}
 
+    virtual bool HasUIAnimation()
+    {
+        return false;
+    }
+
     void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
 
     virtual void SetVsyncCallback(AceVsyncCallback&& callback);
