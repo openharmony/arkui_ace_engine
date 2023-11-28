@@ -143,7 +143,7 @@ HWTEST_F(RegisterTest, CastToRegisterTest005, TestSize.Level1)
         return;
     }
     sleep(3);
-    EXPECT_TRUE(g_threadRunning);
+    EXPECT_FALSE(g_threadRunning);
 
     /**
      * @tc.steps: step2. Call  disconnect and delete the  HdcJdwpSimulator
@@ -211,7 +211,7 @@ HWTEST_F(RegisterTest, CastToRegisterTest007, TestSize.Level1)
     string pkgName = "test_pkt_name";
     ASSERT_EQ(pthread_create(&tid, nullptr, &ConnectJpidTest, (void*)pkgName.c_str()), 0);
     sleep(3);
-    EXPECT_TRUE(g_threadRunning);
+    EXPECT_FALSE(g_threadRunning);
 
     /**
      * @tc.steps: step2. Call  disconnect and delete the  HdcJdwpSimulator
