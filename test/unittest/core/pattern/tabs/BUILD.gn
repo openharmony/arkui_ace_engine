@@ -15,8 +15,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("tabs_test_ng") {
   type = "new"
-  sources = [
-    "$ace_root/frameworks/base/thread/background_task_executor.cpp",
-    "tabs_test_ng.cpp",
-  ]
+  sources = [ "tabs_test_ng.cpp" ]
 }

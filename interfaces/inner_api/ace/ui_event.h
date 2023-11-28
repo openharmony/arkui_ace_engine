@@ -31,7 +31,7 @@ public:
     static void UnregisterUIEventObserver(const std::shared_ptr<UIEventObserver>& observer);
 
     static void GetNodeProperty(
-        const std::string& pageUrl, const std::unordered_map<std::string, std::string>& nodeProperties);
+        const std::string& pageUrl, std::unordered_map<std::string, std::string>& nodeProperties);
 
     static void GetSimplifiedInspectorTree(std::string& tree);
 };

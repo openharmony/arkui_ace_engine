@@ -29,7 +29,7 @@ void UIEvent::UnregisterUIEventObserver(const std::shared_ptr<UIEventObserver>& 
 }
 
 void UIEvent::GetNodeProperty(
-    const std::string& pageUrl, const std::unordered_map<std::string, std::string>& nodeProperties)
+    const std::string& pageUrl, std::unordered_map<std::string, std::string>& nodeProperties)
 {
     UIEventFunc::GetNodeProperty(pageUrl, nodeProperties);
 }

@@ -69,7 +69,7 @@ public:
 
     bool PutMultiple(const std::string& id, const std::string& name, const std::vector<std::string>& value);
 
-    void GetNodeData(const std::string& pageUrl, std::unordered_map<std::string, std::string> nodes);
+    void GetNodeData(const std::string& pageUrl, std::unordered_map<std::string, std::string>& nodes);
 
     void Clear(const std::string& pageUrl);
 

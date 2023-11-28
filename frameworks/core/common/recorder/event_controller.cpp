@@ -82,8 +82,9 @@ void EventController::Unregister(const std::shared_ptr<UIEventObserver>& observe
     std::unique_lock<std::mutex> lock(cacheLock_);
     auto iter = std::remove_if(clientList_.begin(), clientList_.end(),
         [&observer](UIEventClient client) { return client.observer == observer; });
+    bool change = iter != clientList_.end();
     clientList_.erase(iter, clientList_.end());
-    if (iter != clientList_.end()) {
+    if (change) {
         NotifyConfigChange();
     }
 }

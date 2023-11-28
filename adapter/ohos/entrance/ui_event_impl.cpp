@@ -45,7 +45,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_UnregisterUIEventObserver(const std::s
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetNodeProperty(
-    const std::string& pageUrl, const std::unordered_map<std::string, std::string>& nodeProperties)
+    const std::string& pageUrl, std::unordered_map<std::string, std::string>& nodeProperties)
 {
     TAG_LOGD(AceLogTag::ACE_UIEVENT, "GetNodeProperty.");
     Recorder::NodeDataCache::Get().GetNodeData(pageUrl, nodeProperties);

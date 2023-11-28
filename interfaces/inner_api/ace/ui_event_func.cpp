@@ -88,7 +88,7 @@ void UIEventFunc::UnregisterUIEventObserver(const std::shared_ptr<UIEventObserve
 }
 
 void UIEventFunc::GetNodeProperty(
-    const std::string& pageUrl, const std::unordered_map<std::string, std::string>& nodeProperties)
+    const std::string& pageUrl, std::unordered_map<std::string, std::string>& nodeProperties)
 {
     auto func = UIEventFunc::Get();
     if (func.IsAvailable()) {

@@ -26,7 +26,7 @@
 namespace OHOS::Ace {
 using RegisterUIEventObserverFunc = void (*)(const std::string&, const std::shared_ptr<UIEventObserver>&);
 using UnregisterUIEventObserverFunc = void (*)(const std::shared_ptr<UIEventObserver>&);
-using GetNodePropertyFunc = void (*)(const std::string&, const std::unordered_map<std::string, std::string>&);
+using GetNodePropertyFunc = void (*)(const std::string&, std::unordered_map<std::string, std::string>&);
 using GetSimplifiedInspectorTreeFunc = void (*)(std::string&);
 
 class UIEventFunc final {
@@ -38,7 +38,7 @@ public:
     static void UnregisterUIEventObserver(const std::shared_ptr<UIEventObserver>& observer);
 
     static void GetNodeProperty(
-        const std::string& pageUrl, const std::unordered_map<std::string, std::string>& nodeProperties);
+        const std::string& pageUrl, std::unordered_map<std::string, std::string>& nodeProperties);
 
     static void GetSimplifiedInspectorTree(std::string& tree);
 
