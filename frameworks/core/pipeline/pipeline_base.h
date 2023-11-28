@@ -900,6 +900,7 @@ public:
     void RemoveJsFormVsyncCallback(int32_t subWindowId);
 
     virtual void SetIsLayoutFullScreen(bool isLayoutFullScreen) {}
+    virtual void SetIsNeedAvoidWindow(bool isLayoutFullScreen) {}
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) {}
 
     void SetIsAppWindow(bool isAppWindow)
