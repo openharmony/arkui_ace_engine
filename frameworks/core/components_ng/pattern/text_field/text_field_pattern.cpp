@@ -1032,6 +1032,11 @@ void TextFieldPattern::HandleOnCut()
     if (!IsSelected()) {
         return;
     }
+    if (IsInPasswordMode()) {
+        UpdateSelection(selectController_->GetEndIndex());
+        StartTwinkling();
+        return;
+    }
     auto selectedText = contentController_->GetSelectedValue(start, end);
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Cut value is %{private}s", selectedText.c_str());
