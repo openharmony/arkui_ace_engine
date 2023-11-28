@@ -81,7 +81,7 @@ public:
 
 private:
     // Recognize whether MOVE/UP event is in response region.
-    void IsPointInRegion(const TouchEvent& event);
+    bool IsPointInRegion(const TouchEvent& event);
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
     void HandleTouchMoveEvent(const TouchEvent& event) override;
