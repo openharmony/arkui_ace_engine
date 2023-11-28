@@ -113,6 +113,9 @@ private:
     bool ISAllowUpdate() const;
     void EnableDrag();
     void UpdateConfiguration();
+    void HandleFormComponent(const RequestFormInfo& info);
+    void AddFormComponent(const RequestFormInfo& info);
+    void UpdateFormComponent(const RequestFormInfo& info);
 
     void HandleSnapshot();
     void TakeSurfaceCaptureForUI();
@@ -135,6 +138,7 @@ private:
     RequestFormInfo cardInfo_;
     bool isLoaded_ = false;
     bool isVisible_ = true;
+    bool isBeenLayout_ = false;
     bool isUnTrust_ = false;
     bool isDynamic_ = true;
     bool isSnapshot_ = false;

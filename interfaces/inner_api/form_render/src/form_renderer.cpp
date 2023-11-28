@@ -198,6 +198,7 @@ void FormRenderer::OnSurfaceChange(float width, float height)
         HILOG_ERROR("form renderer delegate is null!");
         return;
     }
+    HILOG_INFO("Form OnSurfaceChange!");
     formRendererDelegate_->OnSurfaceChange(width, height);
 }
 
