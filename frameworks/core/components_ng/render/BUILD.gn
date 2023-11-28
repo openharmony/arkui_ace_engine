@@ -93,7 +93,7 @@ build_component_ng("render_ng") {
     external_deps = [ "player_framework:media_client" ]
   }
 
-  if (defined(video_texture_support) && video_texture_support) {
+  if (is_arkui_x) {
     sources += [ "adapter/render_texture_impl.cpp" ]
   }
 }
