@@ -202,7 +202,7 @@ struct ArkUICommonModifierAPI {
     void (*ResetVisibility)(NodeHandle node);
     void (*SetAccessibilityText)(NodeHandle node, const char* value);
     void (*ResetAccessibilityText)(NodeHandle node);
-    void (*SetAllowDrop)(NodeHandle node, char** value, int32_t length);
+    void (*SetAllowDrop)(NodeHandle node, const char** value, int32_t length);
     void (*ResetAllowDrop)(NodeHandle node);
     void (*SetAccessibilityLevel)(NodeHandle node, const char* value);
     void (*ResetAccessibilityLevel)(NodeHandle node);
@@ -552,7 +552,7 @@ struct ArkUINavigationModifierAPI {
     void (*ResetTitleMode)(NodeHandle node);
     void (*SetHideBackButton)(NodeHandle node, bool hideBackButton);
     void (*ResetHideBackButton)(NodeHandle node);
-    void (*SetSubtitle)(NodeHandle node, char* subtitle);
+    void (*SetSubtitle)(NodeHandle node, const char* subtitle);
     void (*ResetSubtitle)(NodeHandle node);
     void (*ResetUsrNavigationMode)(NodeHandle node);
     void (*SetUsrNavigationMode)(NodeHandle node, int32_t value);
@@ -576,13 +576,13 @@ struct ArkUINavRouterModifierAPI {
 };
 
 struct ArkUINavigatorModifierAPI {
-    void (*SetTarget)(NodeHandle node, char* value);
+    void (*SetTarget)(NodeHandle node, const char* value);
     void (*ResetTarget)(NodeHandle node);
     void (*SetType)(NodeHandle node, int32_t value);
     void (*ResetType)(NodeHandle node);
     void (*SetActive)(NodeHandle node, bool active);
     void (*ResetActive)(NodeHandle node);
-    void (*SetParams)(NodeHandle node, char* args);
+    void (*SetParams)(NodeHandle node, const char* args);
     void (*ResetParams)(NodeHandle node);
 };
 
