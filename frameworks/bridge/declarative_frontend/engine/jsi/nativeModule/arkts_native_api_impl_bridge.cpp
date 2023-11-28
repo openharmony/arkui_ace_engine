@@ -848,13 +848,77 @@ void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> obj
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigation"), navigation);
 }
 
-void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto image = panda::ObjectRef::New(vm);
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetCopyOption));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetCopyOption));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoResize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetAutoResize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoResize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetAutoResize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setObjectRepeat"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetObjectRepeat));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObjectRepeat"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetObjectRepeat));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRenderMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetRenderMode));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRenderMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetRenderMode));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSyncLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetSyncLoad));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSyncLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetSyncLoad));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setObjectFit"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ImageBridge::SetObjectFit));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetObjectFit));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObjectFit"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ImageBridge::ResetObjectFit));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetObjectFit));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFitOriginalSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetFitOriginalSize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFitOriginalSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetFitOriginalSize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSourceSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetSourceSize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSourceSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetSourceSize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMatchTextDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetMatchTextDirection));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMatchTextDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetMatchTextDirection));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFillColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetFillColor));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFillColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetFillColor));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlt"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetAlt));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlt"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetAlt));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImageInterpolation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetImageInterpolation));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImageInterpolation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetImageInterpolation));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColorFilter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetColorFilter));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColorFilter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetColorFilter));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSyncLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetSyncLoad));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSyncLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetSyncLoad));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setObjectFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetObjectFit));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObjectFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetObjectFit));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFitOriginalSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetFitOriginalSize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFitOriginalSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetFitOriginalSize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDraggable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetDraggable));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDraggable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetDraggable));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "image"), image);
 }
 
