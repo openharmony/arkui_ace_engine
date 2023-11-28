@@ -581,6 +581,14 @@ export struct ChipComponent {
     })
   }
 
+  private getVisibility(): Visibility {
+    if (this.toVp(this.getChipNodeHeight()) > 0 && this.toVp(this.getChipNodeWidth()) > 0) {
+      return Visibility.Visible
+    } else {
+      return Visibility.None
+    }
+  }
+
   aboutToDisappear() {
     this.smListener.off("change")
     this.mdListener.off("change")
@@ -599,6 +607,8 @@ export struct ChipComponent {
           .objectFit(ImageFit.Cover)
           .focusable(false)
           .flexShrink(0)
+          .visibility(this.getVisibility())
+
       }
 
       Text(this.label?.text ?? "")
@@ -613,6 +623,7 @@ export struct ChipComponent {
         .flexShrink(1)
         .focusable(true)
         .textAlign(TextAlign.Center)
+        .visibility(this.getVisibility())
 
       Image(this.getSuffixIconSrc())
         .opacity(this.getChipNodeOpacity())
@@ -622,6 +633,7 @@ export struct ChipComponent {
         .focusable(this.getSuffixIconFocusable())
         .objectFit(ImageFit.Cover)
         .flexShrink(0)
+        .visibility(this.getVisibility())
         .stateStyles({
           focused: this.suffixIconFocusStyles,
           normal: this.suffixIconNormalStyles,
@@ -681,7 +693,7 @@ export struct ChipComponent {
   }
 
   build() {
-    if (!this.deleteChip && (this.toVp(this.getChipNodeHeight()) > 0 && this.toVp(this.getChipNodeWidth()) > 0)) {
+    if (!this.deleteChip) {
       this.chipBuilder()
     }
   }
