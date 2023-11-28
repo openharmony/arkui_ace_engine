@@ -559,6 +559,13 @@ void TabBarPattern::OnModifyDone()
         gestureHub->AddTouchEvent(tabBarPattern->touchEvent_);
     };
     swiperController_->SetAddTabBarEventCallback(std::move(addEventCallback));
+
+    auto surfaceChangeCallback = [weak = WeakClaim(this)]() {
+        auto tabBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(tabBarPattern);
+        tabBarPattern->isTouchingSwiper_ = false;
+    };
+    swiperController_->SetSurfaceChangeCallback(std::move(surfaceChangeCallback));
 }
 
 bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

@@ -358,6 +358,10 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 if (swiper->indicatorController_) {
                     swiper->indicatorController_->Stop();
                 }
+                const auto& surfaceChangeCallback = swiper->swiperController_->GetSurfaceChangeCallback();
+                if (surfaceChangeCallback) {
+                    surfaceChangeCallback();
+                }
                 swiper->currentOffset_ = 0.0f;
                 swiper->itemPosition_.clear();
                 swiper->isVoluntarilyClear_ = true;
@@ -2019,27 +2023,31 @@ void SwiperPattern::PlayTranslateAnimation(
 void SwiperPattern::OnSpringAnimationStart(float velocity)
 {
     AnimationCallbackInfo info;
-    info.velocity = velocity;
+    info.velocity = Dimension(velocity, DimensionUnit::PX).ConvertToVp();
     info.currentOffset = GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
 
-    auto nextIndex = ComputeNextIndexByVelocity(velocity);
-    if (GetLoopIndex(currentIndex_) == GetLoopIndex(nextIndex)) {
+    nextIndex_ = ComputeNextIndexByVelocity(velocity);
+    if (GetLoopIndex(currentIndex_) == GetLoopIndex(nextIndex_)) {
         info.targetOffset = info.currentOffset;
     } else {
-        auto iter = itemPosition_.find(nextIndex);
+        auto iter = itemPosition_.find(nextIndex_);
         auto nextOffset = iter != itemPosition_.end() ? iter->second.startPos : 0.0f;
         info.targetOffset = GetCustomPropertyOffset() + Dimension(nextOffset, DimensionUnit::PX).ConvertToVp();
     }
 
-    FireAnimationStartEvent(GetLoopIndex(currentIndex_), GetLoopIndex(nextIndex), info);
+    FireAnimationStartEvent(GetLoopIndex(currentIndex_), GetLoopIndex(nextIndex_), info);
 }
 
 void SwiperPattern::OnSpringAndFadeAnimationFinish()
 {
-    auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
-    auto nextIndex = firstItemInfoInVisibleArea.first;
-    if (GetLoopIndex(currentIndex_) != GetLoopIndex(nextIndex)) {
-        UpdateCurrentIndex(nextIndex);
+    auto itemInfoInVisibleArea = std::make_pair(0, SwiperItemInfo {});
+    if (!itemPosition_.empty()) {
+        auto item = itemPosition_.find(nextIndex_);
+        itemInfoInVisibleArea = std::make_pair(item->first,
+            SwiperItemInfo { item->second.startPos, item->second.endPos });
+    }
+    if (GetLoopIndex(currentIndex_) != GetLoopIndex(nextIndex_)) {
+        UpdateCurrentIndex(nextIndex_);
         do {
             auto host = GetHost();
             if (!host) {
@@ -2059,10 +2067,10 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
         oldIndex_ = currentIndex_;
     }
     AnimationCallbackInfo info;
-    auto firstIndexStartPos = firstItemInfoInVisibleArea.second.startPos;
-    info.currentOffset = GetCustomPropertyOffset() + Dimension(firstIndexStartPos, DimensionUnit::PX).ConvertToVp();
+    auto indexStartPos = itemInfoInVisibleArea.second.startPos;
+    info.currentOffset = GetCustomPropertyOffset() + Dimension(indexStartPos, DimensionUnit::PX).ConvertToVp();
     FireAnimationEndEvent(GetLoopIndex(currentIndex_), info);
-    currentIndexOffset_ = firstIndexStartPos;
+    currentIndexOffset_ = indexStartPos;
     UpdateItemRenderGroup(false);
     NotifyParentScrollEnd();
     StartAutoPlay();
@@ -2072,14 +2080,14 @@ void SwiperPattern::OnFadeAnimationStart()
 {
     AnimationCallbackInfo info;
     info.currentOffset = GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
-    auto nextIndex = ComputeNextIndexByVelocity(0.0);
-    if (GetLoopIndex(currentIndex_) == GetLoopIndex(nextIndex)) {
+    nextIndex_ = ComputeNextIndexByVelocity(0.0);
+    if (GetLoopIndex(currentIndex_) == GetLoopIndex(nextIndex_)) {
         info.targetOffset = info.currentOffset;
     } else {
         info.targetOffset = GetCustomPropertyOffset();
     }
 
-    FireAnimationStartEvent(GetLoopIndex(currentIndex_), GetLoopIndex(nextIndex), info);
+    FireAnimationStartEvent(GetLoopIndex(currentIndex_), GetLoopIndex(nextIndex_), info);
 }
 
 void SwiperPattern::PlaySpringAnimation(double dragVelocity)
@@ -2115,6 +2123,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
             swiper->UpdateCurrentOffset(static_cast<float>(position) - swiper->currentOffset_);
         }
     });
+    nextIndex_ = currentIndex_;
     springController_->AddStartListener([weak = AceType::WeakClaim(this), dragVelocity]() {
         auto swiperPattern = weak.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
@@ -2152,6 +2161,7 @@ void SwiperPattern::PlayFadeAnimation()
         }
     }));
 
+    nextIndex_ = currentIndex_;
     fadeController_->AddStartListener([weak]() {
         auto swiperPattern = weak.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
