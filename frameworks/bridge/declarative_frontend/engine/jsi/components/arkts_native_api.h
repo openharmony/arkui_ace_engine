@@ -421,6 +421,18 @@ struct ArkUITimepickerModifierAPI {
     void (*ResetTimepickerBackgroundColor)(NodeHandle node);
 };
 
+struct ArkUIRowModifierAPI {
+    void (*SetRowJustifyContent)(NodeHandle node, int32_t flexAlign);
+    void (*ResetRowJustifyContent)(NodeHandle node);
+    void (*SetRowAlignItems)(NodeHandle node, int32_t verticalAlign);
+    void (*ResetRowAlignItems)(NodeHandle node);
+};
+
+struct ArkUIRowSplitModifierAPI {
+    void (*SetRowSplitResizeable)(NodeHandle node, bool resizeable);
+    void (*ResetRowSplitResizeable)(NodeHandle node);
+};
+
 struct ArkUITextpickerModifierAPI {
     void (*SetTextpickerBackgroundColor)(NodeHandle node, uint32_t color);
     void (*SetTextpickerCanLoop)(NodeHandle node, bool value);
@@ -703,6 +715,8 @@ struct ArkUINodeAPI {
     ArkUICommonModifierAPI (*GetCommonModifier)();
     ArkUICheckboxGroupModifierAPI (*GetCheckboxGroupModifier)();
     ArkUICounterModifierAPI (*GetCounterModifier)();
+    ArkUIRowModifierAPI (*GetRowModifier)();
+    ArkUIRowSplitModifierAPI (*GetRowSplitModifier)();
     ArkUITextModifierAPI (*GetTextModifier)();
     ArkUIButtonModifierAPI (*GetButtonModifier)();
     ArkUIToggleModifierAPI (*GetToggleModifier)();

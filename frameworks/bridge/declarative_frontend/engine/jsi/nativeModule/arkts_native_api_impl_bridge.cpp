@@ -35,6 +35,8 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_radio_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rating_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_split_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_search_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.h"
@@ -381,6 +383,39 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     checkboxgroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGroupMark"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxGroupBridge::ResetGroupMark));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "checkboxgroup"), checkboxgroup);
+
+    auto panel = panda::ObjectRef::New(vm);
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowCloseIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetShowCloseIcon));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShowCloseIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetShowCloseIcon));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDragBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetDragBar));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDragBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetDragBar));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetShow));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetShow));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "panel"), panel);
+
+    auto row = panda::ObjectRef::New(vm);
+    row->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignItems"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::SetAlignItems));
+    row->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignItems"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::ResetAlignItems));
+    row->Set(vm, panda::StringRef::NewFromUtf8(vm, "setJustifyContent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::SetJustifyContent));
+    row->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetJustifyContent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::ResetJustifyContent));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "row"), row);
+
+    auto rowSplit = panda::ObjectRef::New(vm);
+    rowSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResizeable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowSplitBridge::SetResizeable));
+    rowSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResizeable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowSplitBridge::ResetResizeable));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "rowSplit"), rowSplit);
 
     auto text = panda::ObjectRef::New(vm);
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
