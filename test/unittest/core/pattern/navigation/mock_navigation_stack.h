@@ -19,17 +19,17 @@
 #define private public
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 struct MockReplace {
-    bool isReplace_ = false;
+    int32_t isReplace_ = 0;
 };
 class MockNavigationStack : public OHOS::Ace::NG::NavigationStack {
     DECLARE_ACE_TYPE(MockNavigationStack, NavigationStack);
 public:
-    void UpdateIsReplace(bool isReplace) const override
+    void UpdateReplaceValue(int32_t isReplace) const override
     {
         mockReplace_->isReplace_ = isReplace;
     }
 
-    bool IsReplace() const override
+    int32_t GetReplaceValue() const override
     {
         return mockReplace_->isReplace_;
     }

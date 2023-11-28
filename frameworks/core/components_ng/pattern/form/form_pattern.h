@@ -85,6 +85,11 @@ public:
         formLinkInfos_ = infos;
     }
 
+    bool IsJsCard() const
+    {
+        return isJsCard_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -138,6 +143,8 @@ private:
     int32_t scopeId_;
     std::string localeTag_ = AceApplicationInfo::GetInstance().GetLocaleTag();
     std::vector<std::string> formLinkInfos_;
+
+    bool isJsCard_ = true;
 };
 
 } // namespace NG

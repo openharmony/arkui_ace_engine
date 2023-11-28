@@ -35,6 +35,7 @@
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/web/web_accessibility_node.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/web_layout_algorithm.h"
@@ -411,6 +412,11 @@ public:
         return rootLayerHeight_;
     }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
+    RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int32_t accessibilityId, bool isAccessibilityFocus);
+    RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int32_t accessibilityId);
+    RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int32_t accessibilityId, int32_t direction);
+    void ExecuteAction(int32_t nodeId, AceAction action) const;
+    void SetAccessibilityState(bool state);
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -551,6 +557,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
     OffsetF GetSelectPopupPostion(const OHOS::NWeb::SelectMenuBound& bounds);
+    void SetSelfAsParentOfWebCoreNode(NWeb::NWebAccessibilityNodeInfo& info) const;
 
     struct TouchInfo {
         float x = -1.0f;
@@ -572,6 +579,7 @@ private:
         const std::vector<NWeb::DateTimeSuggestion>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task) const;
+    void OfflineMode();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -630,7 +638,8 @@ private:
     bool isFirstFlingScrollVelocity_ = true;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool scrollState_ = false;
-    NestedScrollMode nestedScrollMode_ = NestedScrollMode::SELF_ONLY;
+    NestedScrollMode nestedScrollForwardMode_ = NestedScrollMode::SELF_FIRST;
+    NestedScrollMode nestedScrollBackwardMode_ = NestedScrollMode::SELF_FIRST;
     Axis axis_ = Axis::FREE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
@@ -639,7 +648,10 @@ private:
     RefPtr<WebDelegateObserver> observer_;
     std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
     std::optional<ScriptItems> scriptItems_;
+    bool isOfflineMode_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
+    bool accessibilityState_ = false;
+    RefPtr<WebAccessibilityNode> webAccessibilityNode_;
 };
 } // namespace OHOS::Ace::NG
 

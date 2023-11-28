@@ -16,36 +16,61 @@
 #include "anr_thread.h"
 
 #include "flutter/fml/thread.h"
+#include "core/common/task_runner_adapter.h"
+#include "core/common/task_runner_adapter_factory.h"
 
 namespace OHOS::Ace {
 
 namespace {
-std::unique_ptr<fml::Thread> g_anrThread;
+std::unique_ptr<fml::Thread> g_anrThreadFml;
+RefPtr<TaskRunnerAdapter> g_anrThread;
 } // namespace
 
 void AnrThread::Start()
 {
-    if (!g_anrThread) {
-        g_anrThread = std::make_unique<fml::Thread>("anr");
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        if (!g_anrThread) {
+            g_anrThread = TaskRunnerAdapterFactory::Create(false, "anr");
+        }
+    } else {
+        if (!g_anrThreadFml) {
+            g_anrThreadFml = std::make_unique<fml::Thread>("anr");
+        }
     }
 }
 
 void AnrThread::Stop()
 {
-    g_anrThread.reset();
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        g_anrThread.Reset();
+    } else {
+        g_anrThreadFml.reset();
+    }
 }
 
 bool AnrThread::PostTaskToTaskRunner(Task&& task, uint32_t delayTime)
 {
-    if (!g_anrThread || !task) {
-        return false;
-    }
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        if (!g_anrThread || !task) {
+            return false;
+        }
 
-    auto anrTaskRunner = g_anrThread->GetTaskRunner();
-    if (delayTime > 0) {
-        anrTaskRunner->PostDelayedTask(std::move(task), fml::TimeDelta::FromSeconds(delayTime), {});
+        if (delayTime > 0) {
+            g_anrThread->PostDelayedTask(std::move(task), delayTime, {});
+        } else {
+            g_anrThread->PostTask(std::move(task), {});
+        }
     } else {
-        anrTaskRunner->PostTask(std::move(task), {});
+        if (!g_anrThreadFml || !task) {
+            return false;
+        }
+
+        auto anrTaskRunner = g_anrThreadFml->GetTaskRunner();
+        if (delayTime > 0) {
+            anrTaskRunner->PostDelayedTask(std::move(task), fml::TimeDelta::FromSeconds(delayTime), {});
+        } else {
+            anrTaskRunner->PostTask(std::move(task), {});
+        }
     }
     return true;
 }

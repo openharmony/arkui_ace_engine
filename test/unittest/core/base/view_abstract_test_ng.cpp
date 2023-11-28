@@ -21,6 +21,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -31,8 +32,14 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/components_ng/pattern/navigator/navigator_model_ng.h"
+#include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/base/element_register.h"
+#include "frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
+#include "frameworks/core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 #include "frameworks/core/pipeline/base/element.h"
 #undef private
 #undef protected
@@ -52,7 +59,7 @@ const Dimension RIGHT { 10.0, DimensionUnit::PX };
 const Dimension BOTTOM { 20.0, DimensionUnit::PX };
 const Dimension VALUE { -50.0, DimensionUnit::PX };
 const Dimension ZERO { 0.0, DimensionUnit::PX };
-
+const InvertVariant invert = 0.0f;
 const OffsetF OFFSETF { 1.0, 1.0 };
 const Offset OFFSET { 2.0, 2.0 };
 const float RATIO = 1.0f;
@@ -61,7 +68,6 @@ const int32_t TEN = 10;
 const int32_t FOUF = 4;
 const int32_t INDEX = 1;
 const Color BLUE = Color(0xff0000ff);
-const Color DEFAULT_COLOR = Color(0xFF007DFF);
 const SafeAreaExpandOpts safeAreaExpandOpts = SafeAreaExpandOpts();
 const std::vector<ObscuredReasons> reasonsVector = { ObscuredReasons::PLACEHOLDER };
 
@@ -664,11 +670,12 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest015, TestSize.Level1)
      */
     viewAbstractModelNG.SetPivot(WIDTH, HEIGHT, WIDTH);
     NG::TranslateOptions pttions;
+    BlurOption blurOption;
     ViewAbstract::SetTranslate(std::move(pttions));
     Matrix4 matrix;
     ViewAbstract::SetTransformMatrix(std::move(matrix));
-    ViewAbstract::SetBackdropBlur(RADIUS);
-    ViewAbstract::SetFrontBlur(RADIUS);
+    ViewAbstract::SetBackdropBlur(RADIUS, blurOption);
+    ViewAbstract::SetFrontBlur(RADIUS, blurOption);
     ViewAbstract::SetInspectorId(srcimages);
 
     Vector5F scale(1.0f, 1.0f, 2.0f, 2.0f, 0.0f);
@@ -705,9 +712,10 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest016, TestSize.Level1)
     NG::TranslateOptions pttions;
     ViewAbstract::SetTranslate(std::move(pttions));
     Matrix4 matrix;
+    BlurOption blurOption;
     ViewAbstract::SetTransformMatrix(std::move(matrix));
-    ViewAbstract::SetBackdropBlur(RADIUS);
-    ViewAbstract::SetFrontBlur(RADIUS);
+    ViewAbstract::SetBackdropBlur(RADIUS, blurOption);
+    ViewAbstract::SetFrontBlur(RADIUS, blurOption);
     ViewAbstract::SetInspectorId(srcimages);
     ViewAbstract::SetDebugLine(srcimages);
 
@@ -757,7 +765,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest017, TestSize.Level1)
     ViewAbstract::SetContrast(RADIUS);
     ViewAbstract::SetSaturate(RADIUS);
     ViewAbstract::SetSepia(RADIUS);
-    ViewAbstract::SetInvert(RADIUS);
+    ViewAbstract::SetInvert(invert);
     ViewAbstract::SetHueRotate(RATIO);
     ViewAbstract::SetBrightness(RADIUS);
     ViewAbstract::SetColorBlend(BLUE);
@@ -794,7 +802,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest018, TestSize.Level1)
     ViewAbstract::SetContrast(RADIUS);
     ViewAbstract::SetSaturate(RADIUS);
     ViewAbstract::SetSepia(RADIUS);
-    ViewAbstract::SetInvert(RADIUS);
+    ViewAbstract::SetInvert(invert);
     ViewAbstract::SetHueRotate(RATIO);
     ViewAbstract::SetBrightness(RADIUS);
     ViewAbstract::SetColorBlend(BLUE);
@@ -1429,16 +1437,17 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest034, TestSize.Level1)
     /**
      * @tc.steps: step2. related function is called.
      */
+    BlurOption blurOption;
     ViewAbstract::SetBrightness(RADIUS);
     ViewAbstract::SetGrayScale(RADIUS);
     ViewAbstract::SetContrast(RADIUS);
     ViewAbstract::SetSaturate(RADIUS);
     ViewAbstract::SetSepia(RADIUS);
-    ViewAbstract::SetInvert(RADIUS);
+    ViewAbstract::SetInvert(invert);
     ViewAbstract::SetHueRotate(RATIO);
     ViewAbstract::SetColorBlend(BLUE);
-    ViewAbstract::SetBackdropBlur(RADIUS);
-    ViewAbstract::SetFrontBlur(RADIUS);
+    ViewAbstract::SetBackdropBlur(RADIUS, blurOption);
+    ViewAbstract::SetFrontBlur(RADIUS, blurOption);
     ViewAbstract::SetClipEdge(false);
 
     /**
@@ -1710,12 +1719,12 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     EXPECT_FALSE(mouseInfo.IsStopPropagation());
     /**
      * @tc.steps: step4. create mouseInfo, set right param and call onMouseCallback_;
-     * @tc.expected: StopPropagation in mouseInfo is true.
+     * @tc.expected: StopPropagation in mouseInfo is false.
      */
     mouseInfo.SetButton(MouseButton::RIGHT_BUTTON);
     mouseInfo.SetAction(MouseAction::RELEASE);
     inputHub->showMenu_->onMouseCallback_(mouseInfo);
-    EXPECT_TRUE(mouseInfo.IsStopPropagation());
+    EXPECT_FALSE(mouseInfo.IsStopPropagation());
 
     /**
      * @tc.steps: step5. create mouseInfo, set right param and call BindMenuWithCustomNode;
@@ -1732,12 +1741,12 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     ViewAbstract::BindMenuWithItems(std::move(param), targetNode, OFFSETF, menuParam);
     menuParam.type = MenuType::MULTI_MENU;
     ViewAbstract::BindMenuWithCustomNode(mainNode, targetNode, OFFSETF, menuParam);
-    EXPECT_TRUE(mouseInfo.IsStopPropagation());
+    EXPECT_FALSE(mouseInfo.IsStopPropagation());
     param.push_back(OptionParam());
     ViewAbstract::BindMenuWithItems(std::move(param), targetNode, OFFSETF, menuParam);
     menuParam.type = MenuType::CONTEXT_MENU;
     ViewAbstract::BindMenuWithCustomNode(mainNode, targetNode, OFFSETF, menuParam);
-    EXPECT_TRUE(mouseInfo.IsStopPropagation());
+    EXPECT_FALSE(mouseInfo.IsStopPropagation());
 }
 
 /**
@@ -2105,32 +2114,83 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableBlurTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: ViewAbstractArk001
- * @tc.desc: Test the operation of View_Abstract
+ * @tc.name: ViewAbstractMonopolizeEvent001
+ * @tc.desc: View_Abstract set MonopolizeEvent true test
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTestNg, ViewAbstractArk001, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractMonopolizeEvent001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. get framenode by GetFrameNodeById;
-     * @tc.expected: node is not null.
+     * @tc.steps: step1. create and put mainNode, then build some necessary params.
      */
-    auto rootNode = reinterpret_cast<FrameNode*>(GetArkUIInternalNodeAPI()->GetFrameNodeById(REGISTER_ID));
-    EXPECT_NE(rootNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
 
     /**
-     * @tc.steps: step2. get node id;
-     * @tc.expected: node id is equal to REGISTER_ID.
+     * @tc.steps: step2. set monopolize
      */
-    EXPECT_EQ(rootNode->GetId(), REGISTER_ID);
+    ViewAbstract::SetMonopolizeEvents(true);
+
+    /**
+     * @tc.steps: step3. get node in ViewStackProcessor.
+     * @tc.expected: node is not null.
+     */
+    auto rootFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(rootFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step4. get monopolizeEvents value of the node.
+     * @tc.expected: value is equal to true.
+     */
+    EXPECT_EQ(rootFrameNode->GetMonopolizeEvents(), true);
+
+    /**
+     * @tc.steps: step5. finish view stack.
+     */
+    ViewStackProcessor::GetInstance()->Finish();
 }
 
 /**
- * @tc.name: ViewAbstractArk002
- * @tc.desc: Test the operation of View_Abstract
+ * @tc.name: ViewAbstractMonopolizeEvent002
+ * @tc.desc: View_Abstract set MonopolizeEvent false test
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTestNg, ViewAbstractArk002, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, ViewAbstractMonopolizeEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and put mainNode, then build some necessary params.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+
+    /**
+     * @tc.steps: step2. set monopolize
+     */
+    ViewAbstract::SetMonopolizeEvents(false);
+
+    /**
+     * @tc.steps: step3. get node in ViewStackProcessor.
+     * @tc.expected: node is not null.
+     */
+    auto rootFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(rootFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step4. get monopolizeEvents value of the node.
+     * @tc.expected: value is equal to true.
+     */
+    EXPECT_EQ(rootFrameNode->GetMonopolizeEvents(), false);
+
+    /**
+     * @tc.steps: step5. finish view stack.
+     */
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: ViewAbstractMonopolizeEvent003
+ * @tc.desc: View_Abstract not set MonopolizeEvent test (use default)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractMonopolizeEvent003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create and put mainNode, then build some necessary params.
@@ -2145,53 +2205,14 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractArk002, TestSize.Level1)
     EXPECT_NE(rootFrameNode, nullptr);
 
     /**
-     * @tc.steps: step3. set BLUE by SetBackgroundColor and get renderContext.
-     * @tc.expected: renderContext is not null.
+     * @tc.steps: step3. get monopolizeEvents value of the node.
+     * @tc.expected: value is equal to true.
      */
-    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundColor(AceType::RawPtr(rootFrameNode), BLUE.GetValue());
-    auto renderContext = rootFrameNode->GetRenderContext();
-    EXPECT_NE(renderContext, nullptr);
+    EXPECT_EQ(rootFrameNode->GetMonopolizeEvents(), false);
 
     /**
-     * @tc.steps: step4. get backgroundColor value of the node.
-     * @tc.expected: value is equal to BLUE.
+     * @tc.steps: step5. finish view stack.
      */
-    EXPECT_EQ(renderContext->GetBackgroundColor(), BLUE);
-    ViewStackProcessor::GetInstance()->instance = nullptr;
-}
-
-/**
- * @tc.name: ViewAbstractArk003
- * @tc.desc: Test the operation of View_Abstract.
- * @tc.type: FUNC
- */
-HWTEST_F(ViewAbstractTestNg, ViewAbstractArk003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create and put mainNode, then build some necessary params.
-     */
-    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
-
-    /**
-     * @tc.steps: step2. get node in ViewStackProcessor.
-     * @tc.expected: node is not null.
-     */
-    auto rootFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    EXPECT_NE(rootFrameNode, nullptr);
-
-    /**
-     * @tc.steps: step3. set BLUE by ResetBackgroundColor and get renderContext.
-     * @tc.expected: renderContext is not null.
-     */
-    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBackgroundColor(AceType::RawPtr(rootFrameNode));
-    auto renderContext = rootFrameNode->GetRenderContext();
-    EXPECT_NE(renderContext, nullptr);
-
-    /**
-     * @tc.steps: step4. get backgroundColor value of the node.
-     * @tc.expected: value is equal to BLUE.
-     */
-    EXPECT_EQ(renderContext->GetBackgroundColor(), DEFAULT_COLOR);
-    ViewStackProcessor::GetInstance()->instance = nullptr;
+    ViewStackProcessor::GetInstance()->Finish();
 }
 } // namespace OHOS::Ace::NG

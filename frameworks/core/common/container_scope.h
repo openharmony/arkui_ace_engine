@@ -23,14 +23,10 @@
 
 namespace OHOS::Ace {
 
-constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
-constexpr int32_t INSTANCE_ID_PLATFORM = -2;
-
 class ACE_EXPORT ContainerScope {
 public:
     explicit ContainerScope(int32_t id)
     {
-        restoreId_ = CurrentId();
         UpdateCurrent(id);
     }
 
@@ -44,7 +40,7 @@ public:
     static void UpdateCurrent(int32_t id);
 
 private:
-    int32_t restoreId_ = INSTANCE_ID_UNDEFINED;
+    int32_t restoreId_ = CurrentId();
 
     ACE_DISALLOW_COPY_AND_MOVE(ContainerScope);
 };

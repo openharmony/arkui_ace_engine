@@ -87,6 +87,14 @@ void RosenWindow::Init()
     }
 }
 
+void RosenWindow::FlushFrameRate(int32_t rate)
+{
+    if (!rsWindow_ || rate < 0) {
+        return;
+    }
+    rsWindow_->FlushFrameRate(rate);
+}
+
 void RosenWindow::RequestFrame()
 {
     CHECK_NULL_VOID(onShow_);

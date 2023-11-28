@@ -31,6 +31,17 @@
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace {
+enum class RichEditorResponseType : int32_t {
+    RIGHT_CLICK = 0,
+    LONG_PRESS,
+    SELECTED_BY_MOUSE,
+};
+
+struct UserGestureOptions {
+    GestureEventFunc onClick;
+    GestureEventFunc onLongPress;
+};
+
 struct ImageSpanSize {
     CalcDimension width;
     CalcDimension height;
@@ -43,15 +54,19 @@ struct ImageSpanAttribute {
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius;
 };
-struct ImageSpanOptions {
+
+struct SpanOptionBase {
+    std::optional<int32_t> offset;
+    UserGestureOptions userGestureOption;
+};
+
+struct ImageSpanOptions : SpanOptionBase {
     std::optional<int32_t> offset;
     std::optional<std::string> image;
     std::optional<std::string> bundleName;
     std::optional<std::string> moduleName;
     std::optional<RefPtr<PixelMap>> imagePixelMap;
     std::optional<ImageSpanAttribute> imageAttribute;
-    GestureEventFunc onClick;
-    GestureEventFunc onLongPress;
 };
 
 struct SpanPositionInfo {
@@ -71,6 +86,12 @@ struct SpanPositionInfo {
     int32_t spanStart_ = 0;
     int32_t spanEnd_ = 0;
     int32_t spanOffset_ = 0;
+
+    std::string ToString()
+    {
+        return "spanIndex: " + std::to_string(spanIndex_) + ", spanStart: " + std::to_string(spanStart_) + ", spanEnd" +
+               std::to_string(spanEnd_) + ", spanOffset: " + std::to_string(spanOffset_);
+    }
 };
 
 struct UpdateSpanStyle {
@@ -83,6 +104,7 @@ struct UpdateSpanStyle {
         updateFontFamily.reset();
         updateTextDecoration.reset();
         updateTextDecorationColor.reset();
+        updateTextShadows.reset();
 
         updateImageWidth.reset();
         updateImageHeight.reset();
@@ -99,6 +121,7 @@ struct UpdateSpanStyle {
     std::optional<std::vector<std::string>> updateFontFamily = std::nullopt;
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
     std::optional<Color> updateTextDecorationColor = std::nullopt;
+    std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
 
     std::optional<CalcDimension> updateImageWidth = std::nullopt;
     std::optional<CalcDimension> updateImageHeight = std::nullopt;
@@ -128,13 +151,12 @@ struct SelectMenuParam {
     std::function<void()> onDisappear;
 };
 
-struct TextSpanOptions {
+struct TextSpanOptions : SpanOptionBase {
     std::optional<int32_t> offset;
     std::string value;
     std::optional<TextStyle> style;
     std::optional<UpdateParagraphStyle> paraStyle;
-    GestureEventFunc onClick;
-    GestureEventFunc onLongPress;
+    UserGestureOptions userGestureOption;
 };
 
 class ACE_EXPORT RichEditorControllerBase : public AceType {
@@ -143,6 +165,7 @@ class ACE_EXPORT RichEditorControllerBase : public AceType {
 public:
     virtual int32_t AddImageSpan(const ImageSpanOptions& options) = 0;
     virtual int32_t AddTextSpan(const TextSpanOptions& options) = 0;
+    virtual int32_t AddPlaceholderSpan(const RefPtr<NG::UINode>& customNode, const SpanOptionBase& options) = 0;
     virtual int32_t GetCaretOffset() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
     virtual void UpdateParagraphStyle(int32_t start, int32_t end, const UpdateParagraphStyle& style) = 0;
@@ -153,6 +176,8 @@ public:
     virtual std::vector<ParagraphInfo> GetParagraphsInfo(int32_t start, int32_t end) = 0;
     virtual void DeleteSpans(const RangeOptions& options) = 0;
     virtual void CloseSelectionMenu() = 0;
+    virtual RichEditorSelection GetSelectionSpansInfo() = 0;
+    virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd) = 0;
 };
 
 class ACE_EXPORT RichEditorModel {
@@ -169,7 +194,7 @@ public:
     virtual void SetOnDeleteComplete(std::function<void()>&& func) = 0;
     virtual void SetCustomKeyboard(std::function<void()>&& func) = 0;
     virtual void SetCopyOption(CopyOptions& copyOptions) = 0;
-    virtual void BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
+    virtual void BindSelectionMenu(RichEditorType& editorType, RichEditorResponseType& responseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) = 0;
     virtual void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
 

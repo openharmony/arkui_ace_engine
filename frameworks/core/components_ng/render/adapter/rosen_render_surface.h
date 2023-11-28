@@ -35,12 +35,13 @@ constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 #ifdef OHOS_PLATFORM
 struct SurfaceBufferNode {
     SurfaceBufferNode(sptr<SurfaceBuffer> buf, int32_t fence, OffsetF orgin)
-        : buffer_(std::move(buf)), fence_(fence), orgin_(orgin) {}
+        : buffer_(std::move(buf)), fence_(fence), orgin_(orgin)
+    {}
     ~SurfaceBufferNode() noexcept = default;
 
     sptr<SurfaceBuffer> buffer_;
     int32_t fence_;
-    OffsetF orgin_ {0, 0};
+    OffsetF orgin_ { 0, 0 };
 };
 #endif
 
@@ -103,7 +104,10 @@ public:
     {
         queueSize_ = queueSize;
     }
+
     void DrawBuffer();
+
+    void DrawBufferForXComponent(RSCanvas& canvas, float width, float height) override;
 
 #ifdef OHOS_PLATFORM
     OHOS::sptr<OHOS::Surface> GetSurface() const
@@ -119,10 +123,10 @@ public:
 private:
     void PostTaskToUI(const std::function<void()>&& task) const;
 
-    std::mutex  surfaceNodeMutex_;
-    OffsetF orgin_ {0, 0};
+    std::mutex surfaceNodeMutex_;
+    OffsetF orgin_ { 0, 0 };
     std::string patternType_;
-    int32_t queueSize_;
+    int32_t queueSize_ = SURFACE_QUEUE_SIZE;
 #ifdef OHOS_PLATFORM
     OHOS::sptr<OHOS::Surface> producerSurface_ = nullptr;
     OHOS::sptr<IConsumerSurface> consumerSurface_ = nullptr;

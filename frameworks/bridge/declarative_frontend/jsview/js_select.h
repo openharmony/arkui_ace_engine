@@ -23,6 +23,7 @@ class JSSelect : public JSViewAbstract {
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
+    static bool IsPercentStr(std::string& percent);
 
     static void Selected(const JSCallbackInfo& info);
     static void Value(const JSCallbackInfo& info);
@@ -46,6 +47,9 @@ public:
     static void SetSpace(const JSCallbackInfo& info);
     static void SetArrowPosition(const JSCallbackInfo& info);
     static void SetMenuAlign(const JSCallbackInfo& info);
+    static void SetOptionWidth(const JSCallbackInfo& info);
+    static void SetOptionHeight(const JSCallbackInfo& info);
+    static void SetOptionWidthFitTrigger(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif

@@ -1,61 +1,77 @@
-//@ts-nocheck
+
+/// <reference path="./import.ts" />
+class ImageObjectFitModifier extends Modifier<number> {
+    static identity: Symbol = Symbol('imageObjectFit');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        GetUINativeModule().image.resetObjectFit(node);
+      } else {
+        GetUINativeModule().image.setObjectFit(node, this.value!);
+      }
+    }
+  }
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
-    alt(value: any): ImageAttribute {
+    onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
         throw new Error("Method not implemented.");
     }
-    matchTextDirection(value: boolean): ImageAttribute {
+    alt(value: any): this {
         throw new Error("Method not implemented.");
     }
-    fitOriginalSize(value: boolean): ImageAttribute {
+    matchTextDirection(value: boolean): this {
         throw new Error("Method not implemented.");
     }
-    fillColor(value: ResourceColor): ImageAttribute {
+    fitOriginalSize(value: boolean): this {
         throw new Error("Method not implemented.");
     }
-    objectFit(value: ImageFit): ImageAttribute {
+    fillColor(value: ResourceColor): this {
         throw new Error("Method not implemented.");
     }
-    objectRepeat(value: ImageRepeat): ImageAttribute {
+    objectFit(value: ImageFit): this {
+        if (value) {
+          modifier(this._modifiers, ImageObjectFitModifier, value);
+        } else {
+          modifier(this._modifiers, ImageObjectFitModifier, undefined);
+        }
+        return this;
+      }
+    objectRepeat(value: ImageRepeat): this {
         throw new Error("Method not implemented.");
     }
-    autoResize(value: boolean): ImageAttribute {
+    autoResize(value: boolean): this {
         throw new Error("Method not implemented.");
     }
-    renderMode(value: ImageRenderMode): ImageAttribute {
+    renderMode(value: ImageRenderMode): this {
         throw new Error("Method not implemented.");
     }
-    interpolation(value: ImageInterpolation): ImageAttribute {
+    interpolation(value: ImageInterpolation): this {
         throw new Error("Method not implemented.");
     }
-    sourceSize(value: { width: number; height: number; }): ImageAttribute {
+    sourceSize(value: { width: number; height: number; }): this {
         throw new Error("Method not implemented.");
     }
-    syncLoad(value: boolean): ImageAttribute {
+    syncLoad(value: boolean): this {
         throw new Error("Method not implemented.");
     }
-    colorFilter(value: ColorFilter): ImageAttribute {
+    colorFilter(value: ColorFilter): this {
         throw new Error("Method not implemented.");
     }
-    copyOption(value: CopyOptions): ImageAttribute {
+    copyOption(value: CopyOptions): this {
         throw new Error("Method not implemented.");
     }
-    onComplete(callback: (event?: { width: number; height: number; componentWidth: number; componentHeight: number; loadingStatus: number; contentWidth: number; contentHeight: number; contentOffsetX: number; contentOffsetY: number; } | undefined) => void): ImageAttribute {
+    onComplete(callback: (event?: { width: number; height: number; componentWidth: number; componentHeight: number; loadingStatus: number; contentWidth: number; contentHeight: number; contentOffsetX: number; contentOffsetY: number; } | undefined) => void): this {
         throw new Error("Method not implemented.");
     }
-    onError(callback: (event: { componentWidth: number; componentHeight: number; }) => void): ImageAttribute {
+    onError(callback: (event: { componentWidth: number; componentHeight: number; message: string; }) => void): this {
         throw new Error("Method not implemented.");
     }
-    onError(callback: (event: { componentWidth: number; componentHeight: number; message: string; }) => void): ImageAttribute {
-        throw new Error("Method not implemented.");
-    }
-    onFinish(event: () => void): ImageAttribute {
+    onFinish(event: () => void): this {
         throw new Error("Method not implemented.");
     }
 }
-
+// @ts-ignore
 globalThis.Image.attributeModifier = function(modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = globalThis.getArkUINativeModule().getFrameNodeById(elmtId);
+    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
     var component = this.createOrGetNode(elmtId, () =>
     {
         return new ArkImageComponent(nativeNode);

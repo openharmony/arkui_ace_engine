@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 #include "base/geometry/axis.h"
@@ -42,6 +43,9 @@ void TabsPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    // expand to navigation bar by default
+    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(
+        { .edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM });
 }
 
 void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& event)
@@ -117,6 +121,24 @@ void TabsPattern::SetOnTabBarClickEvent(std::function<void(const BaseEventInfo*)
         (*onTabBarClickEvent_).swap(tabBarClickEvent);
     } else {
         onTabBarClickEvent_ = std::make_shared<ChangeEvent>(tabBarClickEvent);
+    }
+}
+
+void TabsPattern::SetAnimationEndEvent(AnimationEndEvent&& event)
+{
+    if (animationEndEvent_) {
+        (*animationEndEvent_).swap(event);
+    } else {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+        CHECK_NULL_VOID(tabsNode);
+        auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+        CHECK_NULL_VOID(swiperNode);
+        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        animationEndEvent_ = std::make_shared<AnimationEndEvent>(std::move(event));
+        eventHub->AddAnimationEndEvent(animationEndEvent_);
     }
 }
 

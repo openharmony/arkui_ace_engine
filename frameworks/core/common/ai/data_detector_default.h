@@ -28,6 +28,11 @@ public:
         return false;
     }
     void DataDetect(const TextDataDetectInfo& info, const TextDetectResultFunc& resultFunc) override {}
+
+    void AdjustCursorPosition(int32_t& caretPos, const std::string& content, TimeStamp& lastAiPosTimeStamp,
+        const TimeStamp& lastClickTimeStamp) {}
+
+    void AdjustWordSelection(int32_t& caretPos, const std::string& content, int32_t& start, int32_t& end) {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_DATA_DETECTOR_DEFAULT_H

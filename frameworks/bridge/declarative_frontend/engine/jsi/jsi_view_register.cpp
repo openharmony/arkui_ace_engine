@@ -221,6 +221,24 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
+panda::Local<panda::JSValueRef> JsLoadCustomTitleBar(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    if (argc != 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsObject()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+    AddCustomTitleBarComponent(obj);
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
 panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -963,6 +981,48 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
     return panda::BooleanRef::New(vm, result);
 }
 
+panda::Local<panda::JSValueRef> SetCursor(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    if (vm == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (argc < 1 || !firstArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t intValue = firstArg->Int32Value(vm);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
+    if (!pipelineContext->GetTaskExecutor()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext, intValue]() { pipelineContext->SetCursor(intValue); },
+        TaskExecutor::TaskType::UI);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> RestoreDefault(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    if (vm == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
+    if (!pipelineContext->GetTaskExecutor()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext]() { pipelineContext->RestoreDefault(); },
+        TaskExecutor::TaskType::UI);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 #ifdef FORM_SUPPORTED
 void JsRegisterFormViews(BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload)
 {
@@ -1207,7 +1267,15 @@ void JsRegisterViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsRegisterNamedRoute));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getArkUINativeModule"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NG::ArkUINativeModule::GetArkUINativeModule));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomTitleBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomTitleBar));
 
+    BindingTarget cursorControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
+    cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCursor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetCursor));
+    cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "restoreDefault"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RestoreDefault));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "cursorControl"), cursorControlObj);
     JsBindViews(globalObj);
 
     JSObjectTemplate toggleType;

@@ -73,10 +73,12 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
         auto result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
         result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
+        result->SetScrollSource(GetScrollSource());
         return result;
     } else {
         auto result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
         result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
+        result->SetScrollSource(GetScrollSource());
         return result;
     }
 }
@@ -128,8 +130,7 @@ void GridPattern::OnModifyDone()
         InitScrollableEvent();
     }
 
-    auto edgeEffect = gridLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
-    SetEdgeEffect(edgeEffect);
+    SetEdgeEffect();
 
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -249,6 +250,14 @@ void GridPattern::FireOnScrollStart()
     if (GetScrollAbort()) {
         return;
     }
+    if (scrollStop_) {
+        // onScrollStart triggers immediately on gesture dragStart, but onScrollStop marks scrollStop_ to true on
+        // gesture dragEnd, and consumes it/fires onScrollStop after layout. When the user quickly swipes twice, the
+        // second onScrollStart can trigger before the first onScrollEnd. In this case, we let the two events annihilate
+        // each other and fire neither.
+        scrollStop_ = false;
+        return;
+    }
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
         scrollBar->PlayScrollBarAppearAnimation();
@@ -261,15 +270,6 @@ void GridPattern::FireOnScrollStart()
     auto onScrollStart = hub->GetOnScrollStart();
     CHECK_NULL_VOID(onScrollStart);
     onScrollStart();
-}
-
-bool GridPattern::OnScrollCallback(float offset, int32_t source)
-{
-    if (source == SCROLL_FROM_START) {
-        FireOnScrollStart();
-        return true;
-    }
-    return ScrollablePattern::OnScrollCallback(offset, source);
 }
 
 SizeF GridPattern::GetContentSize() const
@@ -298,7 +298,7 @@ void GridPattern::CheckRestartSpring()
     edgeEffect->ProcessScrollOver(0);
 }
 
-float GridPattern::GetMainGap()
+float GridPattern::GetMainGap() const
 {
     float mainGap = 0.0;
     auto host = GetHost();
@@ -414,6 +414,9 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
                         (gridLayoutInfo.endIndex_ != gridLayoutInfo_.endIndex_);
     bool offsetEnd = gridLayoutInfo_.offsetEnd_;
     gridLayoutInfo_ = gridLayoutInfo;
+    if (gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_)) {
+        gridLayoutInfo_.reachStart_ = true;
+    }
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
     currentHeight_ = EstimateHeight();
     if (!offsetEnd && gridLayoutInfo_.offsetEnd_) {
@@ -543,9 +546,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
             }
             StartScrollBarAnimatorByProxy();
         }
-        if (!GetScrollAbort()) {
-            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-        }
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
         scrollStop_ = false;
         SetScrollAbort(false);
     }
@@ -560,13 +561,9 @@ void GridPattern::MarkDirtyNodeSelf()
 
 void GridPattern::OnScrollEndCallback()
 {
+    SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
-}
-
-void GridPattern::OnScrollStartCallback()
-{
-    FireOnScrollStart();
 }
 
 std::pair<bool, bool> GridPattern::IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex)
@@ -1247,10 +1244,9 @@ void GridPattern::ScrollBy(float offset)
 
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    Pattern::ToJsonValue(json);
+    ScrollablePattern::ToJsonValue(json);
     json->Put("multiSelectable", multiSelectable_ ? "true" : "false");
     json->Put("supportAnimation", supportAnimation_ ? "true" : "false");
-    json->Put("friction", GetFriction());
 }
 
 void GridPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
@@ -1341,11 +1337,7 @@ void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     if (!isConfigScrollable_) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     ScrollablePattern::AnimateTo(position, duration, curve, smooth);
-    FireOnScrollStart();
 }
 
 void GridPattern::ScrollTo(float position)
@@ -1375,31 +1367,7 @@ float GridPattern::EstimateHeight() const
         return info.GetContentOffset(mainGap);
     }
 
-    float heightSum = 0;
-    int32_t itemCount = 0;
-    float height = 0;
-    for (const auto& item : info.lineHeightMap_) {
-        auto line = info.gridMatrix_.find(item.first);
-        if (line == info.gridMatrix_.end()) {
-            continue;
-        }
-        if (line->second.empty()) {
-            continue;
-        }
-        auto lineStart = line->second.begin()->second;
-        auto lineEnd = line->second.rbegin()->second;
-        itemCount += (lineEnd - lineStart + 1);
-        heightSum += item.second + mainGap;
-    }
-    if (itemCount == 0) {
-        return 0;
-    }
-    auto averageHeight = heightSum / itemCount;
-    height = info.startIndex_ * averageHeight - info.currentOffset_;
-    if (itemCount >= (info.childrenCount_ - 1)) {
-        height = info.GetStartLineOffset(mainGap);
-    }
-    return height;
+    return info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
 }
 
 float GridPattern::GetAverageHeight() const
@@ -1472,26 +1440,8 @@ void GridPattern::UpdateScrollBarOffset()
             offset = gridLayoutInfo_.GetContentOffset(mainGap);
             estimatedHeight = gridLayoutInfo_.GetContentHeight(mainGap);
         } else {
-            float heightSum = 0;
-            int32_t itemCount = 0;
-            for (const auto& item : info.lineHeightMap_) {
-                auto line = info.gridMatrix_.find(item.first);
-                if (line == info.gridMatrix_.end() || line->second.empty()) {
-                    continue;
-                }
-                auto lineStart = line->second.begin()->second;
-                auto lineEnd = line->second.rbegin()->second;
-                itemCount += (lineEnd - lineStart + 1);
-                heightSum += item.second + mainGap;
-            }
-            auto averageHeight = itemCount == 0 ? 0.0 : heightSum / itemCount;
-            offset = info.startIndex_ * averageHeight - info.currentOffset_;
-            if (itemCount >= (info.childrenCount_ - 1)) {
-                estimatedHeight = heightSum - mainGap;
-                offset = info.GetStartLineOffset(mainGap);
-            } else {
-                estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight;
-            }
+            offset = info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
+            estimatedHeight = info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), mainGap);
         }
     }
     if (info.startMainLineIndex_ != 0 && info.startIndex_ == 0) {
@@ -1503,16 +1453,13 @@ void GridPattern::UpdateScrollBarOffset()
     UpdateScrollBarRegion(offset, estimatedHeight, Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 }
 
-RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
+DisplayMode GridPattern::GetDefaultScrollBarDisplayMode() const
 {
     auto defaultDisplayMode = DisplayMode::OFF;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         defaultDisplayMode = DisplayMode::AUTO;
     }
-    auto property = MakeRefPtr<ScrollablePaintProperty>();
-    // default "scrollBar" attribute of Grid is BarState.Off
-    property->UpdateScrollBarMode(defaultDisplayMode);
-    return property;
+    return defaultDisplayMode;
 }
 
 int32_t GridPattern::GetOriginalIndex() const
@@ -1586,10 +1533,22 @@ bool GridPattern::IsOutOfBoundary(bool useCurrentDelta)
     float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
     bool outOfEnd = (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) &&
                     LessNotEqual(endPos, gridLayoutInfo_.lastMainSize_);
-    bool scrollable = (gridLayoutInfo_.startIndex_ > 0) ||
+    bool scrollable = GetAlwaysEnabled() || (gridLayoutInfo_.startIndex_ > 0) ||
                       (gridLayoutInfo_.endIndex_ < gridLayoutInfo_.childrenCount_ - 1) ||
                       GreatNotEqual(gridLayoutInfo_.totalHeightOfItemsInView_, gridLayoutInfo_.lastMainSize_);
     return (outOfStart || outOfEnd) && scrollable;
+}
+
+float GridPattern::GetEndOffset()
+{
+    float contentHeight = gridLayoutInfo_.lastMainSize_ - gridLayoutInfo_.contentEndPadding_;
+    float mainGap = GetMainGap();
+    if (GetAlwaysEnabled() &&
+        GreatNotEqual(contentHeight, gridLayoutInfo_.GetTotalLineHeight(mainGap))) {
+        return gridLayoutInfo_.GetTotalLineHeight(mainGap) -
+                gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+    }
+    return contentHeight - gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
 }
 
 void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
@@ -1602,23 +1561,13 @@ void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto grid = weak.Upgrade();
         CHECK_NULL_RETURN(grid, 0.0);
-        if (grid->GetAlwaysEnabled() &&
-            GreatNotEqual(grid->GetMainContentSize(), grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()))) {
-            return grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()) -
-                   grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
-        }
-        return grid->GetMainContentSize() - grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
+        return grid->GetEndOffset();
     });
     scrollEffect->SetTrailingCallback([]() -> double { return 0.0; });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto grid = weak.Upgrade();
         CHECK_NULL_RETURN(grid, 0.0);
-        if (grid->GetAlwaysEnabled() &&
-            GreatNotEqual(grid->GetMainContentSize(), grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()))) {
-            return grid->gridLayoutInfo_.GetTotalLineHeight(grid->GetMainGap()) -
-                   grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
-        }
-        return grid->GetMainContentSize() - grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
+        return grid->GetEndOffset();
     });
     scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
 }

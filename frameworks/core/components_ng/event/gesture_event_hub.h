@@ -28,11 +28,13 @@
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/scrollable_event.h"
+#include "core/components_ng/event/target_component.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
+#include "core/gestures/gesture_info.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 namespace OHOS::Msdp::DeviceStatus {
@@ -219,6 +221,13 @@ public:
     // Set by user define, which will replace old one.
     void SetUserOnClick(GestureEventFunc&& clickEvent);
 
+    void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
+
+    GestureJudgeFunc GetOnGestureJudgeBeginCallback() const
+    {
+        return gestureJudgeFunc_;
+    }
+
     // When the event param is undefined, it will clear the callback.
     void ClearUserOnClick();
     void ClearUserOnTouch();
@@ -310,7 +319,8 @@ public:
 
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint);
+        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
+        const RefPtr<TargetComponent>& targetComponent);
 
     RefPtr<FrameNode> GetFrameNode() const;
 
@@ -409,6 +419,7 @@ public:
             dragEventActuator_->SetThumbnailCallback(std::move(callback));
         }
     }
+#endif // ENABLE_DRAG_FRAMEWORK
 
     bool GetTextDraggable() const
     {
@@ -439,7 +450,6 @@ public:
     {
         return previewMode_;
     }
-#endif // ENABLE_DRAG_FRAMEWORK
 
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
     {
@@ -482,9 +492,19 @@ public:
     bool IsAllowedDrag(RefPtr<EventHub> eventHub);
     void HandleNotallowDrag(const GestureEvent& info);
 
+    RefPtr<DragEventActuator> GetDragEventActuator()
+    {
+        return dragEventActuator_;
+    }
+
+    bool GetMonopolizeEvents() const;
+
+    void SetMonopolizeEvents(bool monopolizeEvents);
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId);
+        std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
+        const RefPtr<TargetComponent>& targetComponent);
 
     void UpdateGestureHierarchy();
 
@@ -528,11 +548,12 @@ private:
     GestureEvent gestureInfoForWeb_;
     bool isReceivedDragGestureInfo_ = false;
 
-#ifdef ENABLE_DRAG_FRAMEWORK
+    GestureJudgeFunc gestureJudgeFunc_;
+
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
-#endif
+    bool monopolizeEvents_ = false;
 };
 
 } // namespace OHOS::Ace::NG

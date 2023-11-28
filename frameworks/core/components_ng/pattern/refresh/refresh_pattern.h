@@ -90,7 +90,7 @@ public:
     void UpdateInternalPlacement();
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        return { FocusType::SCOPE, true };
     }
 
     float GetLoadingDistance() const

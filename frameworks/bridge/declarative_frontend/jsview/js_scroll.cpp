@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_list.h"
+#include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/scroll_model_impl.h"
@@ -254,6 +255,30 @@ void JSScroll::OnScrollStopCallback(const JSCallbackInfo& args)
     args.SetReturnValue(args.This());
 }
 
+void JSScroll::ReachStartCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        ScrollModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
+    }
+    args.ReturnSelf();
+}
+
+void JSScroll::ReachEndCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        ScrollModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
+    }
+    args.ReturnSelf();
+}
+
 void JSScroll::JSBind(BindingTarget globalObj)
 {
     JSClass<JSScroll>::Declare("Scroll");
@@ -267,6 +292,8 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("onScrollEnd", &JSScroll::OnScrollEndCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollStart", &JSScroll::OnScrollStartCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollStop", &JSScroll::OnScrollStopCallback, opt);
+    JSClass<JSScroll>::StaticMethod("onReachStart", &JSScroll::ReachStartCallback);
+    JSClass<JSScroll>::StaticMethod("onReachEnd", &JSScroll::ReachEndCallback);
     JSClass<JSScroll>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSScroll>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSScroll>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -296,7 +323,7 @@ void JSScroll::SetScrollBar(const JSCallbackInfo& args)
     }
     int32_t displayMode;
     if (args[0]->IsNull() || args[0]->IsUndefined() || !ParseJsInt32(args[0], displayMode)) {
-        displayMode = static_cast<int32_t>(NG::DisplayMode::AUTO);
+        displayMode = static_cast<int32_t>(DisplayMode::AUTO);
     }
     ScrollModel::GetInstance()->SetDisplayMode(displayMode);
 }
@@ -335,26 +362,9 @@ void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
 
 void JSScroll::SetEdgeEffect(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1) {
-        return;
-    }
-    int32_t edgeEffect;
-    if (args[0]->IsNull() || args[0]->IsUndefined() || !ParseJsInt32(args[0], edgeEffect) ||
-        edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
-        edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
-    }
-    ScrollModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), true);
-
-    if (args.Length() == 2) { // 2 is parameter count
-        auto paramObject = JSRef<JSObject>::Cast(args[1]);
-        if (args[1]->IsNull() || args[1]->IsUndefined()) {
-            return;
-        } else {
-            JSRef<JSVal> alwaysEnabledParam = paramObject->GetProperty("alwaysEnabled");
-            bool alwaysEnabled = alwaysEnabledParam->IsBoolean() ? alwaysEnabledParam->ToBoolean() : true;
-            ScrollModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), alwaysEnabled);
-        }
-    }
+    auto edgeEffect = JSScrollable::ParseEdgeEffect(args, EdgeEffect::NONE);
+    auto alwaysEnabled = JSScrollable::ParseAlwaysEnable(args, false);
+    ScrollModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
 }
 
 void JSScroll::JsWidth(const JSCallbackInfo& info)

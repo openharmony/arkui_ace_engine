@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/animation/animation_pub.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components_ng/base/group_node.h"
@@ -87,6 +88,7 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
         controller = AceType::MakeRefPtr<SwiperController>();
     }
     swiperPattern->SetSwiperController(controller);
+    swiperPattern->SetFinishCallbackType(FinishCallbackType::LOGICALLY);
 
     auto dividerNode = FrameNode::GetOrCreateFrameNode(
         V2::DIVIDER_ETS_TAG, dividerId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
@@ -275,7 +277,14 @@ void TabsModelNG::SetScrollable(bool scrollable)
 void TabsModelNG::SetAnimationDuration(float duration)
 {
     if (duration < 0) {
-        return;
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            return;
+        }
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+        CHECK_NULL_VOID(tabTheme);
+        duration = tabTheme->GetTabContentAnimationDuration();
     }
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(tabsNode);
@@ -344,6 +353,37 @@ void TabsModelNG::SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& o
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabPattern);
     tabPattern->SetOnTabBarClickEvent(std::move(onTabBarClick));
+}
+
+void TabsModelNG::SetOnAnimationStart(AnimationStartEvent&& onAnimationStart)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAnimationStartEvent(std::move(onAnimationStart));
+}
+
+void TabsModelNG::SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetAnimationEndEvent(std::move(onAnimationEnd));
+}
+
+void TabsModelNG::SetOnGestureSwipe(GestureSwipeEvent&& onGestureSwipe)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetGestureSwipeEvent(std::move(onGestureSwipe));
 }
 
 void TabsModelNG::SetDivider(const TabsItemDivider& divider)

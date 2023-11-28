@@ -612,8 +612,7 @@ public:
         int32_t offset, Accessibility::AccessibilityElementInfo& output);
     bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset);
-    bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-        std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline);
+    bool GetMonopolizeEvents() const;
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -661,6 +660,9 @@ private:
         std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
     void OnVisibleAreaChangeCallback(
         VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio, bool isHandled);
+
+    void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
+
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
     // set costom background layoutConstraint
@@ -671,6 +673,8 @@ private:
 
     void UpdateParentAbsoluteOffset();
     void AddFrameNodeSnapshot(bool isHit, int32_t parentId);
+
+    int32_t GetNodeExpectedRate();
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -733,6 +737,8 @@ private:
     bool checkboxFlag_ = false;
 
     RefPtr<FrameNode> overlayNode_;
+
+    std::unordered_map<std::string, int32_t> sceneRateMap_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

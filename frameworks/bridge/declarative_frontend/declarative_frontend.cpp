@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_page.h"
 #include "core/common/container.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
 #include "frameworks/bridge/card_frontend/form_frontend_delegate_declarative.h"
@@ -166,6 +167,8 @@ DeclarativeFrontend::~DeclarativeFrontend() noexcept
 
 void DeclarativeFrontend::Destroy()
 {
+    // The call doesn't change the page pop status
+    Recorder::NodeDataCache::Get().OnBeforePagePop(true);
     CHECK_RUN_ON(JS);
     LOGI("DeclarativeFrontend Destroy begin.");
     // To guarantee the jsEngine_ and delegate_ released in js thread
@@ -516,6 +519,15 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             }
             return jsEngine->LoadPageSource(url, errorCallback);
         };
+        auto loadPageByBufferCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                            const std::shared_ptr<std::vector<uint8_t>>& content,
+                                            const std::function<void(const std::string&, int32_t)>& errorCallback) {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return false;
+            }
+            return jsEngine->LoadPageSource(content, errorCallback);
+        };
         auto loadNamedRouterCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                            const std::string& namedRouter, bool isTriggeredByJs) {
             auto jsEngine = weakEngine.Upgrade();
@@ -531,7 +543,8 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             }
             return jsEngine->UpdateRootComponent();
         };
-        delegate_->InitializeRouterManager(std::move(loadPageCallback), std::move(loadNamedRouterCallback),
+        delegate_->InitializeRouterManager(std::move(loadPageCallback), std::move(loadPageByBufferCallback),
+                                           std::move(loadNamedRouterCallback),
                                            std::move(updateRootComponentCallback));
 
         auto moduleNamecallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& pageName)->
@@ -577,6 +590,20 @@ void DeclarativeFrontend::RunPage(const std::string& url, const std::string& par
         } else {
             delegate_->RunPage(url, params, pageProfile_);
         }
+    }
+}
+
+void DeclarativeFrontend::RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
+{
+    auto container = Container::Current();
+    auto isStageModel = container ? container->IsUseStageModel() : false;
+    if (!isStageModel) {
+        LOGE("RunPage by buffer must be run under stage model.");
+        return;
+    }
+
+    if (delegate_) {
+        delegate_->RunPage(content, params, pageProfile_);
     }
 }
 

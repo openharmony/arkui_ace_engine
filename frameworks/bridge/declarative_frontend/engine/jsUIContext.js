@@ -83,6 +83,23 @@ class UIInspector {
     }
 }
 
+class UIObserver {
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_observer = globalThis.requireNapi('arkui.observer');
+    }
+    on(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer.on(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    off(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer.off(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+}
+
 
 class UIContext {
     /**
@@ -200,6 +217,11 @@ class UIContext {
         } else {
             return undefined;
         }
+    }
+
+    getUIObserver() {
+        this.observer_ = new UIObserver();
+        return this.observer_;
     }
 }
 class ComponentUtils {

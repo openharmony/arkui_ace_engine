@@ -63,6 +63,8 @@ namespace {
     constexpr float DEFAULT_BORDER_WIDTH = 1.0f;
     constexpr float DEFAULT_PADDING_WITHOUT_BG = 4.0f;
     constexpr float DEFAULT_BUTTON_SIZE = 20.0f;
+    constexpr float MIN_SIZE = 1.0f;
+    constexpr float ENLARGE_SIZE = 50.0f;
     const std::string DEFAULT_TEXT = "Add Security Component Buttom";
     constexpr int INDEX_ZERO = 0;
     constexpr int INDEX_ONE = 1;
@@ -292,8 +294,6 @@ void SecurityComponentModelTestNg::CheckSecurityComponentDefaultProp(RefPtr<Fram
     EXPECT_EQ(property->GetIconStyle().value_or(1), 0);
     EXPECT_EQ(property->GetBackgroundType().value_or(static_cast<int32_t>(ButtonType::NORMAL)),
         static_cast<int32_t>(ButtonType::CAPSULE));
-    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_PADDING);
-    EXPECT_EQ(property->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_PADDING);
     EXPECT_EQ(property->GetTextIconLayoutDirection().value_or(SecurityComponentLayoutDirection::VERTICAL),
         SecurityComponentLayoutDirection::HORIZONTAL);
 }
@@ -318,7 +318,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest001,
     ASSERT_NE(textNode, nullptr);
     auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProp, nullptr);
-    EXPECT_EQ(textProp->GetMaxLines().value_or(0), 1);
+    EXPECT_EQ(textProp->GetMaxLines().value_or(0), static_cast<uint32_t>(1));
     EXPECT_EQ(textProp->GetFontSize().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_FONT_SIZE);
     EXPECT_EQ(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::ITALIC), Ace::FontStyle::NORMAL);
     EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::NORMAL), FontWeight::MEDIUM);
@@ -435,6 +435,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest004,
     SetLocationUserDefinedPropty();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
     EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
@@ -492,6 +493,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest005,
     SetLocationUserDefinedPropty();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
     EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
@@ -555,6 +557,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest006,
     locationSc.SetBackgroundPadding(Dimension(25.0)); // 25.0 vp
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
     EXPECT_NE(property->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
@@ -591,6 +594,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest007,
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
     EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 0.0);
@@ -675,32 +679,45 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationLayoutAlgoTest00
     ASSERT_NE(pattern, nullptr);
     pattern->OnModifyDone();
 
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateMarginSelfIdealSize(SizeF(MIN_SIZE, MIN_SIZE));
+    property->UpdateContentConstraint();
+
     auto layoutAlgo = pattern->CreateLayoutAlgorithm();
     ASSERT_NE(layoutAlgo, nullptr);
 
     auto layoutWrapper = CreateSecurityComponentLayoutWrapper(frameNode);
     ASSERT_NE(layoutWrapper, nullptr);
     layoutAlgo->Measure(layoutWrapper.rawPtr_);
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_BUTTON_SIZE);
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_BUTTON_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_ICON_MIN_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_ICON_MIN_SIZE);
 
-    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
-    ASSERT_NE(property, nullptr);
     property->UpdateBackgroundType(static_cast<int32_t>(ButtonType::CAPSULE));
     property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
     pattern->OnModifyDone();
 
     layoutAlgo->Measure(layoutWrapper.rawPtr_);
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_BUTTON_SIZE);
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_BUTTON_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_ICON_MIN_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_ICON_MIN_SIZE);
 
     property->UpdateBackgroundType(static_cast<int32_t>(ButtonType::CIRCLE));
     property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
     pattern->OnModifyDone();
 
     layoutAlgo->Measure(layoutWrapper.rawPtr_);
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_BUTTON_SIZE);
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_BUTTON_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_ICON_MIN_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_ICON_MIN_SIZE);
+
+    property->UpdateBackgroundType(static_cast<int32_t>(ButtonType::CAPSULE));
+    property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
+    pattern->OnModifyDone();
+
+    property->UpdateMarginSelfIdealSize(SizeF(ENLARGE_SIZE, ENLARGE_SIZE));
+    property->UpdateContentConstraint();
+    layoutAlgo->Measure(layoutWrapper.rawPtr_);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), ENLARGE_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), ENLARGE_SIZE);
 }
 
 /**
@@ -792,6 +809,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest002, Tes
         BUTTON_TYPE_NULL, V2::SAVE_BUTTON_ETS_TAG);
     ASSERT_NE(frameNode, nullptr);
     ASSERT_EQ(frameNode->GetTag(), V2::SAVE_BUTTON_ETS_TAG);
+    frameNode->MarkModifyDone();
 
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
@@ -870,6 +888,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest004, Tes
     EXPECT_EQ(property->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
     EXPECT_EQ(property->GetTextIconLayoutDirection().value_or(SecurityComponentLayoutDirection::HORIZONTAL),
         SecurityComponentLayoutDirection::VERTICAL);
+    frameNode->MarkModifyDone();
 
     auto iconNode = GetCurSecCompChildNode(V2::IMAGE_ETS_TAG);
     ASSERT_NE(iconNode, nullptr);
@@ -918,6 +937,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest005, Tes
     SetSaveUserDefinedPropty();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
     EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
@@ -982,6 +1002,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest006, Tes
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
     EXPECT_NE(property->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
@@ -1102,24 +1123,27 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveLayoutAlgoTest001, T
     ASSERT_NE(pattern, nullptr);
     pattern->OnModifyDone();
 
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateMarginSelfIdealSize(SizeF(MIN_SIZE, MIN_SIZE));
+    property->UpdateContentConstraint();
+
     auto layoutAlgo = pattern->CreateLayoutAlgorithm();
     ASSERT_NE(layoutAlgo, nullptr);
 
     auto layoutWrapper = CreateSecurityComponentLayoutWrapper(frameNode);
     ASSERT_NE(layoutWrapper, nullptr);
     layoutAlgo->Measure(layoutWrapper.rawPtr_);
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_BUTTON_SIZE);
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_BUTTON_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_ICON_MIN_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_ICON_MIN_SIZE);
 
-    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
-    ASSERT_NE(property, nullptr);
     property->UpdateBackgroundType(static_cast<int32_t>(ButtonType::CAPSULE));
     property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
     pattern->OnModifyDone();
 
     layoutAlgo->Measure(layoutWrapper.rawPtr_);
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_BUTTON_SIZE);
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_BUTTON_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_ICON_MIN_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_ICON_MIN_SIZE);
 }
 
 /**
@@ -1280,6 +1304,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest004, Te
     SetPasteUserDefinedPropty();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
     EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
@@ -1337,6 +1362,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest005, Te
     SetPasteUserDefinedPropty();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
     EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
@@ -1520,6 +1546,10 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteLayoutAlgoTest001, 
     auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnModifyDone();
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateMarginSelfIdealSize(SizeF(MIN_SIZE, MIN_SIZE));
+    property->UpdateContentConstraint();
 
     auto layoutAlgo = pattern->CreateLayoutAlgorithm();
     ASSERT_NE(layoutAlgo, nullptr);
@@ -1527,18 +1557,15 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteLayoutAlgoTest001, 
     auto layoutWrapper = CreateSecurityComponentLayoutWrapper(frameNode);
     ASSERT_NE(layoutWrapper, nullptr);
     layoutAlgo->Measure(layoutWrapper.rawPtr_);
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_BUTTON_SIZE);
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_BUTTON_SIZE);
-
-    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
-    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_ICON_MIN_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_ICON_MIN_SIZE);
     property->UpdateBackgroundType(static_cast<int32_t>(ButtonType::CAPSULE));
     property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
     pattern->OnModifyDone();
 
     layoutAlgo->Measure(layoutWrapper.rawPtr_);
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_BUTTON_SIZE);
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_BUTTON_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_ICON_MIN_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_ICON_MIN_SIZE);
 }
 
 /**
@@ -1907,10 +1934,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 
     auto renderContext = parentFrameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    renderContext->UpdateFrontInvert(0.0_vp);
+    InvertVariant invert = 0.0f;
+    renderContext->UpdateFrontInvert(invert);
     ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
-    ASSERT_EQ(renderContext->GetFrontInvert().value().ConvertToVp(), 0.0f);
-    renderContext->UpdateFrontInvert(1.0_vp);
+    ASSERT_EQ(renderContext->GetFrontInvert().value(), InvertVariant(0.0f));
+    invert = 1.0f; // 1.0 means have frontinvert
+    renderContext->UpdateFrontInvert(invert);
     ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
 }
 

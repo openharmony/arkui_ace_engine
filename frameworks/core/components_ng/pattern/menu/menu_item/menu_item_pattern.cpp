@@ -36,6 +36,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 void UpdateFontSize(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<Dimension>& fontSize, const Dimension& defaultFontSize)
 {
@@ -72,15 +73,22 @@ void UpdateFontStyle(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayout
     }
 }
 
-void UpdateFontColor(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
+void UpdateFontColor(const RefPtr<FrameNode>& textNode, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<Color>& fontColor, const Color& defaultFontColor)
 {
+    auto textProperty = textNode ? textNode->GetLayoutProperty<TextLayoutProperty>() : nullptr;
+    CHECK_NULL_VOID(textProperty);
+    auto renderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (fontColor.has_value()) {
         textProperty->UpdateTextColor(fontColor.value());
+        renderContext->UpdateForegroundColor(fontColor.value());
     } else if (menuProperty && menuProperty->GetFontColor().has_value()) {
         textProperty->UpdateTextColor(menuProperty->GetFontColor().value());
+        renderContext->UpdateForegroundColor(menuProperty->GetFontColor().value());
     } else {
         textProperty->UpdateTextColor(defaultFontColor);
+        renderContext->UpdateForegroundColor(defaultFontColor);
     }
 }
 
@@ -666,7 +674,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     UpdateFontStyle(textProperty, menuProperty, fontStyle);
     auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
     UpdateFontColor(
-        textProperty, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
+        node, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
     auto fontFamily = isLabel ? itemProperty->GetLabelFontFamily() : itemProperty->GetFontFamily();
     UpdateFontFamily(textProperty, menuProperty, fontFamily);
     textProperty->UpdateContent(content);
@@ -692,6 +700,9 @@ void MenuItemPattern::UpdateTextNodes()
         host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
     CHECK_NULL_VOID(rightRow);
     UpdateText(rightRow, menuProperty, true);
+    if (IsDisabled()) {
+        UpdateDisabledStyle();
+    }
 }
 
 bool MenuItemPattern::IsDisabled()
@@ -709,6 +720,9 @@ void MenuItemPattern::UpdateDisabledStyle()
     auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     content_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
+    auto textLayoutProperty = content_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
     content_->MarkModifyDone();
 }
 
@@ -734,7 +748,10 @@ void MenuItemPattern::SetAccessibilityAction()
         if (onChange) {
             onChange(pattern->IsSelected());
         }
-
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        pattern->MarkIsSelected(pattern->IsSelected());
+        context->OnMouseSelectUpdate(pattern->IsSelected(), ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         if (pattern->GetSubBuilder() != nullptr) {
             pattern->ShowSubMenu();
             return;
@@ -742,6 +759,33 @@ void MenuItemPattern::SetAccessibilityAction()
 
         pattern->CloseMenu();
     });
+}
+
+void MenuItemPattern::MarkIsSelected(bool isSelected)
+{
+    if (isSelected_ == isSelected) {
+        return;
+    }
+    isSelected_ = isSelected;
+    auto eventHub = GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onChange = eventHub->GetOnChange();
+    auto selectedChangeEvent = eventHub->GetSelectedChangeEvent();
+    if (selectedChangeEvent) {
+        selectedChangeEvent(isSelected);
+    }
+    if (onChange) {
+        onChange(isSelected);
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isSelected) {
+        eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
+        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+    } else {
+        eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
+        host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+    }
 }
 
 bool MenuItemPattern::IsSelectOverlayMenu()

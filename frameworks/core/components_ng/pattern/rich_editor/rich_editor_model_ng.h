@@ -32,9 +32,11 @@ public:
     void SetOnDeleteComplete(std::function<void()>&& func) override;
     void SetCustomKeyboard(std::function<void()>&& func) override;
     void SetCopyOption(CopyOptions& copyOptions) override;
-    void BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
+    void BindSelectionMenu(RichEditorType& editorType, RichEditorResponseType& RichEditorResponseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;
     void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) override;
+
+    static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
 
 private:
     void SetDraggable(bool draggable);

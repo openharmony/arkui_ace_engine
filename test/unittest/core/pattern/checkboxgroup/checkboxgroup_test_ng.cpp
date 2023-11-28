@@ -936,6 +936,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest007, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context { canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT };
     checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
 }
@@ -1066,6 +1068,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest011, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context { canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT };
     checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
 }
@@ -1096,6 +1100,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest012, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context { canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT };
     checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
 }
@@ -1253,6 +1259,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupModifierTest001, TestSize.Level1)
     checkBoxGroupModifier->SetCheckStroke(CHECKBOX_GROUP_LENGTH_ZERO);
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     checkBoxGroupModifier->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
     checkBoxGroupModifier->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
     checkBoxGroupModifier->SetUiStatus(UIStatus::OFF_TO_ON);
@@ -1682,5 +1690,31 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest026, TestSize.Level1)
     geometryNode->SetContentSize(SizeF(COMPONENT_WIDTH, COMPONENT_HEIGHT));
     checkBoxGroupPattern->UpdateModifierParam(parameters);
     EXPECT_FLOAT_EQ(parameters.checkMarkPaintSize, COMPONENT_WIDTH);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPatternTest027
+ * @tc.desc: CheckBoxGroup test Select and ClearSelection.
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest027, TestSize.Level1)
+{
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    checkBoxGroupModelNG.SetSelectAll(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->updateFlag_ = false;
+    pattern->SetAccessibilityAction();
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<CheckBoxGroupAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(accessibilityProperty->ActActionSelect());
+
+    bool isSelected = true;
+    pattern->updateFlag_ = false;
+    pattern->MarkIsSelected(isSelected);
+    EXPECT_TRUE(accessibilityProperty->ActActionClearSelection());
 }
 } // namespace OHOS::Ace::NG

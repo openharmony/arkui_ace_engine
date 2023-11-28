@@ -296,6 +296,15 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     auto oldIndex = GetLoopIndex(oldIndex_);
     if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != TotalCount()) {
         oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
+        if (HasIndicatorNode()) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto indicatorNode = DynamicCast<FrameNode>(
+                host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
+            if (indicatorNode && indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+                indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
+        }
     }
     if (userSetCurrentIndex < 0 || userSetCurrentIndex >= TotalCount()) {
         currentIndex_ = 0;
@@ -1138,8 +1147,8 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             pattern->FireAndCleanScrollingListener();
             pattern->HandleDragStart(info);
             // notify scrollStart upwards
-            pattern->OnScrollStartRecursive(pattern->direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
-                                                                                    : info.GetGlobalLocation().GetY());
+            pattern->NotifyParentScrollStart(pattern->direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
+                                                                                     : info.GetGlobalLocation().GetY());
         }
     };
 
@@ -1500,18 +1509,9 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
 {
     TAG_LOGD(AceLogTag::ACE_SWIPER, "Swiper drag start.");
     UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::START);
-    if (usePropertyAnimation_) {
-        StopPropertyTranslateAnimation();
-    }
-    if (indicatorController_) {
-        indicatorController_->Stop();
-    }
-    StopTranslateAnimation();
-    if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
-        StopSpringAnimationAndFlushImmediately();
-    } else {
-        StopSpringAnimation();
-    }
+
+    StopAnimationOnScrollStart(
+        info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD);
     StopAutoPlay();
 
     const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
@@ -1533,6 +1533,22 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     mainDeltaSum_ = 0.0f;
     // in drag process, close lazy feature.
     SetLazyLoadFeature(false);
+}
+
+void SwiperPattern::StopAnimationOnScrollStart(bool flushImmediately)
+{
+    if (usePropertyAnimation_) {
+        StopPropertyTranslateAnimation();
+    }
+    if (indicatorController_) {
+        indicatorController_->Stop();
+    }
+    StopTranslateAnimation();
+    if (flushImmediately) {
+        StopSpringAnimationAndFlushImmediately();
+    } else {
+        StopSpringAnimation();
+    }
 }
 
 void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
@@ -1703,6 +1719,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     AnimationOption option;
     option.SetDuration(GetDuration());
     option.SetCurve(GetCurveIncludeMotion(velocity / translate));
+    option.SetFinishCallbackType(GetFinishCallbackType());
     OffsetF offset;
     if (GetDirection() == Axis::HORIZONTAL) {
         offset.AddX(translate);
@@ -2685,7 +2702,7 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
                 return;
             }
             if (!swiper->IsLoop() &&
-                swiper->GetLoopIndex(swiper->currentIndex_ + 1) > (childrenSize - displayCount)) {
+                swiper->GetLoopIndex(swiper->currentIndex_) + 1 > (childrenSize - displayCount)) {
                 return;
             }
             swiper->targetIndex_ = swiper->currentIndex_ + 1;
@@ -2859,7 +2876,7 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
                     for (auto index : forEachIndexSet) {
                         auto childNode = forEachNode->GetChildAtIndex(index);
                         CHECK_NULL_VOID(childNode);
-                        childNode->Build();
+                        childNode->Build(nullptr);
                     }
                 },
                 TaskExecutor::TaskType::UI);
@@ -3308,9 +3325,13 @@ void SwiperPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus)
 
 void SwiperPattern::OnScrollStartRecursive(float position)
 {
-    if (!isDragging_) {
-        childScrolling_ = true;
-    }
+    childScrolling_ = true;
+    StopAnimationOnScrollStart(false);
+    NotifyParentScrollStart(position);
+}
+
+void SwiperPattern::NotifyParentScrollStart(float position)
+{
     auto parent = enableNestedScroll_ ? SearchParent() : nullptr;
     if (parent) {
         parent->OnScrollStartRecursive(position);
@@ -3339,7 +3360,7 @@ void SwiperPattern::NotifyParentScrollEnd()
 inline bool SwiperPattern::AnimationRunning() const
 {
     return (controller_ && controller_->IsRunning()) || (springController_ && springController_->IsRunning()) ||
-           fadeAnimationIsRunning_ || usePropertyAnimation_;
+           fadeAnimationIsRunning_ || targetIndex_ || usePropertyAnimation_;
 }
 
 bool SwiperPattern::HandleScrollVelocity(float velocity)
@@ -3364,6 +3385,20 @@ bool SwiperPattern::HandleScrollVelocity(float velocity)
 
 ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedState state)
 {
+    if (source == SCROLL_FROM_ANIMATION && AnimationRunning()) {
+        // deny conflicting animation from child
+        return { offset, false };
+    }
+    // mouse scroll triggers showNext / showPrev instead of updating offset
+    if (source == SCROLL_FROM_AXIS) {
+        auto targetBfr = targetIndex_;
+        (offset > 0) ? ShowPrevious() : ShowNext();
+        if (targetBfr == targetIndex_) {
+            // unchanged targetIndex_ implies Swiper has reached the edge and the mouse scroll isn't consumed.
+            return { offset, true };
+        }
+        return { 0.0f, false };
+    }
     auto parent = parent_.Upgrade();
     if (!parent || !enableNestedScroll_) {
         if (IsOutOfBoundary(offset) && ChildFirst(state)) {

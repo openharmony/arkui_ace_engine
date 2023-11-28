@@ -590,7 +590,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest015, TestSize.Level1)
     radioPaintProperty->ResetRadioCheck();
     pattern->OnClick();
     auto select1 = radioPaintProperty->GetRadioCheckValue();
-    EXPECT_TRUE(select1);
+    EXPECT_FALSE(select1);
 }
 
 /**
@@ -613,7 +613,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest016, TestSize.Level1)
     radioPaintProperty->ResetRadioCheck();
     pattern->OnClick();
     auto select1 = radioPaintProperty->GetRadioCheckValue();
-    EXPECT_TRUE(select1);
+    EXPECT_FALSE(select1);
 }
 
 /**
@@ -1448,5 +1448,31 @@ HWTEST_F(RadioTestNg, RadioPatternTest028, TestSize.Level1)
     pattern->OnRestoreInfo(restoreInfo_);
     ASSERT_NE(radioPaintProperty, nullptr);
     EXPECT_TRUE(radioPaintProperty->GetRadioCheckValue(false));
+}
+
+/**
+ * @tc.name: RadioPatternTest029
+ * @tc.desc: Radio test Select and ClearSelection.
+ */
+HWTEST_F(RadioTestNg, RadioPatternTest029, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->preCheck_ = false;
+    pattern->SetAccessibilityAction();
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<RadioAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(accessibilityProperty->ActActionSelect());
+
+    bool isSelected = true;
+    pattern->preCheck_ = false;
+    pattern->UpdateSelectStatus(isSelected);
+    EXPECT_TRUE(accessibilityProperty->ActActionClearSelection());
 }
 } // namespace OHOS::Ace::NG

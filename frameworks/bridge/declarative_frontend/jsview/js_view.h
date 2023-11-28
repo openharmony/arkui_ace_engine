@@ -38,7 +38,7 @@ public:
     ~JSView() override = default;
     virtual void Destroy(JSView* parentCustomView) = 0;
 
-    virtual RefPtr<AceType> CreateViewNode()
+    virtual RefPtr<AceType> CreateViewNode(bool isTitleNode = false)
     {
         LOGE("Internal error. Not implemented");
         return nullptr;
@@ -178,7 +178,7 @@ public:
     // TODO: delete this after the toolchain for partial update is ready.
     RefPtr<AceType> InternalRender();
 
-    RefPtr<AceType> CreateViewNode() override;
+    RefPtr<AceType> CreateViewNode(bool isTitleNode = false) override;
 
     void MarkNeedUpdate() override;
 
@@ -284,7 +284,7 @@ public:
 
     RefPtr<AceType> InitialRender();
 
-    RefPtr<AceType> CreateViewNode() override;
+    RefPtr<AceType> CreateViewNode(bool isTitleNode = false) override;
 
     static void Create(const JSCallbackInfo& info);
     static void CreateRecycle(const JSCallbackInfo& info);
@@ -314,6 +314,10 @@ public:
     bool JsElementIdExists(int32_t elmtId);
 
     void JSGetProxiedItemRenderState(const JSCallbackInfo& info);
+
+    void JSGetNavDestinationInfo(const JSCallbackInfo& info);
+
+    void JSGetUIContext(const JSCallbackInfo& info);
 
     // Release the UINode hold on the JS object and trigger the delete phase.
     void JSResetRecycleCustomNode(const JSCallbackInfo& info)

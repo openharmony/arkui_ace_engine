@@ -24,6 +24,9 @@
 #include "base/memory/referenced.h"
 #define private public
 #define protected public
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/unittest/core/pattern/app_bar/mock_theme_manager.h"
+
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
@@ -32,8 +35,6 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/calc_length.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -99,6 +100,8 @@ HWTEST_F(AppBarTestNg, Test002, TestSize.Level1)
 {
     auto stage = AceType::MakeRefPtr<FrameNode>("stage", 1, AceType::MakeRefPtr<StagePattern>());
     auto frameNode = AppBarView::Create(stage);
+    auto appBar = Referenced::MakeRefPtr<AppBarView>(frameNode);
+    appBar->iniBehavior();
     stage->GetPattern<StagePattern>()->OnRebuildFrame();
     auto titleBar = frameNode->GetChildAtIndex(0);
     auto backbtn = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
@@ -109,6 +112,8 @@ HWTEST_F(AppBarTestNg, Test002, TestSize.Level1)
     stage->AddChild(test2);
     stage->AddChild(test3);
     frameNode = AppBarView::Create(stage);
+    appBar = Referenced::MakeRefPtr<AppBarView>(frameNode);
+    appBar->iniBehavior();
     stage->GetPattern<StagePattern>()->OnRebuildFrame();
     titleBar = frameNode->GetChildAtIndex(0);
     backbtn = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
@@ -134,7 +139,7 @@ HWTEST_F(AppBarTestNg, Test003, TestSize.Level1)
     auto backBtn = AceType::DynamicCast<FrameNode>(titleBar->GetChildAtIndex(0));
     EXPECT_TRUE(backBtn);
     ClickBtn(backBtn);
-    auto shareBtn = AceType::DynamicCast<FrameNode>(titleBar->GetChildAtIndex(2));
+    auto shareBtn = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(2));
     EXPECT_TRUE(shareBtn);
     SUCCEED();
 }
@@ -235,5 +240,32 @@ HWTEST_F(AppBarTestNg, AppBarSetIconColor008, TestSize.Level1)
     std::optional<Color> NonColor = std::nullopt;
     appBar->SetIconColor(NonColor);
     EXPECT_EQ(property->GetImageSourceInfo()->GetFillColor(), originColor);
+}
+
+/**
+ * @tc.name: AppBarWithNavigation009
+ * @tc.desc: Test when exist navigation hide appbar
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, AppBarWithNavigation009, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>(V2::NAVIGATION_VIEW_ETS_TAG, 1, AceType::MakeRefPtr<StagePattern>());
+    auto atom = AppBarView::Create(stage);
+    auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
+    appBar->iniBehavior();
+    stage->GetPattern<StagePattern>()->OnRebuildFrame();
+    auto titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
+    EXPECT_EQ(titleBar->GetLayoutProperty()->GetVisibility(), VisibleType::GONE);
+
+    auto page2 = AceType::MakeRefPtr<FrameNode>("test", 2, AceType::MakeRefPtr<Pattern>());
+    auto page3 = AceType::MakeRefPtr<FrameNode>("test", 3, AceType::MakeRefPtr<Pattern>());
+    stage->AddChild(page2);
+    stage->AddChild(page3);
+    atom = AppBarView::Create(stage);
+    appBar = Referenced::MakeRefPtr<AppBarView>(atom);
+    appBar->iniBehavior();
+    stage->GetPattern<StagePattern>()->OnRebuildFrame();
+    titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
+    EXPECT_EQ(titleBar->GetLayoutProperty()->GetVisibility(), VisibleType::VISIBLE);
 }
 } // namespace OHOS::Ace::NG

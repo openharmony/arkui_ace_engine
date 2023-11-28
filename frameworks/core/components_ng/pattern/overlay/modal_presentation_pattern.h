@@ -85,8 +85,19 @@ public:
         return isExecuteOnDisappear_;
     }
 
+    bool AvoidKeyboard() const override
+    {
+        // If UIExtensionComponent uses ModalPage, ModalPage will avoid KeyBoard.
+        return isUIExtension_;
+    }
+
+    void UpdateUIExtensionMode(bool isUIExtension)
+    {
+        isUIExtension_ = isUIExtension;
+    }
 private:
     void OnAttachToFrameNode() override;
+    bool isUIExtension_ = false;
     int32_t targetId_ = -1;
     ModalTransition type_ = ModalTransition::DEFAULT;
     std::function<void(const std::string&)> callback_;

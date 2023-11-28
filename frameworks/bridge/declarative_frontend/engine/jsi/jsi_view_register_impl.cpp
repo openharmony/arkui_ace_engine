@@ -63,6 +63,7 @@
 #include "bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "bridge/declarative_frontend/jsview/js_environment.h"
 #include "bridge/declarative_frontend/jsview/js_flex_impl.h"
+#include "bridge/declarative_frontend/jsview/js_folder_stack.h"
 #include "bridge/declarative_frontend/jsview/js_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_form_link.h"
 #include "bridge/declarative_frontend/jsview/js_gauge.h"
@@ -162,7 +163,7 @@
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
@@ -179,9 +180,11 @@
 #ifndef WEARABLE_PRODUCT
 #include "bridge/declarative_frontend/jsview/js_piece.h"
 #include "bridge/declarative_frontend/jsview/js_rating.h"
+#if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_video.h"
 #include "bridge/declarative_frontend/jsview/js_video_controller.h"
+#endif
 #endif
 #endif
 
@@ -219,7 +222,9 @@
 #endif
 
 #ifndef WEARABLE_PRODUCT
+#if defined(CAMERA_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
 #include "bridge/declarative_frontend/jsview/js_camera.h"
+#endif
 #endif
 
 #if defined(WINDOW_SCENE_SUPPORTED)
@@ -230,6 +235,65 @@
 #endif
 
 namespace OHOS::Ace::Framework {
+
+void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
+{
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
+    if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
+        return;
+    }
+    auto uiNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode(true));
+    CHECK_NULL_VOID(uiNode);
+    auto customNode = AceType::DynamicCast<NG::CustomTitleNode>(uiNode);
+    CHECK_NULL_VOID(customNode);
+
+    const auto object = JSRef<JSObject>::Make(obj);
+    auto id = ContainerScope::CurrentId();
+    const JSRef<JSVal> setAppTitle = object->GetProperty("setAppTitle");
+    if (setAppTitle->IsFunction()) {
+        JSRef<JSFunc> jsSetAppTitleFunc = JSRef<JSFunc>::Cast(setAppTitle);
+        auto callback = [obj = object, jsFunc = jsSetAppTitleFunc, id](const std::string& title) {
+            ContainerScope scope(id);
+            const EcmaVM* vm = obj->GetEcmaVM();
+            CHECK_NULL_VOID(vm);
+            JSRef<JSVal> param = JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, title));
+            jsFunc->Call(obj, 1, &param);
+        };
+        customNode->SetAppTitleCallback(callback);
+    }
+#ifdef PIXEL_MAP_SUPPORTED
+    const JSRef<JSVal> setAppIcon = object->GetProperty("setAppIcon");
+    if (setAppIcon->IsFunction()) {
+        JSRef<JSFunc> jsSetAppIconFunc = JSRef<JSFunc>::Cast(setAppIcon);
+        auto callback = [obj = object, jsFunc = jsSetAppIconFunc, id](const RefPtr<PixelMap>& icon) {
+            ContainerScope scope(id);
+            JSRef<JSVal> param = ConvertPixmap(icon);
+            jsFunc->Call(obj, 1, &param);
+        };
+        customNode->SetAppIconCallback(callback);
+    }
+#endif
+    const JSRef<JSVal> onWindowFocused = object->GetProperty("onWindowFocused");
+    if (onWindowFocused->IsFunction()) {
+        JSRef<JSFunc> jsOnWindowFocusedFunc = JSRef<JSFunc>::Cast(onWindowFocused);
+        auto callback = [obj = object, jsFunc = jsOnWindowFocusedFunc, id]() {
+            ContainerScope scope(id);
+            jsFunc->Call(obj);
+        };
+        customNode->SetOnWindowFocusedCallback(callback);
+    }
+
+    const JSRef<JSVal> onWindowUnfocused = object->GetProperty("onWindowUnfocused");
+    if (onWindowUnfocused->IsFunction()) {
+        JSRef<JSFunc> jsOnWindowUnfocusedFunc = JSRef<JSFunc>::Cast(onWindowUnfocused);
+        auto callback = [obj = object, jsFunc = jsOnWindowUnfocusedFunc, id]() {
+            ContainerScope scope(id);
+            jsFunc->Call(obj);
+        };
+        customNode->SetOnWindowUnfocusedCallback(callback);
+    }
+    NG::ViewStackProcessor::GetInstance()->SetCustomTitleNode(customNode);
+}
 
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
@@ -429,6 +493,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Row", JSRow::JSBind },
     { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
+    { "FolderStack", JSFolderStack::JSBind},
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "If", JSIfElse::JSBind },
@@ -505,6 +570,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GridContainer", JSGridContainer::JSBind },
     { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
+    { "FolderStack", JSFolderStack::JSBind},
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
@@ -585,11 +651,15 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "EffectComponent", JSEffectComponent::JSBind },
 #endif
 #ifndef WEARABLE_PRODUCT
+#if defined(CAMERA_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
     { "Camera", JSCamera::JSBind },
+#endif
     { "Piece", JSPiece::JSBind },
     { "Rating", JSRating::JSBind },
+#if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
     { "Video", JSVideo::JSBind },
+#endif
 #endif
 #endif
 #if defined(XCOMPONENT_SUPPORTED)
@@ -631,8 +701,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
     { "Matrix2D", JSMatrix2d::JSBind },
     { "CanvasPattern", JSCanvasPattern::JSBind },
+#if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
     { "VideoController", JSVideoController::JSBind },
+#endif
 #endif
     { "Search", JSSearch::JSBind },
     { "Select", JSSelect::JSBind },
@@ -663,8 +735,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
+#if defined(PLAYER_FRAMEWORK_EXISTS)
     { "Video", JSVideo::JSBind },
     { "VideoController", JSVideoController::JSBind },
+#endif
     { "PluginComponent", JSPlugin::JSBind },
     { "UIExtensionComponent", JSUIExtension::JSBind },
 #endif
@@ -701,8 +775,10 @@ void RegisterAllModule(BindingTarget globalObj)
 #ifdef ABILITY_COMPONENT_SUPPORTED
     JSAbilityComponentController::JSBind(globalObj);
 #endif
+#if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
     JSVideoController::JSBind(globalObj);
+#endif
 #endif
     JSTextInputController::JSBind(globalObj);
     JSTextAreaController::JSBind(globalObj);
@@ -787,8 +863,10 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         JSAbilityComponentController::JSBind(globalObj);
 #endif
     } else if ((*func).first == "Video") {
+#if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
         JSVideoController::JSBind(globalObj);
+#endif
 #endif
     } else if ((*func).first == "Grid") {
         JSColumn::JSBind(globalObj);
@@ -817,21 +895,15 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
 {
     // globalObj is panda::Local<panda::ObjectRef>
     const auto globalObject = JSRef<JSObject>::Make(globalObj);
-    const JSRef<JSVal> globalFuncVal = globalObject->GetProperty("uiNodeRegisterCleanUpFunction");
-    const JSRef<JSVal> globalCleanUpFunc = globalObject->GetProperty("globalRegisterCleanUpFunction");
 
-    if (globalFuncVal->IsFunction()) {
-        const auto globalFunc = JSRef<JSFunc>::Cast(globalFuncVal);
+    const JSRef<JSVal> cleanUpIdleTask = globalObject->GetProperty("uiNodeCleanUpIdleTask");
+    if (cleanUpIdleTask->IsFunction()) {
+        LOGI("CleanUpIdleTask is a valid function");
+        const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
         const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
             jsFunc->Call(globalObject);
         };
-        ElementRegister::GetInstance()->RegisterJSUINodeRegisterCallbackFunc(callback);
-    } else if (globalCleanUpFunc->IsFunction()) {
-        const auto globalFunc = JSRef<JSFunc>::Cast(globalCleanUpFunc);
-        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
-            jsFunc->Call(globalObject);
-        };
-        ElementRegister::GetInstance()->RegisterJSUINodeRegisterGlobalFunc(callback);
+        ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
     }
 }
 
@@ -843,7 +915,7 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
         RegisterModuleByName(globalObj, moduleName);
     }
     JsUINodeRegisterCleanUp(globalObj);
-    
+
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);
@@ -853,8 +925,7 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
     JSRenderingContextSettings::JSBind(globalObj);
 }
 
-void JsBindFormViews(
-    BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload)
+void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload)
 {
     if (!isReload) {
         JSViewAbstract::JSBind(globalObj);

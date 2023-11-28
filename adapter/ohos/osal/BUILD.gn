@@ -50,6 +50,8 @@ template("ace_osal_ohos_source_set") {
       "//base/hiviewdfx/hicollie/interfaces/native/innerkits/include",
       "//commonlibrary/c_utils/base/include",
       "//foundation/window/window_manager/interfaces/innerkits",
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
     ]
 
     sources = [

@@ -761,17 +761,17 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0018, TestSize.Level1)
      * @tc.steps3: call the function GetFocusingTabNodeIdx with the unempty TabIndexNodeList.
      * @tc.expected: The return value of the function is DEFAULT_TAB_FOCUSED_INDEX.
      */
-    int32_t NodeId = 1;
-    focusHub->lastTabIndexNodeId_ = NodeId;
+    int32_t nodeId = 1;
+    focusHub->lastTabIndexNodeId_ = nodeId;
     tabIndexNodes.emplace_back(focusHub->GetTabIndex(), focusHub);
-    EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), NONE_TAB_FOCUSED_INDEX);
+    EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), DEFAULT_TAB_FOCUSED_INDEX);
 
     /**
      * @tc.steps4: call the function GetFocusingTabNodeIdx with the unempty TabIndexNodeList.
      * @tc.expected: The return value of the function is 0.
      */
-    NodeId = -1;
-    focusHub->lastTabIndexNodeId_ = NodeId;
+    nodeId = -1;
+    focusHub->lastTabIndexNodeId_ = nodeId;
     focusHub->currentFocus_ = true;
     EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), 0);
 
@@ -780,7 +780,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0018, TestSize.Level1)
      * @tc.expected: The return value of the function is NONE_TAB_FOCUSED_INDEX.
      */
     focusHub->currentFocus_ = false;
-    EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), NONE_TAB_FOCUSED_INDEX);
+    EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), DEFAULT_TAB_FOCUSED_INDEX);
 }
 
 /**
@@ -3118,5 +3118,54 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0083, TestSize.Level1)
 
     auto res = focusHub->FocusToHeadOrTailChild(true);
     ASSERT_TRUE(res);
+}
+
+/**
+ * @tc.name: LostFocusToViewRoot001
+ * @tc.desc: Test the function LostFocusToViewRoot.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, LostFocusToViewRoot001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+     /**
+     * @tc.Calling LostFocusToViewRoot to increase coverage
+     */
+    focusHub->LostFocusToViewRoot();
+    ASSERT_TRUE(focusHub->currentFocus_ == false);
+}
+
+/*
+ * @tc.name: SetEnabledNode01
+ * @tc.desc: Test the function SetEnabledScope and SetEnabledScope.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, SetEnabledScope001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    focusHub->SetEnabledNode(true);
+    ASSERT_TRUE(focusHub->currentFocus_ == false);
+
+    focusHub->SetEnabledScope(true);
+    ASSERT_TRUE(focusHub->IsFocusableNode());
+
+    focusHub->SetShowNode(true);
+    ASSERT_TRUE(focusHub->currentFocus_ == false);
+
+    focusHub->SetShowScope(true);
+    ASSERT_TRUE(focusHub->currentFocus_ == false);
+    ASSERT_FALSE(focusHub->HandleFocusOnMainView());
 }
 } // namespace OHOS::Ace::NG

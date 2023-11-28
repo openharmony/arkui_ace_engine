@@ -579,15 +579,8 @@ std::shared_ptr<RSImage> ImageProvider::ResizeDrawingImage(
 #ifndef USE_ROSEN_DRAWING
 sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
     const sk_sp<SkImage>& rawImage, int32_t dstWidth, int32_t dstHeight, const std::string& srcKey)
-#else
-std::shared_ptr<RSImage> ImageProvider::ApplySizeToDrawingImage(
-    const std::shared_ptr<RSImage>& rawRSImage, int32_t dstWidth, int32_t dstHeight, const std::string& srcKey)
-#endif
 {
     ACE_FUNCTION_TRACE();
-#ifdef USE_ROSEN_DRAWING
-    auto rawImage = rawRSImage->GetImpl<Rosen::Drawing::SkiaImage>()->GetImage();
-#endif
     auto scaledImageInfo =
         SkImageInfo::Make(dstWidth, dstHeight, rawImage->colorType(), rawImage->alphaType(), rawImage->refColorSpace());
     SkBitmap scaledBitmap;
@@ -595,22 +588,14 @@ std::shared_ptr<RSImage> ImageProvider::ApplySizeToDrawingImage(
         LOGE("Could not allocate bitmap when attempting to scale. srcKey: %{private}s, destination size: [%{public}d x"
              " %{public}d], raw image size: [%{public}d x %{public}d]",
             srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
-#ifndef USE_ROSEN_DRAWING
         return rawImage;
-#else
-        return rawRSImage;
-#endif
     }
     if (!rawImage->scalePixels(scaledBitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone),
             SkImage::kDisallow_CachingHint)) {
         LOGE("Could not scale pixels srcKey: %{private}s, destination size: [%{public}d x"
              " %{public}d], raw image size: [%{public}d x %{public}d]",
             srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
-#ifndef USE_ROSEN_DRAWING
         return rawImage;
-#else
-        return rawRSImage;
-#endif
     }
     // Marking this as immutable makes the MakeFromBitmap call share the pixels instead of copying.
     scaledBitmap.setImmutable();
@@ -620,12 +605,7 @@ std::shared_ptr<RSImage> ImageProvider::ApplySizeToDrawingImage(
         bool needCacheResizedImageFile =
             (1.0 * dstWidth * dstHeight) / (rawImage->width() * rawImage->height()) < RESIZE_MAX_PROPORTION;
         auto context = PipelineBase::GetCurrentContext();
-#ifndef USE_ROSEN_DRAWING
         CHECK_NULL_RETURN(context, scaledImage);
-#else
-        auto scaledRSImage = std::make_shared<RSImage>(static_cast<void*>(&scaledImage));
-        CHECK_NULL_RETURN(context, scaledRSImage);
-#endif
         // card doesn't encode and cache image file.
         if (needCacheResizedImageFile && !srcKey.empty() && !context->IsFormRender()) {
             BackgroundTaskExecutor::GetInstance().PostTask(
@@ -640,21 +620,67 @@ std::shared_ptr<RSImage> ImageProvider::ApplySizeToDrawingImage(
                 },
                 BgTaskPriority::LOW);
         }
-#ifndef USE_ROSEN_DRAWING
         return scaledImage;
-#else
-        return scaledRSImage;
-#endif
     }
     LOGE("Could not create a scaled image from a scaled bitmap. srcKey: %{private}s, destination size: [%{public}d x"
          " %{public}d], raw image size: [%{public}d x %{public}d]",
         srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
-#ifndef USE_ROSEN_DRAWING
     return rawImage;
-#else
-    return rawRSImage;
-#endif
 }
+#else
+std::shared_ptr<RSImage> ImageProvider::ApplySizeToDrawingImage(
+    const std::shared_ptr<RSImage>& rawRSImage, int32_t dstWidth, int32_t dstHeight, const std::string& srcKey)
+{
+    ACE_FUNCTION_TRACE();
+    RSImageInfo scaledImageInfo { dstWidth, dstHeight,
+        rawRSImage->GetColorType(), rawRSImage->GetAlphaType(), rawRSImage->GetColorSpace() };
+    RSBitmap scaledBitmap;
+    if (!scaledBitmap.TryAllocPixels(scaledImageInfo)) {
+        LOGE("Could not allocate bitmap when attempting to scale. srcKey: %{private}s, destination size: [%{public}d x"
+             " %{public}d], raw image size: [%{public}d x %{public}d]",
+            srcKey.c_str(), dstWidth, dstHeight, rawRSImage->GetWidth(), rawRSImage->GetHeight());
+        return rawRSImage;
+    }
+    if (!rawRSImage->ScalePixels(scaledBitmap, RSSamplingOptions(RSFilterMode::LINEAR, RSMipmapMode::NONE), false)) {
+        LOGE("Could not scale pixels srcKey: %{private}s, destination size: [%{public}d x"
+             " %{public}d], raw image size: [%{public}d x %{public}d]",
+            srcKey.c_str(), dstWidth, dstHeight, rawRSImage->GetWidth(), rawRSImage->GetHeight());
+        return rawRSImage;
+    }
+    // Marking this as immutable makes the MakeFromBitmap call share the pixels instead of copying.
+    scaledBitmap.SetImmutable();
+    std::shared_ptr<RSImage> scaledImage = std::make_shared<RSImage>();
+    if (scaledImage->BuildFromBitmap(scaledBitmap)) {
+        const double RESIZE_MAX_PROPORTION = ImageCompressor::GetInstance()->CanCompress() ? 1.0 : 0.25;
+        bool needCacheResizedImageFile =
+            (1.0 * dstWidth * dstHeight) / (rawRSImage->GetWidth() * rawRSImage->GetHeight()) < RESIZE_MAX_PROPORTION;
+        auto context = PipelineBase::GetCurrentContext();
+        // card doesn't encode and cache image file.
+        if (needCacheResizedImageFile && !srcKey.empty() && !context->IsFormRender()) {
+            BackgroundTaskExecutor::GetInstance().PostTask(
+                [srcKey, scaledImage]() {
+                    LOGI("write png cache file: %{private}s", srcKey.c_str());
+                    auto data = scaledImage->EncodeToData(RSEncodedImageFormat::PNG, 100);
+                    if (!data) {
+                        return;
+                    }
+                    auto skData = SkData::MakeWithoutCopy(data->GetData(), data->GetSize());
+                    if (!skData) {
+                        LOGI("encode cache image into cache file failed.");
+                        return;
+                    }
+                    ImageFileCache::GetInstance().WriteCacheFile(srcKey, skData->data(), skData->size());
+                },
+                BgTaskPriority::LOW);
+        }
+        return scaledImage;
+    }
+    LOGE("Could not create a scaled image from a scaled bitmap. srcKey: %{private}s, destination size: [%{public}d x"
+         " %{public}d], raw image size: [%{public}d x %{public}d]",
+        srcKey.c_str(), dstWidth, dstHeight, rawRSImage->GetWidth(), rawRSImage->GetHeight());
+    return rawRSImage;
+}
+#endif
 
 #ifndef USE_ROSEN_DRAWING
 sk_sp<SkImage> ImageProvider::GetSkImage(const std::string& src, const WeakPtr<PipelineBase> context, Size targetSize)
@@ -740,12 +766,12 @@ bool ImageProvider::IsWideGamut(const std::shared_ptr<RSColorSpace>& rsColorSpac
     if (!rsColorSpace) {
         return false;
     }
-    auto colorSpace = rsColorSpace->GetImpl<Rosen::Drawing::SkiaColorSpace>()->GetColorSpace();
+    auto colorSpace = rsColorSpace->GetSkColorSpace();
 #endif
-    skcms_ICCProfile encodedProfile;
     if (!colorSpace)
         return false;
 
+    skcms_ICCProfile encodedProfile;
     colorSpace->toProfile(&encodedProfile);
     if (!encodedProfile.has_toXYZD50) {
         LOGI("This profile's gamut can not be represented by a 3x3 transform to XYZD50");

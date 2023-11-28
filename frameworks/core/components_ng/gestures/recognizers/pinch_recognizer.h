@@ -49,6 +49,7 @@ private:
 
     void OnResetStatus() override;
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    GestureJudgeResult TriggerGestureJudgeCallback();
     Offset ComputePinchCenter();
 
     bool IsCtrlBeingPressed();

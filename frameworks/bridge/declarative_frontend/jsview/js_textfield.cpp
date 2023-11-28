@@ -77,6 +77,8 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
 const uint32_t MAX_LINES = 3;
+const uint32_t MINI_VAILD_VALUE = 1;
+const uint32_t MAX_VAILD_VALUE = 100;
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -187,6 +189,10 @@ void JSTextField::SetType(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         LOGI("SetType create error, info is non-valid");
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        TextFieldModel::GetInstance()->SetType(TextInputType::UNSPECIFIED);
         return;
     }
     if (!info[0]->IsNumber()) {
@@ -379,6 +385,11 @@ void JSTextField::SetSelectedBackgroundColor(const JSCallbackInfo& info)
         CHECK_NULL_VOID(theme);
         selectedColor = theme->GetSelectedColor();
     }
+    // Alpha = 255 means opaque
+    if (selectedColor.GetAlpha() == 255) {
+        // Default setting of 20% opacity
+        selectedColor = selectedColor.ChangeOpacity(0.2);
+    }
     TextFieldModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
 }
 
@@ -501,8 +512,11 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
     }
     if (info.Length() > 1 && info[1]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(info[1]));
-        auto resultId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto resultId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                            const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            PipelineContext::SetCallBackNode(node);
             func->Execute(info);
         };
         TextFieldModel::GetInstance()->SetInputFilter(inputFilter, resultId);
@@ -557,6 +571,9 @@ void JSTextField::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         LOGW("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    if (info[0]->IsString() && info[0]->ToString().empty()) {
         return;
     }
     if (info[0]->IsString() && info[0]->ToString() == "auto") {
@@ -1005,12 +1022,20 @@ void JSTextField::SetShowError(const JSCallbackInfo& info)
 
 void JSTextField::SetShowCounter(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsBoolean()) {
-        LOGI("The info is wrong, it is supposed to be an boolean");
+    if ((!info[0]->IsBoolean() && !info[1]->IsObject())) {
+        LOGI("The info is wrong, it is supposed to be a boolean");
         TextFieldModel::GetInstance()->SetShowCounter(false);
         return;
     }
-
+    if (info[1]->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(info[1]);
+        auto inputNumber = (paramObject->GetProperty("thresholdPercentage")->ToNumber<int32_t>());
+        if (inputNumber < MINI_VAILD_VALUE || inputNumber > MAX_VAILD_VALUE) {
+            LOGI("The info is wrong, it is supposed to be a right number");
+            return;
+        }
+        TextFieldModel::GetInstance()->SetCounterType(inputNumber);
+    }
     TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
 }
 
@@ -1080,9 +1105,11 @@ bool JSTextField::ParseJsCustomKeyboardBuilder(
     }
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     CHECK_NULL_RETURN(builderFunc, false);
-    buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("CustomKeyboard");
+        PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
     return true;

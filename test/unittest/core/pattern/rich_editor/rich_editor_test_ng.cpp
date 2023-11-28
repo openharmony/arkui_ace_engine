@@ -20,6 +20,8 @@
 #define private public
 #define protected public
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/render/mock_paragraph.h"
 
 #include "base/geometry/dimension.h"
@@ -78,6 +80,7 @@ int32_t callBack2 = 0;
 int32_t callBack3 = 0;
 const std::string INIT_VALUE_1 = "hello1";
 const std::string INIT_VALUE_2 = "hello2";
+const std::string INIT_VALUE_3 = "hello world! hello world! hello world!";
 const std::string TEST_INSERT_VALUE = "s";
 const std::string TEST_INSERT_LINE_SEP = "\n";
 const std::string EXCEPT_VALUE = "h\n";
@@ -99,6 +102,7 @@ const CalcLength CALC_LENGTH_CALC {10.0, DimensionUnit::CALC};
 const CalcLength ERROR_CALC_LENGTH_CALC {-10.0, DimensionUnit::CALC};
 const Dimension CALC_TEST {10.0, DimensionUnit::CALC};
 const Dimension ERROR_CALC_TEST {-10.0, DimensionUnit::CALC};
+const Offset MOUSE_GLOBAL_LOCATION = {100, 200};
 } // namespace
 
 class RichEditorTestNg : public testing::Test {
@@ -117,15 +121,18 @@ protected:
 void RichEditorTestNg::SetUp()
 {
     MockPipelineBase::SetUp();
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     richEditorNode_ = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->InitScrollablePattern();
     richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
     richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
-    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>();
+    richEditorPattern->CreateNodePaintMethod();
     richEditorNode_->GetGeometryNode()->SetContentSize({});
 }
 
@@ -180,7 +187,7 @@ void RichEditorTestNg::AddImageSpan()
     imageNode->MountToParent(richEditorNode_, richEditorNode_->children_.size());
     auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
     spanItem->content = " ";
-    spanItem->placeHolderIndex = 0;
+    spanItem->placeholderIndex = 0;
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->spans_.emplace_back(spanItem);
@@ -965,12 +972,14 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = -1;
 
     richEditorPattern->isMouseSelect_ = true;
+    richEditorPattern->hasClicked_ = false;
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 
     richEditorPattern->isMouseSelect_ = false;
+    richEditorPattern->hasClicked_ = false;
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
@@ -980,12 +989,14 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = 1;
 
     richEditorPattern->isMouseSelect_ = true;
+    richEditorPattern->hasClicked_ = false;
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 
     richEditorPattern->isMouseSelect_ = false;
+    richEditorPattern->hasClicked_ = false;
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
@@ -1753,22 +1764,22 @@ HWTEST_F(RichEditorTestNg, CopySelectionMenuParams001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     SelectOverlayInfo selectInfo;
     richEditorPattern->selectedType_ = RichEditorType::TEXT;
-    richEditorPattern->CopySelectionMenuParams(selectInfo);
+    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::LONG_PRESS);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
 
     richEditorPattern->selectedType_ = RichEditorType::IMAGE;
-    richEditorPattern->CopySelectionMenuParams(selectInfo);
+    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::LONG_PRESS);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
 
     richEditorPattern->selectedType_ = RichEditorType::MIXED;
-    richEditorPattern->CopySelectionMenuParams(selectInfo);
+    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::LONG_PRESS);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
 
     richEditorPattern->selectedType_ = RichEditorType(-1);
-    richEditorPattern->CopySelectionMenuParams(selectInfo);
+    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::LONG_PRESS);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
 
-    auto key = std::make_pair(RichEditorType::MIXED, ResponseType::RIGHT_CLICK);
+    auto key = std::make_pair(RichEditorType::MIXED, RichEditorResponseType::RIGHT_CLICK);
     callBack1 = 0;
     callBack2 = 0;
     callBack3 = 0;
@@ -1785,21 +1796,21 @@ HWTEST_F(RichEditorTestNg, CopySelectionMenuParams001, TestSize.Level1)
         return;
     };
     std::shared_ptr<SelectionMenuParams> params1 = std::make_shared<SelectionMenuParams>(
-        RichEditorType::MIXED, buildFunc, onAppear, onDisappear, ResponseType::RIGHT_CLICK);
+        RichEditorType::MIXED, buildFunc, onAppear, onDisappear, RichEditorResponseType::RIGHT_CLICK);
     richEditorPattern->selectionMenuMap_[key] = params1;
     selectInfo.isUsingMouse = true;
     richEditorPattern->selectedType_ = RichEditorType::MIXED;
-    richEditorPattern->CopySelectionMenuParams(selectInfo);
+    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::RIGHT_CLICK);
     EXPECT_NE(selectInfo.menuCallback.onDisappear, nullptr);
 
-    key = std::make_pair(RichEditorType::MIXED, ResponseType::LONG_PRESS);
+    key = std::make_pair(RichEditorType::MIXED, RichEditorResponseType::LONG_PRESS);
     std::shared_ptr<SelectionMenuParams> params2 = std::make_shared<SelectionMenuParams>(
-        RichEditorType::MIXED, buildFunc, nullptr, nullptr, ResponseType::RIGHT_CLICK);
+        RichEditorType::MIXED, buildFunc, nullptr, nullptr, RichEditorResponseType::RIGHT_CLICK);
     richEditorPattern->selectionMenuMap_[key] = params2;
     selectInfo.isUsingMouse = false;
     richEditorPattern->selectedType_ = RichEditorType::MIXED;
-    richEditorPattern->CopySelectionMenuParams(selectInfo);
-    EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
+    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::RIGHT_CLICK);
+    EXPECT_NE(selectInfo.menuCallback.onDisappear, nullptr);
 }
 
 /**
@@ -1857,8 +1868,8 @@ HWTEST_F(RichEditorTestNg, CreateNodePaintMethod002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->contentMod_ =
-        AceType::MakeRefPtr<RichEditorContentModifier>(richEditorPattern->textStyle_, &richEditorPattern->paragraphs_);
+    richEditorPattern->contentMod_ = AceType::MakeRefPtr<RichEditorContentModifier>(
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, richEditorPattern);
     richEditorPattern->isCustomFont_ = true;
     richEditorPattern->CreateNodePaintMethod();
     EXPECT_NE(richEditorPattern->contentMod_, nullptr);
@@ -1891,24 +1902,24 @@ HWTEST_F(RichEditorTestNg, BindSelectionMenu001, TestSize.Level1)
         return;
     };
 
-    auto key = std::make_pair(RichEditorType::MIXED, ResponseType::RIGHT_CLICK);
+    auto key = std::make_pair(RichEditorType::MIXED, RichEditorResponseType::RIGHT_CLICK);
     std::shared_ptr<SelectionMenuParams> params1 = std::make_shared<SelectionMenuParams>(
-        RichEditorType::MIXED, buildFunc, onAppear, onDisappear, ResponseType::RIGHT_CLICK);
+        RichEditorType::MIXED, buildFunc, onAppear, onDisappear, RichEditorResponseType::RIGHT_CLICK);
     richEditorPattern->selectionMenuMap_[key] = params1;
 
     std::function<void()> nullFunc = nullptr;
 
     richEditorPattern->BindSelectionMenu(
-        ResponseType::RIGHT_CLICK, RichEditorType::MIXED, nullFunc, onAppear, onDisappear);
+        RichEditorResponseType::RIGHT_CLICK, RichEditorType::MIXED, nullFunc, onAppear, onDisappear);
     EXPECT_TRUE(richEditorPattern->selectionMenuMap_.empty());
 
     richEditorPattern->selectionMenuMap_[key] = params1;
     richEditorPattern->BindSelectionMenu(
-        ResponseType::RIGHT_CLICK, RichEditorType::MIXED, buildFunc, onAppear, onDisappear);
+        RichEditorResponseType::RIGHT_CLICK, RichEditorType::MIXED, buildFunc, onAppear, onDisappear);
     EXPECT_FALSE(richEditorPattern->selectionMenuMap_.empty());
 
     richEditorPattern->BindSelectionMenu(
-        ResponseType::RIGHT_CLICK, RichEditorType::IMAGE, buildFunc, onAppear, onDisappear);
+        RichEditorResponseType::RIGHT_CLICK, RichEditorType::IMAGE, buildFunc, onAppear, onDisappear);
     EXPECT_FALSE(richEditorPattern->selectionMenuMap_.empty());
 }
 
@@ -2324,5 +2335,518 @@ HWTEST_F(RichEditorTestNg, GetCaretRect002, TestSize.Level1)
 
     EXPECT_EQ(GreatNotEqual(manager->GetHeight(), 0.0f), true);
     EXPECT_EQ(LessNotEqual(manager->GetHeight(), 800.0f), true);
+}
+
+/**
+ * @tc.name: HandleMouseLeftButton002
+ * @tc.desc: test HandleMouseLeftButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleMouseLeftButton002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    AddSpan(INIT_VALUE_1);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    MouseInfo mouseInfo;
+    mouseInfo.action_ = MouseAction::RELEASE;
+    mouseInfo.SetGlobalLocation(MOUSE_GLOBAL_LOCATION);
+    richEditorPattern->mouseStatus_ = MouseStatus::NONE;
+    richEditorPattern->HandleMouseLeftButton(mouseInfo);
+    EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::RELEASED);
+    richEditorPattern->textSelector_ = TextSelector(0, 2);
+    std::vector<RichEditorType> selectType = { RichEditorType::TEXT, RichEditorType::IMAGE, RichEditorType::MIXED };
+    SelectOverlayInfo selectInfo;
+    selectInfo.isUsingMouse = true;
+    for (int32_t i = 0; i < selectType.size(); i++) {
+        richEditorPattern->selectedType_ = selectType[i];
+        richEditorPattern->HandleMouseLeftButton(mouseInfo);
+        EXPECT_NE(richEditorPattern->selectionMenuOffsetByMouse_.GetX(),
+            static_cast<float>(mouseInfo.GetGlobalLocation().GetX()));
+        EXPECT_NE(richEditorPattern->selectionMenuOffsetByMouse_.GetY(),
+            static_cast<float>(mouseInfo.GetGlobalLocation().GetY()));
+    }
+    std::function<void()> buildFunc = []() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = []() {
+        callBack3 = 3;
+        return;
+    };
+    richEditorPattern->mouseStatus_ = MouseStatus::MOVE;
+    for (int32_t i = 0; i < selectType.size(); i++) {
+        richEditorPattern->selectedType_ = selectType[i];
+        auto key = std::make_pair(selectType[i], RichEditorResponseType::SELECTED_BY_MOUSE);
+        std::shared_ptr<SelectionMenuParams> params1 = std::make_shared<SelectionMenuParams>(
+            selectType[i], buildFunc, onAppear, onDisappear, RichEditorResponseType::SELECTED_BY_MOUSE);
+        richEditorPattern->selectionMenuMap_[key] = params1;
+        richEditorPattern->mouseStatus_ = MouseStatus::MOVE;
+        richEditorPattern->HandleMouseLeftButton(mouseInfo);
+        EXPECT_EQ(richEditorPattern->selectionMenuOffsetByMouse_.GetX(),
+            static_cast<float>(mouseInfo.GetGlobalLocation().GetX()));
+        EXPECT_EQ(richEditorPattern->selectionMenuOffsetByMouse_.GetY(),
+            static_cast<float>(mouseInfo.GetGlobalLocation().GetY()));
+    }
+}
+
+/**
+ * @tc.name: Selection001
+ * @tc.desc: test SetSelection and GetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, Selection001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    AddSpan(INIT_VALUE_1);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorPattern->SetSelection(0, 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
+    auto richEditorSelection = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection.selection[0], 0);
+    EXPECT_EQ(richEditorSelection.selection[1], 0);
+
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->SetSelection(0, 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 1);
+    auto richEditorSelection2 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection2.selection[0], 0);
+    EXPECT_EQ(richEditorSelection2.selection[1], 1);
+
+    richEditorPattern->SetSelection(3, 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 1);
+    auto richEditorSelection3 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection3.selection[0], 1);
+    EXPECT_EQ(richEditorSelection3.selection[1], 1);
+
+    richEditorPattern->SetSelection(-1, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 6);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    auto richEditorSelection4 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection4.selection[0], 0);
+    EXPECT_EQ(richEditorSelection4.selection[1], 6);
+
+    richEditorPattern->SetSelection(0, 10);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 6);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    auto richEditorSelection5 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection5.selection[0], 0);
+    EXPECT_EQ(richEditorSelection5.selection[1], 6);
+
+    richEditorPattern->SetSelection(-2, 3);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 3);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 3);
+    auto richEditorSelection6 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection6.selection[0], 0);
+    EXPECT_EQ(richEditorSelection6.selection[1], 3);
+
+    richEditorPattern->SetSelection(-2, 8);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 6);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    auto richEditorSelection7 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection7.selection[0], 0);
+    EXPECT_EQ(richEditorSelection7.selection[1], 6);
+
+    richEditorPattern->SetSelection(-2, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+    auto richEditorSelection8 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection8.selection[0], 0);
+    EXPECT_EQ(richEditorSelection8.selection[1], 0);
+
+    richEditorPattern->SetSelection(1, 3);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 3);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 3);
+    auto richEditorSelection9 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection9.selection[0], 1);
+    EXPECT_EQ(richEditorSelection9.selection[1], 3);
+}
+
+/**
+ * @tc.name: SetSelection002
+ * @tc.desc: test SetSelection and GetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, Selection002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    AddSpan(INIT_VALUE_1);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->SetSelection(0, 1);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    /**
+     * @tc.step: step1. Empty text calls the setSelection interface.
+     * @tc.expected: The interface exits normally, but it does not take effect
+     */
+    ClearSpan();
+    richEditorPattern->SetSelection(1, 3);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+    auto richEditorSelection = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection.selection[0], 0);
+    EXPECT_EQ(richEditorSelection.selection[1], 0);
+    /**
+     * @tc.step: step2. Extra-long text scenes.
+     * @tc.expected: A portion of the selected text is not displayed, but the selection range can be updated
+     * successfully
+     */
+    AddSpan(INIT_VALUE_3);
+    SizeF sizeF(10.0f, 10.0f);
+    richEditorNode_->GetGeometryNode()->SetContentSize(sizeF);
+    richEditorPattern->SetSelection(15, 30);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 15);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 30);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 30);
+    auto richEditorSelection2 = richEditorController->GetSelectionSpansInfo().GetSelection();
+    EXPECT_EQ(richEditorSelection2.selection[0], 15);
+    EXPECT_EQ(richEditorSelection2.selection[1], 30);
+    auto resultObject = richEditorSelection2.resultObjects.front();
+    EXPECT_EQ(resultObject.valueString, INIT_VALUE_3);
+    EXPECT_EQ(resultObject.offsetInSpan[0], 15);
+    EXPECT_EQ(resultObject.offsetInSpan[1], 30);
+}
+
+/**
+ * @tc.name: OnScrollCallback
+ * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, OnScrollCallback, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+
+    int32_t SCROLL_FROM_START = 10;
+    EXPECT_TRUE(richEditorPattern->OnScrollCallback(0, SCROLL_FROM_START));
+
+    int32_t SCROLL_FROM_UPDATE = 1;
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+    EXPECT_FALSE(richEditorPattern->OnScrollCallback(10, SCROLL_FROM_UPDATE)) << "Reach Top Boundary";
+
+    richEditorPattern->richTextRect_ = RectF(0, -40, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+    EXPECT_FALSE(richEditorPattern->OnScrollCallback(-10, SCROLL_FROM_UPDATE)) << "Reach Bottom Boundary";
+
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+    EXPECT_TRUE(richEditorPattern->OnScrollCallback(-10, SCROLL_FROM_UPDATE)) << "Scroll Up 10";
+    EXPECT_EQ(richEditorPattern->scrollOffset_, -10);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -10);
+
+    EXPECT_TRUE(richEditorPattern->OnScrollCallback(-50, SCROLL_FROM_UPDATE)) << "Scroll Up 50";
+    EXPECT_EQ(richEditorPattern->scrollOffset_, -40);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -40);
+
+    EXPECT_TRUE(richEditorPattern->OnScrollCallback(10, SCROLL_FROM_UPDATE)) << "Scroll Down 10";
+    EXPECT_EQ(richEditorPattern->scrollOffset_, -30);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -30);
+
+    EXPECT_TRUE(richEditorPattern->OnScrollCallback(50, SCROLL_FROM_UPDATE)) << "Scroll Down 50";
+    EXPECT_EQ(richEditorPattern->scrollOffset_, 0);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), 0);
+}
+
+/**
+ * @tc.name: MoveHandle
+ * @tc.desc: test whether the handle is moved when scrolling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, MoveHandle, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    SelectOverlayInfo info;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    richEditorPattern->selectOverlayProxy_ =
+        selectOverlayManager->CreateAndShowSelectOverlay(info, richEditorPattern, false);
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->selectOverlayManager_ = selectOverlayManager;
+
+    richEditorPattern->textSelector_.selectionBaseOffset = OffsetF(20, 20);
+    richEditorPattern->textSelector_.firstHandle = RectF(20, 20, 20, 20);
+    richEditorPattern->textSelector_.selectionDestinationOffset = OffsetF(60, 40);
+    richEditorPattern->textSelector_.secondHandle = RectF(60, 40, 20, 20);
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+
+    richEditorPattern->OnScrollCallback(-10, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(richEditorPattern->textSelector_.selectionBaseOffset.GetY(), 10);
+    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle.GetY(), 10);
+    EXPECT_EQ(richEditorPattern->textSelector_.selectionDestinationOffset.GetY(), 30);
+    EXPECT_EQ(richEditorPattern->textSelector_.secondHandle.GetY(), 30);
+
+    richEditorPattern->OnScrollCallback(5, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(richEditorPattern->textSelector_.selectionBaseOffset.GetY(), 15);
+    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle.GetY(), 15);
+    EXPECT_EQ(richEditorPattern->textSelector_.selectionDestinationOffset.GetY(), 35);
+    EXPECT_EQ(richEditorPattern->textSelector_.secondHandle.GetY(), 35);
+}
+
+/**
+ * @tc.name: AutoScrollByEdgeDetection001
+ * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+
+    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE };
+    Dimension AUTO_SCROLL_EDGE_DISTANCE = 15.0_vp;
+    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
+    auto edgeDistance = AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
+
+    param.handleRect = RectF(50, richEditorPattern->contentRect_.GetY() + edgeDistance + 1, 20, 20);
+    richEditorPattern->AutoScrollByEdgeDetection(
+        param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "handle move up but not reach top edge";
+    richEditorPattern->StopAutoScroll();
+
+    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
+    param.handleRect = RectF(50, richEditorPattern->contentRect_.GetY() + edgeDistance - 1, 20, 20);
+    richEditorPattern->AutoScrollByEdgeDetection(
+        param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "handle reach top edge";
+    richEditorPattern->StopAutoScroll();
+
+    auto handleHeight = 20;
+    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
+    param.handleRect =
+        RectF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - 1 - handleHeight, 20, handleHeight);
+    richEditorPattern->AutoScrollByEdgeDetection(
+        param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "handle move down but not reach bottom edge";
+    richEditorPattern->StopAutoScroll();
+
+    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
+    param.handleRect =
+        RectF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - handleHeight + 1, 20, handleHeight);
+    richEditorPattern->AutoScrollByEdgeDetection(
+        param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "handle reach bottom edge";
+    richEditorPattern->StopAutoScroll();
+
+    pipeline->taskExecutor_.Reset();
+}
+
+/**
+ * @tc.name: AutoScrollByEdgeDetection002
+ * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+
+    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
+    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::MOUSE };
+    Dimension AUTO_SCROLL_EDGE_DISTANCE = 15.0_vp;
+    auto edgeDistance = AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
+
+    richEditorPattern->AutoScrollByEdgeDetection(param,
+        OffsetF(50, richEditorPattern->contentRect_.GetY() + edgeDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "mouse move up but not reach top edge";
+    richEditorPattern->StopAutoScroll();
+
+    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
+    richEditorPattern->AutoScrollByEdgeDetection(param,
+        OffsetF(50, richEditorPattern->contentRect_.GetY() + edgeDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "mouse reach top edge";
+    richEditorPattern->StopAutoScroll();
+
+    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
+    richEditorPattern->AutoScrollByEdgeDetection(param,
+        OffsetF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "mouse move down but not reach bottom edge";
+    richEditorPattern->StopAutoScroll();
+
+    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
+    richEditorPattern->AutoScrollByEdgeDetection(param,
+        OffsetF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "mouse reach bottom edge";
+    richEditorPattern->StopAutoScroll();
+
+    pipeline->taskExecutor_.Reset();
+}
+
+/**
+ * @tc.name: AutoScrollByEdgeDetection003
+ * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+
+    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::DRAG };
+    Dimension AUTO_SCROLL_DRAG_EDGE_DISTANCE = 25.0_vp;
+    auto dragDistance = AUTO_SCROLL_DRAG_EDGE_DISTANCE.ConvertToPx();
+
+    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
+    richEditorPattern->AutoScrollByEdgeDetection(param,
+        OffsetF(50, richEditorPattern->contentRect_.GetY() + dragDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "drag move up but not reach top edge";
+    richEditorPattern->StopAutoScroll();
+
+    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
+    richEditorPattern->AutoScrollByEdgeDetection(param,
+        OffsetF(50, richEditorPattern->contentRect_.GetY() + dragDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "drag reach top edge";
+    richEditorPattern->StopAutoScroll();
+
+    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
+    richEditorPattern->AutoScrollByEdgeDetection(param,
+        OffsetF(50, richEditorPattern->contentRect_.Bottom() - dragDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "drag move down but not reach bottom edge";
+    richEditorPattern->StopAutoScroll();
+
+    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
+    richEditorPattern->AutoScrollByEdgeDetection(param,
+        OffsetF(50, richEditorPattern->contentRect_.Bottom() - dragDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "drag reach bottom edge";
+    richEditorPattern->StopAutoScroll();
+
+    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, dragDistance - 1);
+    richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(50, 50), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "content height is too small.";
+    richEditorPattern->StopAutoScroll();
+
+    pipeline->taskExecutor_.Reset();
+}
+
+/**
+ * @tc.name: AutoScrollByEdgeDetection004
+ * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+
+    Dimension AUTO_SCROLL_EDGE_DISTANCE = 15.0_vp;
+    auto edgeDistance = AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
+
+    richEditorPattern->prevAutoScrollOffset_ = OffsetF(50, 50);
+    Dimension AUTO_THRESHOLD = 2.0_vp;
+    auto thresholdDistance = AUTO_THRESHOLD.ConvertToPx();
+    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE,
+        .handleRect = RectF(50, 50 + thresholdDistance / 2, 20, 20) };
+    richEditorPattern->AutoScrollByEdgeDetection(
+        param, OffsetF(50, 50 + thresholdDistance / 2), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "moving distance less than minimum distance";
+    richEditorPattern->StopAutoScroll();
+
+    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, edgeDistance - 1);
+    richEditorPattern->AutoScrollByEdgeDetection(
+        param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "content height is too small.";
+    richEditorPattern->StopAutoScroll();
+
+    pipeline->taskExecutor_.Reset();
+}
+
+/**
+ * @tc.name: CheckScrollable
+ * @tc.desc: test CheckScrollable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, CheckScrollable, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+
+    richEditorPattern->CheckScrollable();
+    EXPECT_FALSE(richEditorPattern->scrollable_);
+
+    AddSpan(TEST_INSERT_VALUE);
+    richEditorPattern->CheckScrollable();
+    EXPECT_TRUE(richEditorPattern->scrollable_);
+
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 80);
+    richEditorPattern->CheckScrollable();
+    EXPECT_FALSE(richEditorPattern->scrollable_);
+
+    ClearSpan();
+}
+
+/**
+ * @tc.name: NeedSoftKeyboard001
+ * @tc.desc: test NeedSoftKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, NeedSoftKeyboard001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Get frameNode and pattern.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test whether rich editor need soft keyboard.
+     */
+    EXPECT_TRUE(richEditorPattern->NeedSoftKeyboard());
 }
 } // namespace OHOS::Ace::NG

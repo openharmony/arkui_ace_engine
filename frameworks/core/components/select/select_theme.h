@@ -17,14 +17,15 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SELECT_SELECT_THEME_H
 
 #include "base/geometry/dimension.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
-#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace {
 
@@ -196,6 +197,18 @@ public:
             theme->endIconWidth_ = MENU_END_ICON_WIDTH;
             theme->endIconHeight_ = MENU_END_ICON_HEIGHT;
             theme->contentMargin_ = pattern->GetAttr<Dimension>("content_margin", theme->contentMargin_);
+            theme->selectDefaultBgColor_ =
+                pattern->GetAttr<Color>("select_default_bg_color", theme->selectDefaultBgColor_);
+            theme->selectDefaultBorderRadius_ =
+                pattern->GetAttr<Dimension>("select_default_border_radius", theme->selectDefaultBorderRadius_);
+            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                theme->expandDisplay_ = false;
+            } else {
+                std::string expandDisplay = pattern->GetAttr<std::string>("menu_expand_display", "");
+                theme->expandDisplay_ = (expandDisplay == "true");
+            }
+            theme->maxPaddingStart_ = pattern->GetAttr<Dimension>("max_padding_start", theme->maxPaddingStart_);
+            theme->maxPaddingEnd_ = pattern->GetAttr<Dimension>("max_padding_end", theme->maxPaddingEnd_);
         }
     };
 
@@ -286,6 +299,11 @@ public:
         theme->endIconWidth_ = endIconWidth_;
         theme->endIconHeight_ = endIconHeight_;
         theme->contentMargin_ = contentMargin_;
+        theme->selectDefaultBgColor_ = selectDefaultBgColor_;
+        theme->selectDefaultBorderRadius_ = selectDefaultBorderRadius_;
+        theme->expandDisplay_ = expandDisplay_;
+        theme->maxPaddingStart_ = maxPaddingStart_;
+        theme->maxPaddingEnd_ = maxPaddingEnd_;
         return theme;
     }
 
@@ -813,6 +831,31 @@ public:
         return contentMargin_;
     }
 
+    const Color& GetSelectDefaultBgColor() const
+    {
+        return selectDefaultBgColor_;
+    }
+
+    const Dimension& GetSelectDefaultBorderRadius() const
+    {
+        return selectDefaultBorderRadius_;
+    }
+
+    bool GetExpandDisplay() const
+    {
+        return expandDisplay_;
+    }
+
+    const Dimension& GetMaxPaddingStart() const
+    {
+        return maxPaddingStart_;
+    }
+
+    const Dimension& GetMaxPaddingEnd() const
+    {
+        return maxPaddingEnd_;
+    }
+
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -908,6 +951,12 @@ private:
     int32_t pressAnimationDuration_ = 0;
 
     Edge optionPadding_;
+
+    Color selectDefaultBgColor_;
+    Dimension selectDefaultBorderRadius_;
+    bool expandDisplay_ = false;
+    Dimension maxPaddingStart_;
+    Dimension maxPaddingEnd_;
 };
 
 } // namespace OHOS::Ace

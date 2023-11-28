@@ -59,6 +59,9 @@ namespace {
 constexpr int32_t ITEM_NUMBER = 4;
 constexpr int32_t DEFAULT_INTERVAL = 3000;
 constexpr int32_t DEFAULT_DURATION = 400;
+constexpr int32_t CALL_TIMES = 4;
+constexpr float DRAG_SPEED = 500.0f;
+constexpr float DRAG_OFFSET_X = 50.0f;
 } // namespace
 
 class SwiperTestNg : public testing::Test, public TestNG {
@@ -1200,7 +1203,7 @@ HWTEST_F(SwiperTestNg, SwiperModelNg002, TestSize.Level1)
      */
     auto onAnimationEnd = [](int32_t index, const AnimationCallbackInfo& info) {};
     model.SetOnAnimationEnd(std::move(onAnimationEnd));
-    EXPECT_NE(eventHub->animationEndEvent_, nullptr);
+    EXPECT_NE(pattern->animationEndEvent_, nullptr);
 }
 
 /**
@@ -1243,10 +1246,10 @@ HWTEST_F(SwiperTestNg, SwiperModelNg003, TestSize.Level1)
 
     /**
      * @tc.steps: step3.4. Test SetOnChangeEvent function.
-     * @tc.expected: paintProperty->GetLoop() is not null.
+     * @tc.expected: pattern->onIndexChangeEvent_ is not null.
      */
-    auto onAnimationEnd = [](const BaseEventInfo* info) {};
-    model.SetOnChangeEvent(std::move(onAnimationEnd));
+    auto onChangeEvent = [](const BaseEventInfo* info) {};
+    model.SetOnChangeEvent(std::move(onChangeEvent));
     EXPECT_NE(pattern->onIndexChangeEvent_, nullptr);
 
     /**
@@ -7242,7 +7245,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternIsVisibleChildrenSizeLessThanSwiper001, Test
     pattern_->itemPosition_.clear();
     auto dimension = Dimension(1);
     layoutProperty_->UpdateMinSize(dimension);
-    ASSERT_TRUE(pattern_->itemPosition_.size() == pattern_->TotalCount());
+    ASSERT_TRUE(static_cast<int32_t>(pattern_->itemPosition_.size()) == pattern_->TotalCount());
 
     /**
      * @tc.steps: step2. call IsVisibleChildrenSizeLessThanSwiper.
@@ -10620,6 +10623,41 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperPatternHandleScroll006
+ * @tc.desc: test HandleScroll from child animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll006, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+    // during animation
+    pattern_->targetIndex_ = 1;
+
+    auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_ANIMATION, NestedState::CHILD_SCROLL);
+    EXPECT_EQ(res.remain, 5.0f);
+}
+
+/**
+ * @tc.name: SwiperPatternHandleScroll007
+ * @tc.desc: test HandleScroll from child mouse scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll007, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+
+    // showPrevious
+    auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_AXIS, NestedState::CHILD_SCROLL);
+    EXPECT_EQ(res.remain, 0.0f);
+
+    // showNext
+    res = pattern_->HandleScroll(-5.0f, SCROLL_FROM_AXIS, NestedState::CHILD_SCROLL);
+    EXPECT_EQ(res.remain, 0.0f);
+}
+
+/**
  * @tc.name: SwiperPatternHandleScrollVelocity001
  * @tc.desc: test HandleScrollVelocity self handle
  * @tc.type: FUNC
@@ -10722,5 +10760,26 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnScrollEnd001, TestSize.Level1)
     EXPECT_FALSE(pattern_->childScrolling_);
 
     pattern_->NotifyParentScrollEnd();
+}
+
+/**
+ * @tc.name: SwiperDragScene001
+ * @tc.desc: test Swiper drag LTPO
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperDragScene001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    auto renderContext = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
+    EXPECT_TRUE(!!renderContext);
+    EXPECT_CALL(*renderContext, CalcExpectedFrameRate(_, _)).Times(CALL_TIMES);
+    auto info = GestureEvent();
+    auto localLocation = Offset(DRAG_OFFSET_X, 0.0f);
+    info.SetLocalLocation(localLocation);
+    info.SetMainVelocity(DRAG_SPEED);
+    pattern_->HandleDragStart(info);
+    pattern_->HandleDragUpdate(info);
+    pattern_->HandleDragUpdate(info);
+    pattern_->HandleDragEnd(info.GetMainVelocity());
 }
 } // namespace OHOS::Ace::NG

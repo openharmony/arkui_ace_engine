@@ -39,6 +39,7 @@ const Dimension OFFSET_X { 40.0, DimensionUnit::PX };
 const Dimension OFFSET_Y { 80.0, DimensionUnit::PX };
 const Dimension ANCHOR_X { 100.0, DimensionUnit::PX };
 const Dimension ANCHOR_Y { 200.0, DimensionUnit::PX };
+const InvertVariant invert = 0.0f;
 
 const float VALUE_TEST = 720.0f;
 const Color WHITE = Color(0xffffffff);
@@ -61,7 +62,7 @@ void MakeGraphicsProperty(NG::GraphicsProperty& graphicsProperty)
     graphicsProperty.propFrontBrightness = POSITION_X;
     graphicsProperty.propFrontSaturate = POSITION_X;
     graphicsProperty.propFrontContrast = POSITION_X;
-    graphicsProperty.propFrontInvert = POSITION_X;
+    graphicsProperty.propFrontInvert = invert;
     graphicsProperty.propFrontSepia = POSITION_X;
     graphicsProperty.propFrontHueRotate = VALUE_TEST;
     graphicsProperty.propFrontColorBlend = WHITE;
@@ -249,6 +250,15 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest003, TestSize.Level1)
     graphicsProperty.ToJsonValue(json);
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("color"), "ColoringStrategy.AVERAGE");
     json->Delete(SHADOW_TEST);
+
+    /**
+     * @tc.steps: step3. call ToJsonValue.push propBackShadow colorStrategy_ == ShadowColorStrategy::PRIMARY.
+     * @tc.expected: Return expected results.
+     */
+    shadow.colorStrategy_ = ShadowColorStrategy::PRIMARY;
+    graphicsProperty.propBackShadow = shadow;
+    graphicsProperty.ToJsonValue(json);
+    EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("color"), "ColoringStrategy.PRIMARY");
 }
 
 /**

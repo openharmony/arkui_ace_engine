@@ -24,12 +24,12 @@
 #include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {
-
 namespace {
-
-using StartRegister = void (*)(const std::string& pkgName);
+using StartRegister = void (*)(
+    const std::string& processName, const std::string& pkgName, bool debugApp, const Callback& callbac);
 using StopRegister = void (*)();
-
+// defined in container.h
+constexpr int32_t CONTAINER_ID_DIVIDE_SIZE = 100000;
 } // namespace
 
 HdcRegister::HdcRegister(): registerHandler_(nullptr)
@@ -54,16 +54,16 @@ void HdcRegister::LoadRegisterSo()
     CHECK_NULL_VOID(registerHandler_);
 }
 
-void HdcRegister::StartHdcRegister(int32_t instanceId)
+void HdcRegister::StartHdcRegister(int32_t instanceId, Callback callback)
 {
-    LOGI("Start Hdc Register");
+    LOGI("Start Hdc Register, instance id:%{public}d", instanceId);
     CHECK_NULL_VOID(registerHandler_);
-    if (instanceId != 0) {
+    if (instanceId % CONTAINER_ID_DIVIDE_SIZE != 0) {
         return; // Applications and abilities should only call this function once, especially in multi-instance.
     }
     StartRegister startRegister = (StartRegister)dlsym(registerHandler_, "StartConnect");
     CHECK_NULL_VOID(startRegister);
-    startRegister(pkgName_);
+    startRegister("", pkgName_, isDebugVersion_, callback);
 }
 
 void HdcRegister::StopHdcRegister(int32_t instanceId)

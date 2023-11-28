@@ -154,7 +154,7 @@ sk_sp<SkImage> ImageDecoder::ResizeSkImage()
     auto encodedImage = SkImage::MakeFromEncoded(data_);
 #else
     CHECK_NULL_RETURN(data_, nullptr);
-    auto skData = data_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto skData = SkData::MakeWithoutCopy(data_->GetData(), data_->GetSize());
     auto encodedImage = SkImage::MakeFromEncoded(skData);
 #endif
     CHECK_NULL_RETURN(desiredSize_.IsPositive(), encodedImage);
@@ -224,7 +224,7 @@ RefPtr<CanvasImage> ImageDecoder::QueryCompressedCache()
 
     // create encoded SkImage to use its uniqueId
     CHECK_NULL_RETURN(data_, {});
-    auto skData = data_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto skData = SkData::MakeWithoutCopy(data_->GetData(), data_->GetSize());
     auto skImage = SkImage::MakeFromEncoded(skData);
     std::shared_ptr<RSImage> image = nullptr;
     if (skImage) {

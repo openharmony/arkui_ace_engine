@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/select_model_impl.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -115,6 +116,9 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("paddingBottom", &JSSelect::SetPaddingBottom, opt);
     JSClass<JSSelect>::StaticMethod("paddingLeft", &JSSelect::SetPaddingLeft, opt);
     JSClass<JSSelect>::StaticMethod("paddingRight", &JSSelect::SetPaddingRight, opt);
+    JSClass<JSSelect>::StaticMethod("optionWidth", &JSSelect::SetOptionWidth, opt);
+    JSClass<JSSelect>::StaticMethod("optionHeight", &JSSelect::SetOptionHeight, opt);
+    JSClass<JSSelect>::StaticMethod("optionWidthFitTrigger", &JSSelect::SetOptionWidthFitTrigger, opt);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -130,9 +134,11 @@ void ParseSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeE
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](int32_t index) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](int32_t index) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Select.SelectChangeEvent");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(index));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -164,9 +170,12 @@ void ParseValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEven
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& value) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                        const std::string& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Select.ValueChangeEvent");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -464,10 +473,12 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         int32_t index, const std::string& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Select.onSelect");
+        PipelineContext::SetCallBackNode(node);
         JSRef<JSVal> params[2];
         params[0] = JSRef<JSVal>::Make(ToJSValue(index));
         params[1] = JSRef<JSVal>::Make(ToJSValue(value));
@@ -734,5 +745,91 @@ void JSSelect::SetMenuAlign(const JSCallbackInfo& info)
     }
 
     SelectModel::GetInstance()->SetMenuAlign(menuAlignObj);
+}
+
+bool JSSelect::IsPercentStr(std::string& percent)
+{
+    if (percent.find("%") != std::string::npos) {
+        size_t index = percent.find("%");
+        percent = percent.substr(0, index);
+        return true;
+    }
+    return false;
+}
+
+void JSSelect::SetOptionWidth(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (info[0]->IsUndefined()) {
+        LOGE("OptionWidth is undefined");
+        return;
+    } else if (info[0]->IsNull()) {
+        LOGE("OptionWidth is null");
+        return;
+    } else if (info[0]->IsString()) {
+        std::string modeFlag = info[0]->ToString();
+        if (modeFlag.compare("fit_content") == 0) {
+            SelectModel::GetInstance()->SetOptionWidthFitTrigger(false);
+        } else if (modeFlag.compare("fit_trigger") == 0) {
+            SelectModel::GetInstance()->SetOptionWidthFitTrigger(true);
+        } else if (IsPercentStr(modeFlag)) {
+            LOGE("OptionWidth is percentage");
+            return;
+        } else {
+            ParseJsDimensionVpNG(info[0], value);
+            if (value.IsNegative()) {
+                value.Reset();
+            }
+            SelectModel::GetInstance()->SetOptionWidth(value);
+        }
+    } else {
+        ParseJsDimensionVpNG(info[0], value);
+        if (value.IsNegative()) {
+            value.Reset();
+        }
+        SelectModel::GetInstance()->SetOptionWidth(value);
+    }
+}
+
+void JSSelect::SetOptionHeight(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (info[0]->IsUndefined()) {
+        LOGE("OptionHeight is undefined");
+        return;
+    } else if (info[0]->IsNull()) {
+        LOGE("OptionHeight is null");
+        return;
+    } else if (info[0]->IsString()) {
+        std::string modeFlag = info[0]->ToString();
+        if (IsPercentStr(modeFlag)) {
+            LOGE("OptionHeight is a percentage");
+            return;
+        } else {
+            ParseJsDimensionVpNG(info[0], value);
+            if (value.IsNegative()) {
+                LOGE("OptionHeight is negative");
+                return;
+            }
+            SelectModel::GetInstance()->SetOptionHeight(value);
+        }
+    } else {
+        ParseJsDimensionVpNG(info[0], value);
+        if (value.IsNegative()) {
+            LOGE("OptionHeight is negative");
+            return;
+        }
+        SelectModel::GetInstance()->SetOptionHeight(value);
+    }
+}
+
+void JSSelect::SetOptionWidthFitTrigger(const JSCallbackInfo& info)
+{
+    bool isFitTrigger = false;
+    if (info[0]->IsBoolean()) {
+        isFitTrigger = info[0]->ToBoolean();
+    }
+    
+    SelectModel::GetInstance()->SetOptionWidthFitTrigger(isFitTrigger);
 }
 } // namespace OHOS::Ace::Framework

@@ -21,6 +21,7 @@
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
+#include "core/components_ng/event/target_component.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
 
@@ -481,15 +482,17 @@ public:
         std::stringstream oss;
         oss << "frameNodeId: " << nodeId << ", "
             << "type: " << type << ", "
-            << "id: " << id << ", "
-            << "parentId: " << parentId;
+            << "depth: " << this->depth << ", "
+            << std::hex
+            << "id: 0x" << id << ", "
+            << "parentId: 0x" << parentId;
         if (!customInfo.empty()) {
             oss << ", " << "customInfo: " << customInfo;
         }
-        dumpList.emplace_back(std::make_pair(depth, oss.str()));
-        dumpList.emplace_back(std::make_pair(depth + 1, "stateHistory:"));
+        dumpList.emplace_back(std::make_pair(depth + this->depth, oss.str()));
+        dumpList.emplace_back(std::make_pair(depth + 1 + this->depth, "stateHistory:"));
         for (const auto& state : stateHistory) {
-            state.Dump(dumpList, depth + 1 + 1);
+            state.Dump(dumpList, depth + 1 + 1 + this->depth);
         }
     }
 
@@ -513,6 +516,7 @@ public:
     std::string type;
     uint64_t id = 0;
     uint64_t parentId = 0;
+    int32_t depth = 0;
     std::string customInfo;
     std::list<StateRecord> stateHistory;
 };
@@ -639,6 +643,18 @@ public:
         return info;
     }
 
+    void SetTargetComponent(const RefPtr<NG::TargetComponent>& targetComponent)
+    {
+        targetComponent_ = targetComponent;
+    }
+
+    RefPtr<NG::TargetComponent> GetTargetComponent()
+    {
+        return targetComponent_;
+    }
+private:
+    virtual bool ShouldResponse() { return true; };
+
 protected:
     Offset coordinateOffset_;
     GetEventTargetImpl getEventTargetImpl_;
@@ -649,6 +665,7 @@ protected:
     int32_t nodeId_ = -1;
     WeakPtr<NG::FrameNode> node_ = nullptr;
     Axis direction_ = Axis::NONE;
+    RefPtr<NG::TargetComponent> targetComponent_;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;

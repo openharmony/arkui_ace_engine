@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
 namespace OHOS::Ace {
@@ -123,6 +124,7 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
                 }
             }
             if (!isValid || titleHeight.Value() < 0) {
+                NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight, false);
                 return;
             }
             NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
@@ -148,9 +150,11 @@ void JSNavDestination::SetOnShown(const JSCallbackInfo& info)
     }
 
     auto onShownCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onShown = [execCtx = info.GetExecutionContext(), func = std::move(onShownCallback)]() {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onShown = [execCtx = info.GetExecutionContext(), func = std::move(onShownCallback), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("NavDestination.onShown");
+        PipelineContext::SetCallBackNode(node);
         JSRef<JSVal> params[1];
         params[0] = JSRef<JSVal>::Make(ToJSValue("undefined"));
         func->ExecuteJS(1, params);
@@ -165,9 +169,11 @@ void JSNavDestination::SetOnHidden(const JSCallbackInfo& info)
         return;
     }
     auto onHiddenCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onHidden = [execCtx = info.GetExecutionContext(), func = std::move(onHiddenCallback)]() {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onHidden = [execCtx = info.GetExecutionContext(), func = std::move(onHiddenCallback), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("NavDestination.onHidden");
+        PipelineContext::SetCallBackNode(node);
         func->ExecuteJS();
     };
     NavDestinationModel::GetInstance()->SetOnHidden(std::move(onHidden));

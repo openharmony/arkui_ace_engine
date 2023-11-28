@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,8 @@ public:
     void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) override;
     void SetListDirection(Axis axis) override;
     void SetScrollBar(DisplayMode scrollBar) override;
+    void SetScrollBarColor(const std::string& /* value */) override {};
+    void SetScrollBarWidth(const std::string& /* value */) override {};
     void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
     void SetEditMode(bool editMode) override;
     void SetDivider(const V2::ItemDivider& divider) override;
@@ -68,6 +70,11 @@ public:
     void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) override;
     void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) override;
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
+
+    DisplayMode GetDisplayMode() const override
+    {
+        return DisplayMode::OFF;
+    }
 
 private:
     static std::unique_ptr<ListModel> instance_;

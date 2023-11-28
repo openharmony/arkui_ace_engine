@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <memory>
 #include <sstream>
+#include "form_info_base.h"
 
 #include "base/log/log.h"
 #include "core/common/container.h"
@@ -51,27 +52,6 @@ constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 constexpr char IS_DYNAMIC[] = "isDynamic";
 constexpr int32_t READD_FORM_DELAY_TIME = 50;
-
-bool GetFormInfo(
-    std::string& bundleName, std::string& moduleName, const std::string& cardName, OHOS::AppExecFwk::FormInfo& formInfo)
-{
-    std::vector<OHOS::AppExecFwk::FormInfo> formInfos;
-    auto result = OHOS::AppExecFwk::FormMgr::GetInstance().GetFormsInfoByModule(bundleName, moduleName, formInfos);
-    if (result != 0) {
-        LOGW("Query FormInfo failed.");
-        return false;
-    }
-
-    auto iter = formInfos.begin();
-    while (iter != formInfos.end()) {
-        if (cardName == iter->name) {
-            formInfo = *iter;
-            return true;
-        }
-        iter++;
-    }
-    return false;
-}
 } // namespace
 
 FormManagerDelegate::~FormManagerDelegate()
@@ -120,7 +100,12 @@ void FormManagerDelegate::UnregisterEvent()
     resRegister->UnregisterEvent(MakeEventHash(FORM_EVENT_ON_ERROR));
 }
 
+#if OHOS_STANDARD_SYSTEM
+void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info,
+    const AppExecFwk::FormInfo& formInfo)
+#else
 void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info)
+#endif
 {
 #ifdef OHOS_STANDARD_SYSTEM
     // dynamic add new form should release the running form first.
@@ -156,15 +141,9 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     if (info.dimension != -1) {
         wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
     }
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, info.renderingMode);
 
-    OHOS::AppExecFwk::FormInfo formInfo;
-    AppExecFwk::FormType uiSyntax = AppExecFwk::FormType::JS;
-    std::string bundleName(info.bundleName);
-    std::string moduleName(info.moduleName);
-    GetFormInfo(bundleName, moduleName, info.cardName, formInfo);
-
-    uiSyntax = formInfo.uiSyntax;
-    if (uiSyntax == AppExecFwk::FormType::ETS) {
+    if (formInfo.uiSyntax == AppExecFwk::FormType::ETS) {
         CHECK_NULL_VOID(renderDelegate_);
         wantCache_.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate_->AsObject());
         wantCache_.SetParam(ALLOW_UPDATE, info.allowUpdate);
@@ -796,6 +775,29 @@ void FormManagerDelegate::SetFormUtils(const std::shared_ptr<FormUtils>& formUti
     if (formUtils) {
         formUtils_ = formUtils;
     }
+}
+
+bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::string& moduleName,
+    const std::string& cardName, AppExecFwk::FormInfo& formInfo)
+{
+    std::string bundle(bundleName);
+    std::string module(moduleName);
+    std::vector<OHOS::AppExecFwk::FormInfo> formInfos;
+    auto result = OHOS::AppExecFwk::FormMgr::GetInstance().GetFormsInfoByModule(bundle, module, formInfos);
+    if (result != 0) {
+        LOGW("Query FormInfo failed.");
+        return false;
+    }
+
+    auto iter = formInfos.begin();
+    while (iter != formInfos.end()) {
+        if (cardName == iter->name) {
+            formInfo = *iter;
+            return true;
+        }
+        iter++;
+    }
+    return false;
 }
 #endif
 } // namespace OHOS::Ace

@@ -25,6 +25,7 @@
 #include "core/common/ace_view.h"
 #include "core/event/key_event_recognizer.h"
 #include "core/common/flutter/flutter_thread_model.h"
+#include "core/common/thread_model_impl.h"
 
 namespace OHOS::Ace::Platform {
 using ReleaseCallback = std::function<void()>;
@@ -32,6 +33,7 @@ using ReleaseCallback = std::function<void()>;
 class AceViewPreview : public AceView, public Referenced {
 public:
     AceViewPreview(int32_t instanceId, std::unique_ptr<FlutterThreadModel> threadModel);
+    AceViewPreview(int32_t instanceId, std::unique_ptr<ThreadModelImpl> threadModelImpl);
     ~AceViewPreview() override = default;
     static AceViewPreview* CreateView(
         int32_t instanceId, bool useCurrentEventRunner = false, bool usePlatformThread = false);
@@ -177,6 +179,11 @@ public:
         return threadModel_.get();
     }
 
+    ThreadModelImpl* GetThreadModelImpl() const
+    {
+        return threadModelImpl_.get();
+    }
+
     void NotifySurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -204,6 +211,7 @@ private:
     KeyEventCallback keyEventCallback_;
     KeyEventRecognizer keyEventRecognizer_;
     std::unique_ptr<FlutterThreadModel> threadModel_;
+    std::unique_ptr<ThreadModelImpl> threadModelImpl_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceViewPreview);
 };

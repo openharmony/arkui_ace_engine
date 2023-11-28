@@ -23,14 +23,20 @@ std::string ContainerModalAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_RETURN(columnNode, "");
-    auto titleNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
-    CHECK_NULL_RETURN(titleNode, "");
-    auto titleLabel = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(1));
-    CHECK_NULL_RETURN(titleLabel, "");
-    auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, "");
-    return textLayoutProperty->GetContentValue("");
+    auto containerModalPattern = frameNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerModalPattern, "");
+    auto textLabel = containerModalPattern->GetAppLabel();
+    if (!textLabel.empty()) {
+        return textLabel;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, "");
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_RETURN(themeConstants, "");
+    auto appLabelId = pipeline->GetWindowManager()->GetAppLabelId();
+    return themeConstants->GetString(appLabelId);
 }
 } // namespace OHOS::Ace::NG

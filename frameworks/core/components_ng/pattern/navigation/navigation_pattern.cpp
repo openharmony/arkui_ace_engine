@@ -124,6 +124,8 @@ void NavigationPattern::OnAttachToFrameNode()
     if (theme && theme->GetNavBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
+    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_ALL, .type = SAFE_AREA_TYPE_SYSTEM };
+    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
 void NavigationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -146,21 +148,29 @@ void NavigationPattern::OnModifyDone()
     auto preTopNavPath = navigationStack_->GetPreTopNavPath();
     auto pathNames = navigationStack_->GetAllPathName();
     auto preSize = navigationStack_->PreSize();
-
     NavPathList navPathList;
+    auto replaceValue = navigationStack_->GetReplaceValue();
     for (size_t i = 0; i < pathNames.size(); ++i) {
         auto pathName = pathNames[i];
         RefPtr<UINode> uiNode = navigationStack_->Get(pathName);
+        auto isSameWithLast = preTopNavPath && (replaceValue == 1) && (uiNode == preTopNavPath->second)
+            && (preTopNavPath->first == pathName);
         if (uiNode) {
-            navPathList.emplace_back(std::make_pair(pathName, uiNode));
             navigationStack_->RemoveInNavPathList(pathName, uiNode);
             navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
+            if (isSameWithLast) {
+                uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
+            }
+            navPathList.emplace_back(std::make_pair(pathName, uiNode));
             continue;
         }
         uiNode = navigationStack_->GetFromPreBackup(pathName);
         if (uiNode) {
-            navPathList.emplace_back(std::make_pair(pathName, uiNode));
             navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
+            if (isSameWithLast) {
+                uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
+            }
+            navPathList.emplace_back(std::make_pair(pathName, uiNode));
             continue;
         }
         uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
@@ -194,8 +204,13 @@ void NavigationPattern::CheckTopNavPathChange(
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage)
 {
-    if (preTopNavPath == newTopNavPath) {
+    auto replaceValue = navigationStack_->GetReplaceValue();
+    if (preTopNavPath == newTopNavPath && replaceValue != 1) {
         return;
+    }
+    if (replaceValue == 1) {
+        const int32_t replaceAnimation = 2;
+        navigationStack_->UpdateReplaceValue(replaceAnimation);
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
@@ -207,6 +222,7 @@ void NavigationPattern::CheckTopNavPathChange(
     RefPtr<NavDestinationGroupNode> preTopNavDestination;
     if (preTopNavPath.has_value()) {
         // pre page is not in the current stack
+        isPopPage |= navigationStack_->FindIndex(preTopNavPath->first, preTopNavPath->second, true) == -1;
         preTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(preTopNavPath->second));
         if (preTopNavDestination) {
@@ -270,16 +286,22 @@ void NavigationPattern::CheckTopNavPathChange(
         focusHub->RequestFocus();
     }
     // animation need to run after layout task
-    context->AddAfterLayoutTask([preTopNavDestination, newTopNavDestination, isPopPage,
-                                    weakNavigationPattern = WeakClaim(this), this]() {
-        auto navigationPattern = weakNavigationPattern.Upgrade();
-        CHECK_NULL_VOID(navigationPattern);
-        if (navigationMode_ == NavigationMode::STACK) {
+    if (navigationMode_ == NavigationMode::STACK) {
+        context->AddAfterLayoutTask([preTopNavDestination, newTopNavDestination, isPopPage,
+                                    weakNavigationPattern = WeakClaim(this)]() {
+            auto navigationPattern = weakNavigationPattern.Upgrade();
+            CHECK_NULL_VOID(navigationPattern);
             navigationPattern->DoStackModeTransitionAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
-        } else {
+        });
+    }
+    if (navigationMode_ == NavigationMode::SPLIT) {
+        context->AddAfterLayoutTask([preTopNavDestination, newTopNavDestination, isPopPage,
+                                        weakNavigationPattern = WeakClaim(this)]() {
+            auto navigationPattern = weakNavigationPattern.Upgrade();
+            CHECK_NULL_VOID(navigationPattern);
             navigationPattern->DoSplitModeTransitionAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
-        }
-    });
+        });
+    }
     hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -379,14 +401,14 @@ void NavigationPattern::DoStackModeTransitionAnimation(const RefPtr<NavDestinati
     CHECK_NULL_VOID(navigationNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    auto isReplace = navigationStack_->IsReplace();
-    if (isReplace) {
+    auto replaceVal = navigationStack_->GetReplaceValue();
+    if (replaceVal != 0) {
         if (newTopNavDestination && preTopNavDestination) {
             navigationNode->TransitionWithReplace(preTopNavDestination, newTopNavDestination, false);
         } else if (newTopNavDestination) {
             navigationNode->TransitionWithReplace(navBarNode, newTopNavDestination, true);
         }
-        navigationStack_->UpdateIsReplace(false);
+        navigationStack_->UpdateReplaceValue(0);
         return;
     }
     if (newTopNavDestination && preTopNavDestination) {
@@ -421,12 +443,12 @@ void NavigationPattern::DoSplitModeTransitionAnimation(const RefPtr<NavDestinati
     CHECK_NULL_VOID(navigationNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    auto isReplace = navigationStack_->IsReplace();
-    if (isReplace) {
+    auto replaceValue = navigationStack_->GetReplaceValue();
+    if (replaceValue != 0) {
         if (newTopNavDestination && preTopNavDestination) {
             navigationNode->TransitionWithReplace(preTopNavDestination, newTopNavDestination, false);
         }
-        navigationStack_->UpdateIsReplace(false);
+        navigationStack_->UpdateReplaceValue(0);
         return;
     }
     if (newTopNavDestination && preTopNavDestination) {
@@ -554,16 +576,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     // considering backButton visibility
                     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
                         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
-                    if (navigationStack->Size() == 1 &&
-                        (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
-                            navigationLayoutProperty->GetHideNavBar().value_or(false))) {
-                        // cases that backButton of navDestination is gone when there's only one child and
-                        // 1. In SPLIT mode, it's the first level page
-                        // 2. In STACK mode, the navBar is hidden
-                        navigationGroupNode->SetBackButtonVisible(curTopNavDestination, false);
-                    } else {
-                        navigationGroupNode->SetBackButtonVisible(curTopNavDestination, true);
-                    }
                     pattern->UpdateContextRect(curTopNavDestination, navigationGroupNode);
                 }
                 // considering navBar visibility
@@ -573,7 +585,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 CHECK_NULL_VOID(navBarLayoutProperty);
                 if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
                     (pattern->GetNavigationMode() == NavigationMode::STACK &&
-                        navigationGroupNode->GetNeedSetInvisible())) {
+                        (navigationGroupNode->GetNeedSetInvisible() || navigationStack->Size() >= 1))) {
                     navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
                 } else {
                     navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
@@ -600,10 +612,6 @@ void NavigationPattern::UpdateContextRect(
     CHECK_NULL_VOID(navBarNode);
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     CHECK_NULL_VOID(navigationPattern);
-    auto size = curDestination->GetGeometryNode()->GetFrameSize();
-    curDestination->GetRenderContext()->ClipWithRRect(
-        RectF(0.0f, 0.0f, size.Width(), size.Height()), RadiusF(EdgeF(0.0f, 0.0f)));
-    curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
 
     if (navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
         curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);

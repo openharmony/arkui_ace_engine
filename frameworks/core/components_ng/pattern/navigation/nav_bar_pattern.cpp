@@ -304,7 +304,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
             menuItemLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
             menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
-            menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS));
+            menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
             auto renderContext = menuItemNode->GetRenderContext();
             CHECK_NULL_RETURN(renderContext, nullptr);
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -356,7 +356,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         menuItemLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
         menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
-        menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS));
+        menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
         auto renderContext = menuItemNode->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, nullptr);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -542,6 +542,8 @@ void NavBarPattern::OnAttachToFrameNode()
     if (theme && theme->GetNavBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
+    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_ALL, .type = SAFE_AREA_TYPE_SYSTEM };
+    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
 void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -777,7 +779,7 @@ void NavBarPattern::ResetAssociatedScroll()
     titlePattern->ResetAssociatedScroll();
 }
 
-bool NavBarPattern::UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node)
+bool NavBarPattern::UpdateAssociatedScrollOffset(float offset)
 {
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, true);
@@ -785,7 +787,7 @@ bool NavBarPattern::UpdateAssociatedScrollOffset(float offset, const RefPtr<Fram
     CHECK_NULL_RETURN(titleNode, true);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, true);
-    return titlePattern->UpdateAssociatedScrollOffset(offset, node);
+    return titlePattern->UpdateAssociatedScrollOffset(offset);
 }
 
 bool NavBarPattern::IsTitleModeFree()

@@ -221,6 +221,18 @@ public:
     {
         return showedSubMenu_;
     }
+    
+    void SetIsWidthModifiedBySelect(bool isModified)
+    {
+        isWidthModifiedBySelect_ = isModified;
+    }
+    
+    bool IsWidthModifiedBySelect() const
+    {
+        return isWidthModifiedBySelect_;
+    }
+    
+    float GetSelectMenuWidth();
     void HideSubMenu();
     void OnModifyDone() override;
 
@@ -238,12 +250,12 @@ public:
         isFirstShow_ = true;
     }
 
-    void SetOriginOffset(OffsetF offset)
+    void SetOriginOffset(const OffsetF& offset)
     {
         originOffset_ = offset;
     }
 
-    void SetEndOffset(OffsetF offset)
+    void SetEndOffset(const OffsetF& offset)
     {
         endOffset_ = offset;
     }
@@ -253,7 +265,7 @@ public:
         return endOffset_;
     }
 
-    void SetPreviewOriginOffset(OffsetF offset)
+    void SetPreviewOriginOffset(const OffsetF& offset)
     {
         previewOriginOffset_ = offset;
     }
@@ -263,6 +275,25 @@ public:
         return previewOriginOffset_;
     }
 
+    void SetHasLaid(bool hasLaid)
+    {
+        hasLaid_ = hasLaid;
+    }
+
+    bool HasLaid() const
+    {
+        return hasLaid_;
+    }
+
+    void SetTargetSize(const SizeF& size)
+    {
+        targetSize_ = size;
+    }
+
+    SizeF GetTargetSize() const
+    {
+        return targetSize_;
+    }
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -282,6 +313,7 @@ private:
     // If CustomBuilder is declared with <Menu> and <MenuItem>,
     // reset outer menu container and only apply theme on the inner <Menu> node.
     void ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu);
+    void ResetScrollTheme(const RefPtr<FrameNode>& host);
     void CopyMenuAttr(const RefPtr<FrameNode>& menuNode) const;
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -313,6 +345,10 @@ private:
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF previewOriginOffset_;
+	
+    bool isWidthModifiedBySelect_ = false;
+    bool hasLaid_ = false;
+    SizeF targetSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

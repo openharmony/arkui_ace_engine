@@ -84,6 +84,14 @@ public:
         json->Put("showErrorText", propShowErrorText_.value_or(false));
         json->Put("showCounter", propShowCounter_.value_or(false));
         json->Put("showUnderline", propShowUnderline_.value_or(false));
+        auto jsonCancelButton = JsonUtil::Create(true);
+        jsonCancelButton->Put("style", static_cast<int32_t>(propCleanNodeStyle_.value_or(CleanNodeStyle::INPUT)));
+        auto jsonIconOptions = JsonUtil::Create(true);
+        jsonIconOptions->Put("size", propIconSize_.value_or(Dimension()).ToString().c_str());
+        jsonIconOptions->Put("src", propIconSrc_.value_or("").c_str());
+        jsonIconOptions->Put("color", propIconColor_.value_or(Color()).ColorToString().c_str());
+        jsonCancelButton->Put("icon", jsonIconOptions->ToString().c_str());
+        json->Put("cancelButton", jsonCancelButton->ToString().c_str());
         json->Put("selectAll", propSelectAllValue_.value_or(false));
     }
 
@@ -155,6 +163,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSize, CalcDimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSrc, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetCounter, int32_t, PROPERTY_UPDATE_MEASURE);
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
@@ -191,6 +200,7 @@ protected:
         value->propIconSize_ = CloneIconSize();
         value->propIconColor_ = CloneIconColor();
         value->propSelectAllValue_ = CloneSelectAllValue();
+        value->propSetCounter_ = CloneSetCounter();
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutProperty);

@@ -54,6 +54,7 @@ public:
 
     void Create(const WeakPtr<FrameNode>& frameNode, bool followWithoutTransition = false);
 
+    RefPtr<FrameNode> CreateHolderNode(const RefPtr<FrameNode>& node);
     RefPtr<GeometryTransition> gt_;
 };
 
@@ -78,8 +79,21 @@ void GeometryTransitionTestNg::TearDown()
 void GeometryTransitionTestNg::Create(const WeakPtr<FrameNode>& node, bool followWithoutTransition)
 {
     gt_ = AceType::MakeRefPtr<GeometryTransition>("test", followWithoutTransition);
+    // The constructor has been modified and requires additional assignments
+    gt_->inNode_ = node;
 }
 
+RefPtr<FrameNode> GeometryTransitionTestNg::CreateHolderNode(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto newNode = FrameNode::CreateFrameNode(
+        node->GetTag(), ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    newNode->SetGeometryNode(node->GetGeometryNode()->Clone());
+    auto frameSize = node->GetGeometryNode()->GetFrameSize();
+    newNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(frameSize.Width()), CalcLength(frameSize.Height())));
+    return newNode;
+}
 
 /**
  * @tc.name: GeometryTransition001
@@ -119,8 +133,33 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition001, TestSize.Level1)
     gt_->Build(weakNode2, true);
     gt_->WillLayout(node2);
     gt_->DidLayout(node2);
+    EXPECT_TRUE(gt_->hasInAnim_);
+    EXPECT_FALSE(gt_->hasOutAnim_);
+
+    Create(weakNode1, true);
+    weakNode2.Upgrade()->isRemoving_ = true;
+    gt_->Build(weakNode2, true);
+    gt_->WillLayout(node2);
+    gt_->DidLayout(node2);
+    EXPECT_TRUE(gt_->hasInAnim_);
+    EXPECT_FALSE(gt_->hasOutAnim_);
+
+    /**
+     * @tc.steps: step1. Build with empty node.
+     * @tc.expected: hasInAnim_ and hasOutAnim_ are false and state_ is ACTIVE
+     */
+    auto weakNodeTemp = weakNode3.Upgrade();
+    weakNode2.Upgrade()->isRemoving_ = false;
+    weakNodeTemp->isRemoving_ = false;
+    weakNodeTemp->onMainTree_ = true;
+    Create(weakNode3, true);
+    gt_->outNode_ = weakNode1;
+    gt_->Build(weakNode2, true);
+    gt_->WillLayout(node2);
+    gt_->DidLayout(node2);
     EXPECT_FALSE(gt_->hasInAnim_);
     EXPECT_FALSE(gt_->hasOutAnim_);
+    EXPECT_FALSE(gt_->state_ == GeometryTransition::State::ACTIVE);
 }
 
 /**
@@ -196,7 +235,54 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition003, TestSize.Level1)
     EXPECT_EQ(gt_->inNode_, gt_->outNode_);
     gt_->inNode_.Upgrade()->isRemoving_ = true;
     gt_->outNode_ = weakNode2;
+    gt_->Build(gt_->inNode_, true);
+
+    /**
+     * @tc.steps:  Cover all situations for InAnim and OutAnim
+     * @tc.expected: the location of weakNode1 and weakNode2 meetings expectations.
+     */
+    bool bFlagIn = gt_->hasInAnim_;
+    bool bFlagOut = gt_->hasOutAnim_;
+    bool bFlagFollow = gt_->followWithoutTransition_;
+    gt_->hasInAnim_ = false;
+    gt_->hasOutAnim_ = true;
+    gt_->followWithoutTransition_ = true;
     gt_->Build(weakNode2, true);
+
+    /**
+     * @tc.steps:  Cover all situations for InAnim and OutAnim
+     */
+    gt_->hasInAnim_ = false;
+    gt_->hasOutAnim_ = false;
+    gt_->Build(weakNode2, true);
+
+    /**
+     * @tc.step:  Cover all situations for InAnim and OutAnim
+     */
+    gt_->hasInAnim_ = true;
+    gt_->hasOutAnim_ = false;
+    gt_->Build(weakNode2, true);
+
+    /**
+     * @tc.expected: IsRunning is false.
+     */
+    bool bResult = false;
+    bResult = gt_->IsRunning(weakNode3);
+    EXPECT_FALSE(bResult);
+
+    /**
+     * @tc.expected: IsRunning is true.
+     */
+    weakNode2.Upgrade()->layoutPriority_ = 1;
+    bResult = gt_->IsRunning(weakNode2);
+    EXPECT_TRUE(bResult);
+    /**
+     * @tc.steps: Reduction
+     */
+    gt_->hasInAnim_ = bFlagIn;
+    gt_->hasOutAnim_ = bFlagOut;
+    gt_->followWithoutTransition_ = bFlagFollow;
+
     EXPECT_EQ(weakNode2, gt_->inNode_);
     gt_->hasInAnim_ = false;
     gt_->Build(weakNode2, false);
@@ -229,6 +315,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition004, TestSize.Level1)
      * @tc.steps: step2. call OnReSync with some useless condition.
      * @tc.expected: hasOutAnim_ in GeometryTransition is false
      */
+    gt_->holder_ = CreateHolderNode(gt_->outNode_.Upgrade());
     gt_->OnReSync();
     weakNode1.Upgrade()->GetRenderContext()->isSynced_ = true;
     gt_->OnReSync();
@@ -260,6 +347,40 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition004, TestSize.Level1)
     EXPECT_TRUE(gt_->OnAdditionalLayout(weakNode1));
     weakNode1.Upgrade()->parent_ = nullptr;
     EXPECT_FALSE(gt_->OnAdditionalLayout(weakNode1));
+
+    auto weakNodeTemp = weakNode1.Upgrade();
+    weakNodeTemp->onMainTree_ = true;
+    weakNodeTemp->renderContext_->isSynced_ = true;
+    weakNode2.Upgrade()->isRemoving_ = true;
+    gt_->outNodeTargetAbsRect_ = RectF(10.0f, 10.0f, 10.0f, 10.0f);
+    gt_->inNode_ = weakNode1;
+    gt_->outNode_ = weakNode2;
+    RefPtr<FrameNode> trigger = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    gt_->OnReSync(trigger);
+    gt_->OnReSync();
+    gt_->ToString();
+    EXPECT_TRUE(gt_->hasOutAnim_);
+
+    // posChanged  is true
+    gt_->hasOutAnim_ = false;
+    gt_->outNodeTargetAbsRect_ = RectF(1.0f, 10.0f, 1.0f, 1.0f);
+    gt_->OnReSync();
+    EXPECT_FALSE(gt_->hasOutAnim_);
+
+    // posChanged is true
+    gt_->outNodeTargetAbsRect_ = RectF(10.0f, 1.0f, 1.0f, 1.0f);
+    gt_->OnReSync();
+    EXPECT_FALSE(gt_->hasOutAnim_);
+
+    // sizeChanged  is true
+    gt_->outNodeTargetAbsRect_ = RectF(1.0f, 1.0f, 10.0f, 1.0f);
+    gt_->OnReSync();
+    EXPECT_TRUE(gt_->hasOutAnim_);
+
+    // sizeChanged  is true
+    gt_->outNodeTargetAbsRect_ = RectF(1.0f, 1.0f, 1.0f, 10.0f);
+    gt_->OnReSync();
+    EXPECT_TRUE(gt_->hasOutAnim_);
 }
 
 /**
@@ -282,9 +403,23 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest005, TestSize.Level1)
      * @tc.expected: called OnFollowWithoutTransition and result is expected
      */
     gt_->followWithoutTransition_ = true;
-    bool result =gt_->OnFollowWithoutTransition(true);
+    bool result = gt_->OnFollowWithoutTransition(true);
     EXPECT_FALSE(result);
 
+    // direction has value is false
+    RefPtr<FrameNode> trigger = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    gt_->holder_ = CreateHolderNode(gt_->outNode_.Upgrade());
+    trigger->AddChild(gt_->holder_);
+    result = gt_->OnFollowWithoutTransition();
+    EXPECT_FALSE(result);
+
+    // direction is false
+    gt_->holder_ = CreateHolderNode(gt_->outNode_.Upgrade());
+    trigger->AddChild(gt_->holder_);
+    result = gt_->OnFollowWithoutTransition(false);
+    EXPECT_TRUE(result);
+
+    // direction is true
     gt_->followWithoutTransition_ = false;
     result = gt_->OnFollowWithoutTransition(true);
     EXPECT_FALSE(result);
@@ -334,5 +469,39 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest006, TestSize.Level1)
     gt_->RecordAnimationOption(trigger, option);
     result = option.IsValid();
     EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: IsParent(trigger, inNode_) is true
+     * @tc.expected: option is not IsValid
+     */
+    trigger->AddChild(gt_->inNode_.Upgrade());
+    gt_->RecordAnimationOption(trigger, option);
+    result = option.IsValid();
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: set option Duration(0);
+     * @tc.expected: option is not IsValid
+     */
+    option.SetDuration(0);
+    AnimationOption optionTemp = AnimationOption();
+    optionTemp.SetDuration(DURATION_TIMES);
+    stack->SetImplicitAnimationOption(optionTemp);
+    gt_->RecordAnimationOption(trigger, option);
+    result = option.IsValid();
+    EXPECT_FALSE(result);
+
+    stack->SetImplicitAnimationOption(option);
+    gt_->animationOption_ = optionTemp;
+    result = option.IsValid();
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: Remove inNode from trigger
+     */
+    trigger->RemoveChild(gt_->inNode_.Upgrade());
+    gt_->RecordAnimationOption(trigger, option);
+    result = option.IsValid();
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG

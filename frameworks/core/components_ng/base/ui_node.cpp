@@ -665,10 +665,24 @@ RefPtr<LayoutWrapperNode> UINode::CreateLayoutWrapper(bool forceMeasure, bool fo
     return frameChild ? frameChild->CreateLayoutWrapper(forceMeasure, forceLayout) : nullptr;
 }
 
-void UINode::Build()
+void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
     for (const auto& child : GetChildren()) {
-        child->Build();
+        if (InstanceOf<CustomNode>(child)) {
+            auto custom = DynamicCast<CustomNode>(child);
+            if (custom->HasExtraInfo()) {
+                if (!extraInfos) {
+                    extraInfos = std::make_shared<std::list<ExtraInfo>>();
+                }
+                extraInfos->emplace_front(custom->GetExtraInfo());
+                custom->Build(extraInfos);
+                extraInfos->pop_front();
+            } else {
+                custom->Build(extraInfos);
+            }
+        } else {
+            child->Build(extraInfos);
+        }
     }
 }
 
@@ -897,4 +911,28 @@ void UINode::OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConst
     }
 }
 
+std::string UINode::GetCurrentCustomNodeInfo()
+{
+    auto parent = AceType::Claim(this);
+    std::string extraInfo;
+    while (parent) {
+        if (InstanceOf<CustomNode>(parent)) {
+            auto custom = DynamicCast<CustomNode>(parent);
+            auto list = custom->GetExtraInfos();
+            for (const auto& child : list) {
+                extraInfo.append("    ").append(child.page).append(":")
+                    .append(std::to_string(child.line)).append("\n");
+            }
+            break;
+        }
+        parent = parent->GetParent();
+       
+    }
+    return extraInfo;
+}
+
+int32_t UINode::GenerateAccessibilityId()
+{
+    return currentAccessibilityId_++;
+}
 } // namespace OHOS::Ace::NG

@@ -63,6 +63,7 @@ RefPtr<FrameNode> RenderContext::GetHost() const
 void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(propBorder_, BorderProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(propPointLight_, PointLightProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propBdImage_, BorderImageProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propOverlay_, OverlayProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propPositionProperty_, RenderPositionProperty);
@@ -89,7 +90,7 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("backgroundColor", propBackgroundColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
     json->Put("zIndex", propZIndex_.value_or(0));
     json->Put("opacity", propOpacity_.value_or(1));
-    if (propProgressMask_.has_value()) {
+    if (propProgressMask_.has_value() && propProgressMask_.value()) {
         json->Put("total", propProgressMask_.value()->GetMaxValue());
         json->Put("updateProgress", propProgressMask_.value()->GetValue());
         json->Put("updateColor", propProgressMask_.value()->GetColor().ColorToString().c_str());

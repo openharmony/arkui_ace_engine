@@ -34,6 +34,7 @@ var ColoringStrategy;
 (function (ColoringStrategy) {
   ColoringStrategy["INVERT"] = "invert";
   ColoringStrategy["AVERAGE"] = "average";
+  ColoringStrategy["PRIMARY"] = "primary";
 })(ColoringStrategy || (ColoringStrategy = {}));
 
 var TextInputStyle;
@@ -57,13 +58,13 @@ var TextAlign;
   TextAlign[TextAlign["JUSTIFY"] = 3] = "JUSTIFY";
 })(TextAlign || (TextAlign = {}));
 
-var TextDataDetectType;
-(function (TextDataDetectType) {
-  TextDataDetectType[TextDataDetectType["PHONE_NUMBER"] = 0] = "PHONE_NUMBER";
-  TextDataDetectType[TextDataDetectType["URL"] = 1] = "URL";
-  TextDataDetectType[TextDataDetectType["EMAIL"] = 2] = "EMAIL";
-  TextDataDetectType[TextDataDetectType["ADDRESS"] = 3] = "ADDRESS";
-})(TextDataDetectType || (TextDataDetectType = {}));
+var TextDataDetectorType;
+(function (TextDataDetectorType) {
+  TextDataDetectorType[TextDataDetectorType["PHONE_NUMBER"] = 0] = "PHONE_NUMBER";
+  TextDataDetectorType[TextDataDetectorType["URL"] = 1] = "URL";
+  TextDataDetectorType[TextDataDetectorType["EMAIL"] = 2] = "EMAIL";
+  TextDataDetectorType[TextDataDetectorType["ADDRESS"] = 3] = "ADDRESS";
+})(TextDataDetectorType || (TextDataDetectorType = {}));
 
 var DataPanelType;
 (function (DataPanelType) {
@@ -581,8 +582,14 @@ var FormDimension;
   FormDimension["Dimension_2_4"] = 3;
   FormDimension["Dimension_4_4"] = 4;
   FormDimension["Dimension_2_1"] = 5;
-  FormDimension["Dimension_1_1"] = 6;
+  FormDimension["DIMENSION_1_1"] = 6;
 })(FormDimension || (FormDimension = {}));
+
+let FormRenderingMode;
+(function (FormRenderingMode) {
+  FormRenderingMode.FULL_COLOR = 0;
+  FormRenderingMode.SINGLE_COLOR = 1;
+})(FormRenderingMode || (FormRenderingMode = {}));
 
 var TransitionType;
 (function (TransitionType) {
@@ -869,6 +876,13 @@ var ResponseType;
   ResponseType[ResponseType["LongPress"] = 1] = "LongPress";
 })(ResponseType || (ResponseType = {}));
 
+var RichEditorResponseType;
+(function (RichEditorResponseType) {
+  RichEditorResponseType[RichEditorResponseType["RIGHT_CLICK"] = 0] = "RIGHT_CLICK";
+  RichEditorResponseType[RichEditorResponseType["LONG_PRESS"] = 1] = "LONG_PRESS";
+  RichEditorResponseType[RichEditorResponseType["SELECT"] = 2] = "SELECT";
+})(RichEditorResponseType || (RichEditorResponseType = {}));
+
 var MenuPreviewMode;
 (function (MenuPreviewMode) {
   MenuPreviewMode[MenuPreviewMode["NONE"] = 0] = "NONE";
@@ -1095,6 +1109,11 @@ var BlurStyle;
   BlurStyle[BlurStyle["BACKGROUND_REGULAR"] = 5] = "BACKGROUND_REGULAR";
   BlurStyle[BlurStyle["BACKGROUND_THICK"] = 6] = "BACKGROUND_THICK";
   BlurStyle[BlurStyle["BACKGROUND_ULTRA_THICK"] = 7] = "BACKGROUND_ULTRA_THICK";
+  BlurStyle[BlurStyle["COMPONENT_ULTRA_THIN"] = 8] = "COMPONENT_ULTRA_THIN";
+  BlurStyle[BlurStyle["COMPONENT_THIN"] = 9] = "COMPONENT_THIN";
+  BlurStyle[BlurStyle["COMPONENT_REGULAR"] = 10] = "COMPONENT_REGULAR";
+  BlurStyle[BlurStyle["COMPONENT_THICK"] = 11] = "COMPONENT_THICK";
+  BlurStyle[BlurStyle["COMPONENT_ULTRA_THICK"] = 12] = "COMPONENT_ULTRA_THICK";
   BlurStyle[BlurStyle["NONE"] = 0] = "NONE";
 })(BlurStyle || (BlurStyle = {}));
 
@@ -1252,6 +1271,27 @@ var FunctionKey;
   FunctionKey[FunctionKey["F11"] = 11] = "F11";
   FunctionKey[FunctionKey["F12"] = 12] = "F12";
 })(FunctionKey || (FunctionKey = {}));
+
+var GestureJudgeResult;
+(function (GestureJudgeResult) {
+  GestureJudgeResult[GestureJudgeResult["CONTINUE"] = 0] = "CONTINUE";
+  GestureJudgeResult[GestureJudgeResult["REJECT"] = 1] = "REJECT";
+})(GestureJudgeResult || (GestureJudgeResult = {}));
+
+var GestureControl;
+(function (GestureControl) {
+    let GestureType;
+    (function (GestureType) {
+        GestureType[GestureType["TAP_GESTURE"] = 0] = "TAP_GESTURE";
+        GestureType[GestureType["LONG_PRESS_GESTURE"] = 1] = "LONG_PRESS_GESTURE";
+        GestureType[GestureType["PAN_GESTURE"] = 2] = "PAN_GESTURE";
+        GestureType[GestureType["PINCH_GESTURE"] = 3] = "PINCH_GESTURE";
+        GestureType[GestureType["SWIPE_GESTURE"] = 4] = "SWIPE_GESTURE";
+        GestureType[GestureType["ROTATION_GESTURE"] = 5] = "ROTATION_GESTURE";
+        GestureType[GestureType["DRAG"] = 6] = "DRAG";
+        GestureType[GestureType["CLICK"] = 7] = "CLICK";
+    })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
+})(GestureControl || (GestureControl = {}));
 
 class SubTabBarStyle {
   constructor(content) {
@@ -1553,42 +1593,45 @@ class NavPathStack {
     this.pathArray = [];
     // indicate class has changed.
     this.changeFlag = 0;
-    this.isReplace = false;
+    // replace value 0: don't do anything;
+    // 1: replace value and do replace animation;
+    // 2: don't replace value but do replace animation
+    this.isReplace = 0;
     this.type = this.constructor.name;
   }
   pushName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   push(info) {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   pushPathByName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   pushPath(info) {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   replacePath(info) {
     if (this.pathArray.length !== 0) {
       this.pathArray.pop();
     }
     this.pathArray.push(info);
-    this.isReplace = true;
+    this.isReplace = 1;
     this.changeFlag = this.changeFlag + 1;
   }
   replacePathByName(name, param) {
     if (this.pathArray.length !== 0) {
       this.pathArray.pop();
     }
-    this.isReplace = true;
+    this.isReplace = 1;
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
   }
@@ -1601,7 +1644,7 @@ class NavPathStack {
     }
     let pathInfo = this.pathArray.pop();
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
     return pathInfo;
   }
   popTo(name) {
@@ -1610,7 +1653,7 @@ class NavPathStack {
       return -1;
     }
     this.pathArray.splice(index + 1);
-    this.isReplace = false;
+    this.isReplace = 0;
     this.changeFlag = this.changeFlag + 1;
     return index;
   }
@@ -1621,7 +1664,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
     return index;
   }
   popToIndex(index) {
@@ -1630,7 +1673,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   moveToTop(name) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -1640,7 +1683,7 @@ class NavPathStack {
     let info = this.pathArray.splice(index, 1);
     this.pathArray.push(info[0]);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
     return index;
   }
   moveIndexToTop(index) {
@@ -1650,12 +1693,12 @@ class NavPathStack {
     let info = this.pathArray.splice(index, 1);
     this.pathArray.push(info[0]);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   clear() {
     this.pathArray.splice(0);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   removeName(name) {
     var removed = false;
@@ -1667,7 +1710,7 @@ class NavPathStack {
     }
     if (removed) {
       this.changeFlag = this.changeFlag + 1;
-      this.isReplace = false;
+      this.isReplace = 0;
     }
   }
   removeIndex(index) {
@@ -1676,7 +1719,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index, 1);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   getAllPathName() {
     let array = this.pathArray.flatMap(element => element.name);
@@ -1868,6 +1911,16 @@ var NestedScrollMode;
   NestedScrollMode[NestedScrollMode["PARALLEL"] = 3] = "PARALLEL";
 })(NestedScrollMode || (NestedScrollMode = {}));
 
+var IlluminatedType;
+(function (IlluminatedType) {
+  IlluminatedType[IlluminatedType["NONE"] = 0] = "NONE";
+  IlluminatedType[IlluminatedType["BORDER"] = 1] = "BORDER";
+  IlluminatedType[IlluminatedType["CONTENT"] = 2] = "CONTENT";
+  IlluminatedType[IlluminatedType["BORDER_CONTENT"] = 3] = "BORDER_CONTENT";
+  IlluminatedType[IlluminatedType["BLOOM_BORDER"] = 4] = "BLOOM_BORDER";
+  IlluminatedType[IlluminatedType["BLOOM_BORDER_CONTENT"] = 5] = "BLOOM_BORDER_CONTENT";
+})(IlluminatedType || (IlluminatedType = {}));
+
 var ScrollAlign;
 (function (ScrollAlign) {
   ScrollAlign[ScrollAlign["START"] = 0] = "START";
@@ -2018,3 +2071,16 @@ var WebLayoutMode;
   WebLayoutMode[WebLayoutMode["NONE"] = 0] = "NONE";
   WebLayoutMode[WebLayoutMode["FIT_CONTENT"] = 1] = "FIT_CONTENT";
 })(WebLayoutMode || (WebLayoutMode = {}));
+
+var OptionWidthMode;
+(function (OptionWidthMode) {
+  OptionWidthMode["FIT_CONTENT"] = "fit_content";
+  OptionWidthMode["FIT_TRIGGER"] = "fit_trigger";
+})(OptionWidthMode || (OptionWidthMode = {}));
+
+var ArrowPointPosition;
+(function (ArrowPointPosition) {
+  ArrowPointPosition["START"] = "Start";
+  ArrowPointPosition["CENTER"] = "Center";
+  ArrowPointPosition["END"] = "End";
+})(ArrowPointPosition || (ArrowPointPosition = {}));

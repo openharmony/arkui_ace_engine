@@ -875,6 +875,8 @@ HWTEST_F(ToggleTestNg, TogglePaintTest001, TestSize.Level1)
 HWTEST_F(ToggleTestNg, TogglePaintTest002, TestSize.Level1)
 {
     auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
+    SizeF toggleSize(SWITCH_WIDTH, SWITCH_HEIGHT);
+    switchModifier->SetSize(toggleSize);
     switchModifier->hoverColor_ = Color::RED;
     switchModifier->clickEffectColor_ = Color::BLUE;
     switchModifier->touchHoverType_ = TouchHoverAnimationType::HOVER;
@@ -1242,6 +1244,31 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0019, TestSize.Level1)
     pattern->dragOffsetX_ = 0;
     pattern->HandleDragEnd();
     EXPECT_FALSE(pattern->isDragEvent_);
+}
+
+/**
+ * @tc.name: TogglePatternTest020
+ * @tc.desc: Switch test Select and ClearSelection.
+ */
+HWTEST_F(ToggleTestNg, TogglePatternTest020, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isOn_ = false;
+    pattern->SetAccessibilityAction();
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<SwitchAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(accessibilityProperty->ActActionSelect());
+
+    bool isSelected = true;
+    pattern->isOn_ = false;
+    pattern->UpdateSelectStatus(isSelected);
+    EXPECT_TRUE(accessibilityProperty->ActActionClearSelection());
 }
 
 /**

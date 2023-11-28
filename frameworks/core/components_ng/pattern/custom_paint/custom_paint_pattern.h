@@ -57,6 +57,8 @@ public:
         canvasSize_ = canvasSize;
     }
 
+    void OnPixelRoundFinish(const SizeF& pixelGridRoundSize) override;
+
     void SetAntiAlias(bool isEnabled);
 
     void FillRect(const Rect& rect);
@@ -148,6 +150,7 @@ private:
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
     bool isCanvasInit_ = false;
+    SizeF oldPixelGridRoundSize = {-1, -1};
 
     RefPtr<RenderingContext2DModifier> contentModifier_;
 

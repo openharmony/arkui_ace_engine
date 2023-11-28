@@ -14,7 +14,10 @@
  */
 
 #include "core/components_ng/event/touch_event.h"
+
+#include "core/components_ng/event/response_ctrl.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -25,6 +28,14 @@ bool TouchEventActuator::DispatchEvent(const TouchEvent& point)
 
 bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 {
+    auto attachedNode = GetAttachedNode();
+    if (attachedNode.Invalid()) {
+        return true;
+    }
+    // if current node is forbidden by monopolize, upper nodes should not response either
+    if (!ShouldResponse()) {
+        return false;
+    }
     return TriggerTouchCallBack(point);
 }
 
@@ -134,6 +145,24 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
             return false;
         }
     }
+    return true;
+}
+
+bool TouchEventActuator::ShouldResponse()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, true);
+
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, true);
+
+    auto frameNode = GetAttachedNode();
+    auto ctrl = eventManager->GetResponseCtrl();
+    CHECK_NULL_RETURN(ctrl, true);
+    if (!ctrl->ShouldResponse(frameNode)) {
+        return false;
+    }
+    ctrl->TrySetFirstResponse(frameNode);
     return true;
 }
 

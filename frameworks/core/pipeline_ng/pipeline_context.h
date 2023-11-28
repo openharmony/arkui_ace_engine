@@ -31,6 +31,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -75,6 +76,23 @@ public:
 
     void SetupSubRootElement();
 
+    bool NeedSoftKeyboard() override;
+
+    void SetFocusNode(RefPtr<FrameNode> node)
+    {
+        focusNode_ = node;
+    }
+
+    RefPtr<FrameNode> GetFocusNode()
+    {
+        return focusNode_;
+    }
+
+    void SetOnWindowFocused(const std::function<void()>& callback) override
+    {
+        focusOnNodeCallback_ = callback;
+    }
+
     const RefPtr<FrameNode>& GetRootElement() const
     {
         return rootNode_;
@@ -114,7 +132,7 @@ public:
         return false;
     }
 
-    void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override;
+    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) override;
 
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
@@ -207,6 +225,8 @@ public:
 
     void AddAfterLayoutTask(std::function<void()>&& task);
 
+    void AddPersistAfterLayoutTask(std::function<void()>&& task);
+
     void AddAfterRenderTask(std::function<void()>&& task);
 
     void FlushDirtyNodeUpdate();
@@ -225,7 +245,7 @@ public:
     {
         return safeAreaManager_;
     }
-    SafeAreaInsets GetSafeArea() const;
+    virtual SafeAreaInsets GetSafeArea() const;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
@@ -248,6 +268,11 @@ public:
 #endif
 
     const RefPtr<DragDropManager>& GetDragDropManager();
+
+    const RefPtr<FrameRateManager>& GetFrameRateManager()
+    {
+        return frameRateManager_;
+    }
 
     void FlushBuild() override;
 
@@ -407,6 +432,7 @@ public:
 
     void SetIgnoreViewSafeArea(bool value) override;
     void SetIsLayoutFullScreen(bool value) override;
+    void SetIsNeedAvoidWindow(bool value) override;
 
     void AddAnimationClosure(std::function<void()>&& animation);
     void FlushAnimationClosure();
@@ -439,7 +465,39 @@ public:
         }
     }
 
+    void SetScreenNode(const RefPtr<FrameNode>& node)
+    {
+        CHECK_NULL_VOID(node);
+        screenNode_ = AceType::WeakClaim(AceType::RawPtr(node));
+    }
+    RefPtr<FrameNode> GetScreenNode() const
+    {
+        return screenNode_.Upgrade();
+    }
+
     void SetJSViewActive(bool active, WeakPtr<CustomNode> custom);
+
+    void UpdateCurrentActiveNode(const WeakPtr<FrameNode>& node) override
+    {
+        activeNode_ = std::move(node);
+    }
+
+    const WeakPtr<FrameNode>& GetCurrentActiveNode() const
+    {
+        return activeNode_;
+    }
+
+    std::string GetCurrentExtraInfo() override;
+    void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
+
+    void SetCursor(int32_t cursorValue) override;
+
+    void RestoreDefault() override;
+
+    // for frontend animation interface.
+    void OpenFrontendAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+        const std::function<void()>& finishCallback);
+    void CloseFrontendAnimation();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -490,6 +548,8 @@ private:
 
     // only used for static form.
     void UpdateFormLinkInfos();
+
+    void FlushFrameRate();
 
     template<typename T>
     struct NodeCompare {
@@ -559,12 +619,14 @@ private:
     RefPtr<DragDropManager> dragDropManager_;
     RefPtr<SharedOverlayManager> sharedTransitionManager_;
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
+    RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
 #ifdef WINDOW_SCENE_SUPPORTED
     RefPtr<UIExtensionManager> uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
 #endif
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     WeakPtr<FrameNode> dirtyDefaultFocusNode_;
+    WeakPtr<FrameNode> screenNode_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
     uint64_t resampleTimeStamp_ = 0;
@@ -577,6 +639,11 @@ private:
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;
+    WeakPtr<FrameNode> activeNode_;
+
+    RefPtr<FrameNode> focusNode_;
+    std::function<void()> focusOnNodeCallback_;
+
     std::unique_ptr<MouseEvent> lastMouseEvent_;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;

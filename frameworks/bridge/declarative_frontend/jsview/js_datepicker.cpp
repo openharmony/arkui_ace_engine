@@ -366,9 +366,12 @@ void JSDatePicker::OnChange(const JSCallbackInfo& info)
 
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), DatePickerChangeEventToJSValue);
-    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                        const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("datePicker.onChange");
+        PipelineContext::SetCallBackNode(node);
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -382,9 +385,12 @@ void JSDatePicker::OnDateChange(const JSCallbackInfo& info)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), DatePickerDateChangeEventToJSValue);
-    auto onDateChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDateChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                            const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("datePicker.onDateChange");
+        PipelineContext::SetCallBackNode(node);
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
         func->Execute(*eventInfo);
     };
@@ -399,9 +405,12 @@ void JSTimePicker::OnChange(const JSCallbackInfo& info)
 
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), DatePickerChangeEventToJSValue);
-    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* index) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                        const BaseEventInfo* index) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("datePicker.onChange");
+        PipelineContext::SetCallBackNode(node);
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
         func->Execute(*eventInfo);
     };
@@ -482,7 +491,9 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
 {
     JSRef<JSVal> changeEventVal = selectedObject->GetProperty("changeEvent");
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                           const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("DatePicker.SelectedDateTimeChangeEvent");
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
@@ -514,6 +525,7 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
         if (minute && minute->IsNumber()) {
             dateTime.tm_min = minute->GetInt();
         }
+        PipelineContext::SetCallBackNode(node);
         auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
         auto dateObj = JSDate::New(milliseconds);
         func->ExecuteJS(1, &dateObj);
@@ -645,42 +657,47 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     std::function<void(const std::string&)> changeEvent;
     std::function<void(const std::string&)> dateChangeEvent;
     std::function<void(const std::string&)> dateAcceptEvent;
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onChange = paramObject->GetProperty("onChange");
     if (!onChange->IsUndefined() && onChange->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
-        changeEvent = [execCtx = info.GetExecutionContext(), type = pickerType, func = std::move(jsFunc)](
-                          const std::string& info) {
+        changeEvent = [execCtx = info.GetExecutionContext(), type = pickerType, func = std::move(jsFunc),
+                          node = frameNode](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             std::vector<std::string> keys;
             keys = { "year", "month", "day" };
             ACE_SCORING_EVENT("DatePickerDialog.onChange");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(keys, info);
         };
     }
     auto onAccept = paramObject->GetProperty("onAccept");
     if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
-        acceptEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+        acceptEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
             ACE_SCORING_EVENT("DatePickerDialog.onAccept");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(keys, info);
         };
     }
     auto onCancel = paramObject->GetProperty("onCancel");
     if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
-        cancelEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        cancelEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("DatePickerDialog.onCancel");
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
     }
     auto onDateChange = paramObject->GetProperty("onDateChange");
     if (!onDateChange->IsUndefined() && onDateChange->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDateChange));
-        dateChangeEvent = [execCtx = info.GetExecutionContext(), type = pickerType, func = std::move(jsFunc)](
-                              const std::string& info) {
+        dateChangeEvent = [execCtx = info.GetExecutionContext(), type = pickerType, func = std::move(jsFunc),
+                              node = frameNode](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("DatePickerDialog.onDateChange");
             auto selectedJson = JsonUtil::ParseJsonString(info);
@@ -708,17 +725,17 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
             if (minute && minute->IsNumber()) {
                 dateTime.tm_min = minute->GetInt();
             }
-
             auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
             auto dateObj = JSDate::New(milliseconds);
+            PipelineContext::SetCallBackNode(node);
             func->ExecuteJS(1, &dateObj);
         };
     }
     auto onDateAccept = paramObject->GetProperty("onDateAccept");
     if (!onDateAccept->IsUndefined() && onDateAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDateAccept));
-        dateAcceptEvent = [execCtx = info.GetExecutionContext(), type = pickerType, func = std::move(jsFunc)](
-                              const std::string& info) {
+        dateAcceptEvent = [execCtx = info.GetExecutionContext(), type = pickerType, func = std::move(jsFunc),
+                              node = frameNode](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("DatePickerDialog.onDateAccept");
             auto selectedJson = JsonUtil::ParseJsonString(info);
@@ -746,9 +763,9 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
             if (minute && minute->IsNumber()) {
                 dateTime.tm_min = minute->GetInt();
             }
-
             auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
             auto dateObj = JSDate::New(milliseconds);
+            PipelineContext::SetCallBackNode(node);
             func->ExecuteJS(1, &dateObj);
         };
     }
@@ -1190,34 +1207,39 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     std::function<void()> cancelEvent;
     std::function<void(const std::string&)> acceptEvent;
     std::function<void(const std::string&)> changeEvent;
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onChange = paramObject->GetProperty("onChange");
     if (!onChange->IsUndefined() && onChange->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
-        changeEvent = [execCtx = info.GetExecutionContext(), type = DatePickerType::TIME, func = std::move(jsFunc)](
-                          const std::string& info) {
+        changeEvent = [execCtx = info.GetExecutionContext(), type = DatePickerType::TIME, func = std::move(jsFunc),
+                          node = targetNode](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             std::vector<std::string> keys;
             keys = { "hour", "minute" };
             ACE_SCORING_EVENT("DatePickerDialog.onChange");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(keys, info);
         };
     }
     auto onAccept = paramObject->GetProperty("onAccept");
     if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
-        acceptEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+        acceptEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                          const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
             ACE_SCORING_EVENT("DatePickerDialog.onAccept");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(keys, info);
         };
     }
     auto onCancel = paramObject->GetProperty("onCancel");
     if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
-        cancelEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        cancelEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("DatePickerDialog.onCancel");
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
     }

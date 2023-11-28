@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 
 #include "base/log/dump_log.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -28,6 +29,8 @@ DeclarativeFrontendNG::~DeclarativeFrontendNG() noexcept
 
 void DeclarativeFrontendNG::Destroy()
 {
+    // The call doesn't change the page pop status
+    Recorder::NodeDataCache::Get().OnBeforePagePop(true);
     CHECK_RUN_ON(JS);
     // To guarantee the jsEngine_ and delegate_ released in js thread
     delegate_.Reset();
@@ -94,6 +97,16 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
             return false;
         }
         return jsEngine->LoadPageSource(url, errorCallback);
+    };
+
+    auto loadPageByBufferCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                        const std::shared_ptr<std::vector<uint8_t>>& content,
+                                        const std::function<void(const std::string&, int32_t)>& errorCallback) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return false;
+        }
+        return jsEngine->LoadPageSource(content, errorCallback);
     };
 
     auto mediaQueryCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
@@ -228,6 +241,7 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
     };
 
     pageRouterManager->SetLoadJsCallback(std::move(loadPageCallback));
+    pageRouterManager->SetLoadJsByBufferCallback(std::move(loadPageByBufferCallback));
     pageRouterManager->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
     pageRouterManager->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
 
@@ -365,6 +379,20 @@ void DeclarativeFrontendNG::RunPage(const std::string& url, const std::string& p
     // Not use this pageId from backend, manage it in FrontendDelegateDeclarativeNg.
     if (delegate_) {
         delegate_->RunPage(url, params, pageProfile_);
+    }
+}
+
+void DeclarativeFrontendNG::RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
+{
+    auto container = Container::Current();
+    auto isStageModel = container ? container->IsUseStageModel() : false;
+    if (!isStageModel) {
+        LOGE("RunPage by buffer must be run under stage model.");
+        return;
+    }
+
+    if (delegate_) {
+        delegate_->RunPage(content, params, pageProfile_);
     }
 }
 
@@ -557,5 +585,14 @@ void DeclarativeFrontendNG::HotReload()
     auto manager = GetPageRouterManager();
     CHECK_NULL_VOID(manager);
     manager->FlushFrontend();
+}
+
+std::string DeclarativeFrontendNG::GetCurrentPageUrl() const
+{
+    auto pageRouterManager = GetPageRouterManager();
+    if (pageRouterManager) {
+        return pageRouterManager->GetCurrentPageUrl();
+    }
+    return "";
 }
 } // namespace OHOS::Ace

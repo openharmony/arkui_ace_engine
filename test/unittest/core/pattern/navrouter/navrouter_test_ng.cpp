@@ -1772,7 +1772,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
     navBar->GetLayoutProperty<NavBarLayoutProperty>()->propHideBackButton_ = true;
     pattern->OnModifyDone();
-    ASSERT_EQ(buttonNode->GetLayoutProperty()->propVisibility_, VisibleType::GONE);
+    EXPECT_FALSE(buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->propVisibility_.has_value());
 
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto layoutProperty = AceType::MakeRefPtr<NavBarLayoutProperty>();

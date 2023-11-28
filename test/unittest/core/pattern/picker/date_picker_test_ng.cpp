@@ -22,6 +22,7 @@
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/pipeline/mock_pipeline_base.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
@@ -154,8 +155,6 @@ public:
 void DatePickerTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
 }
 
 void DatePickerTestNg::TearDownTestSuite()
@@ -166,19 +165,31 @@ void DatePickerTestNg::TearDownTestSuite()
 void DatePickerTestNg::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == DialogTheme::TypeId()) {
+            return AceType::MakeRefPtr<DialogTheme>();
+        } else if (type == PickerTheme::TypeId()) {
+            return MockThemeDefault::GetPickerTheme();
+        } else {
+            return nullptr;
+        }
+    });
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
 }
 
 void DatePickerTestNg::TearDown()
 {
     MockPipelineBase::GetCurrent()->themeManager_ = nullptr;
+    ViewStackProcessor::GetInstance()->ClearStack();
 }
 
 void DatePickerTestNg::CreateDatePickerColumnNode()
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
 
@@ -199,7 +210,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelCreateDatePicker001, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto buttonNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild()->GetChildAtIndex(0));
@@ -259,7 +270,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle001, TestSize.Lev
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     PickerTextStyle data;
     DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -284,7 +295,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle002, TestSize.Lev
     data.textColor = Color::RED;
     data.fontWeight = Ace::FontWeight::BOLD;
     DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -307,7 +318,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle003, TestSize.Lev
     PickerTextStyle data;
     data.fontSize = Dimension(0);
     DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -327,7 +338,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle001, TestSize.Level1
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     PickerTextStyle data;
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -352,7 +363,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle002, TestSize.Level1
     data.textColor = Color::RED;
     data.fontWeight = Ace::FontWeight::BOLD;
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -375,7 +386,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle003, TestSize.Level1
     PickerTextStyle data;
     data.fontSize = Dimension(0);
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -395,7 +406,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle001, TestSize.Leve
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     PickerTextStyle data;
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -420,7 +431,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle002, TestSize.Leve
     data.textColor = Color::RED;
     data.fontWeight = Ace::FontWeight::BOLD;
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -443,7 +454,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle003, TestSize.Leve
     PickerTextStyle data;
     data.fontSize = Dimension(0);
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -527,7 +538,8 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow002, TestSize.Level1)
     auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
 
     ASSERT_NE(dialogNode, nullptr);
-    auto midStackNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetChildAtIndex(1));
+    auto midStackNode =
+        AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
     auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
     auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1));
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
@@ -667,7 +679,8 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow005, TestSize.Level1)
     auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
 
     ASSERT_NE(dialogNode, nullptr);
-    auto midStackNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetChildAtIndex(1));
+    auto midStackNode =
+        AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
     auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
     auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1));
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
@@ -715,7 +728,8 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow006, TestSize.Level1)
     auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
 
     ASSERT_NE(dialogNode, nullptr);
-    auto midStackNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetChildAtIndex(1));
+    auto midStackNode =
+        AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
     auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
     auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1));
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
@@ -763,7 +777,8 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow007, TestSize.Level1)
     auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
 
     ASSERT_NE(dialogNode, nullptr);
-    auto midStackNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetChildAtIndex(1));
+    auto midStackNode =
+        AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
     auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
     auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1));
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
@@ -785,7 +800,7 @@ HWTEST_F(DatePickerTestNg, DatePickerRowLayoutPropertyToJsonValue001, TestSize.L
     PickerTextStyle data;
     data.fontSize = Dimension(0);
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -808,7 +823,7 @@ HWTEST_F(DatePickerTestNg, DatePickerRowLayoutPropertyReset001, TestSize.Level1)
     PickerTextStyle data;
     data.fontSize = Dimension(0);
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -829,7 +844,7 @@ HWTEST_F(DatePickerTestNg, DatePickerRowLayoutPropertyClone001, TestSize.Level1)
     PickerTextStyle data;
     data.fontSize = Dimension(0);
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, data);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -848,7 +863,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest001, TestSize.Level1)
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     DatePickerModel::GetInstance()->SetShowLunar(true);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -867,7 +882,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest002, TestSize.Level1)
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     DatePickerModel::GetInstance()->SetStartDate(PickerDate(START_YEAR_BEFORE, 1, 1));
     DatePickerModel::GetInstance()->SetEndDate(PickerDate(END_YEAR, 1, 1));
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -888,7 +903,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest003, TestSize.Level1)
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     DatePickerModel::GetInstance()->SetSelectedDate(PickerDate(START_YEAR_BEFORE, 1, 1));
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -911,7 +926,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest004, TestSize.Level1)
 
     auto onChange = [](const BaseEventInfo* info) { EXPECT_EQ(info->GetType(), "DatePickerChangeEvent"); };
     DatePickerModel::GetInstance()->SetOnChange(std::move(onChange));
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -975,7 +990,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg001, TestSize.Le
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
     pickerFrameNode->MarkModifyDone();
     auto columnNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
@@ -1009,7 +1024,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg002, TestSize.Le
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
     pickerFrameNode->MarkModifyDone();
 
@@ -1045,7 +1060,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg003, TestSize.Le
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
     pickerFrameNode->MarkModifyDone();
     auto columnNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
@@ -1090,7 +1105,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg004, TestSize.Le
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
     pickerFrameNode->MarkModifyDone();
     auto yearColumnNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
@@ -1132,7 +1147,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg005, TestSize.Le
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
     pickerFrameNode->MarkModifyDone();
     auto yearColumnNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
@@ -1174,7 +1189,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg006, TestSize.Le
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
 
     auto datePickerPattern = pickerFrameNode->GetPattern<DatePickerPattern>();
@@ -1205,7 +1220,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPaintTest001, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -1241,7 +1256,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPaintTest002, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -1278,7 +1293,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest005, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -1316,7 +1331,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest006, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -1367,7 +1382,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest007, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -1454,7 +1469,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAlgorithmTest001, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 2;
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -1506,7 +1521,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAlgorithmTest002, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -1575,7 +1590,8 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow008, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
     auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
 
-    auto midStackNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetChildAtIndex(1));
+    auto midStackNode =
+        AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
     auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetFirstChild());
     ASSERT_NE(dateNode, nullptr);
     auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
@@ -1632,7 +1648,8 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow009, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
     auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
 
-    auto midStackNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetChildAtIndex(1));
+    auto midStackNode =
+        AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
     auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetFirstChild());
     ASSERT_NE(dateNode, nullptr);
     auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
@@ -1689,7 +1706,8 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow010, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
     auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
 
-    auto midStackNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetChildAtIndex(1));
+    auto midStackNode =
+        AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
     auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetFirstChild());
     ASSERT_NE(dateNode, nullptr);
     auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
@@ -1720,7 +1738,7 @@ HWTEST_F(DatePickerTestNg, DatePickerFireChangeEventTest001, TestSize.Level1)
 
     auto changeEvent = [](const BaseEventInfo* info) { EXPECT_EQ(info->GetType(), "DatePickerChangeEvent"); };
     DatePickerModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -1741,7 +1759,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest001, TestSize.Level1)
      */
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
@@ -1772,7 +1790,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest002, TestSize.Level1)
      */
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
@@ -1802,7 +1820,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest003, TestSize.Level1)
      */
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
@@ -1877,7 +1895,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest004, TestSize.Level1)
      */
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
@@ -1936,7 +1954,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest006, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
     pickerFrameNode->MarkModifyDone();
     auto firstChild = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild());
@@ -1976,7 +1994,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest007, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
     pickerFrameNode->MarkModifyDone();
     auto firstChild = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild());
@@ -2039,7 +2057,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest009, TestSize.Level1)
      */
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
@@ -2070,7 +2088,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest010, TestSize.Level1)
      */
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto jsonValue = JsonUtil::Create(true);
@@ -2104,7 +2122,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest011, TestSize.Level1)
      */
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
@@ -2132,7 +2150,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest012, TestSize.Level1)
      */
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
@@ -2188,7 +2206,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest013, TestSize.Level1)
      */
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
@@ -2233,7 +2251,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest014, TestSize.Level1)
      */
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
@@ -2290,7 +2308,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest015, TestSize.Level1)
      */
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
@@ -2338,7 +2356,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest016, TestSize.Level1)
      */
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
     auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
@@ -2458,7 +2476,7 @@ HWTEST_F(DatePickerTestNg, PerformActionTest001, TestSize.Level1)
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
     pickerFrameNode->MarkModifyDone();
 
@@ -2527,7 +2545,7 @@ HWTEST_F(DatePickerTestNg, DatePickerEventActionsTest001, TestSize.Level1)
      */
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
 
@@ -2756,7 +2774,8 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow011, TestSize.Level1)
      */
     auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
     ASSERT_NE(dialogNode, nullptr);
-    auto midStackNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetChildAtIndex(1));
+    auto midStackNode =
+        AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
     auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
     auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);

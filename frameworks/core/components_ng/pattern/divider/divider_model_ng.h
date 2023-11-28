@@ -28,8 +28,11 @@ public:
     void DividerColor(const Color& value) override;
     void StrokeWidth(const Dimension& value) override;
     void LineCap(const enum LineCap& value) override;
+    static void StrokeWidth(FrameNode* frameNode, const Dimension& value);
+    static void LineCap(FrameNode* frameNode, const enum LineCap& value);
+    static void SetDividerColor(FrameNode* frameNode, const Color& color);
+    static void SetVertical(FrameNode* frameNode, const bool& value);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIVIDER_DIVIDER_MODEL_NG_H

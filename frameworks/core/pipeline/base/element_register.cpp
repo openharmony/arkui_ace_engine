@@ -145,12 +145,6 @@ bool ElementRegister::RemoveItem(ElementIdType elementId, const std::string& tag
     }
     auto removed = itemMap_.erase(elementId);
     if (removed) {
-        auto iter = deletedCachedItems_.find(elementId);
-        if (iter != deletedCachedItems_.end()) {
-            LOGD("ElmtId %{public}d has already deleted by custom node", elementId);
-            deletedCachedItems_.erase(iter);
-            return true;
-        }
         LOGD("ElmtId %{public}d successfully removed from registry, added to list of removed Elements.", elementId);
         removedItems_.insert(std::pair(elementId, tag));
         LOGD("Size of removedItems_ removedItems_ %{public}d", static_cast<int32_t>(removedItems_.size()));
@@ -180,7 +174,7 @@ void ElementRegister::MoveRemovedItems(RemovedElementsType& removedItems)
 {
     LOGD("MoveRemovedItems return set of %{public}d elmtIds", static_cast<int32_t>(removedItems_.size()));
     removedItems = removedItems_;
-    removedItems_ = std::unordered_set<std::pair<ElementIdType, std::string>, deleted_element_hash>();
+    removedItems_.clear();
 }
 
 void ElementRegister::Clear()
@@ -243,8 +237,6 @@ void ElementRegister::ClearPendingRemoveNodes()
 {
     LOGD("ElementRegister::ClearPendingRemoveNodes()");
     pendingRemoveNodes_.clear();
-    CallJSUINodeRegisterCallbackFunc();
-    CallJSUINodeRegisterGlobalFunc();
 }
 
 } // namespace OHOS::Ace

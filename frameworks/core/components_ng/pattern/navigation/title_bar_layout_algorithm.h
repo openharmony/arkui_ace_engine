@@ -110,8 +110,6 @@ private:
     void LayoutMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float subtitleHeight);
 
-    bool GetNavigationBackButtonState(const RefPtr<TitleBarNode>& titleBarNode);
-
     // set variables from theme
     void InitializeTheme();
 
@@ -128,6 +126,7 @@ private:
     bool isInitialSubtitle_ = true;
     float minTitleHeight_ = 0.0f;
     float menuWidth_ = 0.0f;
+    bool showBackButton_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TitleBarLayoutAlgorithm);
 };

@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/event/gesture_info.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"
@@ -70,6 +71,8 @@ public:
     {
         OnFinishGestureReferee(touchId, isBlocked);
     }
+
+    virtual void AboutToAccept();
 
     // Called when request of handling gesture sequence is accepted by gesture referee.
     virtual void OnAccepted() = 0;
@@ -140,10 +143,7 @@ public:
         return refereeState_;
     }
 
-    void SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
-    {
-        gestureGroup_ = gestureGroup;
-    }
+    bool SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
 
     void SetOnAction(const GestureEventFunc& onAction)
     {
@@ -238,6 +238,26 @@ public:
     void AddGestureProcedure(const std::string& procedure) const;
     // for recognizer group
     void AddGestureProcedure(const TouchEvent& point, const RefPtr<NGGestureRecognizer>& recognizer) const;
+
+    void SetGestureInfo(const RefPtr<GestureInfo>& gestureInfo)
+    {
+        gestureInfo_ = gestureInfo;
+    }
+
+    RefPtr<GestureInfo> GetGestureInfo()
+    {
+        return gestureInfo_;
+    }
+
+    void SetIsSystemGesture(bool isSystemGesture)
+    {
+        if (gestureInfo_) {
+            gestureInfo_->SetIsSystemGesture(isSystemGesture);
+        } else {
+            gestureInfo_ = MakeRefPtr<GestureInfo>(isSystemGesture);
+        }
+    }
+
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -261,6 +281,7 @@ protected:
     virtual void OnResetStatus() = 0;
 
     virtual void OnSucceedCancel() {}
+    bool ShouldResponse() override;
 
     RefereeState refereeState_ = RefereeState::READY;
 
@@ -285,6 +306,8 @@ protected:
     int32_t transId_ = 0;
 
     int32_t currentFingers_ = 0;
+    RefPtr<GestureInfo> gestureInfo_;
+
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
 };

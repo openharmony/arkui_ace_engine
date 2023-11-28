@@ -41,6 +41,10 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            theme->padding_ = Edge(themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
+                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL),
+                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
+                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL));
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -79,6 +83,16 @@ public:
         return disabledAlpha_;
     }
 
+    const Dimension& GetScrollbarMinHeight()
+    {
+        return scrollbarMinHeight_;
+    }
+
+    const Edge& GetPadding() const
+    {
+        return padding_;
+    }
+
 protected:
     RichEditorTheme() = default;
 
@@ -86,6 +100,8 @@ private:
     float disabledAlpha_ = 0.0f;
     bool draggable_ = false;
     Dimension defaultCaretHeight_ = 18.5_vp;
+    Dimension scrollbarMinHeight_ = 4.0_vp;
+    Edge padding_;
 };
 } // namespace OHOS::Ace::NG
 

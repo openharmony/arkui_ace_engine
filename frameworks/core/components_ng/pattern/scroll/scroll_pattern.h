@@ -23,7 +23,6 @@
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
-#include "core/components_ng/pattern/scroll/scroll_paint_property.h"
 #include "core/components_ng/pattern/scroll/scroll_paint_method.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -36,14 +35,9 @@ class ScrollPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(ScrollPattern, ScrollablePattern);
 
 public:
-    ScrollPattern() : ScrollablePattern(true) {}
+    ScrollPattern() : ScrollablePattern(EdgeEffect::NONE, true) {}
 
     ~ScrollPattern() override = default;
-
-    bool IsAtomicNode() const override
-    {
-        return false;
-    }
 
     bool UsResRegion() override
     {
@@ -53,11 +47,6 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ScrollLayoutProperty>();
-    }
-
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<ScrollPaintProperty>();
     }
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
@@ -100,6 +89,7 @@ public:
     }
 
     bool OnScrollCallback(float offset, int32_t source) override;
+
     void OnScrollEndCallback() override;
 
     double GetCurrentPosition() const
@@ -109,8 +99,7 @@ public:
 
     float GetTotalOffset() const override
     {
-        return GetScrollSource() == SCROLL_FROM_JUMP || GetScrollSource() == SCROLL_FROM_BAR
-                                    ? -std::clamp(currentOffset_, -scrollableDistance_, 0.0f) : -currentOffset_;
+        return -currentOffset_;
     }
 
     void ResetPosition();
@@ -163,7 +152,6 @@ public:
 
     void OnAnimateStop() override;
     bool UpdateCurrentOffset(float offset, int32_t source) override;
-    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
     void ScrollBy(float pixelX, float pixelY, bool smooth, const std::function<void()>& onFinish = nullptr);
     bool ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish = nullptr);
@@ -179,7 +167,6 @@ public:
     }
     bool ScrollPageCheck(float delta, int32_t source);
     void AdjustOffset(float& delta, int32_t source);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     Rect GetItemRect(int32_t index) const override;
 
     // scrollSnap
@@ -188,6 +175,8 @@ public:
     void CaleSnapOffsets();
     void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign);
     void CaleSnapOffsetsByPaginations();
+
+    float GetSelectScrollWidth();
 
     bool IsSnapToInterval() const
     {
@@ -263,6 +252,26 @@ public:
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+	
+    void SetIsWidthModifiedBySelect(bool isModified)
+    {
+        isWidthModifiedBySelect_ = isModified;
+    }
+    
+    bool IsWidthModifiedBySelect() const
+    {
+        return isWidthModifiedBySelect_;
+    }
+    
+    void SetIsSelectScroll(bool isSelect)
+    {
+        isSelectScroll_ = isSelect;
+    }
+    
+    bool IsSelectScroll() const
+    {
+        return isSelectScroll_;
+    }
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
@@ -285,7 +294,7 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> scrollEffect);
     void UpdateScrollBarOffset() override;
-    void FireOnScrollStart();
+    void FireOnScrollStart() override;
     void FireOnScrollStop();
     void SetAccessibilityAction();
     void ScrollSnapTrigger();
@@ -300,7 +309,6 @@ private:
     SizeF viewSize_;
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
-    bool scrollStop_ = false;
     std::vector<std::shared_ptr<IScrollUpdateCallback>> listenerVector_;
 
     // scrollSnap
@@ -309,6 +317,9 @@ private:
     std::pair<bool, bool> enableSnapToSide_ = { true, true };
     Dimension intervalSize_;
     bool scrollSnapUpdate_ = false;
+    
+    bool isWidthModifiedBySelect_ = false;
+    bool isSelectScroll_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,8 @@ public:
     void SetOnScrollEnd(NG::ScrollEndEvent&& event) override;
     void SetOnScrollStart(OnScrollStartEvent&& event) override {}
     void SetOnScrollStop(OnScrollStopEvent&& event) override {}
+    void SetOnReachStart(OnReachEvent&& onReachStart) override {};
+    void SetOnReachEnd(OnReachEvent&& onReachEnd) override {};
     void SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy) override;
     void InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std::pair<bool, Color>& color,
         const std::pair<bool, Dimension>& width, EdgeEffect effect) override;

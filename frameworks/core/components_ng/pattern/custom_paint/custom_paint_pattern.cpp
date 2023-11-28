@@ -60,18 +60,16 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto customPaintEventHub = GetEventHub<CustomPaintEventHub>();
     CHECK_NULL_RETURN(customPaintEventHub, false);
 
-    if (config.contentSizeChange || config.frameSizeChange) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            isCanvasInit_ = !config.frameSizeChange;
-        } else {
-            isCanvasInit_ = false;
-        }
-    } else if (config.frameOffsetChange || config.contentOffsetChange) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            isCanvasInit_ = true;
-        } else {
-            isCanvasInit_ = false;
-        }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        isCanvasInit_ = geometryNode->GetPixelGridRoundSize() == oldPixelGridRoundSize;
+        oldPixelGridRoundSize = geometryNode->GetPixelGridRoundSize();
+    } else if (config.contentSizeChange || config.frameSizeChange || config.frameOffsetChange ||
+               config.contentOffsetChange) {
+        isCanvasInit_ = false;
     }
 
     if (!isCanvasInit_) {
@@ -895,5 +893,11 @@ void CustomPaintPattern::SetFilterParam(const std::string& filterStr)
 TransformParam CustomPaintPattern::GetTransform() const
 {
     return paintMethod_->GetTransform();
+}
+
+void CustomPaintPattern::OnPixelRoundFinish(const SizeF& pixelGridRoundSize)
+{
+    CHECK_NULL_VOID(paintMethod_);
+    paintMethod_->UpdateRecordingCanvas(pixelGridRoundSize.Width(), pixelGridRoundSize.Height());
 }
 } // namespace OHOS::Ace::NG

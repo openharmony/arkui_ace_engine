@@ -15,8 +15,7 @@
 
 #include "adapter/preview/entrance/clipboard/clipboard_impl.h"
 
-#include "util/ClipboardHelper.h"
-
+#include "adapter/preview/entrance/ace_preview_helper.h"
 #include "frameworks/base/utils/utils.h"
 
 namespace OHOS::Ace::Platform {
@@ -38,7 +37,13 @@ RefPtr<PasteDataMix> ClipboardImpl::CreatePasteDataMix()
 void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, bool isDragData)
 {
     CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostTask([data] { ClipboardHelper::SetClipboardData(data); },
+    taskExecutor_->PostTask(
+        [data] {
+            auto setClipboardData = AcePreviewHelper::GetInstance()->GetCallbackOfSetClipboardData();
+            if (setClipboardData) {
+                setClipboardData(data);
+            }
+        },
         TaskExecutor::TaskType::UI);
 }
 
@@ -47,7 +52,13 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
     if (!taskExecutor_ || !callback) {
         return;
     }
-    taskExecutor_->PostTask([callback] { callback(ClipboardHelper::GetClipboardData()); },
+    taskExecutor_->PostTask(
+        [callback] {
+            auto getClipboardData = AcePreviewHelper::GetInstance()->GetCallbackOfGetClipboardData();
+            if (callback && getClipboardData) {
+                callback(getClipboardData());
+            }
+        },
         TaskExecutor::TaskType::UI);
 }
 
@@ -56,7 +67,13 @@ void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
     if (!taskExecutor_ || !callback) {
         return;
     }
-    taskExecutor_->PostTask([callback] { callback(!ClipboardHelper::GetClipboardData().empty()); },
+    taskExecutor_->PostTask(
+        [callback] {
+            auto getClipboardData = AcePreviewHelper::GetInstance()->GetCallbackOfGetClipboardData();
+            if (callback && getClipboardData) {
+                callback(!getClipboardData().empty());
+            }
+        },
         TaskExecutor::TaskType::UI);
 }
 

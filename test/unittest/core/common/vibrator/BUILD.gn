@@ -18,7 +18,9 @@ ohos_unittest("vibrator_test") {
   module_out_path = "$basic_test_output_path/common"
 
   sources = [
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
+    "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "vibrator_test.cpp",
   ]

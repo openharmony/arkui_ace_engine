@@ -43,6 +43,7 @@ constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
+constexpr char CUSTOM_TITLE_KEY[] = "persist.sys.arkui.customtitle";
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int DEFAULT_THRESHOLD_JANK = 15;
@@ -73,8 +74,7 @@ bool IsDownloadByNetworkDisabled()
 
 bool IsTraceEnabled()
 {
-    return (system::GetParameter("persist.ace.trace.enabled", "0") == "1" ||
-            system::GetParameter("debug.ace.trace.enabled", "0") == "1");
+    return (system::GetParameter("persist.ace.trace.enabled", "1") == "1");
 }
 
 bool IsSvgTraceEnabled()
@@ -205,6 +205,16 @@ bool IsExtSurfaceEnabled()
     return false;
 #endif
 }
+
+bool IsTitleStyleEnabled()
+{
+    return system::GetBoolParameter("persist.ace.title.style.enabled", false);
+}
+
+bool IsFlutterDecouplingEnabled()
+{
+    return system::GetBoolParameter("persist.ace.flutter.decoupling.enabled", false);
+}
 } // namespace
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
@@ -245,6 +255,8 @@ int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 bool SystemProperties::resourceDecoupling_ = GetResourceDecoupling();
+bool SystemProperties::changeTitleStyleEnabled_ = IsTitleStyleEnabled();
+bool SystemProperties::flutterDecouplingEnabled_ = IsFlutterDecouplingEnabled();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -469,5 +481,10 @@ bool SystemProperties::GetResourceDecoupling()
 int32_t SystemProperties::GetJankFrameThreshold()
 {
     return system::GetIntParameter<int>("persist.sys.arkui.perf.threshold", DEFAULT_THRESHOLD_JANK);
+}
+
+std::string SystemProperties::GetCustomTitleFilePath()
+{
+    return system::GetParameter(CUSTOM_TITLE_KEY, "");
 }
 } // namespace OHOS::Ace

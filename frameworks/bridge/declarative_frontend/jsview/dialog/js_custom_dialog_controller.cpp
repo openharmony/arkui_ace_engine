@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/models/custom_dialog_controller_model_impl.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -92,12 +93,17 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         // Process cancel function.
         JSRef<JSVal> cancelCallback = constructorArg->GetProperty("cancel");
         if (!cancelCallback->IsUndefined() && cancelCallback->IsFunction()) {
+            WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
             auto jsCancelFunction = AceType::MakeRefPtr<JsFunction>(ownerObj, JSRef<JSFunc>::Cast(cancelCallback));
             instance->jsCancelFunction_ = jsCancelFunction;
 
-            auto onCancel = [execCtx = info.GetExecutionContext(), func = std::move(jsCancelFunction)]() {
+            auto onCancel = [execCtx = info.GetExecutionContext(), func = std::move(jsCancelFunction),
+                                node = frameNode]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("onCancel");
+                auto pipelineContext = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID(pipelineContext);
+                pipelineContext->UpdateCurrentActiveNode(node);
                 func->Execute();
             };
             instance->dialogProperties_.onCancel = onCancel;
@@ -189,6 +195,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.closeAnimation = closeAnimation;
         }
 
+        // Parse showInSubWindowValue.
         auto showInSubWindowValue = constructorArg->GetProperty("showInSubWindow");
         if (showInSubWindowValue->IsBoolean()) {
 #if defined(PREVIEW)
@@ -199,6 +206,11 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 #endif
         }
 
+        // Parse isModal.
+        auto isModalValue = constructorArg->GetProperty("isModal");
+        if (isModalValue->IsBoolean()) {
+            instance->dialogProperties_.isModal = isModalValue->ToBoolean();
+        }
         info.SetReturnValue(instance);
     } else {
         LOGE("JSView creation with invalid arguments.");
@@ -270,6 +282,9 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     }
     auto containerId = this->ownerView_->GetInstanceId();
     ContainerScope containerScope(containerId);
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
 
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
@@ -278,16 +293,18 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         return;
     }
 
-    auto buildFunc = [buildfunc = jsBuilderFunction_]() {
+    auto buildFunc = [buildfunc = jsBuilderFunction_, node = frameNode, context = pipelineContext]() {
         {
             ACE_SCORING_EVENT("CustomDialog.builder");
+            context->UpdateCurrentActiveNode(node);
             buildfunc->Execute();
         }
     };
 
-    auto cancelTask = ([cancelCallback = jsCancelFunction_]() {
+    auto cancelTask = ([cancelCallback = jsCancelFunction_, node = frameNode, context = pipelineContext]() {
         if (cancelCallback) {
             ACE_SCORING_EVENT("CustomDialog.cancel");
+            context->UpdateCurrentActiveNode(node);
             cancelCallback->Execute();
         }
     });
@@ -330,9 +347,13 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         return;
     }
 
-    auto cancelTask = ([cancelCallback = jsCancelFunction_]() {
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto cancelTask = ([cancelCallback = jsCancelFunction_, node = frameNode]() {
         if (cancelCallback) {
             ACE_SCORING_EVENT("CustomDialog.cancel");
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
             cancelCallback->Execute();
         }
     });
@@ -347,31 +368,32 @@ bool JSCustomDialogController::ParseAnimation(
     if (animationValue->IsNull() || !animationValue->IsObject()) {
         return false;
     }
-    auto animationArgs = JsonUtil::ParseJsonString(animationValue->ToString());
-    if (animationArgs->IsNull()) {
-        return false;
-    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(animationValue);
     // If the attribute does not exist, the default value is used.
-    auto duration = animationArgs->GetInt("duration", DEFAULT_ANIMATION_DURATION);
-    auto delay = animationArgs->GetInt("delay", 0);
-    auto iterations = animationArgs->GetInt("iterations", 1);
-    auto tempo = static_cast<float>(animationArgs->GetDouble("tempo", 1.0));
-    auto finishCallbackType = static_cast<FinishCallbackType>(animationArgs->GetInt("finishCallbackType", 0));
-    if (NonPositive(tempo)) {
+    int32_t duration = obj->GetPropertyValue<int32_t>("duration", DEFAULT_ANIMATION_DURATION);
+    int32_t delay = obj->GetPropertyValue<int32_t>("delay", 0);
+    int32_t iterations = obj->GetPropertyValue<int32_t>("iterations", 1);
+    float tempo = obj->GetPropertyValue<float>("tempo", 1.0);
+    auto finishCallbackType = static_cast<FinishCallbackType>(obj->GetPropertyValue<int32_t>("finishCallbackType", 0));
+    if (tempo < 0) {
         tempo = 1.0f;
+    } else if (tempo == 0) {
+        tempo = 1000.0f;
     }
-    auto direction = StringToAnimationDirection(animationArgs->GetString("playMode", "normal"));
+    auto direction = StringToAnimationDirection(obj->GetPropertyValue<std::string>("playMode", "normal"));
     RefPtr<Curve> curve;
-    auto curveArgs = animationArgs->GetValue("curve");
+    JSRef<JSVal> curveArgs = obj->GetProperty("curve");
     if (curveArgs->IsString()) {
-        curve = CreateCurve(animationArgs->GetString("curve", "linear"));
+        curve = CreateCurve(obj->GetPropertyValue<std::string>("curve", "linear"));
     } else if (curveArgs->IsObject()) {
-        auto curveString = curveArgs->GetValue("__curveString");
-        if (!curveString) {
+        JSRef<JSObject> curveObj = JSRef<JSObject>::Cast(curveArgs);
+        JSRef<JSVal> curveString = curveObj->GetProperty("__curveString");
+        if (!curveString->IsString()) {
             // Default AnimationOption which is invalid.
             return false;
         }
-        curve = CreateCurve(curveString->GetString());
+        curve = CreateCurve(curveString->ToString());
     } else {
         curve = Curves::EASE_IN_OUT;
     }
@@ -383,14 +405,17 @@ bool JSCustomDialogController::ParseAnimation(
     result.SetCurve(curve);
     result.SetFinishCallbackType(finishCallbackType);
 
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(animationValue);
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
-        onFinishEvent = [execCtx = execContext, func = std::move(jsFunc)]() {
+        onFinishEvent = [execCtx = execContext, func = std::move(jsFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("CustomDialog.onFinish");
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
             func->Execute();
         };
         result.SetOnFinishEvent(onFinishEvent);

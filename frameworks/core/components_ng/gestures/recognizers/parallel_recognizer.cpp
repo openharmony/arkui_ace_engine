@@ -29,7 +29,7 @@ void ParallelRecognizer::OnAccepted()
 {
     refereeState_ = RefereeState::SUCCEED;
     if (currentBatchRecognizer_) {
-        currentBatchRecognizer_->OnAccepted();
+        currentBatchRecognizer_->AboutToAccept();
         currentBatchRecognizer_.Reset();
     }
 }
@@ -119,7 +119,7 @@ void ParallelRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& reco
         }
 
         if (refereeState_ == RefereeState::SUCCEED) {
-            recognizer->OnAccepted();
+            recognizer->AboutToAccept();
         } else if ((refereeState_ == RefereeState::PENDING_BLOCKED) ||
                    (refereeState_ == RefereeState::SUCCEED_BLOCKED)) {
             recognizer->OnBlocked();

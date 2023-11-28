@@ -38,6 +38,9 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
+#include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -75,6 +78,53 @@ constexpr Dimension MAX_DIAMETER = 3.5_vp;
 constexpr Dimension MIN_DIAMETER = 1.5_vp;
 constexpr Dimension MIN_ARROWHEAD_DIAMETER = 2.0_vp;
 constexpr Dimension ANIMATION_TEXT_OFFSET = 12.0_vp;
+
+RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_t overlayId,
+    float& buttonWidth, bool isSelectAll = false)
+{
+    auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(
+        static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
+        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
+        static_cast<int32_t>(ButtonType::CAPSULE));
+    CHECK_NULL_RETURN(pasteButton, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, pasteButton);
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(textOverlayTheme, pasteButton);
+    auto textStyle = textOverlayTheme->GetMenuButtonTextStyle();
+
+    auto buttonLayoutProperty = pasteButton->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    buttonLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
+    buttonLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
+
+    auto buttonPaintProperty = pasteButton->GetPaintProperty<SecurityComponentPaintProperty>();
+    if (callback) {
+        buttonPaintProperty->UpdateFontColor(textStyle.GetTextColor());
+    } else {
+        buttonPaintProperty->UpdateFontColor(
+            textStyle.GetTextColor().BlendOpacity(textOverlayTheme->GetAlphaDisabled()));
+    }
+    const auto& padding = textOverlayTheme->GetMenuButtonPadding();
+    buttonLayoutProperty->UpdateBackgroundLeftPadding(padding.Left());
+    buttonLayoutProperty->UpdateBackgroundRightPadding(padding.Right());
+    buttonLayoutProperty->UpdateUserDefinedIdealSize(
+        { std::nullopt, std::optional<CalcLength>(textOverlayTheme->GetMenuButtonHeight()) });
+    buttonPaintProperty->UpdateBackgroundColor(Color::WHITE);
+    if (callback) {
+        pasteButton->GetOrCreateGestureEventHub()->SetUserOnClick([callback](GestureEvent& /* info */) {
+            if (callback) {
+                callback();
+            }
+        });
+    } else {
+        auto buttonEventHub = pasteButton->GetEventHub<OptionEventHub>();
+        CHECK_NULL_RETURN(buttonEventHub, pasteButton);
+        buttonEventHub->SetEnabled(false);
+    }
+    pasteButton->MarkModifyDone();
+    return pasteButton;
+}
 
 RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void()>& callback, int32_t overlayId,
     float& buttonWidth, bool isSelectAll = false)
@@ -910,8 +960,7 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
     }
     if (info->menuInfo.showPaste) {
         float buttonWidth = 0.0f;
-        auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE),
-            info->menuCallback.onPaste, GetId(), buttonWidth);
+        auto button = BuildPasteButton(info->menuCallback.onPaste, GetId(), buttonWidth);
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;

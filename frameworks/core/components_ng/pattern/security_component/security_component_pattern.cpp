@@ -266,6 +266,11 @@ void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, R
         buttonLayoutProp->UpdateBorderWidth(widthProp);
     }
 
+    if (scPaintProp->GetBackgroundBorderStyle().has_value()) {
+        BorderStyleProperty style;
+        style.SetBorderStyle(scPaintProp->GetBackgroundBorderStyle().value());
+        buttonRender->UpdateBorderStyle(style);
+    }
     if (scLayoutProp->GetBackgroundBorderRadius().has_value()) {
         buttonLayoutProp->UpdateBorderRadius(
             BorderRadiusProperty(scLayoutProp->GetBackgroundBorderRadius().value()));

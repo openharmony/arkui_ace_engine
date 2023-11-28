@@ -44,7 +44,10 @@ ohos_shared_library("ace_xcomponent_controller") {
 
   public_configs = [ ":xcomponent_controller_config" ]
 
-  deps = [ "$ace_root/interfaces/inner_api/ace:ace_uicontent" ]
+  deps = [
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "$ace_root/interfaces/inner_api/ace:ace_uicontent",
+  ]
 
   external_deps = [
     "c_utils:utils",

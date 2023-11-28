@@ -38,6 +38,7 @@ public:
         lanes_ = listItemGroupPaintInfo.lanes;
         spaceWidth_ = listItemGroupPaintInfo.spaceWidth;
         laneGutter_ = listItemGroupPaintInfo.laneGutter;
+        totalItemCount_ = listItemGroupPaintInfo.totalItemCount;
     }
     ~ListItemGroupPaintMethod() override = default;
 
@@ -52,6 +53,7 @@ private:
     float spaceWidth_ = 0.0f;
     float laneGutter_ = 0.0f;
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
+    int32_t totalItemCount_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H

@@ -21,6 +21,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/models/alert_dialog_model_impl.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
@@ -114,10 +115,15 @@ void ParseButtonObj(
 
     auto actionValue = objInner->GetProperty("action");
     if (actionValue->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-        auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc), property]() {
+        auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc), property,
+                            node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("AlertDialog.[" + property + "].onAction");
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
             func->Execute();
         };
         AlertDialogModel::GetInstance()->SetParseButtonObj(eventFunc, buttonInfo, properties, property);
@@ -198,10 +204,14 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         // Parse cancel.
         auto cancelValue = obj->GetProperty("cancel");
         if (cancelValue->IsFunction()) {
+            WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
             auto cancelFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(cancelValue));
-            auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
+            auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(cancelFunc), node = frameNode]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("AlertDialog.property.cancel");
+                auto pipelineContext = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID(pipelineContext);
+                pipelineContext->UpdateCurrentActiveNode(node);
                 func->Execute();
             };
             AlertDialogModel::GetInstance()->SetOnCancel(eventFunc, properties);
@@ -258,6 +268,20 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         DimensionRect maskRect;
         if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
             properties.maskRect = maskRect;
+        }
+
+        // Parse showInSubWindowValue.
+        auto showInSubWindowValue = obj->GetProperty("showInSubWindow");
+        if (showInSubWindowValue->IsBoolean()) {
+            LOGI("Parse showInSubWindowValue");
+            properties.isShowInSubWindow = showInSubWindowValue->ToBoolean();
+        }
+
+        // Parse isModal.
+        auto isModalValue = obj->GetProperty("isModal");
+        if (isModalValue->IsBoolean()) {
+            LOGI("Parse isModalValue");
+            properties.isModal = isModalValue->ToBoolean();
         }
         AlertDialogModel::GetInstance()->SetShowDialog(properties);
     }

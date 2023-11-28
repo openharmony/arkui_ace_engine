@@ -91,6 +91,7 @@ void LayoutProperty::Reset()
     padding_.reset();
     margin_.reset();
     borderWidth_.reset();
+    outerBorderWidth_.reset();
     magicItemProperty_.reset();
     positionProperty_.reset();
     measureType_.reset();
@@ -681,6 +682,16 @@ void LayoutProperty::UpdateBorderWidth(const BorderWidthProperty& value)
         borderWidth_ = std::make_unique<BorderWidthProperty>();
     }
     if (borderWidth_->UpdateWithCheck(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateOuterBorderWidth(const BorderWidthProperty& value)
+{
+    if (!outerBorderWidth_) {
+        outerBorderWidth_ = std::make_unique<BorderWidthProperty>();
+    }
+    if (outerBorderWidth_->UpdateWithCheck(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
 }

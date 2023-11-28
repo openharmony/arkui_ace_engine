@@ -1009,7 +1009,7 @@ public:
 
         RSMatrix matrix;
         if (!NearZero(rotation_)) {
-            matrix.Rotate(rotation_, center_.GetX(), center_.GetY());
+            matrix.PreRotate(rotation_, center_.GetX(), center_.GetY());
         }
 
         std::vector<RSScalar> pos;
@@ -1019,7 +1019,8 @@ public:
         if (isRepeat_) {
             tileMode = RSTileMode::REPEAT;
         }
-        return RSRecordingShaderEffect::CreateSweepGradient(center_, colors, pos, tileMode, startAngle_, endAngle_);
+        return RSRecordingShaderEffect::CreateSweepGradient(
+            center_, colors, pos, tileMode, startAngle_, endAngle_, &matrix);
     }
 #endif
 
@@ -3011,8 +3012,7 @@ void RosenDecorationPainter::PaintShadow(const RSPath& path, const Shadow& shado
 
         // LightPos is the location of a spot light source, which is by default located directly above the center
         // of the component.
-        auto tmpPath = drPath.GetCmdList()->Playback();
-        auto drRect = tmpPath->GetBounds();
+        auto drRect = drPath.GetBounds();
         RSPoint3 lightPos = RSPoint3(drRect.GetLeft() * FLOAT_HALF + drRect.GetRight() * FLOAT_HALF,
             drRect.GetTop() * FLOAT_HALF + drRect.GetBottom() * FLOAT_HALF, shadow.GetLightHeight());
 

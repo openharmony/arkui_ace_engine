@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -563,5 +564,114 @@ HWTEST_F(TextTimerTestNg, TextTimerTest008, TestSize.Level1)
 
     pattern->OnVisibleAreaChange(false);
     EXPECT_EQ(host->GetChildren().size(), length);
+}
+
+/**
+ * @tc.name: TextTimerLayoutAlgorithmTest001
+ * @tc.desc: Test LayoutAlgorithm of TextTimer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerLayoutAlgorithmTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(TEXT_TIMER_FORMAT);
+    testProperty.inputCount = std::make_optional(INPUT_COUNT);
+    testProperty.isCountDown = std::make_optional(IS_COUNT_DOWN);
+    testProperty.fontSize = std::make_optional(FONT_SIZE_VALUE);
+    testProperty.textColor = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.italicFontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    testProperty.fontWeight = std::make_optional(FONT_WEIGHT_VALUE);
+    testProperty.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. create childFrameNode.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textNode, textGeometryNode, textNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutWrapper, nullptr);
+    textLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(textNode->GetPattern()->CreateLayoutAlgorithm()));
+    textNode->MountToParent(frameNode);
+    layoutWrapper->AppendChild(textLayoutWrapper);
+    EXPECT_EQ(layoutWrapper->currentChildCount_, 1);
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<TextTimerLayoutAlgorithm>();
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF());
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.selfIdealSize.SetWidth(200.f);
+    contentConstraint.selfIdealSize.SetHeight(200.f);
+    layoutProperty->UpdateLayoutConstraint(contentConstraint);
+    layoutProperty->UpdateContentConstraint();
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(200.f, 200.f));
+}
+
+/**
+ * @tc.name: TextTimerTest009
+ * @tc.desc: Test UpdateTextTimer of TextTimerPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(TEXT_TIMER_FORMAT);
+    testProperty.inputCount = std::make_optional(INPUT_COUNT);
+    testProperty.isCountDown = std::make_optional(true);
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetFormat(), TEXT_TIMER_FORMAT);
+    EXPECT_EQ(layoutProperty->GetInputCount(), INPUT_COUNT);
+    EXPECT_EQ(layoutProperty->GetIsCountDown(), true);
+
+    /**
+     * @tc.steps: step2. get the properties of all settings.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    auto textNode = pattern->GetTextNode();
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->Reset();
+    EXPECT_EQ(textLayoutProperty->GetFontStyle(), nullptr);
+    EXPECT_EQ(textLayoutProperty->GetTextLineStyle(), nullptr);
+    EXPECT_FALSE(textLayoutProperty->HasContent());
+    EXPECT_FALSE(textLayoutProperty->HasForegroundColor());
+
+    pattern->textTimerController_ = nullptr;
+    pattern->OnModifyDone();
+    textLayoutProperty->CleanDirty();
+    pattern->scheduler_->callback_(1);
+    EXPECT_EQ(pattern->textTimerController_, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetPropertyChangeFlag(), PROPERTY_UPDATE_NORMAL);
+
+    textLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+    pattern->scheduler_->callback_(1);
+    EXPECT_EQ(textLayoutProperty->GetPropertyChangeFlag(), PROPERTY_UPDATE_LAYOUT);
 }
 } // namespace OHOS::Ace::NG

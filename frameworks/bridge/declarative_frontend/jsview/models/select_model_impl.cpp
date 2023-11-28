@@ -435,4 +435,10 @@ void SelectModelImpl::SetMenuAlign(const MenuAlign& menuAlign) {}
 void SelectModelImpl::SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent) {}
 
 void SelectModelImpl::SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent) {}
+
+void SelectModelImpl::SetOptionWidth(const Dimension& value) {}
+
+void SelectModelImpl::SetOptionHeight(const Dimension& value) {}
+
+void SelectModelImpl::SetOptionWidthFitTrigger(bool isFitTrigger) {}
 } // namespace OHOS::Ace::Framework

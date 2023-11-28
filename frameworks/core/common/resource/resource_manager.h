@@ -28,6 +28,7 @@
 #include "base/utils/resource_configuration.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/theme/resource_adapter.h"
+#include "core/common/lru/count_limit_lru.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT ResourceManager : public AceType {
@@ -40,26 +41,40 @@ public:
 
     RefPtr<ResourceAdapter> GetOrCreateResourceAdapter(RefPtr<ResourceObject>& resourceObject);
 
+    std::string MakeCacheKey(const std::string& bundleName, const std::string& moduleName)
+    {
+        return bundleName + "." + moduleName;
+    }
+
     void AddResourceAdapter(
         const std::string& bundleName, const std::string& moduleName, RefPtr<ResourceAdapter>& resourceAdapter)
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
-        resourceAdapters_.emplace(std::make_pair(bundleName, moduleName), resourceAdapter);
+        if (bundleName.empty() && moduleName.empty()) {
+            resourceAdapters_[std::make_pair(bundleName, moduleName)] = resourceAdapter;
+        } else {
+            auto key = MakeCacheKey(bundleName, moduleName);
+            CountLimitLRU::CacheWithCountLimitLRU<RefPtr<ResourceAdapter>>(
+                key, resourceAdapter, cacheList_, cache_, capacity_);
+        }
     }
 
     bool IsResourceAdapterRecord(const std::string& bundleName, const std::string& moduleName)
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
-        auto adaptId = std::make_pair(bundleName, moduleName);
-        auto iter = resourceAdapters_.find(adaptId);
-        return iter != resourceAdapters_.end();
+        auto key = MakeCacheKey(bundleName, moduleName);
+        auto iter = cache_.find(key);
+        return iter != cache_.end();
     }
 
     RefPtr<ResourceAdapter> GetResourceAdapter(const std::string& bundleName, const std::string& moduleName)
     {
-        std::shared_lock<std::shared_mutex> lock(mutex_);
-        auto adaptId = std::make_pair(bundleName, moduleName);
-        return resourceAdapters_.at(adaptId);
+        std::unique_lock<std::shared_mutex> lock(mutex_);
+        if (bundleName.empty() && moduleName.empty()) {
+            return resourceAdapters_.at(std::make_pair(bundleName, moduleName));
+        }
+        auto key = MakeCacheKey(bundleName, moduleName);
+        return CountLimitLRU::GetCacheObjWithCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
     }
 
     RefPtr<ResourceAdapter> GetResourceAdapter()
@@ -74,6 +89,9 @@ public:
         std::unique_lock<std::shared_mutex> lock(mutex_);
         for (auto iter = resourceAdapters_.begin(); iter != resourceAdapters_.end(); ++iter) {
             iter->second->UpdateConfig(config);
+        }
+        for (auto iter = cacheList_.begin(); iter != cacheList_.end(); ++iter) {
+            iter->cacheObj->UpdateConfig(config);
         }
     }
 
@@ -96,6 +114,10 @@ private:
 
     std::map<std::pair<std::string, std::string>, RefPtr<ResourceAdapter>> resourceAdapters_;
     std::shared_mutex mutex_;
+
+    std::atomic<size_t> capacity_ = 3;
+    std::list<CacheNode<RefPtr<ResourceAdapter>>> cacheList_;
+    std::unordered_map<std::string, std::list<CacheNode<RefPtr<ResourceAdapter>>>::iterator> cache_;
 };
 } // namespace OHOS::Ace
 

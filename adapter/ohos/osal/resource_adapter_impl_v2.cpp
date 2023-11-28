@@ -134,11 +134,17 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     CHECK_NULL_RETURN(container, nullptr);
     auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
     CHECK_NULL_RETURN(aceContainer, nullptr);
+    
+    RefPtr<ResourceAdapter> newResourceAdapter = nullptr;
     auto context = aceContainer->GetAbilityContextByModule(bundleName, moduleName);
-    CHECK_NULL_RETURN(context, nullptr);
-
-    auto resourceManager = context->GetResourceManager();
-    auto newResourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager);
+    if (context) {
+        auto resourceManager = context->GetResourceManager();
+        newResourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager);
+    } else {
+        newResourceAdapter = ResourceAdapter::CreateV2();
+        auto resourceInfo = aceContainer->GetResourceInfo();
+        newResourceAdapter->Init(resourceInfo);
+    }
 
     auto resConfig = aceContainer->GetResourceConfiguration();
     newResourceAdapter->UpdateConfig(resConfig);

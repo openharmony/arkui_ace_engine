@@ -81,6 +81,8 @@ struct DragControllerAsyncCtx {
     int32_t sourceType = 0;
     std::mutex dragStateMutex;
     DragState dragState = DragState::PENDING;
+    DimensionOffset touchPoint = DimensionOffset(0.0_vp, 0.0_vp);
+    bool hasTouchPoint = false;
 };
 } // namespace
 
@@ -92,6 +94,67 @@ napi_value CreateCallbackErrorValue(napi_env env, int32_t errCode)
     NAPI_CALL(env, napi_create_object(env, &jsObject));
     NAPI_CALL(env, napi_set_named_property(env, jsObject, "code", jsValue));
     return jsObject;
+}
+
+double ConvertToPx(DragControllerAsyncCtx* asyncCtx, const Dimension& dimension, double size)
+{
+    auto unit = dimension.Unit();
+    auto value = dimension.Value();
+    if (unit == DimensionUnit::PERCENT) {
+        return value * size;
+    }
+    if (unit == DimensionUnit::NONE || unit == DimensionUnit::PX) {
+        return value;
+    }
+    auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+    if (!container) {
+        return 0.0;
+    }
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, 0.0);
+    if (unit == DimensionUnit::VP) {
+        return value * pipeline->GetDipScale();
+    }
+    if (unit == DimensionUnit::FP) {
+        return value * pipeline->GetDipScale() * pipeline->GetFontScale();
+    }
+    if (unit == DimensionUnit::LPX) {
+        return value * pipeline->GetLogicScale();
+    }
+    return 0.0;
+}
+
+static std::optional<Dimension> HandleDimensionType(napi_value parameterNapi, napi_env env)
+{
+    size_t ret = 0;
+    std::string parameterStr;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, parameterNapi, &valueType);
+    Dimension parameter;
+    if (valueType == napi_number) {
+        double parameterValue;
+        napi_get_value_double(env, parameterNapi, &parameterValue);
+        parameter.SetValue(parameterValue);
+        parameter.SetUnit(DimensionUnit::VP);
+    } else if (valueType == napi_string) {
+        size_t parameterLen = GetParamLen(env, parameterNapi) + 1;
+        std::unique_ptr<char[]> parameterTemp = std::make_unique<char[]>(parameterLen);
+        napi_get_value_string_utf8(env, parameterNapi, parameterTemp.get(), parameterLen, &ret);
+        parameterStr = parameterTemp.get();
+        parameter = StringUtils::StringToDimensionWithUnit(parameterStr, DimensionUnit::VP);
+    } else if (valueType == napi_object) {
+        ResourceInfo recv;
+        if (!ParseResourceParam(env, parameterNapi, recv)) {
+            return std::nullopt;
+        }
+        if (!ParseString(recv, parameterStr)) {
+            return std::nullopt;
+        }
+        parameter = StringUtils::StringToDimensionWithUnit(parameterStr, DimensionUnit::VP);
+    } else {
+        return std::nullopt;
+    }
+    return parameter;
 }
 
 void HandleSuccess(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg& dragNotifyMsg)
@@ -267,9 +330,15 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             }
             int32_t width = asyncCtx->pixmap->GetWidth();
             int32_t height = asyncCtx->pixmap->GetHeight();
+            double x = ConvertToPx(asyncCtx, asyncCtx->touchPoint.GetX(), width);
+            double y = ConvertToPx(asyncCtx, asyncCtx->touchPoint.GetY(), height);
+            if (!asyncCtx->hasTouchPoint) {
+                x = -width * PIXELMAP_WIDTH_RATE;
+                y = -height * PIXELMAP_HEIGHT_RATE;
+            }
 
             Msdp::DeviceStatus::DragData dragData {
-                { asyncCtx->pixmap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE }, {}, udKey, "", "",
+                { asyncCtx->pixmap, -x, -y }, {}, udKey, "", "",
                 asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, {}
             };
 
@@ -299,6 +368,31 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             }
         },
         TaskExecutor::TaskType::JS);
+}
+
+bool ParseTouchPoint(DragControllerAsyncCtx* asyncCtx, napi_valuetype& valueType)
+{
+    napi_value touchPointNapi = nullptr;
+    napi_get_named_property(asyncCtx->env, asyncCtx->argv[1], "touchPoint", &touchPointNapi);
+    napi_typeof(asyncCtx->env, touchPointNapi, &valueType);
+    if (valueType == napi_object) {
+        napi_value xNapi = nullptr;
+        napi_get_named_property(asyncCtx->env, touchPointNapi, "x", &xNapi);
+        std::optional<Dimension> dx = HandleDimensionType(xNapi, asyncCtx->env);
+        if (dx == std::nullopt) {
+            return false;
+        }
+        napi_value yNapi = nullptr;
+        napi_get_named_property(asyncCtx->env, touchPointNapi, "y", &yNapi);
+        std::optional<Dimension> dy = HandleDimensionType(yNapi, asyncCtx->env);
+        if (dy == std::nullopt) {
+            return false;
+        }
+        asyncCtx->touchPoint = DimensionOffset(dx.value(), dy.value());
+    } else {
+        return false;
+    }
+    return true;
 }
 
 bool ParseDragItemInfoParam(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
@@ -398,6 +492,9 @@ bool ParseDragInfoParam(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
         errMsg = "extraParams's type is wrong";
         return false;
     }
+    
+    asyncCtx->hasTouchPoint = ParseTouchPoint(asyncCtx, valueType);
+
     return true;
 }
 
@@ -461,11 +558,15 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
     napi_open_escapable_handle_scope(env, &scope);
 
     auto* asyncCtx = new DragControllerAsyncCtx();
+    if (asyncCtx == nullptr) {
+        LOGE("DragControllerAsyncContext is null");
+        return nullptr;
+    }
     InitializeDragControllerCtx(env, info, asyncCtx);
 
     std::string errMsg;
     if (!CheckAndParseParams(asyncCtx, errMsg)) {
-        NapiThrow(asyncCtx->env, errMsg, Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(asyncCtx->env, errMsg, Framework::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
 

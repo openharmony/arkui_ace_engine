@@ -97,7 +97,7 @@ bool DrawingPainter::SetPen(RSPen& pen, const ShapePaintProperty& shapePaintProp
 
     if (shapePaintProperty.HasStrokeDashArray()) {
         auto lineDashState = shapePaintProperty.GetStrokeDashArrayValue();
-        std::vector<RSScalar> intervals(lineDashState.size());
+        RSScalar intervals[lineDashState.size()];
         for (size_t i = 0; i < lineDashState.size(); ++i) {
             intervals[i] = static_cast<RSScalar>(lineDashState[i].ConvertToPx());
         }
@@ -105,7 +105,7 @@ bool DrawingPainter::SetPen(RSPen& pen, const ShapePaintProperty& shapePaintProp
         if (shapePaintProperty.HasStrokeDashOffset()) {
             phase = static_cast<RSScalar>(shapePaintProperty.GetStrokeDashOffsetValue().ConvertToPx());
         }
-        pen.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, phase));
+        pen.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, lineDashState.size(), phase));
     }
 
     if (shapePaintProperty.HasStrokeMiterLimit()) {

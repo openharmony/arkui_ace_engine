@@ -82,9 +82,14 @@ void TextFieldModelNG::CreateNode(
     AddDragFrameNodeToManager();
     PaddingProperty paddings;
     ProcessDefaultPadding(paddings);
-    auto draggable = pipeline->GetDraggable<TextFieldTheme>();
-    SetDraggable(draggable);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, paddings);
+    if (frameNode->IsFirstBuilding()) {
+        auto draggable = pipeline->GetDraggable<TextFieldTheme>();
+        SetDraggable(draggable);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetTextDraggable(true);
+    }
 }
 
 void TextFieldModelNG::SetDraggable(bool draggable)
@@ -123,6 +128,10 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
+    auto focusHub = pattern->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
+    focusHub->SetFocusType(FocusType::NODE);
+    focusHub->SetFocusStyleType(FocusStyleType::CUSTOM_REGION);
     return pattern->GetTextFieldController();
 };
 
@@ -449,6 +458,15 @@ void TextFieldModelNG::SetShowCounter(bool value)
     }
 }
 
+void TextFieldModelNG::SetCounterType(int32_t value)
+{
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SetCounter, value);
+}
+
 void TextFieldModelNG::SetBarState(OHOS::Ace::DisplayMode value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, DisplayMode, value);
@@ -572,6 +590,7 @@ void TextFieldModelNG::SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCleanNodeStyle(cleanNodeStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CleanNodeStyle, cleanNodeStyle);
 }
 
 void TextFieldModelNG::SetCancelIconSize(const CalcDimension& iconSize)
@@ -592,5 +611,10 @@ void TextFieldModelNG::SetCancelIconColor(const Color& iconColor)
 void TextFieldModelNG::SetSelectAllValue(bool isSelectAllValue)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue);
+}
+
+void TextFieldModelNG::SetMaxViewLines(FrameNode* frameNode, uint32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxViewLines, value, frameNode);
 }
 } // namespace OHOS::Ace::NG

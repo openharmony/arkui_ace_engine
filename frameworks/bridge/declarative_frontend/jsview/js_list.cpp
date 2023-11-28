@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/list_model_impl.h"
@@ -27,7 +28,6 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
-#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 
 namespace OHOS::Ace {
 
@@ -61,7 +61,13 @@ const std::vector<V2::ScrollSnapAlign> SCROLL_SNAP_ALIGN = { V2::ScrollSnapAlign
     V2::ScrollSnapAlign::CENTER, V2::ScrollSnapAlign::END };
 
 namespace {
-    const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
+const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
+constexpr ScrollAlign ALIGN_TABLE[] = {
+    ScrollAlign::START,
+    ScrollAlign::CENTER,
+    ScrollAlign::END,
+    ScrollAlign::AUTO,
+};
 }
 
 void JSList::SetDirection(int32_t direction)
@@ -71,32 +77,31 @@ void JSList::SetDirection(int32_t direction)
 
 void JSList::SetScrollBar(const JSCallbackInfo& info)
 {
-    // default value 1 represents scrollBar DisplayMode::AUTO.
-    int32_t scrollBar = 1;
-    ParseJsInteger<int32_t>(info[0], scrollBar);
-    scrollBar = scrollBar < 0 ? 1 : scrollBar;
-    ListModel::GetInstance()->SetScrollBar(static_cast<DisplayMode>(scrollBar));
+    auto displayMode = JSScrollable::ParseDisplayMode(info, ListModel::GetInstance()->GetDisplayMode());
+    ListModel::GetInstance()->SetScrollBar(displayMode);
+}
+
+void JSList::SetScrollBarColor(const std::string& color)
+{
+    auto scrollBarColor = JSScrollable::ParseBarColor(color);
+    if (!scrollBarColor.empty()) {
+        ListModel::GetInstance()->SetScrollBarColor(scrollBarColor);
+    }
+}
+
+void JSList::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
+{
+    auto scrollBarWidth = JSScrollable::ParseBarWidth(scrollWidth);
+    if (!scrollBarWidth.empty()) {
+        ListModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
+    }
 }
 
 void JSList::SetEdgeEffect(const JSCallbackInfo& info)
 {
-    int32_t edgeEffect;
-    if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsInt32(info[0], edgeEffect) ||
-        edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
-        edgeEffect = static_cast<int32_t>(EdgeEffect::SPRING);
-    }
-    ListModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), false);
-
-    if (info.Length() == 2) { // 2 is parameter count
-        auto paramObject = JSRef<JSObject>::Cast(info[1]);
-        if (info[1]->IsNull() || info[1]->IsUndefined()) {
-            return;
-        } else {
-            JSRef<JSVal> alwaysEnabledParam = paramObject->GetProperty("alwaysEnabled");
-            bool alwaysEnabled = alwaysEnabledParam->IsBoolean() ? alwaysEnabledParam->ToBoolean() : false;
-            ListModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), alwaysEnabled);
-        }
-    }
+    auto edgeEffect = JSScrollable::ParseEdgeEffect(info, EdgeEffect::SPRING);
+    auto alwaysEnabled = JSScrollable::ParseAlwaysEnable(info, false);
+    ListModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
 }
 
 void JSList::SetEditMode(bool editMode)
@@ -683,6 +688,8 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("clip", &JSList::JsClip);
     JSClass<JSList>::StaticMethod("listDirection", &JSList::SetDirection);
     JSClass<JSList>::StaticMethod("scrollBar", &JSList::SetScrollBar);
+    JSClass<JSList>::StaticMethod("scrollBarWidth", &JSList::SetScrollBarWidth);
+    JSClass<JSList>::StaticMethod("scrollBarColor", &JSList::SetScrollBarColor);
     JSClass<JSList>::StaticMethod("edgeEffect", &JSList::SetEdgeEffect);
     JSClass<JSList>::StaticMethod("divider", &JSList::SetDivider);
     JSClass<JSList>::StaticMethod("editMode", &JSList::SetEditMode);
@@ -733,6 +740,7 @@ void JSListScroller::JSBind(BindingTarget globalObj)
 {
     JSClass<JSListScroller>::Declare("ListScroller");
     JSClass<JSListScroller>::CustomMethod("getItemRectInGroup", &JSListScroller::GetItemRectInGroup);
+    JSClass<JSListScroller>::CustomMethod("scrollToItemInGroup", &JSListScroller::ScrollToItemInGroup);
     JSClass<JSListScroller>::CustomMethod("closeAllSwipeActions", &JSListScroller::CloseAllSwipeActions);
     JSClass<JSListScroller>::InheritAndBind<JSScroller>(globalObj, JSListScroller::Constructor,
         JSListScroller::Destructor);
@@ -769,6 +777,54 @@ void JSListScroller::GetItemRectInGroup(const JSCallbackInfo& args)
     } else {
         JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
     }
+}
+
+void JSListScroller::ScrollToItemInGroup(const JSCallbackInfo& args)
+{
+    int32_t index = 0;
+    int32_t indexInGroup = 0;
+    bool smooth = false;
+    ScrollAlign align = ScrollAlign::NONE;
+
+    if (args.Length() < 1) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
+
+    auto scrollController = GetController().Upgrade();
+    if (!scrollController) {
+        JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
+        return;
+    }
+
+    if (!ConvertFromJSValue(args[0], index) || index < 0) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
+
+    if (args.Length() >= 2) { // 2 is param count
+        if (!ConvertFromJSValue(args[1], indexInGroup) || indexInGroup < 0) {
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+            return;
+        }
+    }
+
+    if (args.Length() >= 3) { // 3 is param count
+        if (!args[2]->IsBoolean()) { // 2 is the param index of smooth
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+            return;
+        }
+        smooth = args[2]->ToBoolean(); // 2 is the param index of smooth
+    }
+
+    if (args.Length() == 4) { // 4 is param count
+        if (!ConvertFromJSValue(args[3], ALIGN_TABLE, align)) { // 3 is param count of align
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+            return;
+        }
+    }
+
+    scrollController->JumpToItemInGroup(index, indexInGroup, smooth, align, SCROLL_FROM_JUMP);
 }
 
 void JSListScroller::CloseAllSwipeActions(const JSCallbackInfo& args)

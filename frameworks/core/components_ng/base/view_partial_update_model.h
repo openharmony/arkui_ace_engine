@@ -51,10 +51,12 @@ struct NodeInfoPU {
 
     bool hasMeasureOrLayout = false;
     bool isStatic = false;
+    bool isCustomTitle = false;
     int32_t codeRow = -1;
     int32_t codeCol = -1;
 
     std::string jsViewName;
+    NG::ExtraInfo extraInfo;
 };
 
 using UpdateTask = std::tuple<int32_t, RefPtr<AceType>, RefPtr<AceType>>;

@@ -17,13 +17,13 @@
 
 #include <map>
 
+#include "base/geometry/rect.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "core/event/ace_events.h"
 #include "core/gestures/velocity.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-#include "base/geometry/rect.h"
 #include "core/common/udmf/unified_data.h"
 #endif
 
@@ -50,7 +50,6 @@ private:
     std::string plainText_;
 };
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 enum class DragRet {
     DRAG_DEFAULT = -1,
     DRAG_SUCCESS = 0,
@@ -63,7 +62,6 @@ enum class DragBehavior {
     COPY = 0,
     MOVE = 1,
 };
-#endif
 
 class ACE_FORCE_EXPORT DragEvent : public AceType {
     DECLARE_ACE_TYPE(DragEvent, AceType)
@@ -142,42 +140,84 @@ public:
         return pixelMap_;
     }
 
+    void SetSummary(std::map<std::string, int64_t>& summary)
+    {
+        summary_ = summary;
+    }
+
+    std::map<std::string, int64_t>& GetSummary()
+    {
+        return summary_;
+    }
+
+    void SetResult(DragRet dragRet)
+    {
+        dragRet_ = dragRet;
+    }
+
+    DragRet GetResult()
+    {
+        return dragRet_;
+    }
+
+    Rect GetPreviewRect()
+    {
+        return previewRect_;
+    }
+
+    void SetPreviewRect(Rect previewRect)
+    {
+        previewRect_ = previewRect;
+    }
+
+    void UseCustomAnimation(bool useCustomAnimation)
+    {
+        useCustomAnimation_ = useCustomAnimation;
+    }
+
+    bool IsUseCustomAnimation()
+    {
+        return useCustomAnimation_;
+    }
+
+    void SetCopy(bool copy)
+    {
+        copy_ = copy;
+    }
+
+    bool IsCopy()
+    {
+        return copy_;
+    }
+
+    void SetUdKey(const std::string udKey)
+    {
+        udKey_ = udKey;
+    }
+
+    std::string GetUdKey()
+    {
+        return udKey_;
+    }
+
+    void SetIsGetDataSuccess(bool isGetDataSuccess)
+    {
+        isGetDataSuccess_ = isGetDataSuccess;
+    }
+
+    bool IsGetDataSuccess()
+    {
+        return isGetDataSuccess_;
+    }
+
 #ifdef ENABLE_DRAG_FRAMEWORK
     void SetData(const RefPtr<UnifiedData>& unifiedData);
 
     RefPtr<UnifiedData>& GetData();
 
-    void SetSummary(std::map<std::string, int64_t>& summary);
-
-    std::map<std::string, int64_t>& GetSummary();
-
-    void SetResult(DragRet dragRet);
-
-    DragRet GetResult();
-
-    void SetPreviewRect(Rect previewRect);
-
-    Rect GetPreviewRect();
-
-    void UseCustomAnimation(bool useCustomAnimation);
-
-    bool IsUseCustomAnimation();
-
-    void SetUdKey(const std::string udKey);
-
-    std::string GetUdKey();
-
     void SetDragInfo(const RefPtr<UnifiedData>& dragInfo);
 
     RefPtr<UnifiedData>& GetDragInfo();
-
-    void SetCopy(bool copy);
-
-    bool IsCopy();
-
-    void SetIsGetDataSuccess(bool isGetDataSuccess);
-
-    bool IsGetDataSuccess();
 #endif
 
     void SetVelocity(const Velocity& velocity)
@@ -198,16 +238,16 @@ private:
     double y_ = 0.0;
     std::string description_;
     RefPtr<PixelMap> pixelMap_;
-#ifdef ENABLE_DRAG_FRAMEWORK
-    RefPtr<UnifiedData> unifiedData_;
     std::map<std::string, int64_t> summary_;
     std::string udKey_ = "";
     DragRet dragRet_ = DragRet::DRAG_DEFAULT;
     Rect previewRect_;
     bool useCustomAnimation_ = false;
     bool isGetDataSuccess_ = false;
-    RefPtr<UnifiedData> dragInfo_;
     bool copy_ = true;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    RefPtr<UnifiedData> unifiedData_;
+    RefPtr<UnifiedData> dragInfo_;
 #endif
     Velocity velocity_;
 };

@@ -75,6 +75,9 @@ struct TextConfig;
 #endif
 
 namespace OHOS::Ace::NG {
+
+enum class FocuseIndex { TEXT = 0, CANCEL, UNIT };
+
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
 enum class DragStatus { DRAGGING, ON_DROP, NONE };
@@ -169,6 +172,11 @@ public:
         }
     }
 
+    bool NeedSoftKeyboard() const override
+    {
+        return true;
+    }
+
     void OnModifyDone() override;
     void UpdateSelectionOffset();
     void CalcCaretMetricsByPosition(
@@ -178,12 +186,29 @@ public:
 
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
+    void UpdateAreaTextColor();
+    void UltralimitShake();
     void DeleteBackward(int32_t length) override;
     void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
+
+    WeakPtr<LayoutWrapper> GetCounterNode()
+    {
+        return counterTextNode_;
+    }
+
+    bool GetCounterState() const
+    {
+        return counterChange_;
+    }
+
+    void SetCounterState(bool counterChange)
+    {
+        counterChange_ = counterChange;
+    }
 
     float GetTextOrPlaceHolderFontSize();
 
@@ -869,11 +894,6 @@ public:
         return isCustomFont_;
     }
 
-    bool IsFocus()
-    {
-        return HasFocus();
-    }
-
     void SetISCounterIdealHeight(bool IsIdealHeight)
     {
         isCounterIdealheight_ = IsIdealHeight;
@@ -945,6 +965,12 @@ public:
         return showSelect_;
     }
 
+    bool UpdateFocusForward();
+
+    bool UpdateFocusBackward();
+
+    bool HandleSpaceEvent();
+
     RefPtr<PixelMap> GetPixelMap();
 
     void UpdateShowMagnifier(bool isShowMagnifier = false)
@@ -969,18 +995,19 @@ public:
         return localOffset_;
     }
 
-    int32_t GetCaretPosition()
-    {
-        return operationRecords_.back().caretPosition;
-    }
-
     int32_t GetContentWideTextLength()
     {
         return static_cast<int32_t>(contentController_->GetWideText().length());
     }
 
     void ShowMenu();
+    bool HasFocus() const;
+    void StopTwinkling();
 
+    const TimeStamp& GetLastClickTime()
+    {
+        return lastClickTimeStamp_;
+    }
 #ifdef ENABLE_DRAG_FRAMEWORK
 protected:
     virtual void InitDragEvent();
@@ -988,7 +1015,6 @@ protected:
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
-    bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
@@ -1016,6 +1042,7 @@ private:
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
+    void ChangeMouseState(const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId);
     void HandleMouseEvent(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);
     void HandleRightMouseEvent(MouseInfo& info);
@@ -1031,7 +1058,8 @@ private:
 
     void CursorMoveOnClick(const Offset& offset);
 
-    void ProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
+    void ProcessOverlay(
+        bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true, bool isHiddenHandle = false);
     void DelayProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
     SelectHandleInfo GetSelectHandleInfo(OffsetF info);
     void UpdateSelectOverlaySecondHandle(bool needLayout = false);
@@ -1062,7 +1090,6 @@ private:
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
     void StartTwinkling();
-    void StopTwinkling();
     void CheckIfNeedToResetKeyboard();
 
     float PreferredTextHeight(bool isPlaceholder, bool isAlgorithmMeasure = false);
@@ -1103,6 +1130,20 @@ private:
     void UpdateHandlesOffsetOnScroll(float offset);
     void CloseHandleAndSelect() override;
     bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex);
+    void PaintTextRect();
+    void PaintResponseAreaRect();
+    void PaintCancelRect();
+    void PaintUnitRect();
+    void PaintPasswordRect();
+    bool CancelNodeIsShow()
+    {
+        auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+        CHECK_NULL_RETURN(cleanNodeArea, false);
+        return cleanNodeArea->IsShow();
+    }
+    void CleanNodeResponseKeyEvent();
+    void PasswordResponseKeyEvent();
+    void UnitResponseKeyEvent();
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif
@@ -1166,6 +1207,9 @@ private:
     bool needToRequestKeyboardOnFocus_ = false;
     bool isTransparent_ = false;
     bool contChange_ = false;
+    bool counterChange_ = false;
+    WeakPtr<LayoutWrapper> counterTextNode_;
+    bool hasCounterMargin_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
@@ -1264,6 +1308,7 @@ private:
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
     CleanNodeStyle cleanNodeStyle_ = CleanNodeStyle::INVISIBLE;
+    FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
     bool isTouchCaret_ = false;

@@ -21,6 +21,7 @@
 #include <memory>
 #include <refbase.h>
 #include <list>
+#include <vector>
 
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
@@ -75,10 +76,14 @@ public:
     void SetModalOnRemoteReadyCallback(
     const std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)>&& callback);
     void SetOnRemoteReadyCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
-    void SetOnSyncOnCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
-    void SetOnAsyncOnCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
-    void SetOnSyncOffCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
-    void SetOnAsyncOffCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
+    void SetOnSyncOnCallbackList(
+        const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
+    void SetOnAsyncOnCallbackList(
+        const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
+    void SetOnSyncOffCallbackList(
+        const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
+    void SetOnAsyncOffCallbackList(
+        const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
     void SetOnReleaseCallback(const std::function<void(int32_t)>&& callback);
     void SetOnResultCallback(const std::function<void(int32_t, const AAFwk::Want&)>&& callback);
     void SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback);
@@ -108,21 +113,20 @@ public:
         int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
     virtual bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset) override;
-    virtual bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-        std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline) override;
 
     int32_t GetSessionId();
-
-    int32_t GetUiExtensionId() override;
-
-    int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId) override;
-    const RefPtr<FrameNode>& GetUiExtensionNode()
+    void SetModalFlag(bool isModal)
     {
-        return contentNode_;
+        isModal_ = isModal;
     }
 
+    int32_t GetUiExtensionId() override;
+    int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId) override;
+
     void OnAccessibilityEvent(
-        const Accessibility::AccessibilityEventInfo& info, std::vector<int32_t> uiExtensionIdLevelList);
+        const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList);
+
+    void HandleDragEvent(const PointerEvent& info) override;
 
 private:
     enum ReleaseCode {
@@ -183,8 +187,8 @@ private:
     std::function<void()> onModalDestroy_;
     std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onModalRemoteReadyCallback_;
     std::function<void(const RefPtr<UIExtensionProxy>&)> onRemoteReadyCallback_;
-    std::function<void(const RefPtr<UIExtensionProxy>&)> onSyncOnCallback_;
-    std::function<void(const RefPtr<UIExtensionProxy>&)> onAsyncOnCallback_;
+    std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList_;
+    std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onAsyncOnCallbackList_;
     std::function<void(int32_t)> onReleaseCallback_;
     std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
@@ -201,9 +205,9 @@ private:
 
     bool transferringCaller_ = false;
     bool isVisible_ = true;
+    bool isModal_ = false;
 
-    int32_t uiExtensionId_ = -1;
-    static thread_local int32_t currentUiExtensionId_;
+    int32_t uiExtensionId_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H

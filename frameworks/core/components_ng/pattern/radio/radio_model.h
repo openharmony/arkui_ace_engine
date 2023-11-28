@@ -40,6 +40,7 @@ public:
     virtual void SetOnChangeEvent(NG::ChangeEvent&& onChangeEvent) {};
     virtual void SetOnClickEvent(std::function<void()>&& onClick) {};
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) {};
+    virtual void SetHoverEffect(HoverEffectType hoverEffect) {};
 
 private:
     static std::unique_ptr<RadioModel> instance_;

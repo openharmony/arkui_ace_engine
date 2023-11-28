@@ -426,11 +426,6 @@ void TitleBarPattern::ProcessTitleDragEnd()
         } else if (GreatNotEqual(tempTitleBarHeight_, titleMiddleValue)) {
             AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_);
             enableAssociatedScroll_ = false;
-            CHECK_NULL_VOID(associatedScrollNode_);
-            auto scrollablePattern = associatedScrollNode_->GetPattern<ScrollablePattern>();
-            CHECK_NULL_VOID(scrollablePattern);
-            scrollablePattern->StopAnimate();
-            scrollablePattern->AnimateTo(0, DEFAULT_ANIMATION_DURATION, Curves::FAST_OUT_SLOW_IN, false);
             return;
         }
     }
@@ -772,6 +767,8 @@ void TitleBarPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_TOP, .type = SAFE_AREA_TYPE_SYSTEM };
+    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
 void TitleBarPattern::ResetAssociatedScroll()
@@ -791,9 +788,8 @@ void TitleBarPattern::ResetAssociatedScroll()
     SetMaxTitleBarHeight();
 }
 
-bool TitleBarPattern::UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node)
+bool TitleBarPattern::UpdateAssociatedScrollOffset(float offset)
 {
-    associatedScrollNode_ = node;
     if (!enableAssociatedScroll_) {
         return true;
     }

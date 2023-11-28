@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@
 #include "frameworks/base/utils/system_properties.h"
 #include "parameters.h"
 #include "image_source.h"
+#include "display_manager.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
@@ -273,7 +274,7 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) { return; };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
     PanDirection panDirection;
-    panDirection.type = PanDirection::VERTICAL;
+    panDirection.type = PanDirection::ALL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
@@ -1118,6 +1119,11 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     drawSizeCache_ = drawSize_;
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     delegate_->SetBoundsOrResize(drawSize_, offset);
+    if (isOfflineMode_) {
+        isOfflineMode_ = false;
+        OnWindowShow();
+    }
+
     // first update size to load url.
     if (!isUrlLoaded_) {
         isUrlLoaded_ = true;
@@ -1487,6 +1493,8 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
         delegate_->SetPopup(isPopup_);
         delegate_->SetParentNWebId(parentNWebId_);
+        accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
+        delegate_->UpdateAccessibilityState(accessibilityState_);
         delegate_->SetBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         if (isEnhanceSurface_) {
@@ -1496,6 +1504,8 @@ void WebPattern::OnModifyDone()
         } else {
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
+            int32_t instanceId = Container::CurrentId();
+            renderSurface_->SetInstanceId(instanceId);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (type_ == WebType::TEXTURE) {
                 renderSurface_->SetIsTexture(true);
@@ -1557,6 +1567,9 @@ void WebPattern::OnModifyDone()
         }
         isAllowWindowOpenMethod_ = SystemProperties::GetAllowWindowOpenMethodEnabled();
         delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
+        if (!webAccessibilityNode_) {
+            webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(host);
+        }
     }
 
     // Initialize events such as keyboard, focus, etc.
@@ -1574,6 +1587,42 @@ void WebPattern::OnModifyDone()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddOnAreaChangeNode(host->GetId());
+
+    // offline mode
+    if (!host->IsOnMainTree()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "Web offline mode type");
+        isOfflineMode_ = true;
+        OfflineMode();
+    }
+}
+
+void WebPattern::OfflineMode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int width = 0;
+    int height = 0;
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto& calcLayout = layoutProperty->GetCalcLayoutConstraint();
+    if (calcLayout) {
+        width = calcLayout->selfIdealSize ?
+            calcLayout->selfIdealSize->Width()->GetDimension().ConvertToPx() : 0;
+        height = calcLayout->selfIdealSize ?
+            calcLayout->selfIdealSize->Height()->GetDimension().ConvertToPx() : 0;
+    }
+    bool isUnSetSize = (width == 0) && (height == 0);
+    auto defaultDisplay = OHOS::Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (isUnSetSize && defaultDisplay) {
+        width = defaultDisplay->GetWidth();
+        height = defaultDisplay->GetHeight();
+    }
+    Size drawSize = Size(width, height);
+    Offset offset = Offset(0, 0);
+    delegate_->SetBoundsOrResize(drawSize, offset);
+    isUrlLoaded_ = true;
+    delegate_->LoadUrl();
+    OnWindowHide();
 }
 
 bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard)
@@ -2099,7 +2148,7 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
             item.label, ""
         });
     }
-    auto menu = MenuView::Create(selectParam, id);
+    auto menu = MenuView::Create(selectParam, id, host->GetTag());
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto eventHub = host->GetEventHub<WebEventHub>();
@@ -2525,6 +2574,7 @@ ScrollResult WebPattern::HandleScroll(float offset, int32_t source, NestedState 
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::HandleScroll offset = %{public}f", offset);
     auto parent = parent_.Upgrade();
     if (parent) {
+        source = isMouseEvent_ ? SCROLL_FROM_AXIS : source;
         return parent->HandleScroll(offset, source, state);
     }
     return { 0.0f, false };
@@ -2534,11 +2584,9 @@ bool WebPattern::HandleScrollVelocity(float velocity)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::HandleScrollVelocity velocity = %{public}f", velocity);
     auto parent = parent_.Upgrade();
-    if (parent) {
-        if (parent->HandleScrollVelocity(velocity)) {
-            TAG_LOGI(AceLogTag::ACE_WEB, "Parent component successfully called HandleScrollVelocity");
-            return true;
-        }
+    if (parent && parent->HandleScrollVelocity(velocity)) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "Parent component successfully called HandleScrollVelocity");
+        return true;
     }
     return false;
 }
@@ -2565,17 +2613,18 @@ void WebPattern::OnScrollEndRecursive()
 void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
 {
     float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
-    if (nestedScrollMode_ != NestedScrollMode::SELF_FIRST) {
-        return;
-    }
-    if (isFling) {
-        if (velocity != 0 && isFirstFlingScrollVelocity_) {
-            HandleScrollVelocity(velocity);
-            isFirstFlingScrollVelocity_ = false;
+    if (!isFling) {
+        if (scrollState_ && ((velocity < 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST) ||
+                                (velocity > 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST))) {
+            HandleScroll(-velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         }
     } else {
-        if (scrollState_) {
-            HandleScroll(-velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        if (((velocity > 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST) ||
+                (velocity < 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST))) {
+            if (isFirstFlingScrollVelocity_) {
+                HandleScrollVelocity(velocity);
+                isFirstFlingScrollVelocity_ = false;
+            }
         }
     }
 }
@@ -2633,35 +2682,31 @@ void WebPattern::OnRootLayerChanged(int width, int height)
 
 void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
 {
-    if (nestedOpt.forward == NestedScrollMode::SELF_ONLY &&
-        nestedOpt.backward == NestedScrollMode::SELF_ONLY) {
-        nestedScrollMode_ = NestedScrollMode::SELF_ONLY;
-    } else if (nestedOpt.forward == NestedScrollMode::SELF_FIRST &&
-               nestedOpt.backward == NestedScrollMode::SELF_FIRST) {
-        nestedScrollMode_ = NestedScrollMode::SELF_FIRST;
-    } else if (nestedOpt.forward == NestedScrollMode::PARENT_FIRST &&
-               nestedOpt.backward == NestedScrollMode::PARENT_FIRST) {
-        nestedScrollMode_ = NestedScrollMode::PARENT_FIRST;
-    } else if (nestedOpt.forward == NestedScrollMode::PARALLEL &&
-               nestedOpt.backward == NestedScrollMode::PARALLEL) {
-        nestedScrollMode_ = NestedScrollMode::PARALLEL;
-    }
-    TAG_LOGD(AceLogTag::ACE_WEB, "SetNestedScroll %{public}d", nestedScrollMode_);
+    nestedScrollForwardMode_ = nestedOpt.forward;
+    nestedScrollBackwardMode_ = nestedOpt.backward;
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "SetNestedScroll  nestedScrollForwardMode_ = %{public}d, nestedScrollBackwardMode_ = %{public}d",
+        nestedScrollForwardMode_, nestedScrollBackwardMode_);
 }
 
 bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
     float offset = GetAxis() == Axis::HORIZONTAL ? x : y;
     float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
-    if (nestedScrollMode_ == NestedScrollMode::PARENT_FIRST) {
+    if (((offset > 0 || velocity > 0) && nestedScrollForwardMode_ == NestedScrollMode::PARENT_FIRST) ||
+        ((offset < 0 || velocity < 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARENT_FIRST)) {
         if (offset != 0) {
             auto result = HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
             TAG_LOGD(AceLogTag::ACE_WEB, "FilterScrollEvent ScrollBy remainOffset = %{public}f", result.remain);
-            return NearZero(result.remain);
+            CHECK_NULL_RETURN(delegate_, false);
+            GetAxis() == Axis::HORIZONTAL ? delegate_->ScrollBy(-result.remain, 0)
+                                          : delegate_->ScrollBy(0, -result.remain);
+            return true;
         } else {
             return HandleScrollVelocity(velocity);
         }
-    } else if (nestedScrollMode_ == NestedScrollMode::PARALLEL) {
+    } else if (((offset > 0 || velocity > 0) && nestedScrollForwardMode_ == NestedScrollMode::PARALLEL) ||
+               ((offset < 0 || velocity < 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARALLEL)) {
         if (offset != 0) {
             HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         } else {
@@ -2788,6 +2833,67 @@ void WebPattern::UpdateJavaScriptOnDocumentStart()
     if (delegate_ && scriptItems_.has_value()) {
         delegate_->SetJavaScriptItems(scriptItems_.value());
         scriptItems_ = std::nullopt;
+    }
+}
+
+RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeById(int32_t accessibilityId)
+{
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
+    auto& info = webAccessibilityNode_->GetAccessibilityNodeInfo();
+    if (!delegate_->GetAccessibilityNodeInfoById(accessibilityId, info)) {
+        return nullptr;
+    }
+    SetSelfAsParentOfWebCoreNode(info);
+    return webAccessibilityNode_;
+}
+
+RefPtr<WebAccessibilityNode> WebPattern::GetFocusedAccessibilityNode(int32_t accessibilityId, bool isAccessibilityFocus)
+{
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
+    auto& info = webAccessibilityNode_->GetAccessibilityNodeInfo();
+    if (!delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus, info)) {
+        return nullptr;
+    }
+    SetSelfAsParentOfWebCoreNode(info);
+    return webAccessibilityNode_;
+}
+
+RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeByFocusMove(int32_t accessibilityId, int32_t direction)
+{
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
+    auto& info = webAccessibilityNode_->GetAccessibilityNodeInfo();
+    if (!delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction, info)) {
+        return nullptr;
+    }
+    SetSelfAsParentOfWebCoreNode(info);
+    return webAccessibilityNode_;
+}
+
+
+void WebPattern::ExecuteAction(int32_t nodeId, AceAction action) const
+{
+    CHECK_NULL_VOID(delegate_);
+    delegate_->ExecuteAction(nodeId, action);
+}
+
+void WebPattern::SetAccessibilityState(bool state)
+{
+    CHECK_NULL_VOID(delegate_);
+    if (accessibilityState_ != state) {
+        accessibilityState_ = state;
+        delegate_->SetAccessibilityState(state);
+    }
+}
+
+void WebPattern::SetSelfAsParentOfWebCoreNode(NWeb::NWebAccessibilityNodeInfo& info) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (info.parentId == -1) { // root node of web core
+        info.parentId = host->GetAccessibilityId();
     }
 }
 } // namespace OHOS::Ace::NG

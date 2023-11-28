@@ -42,7 +42,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->color_ = themeConstants->GetColor(THEME_FOCUSANIMATION_COLOR);
             auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {
                 return theme;

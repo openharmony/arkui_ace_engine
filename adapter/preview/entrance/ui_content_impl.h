@@ -41,6 +41,8 @@ public:
 
     // UI content lifeCycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
+    void Initialize(OHOS::Rosen::Window* window,
+        const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override {}
     void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override {}
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override {}
@@ -69,6 +71,7 @@ public:
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override {}
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override {}
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override {}
+    void UpdateTitleInTargetPos(bool isShow, int32_t height) override {}
 
     // Window color
     uint32_t GetBackgroundColor() override;

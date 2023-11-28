@@ -81,4 +81,6 @@ void DrawBuffer() {}
 
 void ConsumeXComponentBuffer() {}
 
+void RosenRenderSurface::DrawBufferForXComponent(RSCanvas& canvas, float width, float height) {}
+
 } // namespace OHOS::Ace::NG

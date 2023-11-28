@@ -1,3 +1,4 @@
+/// <reference path="./import.ts" />
 const COLOR_WITH_MAGIC = /#[0-9A-Fa-f]{6,8}/;
 const COLOR_WITH_MAGIC_MINI = /#[0-9A-Fa-f]{3,4}/;
 const COLOR_WITH_RGB = /rgb\(([0-9]{1,3})\,([0-9]{1,3})\,([0-9]{1,3})\)/i;
@@ -13,7 +14,7 @@ const MIN_COLOR_STR_LEN = 8;
 const HEX_DECIMAL = 16;
 
 class ArkColor implements Equable{
-    private color: number | undefined;
+    color: number | undefined;
 
     constructor() {
         this.color = undefined;
@@ -23,7 +24,10 @@ class ArkColor implements Equable{
         return (this.color === another.color);
     }
 
-    parseColorValue(value: number | string | undefined) {
+    parseColorValue(value: number | string | undefined | Resource) {
+        if(isResource(value)){
+            return false;
+        }
         if (typeof value === "number") {
             return this.parseColorUint(value);
         } else if (typeof value === "string") {
@@ -31,8 +35,8 @@ class ArkColor implements Equable{
         } else if (value === undefined) {
             this.color = value;
             return true;
-        }
-        return false;
+        } 
+        return false;        
     }
 
     parseColorString(colorStr: string) {

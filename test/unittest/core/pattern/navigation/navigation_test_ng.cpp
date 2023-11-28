@@ -76,6 +76,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+constexpr Dimension DEFAULT_NAVBAR_WIDTH = 240.0_vp;
 constexpr int32_t TEST_DATA = 10;
 const std::string NAVIGATION_TITLE = "NavigationTestNg";
 const std::string TEST_TAG = "test";
@@ -835,7 +836,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_013, TestSize.Level1)
      * @tc.steps: step2. check pattern->preNavBarWidth_.
      * @tc.expected: preNavBarWidth_ is correct.
      */
-    EXPECT_EQ(pattern->preNavBarWidth_, 360.0);
+    EXPECT_EQ(pattern->preNavBarWidth_, static_cast<float>(DEFAULT_NAVBAR_WIDTH.ConvertToPx()));
     pattern->preNavBarWidth_ = 0;
     pattern->HandleDragUpdate(FLOAT_260);
     EXPECT_EQ(pattern->realNavBarWidth_, 0.0);
@@ -1220,7 +1221,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     navigationLayoutAlgorithm->navigationMode_ = NavigationMode::SPLIT;
     layout->propHideNavBar_ = true;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    ASSERT_FALSE(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_.has_value());
+    EXPECT_EQ(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_.value(), VisibleType::INVISIBLE);
 }
 
 /**
@@ -2444,20 +2445,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0014, TestSize.Level1)
     ASSERT_NE(backButtonNode2->renderContext_, nullptr);
     navigation->BackButtonAnimation(backButtonNode2, false);
     navigation->BackButtonAnimation(backButtonNode2, true);
-
-    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
-        "titleBarNode", 124, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    navDestination->titleBarNode_ = titleBarNode;
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-
-    auto backButtonNode = FrameNode::CreateFrameNode("backButtonNode22", 125, AceType::MakeRefPtr<ButtonPattern>());
-    titleBarNode->backButton_ = backButtonNode;
-    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    navigation->SetBackButtonVisible(navDestination);
-    ASSERT_EQ(backButtonLayoutProperty->propVisibility_.value(), VisibleType::VISIBLE);
-
-    navigation->SetBackButtonVisible(navDestination, false);
-    ASSERT_EQ(backButtonLayoutProperty->propVisibility_.value(), VisibleType::GONE);
 }
 
 /**
@@ -2984,33 +2971,31 @@ HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest001, T
     /**
      * @tc.steps: step1. create navigation.
      */
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
     RefPtr<TitleBarPattern> titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
     titleBarPattern->enableAssociatedScroll_ = true;
-    titleBarPattern->UpdateAssociatedScrollOffset(DEFAULT_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(DEFAULT_TITLE_BAR_OFFSET);
     EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
 
     titleBarPattern->enableAssociatedScroll_ = false;
-    titleBarPattern->UpdateAssociatedScrollOffset(DEFAULT_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(DEFAULT_TITLE_BAR_OFFSET);
     EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
 
     titleBarPattern->enableAssociatedScroll_ = true;
-    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_LARGE_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_LARGE_TITLE_BAR_OFFSET);
     EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
 
     titleBarPattern->enableAssociatedScroll_ = true;
     titleBarPattern->dragScrolling_ = true;
     titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
     titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
-    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET);
     EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
 
     titleBarPattern->enableAssociatedScroll_ = true;
     titleBarPattern->dragScrolling_ = true;
     titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
     titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
-    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET);
     EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
 }
 
@@ -3024,8 +3009,6 @@ HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest002, T
     /**
      * @tc.steps: step1. create navigation.
      */
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
     RefPtr<TitleBarPattern> titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
 
     titleBarPattern->enableAssociatedScroll_ = true;
@@ -3034,7 +3017,7 @@ HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest002, T
     titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
     titleBarPattern->defaultTitleBarHeight_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
     titleBarPattern->maxTitleBarHeight_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
-    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET);
     EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
 
     titleBarPattern->enableAssociatedScroll_ = true;
@@ -3042,7 +3025,7 @@ HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest002, T
     titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
     titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
     titleBarPattern->maxTitleBarHeight_ = MAX_TITLE_BAR_HEIGHT;
-    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET);
     EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
 }
 
@@ -3056,8 +3039,6 @@ HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest003, T
     /**
      * @tc.steps: step1. create navigation.
      */
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
     RefPtr<TitleBarPattern> titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
 
     titleBarPattern->enableAssociatedScroll_ = true;
@@ -3066,7 +3047,7 @@ HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest003, T
     titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
     titleBarPattern->defaultTitleBarHeight_ = DEFAULT_TITLE_BAR_HEIGHT;
     titleBarPattern->maxTitleBarHeight_ = NEGATIVE_MAX_TITLE_BAR_HEIGHT;
-    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET);
     EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
 
     titleBarPattern->enableAssociatedScroll_ = true;
@@ -3075,7 +3056,7 @@ HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest003, T
     titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
     titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
     titleBarPattern->maxTitleBarHeight_ = NEGATIVE_MAX_TITLE_BAR_HEIGHT;
-    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET, frameNode);
+    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET);
     EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
 }
 
@@ -3189,7 +3170,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
     ASSERT_NE(navigationNode, nullptr);
     auto pattern = navigationNode->GetPattern<NavigationPattern>();
     auto stack = pattern->GetNavigationStack();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.add page A to stack
@@ -3199,7 +3180,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     navigationPattern->SetNavigationMode(NavigationMode::STACK);
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.replace page A in stack
@@ -3207,17 +3188,17 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
     RefPtr<FrameNode> replaceNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
     stack->Remove();
     stack->Add("B", replaceNode);
-    stack->UpdateIsReplace(true);
-    ASSERT_TRUE(stack->IsReplace());
+    stack->UpdateReplaceValue(1);
+    ASSERT_EQ(stack->GetReplaceValue(), 1);
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.push A
      */
     stack->Add("C", frameNode);
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
 
 HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
@@ -3235,7 +3216,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
     ASSERT_NE(navigationNode, nullptr);
     auto pattern = navigationNode->GetPattern<NavigationPattern>();
     auto stack = pattern->GetNavigationStack();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.add page A to stack
@@ -3246,7 +3227,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     navigationPattern->SetNavigationMode(NavigationMode::STACK);
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.replace page A in stack
@@ -3254,17 +3235,17 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
     RefPtr<FrameNode> replaceNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
     stack->Remove();
     stack->Add("B", replaceNode);
-    stack->UpdateIsReplace(true);
-    ASSERT_TRUE(stack->IsReplace());
+    stack->UpdateReplaceValue(1);
+    ASSERT_EQ(stack->GetReplaceValue(), 1);
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step3.pop page B
      */
     stack->Remove();
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
 
 HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
@@ -3282,7 +3263,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
     ASSERT_NE(navigationNode, nullptr);
     auto pattern = navigationNode->GetPattern<NavigationPattern>();
     auto stack = pattern->GetNavigationStack();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.add page A to stack
@@ -3293,7 +3274,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     navigationPattern->SetNavigationMode(NavigationMode::STACK);
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.replace page A in stack
@@ -3301,16 +3282,16 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
     RefPtr<FrameNode> replaceNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
     stack->Remove();
     stack->Add("B", replaceNode);
-    stack->UpdateIsReplace(true);
-    ASSERT_TRUE(stack->IsReplace());
+    stack->UpdateReplaceValue(1);
+    ASSERT_EQ(stack->GetReplaceValue(), 1);
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step3.pop page B
      */
     stack->Clear();
     navigationPattern->OnModifyDone();
-    ASSERT_FALSE(stack->IsReplace());
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
 } // namespace OHOS::Ace::NG

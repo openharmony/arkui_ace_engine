@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 
+
 #if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
@@ -27,6 +28,7 @@
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 #include "core/common/container.h"
 #include "core/components/image/image_event.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -91,13 +93,18 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     }
 
     std::string src;
-    if (!ParseJsMedia(args[0], src)) {
+    if (args[0]->IsString()) {
+        src = args[0]->ToString();
+    } else if (!ParseJsMedia(args[0], src)) {
         return;
     }
     if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
         return;
     }
-    ImageModel::GetInstance()->SetAlt(src);
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(args[0], bundleName, moduleName);
+    ImageModel::GetInstance()->SetAlt(ImageSourceInfo { src, bundleName, moduleName });
 }
 
 void JSImage::SetObjectFit(int32_t value)
@@ -163,9 +170,11 @@ void JSImage::OnFinish(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(tmpInfo));
-    auto onFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Image.onFinish");
+        PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
     ImageModel::GetInstance()->SetSvgAnimatorFinishEvent(onFinish);

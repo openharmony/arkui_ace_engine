@@ -47,21 +47,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->height_ = themeConstants->GetDimension(THEME_SEARCH_DEFAULT_HEIGHT);
-            theme->placeholderColor_ = themeConstants->GetColor(THEME_SEARCH_PLACEHOLDER_COLOR);
-            theme->focusPlaceholderColor_ = themeConstants->GetColor(THEME_SEARCH_FOCUS_PLACEHOLDER_COLOR);
-            theme->textColor_ = themeConstants->GetColor(THEME_SEARCH_TEXT_COLOR);
-            theme->focusTextColor_ = themeConstants->GetColor(THEME_SEARCH_FOCUS_TEXT_COLOR);
-            theme->fontSize_ = themeConstants->GetDimension(THEME_SEARCH_FONT_SIZE);
-            theme->iconSize_ = themeConstants->GetDimension(THEME_SEARCH_ICON_SIZE);
-            theme->closeIconSize_ = themeConstants->GetDimension(THEME_SEARCH_CLOSE_ICON_SIZE);
-            theme->closeIconHotZoneSize_ = themeConstants->GetDimension(THEME_SEARCH_CLOSE_ICON_HOT_ZONE_HORIZONTAL);
-            theme->textFieldWidthReserved_ = theme->closeIconHotZoneSize_;
-            theme->leftPadding_ = themeConstants->GetDimension(THEME_SEARCH_TEXT_FIELD_PADDING_LEFT);
-            theme->rightPadding_ = themeConstants->GetDimension(THEME_SEARCH_TEXT_FIELD_PADDING_RIGHT);
-            theme->fontWeight_ = FontWeight(themeConstants->GetInt(THEME_SEARCH_FONT_WEIGHT));
-            theme->borderRadius_ = Radius(themeConstants->GetDimension(THEME_SEARCH_TEXT_FIELD_BORDER_RADIUS));
-            theme->blockRightShade_ = themeConstants->GetInt(THEME_SEARCH_BLOCK_RIGHT_SHADE);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -77,6 +62,17 @@ public:
                 LOGW("find pattern of search fail");
                 return;
             }
+            theme->height_ = pattern->GetAttr<Dimension>("search_default_height", 0.0_vp);
+            theme->iconSize_ = pattern->GetAttr<Dimension>("search_icon_size", 0.0_vp);
+            theme->closeIconSize_ = pattern->GetAttr<Dimension>("search_close_icon_size", 0.0_vp);
+            theme->closeIconHotZoneSize_ =
+                pattern->GetAttr<Dimension>("search_close_icon_hot_zone_horizontal", 0.0_vp);
+            theme->textFieldWidthReserved_ = theme->closeIconHotZoneSize_;
+            theme->leftPadding_ = pattern->GetAttr<Dimension>("search_text_field_padding_left", 0.0_vp);
+            theme->rightPadding_ = pattern->GetAttr<Dimension>("search_text_field_padding_right", 0.0_vp);
+            theme->fontWeight_ = FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("search_font_weight", 0.0)));
+            theme->borderRadius_ = Radius(pattern->GetAttr<Dimension>("search_text_field_border_radius", 0.0_vp));
+            theme->blockRightShade_ = static_cast<int32_t>(pattern->GetAttr<double>("search_block_right_shade", 0.0));
             theme->placeholderColor_ = pattern->GetAttr<Color>("tips_text_color", Color());
             theme->focusPlaceholderColor_ = pattern->GetAttr<Color>("tips_text_color_focused", Color());
             theme->textColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());

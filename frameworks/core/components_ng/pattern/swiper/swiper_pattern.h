@@ -319,6 +319,18 @@ public:
         }
     }
 
+    void UpdateAnimationEndEvent(AnimationEndEvent&& event)
+    {
+        if (!animationEndEvent_) {
+            animationEndEvent_ = std::make_shared<AnimationEndEvent>(event);
+            auto eventHub = GetEventHub<SwiperEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->AddAnimationEndEvent(animationEndEvent_);
+        } else {
+            (*animationEndEvent_).swap(event);
+        }
+    }
+
     void SetSwiperParameters(const SwiperParameters& swiperParameters)
     {
         swiperParameters_ = std::make_shared<SwiperParameters>(swiperParameters);
@@ -458,6 +470,16 @@ public:
             SetLazyLoadFeature(true);
         }
         cachedCount_ = cachedCount;
+    }
+
+    void SetFinishCallbackType(FinishCallbackType finishCallbackType)
+    {
+        finishCallbackType_ = finishCallbackType;
+    }
+
+    FinishCallbackType GetFinishCallbackType() const
+    {
+        return finishCallbackType_;
     }
 
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
@@ -613,6 +635,12 @@ private:
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
 
     /**
+     * @brief Stops animations when the scroll starts.
+     *
+     * @param flushImmediately Whether to flush layout immediately.
+     */
+    void StopAnimationOnScrollStart(bool flushImmediately);
+    /**
      * @brief Checks if the animation is currently running.
      *
      * @return true if the animation is running, false otherwise.
@@ -643,6 +671,13 @@ private:
 
     void OnScrollStartRecursive(float position) override;
     void OnScrollEndRecursive() override;
+
+    /**
+     * @brief Notifies the parent component that the scroll has started at the specified position.
+     *
+     * @param position The position where the scroll has started.
+     */
+    void NotifyParentScrollStart(float position);
     /**
      * @brief Notifies the parent NestableScrollContainer that the scroll has ended.
      */
@@ -703,6 +738,9 @@ private:
     bool indicatorIsBoolean_ = true;
     bool isAtHotRegion_ = false;
     bool isDragging_ = false;
+    /**
+     * @brief Indicates whether the child NestableScrollContainer is currently scrolling and affecting Swiper.
+     */
     bool childScrolling_ = false;
     bool isTouchDown_ = false;
     std::optional<bool> preLoop_;
@@ -711,6 +749,7 @@ private:
 
     ChangeEventPtr changeEvent_;
     ChangeEventPtr onIndexChangeEvent_;
+    AnimationEndEventPtr animationEndEvent_;
 
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;
     mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
@@ -759,6 +798,7 @@ private:
 
     WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
+    FinishCallbackType finishCallbackType_ = FinishCallbackType::REMOVED;
 };
 } // namespace OHOS::Ace::NG
 

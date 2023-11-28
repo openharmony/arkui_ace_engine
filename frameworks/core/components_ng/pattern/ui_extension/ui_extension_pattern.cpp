@@ -26,6 +26,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
+#include "base/geometry/offset.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -97,6 +98,7 @@ public:
     void OnAccessibilityEvent(
         const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList) override
     {
+        ContainerScope scope(instanceId_);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto taskExecutor = pipeline->GetTaskExecutor();
@@ -115,13 +117,26 @@ private:
     WeakPtr<UIExtensionPattern> uiExtensionPattern_;
 };
 
-thread_local int32_t UIExtensionPattern::currentUiExtensionId_ = 1;
-
-UIExtensionPattern::UIExtensionPattern() : uiExtensionId_(currentUiExtensionId_++)
-{}
+UIExtensionPattern::UIExtensionPattern()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_VOID(ngPipeline);
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionId_ = uiExtensionManager->ApplyExtensionId();
+}
 
 UIExtensionPattern::~UIExtensionPattern()
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_VOID(ngPipeline);
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionManager->RecycleExtensionId(uiExtensionId_);
     DestorySession();
 }
 
@@ -201,6 +216,7 @@ void UIExtensionPattern::OnConnect()
     host->AddChild(contentNode_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->CreateNodeInRenderThread();
+    surfaceNode->SetForeground(isModal_);
     auto pipeline = PipelineBase::GetCurrentContext();
     auto weak = WeakClaim(this);
     auto pattern = weak.Upgrade();
@@ -221,10 +237,9 @@ void UIExtensionPattern::OnConnect()
 }
 
 void UIExtensionPattern::OnAccessibilityEvent(
-    const Accessibility::AccessibilityEventInfo& info, std::vector<int32_t> uiExtensionIdLevelList)
+    const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList)
 {
     CHECK_RUN_ON(UI);
-    LOGI("UIExtension OnAccessibilityEvent called");
     CHECK_NULL_VOID(session_);
     ContainerScope scope(instanceId_);
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
@@ -234,14 +249,15 @@ void UIExtensionPattern::OnAccessibilityEvent(
     if (ngPipeline) {
         auto window = container->GetUIWindow(instanceId_);
         CHECK_NULL_VOID(window);
-        if (window->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
-            uiExtensionIdLevelList.insert(uiExtensionIdLevelList.begin(), uiExtensionId_);
-        }
+        std::vector<int32_t> uiExtensionIdLevelListNew;
+        uiExtensionIdLevelListNew.assign(uiExtensionIdLevelList.begin(), uiExtensionIdLevelList.end());
+        uiExtensionIdLevelListNew.insert(uiExtensionIdLevelListNew.begin(), uiExtensionId_);
         auto frontend = container->GetFrontend();
         CHECK_NULL_VOID(frontend);
         auto accessibilityManager = frontend->GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
         if (accessibilityManager) {
-            accessibilityManager->SendAccessibilitySyncEvent(info, uiExtensionIdLevelList);
+            accessibilityManager->SendAccessibilitySyncEvent(info, uiExtensionIdLevelListNew);
         }
     }
 }
@@ -502,6 +518,7 @@ bool UIExtensionPattern::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
+        DisPatchFocusActiveEvent(true);
         // tab trigger consume the key event
         return pipeline->IsTabJustTriggerOnKeyEvent();
     } else {
@@ -607,6 +624,33 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
     DispatchPointerEvent(pointerEvent);
 }
 
+void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
+{
+    const auto pointerEvent = info.rawPointerEvent;
+    CHECK_NULL_VOID(pointerEvent);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selfGlobalOffset = host->GetTransformRelativeOffset();
+    auto scale = host->GetTransformScale();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto window = static_cast<RosenWindow*>(pipeline->GetWindow());
+    CHECK_NULL_VOID(window);
+    auto rsWindow = window->GetRSWindow();
+    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
+    if (rsWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
+        Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
+    } else {
+        Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
+    }
+    Offset touchOffsetToWindow {info.windowX, info.windowY};
+    Offset touchOffsetToFrameNode {info.displayX, info.displayY};
+    auto rectToWindow = host->GetTransformRectRelativeToWindow();
+    UpdateTextFieldManager(
+        { rectToWindow.GetOffset().GetX(), rectToWindow.GetOffset().GetY() }, rectToWindow.Height());
+    DispatchPointerEvent(pointerEvent);
+}
+
 void UIExtensionPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -653,9 +697,10 @@ void UIExtensionPattern::SetOnRemoteReadyCallback(const std::function<void(const
         };
 }
 
-void UIExtensionPattern::SetOnSyncOnCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
+void UIExtensionPattern::SetOnSyncOnCallbackList(
+    const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList)
 {
-    onSyncOnCallback_ = std::move(callback);
+    onSyncOnCallbackList_ = std::move(callbackList);
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -668,16 +713,22 @@ void UIExtensionPattern::SetOnSyncOnCallback(const std::function<void(const RefP
             taskExecutor->PostTask([weak, instanceId]() {
                 ContainerScope scope(instanceId);
                 auto pattern = weak.Upgrade();
-                if (pattern && pattern->onSyncOnCallback_) {
-                    pattern->onSyncOnCallback_(MakeRefPtr<UIExtensionProxy>(pattern->session_, pattern));
+                if (!pattern) {
+                    return;
+                }
+                for (const auto& callback : pattern->onSyncOnCallbackList_) {
+                    if (callback) {
+                        callback(MakeRefPtr<UIExtensionProxy>(pattern->session_, pattern));
+                    }
                 }
             }, TaskExecutor::TaskType::UI);
         };
 }
 
-void UIExtensionPattern::SetOnAsyncOnCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
+void UIExtensionPattern::SetOnAsyncOnCallbackList(
+    const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList)
 {
-    onAsyncOnCallback_ = std::move(callback);
+    onAsyncOnCallbackList_ = std::move(callbackList);
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -690,37 +741,28 @@ void UIExtensionPattern::SetOnAsyncOnCallback(const std::function<void(const Ref
             taskExecutor->PostTask([weak, instanceId]() {
                 ContainerScope scope(instanceId);
                 auto pattern = weak.Upgrade();
-                if (pattern && pattern->onAsyncOnCallback_) {
-                    pattern->onAsyncOnCallback_(MakeRefPtr<UIExtensionProxy>(pattern->session_, pattern));
+                if (!pattern) {
+                    return;
+                }
+                for (const auto& callback : pattern->onAsyncOnCallbackList_) {
+                    if (callback) {
+                        callback(MakeRefPtr<UIExtensionProxy>(pattern->session_, pattern));
+                    }
                 }
             }, TaskExecutor::TaskType::UI);
         };
 }
 
-void UIExtensionPattern::SetOnSyncOffCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
+void UIExtensionPattern::SetOnSyncOffCallbackList(
+    const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList)
 {
-    onSyncOnCallback_ = std::move(callback);
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
-    extSessionEventCallback->notifySyncOnFunc_ = nullptr;
+    onSyncOnCallbackList_ = std::move(callbackList);
 }
 
-void UIExtensionPattern::SetOnAsyncOffCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
+void UIExtensionPattern::SetOnAsyncOffCallbackList(
+    const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList)
 {
-    onAsyncOnCallback_ = std::move(callback);
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
-    extSessionEventCallback->notifyAsyncOnFunc_ = nullptr;
+    onAsyncOnCallbackList_ = std::move(callbackList);
 }
 
 void UIExtensionPattern::SetModalOnRemoteReadyCallback(
@@ -934,16 +976,6 @@ void UIExtensionPattern::FocusMoveSearch(int32_t elementId, int32_t direction,
 {
     CHECK_NULL_VOID(session_);
     session_->TransferFocusMoveSearch(elementId, direction, baseParent, output);
-}
-
-bool UIExtensionPattern::SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-    std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline)
-{
-    auto instanceId = pipeline->GetInstanceId();
-    auto window = Platform::AceContainer::GetUIWindow(instanceId);
-    CHECK_NULL_RETURN(window, false);
-    OHOS::Rosen::WMError ret = window->TransferAccessibilityEvent(eventInfo, uiExtensionIdLevelList);
-    return ret == OHOS::Rosen::WMError::WM_OK;
 }
 
 void UIExtensionPattern::ProcessUIExtensionSessionActivationResult(OHOS::Rosen::WSError errcode)

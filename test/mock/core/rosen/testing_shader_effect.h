@@ -20,6 +20,7 @@
 
 #include "testing_color.h"
 #include "testing_point.h"
+#include "testing_matrix.h"
 
 namespace OHOS::Ace::Testing {
 enum class TileMode {
@@ -35,7 +36,7 @@ public:
 
     static std::shared_ptr<TestingShaderEffect> CreateSweepGradient(const TestingPoint& /* centerPt */,
         const std::vector<uint32_t>& /* colors */, const std::vector<float>& /* pos */, TileMode /* mode */,
-        float /* startAngle */, float /* endAngle */)
+        float /* startAngle */, float /* endAngle */, const TestingMatrix *)
     {
         return std::make_shared<TestingShaderEffect>();
     }

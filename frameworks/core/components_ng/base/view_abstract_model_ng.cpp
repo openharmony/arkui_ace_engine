@@ -27,6 +27,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -60,6 +61,8 @@ void ViewAbstractModelNG::BindMenu(
     std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+    auto targetId = targetNode->GetId();
 #ifdef ENABLE_DRAG_FRAMEWORK
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -67,7 +70,22 @@ void ViewAbstractModelNG::BindMenu(
     CHECK_NULL_VOID(pipelineContext);
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-
+    auto menuNode = overlayManager->GetMenuNode(targetId);
+    if (menuNode) {
+        auto pattern = menuNode->GetPattern<MenuWrapperPattern>();
+        if (!pattern->GetShow() && menuParam.isShow) {
+            overlayManager->ShowMenu(targetId, menuParam.positionOffset, menuNode);
+        } else if (pattern->GetShow() && menuParam.setShow && !menuParam.isShow) {
+            overlayManager->HideMenu(menuNode, targetId, false);
+        }
+    } else if (menuParam.isShow) {
+        if (!params.empty()) {
+            NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
+        } else if (buildFunc) {
+            std::function<void()> previewBuildFunc;
+            CreateCustomMenu(buildFunc, targetNode, menuParam.positionOffset, previewBuildFunc, menuParam);
+        }
+    }
     GestureEventFunc showMenu;
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
     if (!params.empty()) {
@@ -100,14 +118,35 @@ void ViewAbstractModelNG::BindMenu(
     gestureHub->BindMenu(std::move(showMenu));
 
     // delete menu when target node destroy
-    auto destructor = [id = targetNode->GetId()]() {
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->DeleteMenu(id);
-    };
-    targetNode->PushDestroyCallback(destructor);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto expandDisplay = theme->GetExpandDisplay();
+    if (!expandDisplay) {
+        auto destructor = [id = targetNode->GetId()]() {
+            auto pipeline = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->DeleteMenu(id);
+        };
+        targetNode->PushDestroyCallback(destructor);
+    } else {
+        auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+            CHECK_NULL_VOID(subwindow);
+            auto childContainerId = subwindow->GetChildContainerId();
+            auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+            CHECK_NULL_VOID(childContainer);
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->DeleteMenu(id);
+        };
+        targetNode->PushDestroyCallback(destructor);
+    }
 }
 
 void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void()>& buildFunc,
@@ -124,6 +163,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             auto containerId = Container::CurrentId();
             auto taskExecutor = Container::CurrentTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
+            info.SetStopPropagation(true);
             taskExecutor->PostTask(
                 [containerId, builder = builderF, weakTarget, menuParam, info]() mutable {
                     auto targetNode = weakTarget.Upgrade();
@@ -138,7 +178,6 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                         std::function<void()> previewBuildFunc;
                         NG::ViewAbstractModelNG::CreateCustomMenu(
                             builder, targetNode, menuPosition, previewBuildFunc, menuParam);
-                        info.SetStopPropagation(true);
                     }
                 },
                 TaskExecutor::TaskType::PLATFORM);
@@ -363,5 +402,28 @@ void ViewAbstractModelNG::SetAccessibilityImportance(const std::string& importan
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->SetAccessibilityLevel(importance);
+}
+
+void ViewAbstractModelNG::SetAccessibilityText(FrameNode* frameNode, const std::string& text)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityText(text);
+}
+
+void ViewAbstractModelNG::SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel(importance);
+}
+
+void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, const std::string& description)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityDescription(description);
 }
 } // namespace OHOS::Ace::NG

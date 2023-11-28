@@ -95,4 +95,44 @@ void PatternLockModelNG::SetStrokeWidth(const Dimension& lineWidth)
     ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, PathStrokeWidth, lineWidth);
 }
 
+void PatternLockModelNG::SetActiveColor(FrameNode* frameNode, const Color& activeColor)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveColor, activeColor, frameNode);
+}
+
+void PatternLockModelNG::SetCircleRadius(FrameNode* frameNode, const Dimension& radius)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, CircleRadius, radius, frameNode);
+}
+
+void PatternLockModelNG::SetSelectedColor(FrameNode* frameNode, const Color& selectedColor)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, SelectedColor, selectedColor, frameNode);
+}
+
+void PatternLockModelNG::SetSideLength(FrameNode* frameNode, const Dimension& sideLength)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(PatternLockLayoutProperty, SideLength, sideLength, frameNode);
+}
+
+void PatternLockModelNG::SetAutoReset(FrameNode* frameNode, bool isAutoReset)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, AutoReset, isAutoReset, frameNode);
+}
+
+void PatternLockModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& lineWidth)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, PathStrokeWidth, lineWidth, frameNode);
+}
+
+void PatternLockModelNG::SetRegularColor(FrameNode* frameNode, const Color& regularColor)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, RegularColor, regularColor, frameNode);
+}
+
+void PatternLockModelNG::SetPathColor(FrameNode* frameNode, const Color& pathColor)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, PathColor, pathColor, frameNode);
+}
+
 } // namespace OHOS::Ace::NG

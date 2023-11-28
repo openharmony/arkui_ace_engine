@@ -68,6 +68,7 @@ public:
         paintMethod->SetIsOnAnimationFlag(isOnAnimationFlag_);
         paintMethod->SetTouchHoverAnimationType(touchHoverType_);
         paintMethod->SetIsFirstCreated(isFirstCreated_);
+        paintMethod->SetShowHoverEffect(showHoverEffect_);
         isFirstCreated_ = false;
         return paintMethod;
     }
@@ -119,9 +120,21 @@ public:
         isUserSetResponseRegion_ = isUserSetResponseRegion;
     }
 
+    void SetShowHoverEffect(bool showHoverEffect)
+    {
+        showHoverEffect_ = showHoverEffect;
+    }
+
     FocusPattern GetFocusPattern() const override;
 
     void UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode);
+
+    void MarkIsSelected(bool isSelected);
+
+    void SetSelected(bool isSelected)
+    {
+        preCheck_ = isSelected;
+    }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
@@ -157,6 +170,8 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
+    void SetAccessibilityAction();
+    void UpdateSelectStatus(bool isSelected);
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -183,6 +198,7 @@ private:
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     bool isOnAnimationFlag_ = false;
     bool isUserSetResponseRegion_ = false;
+    bool showHoverEffect_ = true;
 
     RefPtr<RadioModifier> radioModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);

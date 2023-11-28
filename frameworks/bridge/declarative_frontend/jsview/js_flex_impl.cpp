@@ -28,12 +28,10 @@ namespace OHOS::Ace::Framework {
 void JSFlexImpl::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGD("No input args, use default row setting");
         FlexModel::GetInstance()->CreateFlexRow();
         return;
     }
     if (!info[0]->IsObject()) {
-        LOGD("arg is not a object, use default row setting");
         FlexModel::GetInstance()->CreateFlexRow();
         return;
     }
@@ -157,7 +155,6 @@ void JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal
 void JSFlexImpl::JsFlexWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -173,7 +170,6 @@ void JSFlexImpl::JsFlexWidth(const JSRef<JSVal>& jsValue)
 void JSFlexImpl::JsFlexHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -189,12 +185,10 @@ void JSFlexImpl::JsFlexHeight(const JSRef<JSVal>& jsValue)
 void JSFlexImpl::JsFlexSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
         return;
     }
 
@@ -226,6 +220,7 @@ void JSFlexImpl::JSBind(BindingTarget globalObj)
     JSClass<JSFlexImpl>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSFlexImpl>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSFlexImpl>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSFlexImpl>::StaticMethod("pointLight", &JSViewAbstract::JsPointLight, opt);
     JSClass<JSFlexImpl>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

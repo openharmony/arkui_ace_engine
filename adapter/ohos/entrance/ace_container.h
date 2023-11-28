@@ -32,12 +32,17 @@
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
+#include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/pipeline/pipeline_context.h"
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
+}
+
+namespace OHOS::Ace {
+class FontManager;
 }
 
 namespace OHOS::Ace::Platform {
@@ -50,10 +55,11 @@ struct ParsedConfig {
     std::string languageTag;
     std::string direction;
     std::string densitydpi;
+    std::string themeTag;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
-                 densitydpi.empty());
+                 densitydpi.empty() && themeTag.empty());
     }
 };
 
@@ -228,6 +234,11 @@ public:
         return resourceInfo_.GetHapPath();
     }
 
+    const ResourceInfo& GetResourceInfo() const
+    {
+        return resourceInfo_;
+    }
+
     void SetHapPath(const std::string& hapPath);
 
     void Dispatch(
@@ -250,6 +261,10 @@ public:
     void DumpHeapSnapshot(bool isPrivate) override;
 
     void SetLocalStorage(NativeReference* storage, NativeReference* context);
+
+    bool ParseThemeConfig(const std::string& themeConfig);
+
+    void CheckAndSetFontFamily();
 
     void OnFinish()
     {
@@ -317,6 +332,8 @@ public:
         }
     }
 
+    bool IsTransparentBg() const;
+
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool useNewPipeline = false);
@@ -324,6 +341,8 @@ public:
     static void DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback = nullptr);
     static bool RunPage(
         int32_t instanceId, const std::string& content, const std::string& params, bool isNamedRouter = false);
+    static bool RunPage(
+        int32_t instanceId, const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params);
     static bool PushPage(int32_t instanceId, const std::string& content, const std::string& params);
     static bool OnBackPressed(int32_t instanceId);
     static void OnShow(int32_t instanceId);
@@ -451,36 +470,39 @@ public:
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         StopDragCallback&& stopDragCallback) override;
-    
+
     bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
 
-    static void SearchElementInfoByAccessibilityIdNG(
-        int32_t instanceId, int32_t elementId, int32_t mode,
-        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void SearchElementInfoByAccessibilityIdNG(
+        int32_t elementId, int32_t mode, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output);
 
-    static void SearchElementInfosByTextNG(
-        int32_t instanceId, int32_t elementId, const std::string& text,
-        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output);
-    
-    static void FindFocusedElementInfoNG(
-        int32_t instanceId, int32_t elementId, int32_t focusType,
-        int32_t baseParent, Accessibility::AccessibilityElementInfo& output);
+    void SearchElementInfosByTextNG(
+        int32_t elementId, const std::string& text, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output);
 
-    static void FocusMoveSearchNG(
-        int32_t instanceId, int32_t elementId, int32_t direction,
-        int32_t baseParent, Accessibility::AccessibilityElementInfo& output);
-    
-    static bool NotifyExecuteAction(
-        int32_t instanceId, int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+    void FindFocusedElementInfoNG(
+        int32_t elementId, int32_t focusType, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& output);
+
+    void FocusMoveSearchNG(
+        int32_t elementId, int32_t direction, int32_t baseParent,
+        Accessibility::AccessibilityElementInfo& output);
+
+    bool NotifyExecuteAction(
+        int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset);
-    
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
     void InitializeCallback();
     void InitializeTask();
     void InitWindowCallback();
+    bool IsFontFileExistInPath(std::string path);
+    std::string GetFontFamilyName(std::string path);
+    bool endsWith(std::string str, std::string suffix);
 
     void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
         uint32_t windowId, UIEnvCallback callback = nullptr);

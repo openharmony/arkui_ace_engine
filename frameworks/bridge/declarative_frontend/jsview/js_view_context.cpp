@@ -22,12 +22,14 @@
 #include "base/log/ace_trace.h"
 #include "base/log/jank_frame_report.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 
 #ifdef USE_ARK_ENGINE
@@ -145,34 +147,33 @@ bool CheckIfSetFormAnimationDuration(const RefPtr<PipelineBase>& pipelineContext
 } // namespace
 
 const AnimationOption JSViewContext::CreateAnimation(
-    const std::unique_ptr<JsonValue>& animationArgs, const std::function<float(float)>& jsFunc, bool isForm)
+    const JSRef<JSObject>& animationArgs, const std::function<float(float)>& jsFunc, bool isForm)
 {
     AnimationOption option = AnimationOption();
-    if (!animationArgs) {
-        return option;
-    }
     // If the attribute does not exist, the default value is used.
-    auto duration = animationArgs->GetInt("duration", DEFAULT_DURATION);
-    auto delay = animationArgs->GetInt("delay", 0);
-    auto iterations = animationArgs->GetInt("iterations", 1);
-    auto tempo = animationArgs->GetDouble("tempo", 1.0);
+    auto duration = animationArgs->GetPropertyValue<int32_t>("duration", DEFAULT_DURATION);
+    auto delay = animationArgs->GetPropertyValue<int32_t>("delay", 0);
+    auto iterations = animationArgs->GetPropertyValue<int32_t>("iterations", 1);
+    auto tempo = animationArgs->GetPropertyValue<double>("tempo", 1.0);
     if (SystemProperties::GetRosenBackendEnabled() && NearZero(tempo)) {
         // set duration to 0 to disable animation.
         duration = 0;
     }
-    auto direction = StringToAnimationDirection(animationArgs->GetString("playMode", "normal"));
-    auto finishCallbackType = static_cast<FinishCallbackType>(animationArgs->GetInt("finishCallbackType", 0));
+    auto direction = StringToAnimationDirection(animationArgs->GetPropertyValue<std::string>("playMode", "normal"));
+    auto finishCallbackType = static_cast<FinishCallbackType>(
+        animationArgs->GetPropertyValue<int32_t>("finishCallbackType", 0));
     RefPtr<Curve> curve;
-    auto curveArgs = animationArgs->GetValue("curve");
+    auto curveArgs = animationArgs->GetProperty("curve");
     if (curveArgs->IsString()) {
-        curve = CreateCurve(animationArgs->GetString("curve", DOM_ANIMATION_TIMING_FUNCTION_EASE_IN_OUT));
+        curve = CreateCurve(animationArgs->GetPropertyValue<std::string>("curve",
+            DOM_ANIMATION_TIMING_FUNCTION_EASE_IN_OUT));
     } else if (curveArgs->IsObject()) {
-        auto curveString = curveArgs->GetValue("__curveString");
-        if (!curveString) {
+        JSRef<JSVal> curveString = JSRef<JSObject>::Cast(curveArgs)->GetProperty("__curveString");
+        if (!curveString->IsString()) {
             // Default AnimationOption which is invalid.
             return option;
         }
-        auto aniTimFunc = curveString->GetString();
+        auto aniTimFunc = curveString->ToString();
 
         std::string customFuncName(DOM_ANIMATION_TIMING_FUNCTION_CUSTOM);
         if (aniTimFunc == customFuncName) {
@@ -218,9 +219,14 @@ std::function<float(float)> ParseCallBackFunction(const JSRef<JSObject>& obj)
         JSRef<JSObject> curveobj = JSRef<JSObject>::Cast(curveVal);
         JSRef<JSVal> onCallBack = curveobj->GetProperty("__curveCustomFunc");
         if (onCallBack->IsFunction()) {
+            WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
             RefPtr<JsFunction> jsFuncCallBack =
                 AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
-            customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId()](float time) -> float {
+            customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId(), node = frameNode]
+                (float time) -> float {
+                auto pipelineContext = PipelineContext::GetCurrentContext();
+                CHECK_NULL_RETURN(pipelineContext, 1.0f);
+                pipelineContext->UpdateCurrentActiveNode(node);
                 ContainerScope scope(id);
                 JSRef<JSVal> params[1];
                 params[0] = JSRef<JSVal>::Make(ToJSValue(time));
@@ -263,21 +269,22 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentId()]() {
+                            id = Container::CurrentId(), node = frameNode]() mutable {
+            CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
             func->Execute();
+            func = nullptr;
         };
     }
-    auto animationArgs = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (animationArgs->IsNull()) {
-        ViewContextModel::GetInstance()->closeAnimation(option, false);
-        return;
-    }
 
-    option = CreateAnimation(animationArgs, ParseCallBackFunction(obj), pipelineContextBase->IsFormRender());
+    option = CreateAnimation(obj, ParseCallBackFunction(obj), pipelineContextBase->IsFormRender());
     if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
         option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase))) {
         option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase));
@@ -328,12 +335,18 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     std::function<void()> onFinishEvent;
     auto traceStreamPtr = std::make_shared<std::stringstream>();
     if (onFinish->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentId(), traceStreamPtr]() {
+                            id = Container::CurrentId(), traceStreamPtr, node = frameNode]() mutable {
+            CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
             func->Execute();
+            func = nullptr;
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     } else {
@@ -342,13 +355,8 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         };
     }
 
-    auto animationArgs = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (animationArgs->IsNull()) {
-        return;
-    }
-
     AnimationOption option =
-        CreateAnimation(animationArgs, ParseCallBackFunction(obj), pipelineContext->IsFormRender());
+        CreateAnimation(obj, ParseCallBackFunction(obj), pipelineContext->IsFormRender());
     *traceStreamPtr << "AnimateTo, Options"
                     << " duration:" << option.GetDuration()
                     << ",iteration:" << option.GetIteration()

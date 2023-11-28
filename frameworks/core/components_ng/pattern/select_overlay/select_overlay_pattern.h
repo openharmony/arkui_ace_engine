@@ -160,6 +160,8 @@ public:
 
     void BeforeCreateLayoutWrapper() override;
 
+    void StartHiddenHandleTask(bool isDelay = true);
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void UpdateHandleHotZone();
@@ -175,7 +177,6 @@ private:
     void HandlePanCancel();
 
     void CheckHandleReverse();
-    void StartHiddenHandleTask();
     void StopHiddenHandleTask();
     void HiddenHandle();
     void AddMenuResponseRegion(std::vector<DimensionRect>& responseRegion);
