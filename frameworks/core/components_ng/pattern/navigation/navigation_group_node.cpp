@@ -770,17 +770,11 @@ void NavigationGroupNode::TransitionWithReplace(
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 auto curNode = weakNode.Upgrade();
                 CHECK_NULL_VOID(curNode);
-                if (curNode->GetRenderContext()) {
-                    curNode->GetRenderContext()->UpdateOpacity(1.0f);
-                }
-                if (curNode->GetEventHub<EventHub>()) {
-                    curNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
-                }
                 auto navigationNode = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigationNode);
                 navigationNode->isOnAnimation_ = false;
                 navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-                navigationNode->DealNavigationExit(weakNode.Upgrade(), isNavBar);
+                navigationNode->DealNavigationExit(curNode, isNavBar);
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
                 context->MarkNeedFlushMouseEvent();
@@ -789,7 +783,6 @@ void NavigationGroupNode::TransitionWithReplace(
     });
     preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
     curNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
-    preNode->GetRenderContext()->UpdateOpacity(1.0f);
     curNode->GetRenderContext()->UpdateOpacity(0.0f);
     if (!isNavBar) {
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
@@ -799,9 +792,8 @@ void NavigationGroupNode::TransitionWithReplace(
     }
     AnimationUtils::Animate(
         option,
-        [preNode, curNode]() {
+        [curNode]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
-            preNode->GetRenderContext()->UpdateOpacity(0.0f);
             curNode->GetRenderContext()->UpdateOpacity(1.0f);
         },
         option.GetOnFinishEvent());
