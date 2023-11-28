@@ -350,4 +350,81 @@ void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
 {
     ViewAbstract::SetOnDrop(std::move(onDrop));
 }
+
+void TextModelNG::SetTextCase(FrameNode* frameNode, Ace::TextCase value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value, frameNode);
+}
+
+void TextModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, value, frameNode);
+}
+
+void TextModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMinFontSize, value, frameNode);
+}
+
+void TextModelNG::SetDraggable(FrameNode* frameNode, bool draggable)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDraggable(draggable);
+}
+
+void TextModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMaxFontSize, value, frameNode);
+}
+
+void TextModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value, frameNode);
+}
+
+void TextModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions copyOption)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption, frameNode);
+}
+
+void TextModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value, frameNode);
+}
+
+void TextModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, HeightAdaptivePolicy, value, frameNode);
+}
+
+void TextModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextIndent, value, frameNode);
+}
+
+void TextModelNG::SetBaselineOffset(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, BaselineOffset, value, frameNode);
+}
+
+void TextModelNG::SetFont(FrameNode* frameNode, const Font& value)
+{
+    if (value.fontSize.has_value()) {
+        SetFontSize(frameNode, value.fontSize.value());
+    }
+    if (value.fontWeight.has_value()) {
+        SetFontWeight(frameNode, value.fontWeight.value());
+    }
+    if (!value.fontFamilies.empty()) {
+        SetFontFamily(frameNode, value.fontFamilies);
+    }
+    if (value.fontStyle.has_value()) {
+        SetItalicFontStyle(frameNode, value.fontStyle.value());
+    }
+}
+
+void TextModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LetterSpacing, value, frameNode);
+}
 } // namespace OHOS::Ace::NG

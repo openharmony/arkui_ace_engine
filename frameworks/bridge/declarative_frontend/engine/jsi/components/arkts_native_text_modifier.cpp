@@ -14,6 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_modifier.h"
 
+#include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -27,9 +28,22 @@ constexpr Dimension DEFAULT_LINE_HEIGHT = Dimension(0.0, DimensionUnit::PX);
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr TextCase DEFAULT_TEXT_CASE = TextCase::NORMAL;
+constexpr uint32_t DEFAULT_MAX_LINE = Infinity<uint32_t>();
+constexpr bool DEFAULT_TEXT_DRAGGABLE = false;
+constexpr Dimension DEFAULT_MAX_FONT_SIZE = Dimension(10.0, DimensionUnit::FP);
+constexpr Dimension DEFAULT_MIN_FONT_SIZE = Dimension(1.0, DimensionUnit::FP);
+constexpr CopyOptions DEFAULT_COPY_OPTION = CopyOptions::None;
+constexpr Dimension DEFAULT_BASELINE_OFFSET = 0.0_fp;
+constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
+constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
+constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
+const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 const std::vector<OHOS::Ace::TextAlign> TEXT_ALIGNS = { OHOS::Ace::TextAlign::START, OHOS::Ace::TextAlign::CENTER,
     OHOS::Ace::TextAlign::END, OHOS::Ace::TextAlign::JUSTIFY, OHOS::Ace::TextAlign::LEFT, OHOS::Ace::TextAlign::RIGHT };
+const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
+    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 
 FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
 {
@@ -177,11 +191,286 @@ void ResetTextDecoration(NodeHandle node)
     TextModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
 }
 
+void SetTextTextCase(NodeHandle node, int32_t value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextCase(frameNode, static_cast<TextCase>(value));
+}
+
+void ResetTextTextCase(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextCase(frameNode, DEFAULT_TEXT_CASE);
+}
+
+void SetTextMaxLines(NodeHandle node, uint32_t maxLine)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetMaxLines(frameNode, maxLine);
+}
+
+void ResetTextMaxLines(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetMaxLines(frameNode, DEFAULT_MAX_LINE);
+}
+
+void SetTextMinFontSize(NodeHandle node, struct StringAndDouble* info)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension fontSize;
+
+    if (info->valueStr != nullptr) {
+        fontSize = StringUtils::StringToCalcDimension(info->valueStr, false, DimensionUnit::FP);
+    } else {
+        fontSize = CalcDimension(info->value, DimensionUnit::FP);
+    }
+    TextModelNG::SetAdaptMinFontSize(frameNode, fontSize);
+}
+
+void ReSetTextMinFontSize(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetAdaptMinFontSize(frameNode, DEFAULT_MIN_FONT_SIZE);
+}
+
+void SetTextDraggable(NodeHandle node, uint32_t draggable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetDraggable(frameNode, static_cast<bool>(draggable));
+}
+
+void ResetTextDraggable(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetDraggable(frameNode, DEFAULT_TEXT_DRAGGABLE);
+}
+
+void SetTextMaxFontSize(NodeHandle node, struct StringAndDouble* info)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension fontSize;
+
+    if (info->valueStr != nullptr) {
+        fontSize = StringUtils::StringToCalcDimension(info->valueStr, false, DimensionUnit::FP);
+    } else {
+        fontSize = CalcDimension(info->value, DimensionUnit::FP);
+    }
+    TextModelNG::SetAdaptMaxFontSize(frameNode, fontSize);
+}
+
+void ResetTextMaxFontSize(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetAdaptMaxFontSize(frameNode, DEFAULT_MAX_FONT_SIZE);
+}
+
+void SetTextFontFamily(NodeHandle node, const char** fontFamilies, uint32_t length)
+{
+    CHECK_NULL_VOID(fontFamilies);
+    if (length <= 0) {
+        return;
+    }
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<std::string> families;
+    for (uint32_t i = 0; i < length; i++) {
+        const char* family = *(fontFamilies + i);
+        if (family != nullptr) {
+            families.emplace_back(std::string(family));
+        }
+    }
+    TextModelNG::SetFontFamily(frameNode, families);
+}
+
+void ResetTextFontFamily(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<std::string> families;
+    families.emplace_back(DEFAULT_FAMILY);
+    TextModelNG::SetFontFamily(frameNode, families);
+}
+
+void SetTextCopyOption(NodeHandle node, const int32_t copyOption)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetCopyOption(frameNode, static_cast<CopyOptions>(copyOption));
+}
+
+void ResetTextCopyOption(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetCopyOption(frameNode, DEFAULT_COPY_OPTION);
+}
+
+void SetTextTextShadow(NodeHandle node, struct TextShadowStruct* shadows, uint32_t length)
+{
+    CHECK_NULL_VOID(shadows);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<Shadow> shadowList(length);
+    for (uint32_t i = 0; i < length; i++) {
+        Shadow shadow;
+        TextShadowStruct* shadowStruct = shadows + i;
+        shadow.SetBlurRadius(shadowStruct->radius);
+        shadow.SetColor(Color(shadowStruct->color));
+        shadow.SetOffsetX(shadowStruct->offsetX);
+        shadow.SetOffsetY(shadowStruct->offsetY);
+        shadow.SetIsFilled(static_cast<bool>(shadowStruct->fill));
+        shadowList.emplace_back(shadow);
+    }
+    TextModelNG::SetTextShadow(frameNode, shadowList);
+}
+
+void ResetTextTextShadow(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Shadow shadow;
+    shadow.SetOffsetX(0.0);
+    shadow.SetOffsetY(0.0);
+    TextModelNG::SetTextShadow(frameNode, std::vector<Shadow> { shadow });
+}
+
+void SetTextHeightAdaptivePolicy(NodeHandle node, int32_t value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetHeightAdaptivePolicy(frameNode, HEIGHT_ADAPTIVE_POLICY[value]);
+}
+
+void ResetTextHeightAdaptivePolicy(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetHeightAdaptivePolicy(frameNode, TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+}
+
+void SetTextTextIndent(NodeHandle node, const struct StringAndDouble* textIndentStruct)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension result;
+    if (textIndentStruct->valueStr != nullptr) {
+        result = StringUtils::StringToCalcDimension(textIndentStruct->valueStr, true, DimensionUnit::FP);
+    } else {
+        result = CalcDimension(textIndentStruct->value, DimensionUnit::FP);
+    }
+    TextModelNG::SetTextIndent(frameNode, result);
+}
+
+void ResetTextTextIndent(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::FP));
+}
+
+void SetTextBaselineOffset(NodeHandle node, const struct StringAndDouble* offset)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension result(offset->value, DimensionUnit::FP);
+    if (offset->valueStr != nullptr) {
+        result = StringUtils::StringToCalcDimension(offset->valueStr, false, DimensionUnit::FP);
+    }
+    TextModelNG::SetBaselineOffset(frameNode, result);
+}
+
+void ResetTextBaselineOffset(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetBaselineOffset(frameNode, DEFAULT_BASELINE_OFFSET);
+}
+
+void SetTextLetterSpacing(NodeHandle node, const struct StringAndDouble* letterSpacingStruct)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    CalcDimension letterSpacing;
+    if (letterSpacingStruct->valueStr != nullptr) {
+        if (std::string(letterSpacingStruct->valueStr).back() == '%') {
+            TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
+            return;
+        } else {
+            letterSpacing = StringUtils::StringToCalcDimension(
+                std::string(letterSpacingStruct->valueStr), false, DimensionUnit::PX);
+        }
+    } else {
+        letterSpacing = CalcDimension(letterSpacingStruct->value, DimensionUnit::VP);
+    }
+    TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
+}
+
+void ResetTextLetterSpacing(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension letterSpacing(0.0, DimensionUnit::FP);
+    TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
+}
+
+void SetTextFont(NodeHandle node,
+    const struct StringAndDouble* size, const char* weight, const char* family, int32_t style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Font font;
+    CalcDimension fontSize;
+    if (size->valueStr != nullptr) {
+        fontSize = StringUtils::StringToCalcDimension(size->valueStr, true, DimensionUnit::FP);
+    } else {
+        fontSize = CalcDimension(size->value, DimensionUnit::FP);
+    }
+    font.fontSize = fontSize;
+    font.fontWeight = Framework::ConvertStrToFontWeight(weight);
+    if (family == nullptr) {
+        font.fontFamilies.clear();
+        font.fontFamilies.emplace_back(DEFAULT_FAMILY);
+    } else {
+        font.fontFamilies = Framework::ConvertStrToFontFamilies(family);
+    }
+    font.fontStyle = static_cast<Ace::FontStyle>(style);
+    TextModelNG::SetFont(frameNode, font);
+}
+
+void ResetTextFont(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Font font;
+    font.fontSize = DEFAULT_FONT_SIZE;
+    font.fontWeight = DEFAULT_FONT_WEIGHT;
+    font.fontStyle = DEFAULT_FONT_STYLE;
+    TextModelNG::SetFont(frameNode, font);
+}
+
 ArkUITextModifierAPI GetTextModifier()
 {
     static const ArkUITextModifierAPI modifier = { SetFontWeight, ResetFontWeight, SetFontStyle, ResetFontStyle,
         SetTextAlign, ResetTextAlign, SetFontColor, ResetFontColor, SetFontSize, ResetFontSize, SetTextLineHeight,
-        ResetTextLineHeight, SetTextTextOverflow, ResetTextTextOverflow, SetTextDecoration, ResetTextDecoration };
+        ResetTextLineHeight, SetTextTextOverflow, ResetTextTextOverflow, SetTextDecoration, ResetTextDecoration,
+        SetTextTextCase, ResetTextTextCase, SetTextMaxLines, ResetTextMaxLines, SetTextMinFontSize,
+        ReSetTextMinFontSize, SetTextDraggable, ResetTextDraggable, SetTextMaxFontSize, ResetTextMaxFontSize,
+        SetTextFontFamily, ResetTextFontFamily, SetTextCopyOption, ResetTextCopyOption, SetTextTextShadow,
+        ResetTextTextShadow, SetTextHeightAdaptivePolicy, ResetTextHeightAdaptivePolicy, SetTextTextIndent,
+        ResetTextTextIndent, SetTextBaselineOffset, ResetTextBaselineOffset, SetTextLetterSpacing,
+        ResetTextLetterSpacing, SetTextFont, ResetTextFont };
 
     return modifier;
 }

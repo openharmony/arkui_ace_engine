@@ -28,6 +28,14 @@ struct StringAndDouble {
     const char *valueStr;
 };
 
+struct TextShadowStruct {
+    double radius;
+    uint32_t color;
+    double offsetX;
+    double offsetY;
+    uint32_t fill;
+};
+
 typedef void* NodeHandle;
 struct ArkUICommonModifierAPI {
     void (*SetBackgroundColor)(NodeHandle node, uint32_t color);
@@ -182,6 +190,33 @@ struct ArkUITextModifierAPI {
     void (*ResetTextTextOverflow)(NodeHandle node);
     void (*SetTextDecoration)(NodeHandle node, const int32_t decoration, const uint32_t color, const int32_t style);
     void (*ResetTextDecoration)(NodeHandle node);
+    void (*SetTextTextCase)(NodeHandle node, int32_t value);
+    void (*ResetTextTextCase)(NodeHandle node);
+    void (*SetTextMaxLines)(NodeHandle node, uint32_t maxLine);
+    void (*ResetTextMaxLines)(NodeHandle node);
+    void (*SetTextMinFontSize)(NodeHandle node, struct StringAndDouble* minFontSize);
+    void (*ReSetTextMinFontSize)(NodeHandle node);
+    void (*SetTextDraggable)(NodeHandle node, uint32_t draggable);
+    void (*ResetTextDraggable)(NodeHandle node);
+    void (*SetTextMaxFontSize)(NodeHandle node, struct StringAndDouble* maxFontSize);
+    void (*ResetTextMaxFontSize)(NodeHandle node);
+    void (*SetTextFontFamily)(NodeHandle node, const char** fontFamilies, uint32_t length);
+    void (*ResetTextFontFamily)(NodeHandle node);
+    void (*SetTextCopyOption)(NodeHandle node, const int32_t copyOption);
+    void (*ResetTextCopyOption)(NodeHandle node);
+    void (*SetTextTextShadow)(NodeHandle node, struct TextShadowStruct* shadows, uint32_t length);
+    void (*ResetTextTextShadow)(NodeHandle node);
+    void (*SetTextHeightAdaptivePolicy)(NodeHandle node, int32_t value);
+    void (*ResetTextHeightAdaptivePolicy)(NodeHandle node);
+    void (*SetTextTextIndent)(NodeHandle node, const struct StringAndDouble* value);
+    void (*ResetTextTextIndent)(NodeHandle node);
+    void (*SetTextBaselineOffset)(NodeHandle node, const struct StringAndDouble* offset);
+    void (*ResetTextBaselineOffset)(NodeHandle node);
+    void (*SetTextLetterSpacing)(NodeHandle node, const struct StringAndDouble* letterSpacingStruct);
+    void (*ResetTextLetterSpacing)(NodeHandle node);
+    void (*SetTextFont)(
+        NodeHandle node, const struct StringAndDouble* size, const char* weight, const char* family, int32_t style);
+    void (*ResetTextFont)(NodeHandle node);
 };
 
 struct ArkUIButtonModifierAPI {
