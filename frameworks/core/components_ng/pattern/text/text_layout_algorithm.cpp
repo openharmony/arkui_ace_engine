@@ -415,8 +415,10 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         if (index >= placeholderIndex.size() ||
             (index >= rectsForPlaceholders.size() && child->GetHostTag() != V2::PLACEHOLDER_SPAN_ETS_TAG)) {
-            return;
+            child->SetActive(false);
+            continue;
         }
+        child->SetActive(true);
         auto rect = rectsForPlaceholders.at(index);
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
