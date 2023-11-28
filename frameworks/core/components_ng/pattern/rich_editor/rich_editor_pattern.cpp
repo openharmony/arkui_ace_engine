@@ -482,6 +482,7 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPa
     auto spanItem = spanNode->GetSpanItem();
     spanItem->content = options.value;
     spanItem->SetTextStyle(options.style);
+    spanItem->hasResourceFontColor = options.hasResourceFontColor;
     AddSpanItem(spanItem, offset);
     if (options.paraStyle) {
         int32_t start = 0;
@@ -1952,6 +1953,33 @@ bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
 }
 #endif
 
+void RichEditorPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& spans = host->GetChildren();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+    for (auto span : spans) {
+        auto spanNode = DynamicCast<SpanNode>(span);
+        if (!spanNode) {
+            continue;
+        }
+        auto spanItem = spanNode->GetSpanItem();
+        if (!spanItem) {
+            continue;
+        }
+        if (spanItem->hasResourceFontColor) {
+            spanNode->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+        }
+    }
+}
+
 void RichEditorPattern::UpdateCaretInfoToController()
 {
     CHECK_NULL_VOID(HasFocus());
@@ -2225,6 +2253,7 @@ void RichEditorPattern::CreateTextSpanNode(
     spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     spanNode->MountToParent(host, info.GetSpanIndex());
     auto spanItem = spanNode->GetSpanItem();
+    spanItem->hasResourceFontColor = true;
     AddSpanItem(spanItem, info.GetSpanIndex());
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
         UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
@@ -3275,12 +3304,14 @@ void RichEditorPattern::ShowSelectOverlay(
 
         pattern->UpdateSelectMenuInfo(hasData, selectInfo, isCopyAll);
 
-        selectInfo.menuCallback.onCopy = [weak]() {
+        selectInfo.menuCallback.onCopy = [weak, usingMouse]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->HandleOnCopy();
             pattern->CloseSelectOverlay();
-            pattern->ResetSelection();
+            if (!usingMouse) {
+                pattern->ResetSelection();
+            }
         };
 
         selectInfo.menuCallback.onCut = [weak]() {
@@ -3741,15 +3772,16 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     int32_t currentPosition = paragraphs_.GetIndex(pos);
     currentPosition = std::min(currentPosition, GetTextContentLength());
     int32_t nextPosition = currentPosition + GetGraphemeClusterLength(GetWideText(), currentPosition);
+    auto wideTextWidth = static_cast<int32_t>(GetWideText().length());
     // if \n char is between current and next position, it's necessary to move selection
     // range one char ahead to reserve handle at the current line
-    if ((currentPosition < GetTextContentLength() && currentPosition > 0 &&
+    if ((currentPosition < std::min(GetTextContentLength(), wideTextWidth) && currentPosition > 0 &&
             GetWideText().substr(currentPosition, 1) == WIDE_NEWLINE)) {
         nextPosition = std::max(currentPosition - GetGraphemeClusterLength(GetWideText(), currentPosition, true), 0);
         std::swap(currentPosition, nextPosition);
     } else if (currentPosition == 0 && GetWideText().substr(currentPosition, 1) == WIDE_NEWLINE) {
         nextPosition = 0;
-    } else if (currentPosition == GetTextContentLength() && currentPosition > 0 &&
+    } else if (currentPosition == std::min(GetTextContentLength(), wideTextWidth) && currentPosition > 0 &&
                GetWideText().substr(currentPosition - 1, 1) == WIDE_NEWLINE &&
                LessOrEqual(pos.GetY(), contentRect_.Height() + contentRect_.GetY())) {
         // if caret at last position and prev char is \n, set selection to the char before \n

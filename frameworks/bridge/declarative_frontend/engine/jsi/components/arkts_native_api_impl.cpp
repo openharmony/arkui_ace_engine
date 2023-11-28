@@ -35,6 +35,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_toggle_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_radio_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rating_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_search_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_select_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_stack_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_slider_modifier.h"
@@ -47,6 +48,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_navigation_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_nav_router_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_navigator_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_column_split_modifier.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/pipeline/base/element_register.h"
@@ -69,6 +71,7 @@ static struct ArkUINodeAPI impl = {
     GetToggleModifier,
     GetImageSpanModifier,
     GetBlankModifier,
+    GetSearchModifier,
     GetSelectModifier,
     GetRadioModifier,
     GetCheckboxModifier,
@@ -90,6 +93,7 @@ static struct ArkUINodeAPI impl = {
     GetNavigatorModifier,
     GetNavRouterModifier,
     GetPatternLockModifier,
+    GetColumnSplitModifier,
     GetImageAnimatorModifier,
 };
 

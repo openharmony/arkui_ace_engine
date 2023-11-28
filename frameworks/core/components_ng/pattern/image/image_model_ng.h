@@ -55,7 +55,20 @@ public:
     void SetOnDrop(OnDragDropFunc &&onDrop) override;
     void SetCopyOption(const CopyOptions &copyOption) override;
     bool UpdateDragItemInfo(DragItemInfo &itemInfo) override;
+    static void SetCopyOption(FrameNode *frameNode, CopyOptions copyOption);
+    static void SetAutoResize(FrameNode *frameNode, bool autoResize);
+    static void SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat);
+    static void SetImageRenderMode(FrameNode *frameNode, ImageRenderMode imageRenderMode);
+    static void SetSyncMode(FrameNode *frameNode, bool syncMode);
     static void SetImageFit(FrameNode *frameNode, ImageFit value);
+    static void SetFitOriginSize(FrameNode *framNode, bool value);
+    static void SetImageSourceSize(FrameNode *frameNode, const std::pair<Dimension, Dimension> &size);
+    static void SetMatchTextDirection(FrameNode *frameNode, bool value);
+    static void SetImageFill(FrameNode *frameNode, const Color &color);
+    static void SetAlt(FrameNode *frameNode, const std::string &src);
+    static void SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation);
+    static void SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix);
+    static void SetDraggable(FrameNode *frameNode, bool draggable);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H

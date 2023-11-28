@@ -139,6 +139,7 @@ const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email",
 const std::string SHEET_HEIGHT_MEDIUM = "medium";
 const std::string SHEET_HEIGHT_LARGE = "large";
 const std::string SHEET_HEIGHT_AUTO = "auto";
+const std::string SHEET_HEIGHT_FITCONTENT = "fit_content";
 const std::string BLOOM_RADIUI_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_radius";
 const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
 
@@ -5622,16 +5623,21 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     NG::SheetStyle sheetStyle;
     sheetStyle.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
+    sheetStyle.showCloseIcon = true;
     std::function<void()> onShowCallback;
     std::function<void()> onDismissCallback;
+    std::function<void()> shouldDismissFunc;
+    std::function<void()> titleBuilderFunction;
     if (info.Length() == 3) {
         if (info[2]->IsObject()) {
-            ParseOverlayCallback(info[2], onShowCallback, onDismissCallback);
+            ParseSheetCallback(info[2], onShowCallback, onDismissCallback, shouldDismissFunc);
             ParseSheetStyle(info[2], sheetStyle);
+            ParseSheetTitle(info[2], sheetStyle, titleBuilderFunction);
         }
     }
-    ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc), sheetStyle,
-        std::move(onShowCallback), std::move(onDismissCallback));
+    ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),
+        std::move(titleBuilderFunction), sheetStyle, std::move(onShowCallback), std::move(onDismissCallback),
+        std::move(shouldDismissFunc));
 }
 
 void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
@@ -5640,11 +5646,43 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto showDragBar = paramObj->GetProperty("dragBar");
     auto backgroundColor = paramObj->GetProperty("backgroundColor");
     auto maskColor = paramObj->GetProperty("maskColor");
+    auto sheetDetents = paramObj->GetProperty("detents");
+    auto backgroundBlurStyle = paramObj->GetProperty("blurStyle");
+    auto showCloseIcon = paramObj->GetProperty("showClose");
+    auto type = paramObj->GetProperty("type");
+
+    std::vector<NG::SheetHeight> detents;
+    if (ParseSheetDetents(sheetDetents, detents)) {
+        sheetStyle.detents = detents;
+    }
+    BlurStyleOption styleOption;
+    if (ParseSheetBackgroundBlurStyle(backgroundBlurStyle, styleOption)) {
+        sheetStyle.backgroundBlurStyle = styleOption;
+    }
+    bool showClose = true;
+    if (showCloseIcon->IsNull() || showCloseIcon->IsUndefined()) {
+        sheetStyle.showCloseIcon = showClose;
+    } else {
+        if (ParseJsBool(showCloseIcon, showClose)) {
+            sheetStyle.showCloseIcon = showClose;
+        }
+    }
     if (showDragBar->IsNull() || showDragBar->IsUndefined()) {
         sheetStyle.showDragBar = true;
     } else {
         if (showDragBar->IsBoolean()) {
             sheetStyle.showDragBar = showDragBar->ToBoolean();
+        }
+    }
+    if (type->IsNull() || type->IsUndefined()) {
+        sheetStyle.sheetType.reset();
+    } else {
+        if (type->IsNumber()) {
+            auto sheetType = type->ToNumber<int32_t>();
+            if (sheetType >= static_cast<int>(NG::SheetType::SHEET_BOTTOM) &&
+                sheetType <= static_cast<int>(NG::SheetType::SHEET_POPUP)) {
+                sheetStyle.sheetType = static_cast<NG::SheetType>(sheetType);
+            }
         }
     }
     Color color;
@@ -5672,7 +5710,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
             sheetStyle.height.reset();
             return;
         }
-        if (heightStr == SHEET_HEIGHT_AUTO) {
+        if (heightStr == SHEET_HEIGHT_FITCONTENT) {
             sheetStyle.sheetMode = NG::SheetMode::AUTO;
             sheetStyle.height.reset();
             return;
@@ -5695,6 +5733,144 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
         sheetStyle.height = sheetHeight;
         sheetStyle.sheetMode.reset();
     }
+}
+
+bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents)
+{
+    if (!args->IsArray()) {
+        return false;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(args);
+    NG::SheetHeight sheetDetent;
+    for (size_t i = 0; i < array->Length(); i++) {
+        ParseSheetDetentHeight(array->GetValueAt(i), sheetDetent);
+        if ((!sheetDetent.height.has_value()) && (!sheetDetent.sheetMode.has_value())) {
+            continue;
+        }
+        sheetDetents.emplace_back(sheetDetent);
+        sheetDetent.height.reset();
+        sheetDetent.sheetMode.reset();
+    }
+    return true;
+}
+
+void JSViewAbstract::ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent)
+{
+    CalcDimension sheetHeight;
+    if (args->IsString()) {
+        std::string heightStr = args->ToString();
+        // Remove all " ".
+        heightStr.erase(std::remove(heightStr.begin(), heightStr.end(), ' '), heightStr.end());
+        std::transform(heightStr.begin(), heightStr.end(), heightStr.begin(), ::tolower);
+        if (heightStr == SHEET_HEIGHT_MEDIUM) {
+            detent.sheetMode = NG::SheetMode::MEDIUM;
+            detent.height.reset();
+            return;
+        }
+        if (heightStr == SHEET_HEIGHT_LARGE) {
+            detent.sheetMode = NG::SheetMode::LARGE;
+            detent.height.reset();
+            return;
+        }
+        if (heightStr.find("calc") != std::string::npos) {
+            sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
+        } else {
+            sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
+        }
+        if (sheetHeight.Value() < 0) {
+            detent.sheetMode.reset();
+            detent.height.reset();
+            return;
+        }
+    }
+    if (!ParseJsDimensionVp(args, sheetHeight)) {
+        detent.sheetMode.reset();
+        detent.height.reset();
+    } else {
+        detent.height = sheetHeight;
+        detent.sheetMode.reset();
+    }
+}
+
+bool JSViewAbstract::ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions)
+{
+    if (args->IsNumber()) {
+        auto sheetBlurStyle = args->ToNumber<int32_t>();
+        if (sheetBlurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            sheetBlurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            blurStyleOptions.blurStyle = static_cast<BlurStyle>(sheetBlurStyle);
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+    return true;
+}
+
+void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
+    std::function<void()>& onDisappear, std::function<void()>& shouldDismiss)
+{
+    auto showCallback = paramObj->GetProperty("onAppear");
+    auto dismissCallback = paramObj->GetProperty("onDisappear");
+    auto shouldDismissFunc = paramObj->GetProperty("shouldDismiss");
+    if (showCallback->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(showCallback));
+        onAppear = [func = std::move(jsFunc)]() { func->Execute(); };
+    }
+    if (dismissCallback->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(dismissCallback));
+        onDisappear = [func = std::move(jsFunc)]() { func->Execute(); };
+    }
+    if (shouldDismissFunc->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(shouldDismissFunc));
+        shouldDismiss = [func = std::move(jsFunc)]() {
+            JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+            objectTemplate->SetInternalFieldCount(1);
+            JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
+            dismissObj->SetPropertyObject(
+                "dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissSheet));
+            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            func->ExecuteJS(1, &newJSVal);
+        };
+    }
+}
+
+void JSViewAbstract::ParseSheetTitle(
+    const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle, std::function<void()>& titleBuilderFunction)
+{
+    auto title = paramObj->GetProperty("title");
+    std::string mainTitle;
+    std::string subtitle;
+    if (title->IsFunction()) {
+        sheetStyle.isTitleBuilder = true;
+        auto titleBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(title));
+        CHECK_NULL_VOID(titleBuilderFunc);
+        titleBuilderFunction = [func = std::move(titleBuilderFunc)]() {
+            ACE_SCORING_EVENT("BindSheet");
+            func->Execute();
+        };
+    } else if (title->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(title);
+        sheetStyle.isTitleBuilder = false;
+        auto sheetTitle = obj->GetProperty("title");
+        auto sheetSubtitle = obj->GetProperty("subtitle");
+        if (ParseJsString(sheetTitle, mainTitle)) {
+            sheetStyle.sheetTitle = mainTitle;
+        }
+        if (ParseJsString(sheetSubtitle, subtitle)) {
+            sheetStyle.sheetSubtitle = subtitle;
+        }
+    }
+}
+
+panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ViewAbstractModel::GetInstance()->DismissSheet();
+    return JSValueRef::Undefined(runtimeCallInfo->GetVM());
 }
 
 void JSViewAbstract::ParseOverlayCallback(

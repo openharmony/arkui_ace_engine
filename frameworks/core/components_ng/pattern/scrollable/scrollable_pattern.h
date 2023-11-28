@@ -22,6 +22,7 @@
 #include "core/animation/select_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
@@ -40,17 +41,28 @@ constexpr double FRICTION = 0.6;
 #else
 constexpr double FRICTION = 0.9;
 #endif
+enum class ModalSheetCoordinationMode : char {
+    UNKNOWN = 0,
+    SHEET_SCROLL = 1,
+    SCROLLABLE_SCROLL = 2,
+};
 class ScrollablePattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
     ScrollablePattern() = default;
-    ScrollablePattern(bool alwaysEnabled) : edgeEffectAlwaysEnabled_(alwaysEnabled) {}
+    ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
+        : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
+    {}
 
     bool IsAtomicNode() const override
     {
         return false;
     }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     // scrollable
     Axis GetAxis() const override
@@ -111,7 +123,7 @@ public:
             scrollableEvent_->SetAxis(axis_);
         }
     }
-    void SetScrollableAxis(Axis axis);
+
     RefPtr<GestureEventHub> GetGestureHub();
     RefPtr<InputEventHub> GetInputHub();
 
@@ -207,6 +219,7 @@ public:
 
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
     void GetParentNavigation();
+    void GetParentModalSheet();
 
     virtual OverScrollOffset GetOverScrollOffset(double delta) const
     {
@@ -374,7 +387,12 @@ public:
     {
         edgeEffectAlwaysEnabled_ = alwaysEnabled;
     }
+
 protected:
+    virtual DisplayMode GetDefaultScrollBarDisplayMode() const
+    {
+        return DisplayMode::AUTO;
+    }
     RefPtr<ScrollBar> GetScrollBar() const
     {
         return scrollBar_;
@@ -515,6 +533,7 @@ private:
     RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);
     bool CoordinateWithNavigation(bool isAtTop, bool isDraggedDown, double& offset, int32_t source);
     void NotifyFRCSceneInfo(double velocity, SceneStatus sceneStatus);
+    ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -529,6 +548,7 @@ private:
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
     bool isRefreshInReactive_ = false;
+    bool isSheetInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
     double friction_ = FRICTION;
@@ -553,7 +573,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
 
     RefPtr<NavBarPattern> navBarPattern_;
-
+    RefPtr<SheetPresentationPattern> sheetPattern_;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;

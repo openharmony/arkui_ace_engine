@@ -160,6 +160,7 @@ public:
     // when paragraph ends with a \n, it causes the paragraph height to gain an extra line
     // to have normal spacing between paragraphs, remove \n from every paragraph except the last one.
     bool needRemoveNewLine = false;
+    bool hasResourceFontColor = false;
     std::optional<LeadingMargin> leadingMargin;
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t selectedStart = -1;

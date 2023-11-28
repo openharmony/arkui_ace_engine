@@ -219,10 +219,91 @@ bool ImageModelNG::UpdateDragItemInfo(DragItemInfo &itemInfo)
     return false;
 }
 
+void ImageModelNG::SetCopyOption(FrameNode *frameNode, CopyOptions copyOption)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCopyOption(copyOption);
+}
+
+void ImageModelNG::SetAutoResize(FrameNode *frameNode, bool autoResize)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, autoResize, frameNode);
+}
+
+void ImageModelNG::SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, imageRepeat, frameNode);
+}
+
+void ImageModelNG::SetImageRenderMode(FrameNode *frameNode, ImageRenderMode imageRenderMode)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRenderMode, imageRenderMode, frameNode);
+}
+
 void ImageModelNG::SetImageFit(FrameNode *frameNode, ImageFit value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageFit, value, frameNode);
+}
+
+void ImageModelNG::SetFitOriginSize(FrameNode *frameNode, bool value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, FitOriginalSize, value, frameNode);
+}
+
+void ImageModelNG::SetSyncMode(FrameNode *frameNode, bool syncMode)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSyncLoad(syncMode);
+}
+
+void ImageModelNG::SetImageSourceSize(FrameNode *frameNode, const std::pair<Dimension, Dimension> &size)
+{
+    SizeF sourceSize =
+        SizeF(static_cast<float>(size.first.ConvertToPx()), static_cast<float>(size.second.ConvertToPx()));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, sourceSize, frameNode);
+}
+
+void ImageModelNG::SetMatchTextDirection(FrameNode *frameNode, bool value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, MatchTextDirection, value, frameNode);
+}
+
+void ImageModelNG::SetImageFill(FrameNode *frameNode, const Color &color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
+}
+
+void ImageModelNG::SetAlt(FrameNode *frameNode, const std::string &src)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, ImageSourceInfo(src), frameNode);
+}
+
+void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolation, frameNode);
+}
+
+void ImageModelNG::SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix, frameNode);
+}
+
+void ImageModelNG::SetDraggable(FrameNode *frameNode, bool draggable)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (draggable) {
+        if (!frameNode->IsDraggable()) {
+            gestureHub->InitDragDropEvent();
+        }
+    } else {
+        gestureHub->RemoveDragEvent();
+    }
+    frameNode->SetCustomerDraggable(draggable);
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

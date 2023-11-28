@@ -922,7 +922,11 @@ void PipelineContext::StartWindowMaximizeAnimation(
     int32_t duration = 400;
     MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
     if (maximizeMode == MaximizeMode::MODE_FULL_FILL || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        duration = 0;
+        int32_t preWidth = GetRootRect().Width();
+        int32_t preHeight = GetRootRect().Height();
+        if (width > preWidth && height > preHeight) {
+            duration = 0;
+        }
     }
     option.SetDuration(duration);
     auto curve = Curves::EASE_OUT;
@@ -1753,8 +1757,11 @@ void PipelineContext::FlushMouseEvent()
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
-    auto userCursor = GetCursor();
-    if (mouseStyleNodeId_ != nodeId || userCursor != MouseFormat::DEFAULT) {
+    auto window = GetWindow();
+    if (window && window->IsUserSetCursor()) {
+        return false;
+    }
+    if (mouseStyleNodeId_ != nodeId) {
         return false;
     }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
@@ -2063,10 +2070,7 @@ void PipelineContext::WindowFocus(bool isFocus)
     onFocus_ = isFocus;
     if (!isFocus) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d lost focus.", windowId_);
-        auto mouseStyle = MouseStyle::CreateMouseStyle();
-        if (mouseStyle) {
-            mouseStyle->ChangePointerStyle(static_cast<int32_t>(GetWindowId()), MouseFormat::DEFAULT);
-        }
+        RestoreDefault();
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
@@ -2112,19 +2116,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
-    auto callback = [weakPattern = WeakClaim(RawPtr(containerPattern)), isShow, hasDeco, needUpdate]() {
-        auto pattern = weakPattern.Upgrade();
-        if (pattern != nullptr) {
-            pattern->ShowTitle(isShow, hasDeco, needUpdate);
-        }
-    };
-    MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
-    if (maximizeMode == MaximizeMode::MODE_FULL_FILL || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        constexpr int32_t delayedTime = 50;
-        taskExecutor_->PostDelayedTask(callback, TaskExecutor::TaskType::UI, delayedTime);
-    } else {
-        callback();
-    }
+    containerPattern->ShowTitle(isShow, hasDeco);
 }
 
 void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)
@@ -2597,18 +2589,25 @@ std::string PipelineContext::GetCurrentExtraInfo()
 void PipelineContext::SetCursor(int32_t cursorValue)
 {
     if (cursorValue >= 0 && cursorValue <= static_cast<int32_t>(MouseFormat::RUNNING)) {
-        cursor_ = static_cast<MouseFormat>(cursorValue);
+        auto window = GetWindow();
+        CHECK_NULL_VOID(window);
         auto mouseStyle = MouseStyle::CreateMouseStyle();
         CHECK_NULL_VOID(mouseStyle);
-        mouseStyle->ChangePointerStyle(GetWindowId(), cursor_);
+        auto cursor = static_cast<MouseFormat>(cursorValue);
+        window->SetCursor(cursor);
+        window->SetUserSetCursor(true);
+        mouseStyle->ChangePointerStyle(GetWindowId(), cursor);
     }
 }
 
 void PipelineContext::RestoreDefault()
 {
-    cursor_ = MouseFormat::DEFAULT;
+    auto window = GetWindow();
+    CHECK_NULL_VOID(window);
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     CHECK_NULL_VOID(mouseStyle);
+    window->SetCursor(MouseFormat::DEFAULT);
+    window->SetUserSetCursor(false);
     mouseStyle->ChangePointerStyle(GetWindowId(), MouseFormat::DEFAULT);
 }
 

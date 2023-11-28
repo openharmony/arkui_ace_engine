@@ -64,6 +64,7 @@
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/form/form_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
+#include "core/components_ng/pattern/overlay/sheet_theme.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
@@ -138,6 +139,7 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::GridItemTheme::TypeId(), &ThemeBuildFunc<NG::GridItemTheme::Builder> },
     { NG::MenuTheme::TypeId(), &ThemeBuildFunc<NG::MenuTheme::Builder> },
     { NG::GaugeTheme::TypeId(), &ThemeBuildFunc<NG::GaugeTheme::Builder> },
+    { NG::SheetTheme::TypeId(), &ThemeBuildFunc<NG::SheetTheme::Builder> },
 };
 } // namespace
 

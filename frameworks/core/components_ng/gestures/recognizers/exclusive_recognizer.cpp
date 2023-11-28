@@ -115,6 +115,16 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
                 auto saveRecognizer = activeRecognizer_;
                 activeRecognizer_->HandleEvent(point);
                 AddGestureProcedure(point, saveRecognizer);
+                int32_t count = 0;
+                // if activeRecognizer_ change to another recognizer, call the handleEvent function of the new
+                // recognizer.
+                while (activeRecognizer_ && saveRecognizer != activeRecognizer_ &&
+                       count < static_cast<int32_t>(recognizers_.size()) - 1) {
+                    saveRecognizer = activeRecognizer_;
+                    activeRecognizer_->HandleEvent(point);
+                    AddGestureProcedure(point, saveRecognizer);
+                    count++;
+                }
             } else {
                 for (const auto& recognizer : recognizers_) {
                     if (recognizer && recognizer->CheckTouchId(point.id)) {

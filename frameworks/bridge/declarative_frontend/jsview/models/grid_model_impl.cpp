@@ -99,13 +99,12 @@ void GridModelImpl::SetGridHeight(const Dimension& value)
     }
 }
 
-void GridModelImpl::SetScrollBarMode(int32_t value)
+void GridModelImpl::SetScrollBarMode(DisplayMode value)
 {
-    auto displayMode = static_cast<DisplayMode>(value);
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     CHECK_NULL_VOID(grid);
-    grid->SetScrollBar(displayMode);
+    grid->SetScrollBar(value);
 }
 
 void GridModelImpl::SetScrollBarColor(const std::string& value)

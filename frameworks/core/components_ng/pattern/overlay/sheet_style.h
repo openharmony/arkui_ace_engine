@@ -20,32 +20,61 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
-
+#include "core/components/common/properties/decoration.h"
+#include "core/components_ng/pattern/overlay/sheet_theme.h"
 namespace OHOS::Ace::NG {
-const Dimension SHEET_RADIUS = 32.0_vp;
-const Dimension SHEET_DRAG_BAR_WIDTH = 64.0_vp;
-const Dimension SHEET_DRAG_BAR_HEIGHT = 24.0_vp;
-const Dimension SHEET_BLANK_MINI_HEIGHT = 8.0_vp;
-const double SHEET_VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
-
+constexpr float SHEET_VELOCITY_THRESHOLD = 1000.0f;
+constexpr float CURVE_MASS = 1.0f;
+constexpr float CURVE_STIFFNESS = 328.0f;
+constexpr float CURVE_DAMPING = 36.0f;
+constexpr float MEDIUM_SIZE = 0.6f;
+constexpr float POPUP_LARGE_SIZE = 0.9f;
 enum SheetMode {
     MEDIUM,
     LARGE,
     AUTO,
 };
 
+enum SheetType {
+    SHEET_BOTTOM,
+    SHEET_CENTER,
+    SHEET_POPUP,
+    SHEET_BOTTOMLANDSPACE,
+    SHEET_BOTTOMPC,
+};
+
+struct SheetHeight {
+    std::optional<Dimension> height;
+    std::optional<SheetMode> sheetMode;
+
+    bool operator==(const SheetHeight& sheetHeight) const
+    {
+        return (height == sheetHeight.height && sheetMode == sheetHeight.sheetMode);
+    }
+};
+
 struct SheetStyle {
     std::optional<Dimension> height;
     std::optional<SheetMode> sheetMode;
     std::optional<bool> showDragBar;
+    std::optional<bool> showCloseIcon;
+    std::optional<bool> isTitleBuilder;
+    std::optional<SheetType> sheetType;
     std::optional<Color> backgroundColor;
     std::optional<Color> maskColor;
+    std::optional<BlurStyleOption> backgroundBlurStyle;
+    std::optional<std::string> sheetTitle;
+    std::optional<std::string> sheetSubtitle;
+    std::vector<SheetHeight> detents;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
-        return !(height != sheetStyle.height || sheetMode != sheetStyle.sheetMode ||
-                 showDragBar != sheetStyle.showDragBar || backgroundColor != sheetStyle.backgroundColor ||
-                 maskColor != sheetStyle.maskColor);
+        return (height == sheetStyle.height && sheetMode == sheetStyle.sheetMode &&
+                showDragBar == sheetStyle.showDragBar && showCloseIcon == sheetStyle.showCloseIcon &&
+                isTitleBuilder == sheetStyle.isTitleBuilder && sheetType == sheetStyle.sheetType &&
+                backgroundColor == sheetStyle.backgroundColor && maskColor == sheetStyle.maskColor &&
+                detents == sheetStyle.detents && backgroundBlurStyle == sheetStyle.backgroundBlurStyle &&
+                sheetTitle == sheetStyle.sheetTitle && sheetSubtitle == sheetStyle.sheetSubtitle);
     }
 };
 } // namespace OHOS::Ace::NG

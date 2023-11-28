@@ -38,7 +38,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->color_ = themeConstants->GetColor(THEME_DIVIDER_COLOR);
             auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {
                 return theme;

@@ -352,10 +352,13 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
     navDestination->SetTransitionType(PageTransitionType::EXIT_POP);
     titleNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
     CHECK_NULL_VOID(titleNode);
+    auto backIcon = AceType::DynamicCast<FrameNode>(titleNode->GetBackButton());
+    CHECK_NULL_VOID(backIcon);
 
     option.SetOnFinishEvent(
         [weakNode = WeakPtr<NavDestinationGroupNode>(navDestination), weakTitle = WeakPtr<TitleBarNode>(titleNode),
-            weakNavigation = WeakClaim(this), id = Container::CurrentId(), nodeWidth, nodeHeight] {
+            weakBackIcon = WeakPtr<FrameNode>(backIcon), weakNavigation = WeakClaim(this),
+            id = Container::CurrentId(), nodeWidth, nodeHeight] {
             ContainerScope scope(id);
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
@@ -363,7 +366,7 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
             CHECK_NULL_VOID(taskExecutor);
             // animation finish event should be posted to UI thread
             taskExecutor->PostTask(
-                [weakNode, weakTitle, weakNavigation, nodeWidth, nodeHeight]() {
+                [weakNode, weakTitle, weakNavigation, weakBackIcon, nodeWidth, nodeHeight]() {
                     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                     auto navigation = weakNavigation.Upgrade();
@@ -380,6 +383,11 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
                     auto title = weakTitle.Upgrade();
                     if (title) {
                         title->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+                        title->GetRenderContext()->UpdateOpacity(1.0);
+                    }
+                    auto backButtonNode = weakBackIcon.Upgrade();
+                    if (backButtonNode) {
+                        backButtonNode->GetRenderContext()->UpdateOpacity(1.0);
                     }
                     node->SetIsOnAnimation(false);
                     node->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
@@ -427,7 +435,6 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
     TitleOpacityAnimationOut(titleNode->GetRenderContext());
 
     // backIcon opacity
-    auto backIcon = AceType::DynamicCast<FrameNode>(titleNode->GetBackButton());
     if (backIcon) {
         BackButtonAnimation(backIcon, false);
     }
@@ -699,23 +706,6 @@ void NavigationGroupNode::BackButtonAnimation(const RefPtr<FrameNode>& backButto
         backButtonNodeContext->OpacityAnimation(transitionOption, 0.0, 1.0);
     } else {
         transitionOption.SetDuration(OPACITY_BACKBUTTON_OUT_DURATION);
-        transitionOption.SetOnFinishEvent(
-            [backButtonNodeContextWK = WeakClaim(RawPtr(backButtonNodeContext)), id = Container::CurrentId()] {
-                ContainerScope scope(id);
-                auto context = PipelineContext::GetCurrentContext();
-                CHECK_NULL_VOID(context);
-                auto taskExecutor = context->GetTaskExecutor();
-                CHECK_NULL_VOID(taskExecutor);
-                // animation finish event should be posted to UI thread.
-                taskExecutor->PostTask(
-                    [backButtonNodeContextWK, id]() {
-                        auto backButtonNodeContext = backButtonNodeContextWK.Upgrade();
-                        CHECK_NULL_VOID(backButtonNodeContext);
-                        ContainerScope scope(id);
-                        backButtonNodeContext->UpdateOpacity(1.0);
-                    },
-                    TaskExecutor::TaskType::UI);
-            });
         backButtonNodeContext->OpacityAnimation(transitionOption, 1.0, 0.0);
     }
 }
@@ -755,22 +745,6 @@ void NavigationGroupNode::TitleOpacityAnimationOut(const RefPtr<RenderContext>& 
     opacityOption.SetDelay(OPACITY_TITLE_OUT_DELAY);
     opacityOption.SetDuration(OPACITY_TITLE_DURATION);
     opacityOption.SetFillMode(FillMode::FORWARDS);
-    opacityOption.SetOnFinishEvent(
-        [transitionOutNodeContextWK = WeakPtr<RenderContext>(transitionOutNodeContext), id = Container::CurrentId()] {
-            ContainerScope scope(id);
-            auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            auto taskExecutor = context->GetTaskExecutor();
-            CHECK_NULL_VOID(taskExecutor);
-            // animation finish event should be posted to UI thread.
-            taskExecutor->PostTask(
-                [transitionOutNodeContextWK, id]() {
-                    auto transitionOutNodeContext = transitionOutNodeContextWK.Upgrade();
-                    CHECK_NULL_VOID(transitionOutNodeContext);
-                    transitionOutNodeContext->UpdateOpacity(1.0);
-                },
-                TaskExecutor::TaskType::UI);
-        });
     transitionOutNodeContext->OpacityAnimation(opacityOption, 1.0, 0.0);
     transitionOutNodeContext->UpdateOpacity(0.0);
 }

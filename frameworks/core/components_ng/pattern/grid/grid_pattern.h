@@ -48,8 +48,6 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    RefPtr<PaintProperty> CreatePaintProperty() override;
-
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
@@ -61,6 +59,8 @@ public:
     {
         return isConfigScrollable_;
     }
+
+    DisplayMode GetDefaultScrollBarDisplayMode() const override;
 
     void SetMultiSelectable(bool multiSelectable)
     {

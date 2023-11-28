@@ -296,8 +296,9 @@ void CustomPaintPaintMethod::UpdatePaintShader(
         if (gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint) {
             shaderEffect = RSShaderEffect::CreateRadialGradient(endPoint, gradient.GetOuterRadius(), colors, pos, mode);
         } else {
-            shaderEffect = RSShaderEffect::CreateTwoPointConical(
-                beginPoint, gradient.GetInnerRadius(), endPoint, gradient.GetOuterRadius(), colors, pos, mode);
+            RSMatrix matrix;
+            shaderEffect = RSShaderEffect::CreateTwoPointConical(beginPoint, gradient.GetInnerRadius(), endPoint,
+                gradient.GetOuterRadius(), colors, pos, mode, &matrix);
         }
     }
     if (pen != nullptr) {

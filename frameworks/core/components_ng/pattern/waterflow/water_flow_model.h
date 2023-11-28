@@ -71,6 +71,13 @@ public:
     {
         return false;
     }
+    static DisplayMode GetDisplayMode()
+    {
+        return DisplayMode::OFF;
+    }
+    virtual void SetScrollBarMode(DisplayMode value) = 0;
+    virtual void SetScrollBarColor(const std::string& value) = 0;
+    virtual void SetScrollBarWidth(const std::string& value) = 0;
 
 private:
     static std::unique_ptr<WaterFlowModel> instance_;
