@@ -36,6 +36,13 @@ struct TextShadowStruct {
     uint32_t fill;
 };
 
+struct ImagePropertiesStruct {
+    const char* src;
+    double number[4];
+    int8_t unit[4];
+    char* calc[4];
+    int32_t duration;
+};
 typedef void* NodeHandle;
 struct ArkUICommonModifierAPI {
     void (*SetBackgroundColor)(NodeHandle node, uint32_t color);
@@ -549,6 +556,21 @@ struct ArkUIPatternLockModifierAPI {
     void (*ResetPatternLockPathColor)(NodeHandle node);
 };
 
+struct ArkUIImageAnimatorModifierAPI {
+    void (*SetState)(NodeHandle node, int32_t state);
+    void (*ResetState)(NodeHandle node);
+    void (*SetDuration)(NodeHandle node, int32_t duration);
+    void (*SetFixedSize)(NodeHandle node, uint32_t fixedSize);
+    void (*ResetFixedSize)(NodeHandle node);
+    void (*SetFillMode)(NodeHandle node, int32_t fillMode);
+    void (*ResetFillMode)(NodeHandle node);
+    void (*SetReverse)(NodeHandle node, uint32_t value);
+    void (*ResetReverse)(NodeHandle node);
+    void (*SetImages)(NodeHandle node, struct ImagePropertiesStruct* images, int32_t length);
+    void (*ResetImages)(NodeHandle node);
+    void (*SetImageAnimatorIteration)(NodeHandle node, int32_t value);
+    void (*ResetImageAnimatorIteration)(NodeHandle node);
+};
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -580,6 +602,7 @@ struct ArkUINodeAPI {
     ArkUINavigatorModifierAPI (*GetNavigatorModifier)();
     ArkUINavRouterModifierAPI (*GetNavRouterModifier)();
     ArkUIPatternLockModifierAPI (*GetPatternLockModifier)();
+    ArkUIImageAnimatorModifierAPI (*GetImageAnimatorModifier)();
 };
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H

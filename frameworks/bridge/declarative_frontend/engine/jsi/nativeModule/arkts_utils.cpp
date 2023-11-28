@@ -42,7 +42,7 @@ enum class ResourceType : uint32_t {
     RAWFILE = 30000
 };
 
-uint32_t ColorAlphaAdapt(uint32_t origin)
+uint32_t ArkTSUtils::ColorAlphaAdapt(uint32_t origin)
 {
     uint32_t result = origin;
     if ((origin >> COLOR_ALPHA_OFFSET) == 0) {

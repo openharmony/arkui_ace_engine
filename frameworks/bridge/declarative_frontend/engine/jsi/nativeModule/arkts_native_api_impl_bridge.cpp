@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkboxgroup_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_animator_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_col_bridge.h"
@@ -753,6 +754,35 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockSelectedColor));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "patternLock"), patternLock);
+
+    auto imageAnimator = panda::ObjectRef::New(vm);
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetState));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetState));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDuration"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetDuration));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFixedSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetFixedSize));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFixedSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetFixedSize));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFillMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetFillMode));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFillMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetFillMode));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setReverse"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetReverse));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetReverse"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetReverse));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImages"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetImages));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImages"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetImages));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIterations"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetIteration));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIterations"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetIteration));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "imageAnimator"), imageAnimator);
 
     RegisterButtonAttributes(object, vm);
     RegisterToggleAttributes(object, vm);
