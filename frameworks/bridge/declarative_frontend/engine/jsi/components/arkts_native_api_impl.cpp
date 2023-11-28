@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_button_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_checkbox_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_checkboxgroup_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_column_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_common_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_counter_modifier.h"
@@ -87,6 +88,7 @@ static struct ArkUINodeAPI impl = {
     GetPanelModifier,
     GetTextAreaModifier,
     GetNavigationModifier,
+    GetColumnModifier,
     GetRichEditorModifier,
     GetImageModifier,
     GetVideoModifier,
