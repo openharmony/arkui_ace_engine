@@ -4800,6 +4800,17 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("maxLines", GreatOrEqual(maxLines, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLines).c_str());
     json->Put("barState", GetBarStateString().c_str());
     json->Put("caretPosition", std::to_string(GetCaretIndex()).c_str());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto jsonShowCounter = JsonUtil::Create(true);
+    jsonShowCounter->Put("value", layoutProperty->GetShowCounterValue(false));
+    auto jsonShowCounterOptions = JsonUtil::Create(true);
+    auto counterType = layoutProperty->GetSetCounterValue(-1);
+    jsonShowCounterOptions->Put("thresholdPercentage", counterType);
+    jsonShowCounter->Put("options", jsonShowCounterOptions);
+    json->Put("showCounter", jsonShowCounter);
 }
 
 void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
