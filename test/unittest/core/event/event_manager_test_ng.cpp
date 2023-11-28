@@ -1416,7 +1416,6 @@ HWTEST_F(EventManagerTestNg, EventManagerTest029, TestSize.Level1)
      */
     auto animatablePoperties = AceType::MakeRefPtr<OHOS::Ace::AnimatableProperties>();
     auto renderNode = AceType::DynamicCast<RenderNode>(animatablePoperties);
-    //ASSERT_NE(renderNode, nullptr);
 
     /**
      * @tc.steps: step2. Call TouchTest with MouseAction::PRESS;
