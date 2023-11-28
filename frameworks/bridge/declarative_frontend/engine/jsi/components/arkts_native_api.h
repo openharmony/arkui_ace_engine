@@ -23,9 +23,46 @@
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 
 typedef void *NodeHandle;
+constexpr int32_t INVALID_FONT_STYLE = -1;
+constexpr int32_t INVALID_COLOR_VALUE = -1;
 struct StringAndDouble {
     double value;
     const char *valueStr;
+};
+
+struct ArkUIResourceColorType {
+    uint32_t number;
+    const char* string;
+};
+
+struct IconsStruct {
+    const char* ShowIconInfo;
+    const char* HiddenIconInfo;
+    const char* SwitchingIconInfo;
+};
+
+struct FontStruct {
+    const struct StringAndDouble* size;
+    const struct StringAndInt32* weight;
+    const char* family;
+    int32_t style;
+};
+
+struct IconOptionsStruct {
+    const struct StringAndDouble* size;
+    int32_t color;
+    const char* src;
+};
+
+struct SearchButtonOptionsStruct {
+    const char* value;
+    const struct StringAndDouble* fontSize;
+    int32_t fontColor;
+};
+
+struct StringAndInt32 {
+    int32_t value;
+    const char* valueStr;
 };
 
 struct TextShadowStruct {
@@ -297,6 +334,34 @@ struct ArkUIImageSpanModifierAPI {
 struct ArkUIBlankModifierAPI {
     void (*SetColor)(NodeHandle node, uint32_t value);
     void (*ResetColor)(NodeHandle node);
+};
+
+struct ArkUISearchModifierAPI {
+    void (*SetSearchPlaceholderColor)(NodeHandle node, uint32_t color);
+    void (*ResetSearchPlaceholderColor)(NodeHandle node);
+    void (*SetSearchTextFont)(NodeHandle node, const struct FontStruct* value);
+    void (*ResetSearchTextFont)(NodeHandle node);
+    void (*SetSearchSelectionMenuHidden)(NodeHandle node, uint32_t selectionMenuHidden);
+    void (*ResetSearchSelectionMenuHidden)(NodeHandle node);
+    void (*SetSearchCaretStyle)(NodeHandle node, const double number, const int8_t unit, uint32_t caretColor);
+    void (*ResetSearchCaretStyle)(NodeHandle node);
+    void (*SetSearchTextAlign)(NodeHandle node, int32_t value);
+    void (*ResetSearchTextAlign)(NodeHandle node);
+    void (*SetSearchCancelButton)(NodeHandle node,
+        int32_t style, const struct StringAndDouble* size, uint32_t color, const char* src);
+    void (*ResetSearchCancelButton)(NodeHandle node);
+    void (*SetSearchEnableKeyboardOnFocus)(NodeHandle node, uint32_t value);
+    void (*ResetSearchEnableKeyboardOnFocus)(NodeHandle node);
+    void (*SetSearchPlaceholderFont)(NodeHandle node, const struct FontStruct* value);
+    void (*ResetSearchPlaceholderFont)(NodeHandle node);
+    void (*SetSearchSearchIcon)(NodeHandle node, const struct IconOptionsStruct* value);
+    void (*ResetSearchSearchIcon)(NodeHandle node);
+    void (*SetSearchSearchButton)(NodeHandle node, const struct SearchButtonOptionsStruct* value);
+    void (*ResetSearchSearchButton)(NodeHandle node);
+    void (*SetSearchFontColor)(NodeHandle node, uint32_t value);
+    void (*ResetSearchFontColor)(NodeHandle node);
+    void (*SetSearchCopyOption)(NodeHandle node, uint32_t value);
+    void (*ResetSearchCopyOption)(NodeHandle node);
 };
 
 struct ArkUISelectModifierAPI {
@@ -612,6 +677,7 @@ struct ArkUINodeAPI {
     ArkUIToggleModifierAPI (*GetToggleModifier)();
     ArkUIImageSpanModifierAPI (*GetImageSpanModifier)();
     ArkUIBlankModifierAPI (*GetBlankModifier)();
+    ArkUISearchModifierAPI (*GetSearchModifier)();
     ArkUISelectModifierAPI (*GetSelectModifier)();
     ArkUIRadioModifierAPI (*GetRadioModifier)();
     ArkUICheckboxModifierAPI (*GetCheckboxModifier)();
