@@ -12,4 +12,444 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const PUBLIC_TIPS="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAFFklEQVRoQ9VZTVLbMBSW3CFhGU4A7KDdhBMUdoUuiE8AnKDkBMAJgBOUniDpoqE7coOmizbsGk5QL4FOrb5nS46kSJYluzBoJpOFbel97+d7P6LkhS/6wuUnjQEYvNvYJpR2o4isspR0YecOKGcNfvg/g9+EEJowkt6RlIzjr7fjJpRXC0AmdES2KaH7IEzXU6CEUnKV/mWf64AJAoCCU0pPQMvbnkLbXp8wEh3Fox9gJb/lBWDQ63aiPw8njJFD7hryablGU3JHGJuQ6FVCWkuzeDhJAPAauhehLHMrsNgBdy9NWnrF0vQMLIIuV2lVBpBpPaIDTfAE/HrICL0UwlY6FV4a7G72IF7egjKOtW8SlrK4qltVAgCHHYN2TxThGRkzGvVDzC4LjFalj4/nhDC0arEAWD++nl64FOIEMNjbOAWTo/BiJbD5EWw+dG3u83yw96ZLSYoWXhPfMcLO4tHtadk+pQC45kE7xZpw81b2US8QmTUebuCbgtEABAT37ZVtHysArhHcDAMPFgRYq9XHoPQRKuTd4d4mWqJXWCJlO7aYMAJA1oCA/TYXnkxYq73zFMILoYe7mzcSTWNgb5nYyQhguPf6oxRUM/gYNeDlNtz9kC47PCC9YiYP7gdUooiJYW80jXWLLgDgdImuky0u/NjHFQwWxH3WvZWQBzaCyGUh0ZbOegsANNMZUbvA6ErIDmckDmEuzRsmYIUt+XwFACYX4HsMIFxQeEU7ITzPCaDQXB0A3JV+2zxCBSBxPgC52P8y7bu0bXrOXeiX/Mxk/qp7q1agV73RzyPxrQIA6AsPXaujMfxW1xqPJe8YEEJq+yXgRisLADSzKy9V1ZT8HiiDKRZotVfq0LBNuYUF5Kxbx32E0HAg+i1PgpCVRlNn2VKmqM/vN89F4SeXGMWmsp+50ncViwAADGJREswAwHqV72zvaARTsKMEYJ6+QylPcSE1ky7Qny8YzcWL/WQA8wAOSDq6QEo+gdK7dz3d8RVaft8WyGYANQMOD9YSUFBCLAFQxJQMoGANKNxqMQYeLAcdVrIyd4daQmY2QQpmCxhqDt9D5UaoCVbTkmNBCnMAUtCFFHA6QABwCJ0cVLVYhLk7K5eCnEGs8GzFfrTsUJn2mqBlWSGyS84TmdL71vdZzho3oP6EtdtxnSyclSeWOm0OIB+biD6gdinhcgnf53JilPOUvZhrIBf4CmnNwmpjkwBLrguLKgCapD7usx+wHgKNXVaZ8dgBKKMdJaeo/YDqRkFtYO6vaiuYMVHJZKGUDPLeGKuErDDUy5zFllIpwsKC2TBPCqZSxSsMJcliU1+hkXb5dlMW0OexJitaxirKYEkJGpfw4rk0T0Wzn/nGQEHD85K82lgl8+Hc74pGGuxfu5qsClw6H7O4mM5ZBwz20aIW0E8FwjStLutPyoe7Uj3DNfhfR4zc8rLm4V6kfDri7FPV3JDBCL4OKqVLw3jdJTzu5wSg1yFCCNw8XWqf1a5xLNdWjV1wFKyixwR/kAFh0SffCR5SbUTTA8N9GwQsg5sf+52AbMlKFihAZGZmUB6o10H8+QzADFPGvsM98EzM89Gvyf19By79OpCO4bKPwR6Wa9mAaysvACoQ9TrIhyYX3kXBGTQ9AZffQQCkZAXDYNSm0SIuTHjTM4bsekmWlyehsVQLgCwhdmC5e0SrkHrBVbIZK/5wobAz/IGbzfB2vo7QwTHgUulzPG/MAs8hPJ75D1DwJF6CXORhAAAAAElFTkSuQmCC";const DURATION=800;export class ExceptionPrompt extends ViewPU{constructor(e,t,o,s=-1){super(e,o,s);this.__type=new SynchedPropertySimpleOneWayPU(t.type,this,"type");this.__HardwareStatus=new SynchedPropertySimpleOneWayPU(t.HardwareStatus,this,"HardwareStatus");this.__Icon=new SynchedPropertySimpleOneWayPU(t.Icon,this,"Icon");this.__TipContent=new SynchedPropertySimpleOneWayPU(t.TipContent,this,"TipContent");this.__ContentText=new SynchedPropertySimpleOneWayPU(t.ContentText,this,"ContentText");this.__ShowStatus=new ObservedPropertySimplePU(!1,this,"ShowStatus");this.__ThemeColorStatus=new SynchedPropertySimpleOneWayPU(t.ThemeColorStatus,this,"ThemeColorStatus");this.__OpacityNum=new ObservedPropertySimplePU(.15,this,"OpacityNum");this.__HEIGHT=new ObservedPropertySimplePU(80,this,"HEIGHT");this.__BORDER_RADIUS=new ObservedPropertySimplePU(12,this,"BORDER_RADIUS");this.__DURATION=new ObservedPropertySimplePU(1500,this,"DURATION");this.__BG_OPACITY=new ObservedPropertySimplePU(1,this,"BG_OPACITY");this.__state=new ObservedPropertySimplePU(!1,this,"state");this.__ErrorDefaultObj=new ObservedPropertyObjectPU({1:"网络未连接",2:"网络连接不稳定，请点击重试",3:"无法连接到服务器，请点击重试",4:"无法获取xxx，请点击重试"},this,"ErrorDefaultObj");this.__text=new ObservedPropertySimplePU("",this,"text");this.ReconnectionFunction=()=>{};this.ConfigureNetworkFunction=()=>{};this.setInitiallyProvidedValue(t);this.declareWatch("type",this.TypeStatusChange);this.declareWatch("ThemeColorStatus",this.OpacityStatusChange)}setInitiallyProvidedValue(e){void 0!==e.ShowStatus&&(this.ShowStatus=e.ShowStatus);void 0!==e.OpacityNum&&(this.OpacityNum=e.OpacityNum);void 0!==e.HEIGHT&&(this.HEIGHT=e.HEIGHT);void 0!==e.BORDER_RADIUS&&(this.BORDER_RADIUS=e.BORDER_RADIUS);void 0!==e.DURATION&&(this.DURATION=e.DURATION);void 0!==e.BG_OPACITY&&(this.BG_OPACITY=e.BG_OPACITY);void 0!==e.state&&(this.state=e.state);void 0!==e.ErrorDefaultObj&&(this.ErrorDefaultObj=e.ErrorDefaultObj);void 0!==e.text&&(this.text=e.text);void 0!==e.ReconnectionFunction&&(this.ReconnectionFunction=e.ReconnectionFunction);void 0!==e.ConfigureNetworkFunction&&(this.ConfigureNetworkFunction=e.ConfigureNetworkFunction)}updateStateVars(e){this.__type.reset(e.type);this.__HardwareStatus.reset(e.HardwareStatus);this.__Icon.reset(e.Icon);this.__TipContent.reset(e.TipContent);this.__ContentText.reset(e.ContentText);this.__ThemeColorStatus.reset(e.ThemeColorStatus)}purgeVariableDependenciesOnElmtId(e){this.__type.purgeDependencyOnElmtId(e);this.__HardwareStatus.purgeDependencyOnElmtId(e);this.__Icon.purgeDependencyOnElmtId(e);this.__TipContent.purgeDependencyOnElmtId(e);this.__ContentText.purgeDependencyOnElmtId(e);this.__ShowStatus.purgeDependencyOnElmtId(e);this.__ThemeColorStatus.purgeDependencyOnElmtId(e);this.__OpacityNum.purgeDependencyOnElmtId(e);this.__HEIGHT.purgeDependencyOnElmtId(e);this.__BORDER_RADIUS.purgeDependencyOnElmtId(e);this.__DURATION.purgeDependencyOnElmtId(e);this.__BG_OPACITY.purgeDependencyOnElmtId(e);this.__state.purgeDependencyOnElmtId(e);this.__ErrorDefaultObj.purgeDependencyOnElmtId(e);this.__text.purgeDependencyOnElmtId(e)}aboutToBeDeleted(){this.__type.aboutToBeDeleted();this.__HardwareStatus.aboutToBeDeleted();this.__Icon.aboutToBeDeleted();this.__TipContent.aboutToBeDeleted();this.__ContentText.aboutToBeDeleted();this.__ShowStatus.aboutToBeDeleted();this.__ThemeColorStatus.aboutToBeDeleted();this.__OpacityNum.aboutToBeDeleted();this.__HEIGHT.aboutToBeDeleted();this.__BORDER_RADIUS.aboutToBeDeleted();this.__DURATION.aboutToBeDeleted();this.__BG_OPACITY.aboutToBeDeleted();this.__state.aboutToBeDeleted();this.__ErrorDefaultObj.aboutToBeDeleted();this.__text.aboutToBeDeleted();SubscriberManager.Get().delete(this.id__());this.aboutToBeDeletedInternal()}get type(){return this.__type.get()}set type(e){this.__type.set(e)}get HardwareStatus(){return this.__HardwareStatus.get()}set HardwareStatus(e){this.__HardwareStatus.set(e)}get Icon(){return this.__Icon.get()}set Icon(e){this.__Icon.set(e)}get TipContent(){return this.__TipContent.get()}set TipContent(e){this.__TipContent.set(e)}get ContentText(){return this.__ContentText.get()}set ContentText(e){this.__ContentText.set(e)}get ShowStatus(){return this.__ShowStatus.get()}set ShowStatus(e){this.__ShowStatus.set(e)}get ThemeColorStatus(){return this.__ThemeColorStatus.get()}set ThemeColorStatus(e){this.__ThemeColorStatus.set(e)}get OpacityNum(){return this.__OpacityNum.get()}set OpacityNum(e){this.__OpacityNum.set(e)}get HEIGHT(){return this.__HEIGHT.get()}set HEIGHT(e){this.__HEIGHT.set(e)}get BORDER_RADIUS(){return this.__BORDER_RADIUS.get()}set BORDER_RADIUS(e){this.__BORDER_RADIUS.set(e)}get DURATION(){return this.__DURATION.get()}set DURATION(e){this.__DURATION.set(e)}get BG_OPACITY(){return this.__BG_OPACITY.get()}set BG_OPACITY(e){this.__BG_OPACITY.set(e)}get state(){return this.__state.get()}set state(e){this.__state.set(e)}get ErrorDefaultObj(){return this.__ErrorDefaultObj.get()}set ErrorDefaultObj(e){this.__ErrorDefaultObj.set(e)}get text(){return this.__text.get()}set text(e){this.__text.set(e)}OpacityStatusChange(e){this.ThemeColorStatus?this.OpacityNum=.15:this.OpacityNum=.2}TypeStatusChange(e){this.state&&1!==this.type&&2!==this.type&&setTimeout((()=>{this.state=!1}),800);1!==this.type&&2!==this.type||(this.ShowStatus?setTimeout((()=>{this.state=!0}),800):this.state=!0);if(this.ShowStatus){this.ShowStatus=!1;setTimeout((()=>{this.text=this.ErrorDefaultObj[this.type];4===this.type&&(this.text=`无法获取${this.ContentText}，请点击重试`);this.ShowStatus=!0}),800)}else{this.text=this.ErrorDefaultObj[this.type];4===this.type&&(this.text=`无法获取${this.ContentText}，请点击重试`);this.ShowStatus=!0}}aboutToAppear(){console.log("123:",this.ContentText);this.ThemeColorStatus?this.OpacityNum=.15:this.OpacityNum=.2}initialRender(){this.observeComponentCreation(((e,t)=>{ViewStackProcessor.StartGetAccessRecordingFor(e);Column.create();Column.width("100%");Column.height(48);Column.position({y:this.HEIGHT});Column.zIndex(999);t||Column.pop();ViewStackProcessor.StopGetAccessRecording()}));this.observeComponentCreation(((e,t)=>{ViewStackProcessor.StartGetAccessRecordingFor(e);Row.create();Context.animation({duration:800});Row.padding({left:{id:-1,type:10002,params:["sys.float.ohos_id_max_padding_start"],bundleName:"",moduleName:""},right:{id:-1,type:10002,params:["sys.float.ohos_id_max_padding_end"],bundleName:"",moduleName:""}});Row.position({});Row.zIndex(999);Row.opacity(this.ShowStatus?1:0);Context.animation(null);t||Row.pop();ViewStackProcessor.StopGetAccessRecording()}));this.observeComponentCreation(((e,t)=>{ViewStackProcessor.StartGetAccessRecordingFor(e);Column.create();Column.height("100%");Column.width("100%");Column.borderRadius(this.BORDER_RADIUS);Column.backgroundColor({id:-1,type:10001,params:["sys.color.ohos_id_color_background"],bundleName:"",moduleName:""});t||Column.pop();ViewStackProcessor.StopGetAccessRecording()}));Column.pop();this.observeComponentCreation(((e,t)=>{ViewStackProcessor.StartGetAccessRecordingFor(e);Column.create();Column.height("100%");Column.width("100%");Column.borderRadius(this.BORDER_RADIUS);Column.backgroundColor({id:-1,type:10001,params:["sys.color.ohos_id_color_warning"],bundleName:"",moduleName:""});Column.opacity(this.OpacityNum);Column.position({});Column.zIndex(999);t||Column.pop();ViewStackProcessor.StopGetAccessRecording()}));Column.pop();this.observeComponentCreation(((e,t)=>{ViewStackProcessor.StartGetAccessRecordingFor(e);Flex.create({justifyContent:FlexAlign.SpaceBetween,alignItems:ItemAlign.Center});Flex.padding({left:12,right:12});Flex.position({});Flex.zIndex(999);Flex.width("100%");Flex.height("100%");Flex.onClick((()=>{this.HardwareStatus&&this.ReconnectionFunction()}));t||Flex.pop();ViewStackProcessor.StopGetAccessRecording()}));this.observeComponentCreation(((e,t)=>{ViewStackProcessor.StartGetAccessRecordingFor(e);Flex.create({alignItems:ItemAlign.Center});Flex.width("100%");Flex.height("100%");t||Flex.pop();ViewStackProcessor.StopGetAccessRecording()}));this.observeComponentCreation(((e,t)=>{ViewStackProcessor.StartGetAccessRecordingFor(e);Image.create(this.Icon||{id:-1,type:2e4,params:["app.media.ic_public_fail"],bundleName:"",moduleName:""}||PUBLIC_TIPS);Image.width("24vp");Image.height("24vp");Image.margin({right:16});Image.objectFit(ImageFit.Contain);Image.fillColor({id:-1,type:10001,params:["sys.color.ohos_id_color_warning"],bundleName:"",moduleName:""});t||Image.pop();ViewStackProcessor.StopGetAccessRecording()}));this.observeComponentCreation(((e,t)=>{ViewStackProcessor.StartGetAccessRecordingFor(e);Text.create(this.TipContent||this.text);Text.fontSize({id:-1,type:10002,params:["sys.float.ohos_id_text_size_body1"],bundleName:"",moduleName:""});Text.fontColor({id:-1,type:10001,params:["sys.color.ohos_id_color_warning"],bundleName:"",moduleName:""});t||Text.pop();ViewStackProcessor.StopGetAccessRecording()}));Text.pop();Flex.pop();this.observeComponentCreation(((e,t)=>{ViewStackProcessor.StartGetAccessRecordingFor(e);If.create();this.TipContent?If.branchId(1):this.ifElseBranchUpdateFunction(0,(()=>{this.observeComponentCreation(((e,t)=>{ViewStackProcessor.StartGetAccessRecordingFor(e);Flex.create({alignItems:ItemAlign.Center,justifyContent:FlexAlign.End});Flex.margin({left:16});Flex.width(this.state?"45%":0);Flex.height("100%");Flex.onClick((()=>{this.ConfigureNetworkFunction()}));t||Flex.pop();ViewStackProcessor.StopGetAccessRecording()}));this.observeComponentCreation(((e,t)=>{ViewStackProcessor.StartGetAccessRecordingFor(e);Text.create("设置网络");Text.fontSize({id:-1,type:10002,params:["sys.float.ohos_id_text_size_body2"],bundleName:"",moduleName:""});Text.fontColor({id:-1,type:10001,params:["sys.color.ohos_id_color_text_secondary"],bundleName:"",moduleName:""});t||Text.pop();ViewStackProcessor.StopGetAccessRecording()}));Text.pop();this.observeComponentCreation(((e,t)=>{ViewStackProcessor.StartGetAccessRecordingFor(e);Image.create({id:-1,type:2e4,params:["app.media.ic_public_arrow_right"],bundleName:"",moduleName:""});Image.margin({left:4});Image.width("15dp");Image.height("24dp");Image.fillColor({id:-1,type:10001,params:["sys.color.ohos_id_color_tertiary"],bundleName:"",moduleName:""});t||Image.pop();ViewStackProcessor.StopGetAccessRecording()}));Flex.pop()}));t||If.pop();ViewStackProcessor.StopGetAccessRecording()}));If.pop();Flex.pop();Row.pop();Column.pop()}rerender(){this.updateDirtyElements()}}
+const PUBLIC_TIPS = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAA7ZJREFUSEu1VU1oXFUU/s6dSVK1xUlnbmKsKdZCJRFrmZmX5r20ZSIopf51U4pZ6EKlqIgLsViQIioiiuJC8G/ThWJXNSpR/Fm0tJM7mbmv01JMMVASm4AkM2ltK9XMzHtH32RmMOmbl2y82/ud853znXu/Q/ifDwXln0yl1qy79vd+JtoP4G4AdwBwAJom8FmAvoiubR2h48crzfL4EnAqFZ7/c+EAA68DWA9gkgDbJb4gWDgM3gTgHgBbAcwAOBjT6igBvJzoBoJCYmcXqDIMYBsDn7mMT26z1Tm/CucNo9tFyyEwPwtgRITcoejY2NX/YpcQzCaszYI4DUAw0YMdudEzqxnRnGHuJsZXAKZaFkJW5Nypy/W4BsGlROJWB605ELVDVAZkNjuxmuR1zKxhWoLxMwH56PUrgzQ+XvLuGgTFpPUmgw8RYMa0yi5PPm2aN60p0xmAW2Jr27b4DbaYtB5j8DCYX5J25v0GwR/37mgvtzkXGTjSodULfpXPGjvuEuxc8O4qYd7UlclM+eEKSfN7AANoExtkOn2t2kHBsJ4B86eCKhujudy0X2CtiEveXYhLkfW2fcV38MntD7gQPwIYklp9uUiwyNoutepvpjsDVEya3nt3pVYtTXH79oWKkzPzAL6TWg3VCX77t62fpFZPBw12LmkWieDInOoMwhUM81swNkqt7qsTlAj0TkyPvhoYmDAn4BFo1ROEKybMD5jwlNRqXZ3gLzA+lLZ6ObADo18RqCxzalcgLmG+RYQXpVa31AisXwG2Pc0CO0j2j8Aj0GpvMM46Cua4tNWW2iuqahaXWm0I7sDczQ6487T6YQWJJplwXmq1py7RAQAfQwhDZtO6WXAxaT4PZjdmZz5qijEsg5mzxPych6sSXO3riy64oRmAh6XOPO770eLbtwohzlZ/p8u9sdOZ8364uYR5jAh7Kk64uyt/stCwikLSeg3gwyAMypw6sTz48rZUpBJe8PypLEJuz3LXXPxP/Y8C9DUIb8icOrzEi6peU2IFojuZKLVaJ60XUrOSvOeoZS6Zt9v29SUE1QoWd4ECEHHBD3XqjGfdK55i3LqfBX9e3XYc7pP2yd/rQTcsnNo8jgHYBeL3XMHvdo6NzfrqHR/YSSH3IBgPe1sv7NBge37Uc4XG8V+ZgCgY1pMEfhuMDgB5MI0TYYqBCpgJVE0ar8rAdMQJO6/4FRK49Lm3t3Xu5sgjAngCzD0gdHvbDsBFgCeI6BRBfBPNpX9ppmMgwYrirwLwDyWbkigJz8KuAAAAAElFTkSuQmCC";
+const RIGHT_ICON = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAR1JREFUSEvt1E9Kw1AQBvBvxgpexIUbN7pRiHgDKYFuBaWW0jaXiQmxWXgAE72BxVJPIf5ZiAgKQheC6MuUtxCCCzMPkl2zHr4ffJN5hIY/ajgfS6CyYVVF2Vl8WLCZdrqjx8rEPwMqIB9HdwDW2LDX7vefXBAVkCXJOrG5BfAFMjt+N3jWIirAhl2m0YaIzACag4ynRdSARbI03iSRKYAPLeIEWOQqjbcKkQmAd/ON3c5g8PpfXc6ADcuT0z0w3UDk3O8Nj2oHLtJwn4UngIT+yTCoFciScJuYryF4a7UK7+B49FIb0OiSS7/pp8stqJZcPjTXa1YB+Th6ALDqGm53owLsY7eCn1m7F9xrn4jfORXgGlqeXwKV7TVe0QK81HAZuzhflQAAAABJRU5ErkJggg==";
+const Start_DURATION = 250;
+const End_DURATION = 200;
+
+export class ExceptionPrompt extends ViewPU {
+    constructor(t, e, o, s = -1) {
+        super(t, o, s);
+        this.__Type = new SynchedPropertySimpleOneWayPU(e.Type, this, "Type");
+        this.__HardwareStatus = new SynchedPropertySimpleOneWayPU(e.HardwareStatus, this, "HardwareStatus");
+        this.__Icon = new SynchedPropertySimpleOneWayPU(e.Icon, this, "Icon");
+        this.__TipContent = new SynchedPropertySimpleOneWayPU(e.TipContent, this, "TipContent");
+        this.__ContentText = new SynchedPropertySimpleOneWayPU(e.ContentText, this, "ContentText");
+        this.__ThemeColorStatus = new SynchedPropertySimpleOneWayPU(e.ThemeColorStatus, this, "ThemeColorStatus");
+        this.__ShowStatus = new ObservedPropertySimplePU(!1, this, "ShowStatus");
+        this.__OpacityNum = new ObservedPropertySimplePU(.15, this, "OpacityNum");
+        this.__HEIGHT = new ObservedPropertySimplePU(80, this, "HEIGHT");
+        this.__BORDER_RADIUS = new ObservedPropertySimplePU(12, this, "BORDER_RADIUS");
+        this.__BG_OPACITY = new ObservedPropertySimplePU(1, this, "BG_OPACITY");
+        this.__state = new ObservedPropertySimplePU(!1, this, "state");
+        this.__ErrorDefaultObj = new ObservedPropertyObjectPU({
+            1: "网络未连接",
+            2: "网络连接不稳定，请点击重试",
+            3: "无法连接到服务器，请点击重试",
+            4: "无法获取xxx，请点击重试"
+        }, this, "ErrorDefaultObj");
+        this.__text = new ObservedPropertySimplePU("", this, "text");
+        this.ReconnectionFunction = () => {
+        };
+        this.ConfigureNetworkFunction = () => {
+        };
+        this.setInitiallyProvidedValue(e);
+        this.declareWatch("Type", this.TypeStatusChange);
+        this.declareWatch("ThemeColorStatus", this.OpacityStatusChange)
+    }
+
+    setInitiallyProvidedValue(t) {
+            void 0 !== t.HardwareStatus ? this.__HardwareStatus.set(t.HardwareStatus) : this.__HardwareStatus.set(!0);
+            void 0 !== t.Icon ? this.__Icon.set(t.Icon) : this.__Icon.set("");
+            void 0 !== t.TipContent ? this.__TipContent.set(t.TipContent) : this.__TipContent.set("");
+            void 0 !== t.ContentText ? this.__ContentText.set(t.ContentText) : this.__ContentText.set("xxx");
+            void 0 !== t.ThemeColorStatus ? this.__ThemeColorStatus.set(t.ThemeColorStatus) : this.__ThemeColorStatus.set(!0);
+        void 0 !== t.ShowStatus && (this.ShowStatus = t.ShowStatus);
+        void 0 !== t.OpacityNum && (this.OpacityNum = t.OpacityNum);
+        void 0 !== t.HEIGHT && (this.HEIGHT = t.HEIGHT);
+        void 0 !== t.BORDER_RADIUS && (this.BORDER_RADIUS = t.BORDER_RADIUS);
+        void 0 !== t.BG_OPACITY && (this.BG_OPACITY = t.BG_OPACITY);
+        void 0 !== t.state && (this.state = t.state);
+        void 0 !== t.ErrorDefaultObj && (this.ErrorDefaultObj = t.ErrorDefaultObj);
+        void 0 !== t.text && (this.text = t.text);
+        void 0 !== t.ReconnectionFunction && (this.ReconnectionFunction = t.ReconnectionFunction);
+        void 0 !== t.ConfigureNetworkFunction && (this.ConfigureNetworkFunction = t.ConfigureNetworkFunction)
+    }
+
+    updateStateVars(t) {
+        this.__Type.reset(t.Type);
+        this.__HardwareStatus.reset(t.HardwareStatus);
+        this.__Icon.reset(t.Icon);
+        this.__TipContent.reset(t.TipContent);
+        this.__ContentText.reset(t.ContentText);
+        this.__ThemeColorStatus.reset(t.ThemeColorStatus)
+    }
+
+    purgeVariableDependenciesOnElmtId(t) {
+        this.__Type.purgeDependencyOnElmtId(t);
+        this.__HardwareStatus.purgeDependencyOnElmtId(t);
+        this.__Icon.purgeDependencyOnElmtId(t);
+        this.__TipContent.purgeDependencyOnElmtId(t);
+        this.__ContentText.purgeDependencyOnElmtId(t);
+        this.__ThemeColorStatus.purgeDependencyOnElmtId(t);
+        this.__ShowStatus.purgeDependencyOnElmtId(t);
+        this.__OpacityNum.purgeDependencyOnElmtId(t);
+        this.__HEIGHT.purgeDependencyOnElmtId(t);
+        this.__BORDER_RADIUS.purgeDependencyOnElmtId(t);
+        this.__BG_OPACITY.purgeDependencyOnElmtId(t);
+        this.__state.purgeDependencyOnElmtId(t);
+        this.__ErrorDefaultObj.purgeDependencyOnElmtId(t);
+        this.__text.purgeDependencyOnElmtId(t)
+    }
+
+    aboutToBeDeleted() {
+        this.__Type.aboutToBeDeleted();
+        this.__HardwareStatus.aboutToBeDeleted();
+        this.__Icon.aboutToBeDeleted();
+        this.__TipContent.aboutToBeDeleted();
+        this.__ContentText.aboutToBeDeleted();
+        this.__ThemeColorStatus.aboutToBeDeleted();
+        this.__ShowStatus.aboutToBeDeleted();
+        this.__OpacityNum.aboutToBeDeleted();
+        this.__HEIGHT.aboutToBeDeleted();
+        this.__BORDER_RADIUS.aboutToBeDeleted();
+        this.__BG_OPACITY.aboutToBeDeleted();
+        this.__state.aboutToBeDeleted();
+        this.__ErrorDefaultObj.aboutToBeDeleted();
+        this.__text.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal()
+    }
+
+    get Type() {
+        return this.__Type.get()
+    }
+
+    set Type(t) {
+        this.__Type.set(t)
+    }
+
+    get HardwareStatus() {
+        return this.__HardwareStatus.get()
+    }
+
+    set HardwareStatus(t) {
+        this.__HardwareStatus.set(t)
+    }
+
+    get Icon() {
+        return this.__Icon.get()
+    }
+
+    set Icon(t) {
+        this.__Icon.set(t)
+    }
+
+    get TipContent() {
+        return this.__TipContent.get()
+    }
+
+    set TipContent(t) {
+        this.__TipContent.set(t)
+    }
+
+    get ContentText() {
+        return this.__ContentText.get()
+    }
+
+    set ContentText(t) {
+        this.__ContentText.set(t)
+    }
+
+    get ThemeColorStatus() {
+        return this.__ThemeColorStatus.get()
+    }
+
+    set ThemeColorStatus(t) {
+        this.__ThemeColorStatus.set(t)
+    }
+
+    get ShowStatus() {
+        return this.__ShowStatus.get()
+    }
+
+    set ShowStatus(t) {
+        this.__ShowStatus.set(t)
+    }
+
+    get OpacityNum() {
+        return this.__OpacityNum.get()
+    }
+
+    set OpacityNum(t) {
+        this.__OpacityNum.set(t)
+    }
+
+    get HEIGHT() {
+        return this.__HEIGHT.get()
+    }
+
+    set HEIGHT(t) {
+        this.__HEIGHT.set(t)
+    }
+
+    get BORDER_RADIUS() {
+        return this.__BORDER_RADIUS.get()
+    }
+
+    set BORDER_RADIUS(t) {
+        this.__BORDER_RADIUS.set(t)
+    }
+
+    get BG_OPACITY() {
+        return this.__BG_OPACITY.get()
+    }
+
+    set BG_OPACITY(t) {
+        this.__BG_OPACITY.set(t)
+    }
+
+    get state() {
+        return this.__state.get()
+    }
+
+    set state(t) {
+        this.__state.set(t)
+    }
+
+    get ErrorDefaultObj() {
+        return this.__ErrorDefaultObj.get()
+    }
+
+    set ErrorDefaultObj(t) {
+        this.__ErrorDefaultObj.set(t)
+    }
+
+    get text() {
+        return this.__text.get()
+    }
+
+    set text(t) {
+        this.__text.set(t)
+    }
+
+    OpacityStatusChange(t) {
+        this.ThemeColorStatus ? this.OpacityNum = .15 : this.OpacityNum = .2
+    }
+
+    TypeStatusChange(t) {
+        if (this.Type) {
+            this.state && 1 !== this.Type && 2 !== this.Type && setTimeout((() => {
+                this.state = !1
+            }), 200);
+            1 !== this.Type && 2 !== this.Type || (this.ShowStatus ? setTimeout((() => {
+                this.state = !0
+            }), 250) : this.state = !0);
+            if (this.ShowStatus) {
+                this.ShowStatus = !1;
+                setTimeout((() => {
+                    this.text = this.ErrorDefaultObj[this.Type];
+                    4 === this.Type && (this.text = `无法获取${this.ContentText}，请点击重试`);
+                    this.ShowStatus = !0
+                }), 200)
+            } else {
+                this.text = this.ErrorDefaultObj[this.Type];
+                4 === this.Type && (this.text = `无法获取${this.ContentText}，请点击重试`);
+                this.ShowStatus = !0
+            }
+        } else this.ShowStatus = !1
+    }
+
+    initialRender() {
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
+            Column.create();
+            Column.width("100%");
+            Column.height(48);
+            Column.position({ y: this.HEIGHT });
+            Column.zIndex(999);
+            e || Column.pop();
+            ViewStackProcessor.StopGetAccessRecording()
+        }));
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
+            Row.create();
+            Context.animation({ duration: 250 });
+            Row.padding({
+                left: {
+                    id: -1,
+                    type: 10002,
+                    params: ["sys.float.ohos_id_max_padding_start"],
+                    bundleName: "",
+                    moduleName: ""
+                },
+                right: {
+                    id: -1,
+                    type: 10002,
+                    params: ["sys.float.ohos_id_max_padding_end"],
+                    bundleName: "",
+                    moduleName: ""
+                }
+            });
+            Row.position({});
+            Row.zIndex(999);
+            Row.opacity(this.ShowStatus ? 1 : 0);
+            Context.animation(null);
+            e || Row.pop();
+            ViewStackProcessor.StopGetAccessRecording()
+        }));
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
+            Column.create();
+            Column.height("100%");
+            Column.width("100%");
+            Column.borderRadius(this.BORDER_RADIUS);
+            Column.backgroundColor({
+                id: -1,
+                type: 10001,
+                params: ["sys.color.ohos_id_color_background"],
+                bundleName: "",
+                moduleName: ""
+            });
+            e || Column.pop();
+            ViewStackProcessor.StopGetAccessRecording()
+        }));
+        Column.pop();
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
+            Column.create();
+            Column.height("100%");
+            Column.width("100%");
+            Column.borderRadius(this.BORDER_RADIUS);
+            Column.backgroundColor({
+                id: -1,
+                type: 10001,
+                params: ["sys.color.ohos_id_color_warning"],
+                bundleName: "",
+                moduleName: ""
+            });
+            Column.opacity(this.OpacityNum);
+            Column.position({});
+            Column.zIndex(999);
+            e || Column.pop();
+            ViewStackProcessor.StopGetAccessRecording()
+        }));
+        Column.pop();
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
+            Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
+            Flex.padding({ left: 12, right: 12 });
+            Flex.position({});
+            Flex.zIndex(999);
+            Flex.width("100%");
+            Flex.height("100%");
+            Flex.onClick((() => {
+                this.HardwareStatus && this.ReconnectionFunction()
+            }));
+            e || Flex.pop();
+            ViewStackProcessor.StopGetAccessRecording()
+        }));
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
+            Flex.create({ alignItems: ItemAlign.Center });
+            Flex.width("100%");
+            Flex.height("100%");
+            e || Flex.pop();
+            ViewStackProcessor.StopGetAccessRecording()
+        }));
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
+            Image.create(this.Icon || PUBLIC_TIPS);
+            Image.width("24vp");
+            Image.height("24vp");
+            Image.fillColor({
+                id: -1,
+                type: 10001,
+                params: ["sys.color.ohos_id_color_warning"],
+                bundleName: "",
+                moduleName: ""
+            });
+            e || Image.pop();
+            ViewStackProcessor.StopGetAccessRecording()
+        }));
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
+            Text.create(this.TipContent || this.text);
+            Text.fontSize({
+                id: -1,
+                type: 10002,
+                params: ["sys.float.ohos_id_text_size_body1"],
+                bundleName: "",
+                moduleName: ""
+            });
+            Text.fontColor({
+                id: -1,
+                type: 10001,
+                params: ["sys.color.ohos_id_color_warning"],
+                bundleName: "",
+                moduleName: ""
+            });
+            Text.margin({ left: 16 });
+            e || Text.pop();
+            ViewStackProcessor.StopGetAccessRecording()
+        }));
+        Text.pop();
+        Flex.pop();
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
+            If.create();
+            this.TipContent ? If.branchId(1) : this.ifElseBranchUpdateFunction(0, (() => {
+                this.observeComponentCreation(((t, e) => {
+                    ViewStackProcessor.StartGetAccessRecordingFor(t);
+                    Flex.create({ alignItems: ItemAlign.Center, justifyContent: FlexAlign.End });
+                    Flex.margin({ left: 16 });
+                    Flex.width(this.state ? 130 : 0);
+                    Flex.height("100%");
+                    Flex.onClick((() => {
+                        this.ConfigureNetworkFunction()
+                    }));
+                    e || Flex.pop();
+                    ViewStackProcessor.StopGetAccessRecording()
+                }));
+                this.observeComponentCreation(((t, e) => {
+                    ViewStackProcessor.StartGetAccessRecordingFor(t);
+                    Text.create("设置网络");
+                    Text.fontSize({
+                        id: -1,
+                        type: 10002,
+                        params: ["sys.float.ohos_id_text_size_body2"],
+                        bundleName: "",
+                        moduleName: ""
+                    });
+                    Text.fontColor({
+                        id: -1,
+                        type: 10001,
+                        params: ["sys.color.ohos_id_color_text_secondary"],
+                        bundleName: "",
+                        moduleName: ""
+                    });
+                    e || Text.pop();
+                    ViewStackProcessor.StopGetAccessRecording()
+                }));
+                Text.pop();
+                this.observeComponentCreation(((t, e) => {
+                    ViewStackProcessor.StartGetAccessRecordingFor(t);
+                    Image.create(RIGHT_ICON);
+                    Image.margin({ left: 4 });
+                    Image.width(15);
+                    Image.height(24);
+                    Image.fillColor({
+                        id: -1,
+                        type: 10001,
+                        params: ["sys.color.ohos_id_color_tertiary"],
+                        bundleName: "",
+                        moduleName: ""
+                    });
+                    e || Image.pop();
+                    ViewStackProcessor.StopGetAccessRecording()
+                }));
+                Flex.pop()
+            }));
+            e || If.pop();
+            ViewStackProcessor.StopGetAccessRecording()
+        }));
+        If.pop();
+        Flex.pop();
+        Row.pop();
+        Column.pop()
+    }
+
+    rerender() {
+        this.updateDirtyElements()
+    }
+}

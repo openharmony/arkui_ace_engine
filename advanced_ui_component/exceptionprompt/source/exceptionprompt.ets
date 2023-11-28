@@ -12,25 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const PUBLIC_TIPS = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAFFklEQVRoQ9VZTVLbMBSW3CFhGU4A7KDdhBMUdoUuiE8AnKDkBMAJgBOUniDpoqE7coOmizbsGk5QL4FOrb5nS46kSJYluzBoJpOFbel97+d7P6LkhS/6wuUnjQEYvNvYJpR2o4isspR0YecOKGcNfvg/g9+EEJowkt6RlIzjr7fjJpRXC0AmdES2KaH7IEzXU6CEUnKV/mWf64AJAoCCU0pPQMvbnkLbXp8wEh3Fox9gJb/lBWDQ63aiPw8njJFD7hryablGU3JHGJuQ6FVCWkuzeDhJAPAauhehLHMrsNgBdy9NWnrF0vQMLIIuV2lVBpBpPaIDTfAE/HrICL0UwlY6FV4a7G72IF7egjKOtW8SlrK4qltVAgCHHYN2TxThGRkzGvVDzC4LjFalj4/nhDC0arEAWD++nl64FOIEMNjbOAWTo/BiJbD5EWw+dG3u83yw96ZLSYoWXhPfMcLO4tHtadk+pQC45kE7xZpw81b2US8QmTUebuCbgtEABAT37ZVtHysArhHcDAMPFgRYq9XHoPQRKuTd4d4mWqJXWCJlO7aYMAJA1oCA/TYXnkxYq73zFMILoYe7mzcSTWNgb5nYyQhguPf6oxRUM/gYNeDlNtz9kC47PCC9YiYP7gdUooiJYW80jXWLLgDgdImuky0u/NjHFQwWxH3WvZWQBzaCyGUh0ZbOegsANNMZUbvA6ErIDmckDmEuzRsmYIUt+XwFACYX4HsMIFxQeEU7ITzPCaDQXB0A3JV+2zxCBSBxPgC52P8y7bu0bXrOXeiX/Mxk/qp7q1agV73RzyPxrQIA6AsPXaujMfxW1xqPJe8YEEJq+yXgRisLADSzKy9V1ZT8HiiDKRZotVfq0LBNuYUF5Kxbx32E0HAg+i1PgpCVRlNn2VKmqM/vN89F4SeXGMWmsp+50ncViwAADGJREswAwHqV72zvaARTsKMEYJ6+QylPcSE1ky7Qny8YzcWL/WQA8wAOSDq6QEo+gdK7dz3d8RVaft8WyGYANQMOD9YSUFBCLAFQxJQMoGANKNxqMQYeLAcdVrIyd4daQmY2QQpmCxhqDt9D5UaoCVbTkmNBCnMAUtCFFHA6QABwCJ0cVLVYhLk7K5eCnEGs8GzFfrTsUJn2mqBlWSGyS84TmdL71vdZzho3oP6EtdtxnSyclSeWOm0OIB+biD6gdinhcgnf53JilPOUvZhrIBf4CmnNwmpjkwBLrguLKgCapD7usx+wHgKNXVaZ8dgBKKMdJaeo/YDqRkFtYO6vaiuYMVHJZKGUDPLeGKuErDDUy5zFllIpwsKC2TBPCqZSxSsMJcliU1+hkXb5dlMW0OexJitaxirKYEkJGpfw4rk0T0Wzn/nGQEHD85K82lgl8+Hc74pGGuxfu5qsClw6H7O4mM5ZBwz20aIW0E8FwjStLutPyoe7Uj3DNfhfR4zc8rLm4V6kfDri7FPV3JDBCL4OKqVLw3jdJTzu5wSg1yFCCNw8XWqf1a5xLNdWjV1wFKyixwR/kAFh0SffCR5SbUTTA8N9GwQsg5sf+52AbMlKFihAZGZmUB6o10H8+QzADFPGvsM98EzM89Gvyf19By79OpCO4bKPwR6Wa9mAaysvACoQ9TrIhyYX3kXBGTQ9AZffQQCkZAXDYNSm0SIuTHjTM4bsekmWlyehsVQLgCwhdmC5e0SrkHrBVbIZK/5wobAz/IGbzfB2vo7QwTHgUulzPG/MAs8hPJ75D1DwJF6CXORhAAAAAElFTkSuQmCC'
-
-const DURATION = 800
-
+const PUBLIC_TIPS = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAA7ZJREFUSEu1VU1oXFUU/s6dSVK1xUlnbmKsKdZCJRFrmZmX5r20ZSIopf51U4pZ6EKlqIgLsViQIioiiuJC8G/ThWJXNSpR/Fm0tJM7mbmv01JMMVASm4AkM2ltK9XMzHtH32RmMOmbl2y82/ud853znXu/Q/ifDwXln0yl1qy79vd+JtoP4G4AdwBwAJom8FmAvoiubR2h48crzfL4EnAqFZ7/c+EAA68DWA9gkgDbJb4gWDgM3gTgHgBbAcwAOBjT6igBvJzoBoJCYmcXqDIMYBsDn7mMT26z1Tm/CucNo9tFyyEwPwtgRITcoejY2NX/YpcQzCaszYI4DUAw0YMdudEzqxnRnGHuJsZXAKZaFkJW5Nypy/W4BsGlROJWB605ELVDVAZkNjuxmuR1zKxhWoLxMwH56PUrgzQ+XvLuGgTFpPUmgw8RYMa0yi5PPm2aN60p0xmAW2Jr27b4DbaYtB5j8DCYX5J25v0GwR/37mgvtzkXGTjSodULfpXPGjvuEuxc8O4qYd7UlclM+eEKSfN7AANoExtkOn2t2kHBsJ4B86eCKhujudy0X2CtiEveXYhLkfW2fcV38MntD7gQPwIYklp9uUiwyNoutepvpjsDVEya3nt3pVYtTXH79oWKkzPzAL6TWg3VCX77t62fpFZPBw12LmkWieDInOoMwhUM81swNkqt7qsTlAj0TkyPvhoYmDAn4BFo1ROEKybMD5jwlNRqXZ3gLzA+lLZ6ObADo18RqCxzalcgLmG+RYQXpVa31AisXwG2Pc0CO0j2j8Aj0GpvMM46Cua4tNWW2iuqahaXWm0I7sDczQ6487T6YQWJJplwXmq1py7RAQAfQwhDZtO6WXAxaT4PZjdmZz5qijEsg5mzxPych6sSXO3riy64oRmAh6XOPO770eLbtwohzlZ/p8u9sdOZ8364uYR5jAh7Kk64uyt/stCwikLSeg3gwyAMypw6sTz48rZUpBJe8PypLEJuz3LXXPxP/Y8C9DUIb8icOrzEi6peU2IFojuZKLVaJ60XUrOSvOeoZS6Zt9v29SUE1QoWd4ECEHHBD3XqjGfdK55i3LqfBX9e3XYc7pP2yd/rQTcsnNo8jgHYBeL3XMHvdo6NzfrqHR/YSSH3IBgPe1sv7NBge37Uc4XG8V+ZgCgY1pMEfhuMDgB5MI0TYYqBCpgJVE0ar8rAdMQJO6/4FRK49Lm3t3Xu5sgjAngCzD0gdHvbDsBFgCeI6BRBfBPNpX9ppmMgwYrirwLwDyWbkigJz8KuAAAAAElFTkSuQmCC'
+const RIGHT_ICON = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAR1JREFUSEvt1E9Kw1AQBvBvxgpexIUbN7pRiHgDKYFuBaWW0jaXiQmxWXgAE72BxVJPIf5ZiAgKQheC6MuUtxCCCzMPkl2zHr4ffJN5hIY/ajgfS6CyYVVF2Vl8WLCZdrqjx8rEPwMqIB9HdwDW2LDX7vefXBAVkCXJOrG5BfAFMjt+N3jWIirAhl2m0YaIzACag4ynRdSARbI03iSRKYAPLeIEWOQqjbcKkQmAd/ON3c5g8PpfXc6ADcuT0z0w3UDk3O8Nj2oHLtJwn4UngIT+yTCoFciScJuYryF4a7UK7+B49FIb0OiSS7/pp8stqJZcPjTXa1YB+Th6ALDqGm53owLsY7eCn1m7F9xrn4jfORXgGlqeXwKV7TVe0QK81HAZuzhflQAAAABJRU5ErkJggg=='
+const Start_DURATION = 250 //动画时长
+const End_DURATION = 200 //动画时长
 @Component
 export struct ExceptionPrompt {
-  @Prop @Watch('TypeStatusChange') type: number //异常提示类型
-  @Prop HardwareStatus: boolean //网络硬件打开状态
-  @Prop Icon: string //异常提示图标
-  @Prop TipContent: string //提示文字内容
-  @Prop ContentText: string //无法获取的文字内容
+  @Prop @Watch('TypeStatusChange') Type: number //异常提示类型
+  @Prop HardwareStatus?: boolean = true //网络硬件打开状态
+  @Prop Icon?: string = '' //异常提示图标
+  @Prop TipContent?: string = '' //提示文字内容
+  @Prop ContentText?: string = 'xxx' //无法获取的文字内容
+  @Prop @Watch('OpacityStatusChange') ThemeColorStatus?: boolean = true //默认浅色背景true  false：深色背景
   @State ShowStatus: boolean = false //异常提示显隐
-  @Prop @Watch('OpacityStatusChange') ThemeColorStatus: boolean //默认浅色背景true  false：深色背景
   @State OpacityNum: number = 0.15 //背景第一层的不透明度
   @State HEIGHT: number = 80 //提示框到顶部的距离
   @State BORDER_RADIUS: number = 12 //提示框的圆角值
-  @State DURATION: number = 1500 //animateTo的duration时间值
+  // @State DURATION: number = 1500 //animateTo的duration时间值
   @State BG_OPACITY: number = 1
   @State state: boolean = false
+  // @State icons?:string=$r('app.media.ic_public_arrow_right1')
   @State ErrorDefaultObj: Object = {
     1: '网络未连接',
     2: '网络连接不稳定，请点击重试',
@@ -38,72 +39,71 @@ export struct ExceptionPrompt {
     4: '无法获取xxx，请点击重试'
   }
   @State text: string = ''
+  // 点击左侧文本触发相关回调
   ReconnectionFunction: () => void = () => {
   }
+  // 点击右侧设置网络触发相关回调
   ConfigureNetworkFunction: () => void = () => {
   }
-
+  // 监听dark背景的变化触发相关业务
   OpacityStatusChange(_propName: boolean): void {
-    // 监听dark背景的变化触发相关业务
+
     if (this.ThemeColorStatus) {
       this.OpacityNum = 0.15
     } else {
       this.OpacityNum = 0.2
     }
   }
-
+  //监听type值的变化触发相关业务
   TypeStatusChange(_propName: string): void {
-    if (this.state && this.type !== 1 && this.type !== 2) {
-      setTimeout(() => {
-        this.state = false
-      }, DURATION)
-    }
-    if (this.type === 1 || this.type === 2) {
-      if (!this.ShowStatus) {
-        this.state = true
-      } else {
+
+    if (this.Type) {
+      if (this.state && this.Type !== 1 && this.Type !== 2) {
         setTimeout(() => {
-          this.state = true
-        }, DURATION)
+          this.state = false
+        }, End_DURATION)
       }
-    }
-    if (this.ShowStatus) {
-      this.ShowStatus = false
-      setTimeout(() => {
-        this.text = this.ErrorDefaultObj[this.type]
-        if (this.type === 4) {
+      if (this.Type === 1 || this.Type === 2) {
+        if (!this.ShowStatus) {
+          this.state = true
+        } else {
+          setTimeout(() => {
+            this.state = true
+          }, Start_DURATION)
+        }
+      }
+      if (this.ShowStatus) {
+        this.ShowStatus = false
+        setTimeout(() => {
+          this.text = this.ErrorDefaultObj[this.Type]
+          if (this.Type === 4) {
+            this.text = `无法获取${this.ContentText}，请点击重试`
+          }
+          this.ShowStatus = true
+        }, End_DURATION)
+      } else {
+        this.text = this.ErrorDefaultObj[this.Type]
+        if (this.Type === 4) {
           this.text = `无法获取${this.ContentText}，请点击重试`
         }
         this.ShowStatus = true
-      }, DURATION)
-    } else {
-      this.text = this.ErrorDefaultObj[this.type]
-      if (this.type === 4) {
-        this.text = `无法获取${this.ContentText}，请点击重试`
       }
-      this.ShowStatus = true
-    }
-  }
-
-  aboutToAppear() {
-    console.log('123:', this.ContentText)
-    if (this.ThemeColorStatus) {
-      this.OpacityNum = 0.15
     } else {
-      this.OpacityNum = 0.2
+      this.ShowStatus = false
     }
   }
 
   build() {
     Column() {
       Row() {
+        // 背景第一层盒子
         Column() {
         }
         .height('100%')
         .width('100%')
         .borderRadius(this.BORDER_RADIUS)
         .backgroundColor($r('sys.color.ohos_id_color_background'))
-
+        // 背景第二层
         Column() {
         }
         .height('100%')
@@ -113,20 +113,18 @@ export struct ExceptionPrompt {
         .opacity(this.OpacityNum)
         .position({})
         .zIndex(999)
-
+        // 异常提示框内容
         Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
           Flex({ alignItems: ItemAlign.Center }) {
-            Image(this.Icon || $r('app.media.ic_public_fail') || PUBLIC_TIPS)
-              .width("24vp")
+            Image(this.Icon || PUBLIC_TIPS)
+              .width('24vp')
               .height('24vp')
-              .margin({
-                right: 16
-              })
-              .objectFit(ImageFit.Contain)
               .fillColor($r('sys.color.ohos_id_color_warning'))
             Text(this.TipContent || this.text)
               .fontSize($r('sys.float.ohos_id_text_size_body1'))
               .fontColor($r('sys.color.ohos_id_color_warning'))
+              .margin({ left: 16 })
+
           }
           .width('100%')
           .height('100%')
@@ -136,14 +134,14 @@ export struct ExceptionPrompt {
               Text('设置网络')
                 .fontSize($r('sys.float.ohos_id_text_size_body2'))
                 .fontColor($r('sys.color.ohos_id_color_text_secondary'))
-              Image($r('app.media.ic_public_arrow_right'))
+              Image(RIGHT_ICON)
                 .margin({ left: 4 })
-                .width('15dp')
-                .height('24dp')
+                .width(15)
+                .height(24)
                 .fillColor($r('sys.color.ohos_id_color_tertiary'))
             }
             .margin({ left: 16 })
-            .width(this.state ? '45%' : 0)
+            .width(this.state ? 130 : 0)
             .height('100%')
             .onClick(() => {
               // 点击设置网络，打开设置网络弹出框
@@ -170,7 +168,7 @@ export struct ExceptionPrompt {
       .position({})
       .zIndex(999)
       .opacity(this.ShowStatus ? 1 : 0)
-      .animation({ duration: DURATION })
+      .animation({ duration: 250 })
     }
     .width('100%')
     .height(48)
