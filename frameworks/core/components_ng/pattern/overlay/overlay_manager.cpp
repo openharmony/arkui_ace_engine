@@ -2552,6 +2552,9 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
             sheetHeight_ = largeHeight;
         } else if (sheetStyle.sheetMode == SheetMode::AUTO) {
             sheetHeight_ = builderGeometryNode->GetFrameSize().Height() + titleGeometryNode->GetFrameSize().Height();
+            if (sheetHeight_ > largeHeight) {
+                sheetHeight_ = largeHeight;
+            }
         }
     } else {
         float height = 0.0f;
