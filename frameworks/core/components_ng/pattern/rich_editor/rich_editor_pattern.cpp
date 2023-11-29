@@ -1309,24 +1309,32 @@ bool RichEditorPattern::HandleUserGestureEvent(
         info.GetLocalLocation().GetY() - GetTextRect().GetY() };
     int32_t start = 0;
     bool isParagraphHead = true;
+    Offset paragraphOffset(0, 0);
     for (const auto& item : spans_) {
         if (!item) {
             continue;
         }
         std::vector<RectF> selectedRects = paragraphs_.GetRects(start, item->position);
         start = item->position;
-        if (isParagraphHead && !selectedRects.empty() && item->leadingMargin.has_value()) {
-            auto addWidth = item->leadingMargin.value().size.Width();
-            selectedRects[0].SetLeft(selectedRects[0].GetX() - addWidth);
-            selectedRects[0].SetWidth(selectedRects[0].GetSize().Width() + addWidth);
+        if (isParagraphHead && !selectedRects.empty()) {
+            if (item->leadingMargin.has_value()) {
+                auto addWidth = item->leadingMargin.value().size.Width();
+                selectedRects[0].SetLeft(selectedRects[0].GetX() - addWidth);
+                selectedRects[0].SetWidth(selectedRects[0].GetSize().Width() + addWidth);
+            }
+            paragraphOffset.SetX(selectedRects[0].GetOffset().GetX());
+            paragraphOffset.SetY(selectedRects[0].GetOffset().GetY());
             isParagraphHead = false;
-        } else if (!isParagraphHead && item->content.back() == '\n') {
+        }
+        if (!isParagraphHead && item->content.back() == '\n') {
             isParagraphHead = true;
         }
         for (auto&& rect : selectedRects) {
             if (!rect.IsInRegion(textOffset)) {
                 continue;
             }
+            info = info.SetScreenLocation(Offset(
+                textOffset.GetX() - paragraphOffset.GetX(), textOffset.GetY() - paragraphOffset.GetY()));
             return gestureFunc(item, info);
         }
     }
