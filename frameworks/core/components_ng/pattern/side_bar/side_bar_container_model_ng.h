@@ -49,9 +49,33 @@ public:
     void SetDividerEndMargin(const Dimension& endMargin) override;
     void SetOnChangeEvent(std::function<void(const bool)>&& onChangeEvent) override;
     void SetMinContentWidth(const Dimension& minContentWidth) override;
+    static void SetSideBarWidth(FrameNode* frameNode, const Dimension& sideBarWidth);
+    static void SetMinSideBarWidth(FrameNode* frameNode, const Dimension& minSideBarWidth);
+    static void SetControlButtonWidth(FrameNode* frameNode, const Dimension& width);
+    static void SetControlButtonHeight(FrameNode* frameNode, const Dimension& height);
+    static void SetControlButtonLeft(FrameNode* frameNode, const Dimension& left);
+    static void SetControlButtonTop(FrameNode* frameNode, const Dimension& top);
+    static void SetControlButtonShowIconInfo(
+        FrameNode* frameNode, const std::string& showIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
+    static void SetControlButtonHiddenIconInfo(
+        FrameNode* frameNode, const std::string& hiddenIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
+    static void SetControlButtonSwitchingIconInfo(
+        FrameNode* frameNode, const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
+    static void SetShowControlButton(FrameNode* frameNode, bool showControlButton);
+    static void SetAutoHide(FrameNode* frameNode, bool autoHide);
+    static void SetMaxSideBarWidth(FrameNode* frameNode, const Dimension& maxSideBarWidth);
+    static void SetMinContentWidth(FrameNode* frameNode, const Dimension& minContentWidth);
+    static void SetSideBarPosition(FrameNode* frameNode, SideBarPosition sideBarPosition);
+    static void SetShowSideBar(FrameNode* frameNode, bool isShow);
+
+    static void SetDividerStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth);
+    static void SetDividerColor(FrameNode* frameNode, const Color& color);
+    static void SetDividerStartMargin(FrameNode* frameNode, const Dimension& startMargin);
+    static void SetDividerEndMargin(FrameNode* frameNode, const Dimension& endMargin);
 
 private:
     void MarkNeedInitRealSideBarWidth() override;
+    static void MarkNeedInitRealSideBarWidth(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SIDE_BAR_CONTAINER_MODEL_H

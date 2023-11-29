@@ -733,6 +733,30 @@ struct ArkUIImageAnimatorModifierAPI {
     void (*ResetImageAnimatorIteration)(NodeHandle node);
 };
 
+struct ArkUISideBarContainerModifierAPI {
+    void (*SetSideBarWidth)(NodeHandle node, const struct StringAndDouble* sideBarWidth);
+    void (*ResetSideBarWidth)(NodeHandle node);
+    void (*SetMinSideBarWidth)(NodeHandle node, const struct StringAndDouble* minSideBarWidth);
+    void (*ResetMinSideBarWidth)(NodeHandle node);
+    void (*SetControlButton)(NodeHandle node, double* values, const struct IconsStruct* sideBarWidth);
+    void (*ResetControlButton)(NodeHandle node);
+    void (*SetShowControlButton)(NodeHandle node, bool isShow);
+    void (*ResetShowControlButton)(NodeHandle node);
+    void (*SetAutoHide)(NodeHandle node, uint32_t value);
+    void (*ResetAutoHide)(NodeHandle node);
+    void (*SetSideBarContainerMaxSideBarWidth)(NodeHandle node, double value, int32_t unit);
+    void (*ResetSideBarContainerMaxSideBarWidth)(NodeHandle node);
+    void (*SetSideBarContainerMinContentWidth)(NodeHandle node, double value, int32_t unit);
+    void (*ResetSideBarContainerMinContentWidth)(NodeHandle node);
+    void (*SetSideBarPosition)(NodeHandle node, int32_t sideBarPosition);
+    void (*ResetSideBarPosition)(NodeHandle node);
+    void (*SetShowSideBar)(NodeHandle node, bool isShow);
+    void (*ResetShowSideBar)(NodeHandle node);
+    void (*SetSideBarContainerDivider)(NodeHandle node, const struct StringAndDouble* strokeWidthStruct, uint32_t color,
+        const struct StringAndDouble* startMarginStruct, const struct StringAndDouble* endMarginStruct);
+    void (*ResetSideBarContainerDivider)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -771,6 +795,7 @@ struct ArkUINodeAPI {
     ArkUIColumnSplitModifierAPI (*GetColumnSplitModifier)();
     ArkUISpanModifierAPI (*GetSpanModifier)();
     ArkUIImageAnimatorModifierAPI (*GetImageAnimatorModifier)();
+    ArkUISideBarContainerModifierAPI (*GetSideBarContainerModifier)();
 };
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H
