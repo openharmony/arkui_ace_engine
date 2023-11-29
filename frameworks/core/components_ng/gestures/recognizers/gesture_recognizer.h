@@ -145,6 +145,11 @@ public:
 
     bool SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
 
+    const WeakPtr<NGGestureRecognizer>& GetGestureGroup() const
+    {
+        return gestureGroup_;
+    }
+
     void SetOnAction(const GestureEventFunc& onAction)
     {
         onAction_ = std::make_unique<GestureEventFunc>(onAction);
