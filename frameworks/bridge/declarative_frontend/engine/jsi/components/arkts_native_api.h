@@ -80,6 +80,12 @@ struct ImagePropertiesStruct {
     char* calc[4];
     int32_t duration;
 };
+
+struct ArkUIFontWeight {
+    int32_t value;
+    const char* valueStr;
+};
+
 typedef void* NodeHandle;
 struct ArkUICommonModifierAPI {
     void (*SetBackgroundColor)(NodeHandle node, uint32_t color);
@@ -558,8 +564,41 @@ struct ArkUIPanelModifierAPI {
 };
 
 struct ArkUITextAreaModifierAPI {
+    void (*SetTextAreaStyle)(NodeHandle node, int32_t style);
+    void (*ResetTextAreaStyle)(NodeHandle node);
+    void (*SetTextAreaSelectionMenuHidden)(NodeHandle node, uint32_t contextMenuHidden);
+    void (*ResetTextAreaSelectionMenuHidden)(NodeHandle node);
     void (*SetTextAreaMaxLines)(NodeHandle node, uint32_t maxLine);
     void (*ResetTextAreaMaxLines)(NodeHandle node);
+    void (*SetTextAreaCopyOption)(NodeHandle node, int32_t copyOptions);
+    void (*ResetTextAreaCopyOption)(NodeHandle node);
+    void (*SetTextAreaPlaceholderColor)(NodeHandle node, const struct ArkUIResourceColorType* colorType);
+    void (*ResetTextAreaPlaceholderColor)(NodeHandle node);
+    void (*SetTextAreaTextAlign)(NodeHandle node, int32_t value);
+    void (*ResetTextAreaTextAlign)(NodeHandle node);
+    void (*SetTextAreaPlaceholderFont)(NodeHandle node, const struct StringAndDouble* size,
+        const struct ArkUIFontWeight* weight, const char* family, int32_t style);
+    void (*ResetTextAreaPlaceholderFont)(NodeHandle node);
+    void (*SetTextAreaBarState)(NodeHandle node, uint32_t barStateValue);
+    void (*ResetTextAreaBarState)(NodeHandle node);
+    void (*SetTextAreaEnableKeyboardOnFocus)(NodeHandle node, uint32_t keyboardOnFocusValue);
+    void (*ResetTextAreaEnableKeyboardOnFocus)(NodeHandle node);
+    void (*SetTextAreaFontFamily)(NodeHandle node, const char* fontFamily);
+    void (*ResetTextAreaFontFamily)(NodeHandle node);
+    void (*SetTextAreaShowCounter)(NodeHandle node, uint32_t value);
+    void (*ResetTextAreaShowCounter)(NodeHandle node);
+    void (*SetTextAreaCaretColor)(NodeHandle node, const struct ArkUIResourceColorType* colorType);
+    void (*ResetTextAreaCaretColor)(NodeHandle node);
+    void (*SetTextAreaMaxLength)(NodeHandle node, int32_t value);
+    void (*ResetTextAreaMaxLength)(NodeHandle node);
+    void (*SetTextAreaFontColor)(NodeHandle node, const struct ArkUIResourceColorType* colorType);
+    void (*ResetTextAreaFontColor)(NodeHandle node);
+    void (*SetTextAreaFontStyle)(NodeHandle node, uint32_t value);
+    void (*ResetTextAreaFontStyle)(NodeHandle node);
+    void (*SetTextAreaFontWeight)(NodeHandle node, uint32_t fontWeight);
+    void (*ResetTextAreaFontWeight)(NodeHandle node);
+    void (*SetTextAreaFontSize)(NodeHandle node, const struct StringAndDouble* size);
+    void (*ResetTextAreaFontSize)(NodeHandle node);
 };
 
 struct ArkUINavigationModifierAPI {
