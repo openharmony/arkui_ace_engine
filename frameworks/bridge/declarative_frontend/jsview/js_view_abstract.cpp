@@ -66,6 +66,7 @@
 #include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/theme/resource_adapter.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
@@ -6546,7 +6547,23 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     int32_t shadowStyle = 0;
     if (ParseJsInteger<int32_t>(jsValue, shadowStyle)) {
         auto style = static_cast<ShadowStyle>(shadowStyle);
-        shadow = Shadow::CreateShadow(style);
+        auto colorMode = SystemProperties::GetColorMode();
+        if (style == ShadowStyle::None) {
+            return true;
+        }
+        
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, false);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        
+        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+        if (!shadowTheme) {
+            LOGW("cannot find theme of shadowStyle, create shadowStyle failed");
+            return false;
+        }
+        
+        shadow = shadowTheme->GetShadow(style, colorMode);
         return true;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);

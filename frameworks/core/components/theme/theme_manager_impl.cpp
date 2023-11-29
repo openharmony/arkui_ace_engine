@@ -14,6 +14,7 @@
  */
 
 #include "core/components/theme/theme_manager_impl.h"
+#include "shadow_theme.h"
 
 #include "core/components/badge/badge_theme.h"
 #include "core/components/button/button_theme.h"
@@ -59,6 +60,7 @@
 #include "core/components/theme/card_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components/theme/resource_adapter.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components/tool_bar/tool_bar_theme.h"
@@ -142,6 +144,7 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::GaugeTheme::TypeId(), &ThemeBuildFunc<NG::GaugeTheme::Builder> },
     { NG::SheetTheme::TypeId(), &ThemeBuildFunc<NG::SheetTheme::Builder> },
     { BlurStyleTheme::TypeId(), &ThemeBuildFunc<BlurStyleTheme::Builder> },
+    { ShadowTheme::TypeId(), &ThemeBuildFunc<ShadowTheme::Builder> }
 };
 } // namespace
 

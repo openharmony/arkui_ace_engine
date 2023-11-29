@@ -95,6 +95,7 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_GAUGE,
     THEME_PATTERN_SHEET,
     THEME_BLUR_STYLE_COMMON,
+    THEME_PATTERN_SHADOW
 };
 
 bool IsDirExist(const std::string& path)
