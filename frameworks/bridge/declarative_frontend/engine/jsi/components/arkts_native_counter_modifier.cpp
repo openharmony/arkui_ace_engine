@@ -21,7 +21,7 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-void SetEnableInc (NodeHandle node, bool enableInc)
+void SetEnableInc(NodeHandle node, bool enableInc)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -33,7 +33,7 @@ void ResetEnableInc(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     CounterModelNG::SetEnableInc(frameNode, true);
 }
-void SetEnableDec (NodeHandle node, bool enableDec)
+void SetEnableDec(NodeHandle node, bool enableDec)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -47,9 +47,8 @@ void ResetEnableDec(NodeHandle node)
 }
 ArkUICounterModifierAPI GetCounterModifier()
 {
-    static const ArkUICounterModifierAPI modifier = { SetEnableInc, ResetEnableInc,
-        SetEnableDec, ResetEnableDec };
+    static const ArkUICounterModifierAPI modifier = { SetEnableInc, ResetEnableInc, SetEnableDec, ResetEnableDec };
 
     return modifier;
 }
-}
+} // namespace OHOS::Ace::NG
