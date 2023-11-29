@@ -1986,7 +1986,7 @@ HWTEST_F(OverlayManagerTestNg, BindSheet004, TestSize.Level1)
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetId);
+        nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     // test node create
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
@@ -1994,8 +1994,8 @@ HWTEST_F(OverlayManagerTestNg, BindSheet004, TestSize.Level1)
     auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
     EXPECT_FALSE(topSheetPattern == nullptr);
     topSheetPattern->sheetThemeType_ = "popup";
-    sheetStyle.sheetType = SheetType::CENTER;
-    EXPECT_EQ(topSheetPattern->GetSheetType(), SheetType::CENTER);
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
+    EXPECT_EQ(topSheetPattern->GetSheetType(), SheetType::SHEET_CENTER);
     topSheetPattern->pageHeight_ = 1000;
     topSheetPattern->sheetMaxWidth_ = 1200;
     overlayManager->sheetHeight_ = 0;
@@ -2024,8 +2024,8 @@ HWTEST_F(OverlayManagerTestNg, BindSheet004, TestSize.Level1)
      * @tc.expected: set sheet page height correctly.
      */
     topSheetPattern->sheetThemeType_ = "auto";
-    sheetStyle.sheetType = SheetType::BOTTOM;
-    EXPECT_EQ(topSheetPattern->GetSheetType(), SheetType::BOTTOM);
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    EXPECT_EQ(topSheetPattern->GetSheetType(), SheetType::SHEET_BOTTOM);
     topSheetPattern->pageHeight_ = 1000;
     SheetHeight detent;
     detent.sheetMode = SheetMode::MEDIUM;
@@ -2131,7 +2131,7 @@ HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
     sheetStyle.sheetTitle = "11";
     sheetStyle.sheetSubtitle = "22";
     overlayManager->BindSheet(true, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle, nullptr,
-        nullptr, nullptr, targetId);
+        nullptr, nullptr, targetNode);
 
     /**
      * @tc.steps: step6. get sheet node, get pattern.
@@ -2141,7 +2141,7 @@ HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
     topSheetPattern->OnDirtyLayoutWrapperSwap(topSheetNode->CreateLayoutWrapper(), DirtySwapConfig());
 
     /**
-     * @tc.steps: step7. Init height ¡¢ sheetDetentHeight and currentOffset.
+     * @tc.steps: step7. Init height , sheetDetentHeight and currentOffset.
      */
     topSheetPattern->sheetDetentHeight_.emplace_back(MINUS_HEIGHT);
     topSheetPattern->height_ = MAX_HEIGHT;
@@ -2154,7 +2154,6 @@ HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
     GestureEvent info;
     info.SetMainDelta(MINUS_HEIGHT);
     topSheetPattern->HandleDragUpdate(info);
-    topSheetPattern->HandleDragEnd({});
     EXPECT_EQ(topSheetPattern->currentOffset_, DEFAULT_HEIGHT);
 
     /**
@@ -2163,7 +2162,6 @@ HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
      */
     info.SetMainDelta(DEFAULT_HEIGHT);
     topSheetPattern->HandleDragUpdate(info);
-    topSheetPattern->HandleDragEnd({});
     EXPECT_EQ(topSheetPattern->currentOffset_, DEFAULT_HEIGHT);
 
     /**
@@ -2193,9 +2191,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea1, TestSize.Level1)
     /**
      * @tc.steps: step1. create sheet node and initialize sheet pattern.
      */
-    auto sheetNode =
-        FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, 1,
-        AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
+    auto sheetNode = FrameNode::CreateFrameNode(
+        V2::SHEET_PAGE_TAG, 1, AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
     ASSERT_NE(sheetNode, nullptr);
     auto dragBarNode = FrameNode::CreateFrameNode(
         "SheetDragBar", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
@@ -2275,9 +2272,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea2, TestSize.Level1)
     /**
      * @tc.steps: step1. create sheet node and initialize sheet pattern.
      */
-    auto sheetNode =
-        FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, 1,
-        AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
+    auto sheetNode = FrameNode::CreateFrameNode(
+        V2::SHEET_PAGE_TAG, 1, AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
     ASSERT_NE(sheetNode, nullptr);
     auto dragBarNode = FrameNode::CreateFrameNode(
         "SheetDragBar", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
