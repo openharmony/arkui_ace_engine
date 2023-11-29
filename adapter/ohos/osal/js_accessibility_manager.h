@@ -127,7 +127,11 @@ public:
         const RefPtr<PipelineBase>& context, const int32_t uiExtensionOffset = 0) override;
     bool ExecuteExtensionActionNG(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, const RefPtr<PipelineBase>& context, int32_t uiExtensionOffset) override;
+#ifdef WEB_SUPPORTED
+    bool ExecuteWebActionNG(int32_t elementId, Accessibility::ActionType action, const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<NG::PipelineContext>& ngPipeline);
     void SetWebAccessibilityState(bool state);
+#endif
 
     std::string GetPagePath();
 
