@@ -64,7 +64,7 @@ ScreenPattern::ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession)
     screenSession_ = screenSession;
     if (screenSession_ != nullptr) {
         screenSession_->SetUpdateToInputManagerCallback(std::bind(&ScreenPattern::UpdateToInputManager,
-            this, std::placeholders::_1, std::placeholders::_2))
+            this, std::placeholders::_1))
     }
 }
 
