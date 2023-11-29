@@ -68,13 +68,10 @@ public:
                 return;
             }
             theme->backgroundColor_ = dialogPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color(0xd9ffffff));
-            auto textColor = dialogPattern->GetAttr<Color>("title_text_color", Color::BLACK);
-            auto textOpacity = dialogPattern->GetAttr<double>("attribute_alpha_content_primary", PRIMARY_RGBA_OPACITY);
-            theme->titleTextStyle_.SetTextColor(textColor.BlendOpacity(textOpacity));
+            theme->titleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("title_text_color", Color::BLACK));
             theme->titleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_fp));
             theme->titleTextStyle_.SetFontWeight(FontWeight::MEDIUM);
-            textOpacity = dialogPattern->GetAttr<double>("attribute_alpha_content_secondary", SECONDARY_RGBA_OPACITY);
-            theme->subtitleTextStyle_.SetTextColor(textColor.BlendOpacity(textOpacity));
+            theme->subtitleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("subtitle_text_color", Color::BLACK));
             theme->subtitleTextStyle_.SetFontSize(
                 dialogPattern->GetAttr<Dimension>("subtitle_text_font_size", 14.0_fp));
             theme->contentTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("content_text_color", Color::BLACK));
