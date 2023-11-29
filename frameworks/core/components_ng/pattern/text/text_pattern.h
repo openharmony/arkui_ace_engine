@@ -309,6 +309,11 @@ public:
         return imageOffset_;
     }
 
+    const OffsetF& GetRightClickOffset() const
+    {
+        return rightClickOffset_;
+    }
+
     bool IsMeasureBoundary() const override
     {
         return isMeasureBoundary_;
@@ -422,7 +427,8 @@ protected:
     virtual void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
-    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool animation);
+    void ShowSelectOverlay(
+        const RectF& firstHandle, const RectF& secondHandle, bool animation, bool isUsingMouse = false);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool IsSelectAll();
     virtual int32_t GetHandleIndex(const Offset& offset) const;
@@ -501,6 +507,7 @@ private:
     std::vector<RectF> rectsForPlaceholders_;
     OffsetF imageOffset_;
 
+    OffsetF rightClickOffset_;
     OffsetF contentOffset_;
     OffsetF parentGlobalOffset_;
     GestureEventFunc onClick_;
