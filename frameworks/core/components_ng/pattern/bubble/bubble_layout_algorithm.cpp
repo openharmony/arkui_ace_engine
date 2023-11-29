@@ -309,10 +309,6 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
     padding_ = popupTheme->GetPadding();
-    paddingStart_ = padding_.Left().ConvertToPx();
-    paddingEnd_ = padding_.Right().ConvertToPx();
-    paddingTop_ = padding_.Top().ConvertToPx();
-    paddingBottom_ = padding_.Bottom().ConvertToPx();
     borderRadius_ = popupTheme->GetRadius().GetX();
     border_.SetBorderRadius(popupTheme->GetRadius());
     targetSpace_ = layoutProp->GetTargetSpace().value_or(popupTheme->GetTargetSpace());
@@ -326,6 +322,12 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
         CreateIdealSize(constraint.value(), Axis::FREE, layoutProp->GetMeasureType(MeasureType::MATCH_PARENT), true);
     wrapperSize_ = wrapperIdealSize;
     targetSecurity_ = HORIZON_SPACING_WITH_SCREEN.ConvertToPx();
+    auto pipelineContext = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
+    wrapperSize_ = SizeF(wrapperSize_.Width(), wrapperSize_.Height() - bottom);
 }
 
 OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool didNeedArrow, bool useArrowOffset)
@@ -510,6 +512,8 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool did
     if (placement_ <= Placement::BOTTOM) {
         step += 1;
     }
+    bVertical_ = false;
+    bHorizontal_ = false;
     for (size_t i = 0, len = currentPlacementStates.size(); i < len;) {
         placement_ = currentPlacementStates[i];
         if (placement_ == Placement::NONE) {
@@ -517,6 +521,18 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool did
         }
         if (bCaretMode_) { // Caret mode
             if ((placement_ != Placement::BOTTOM) && (placement_ != Placement::TOP)) {
+                i++;
+                continue;
+            }
+        }
+        if (bVertical_) {
+            if (setHorizontal_.find(placement_) != setHorizontal_.end()) {
+                i++;
+                continue;
+            }
+        }
+        if (bHorizontal_) {
+            if (setVertical_.find(placement_) != setVertical_.end()) {
                 i++;
                 continue;
             }
@@ -925,6 +941,8 @@ bool BubbleLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& 
             if (childSize.Height() > height) {
                 i += step;
                 return false;
+            } else {
+                bVertical_ = true;
             }
             break;
         }
@@ -936,6 +954,8 @@ bool BubbleLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& 
             if (childSize.Height() > height) {
                 i += step;
                 return false;
+            } else {
+                bVertical_ = true;
             }
             break;
         }
@@ -949,6 +969,8 @@ bool BubbleLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& 
             if (childSize.Width() > width) {
                 i += step;
                 return false;
+            } else {
+                bHorizontal_ = true;
             }
             break;
         }
@@ -960,6 +982,8 @@ bool BubbleLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& 
             if (childSize.Width() > width) {
                 i += step;
                 return false;
+            } else {
+                bHorizontal_ = true;
             }
             break;
         }

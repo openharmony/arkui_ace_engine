@@ -532,7 +532,7 @@ export class PopupComponent extends ViewPU {
         }), Row);
         this.observeComponentCreation2(((t, e) => {
             If.create();
-            this.icon ? this.ifElseBranchUpdateFunction(0, (() => {
+            "" != this.icon.image ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation2(((t, e) => {
                     Image.create(this.getIconImage());
                     Image.width(this.getIconWidth());
@@ -547,7 +547,7 @@ export class PopupComponent extends ViewPU {
         If.pop();
         this.observeComponentCreation2(((t, e) => {
             If.create();
-            this.title ? this.ifElseBranchUpdateFunction(0, (() => {
+            "" != this.title.text ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation2(((t, e) => {
                     Column.create();
                     Column.layoutWeight(1)
@@ -624,9 +624,9 @@ export class PopupComponent extends ViewPU {
                     }))
                 }), Flex);
                 this.observeComponentCreation2(((t, e) => {
-                    var o;
+                    var o, i;
                     If.create();
-                    (null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) ? this.ifElseBranchUpdateFunction(0, (() => {
+                    "" != (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) ? this.ifElseBranchUpdateFunction(0, (() => {
                         this.observeComponentCreation2(((t, e) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());
@@ -655,9 +655,9 @@ export class PopupComponent extends ViewPU {
                 }), If);
                 If.pop();
                 this.observeComponentCreation2(((t, e) => {
-                    var o;
+                    var o, i;
                     If.create();
-                    (null === (o = this.buttons) || void 0 === o ? void 0 : o[1]) ? this.ifElseBranchUpdateFunction(0, (() => {
+                    "" != (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[1]) || void 0 === i ? void 0 : i.text) ? this.ifElseBranchUpdateFunction(0, (() => {
                         this.observeComponentCreation2(((t, e) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());
@@ -748,9 +748,9 @@ export class PopupComponent extends ViewPU {
                     }))
                 }), Flex);
                 this.observeComponentCreation2(((t, e) => {
-                    var o;
+                    var o, i;
                     If.create();
-                    (null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) ? this.ifElseBranchUpdateFunction(0, (() => {
+                    "" != (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) ? this.ifElseBranchUpdateFunction(0, (() => {
                         this.observeComponentCreation2(((t, e) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());
@@ -779,9 +779,9 @@ export class PopupComponent extends ViewPU {
                 }), If);
                 If.pop();
                 this.observeComponentCreation2(((t, e) => {
-                    var o;
+                    var o, i;
                     If.create();
-                    (null === (o = this.buttons) || void 0 === o ? void 0 : o[1]) ? this.ifElseBranchUpdateFunction(0, (() => {
+                    "" != (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[1]) || void 0 === i ? void 0 : i.text) ? this.ifElseBranchUpdateFunction(0, (() => {
                         this.observeComponentCreation2(((t, e) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());
