@@ -97,25 +97,10 @@ void ScreenPattern::UpdateDisplayInfo()
         displayNodeRotation = -displayNodeRotation;
     }
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto paintRect = renderContext->GetPaintRectWithTransform();
-    auto tempHeight = paintRect.Height();
-    auto tempWidth = paintRect.Width();
-    if (displayNodeRotation != DIRECTION0 && displayNodeRotation != DIRECTION180) {
-        auto temp = tempWidth;
-        tempWidth = tempHeight;
-        tempHeight = temp;
-    }
-
-    Rosen::Rect rect = { paintRect.Left(), paintRect.Top(),
-        tempWidth, tempHeight };
-    UpdateToInputManager(rect, displayNodeRotation);
+    UpdateToInputManager(displayNodeRotation);
 }
 
-void ScreenPattern::UpdateToInputManager(Rosen::Rect rect, float rotation)
+void ScreenPattern::UpdateToInputManager(float rotation)
 {
     CHECK_NULL_VOID(screenSession_);
 
@@ -125,11 +110,24 @@ void ScreenPattern::UpdateToInputManager(Rosen::Rect rect, float rotation)
     auto screenProperty = screenSession_->GetScreenProperty();
     auto dpi = screenProperty.GetDefaultDensity() * DOT_PER_INCH;
 
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintRect = renderContext->GetPaintRectWithTransform();
+    auto tempHeight = paintRect.Height();
+    auto tempWidth = paintRect.Width();
+    if (rotation != DIRECTION0 && rotation != DIRECTION180) {
+        auto temp = tempWidth;
+        tempWidth = tempHeight;
+        tempHeight = temp;
+    }
+
     MMI::Rect screenRect = {
-        rect.Left(),
-        rect.Top(),
-        rect.Width(),
-        rect.Height(),
+        paintRect.Left(),
+        paintRect.Top(),
+        tempWidth,
+        tempHeight,
     };
 
     MMI::WindowInfo windowInfo = {
@@ -142,12 +140,6 @@ void ScreenPattern::UpdateToInputManager(Rosen::Rect rect, float rotation)
         .agentWindowId = 0, // root scene id 0
         .flags = 0  // touchable
     };
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto paintRect = renderContext->GetPaintRectWithTransform();
 
     MMI::DisplayInfo displayInfo = {
         .id = screenId,

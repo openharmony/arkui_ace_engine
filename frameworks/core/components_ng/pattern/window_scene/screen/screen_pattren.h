@@ -45,7 +45,7 @@ protected:
 private:
     void UpdateDisplayInfo();
     void DeduplicateDisplayInfo();
-    void UpdateToInputManager(Rosen::Rect rect, float rotation);
+    void UpdateToInputManager(float rotation);
 
     sptr<Rosen::ScreenSession> screenSession_;
 
