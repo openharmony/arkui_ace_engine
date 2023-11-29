@@ -60,6 +60,25 @@ ModelAdapterWrapper::ModelAdapterWrapper(uint32_t key, Render3D::SurfaceType sur
 #endif
 }
 
+void ModelAdapterWrapper::Deinit()
+{
+    ACE_SCOPED_TRACE("ModelAdapterWrapper::Deinit");
+    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
+        ACE_SCOPED_TRACE("ModelAdapterWrapper::Deinit render");
+        auto adapter = weak.Upgrade();
+        CHECK_NULL_VOID(adapter);
+
+        CHECK_NULL_VOID(adapter->widgetAdapter_);
+        adapter->widgetAdapter_->DeInitEngine();
+
+        Render3D::GraphicsManager::GetInstance().UnRegister(adapter->GetKey());
+
+        auto& textureLayer = adapter->textureLayer_;
+        CHECK_NULL_VOID(textureLayer);
+        textureLayer->DestroyRenderTarget();
+    });
+}
+
 void ModelAdapterWrapper::CreateTextureLayer()
 {
     Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
@@ -257,11 +276,7 @@ bool ModelAdapterWrapper::NeedsRepaint()
 
 ModelAdapterWrapper::~ModelAdapterWrapper()
 {
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
-        auto adapter = weak.Upgrade();
-        CHECK_NULL_VOID(adapter);
-        Render3D::GraphicsManager::GetInstance().UnRegister(adapter->GetKey());
-    });
+    // Destroy resource explicitly before destruct
 }
 
 uint32_t ModelAdapterWrapper::GetKey()
