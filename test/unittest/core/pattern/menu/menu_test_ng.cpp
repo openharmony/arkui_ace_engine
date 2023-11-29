@@ -3827,7 +3827,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg006, TestSize.Level1)
     RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     SizeF size(100, 100);
     float clickPosition = 150.0f;
-    menuLayoutAlgorithm->topSpace_ = 200.0f;
+    menuLayoutAlgorithm->topSpace_ = 100.0f;
     auto result = menuLayoutAlgorithm->VerticalLayout(size, clickPosition);
     EXPECT_EQ(result, menuLayoutAlgorithm->topSpace_ - size.Height());
 }
