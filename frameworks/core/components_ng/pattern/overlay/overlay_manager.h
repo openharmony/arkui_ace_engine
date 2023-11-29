@@ -247,12 +247,12 @@ public:
 #endif // ENABLE_DRAG_FRAMEWORK
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear, int32_t targetId);
+        std::function<void()>&& onDisappear, const RefPtr<FrameNode>& targetNode, int32_t sessionId = 0);
 
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildTitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-        std::function<void()>&& shouldDismiss, int32_t targetId);
+        std::function<void()>&& shouldDismiss, const RefPtr<FrameNode>& targetNode);
 
     void CloseSheet(int32_t targetId);
 
@@ -352,7 +352,7 @@ private:
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
     bool DialogInMapHoldingFocus();
     void PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bool isTransitionIn);
-    void FireNavigationStateChange(bool show, const RefPtr<UINode>& node = nullptr);
+    void FireNavigationStateChange(const RefPtr<UINode>& root, bool show, const RefPtr<UINode>& node = nullptr);
     void PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn);
 
     // Key: target Id, Value: PopupInfo
