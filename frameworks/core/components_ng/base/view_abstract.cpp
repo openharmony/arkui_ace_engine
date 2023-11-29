@@ -2166,6 +2166,14 @@ void ViewAbstract::SetLightIlluminated(const uint32_t value)
     ACE_UPDATE_RENDER_CONTEXT(LightIlluminated, value);
 }
 
+void ViewAbstract::SetIlluminatedBorderWidth(const Dimension& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(IlluminatedBorderWidth, value);
+}
+
 void ViewAbstract::SetBloom(const float value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

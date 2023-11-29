@@ -140,8 +140,9 @@ const std::string SHEET_HEIGHT_MEDIUM = "medium";
 const std::string SHEET_HEIGHT_LARGE = "large";
 const std::string SHEET_HEIGHT_AUTO = "auto";
 const std::string SHEET_HEIGHT_FITCONTENT = "fit_content";
-const std::string BLOOM_RADIUI_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_radius";
+const std::string BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
 const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
+const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
 
 constexpr Dimension ARROW_ZERO_PERCENT_VALUE = 0.0_pct;
 constexpr Dimension ARROW_HALF_PERCENT_VALUE = 0.5_pct;
@@ -6084,19 +6085,21 @@ void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
         }
     }
 
-    JSRef<JSVal> illuminated = object->GetProperty("illuminated");
-    if (illuminated->IsNumber()) {
-        uint32_t illuminatedValue = illuminated->ToNumber<uint32_t>();
-        ViewAbstractModel::GetInstance()->SetLightIlluminated(illuminatedValue);
-    }
-
     auto resourceWrapper = CreateResourceWrapper();
     if (!resourceWrapper) {
         return;
     }
-    double bloomRadius = resourceWrapper->GetDoubleByName(BLOOM_RADIUI_SYS_RES_NAME);
+    double bloomRadius = resourceWrapper->GetDoubleByName(BLOOM_RADIUS_SYS_RES_NAME);
     Color bloomColor = resourceWrapper->GetColorByName(BLOOM_COLOR_SYS_RES_NAME);
+    Dimension illuminatedBorderWidth = resourceWrapper->GetDimensionByName(ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME);
 
+    JSRef<JSVal> illuminated = object->GetProperty("illuminated");
+    if (illuminated->IsNumber()) {
+        uint32_t illuminatedValue = illuminated->ToNumber<uint32_t>();
+        ViewAbstractModel::GetInstance()->SetLightIlluminated(illuminatedValue);
+        ViewAbstractModel::GetInstance()->SetIlluminatedBorderWidth(illuminatedBorderWidth);
+    }
+    
     JSRef<JSVal> bloom = object->GetProperty("bloom");
     if (bloom->IsNumber()) {
         float bloomValue = bloom->ToNumber<float>();

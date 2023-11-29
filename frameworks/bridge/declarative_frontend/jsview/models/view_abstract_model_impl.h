@@ -254,6 +254,7 @@ public:
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override {};
     void SetLightIntensity(const float value) override {};
     void SetLightIlluminated(const uint32_t value) override {};
+    void SetIlluminatedBorderWidth(const Dimension& value) override {};
     void SetBloom(const float value) override {};
 };
 
