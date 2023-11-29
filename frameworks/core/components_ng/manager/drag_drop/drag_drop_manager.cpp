@@ -475,7 +475,7 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
 
     if (preTargetFrameNode_) {
         auto preRect = preTargetFrameNode_->GetTransformRectRelativeToWindow();
-        if (!preRect.IsInRegion(PointF(static_cast<float>(point.GetX()), static_cast<float>(point.GetY())))) {
+        if (!preRect.IsInnerRegion(PointF(static_cast<float>(point.GetX()), static_cast<float>(point.GetY())))) {
             PrintDragFrameNode(point, dragFrameNode);
             FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
         }
