@@ -944,6 +944,13 @@ void ViewAbstract::SetDraggable(bool draggable)
     frameNode->SetCustomerDraggable(draggable);
 }
 
+void ViewAbstract::SetDragPreviewOptions(const DragPreviewOption& previewOption)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDragPreviewOptions(previewOption);
+}
+
 void ViewAbstract::SetOnDragStart(
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragStart)
 {

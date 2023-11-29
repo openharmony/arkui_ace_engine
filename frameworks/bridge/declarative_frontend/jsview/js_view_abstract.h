@@ -257,6 +257,7 @@ public:
     static void Pop();
 
     static void JsSetDraggable(bool draggable);
+    static void JsSetDragPreviewOptions(const JSCallbackInfo& info);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static bool ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, NG::DragDropBaseInfo& dragInfo);
     static RefPtr<AceType> ParseDragNode(const JSRef<JSVal>& info);

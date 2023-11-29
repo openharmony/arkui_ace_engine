@@ -30,6 +30,15 @@ namespace OHOS::Ace::NG {
 
 class NGGestureRecognizer;
 
+enum class DragPreviewMode : int32_t {
+    AUTO = 1,
+    DISABLE_SCALE = 2,
+};
+
+typedef struct {
+    DragPreviewMode mode;
+} DragPreviewOption;
+
 class ACE_EXPORT Gesture : public virtual AceType {
     DECLARE_ACE_TYPE(Gesture, AceType);
 

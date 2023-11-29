@@ -400,6 +400,16 @@ public:
         customerSet_ = true;
     }
 
+    void SetDragPreviewOptions(const DragPreviewOption& previewOption)
+    {
+        previewOption_ = previewOption;
+    }
+
+    DragPreviewOption GetDragPreviewOption() const
+    {
+        return previewOption_;
+    }
+
     void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
     {
         builderFunc_ = std::move(buildFunc);
@@ -739,6 +749,8 @@ private:
     RefPtr<FrameNode> overlayNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
+
+    DragPreviewOption previewOption_ { DragPreviewMode::AUTO };
 
     friend class RosenRenderContext;
     friend class RenderContext;

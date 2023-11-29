@@ -229,6 +229,7 @@ public:
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
     static void SetDraggable(bool draggable);
+    static void SetDragPreviewOptions(const DragPreviewOption& previewOption);
     static void SetOnDragStart(
         std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragStart);
     static void SetOnDragEnter(
