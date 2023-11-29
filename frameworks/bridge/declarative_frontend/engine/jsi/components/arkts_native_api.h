@@ -21,6 +21,8 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
+#include "core/event/mouse_event.h"
+#include "core/components/common/properties/decoration.h"
 
 typedef void *NodeHandle;
 constexpr int32_t INVALID_FONT_STYLE = -1;
@@ -272,6 +274,18 @@ struct ArkUICommonModifierAPI {
     void (*ResetResponseRegion)(NodeHandle node);
     void (*SetMouseResponseRegion)(NodeHandle node, const double* values, int32_t length);
     void (*ResetMouseResponseRegion)(NodeHandle node);
+    void (*SetEnabled)(NodeHandle node, bool value);
+    void (*ResetEnabled)(NodeHandle node);
+    void (*SetDraggable)(NodeHandle node, bool value);
+    void (*ResetDraggable)(NodeHandle node);
+    void (*SetAccessibilityGroup)(NodeHandle node, bool value);
+    void (*ResetAccessibilityGroup)(NodeHandle node);
+    void (*SetHoverEffect)(NodeHandle node, int32_t hoverEffectValue);
+    void (*ResetHoverEffect)(NodeHandle node);
+    void (*SetClickEffect)(NodeHandle node, const int32_t level, float scaleValue);
+    void (*ResetClickEffect)(NodeHandle node);
+    void (*SetKeyBoardShortCut)(NodeHandle node, const char* value, const int32_t* keysIntArray, int32_t length);
+    void (*ResetKeyBoardShortCut)(NodeHandle node);
 };
 
 struct ArkUITextModifierAPI {

@@ -442,4 +442,11 @@ void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, cons
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityDescription(description);
 }
+
+void ViewAbstractModelNG::SetAccessibilityGroup(FrameNode* frameNode, bool accessible)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityGroup(accessible);
+}
 } // namespace OHOS::Ace::NG

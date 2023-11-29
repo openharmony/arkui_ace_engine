@@ -2457,4 +2457,74 @@ void ViewAbstract::SetMouseResponseRegion(FrameNode* frameNode, const std::vecto
     gestureHub->MarkResponseRegion(true);
     gestureHub->SetMouseResponseRegion(mouseResponseRegion);
 }
+
+void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    if (eventHub) {
+        eventHub->SetEnabled(enabled);
+    }
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    if (focusHub) {
+        focusHub->SetEnabled(enabled);
+    }
+}
+
+void ViewAbstract::SetDraggable(FrameNode* frameNode, bool draggable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (draggable) {
+        if (!frameNode->IsDraggable()) {
+            gestureHub->InitDragDropEvent();
+        }
+    } else {
+        gestureHub->RemoveDragEvent();
+    }
+    frameNode->SetDraggable(draggable);
+}
+
+void ViewAbstract::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverEffect(hoverEffect);
+}
+
+void ViewAbstract::SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue)
+{
+    ClickEffectInfo clickEffectInfo;
+    clickEffectInfo.level = level;
+    clickEffectInfo.scaleNumber = scaleValue;
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
+}
+
+void ViewAbstract::SetKeyboardShortcut(FrameNode* frameNode,
+    const std::string& value, const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_VOID(frameNode);
+    auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
+    if (value.empty() || (keys.size() == 0 && value.length() == 1)) {
+        eventHub->SetKeyboardShortcut("", 0, nullptr);
+        return;
+    }
+    auto key = eventManager->GetKeyboardShortcutKeys(keys);
+    if ((key == 0 && value.length() == 1) || (key == 0 && keys.size() > 0 && value.length() > 1)) {
+        return;
+    }
+    if (eventManager->IsSameKeyboardShortcutNode(value, key)) {
+        return;
+    }
+    eventHub->SetKeyboardShortcut(value, key, std::move(onKeyboardShortcutAction));
+    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeRef));
+}
 } // namespace OHOS::Ace::NG
