@@ -314,6 +314,58 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityLevel));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityLevel"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityLevel));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDirection));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetDirection));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLayoutWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetLayoutWeight));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLayoutWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetLayoutWeight));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetSize));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetSize));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignSelf"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAlignSelf));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignSelf"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAlignSelf));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAspectRatio"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAspectRatio));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAspectRatio"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAspectRatio));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFlexGrow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetFlexGrow));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFlexGrow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetFlexGrow));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFlexShrink"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetFlexShrink));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFlexShrink"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetFlexShrink));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setConstraintSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetConstraintSize));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetConstraintSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetConstraintSize));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGridOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetGridOffset));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGridOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetGridOffset));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGridSpan"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetGridSpan));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGridSpan"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetGridSpan));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setExpandSafeArea"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetExpandSafeArea));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetExpandSafeArea"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetExpandSafeArea));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignRules"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAlignRules));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignRules"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAlignRules));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFlexBasis"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetFlexBasis));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFlexBasis"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetFlexBasis));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityDescription"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityDescription));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityDescription"),

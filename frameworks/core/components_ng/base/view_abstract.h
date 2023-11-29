@@ -399,6 +399,25 @@ public:
     static void SetMargin(FrameNode *frameNode, const PaddingProperty &value);
     static void SetPadding(FrameNode *frameNode, const CalcLength &value);
     static void SetPadding(FrameNode *frameNode, const PaddingProperty &value);
+    static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
+    static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
+    static void SetAspectRatio(FrameNode *frameNode, float ratio);
+    static void SetAlignSelf(FrameNode* frameNode, FlexAlign value);
+    static void SetFlexBasis(FrameNode* frameNode, const Dimension& value);
+    static void ResetFlexShrink(FrameNode* frameNode);
+    static void SetFlexShrink(FrameNode* frameNode, float value);
+    static void SetFlexGrow(FrameNode* frameNode, float value);
+    static void SetLayoutWeight(FrameNode* frameNode, int32_t value);
+    static void ResetMaxSize(FrameNode* frameNode, bool resetWidth);
+    static void ResetMinSize(FrameNode* frameNode, bool resetWidth);
+    static void SetMinWidth(FrameNode* frameNode, const CalcLength& minWidth);
+    static void SetMaxWidth(FrameNode* frameNode, const CalcLength& maxWidth);
+    static void SetMinHeight(FrameNode* frameNode, const CalcLength& minHeight);
+    static void SetMaxHeight(FrameNode* frameNode, const CalcLength& maxHeight);
+    static void SetAlignRules(FrameNode* frameNode, const std::map<AlignDirection, AlignRule>& alignRules);
+    static void SetGrid(FrameNode* frameNode,
+        std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED);
+    static void ResetAspectRatio(FrameNode* frameNode);
     static void SetAllowDrop(FrameNode* frameNode, const std::set<std::string>& allowDrop);
     static void SetInspectorId(FrameNode* frameNode, const std::string& inspectorId);
     static void SetRestoreId(FrameNode* frameNode, int32_t restoreId);
