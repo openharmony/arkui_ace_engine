@@ -58,6 +58,16 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree)
 }
 } // namespace
 
+
+ScreenPattern::ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession)
+{
+    screenSession_ = screenSession;
+    if (screenSession_ != nullptr) {
+        screenSession_->SetUpdateToInputManagerCallback(std::bind(&ScreenPattern::UpdateToInputManager,
+            this, std::placeholders::_1, std::placeholders::_2))
+    }
+}
+
 void ScreenPattern::OnAttachToFrameNode()
 {
     CHECK_NULL_VOID(screenSession_);
@@ -79,6 +89,35 @@ void ScreenPattern::OnAttachToFrameNode()
 void ScreenPattern::UpdateDisplayInfo()
 {
     CHECK_NULL_VOID(screenSession_);
+    auto displayNode = screenSession_->GetDisplayNode();
+    CHECK_NULL_VOID(displayNode);
+    auto displayNodeRotation = displayNode->GetStagingProperties().GetRotation();
+    // to fix when Scree rotate
+    if (displayNodeRotation < DIRECTION0) {
+        displayNodeRotation = -displayNodeRotation;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintRect = renderContext->GetPaintRectWithTransform();
+    auto tempHeight = paintRect.Height();
+    auto tempWidth = paintRect.Width();
+    if (displayNodeRotation != DIRECTION0 && displayNodeRotation != DIRECTION180) {
+        auto temp = tempWidth;
+        tempWidth = tempHeight;
+        tempHeight = temp;
+    }
+
+    Rosen::Rect rect = { paintRect.Left(), paintRect.Top(),
+        tempWidth, tempHeight };
+    UpdateToInputManager(rect, displayNodeRotation);
+}
+
+void ScreenPattern::UpdateToInputManager(Rosen::Rect rect, float rotation)
+{
+    CHECK_NULL_VOID(screenSession_);
 
     auto pid = getprocpid();
     auto uid = IPCSkeleton::GetCallingUid();
@@ -86,30 +125,11 @@ void ScreenPattern::UpdateDisplayInfo()
     auto screenProperty = screenSession_->GetScreenProperty();
     auto dpi = screenProperty.GetDefaultDensity() * DOT_PER_INCH;
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    auto renderContext = host->GetRenderContext();
-    auto paintRect = renderContext->GetPaintRectWithTransform();
-    auto displayNode = screenSession_->GetDisplayNode();
-
-    auto tempHeight = paintRect.Height();
-    auto tempWidth = paintRect.Width();
-    auto displayNodeRotation = displayNode->GetStagingProperties().GetRotation();
-    if (displayNodeRotation < DIRECTION0) {
-        displayNodeRotation = -displayNodeRotation;
-    }
-    if (displayNodeRotation != DIRECTION0 && displayNodeRotation != DIRECTION180) {
-        auto temp = tempWidth;
-        tempWidth = tempHeight;
-        tempHeight = temp;
-    }
-
     MMI::Rect screenRect = {
-        paintRect.Left(),
-        paintRect.Top(),
-        tempWidth,
-        tempHeight,
+        rect.Left(),
+        rect.Top(),
+        rect.Width(),
+        rect.Height(),
     };
 
     MMI::WindowInfo windowInfo = {
@@ -123,6 +143,12 @@ void ScreenPattern::UpdateDisplayInfo()
         .flags = 0  // touchable
     };
 
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintRect = renderContext->GetPaintRectWithTransform();
+
     MMI::DisplayInfo displayInfo = {
         .id = screenId,
         .x = paintRect.Left(),
@@ -132,7 +158,7 @@ void ScreenPattern::UpdateDisplayInfo()
         .dpi = dpi,
         .name = "display" + std::to_string(screenId),
         .uniq = "default" + std::to_string(screenId),
-        .direction = ConvertDegreeToMMIRotation(displayNodeRotation)
+        .direction = ConvertDegreeToMMIRotation(rotation)
     };
 
     std::lock_guard<std::mutex> lock(g_vecLock);

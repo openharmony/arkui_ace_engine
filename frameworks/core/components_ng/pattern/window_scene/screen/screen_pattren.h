@@ -25,7 +25,7 @@ class ScreenPattern : public StackPattern {
     DECLARE_ACE_TYPE(ScreenPattern, StackPattern);
 
 public:
-    explicit ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession) : screenSession_(screenSession) {}
+    explicit ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession);
     ~ScreenPattern() override = default;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
@@ -45,6 +45,7 @@ protected:
 private:
     void UpdateDisplayInfo();
     void DeduplicateDisplayInfo();
+    void UpdateToInputManager(Rosen::Rect rect, float rotation);
 
     sptr<Rosen::ScreenSession> screenSession_;
 
