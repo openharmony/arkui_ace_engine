@@ -571,7 +571,6 @@ void NavigationModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     // navigation node
     int32_t nodeId = stack->ClaimNodeId();
-    auto theme = NavigationGetTheme();
     ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVIGATION_VIEW_ETS_TAG, nodeId);
     auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
@@ -625,6 +624,18 @@ void NavigationModelNG::Create()
         CHECK_NULL_VOID(navBarLayoutProperty);
         navBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
     }
+    // content node
+    if (!navigationGroupNode->GetContentNode()) {
+        int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId);
+        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId,
+            []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
+        contentNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+        contentNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+            HitTestMode::HTMTRANSPARENT_SELF);
+        navigationGroupNode->AddChild(contentNode);
+        navigationGroupNode->SetContentNode(contentNode);
+    }
 
     // divider node
     if (!navigationGroupNode->GetDividerNode()) {
@@ -642,29 +653,7 @@ void NavigationModelNG::Create()
         auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
         CHECK_NULL_VOID(dividerRenderProperty);
         dividerRenderProperty->UpdateDividerColor(DIVIDER_COLOR);
-        if (theme && theme->GetDividerShadowEnable()) {
-            auto renderContext = dividerNode->GetRenderContext();
-            renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowXS);
-        }
     }
-
-    // content node
-    if (!navigationGroupNode->GetContentNode()) {
-        int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId);
-        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId,
-            []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
-        contentNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-        contentNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
-            HitTestMode::HTMTRANSPARENT_SELF);
-        auto renderContext = contentNode->GetRenderContext();
-        if (theme && !renderContext->HasBackgroundColor()) {
-            renderContext->UpdateBackgroundColor(theme->GetNavigationGroupColor());
-        }
-        navigationGroupNode->AddChild(contentNode);
-        navigationGroupNode->SetContentNode(contentNode);
-    }
-
     stack->Push(navigationGroupNode);
     auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
     if (!navigationLayoutProperty->HasNavigationMode()) {
