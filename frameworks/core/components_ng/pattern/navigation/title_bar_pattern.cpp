@@ -443,17 +443,19 @@ float TitleBarPattern::GetSubtitleOpacity()
 float TitleBarPattern::GetFontSize(float offset)
 {
     auto titleBarHeight = defaultTitleBarHeight_ + offset;
-    auto titleFontSizeDiff = MAX_TITLE_FONT_SIZE - MIN_TITLE_FONT_SIZE;
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_RETURN(theme, 0.0f);
+    auto titleFontSizeDiff = theme->GetTitleFontSizeBig() - theme->GetTitleFontSize();
     auto titleBarHeightDiff = maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     fontSizeRatio_ = titleFontSizeDiff.ConvertToPx() / titleBarHeightDiff;
     auto tempFontSize = static_cast<float>(
         (titleBarHeight - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) * fontSizeRatio_ +
-        MIN_TITLE_FONT_SIZE.ConvertToPx());
-    if (GreatNotEqual(tempFontSize, MAX_TITLE_FONT_SIZE.ConvertToPx())) {
-        tempFontSize = MAX_TITLE_FONT_SIZE.ConvertToPx();
+        theme->GetTitleFontSize().ConvertToPx());
+    if (GreatNotEqual(tempFontSize, theme->GetTitleFontSizeBig().ConvertToPx())) {
+        tempFontSize = theme->GetTitleFontSizeBig().ConvertToPx();
     }
-    if (LessNotEqual(tempFontSize, MIN_TITLE_FONT_SIZE.ConvertToPx())) {
-        tempFontSize = MIN_TITLE_FONT_SIZE.ConvertToPx();
+    if (LessNotEqual(tempFontSize, theme->GetTitleFontSize().ConvertToPx())) {
+        tempFontSize = theme->GetTitleFontSize().ConvertToPx();
     }
     return tempFontSize;
 }
@@ -632,11 +634,9 @@ void TitleBarPattern::SetDefaultTitleFontSize()
     CHECK_NULL_VOID(titleNode);
     auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    if (defaultTitleBarHeight_ == maxTitleBarHeight_) {
-        defaultTitleFontSize_ = textLayoutProperty->GetFontSizeValue(MAX_TITLE_FONT_SIZE);
-    } else {
-        defaultTitleFontSize_ = textLayoutProperty->GetFontSizeValue(MIN_TITLE_FONT_SIZE);
-    }
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    defaultTitleFontSize_ = theme->GetTitleFontSize();
 }
 
 void TitleBarPattern::SetDefaultSubtitleOpacity()
