@@ -110,9 +110,14 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     } else if (sheetType_ == SheetType::SHEET_CENTER) {
         offsetX = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
     } else if (sheetType_ == SheetType::SHEET_POPUP) {
+        auto frameNode = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(frameNode);
+        auto parent = DynamicCast<FrameNode>(frameNode->GetParent());
+        CHECK_NULL_VOID(parent);
+        auto parentOffset = parent->GetPaintRectOffset();
         OffsetF popupStyleSheetOffset = GetPopupStyleSheetOffset();
-        offsetX = popupStyleSheetOffset.GetX();
-        offsetY = popupStyleSheetOffset.GetY();
+        offsetX = popupStyleSheetOffset.GetX() - parentOffset.GetX();
+        offsetY = popupStyleSheetOffset.GetY() - parentOffset.GetY();
     }
     OffsetF positionOffset;
     positionOffset.SetX(offsetX);

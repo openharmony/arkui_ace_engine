@@ -93,18 +93,20 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     sheetMaxHeight_ = sheetLayoutAlgorithm->GetSheetMaxHeight() - statusBarHeight_;
     sheetMaxWidth_ = sheetLayoutAlgorithm->GetSheetMaxWidth();
     centerHeight_ = sheetLayoutAlgorithm->GetCenterHeight();
-
-    if (windowRotate_) {
-        // When rotating the screen,
-        // first switch the sheet to the position corresponding to the proportion before rotation
-        TranslateTo(pageHeight_ - height_);
-        windowRotate_ = false;
-    } else {
-        // After rotation, if need to avoid the keyboard, trigger the avoidance behavior
-        AvoidSafeArea();
+    auto sheetType = GetSheetType();
+    if ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOMLANDSPACE)) {
+        if (windowRotate_) {
+            // When rotating the screen,
+            // first switch the sheet to the position corresponding to the proportion before rotation
+            TranslateTo(pageHeight_ - height_);
+            windowRotate_ = false;
+        } else {
+            // After rotation, if need to avoid the keyboard, trigger the avoidance behavior
+            AvoidSafeArea();
+        }
+        SetColumnMinSize();
     }
     InitialLayoutProps();
-    SetColumnMinSize();
     UpdateDragBarStatus();
     UpdateCloseIconStatus();
     UpdateSheetTitle();
@@ -967,7 +969,9 @@ void SheetPresentationPattern::ClipSheetNode()
 
 void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    if (type == WindowSizeChangeReason::ROTATION) {
+    auto sheetType = GetSheetType();
+    if ((type == WindowSizeChangeReason::ROTATION) &&
+        ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOMLANDSPACE))) {
         windowRotate_ = true;
         firstMeasure_ = true;
         SetColumnMinSize(true);
