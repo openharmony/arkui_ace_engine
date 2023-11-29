@@ -3065,19 +3065,36 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
         return 0;
     }
     int32_t offset = 0;
-    int32_t strIndex = 0;
+    int32_t strIndex = directionMove == 0 ? (originCaretPosition - 1) : originCaretPosition;
     auto wideTextValue = contentController_->GetWideText();
-    for (directionMove == 0 ? strIndex = (originCaretPosition - 1) : strIndex = originCaretPosition;
-         directionMove == 0 ? strIndex >= 0 : strIndex <= textLength;) {
-        if ((wideTextValue[strIndex] >= L'0' && wideTextValue[strIndex] <= L'9') ||
-            (wideTextValue[strIndex] >= L'a' && wideTextValue[strIndex] <= L'z') ||
-            (wideTextValue[strIndex] >= L'A' && wideTextValue[strIndex] <= L'Z')) {
+    if (wideTextValue[strIndex] == L' ') {
+        int32_t wordStart = 0;
+        int32_t wordEnd = 0;
+        if (!paragraph_->GetWordBoundary(strIndex, wordStart, wordEnd)) {
+            return 0;
+        }
+        if (directionMove == 1) {
+            offset += (wordEnd - strIndex);
+            return offset;
+        } else {
+            offset += (strIndex - wordStart + 1); // when move left, actual offset should add 1
+            strIndex = (wordStart - 1);           // when move left, actual index should minus 1
+        }
+    }
+    bool hasJumpBlank = false;
+    for (; directionMove == 0 ? strIndex >= 0 : strIndex <= textLength;) {
+        auto chr = wideTextValue[strIndex];
+        if (StringUtils::IsLetterOrNumberForWchar(chr) || (chr == L' ' && directionMove == 1)) {
+            if (directionMove == 1 && hasJumpBlank && chr != L' ') {
+                return offset;
+            } else if (directionMove == 1 && !hasJumpBlank && chr == L' ') {
+                hasJumpBlank = true;
+            }
             offset++;
         } else {
-            if (offset > 0) {
-                break;
+            if (offset <= 0) {
+                offset = 1;
             }
-            offset = 1;
             break;
         }
         if (directionMove == 0) {
