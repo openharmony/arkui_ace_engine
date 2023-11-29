@@ -6,7 +6,7 @@ class ArkGridContainerComponent extends ArkComponent implements ColumnAttribute 
   justifyContent(value: FlexAlign): ColumnAttribute {
     throw new Error('Method not implemented.');
   }
-  pointLight(value: PointLightStyle): ColumnAttribute{
+  pointLight(value: PointLightStyle): ColumnAttribute {
     throw new Error('Method not implemented.');
   }
 }
@@ -20,5 +20,4 @@ globalThis.GridContainer.attributeModifier = function (modifier) {
   });
   modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
-
-} 
+}

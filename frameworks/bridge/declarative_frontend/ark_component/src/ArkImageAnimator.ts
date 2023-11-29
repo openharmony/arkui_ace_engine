@@ -6,9 +6,16 @@ class ImageAnimatorImagesModifier extends Modifier<ArkImageFrameInfoToArray> {
     if (reset) {
       GetUINativeModule().imageAnimator.resetImages(node);
     } else {
-      GetUINativeModule().imageAnimator.setImages(node, this.value.arrSrc,
-        this.value.arrWidth, this.value.arrHeight, this.value.arrTop, this.value.arrLeft,
-        this.value.arrDuration, this.value.arrSrc.length);
+      GetUINativeModule().imageAnimator.setImages(
+        node,
+        this.value.arrSrc,
+        this.value.arrWidth,
+        this.value.arrHeight,
+        this.value.arrTop,
+        this.value.arrLeft,
+        this.value.arrDuration,
+        this.value.arrSrc.length
+      );
     }
   }
 }
@@ -90,7 +97,7 @@ class ImageAnimatorIterationsModeModifier extends Modifier<number> {
   }
 }
 
-class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<ImageAnimatorAttribute>{
+class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<ImageAnimatorAttribute> {
   images(value: Array<ImageFrameInfo>): ImageAnimatorAttribute {
     if (value && value.length > 0) {
       let isFlag: Boolean = true;
@@ -104,11 +111,11 @@ class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<Ima
         let array: ArkImageFrameInfoToArray = new ArkImageFrameInfoToArray();
         for (let item of value) {
           array.arrSrc.push(<string>item.src);
-          array.arrWidth.push((item.width === undefined || item.width === null) ? 0 : item.width);
-          array.arrHeight.push((item.height === undefined || item.height === null) ? 0 : item.height);
-          array.arrTop.push((item.top === undefined || item.top === null) ? 0 : item.top);
-          array.arrLeft.push((item.left === undefined || item.left === null) ? 0 : item.left);
-          array.arrDuration.push((item.duration === undefined || item.duration === null) ? 0 : item.duration);
+          array.arrWidth.push(item.width === undefined || item.width === null ? 0 : item.width);
+          array.arrHeight.push(item.height === undefined || item.height === null ? 0 : item.height);
+          array.arrTop.push(item.top === undefined || item.top === null ? 0 : item.top);
+          array.arrLeft.push(item.left === undefined || item.left === null ? 0 : item.left);
+          array.arrDuration.push(item.duration === undefined || item.duration === null ? 0 : item.duration);
         }
         modifier(this._modifiers, ImageAnimatorImagesModifier, array);
       } else {
@@ -140,9 +147,7 @@ class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<Ima
     return this;
   }
   preDecode(value: number): ImageAnimatorAttribute {
-    // modifier(this._modifiers, ImageAnimatorPreDecodeModifier, value);
-    // return this;
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
   fillMode(value: FillMode): ImageAnimatorAttribute {
     if (value) {
@@ -172,7 +177,7 @@ class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<Ima
     throw new Error('Method not implemented.');
   }
   monopolizeEvents(monopolize: boolean): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }
 // @ts-ignore
@@ -184,4 +189,4 @@ globalThis.ImageAnimator.attributeModifier = function (modifier) {
   });
   modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
-}
+};

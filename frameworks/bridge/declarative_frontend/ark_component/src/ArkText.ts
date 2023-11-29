@@ -1,6 +1,6 @@
 /// <reference path="./import.ts" />
 class FontColorModifier extends Modifier<number | undefined> {
-  static identity: Symbol = Symbol("fontColor");
+  static identity: Symbol = Symbol('fontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().text.resetFontColor(node);
@@ -11,48 +11,44 @@ class FontColorModifier extends Modifier<number | undefined> {
 }
 
 class FontSizeModifier extends Modifier<number | string> {
-  static identity: Symbol = Symbol("fontSize");
+  static identity: Symbol = Symbol('fontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().text.resetFontSize(node);
-    }
-    else {
+    } else {
       GetUINativeModule().text.setFontSize(node, this.value);
     }
   }
 }
 
 class FontWeightModifier extends Modifier<string> {
-  static identity: Symbol = Symbol("fontWeight");
+  static identity: Symbol = Symbol('fontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().text.resetFontWeight(node);
-    }
-    else {
+    } else {
       GetUINativeModule().text.setFontWeight(node, this.value);
     }
   }
 }
 
 class FontStyleModifier extends Modifier<number> {
-  static identity: Symbol = Symbol("fontStyle");
+  static identity: Symbol = Symbol('fontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().text.resetFontStyle(node);
-    }
-    else {
+    } else {
       GetUINativeModule().text.setFontStyle(node, this.value);
     }
   }
 }
 
 class TextAlignModifier extends Modifier<number> {
-  static identity: Symbol = Symbol("textAlign");
+  static identity: Symbol = Symbol('textAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().text.resetTextAlign(node);
-    }
-    else {
+    } else {
       GetUINativeModule().text.setTextAlign(node, this.value);
     }
   }
@@ -168,7 +164,7 @@ class TextTextOverflowModifier extends Modifier<number> {
   }
 }
 
-class TextBaselineOffsetModifier extends Modifier<number | string>{
+class TextBaselineOffsetModifier extends Modifier<number | string> {
   static identity: symbol = Symbol('textBaselineOffset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -179,7 +175,7 @@ class TextBaselineOffsetModifier extends Modifier<number | string>{
   }
 }
 
-class TextTextCaseModifier extends Modifier<number>{
+class TextTextCaseModifier extends Modifier<number> {
   static identity: symbol = Symbol('textTextCase');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -190,7 +186,7 @@ class TextTextCaseModifier extends Modifier<number>{
   }
 }
 
-class TextTextIndentModifier extends Modifier<number | string>{
+class TextTextIndentModifier extends Modifier<number | string> {
   static identity: symbol = Symbol('textTextIndent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -207,8 +203,15 @@ class TextTextShadowModifier extends Modifier<ArkShadowInfoToArray> {
     if (reset) {
       GetUINativeModule().text.resetTextShadow(node);
     } else {
-      GetUINativeModule().text
-        .setTextShadow(node, this.value.radius, this.value.color, this.value.offsetX, this.value.offsetY, this.value.fill, this.value.radius.length);
+      GetUINativeModule().text.setTextShadow(
+        node,
+        this.value.radius,
+        this.value.color,
+        this.value.offsetX,
+        this.value.offsetY,
+        this.value.fill,
+        this.value.radius.length
+      );
     }
   }
 }
@@ -235,15 +238,15 @@ class TextFontModifier extends Modifier<ArkFont> {
   }
 }
 class ArkTextComponent extends ArkComponent implements TextAttribute {
-    enableDataDetector(enable: boolean): this {
-        throw new Error("Method not implemented.");
-    }
-    dataDetectorConfig(config: any): this {
-        throw new Error("Method not implemented.");
-    }
-    onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-        throw new Error("Method not implemented.");
-    }
+  enableDataDetector(enable: boolean): this {
+    throw new Error('Method not implemented.');
+  }
+  dataDetectorConfig(config: any): this {
+    throw new Error('Method not implemented.');
+  }
+  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
+    throw new Error('Method not implemented.');
+  }
   font(value: Font): TextAttribute {
     let arkValue: ArkFont = new ArkFont();
     if (isLengthType(value.size)) {
@@ -277,8 +280,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   fontSize(value: any): TextAttribute {
     if (!isNumber(value) && !isString(value)) {
       modifier(this._modifiers, FontSizeModifier, undefined);
-    }
-    else {
+    } else {
       modifier(this._modifiers, FontSizeModifier, value);
     }
     return this;
@@ -308,43 +310,36 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     return this;
   }
   fontWeight(value: any): TextAttribute {
-    let fontWeightStr: string = "400";
+    let fontWeightStr: string = '400';
     if (isNumber(value)) {
       if (value === 0) {
-        fontWeightStr = "Lighter"
+        fontWeightStr = 'Lighter';
+      } else if (value === 1) {
+        fontWeightStr = 'Normal';
+      } else if (value === 2) {
+        fontWeightStr = 'Regular';
+      } else if (value === 3) {
+        fontWeightStr = 'Medium';
+      } else if (value === 4) {
+        fontWeightStr = 'Bold';
+      } else if (value === 5) {
+        fontWeightStr = 'Bolder';
+      } else {
+        fontWeightStr = value.toString();
       }
-      else if (value === 1) {
-        fontWeightStr = "Normal"
-      }
-      else if (value === 2) {
-        fontWeightStr = "Regular"
-      }
-      else if (value === 3) {
-        fontWeightStr = "Medium"
-      }
-      else if (value === 4) {
-        fontWeightStr = "Bold"
-      }
-      else if (value === 5) {
-        fontWeightStr = "Bolder"
-      }
-      else {
-        fontWeightStr = value.toString()
-      }
-    }
-    else if (isString(value)) {
-      fontWeightStr = value
+    } else if (isString(value)) {
+      fontWeightStr = value;
     }
     modifier(this._modifiers, FontWeightModifier, fontWeightStr);
     return this;
   }
   textAlign(value: TextAlign): TextAttribute {
-    let textAlignNum = 0
+    let textAlignNum = 0;
     if (isNumber(value)) {
-      textAlignNum = value
+      textAlignNum = value;
     }
     modifier(this._modifiers, TextAlignModifier, textAlignNum);
-    return this
+    return this;
   }
   lineHeight(value: number | string | Resource): TextAttribute {
     if (isLengthType(value)) {
@@ -358,8 +353,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   textOverflow(value: { overflow: TextOverflow }): TextAttribute {
     if (value === null || value === undefined) {
       modifier(this._modifiers, TextTextOverflowModifier, undefined);
-    }
-    else if (isObject(value)) {
+    } else if (isObject(value)) {
       let overflowValue = value.overflow;
       if (isNumber(overflowValue)) {
         if (!(overflowValue in CopyOptions)) {
@@ -402,7 +396,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
       }
       let arkColor: ArkColor = new ArkColor();
       if (arkColor.parseColorValue(value.color)) {
-        arkDecoration.color = arkColor.color
+        arkDecoration.color = arkColor.color;
       }
       modifier(this._modifiers, TextDecorationModifier, arkDecoration);
     }
@@ -440,7 +434,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     }
     return this;
   }
-  draggable(value: boolean): this { 
+  draggable(value: boolean): this {
     if (isBoolean(value)) {
       modifier(this._modifiers, TextDraggableModifier, value);
     } else {
@@ -459,9 +453,13 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
       } else {
         array.radius.push(<number | string>objValue.radius);
         array.color.push(objValue.color);
-        array.offsetX.push((objValue.offsetX === undefined || objValue.offsetX === null) ? 0 : <number | string>objValue.offsetX);
-        array.offsetY.push((objValue.offsetY === undefined || objValue.offsetY === null) ? 0 : <number | string>objValue.offsetY);
-        array.fill.push((objValue.fill === undefined || objValue.fill === null) ? false : objValue.fill);
+        array.offsetX.push(
+          objValue.offsetX === undefined || objValue.offsetX === null ? 0 : <number | string>objValue.offsetX
+        );
+        array.offsetY.push(
+          objValue.offsetY === undefined || objValue.offsetY === null ? 0 : <number | string>objValue.offsetY
+        );
+        array.fill.push(objValue.fill === undefined || objValue.fill === null ? false : objValue.fill);
         modifier(this._modifiers, TextTextShadowModifier, array);
       }
     } else if (Object.getPrototypeOf(value).constructor === Array) {
@@ -477,9 +475,13 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
         for (let objValue of arrayValue) {
           array.radius.push(<number | string>objValue.radius);
           array.color.push(objValue.color);
-          array.offsetX.push((objValue.offsetX === undefined || objValue.offsetX === null) ? 0 : <number | string>objValue.offsetX);
-          array.offsetY.push((objValue.offsetY === undefined || objValue.offsetY === null) ? 0 : <number | string>objValue.offsetY);
-          array.fill.push((objValue.fill === undefined || objValue.fill === null) ? false : objValue.fill);
+          array.offsetX.push(
+            objValue.offsetX === undefined || objValue.offsetX === null ? 0 : <number | string>objValue.offsetX
+          );
+          array.offsetY.push(
+            objValue.offsetY === undefined || objValue.offsetY === null ? 0 : <number | string>objValue.offsetY
+          );
+          array.fill.push(objValue.fill === undefined || objValue.fill === null ? false : objValue.fill);
         }
         modifier(this._modifiers, TextTextShadowModifier, array);
       } else {
@@ -506,16 +508,16 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     return this;
   }
   wordBreak(value: WordBreak): TextAttribute {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
   onCopy(callback: (value: string) => void): TextAttribute {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
   selection(selectionStart: number, selectionEnd: number): TextAttribute {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
   ellipsisMode(value: EllipsisMode): TextAttribute {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }
 
@@ -529,4 +531,4 @@ globalThis.Text.attributeModifier = function (modifier) {
   });
   modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
-}
+};

@@ -43,7 +43,7 @@ class PatternLockRegularColorModifier extends Modifier<number> {
   }
 }
 
-class PatternLockSideLengthModifier extends Modifier<number|string> {
+class PatternLockSideLengthModifier extends Modifier<number | string> {
   static identity: Symbol = Symbol('patternLockSideLength');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -91,9 +91,9 @@ class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribu
   sideLength(value: Length): PatternLockAttribute {
     let arkValue = 288;
     if (isLengthType(value)) {
-      let _value :number|string = <number | string>value;
+      let _value: number | string = <number | string>value;
       modifier(this._modifiers, PatternLockSideLengthModifier, _value);
-    }else{
+    } else {
       modifier(this._modifiers, PatternLockSideLengthModifier, arkValue);
     }
     return this;
@@ -101,7 +101,7 @@ class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribu
   circleRadius(value: Length): PatternLockAttribute {
     let arkValue = 6;
     if (isLengthType(value)) {
-      let _value :number|string = <number | string>value;
+      let _value: number | string = <number | string>value;
       modifier(this._modifiers, PatternLockSideLengthModifier, _value);
     } else {
       modifier(this._modifiers, PatternLockCircleRadiusModifier, arkValue);
@@ -147,14 +147,14 @@ class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribu
   pathStrokeWidth(value: number | string): PatternLockAttribute {
     let arkValue = 12;
     if (isLengthType(value)) {
-      let _value :number|string = <number | string>value;
+      let _value: number | string = <number | string>value;
       modifier(this._modifiers, PatternLockPathStrokeModifier, _value);
     } else {
       modifier(this._modifiers, PatternLockPathStrokeModifier, arkValue);
     }
-    
+
     return this;
-  } 
+  }
 
   autoReset(value: boolean): PatternLockAttribute {
     let arkValue = false;
@@ -163,14 +163,17 @@ class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribu
     }
     modifier(this._modifiers, PatternLockAutoResetModifier, arkValue);
     return this;
-  }  onPatternComplete(callback: (input: Array<number>) => void): PatternLockAttribute {
+  }
+  onPatternComplete(callback: (input: Array<number>) => void): PatternLockAttribute {
     throw new Error('Method not implemented.');
   }
-  onDotConnect(callback: import('../../../../../../../../../openharmony/out/sdk/ohos-sdk/windows/ets/api/@ohos.base').Callback<number>): PatternLockAttribute{
+  onDotConnect(
+    callback: import('../../../../../../../../../openharmony/out/sdk/ohos-sdk/windows/ets/api/@ohos.base').Callback<number>
+  ): PatternLockAttribute {
     throw new Error('Method not implemented.');
   }
   monopolizeEvents(monopolize: boolean): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }
 // @ts-ignore
@@ -182,4 +185,4 @@ globalThis.PatternLock.attributeModifier = function (modifier) {
   });
   modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
-}
+};
