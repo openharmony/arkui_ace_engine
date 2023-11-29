@@ -963,6 +963,7 @@ public:
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
     bool IsInPasswordMode() const;
+    bool IsShowCancelButtonMode() const;
 
     bool GetShowSelect() const
     {
