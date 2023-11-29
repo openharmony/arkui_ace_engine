@@ -337,7 +337,7 @@ export struct PopupComponent {
 
   build() {
     Row() {
-      if (this.icon) {
+      if (this.icon.image !== "") {
         Image(this.getIconImage())
           .width(this.getIconWidth())
           .height(this.getIconHeight())
@@ -345,7 +345,7 @@ export struct PopupComponent {
           .fillColor(this.getIconFillColor())
           .borderRadius(this.getIconBorderRadius())
       }
-      if (this.title) {
+      if (this.title.text !== '') {
         Column() {
           Flex({ alignItems: ItemAlign.Start }) {
             Text(this.getTitleText())
@@ -401,7 +401,7 @@ export struct PopupComponent {
           .constraintSize({ maxHeight: this.getScrollMaxHeight() })
 
           Flex({ wrap: FlexWrap.Wrap }) {
-            if (this.buttons?.[0]) {
+            if (this.buttons?.[0]?.text !== '') {
               Button() {
                 Text(this.getFirstButtonText())
                   .maxLines(2)
@@ -427,7 +427,7 @@ export struct PopupComponent {
                 }
               })
             }
-            if (this.buttons?.[1]) {
+            if (this.buttons?.[1]?.text !== '') {
               Button() {
                 Text(this.getSecondButtonText())
                   .maxLines(2)
@@ -505,7 +505,7 @@ export struct PopupComponent {
           .margin(this.getTitleMargin())
 
           Flex({ wrap: FlexWrap.Wrap }) {
-            if (this.buttons?.[0]) {
+            if (this.buttons?.[0]?.text !== '') {
               Button() {
                 Text(this.getFirstButtonText())
                   .maxLines(2)
@@ -531,7 +531,7 @@ export struct PopupComponent {
                 }
               })
             }
-            if (this.buttons?.[1]) {
+            if (this.buttons?.[1]?.text !== '') {
               Button() {
                 Text(this.getSecondButtonText())
                   .maxLines(2)
