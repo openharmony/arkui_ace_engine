@@ -134,134 +134,7 @@ public:
                 return theme;
             }
             theme = AceType::Claim(new CalendarTheme());
-            theme->calendarTheme_.weekFontSize = themeConstants->GetDimension(THEME_CALENDAR_WEEK_FONT_SIZE);
-            theme->calendarTheme_.dayFontSize = themeConstants->GetDimension(THEME_CALENDAR_DAY_FONT_SIZE);
-            theme->calendarTheme_.lunarDayFontSize = themeConstants->GetDimension(THEME_CALENDAR_LUNAR_FONT_SIZE);
-            theme->calendarTheme_.weekColor = themeConstants->GetColor(THEME_CALENDAR_WEEK_COLOR);
-            theme->calendarTheme_.dayColor = themeConstants->GetColor(THEME_CALENDAR_DAY_COLOR);
-            theme->calendarTheme_.lunarColor = themeConstants->GetColor(THEME_CALENDAR_LUNAR_COLOR);
-            theme->calendarTheme_.weekendDayColor = themeConstants->GetColor(THEME_CALENDAR_WEEKEND_DAY_COLOR);
-            theme->calendarTheme_.weekendLunarColor = themeConstants->GetColor(THEME_CALENDAR_WEEKEND_LUNAR_COLOR);
-            theme->calendarTheme_.todayColor = themeConstants->GetColor(THEME_CALENDAR_TODAY_DAY_COLOR);
-            theme->calendarTheme_.todayLunarColor = themeConstants->GetColor(THEME_CALENDAR_TODAY_LUNAR_COLOR);
-            theme->calendarTheme_.nonCurrentMonthDayColor =
-                themeConstants->GetColor(THEME_CALENDAR_NON_CURRENT_MONTH_DAY_COLOR);
-            theme->calendarTheme_.nonCurrentMonthLunarColor =
-                themeConstants->GetColor(THEME_CALENDAR_NON_CURRENT_MONTH_LUNAR_COLOR);
-            theme->calendarTheme_.workDayMarkSize =
-                themeConstants->GetDimension(THEME_CALENDAR_WORK_DAY_MARK_FONT_SIZE);
-            theme->calendarTheme_.offDayMarkSize = themeConstants->GetDimension(THEME_CALENDAR_OFF_DAY_MARK_FONT_SIZE);
-            theme->calendarTheme_.workDayMarkColor = themeConstants->GetColor(THEME_CALENDAR_WORK_DAY_MARK_COLOR);
-            theme->calendarTheme_.offDayMarkColor = themeConstants->GetColor(THEME_CALENDAR_OFF_DAY_MARK_COLOR);
-            theme->calendarTheme_.nonCurrentMonthWorkDayMarkColor =
-                themeConstants->GetColor(THEME_CALENDAR_NOT_CURRENT_MONTH_WORK_DAY_MARK_COLOR);
-            theme->calendarTheme_.nonCurrentMonthOffDayMarkColor =
-                themeConstants->GetColor(THEME_CALENDAR_NOT_CURRENT_MONTH_OFF_DAY_MARK_COLOR);
-            theme->calendarTheme_.focusedDayColor = themeConstants->GetColor(THEME_CALENDAR_FOCUSED_DAY_COLOR);
-            theme->calendarTheme_.focusedLunarColor = themeConstants->GetColor(THEME_CALENDAR_FOCUSED_LUNAR_COLOR);
-            theme->calendarTheme_.focusedAreaRadius = themeConstants->GetDimension(THEME_CALENDAR_FOCUSED_AREA_RADIUS);
-            theme->calendarTheme_.focusedAreaBackgroundColor =
-                themeConstants->GetColor(THEME_CALENDAR_FOCUSED_AREA_BACKGROUND_COLOR);
-            theme->calendarTheme_.topPadding = themeConstants->GetDimension(THEME_CALENDAR_TOP_PADDING);
-            theme->calendarTheme_.workStateWidth = themeConstants->GetDimension(THEME_CALENDAR_WORK_STATE_WIDTH);
-            theme->calendarTheme_.workStateHorizontalMovingDistance =
-                themeConstants->GetDimension(THEME_CALENDAR_WORK_STATE_HORIZONTAL_MOVING_DISTANCE);
-            theme->calendarTheme_.workStateVerticalMovingDistance =
-                themeConstants->GetDimension(THEME_CALENDAR_WORK_STATE_VERTICAL_MOVING_DISTANCE);
-            theme->calendarTheme_.colSpace = themeConstants->GetDimension(THEME_CALENDAR_COL_SPACE);
-            theme->calendarTheme_.weekHeight = themeConstants->GetDimension(THEME_CALENDAR_WEEK_HEIGHT);
-            theme->calendarTheme_.dayHeight = themeConstants->GetDimension(THEME_CALENDAR_DAY_HEIGHT);
-            theme->calendarTheme_.weekWidth = themeConstants->GetDimension(THEME_CALENDAR_WEEK_WIDTH);
-            theme->calendarTheme_.dayWidth = themeConstants->GetDimension(THEME_CALENDAR_DAY_WIDTH);
-            theme->calendarTheme_.weekAndDayRowSpace =
-                themeConstants->GetDimension(THEME_CALENDAR_WEEK_AND_DAY_ROW_SPACE);
-            theme->calendarTheme_.dailyFiveRowSpace = themeConstants->GetDimension(THEME_CALENDAR_DAILY_FIVE_ROW_SPACE);
-            theme->calendarTheme_.dailySixRowSpace = themeConstants->GetDimension(THEME_CALENDAR_DAILY_SIX_ROW_SPACE);
-            theme->calendarTheme_.gregorianCalendarHeight =
-                themeConstants->GetDimension(THEME_CALENDAR_GREGORIAN_CALENDAR_HEIGHT);
-            theme->calendarTheme_.blurAreaBackgroundColor =
-                themeConstants->GetColor(THEME_CALENDAR_BLUR_AREA_BACKGROUND_COLOR);
-            theme->calendarTheme_.dayFontWeight = themeConstants->GetString(THEME_CALENDAR_DAY_FONT_WIGHT);
-            theme->calendarTheme_.lunarDayFontWeight = themeConstants->GetString(THEME_CALENDAR_LUNAR_DAY_FONT_WIGHT);
-            theme->calendarTheme_.workStateFontWeight = themeConstants->GetString(THEME_CALENDAR_WORK_STATE_FONT_WIGHT);
-            theme->calendarTheme_.workStateOffset =
-                themeConstants->GetDimension(THEME_CALENDAR_WORK_STATE_CENTER_ADJUSTMENT);
-            theme->calendarTheme_.dayYAxisOffset = themeConstants->GetDimension(THEME_CALENDAR_DAY_YAXIS_OFFSET);
-            theme->calendarTheme_.lunarDayYAxisOffset =
-                themeConstants->GetDimension(THEME_CALENDAR_LUNAR_DAY_YAXIS_OFFSET);
-            theme->calendarTheme_.underscoreXAxisOffset =
-                themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_XAXIS_OFFSET);
-            theme->calendarTheme_.underscoreYAxisOffset =
-                themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_YAXIS_OFFSET);
-            theme->calendarTheme_.scheduleMarkerXAxisOffset =
-                themeConstants->GetDimension(THEME_CALENDAR_SCHEDULE_MARKER_XAXIS_OFFSET);
-            theme->calendarTheme_.scheduleMarkerYAxisOffset =
-                themeConstants->GetDimension(THEME_CALENDAR_SCHEDULE_MARKER_YAXIS_OFFSET);
-            theme->calendarTheme_.touchCircleStrokeWidth =
-                themeConstants->GetDimension(THEME_CALENDAR_TOUCH_CIRCLE_STROKE_WIDTH);
-            theme->calendarTheme_.lunarHeight = themeConstants->GetDimension(THEME_CALENDAR_LUNAR_HEIGHT);
-            theme->calendarTheme_.underscoreWidth = themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_WIDTH);
-            theme->calendarTheme_.underscoreLength = themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_LENGTH);
-            theme->calendarTheme_.scheduleMarkerRadius =
-                themeConstants->GetDimension(THEME_CALENDAR_SCHEDULE_MARKER_RADIUS);
-
-            theme->cardCalendarTheme_.titleTextColor = themeConstants->GetColor(THEME_CARD_CALENDAR_TITLE_TEXT_COLOR);
-            theme->cardCalendarTheme_.arrowHeight = themeConstants->GetDimension(THEME_CARD_CALENDAR_ARROW_HEIGHT);
-            theme->cardCalendarTheme_.arrowWidth = themeConstants->GetDimension(THEME_CARD_CALENDAR_ARROW_WIDTH);
-            theme->cardCalendarTheme_.buttonHeight = themeConstants->GetDimension(THEME_CARD_CALENDAR_BUTTON_HEIGHT);
-            theme->cardCalendarTheme_.buttonWidth = themeConstants->GetDimension(THEME_CARD_CALENDAR_BUTTON_WIDTH);
-            theme->cardCalendarTheme_.titleFontSize = themeConstants->GetDimension(THEME_CARD_CALENDAR_TITLE_FONT_SIZE);
-            theme->cardCalendarTheme_.weekColor = themeConstants->GetColor(THEME_CARD_CALENDAR_WEEK_COLOR);
-            theme->cardCalendarTheme_.dayColor = themeConstants->GetColor(THEME_CARD_CALENDAR_DAY_COLOR);
-            theme->cardCalendarTheme_.weekendDayColor = themeConstants->GetColor(THEME_CARD_CALENDAR_WEEKEND_DAY_COLOR);
-            theme->cardCalendarTheme_.nonCurrentMonthDayColor =
-                themeConstants->GetColor(THEME_CARD_CALENDAR_NON_CURRENT_MONTH_DAY_COLOR);
-            theme->cardCalendarTheme_.focusedAreaBackgroundColor =
-                themeConstants->GetColor(THEME_CARD_CALENDAR_FOCUS_AREA_BACKGROUND_COLOR);
-            theme->cardCalendarTheme_.focusedDayColor = themeConstants->GetColor(THEME_CARD_CALENDAR_FOCUS_DAY_COLOR);
-            theme->cardCalendarTheme_.touchColor = themeConstants->GetColor(THEME_CARD_CALENDAR_TOUCH_COLOR);
-            theme->cardCalendarTheme_.topPadding = themeConstants->GetDimension(THEME_CARD_CALENDAR_TOP_PADDING);
-            theme->cardCalendarTheme_.weekHeight = themeConstants->GetDimension(THEME_CARD_CALENDAR_WEEK_HEIGHT);
-            theme->cardCalendarTheme_.dayHeight = themeConstants->GetDimension(THEME_CARD_CALENDAR_DAY_HEIGHT);
-            theme->cardCalendarTheme_.weekWidth = themeConstants->GetDimension(THEME_CARD_CALENDAR_WEEK_WIDTH);
-            theme->cardCalendarTheme_.dayWidth = themeConstants->GetDimension(THEME_CARD_CALENDAR_DAY_WIDTH);
-            theme->cardCalendarTheme_.focusedAreaRadius =
-                themeConstants->GetDimension(THEME_CARD_CALENDAR_FOCUS_AREA_RADIUS);
-            theme->cardCalendarTheme_.weekFontSize = themeConstants->GetDimension(THEME_CARD_CALENDAR_WEEK_FONT_SIZE);
-            theme->cardCalendarTheme_.dayFontSize = themeConstants->GetDimension(THEME_CARD_CALENDAR_DAY_FONT_SIZE);
-            theme->cardCalendarTheme_.lunarColor = themeConstants->GetColor(THEME_CARD_CALENDAR_LUNAR_COLOR);
-            theme->cardCalendarTheme_.weekendLunarColor =
-                themeConstants->GetColor(THEME_CARD_CALENDAR_WEEKEND_LUNAR_COLOR);
-            theme->cardCalendarTheme_.nonCurrentMonthLunarColor =
-                themeConstants->GetColor(THEME_CARD_CALENDAR_NON_CURRENT_MONTH_LUNAR_COLOR);
-            theme->cardCalendarTheme_.gregorianCalendarHeight =
-                themeConstants->GetDimension(THEME_CARD_CALENDAR_GREGORIAN_CALENDAR_HEIGHT);
-            theme->cardCalendarTheme_.lunarDayFontSize =
-                themeConstants->GetDimension(THEME_CARD_CALENDAR_LUNAR_FONT_SIZE);
-            theme->cardCalendarTheme_.workDayMarkColor =
-                themeConstants->GetColor(THEME_CARD_CALENDAR_WORK_DAY_MARK_COLOR);
-            theme->cardCalendarTheme_.weekAndDayRowSpace =
-                themeConstants->GetDimension(THEME_CARD_CALENDAR_WEEK_AND_DAY_ROW_SPACE);
-            theme->cardCalendarTheme_.dailyFiveRowSpace =
-                themeConstants->GetDimension(THEME_CARD_CALENDAR_DAILY_FIVE_ROW_SPACE);
-            theme->cardCalendarTheme_.dayYAxisOffset = themeConstants->GetDimension(THEME_CALENDAR_DAY_YAXIS_OFFSET);
-            theme->cardCalendarTheme_.lunarDayYAxisOffset =
-                themeConstants->GetDimension(THEME_CALENDAR_LUNAR_DAY_YAXIS_OFFSET);
-            theme->cardCalendarTheme_.underscoreXAxisOffset =
-                themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_XAXIS_OFFSET);
-            theme->cardCalendarTheme_.underscoreYAxisOffset =
-                themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_YAXIS_OFFSET);
-            theme->cardCalendarTheme_.scheduleMarkerXAxisOffset =
-                themeConstants->GetDimension(THEME_CALENDAR_SCHEDULE_MARKER_XAXIS_OFFSET);
-            theme->cardCalendarTheme_.scheduleMarkerYAxisOffset =
-                themeConstants->GetDimension(THEME_CALENDAR_SCHEDULE_MARKER_YAXIS_OFFSET);
-            theme->cardCalendarTheme_.lunarHeight = themeConstants->GetDimension(THEME_CALENDAR_LUNAR_HEIGHT);
-            theme->cardCalendarTheme_.underscoreWidth = themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_WIDTH);
-            theme->cardCalendarTheme_.underscoreLength = themeConstants->GetDimension(THEME_CALENDAR_UNDERSCORE_LENGTH);
-            theme->cardCalendarTheme_.scheduleMarkerRadius =
-                themeConstants->GetDimension(THEME_CALENDAR_SCHEDULE_MARKER_RADIUS);
-            theme->cardCalendarTheme_.boundaryColOffset =
-                themeConstants->GetDimension(THEME_CARD_CALENDAR_BOUNDARY_COL_OFFSET);
+            ParseNewPattern(themeConstants->GetThemeStyle(), theme);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -411,6 +284,114 @@ public:
                 "calendar_day_key_focused_pen_width", 0.0_vp);
             theme->entryFontSize_ = pattern->GetAttr<Dimension>("calendar_picker_entry_font_size", 0.0_fp);
             theme->dialogBorderRadius_ = pattern->GetAttr<Dimension>("calendar_picker_dialog_border_radius", 0.0_vp);
+        }
+
+        void ParseNewPattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<CalendarTheme>& theme) const
+        {
+            if (!themeStyle) {
+                LOGW("Calendar parse pattern failed, themeStyle is invalid.");
+                return;
+            }
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_CALENDAR, nullptr);
+            if (!pattern) {
+                LOGW("find pattern of calendar fail");
+                return;
+            }
+            theme->calendarTheme_.weekFontSize = pattern->GetAttr<Dimension>("calendar_week_font_size", 14.0_fp);
+            theme->calendarTheme_.dayFontSize = pattern->GetAttr<Dimension>("calendar_day_font_size", 18.0_fp);
+            theme->calendarTheme_.lunarDayFontSize = pattern->GetAttr<Dimension>("calendar_lunar_font_size", 12.0_fp);
+            theme->calendarTheme_.workDayMarkSize =
+                pattern->GetAttr<Dimension>("calendar_work_day_mark_font_size", 10.0_fp);
+            theme->calendarTheme_.offDayMarkSize =
+                pattern->GetAttr<Dimension>("calendar_off_day_mark_font_size", 10.0_fp);
+            theme->calendarTheme_.focusedAreaRadius =
+                pattern->GetAttr<Dimension>("calendar_focused_area_radius", 24.0_vp);
+            theme->calendarTheme_.topPadding = pattern->GetAttr<Dimension>("top_padding", 16.0_vp);
+            theme->calendarTheme_.workStateWidth = pattern->GetAttr<Dimension>("work_state_width", 16.0_vp);
+            theme->calendarTheme_.workStateHorizontalMovingDistance =
+                pattern->GetAttr<Dimension>("work_state_horizontal_moving_distance", 2.0_vp);
+            theme->calendarTheme_.workStateVerticalMovingDistance =
+                pattern->GetAttr<Dimension>("work_state_vertical_moving_distance", 16.0_vp);
+            theme->calendarTheme_.colSpace = pattern->GetAttr<Dimension>("column_space", 39.0_vp);
+            theme->calendarTheme_.weekHeight = pattern->GetAttr<Dimension>("week_height", 19.0_vp);
+            theme->calendarTheme_.dayHeight = pattern->GetAttr<Dimension>("day_height", 41.0_vp);
+            theme->calendarTheme_.weekWidth = pattern->GetAttr<Dimension>("week_width", 48.0_vp);
+            theme->calendarTheme_.dayWidth = pattern->GetAttr<Dimension>("day_width", 48.0_vp);
+            theme->calendarTheme_.weekAndDayRowSpace = pattern->GetAttr<Dimension>("week_and_day_space", 12.0_vp);
+            theme->calendarTheme_.dailyFiveRowSpace = pattern->GetAttr<Dimension>("five_row_space", 20.0_vp);
+            theme->calendarTheme_.dailySixRowSpace = pattern->GetAttr<Dimension>("six_row_space", 10.0_vp);
+            theme->calendarTheme_.gregorianCalendarHeight = pattern->GetAttr<Dimension>("gregorian_height", 25.0_vp);
+            theme->calendarTheme_.dayFontWeight = pattern->GetAttr<std::string>("day_font_weight", "500");
+            theme->calendarTheme_.lunarDayFontWeight = pattern->GetAttr<std::string>("lunar_day_font_weight", "500");
+            theme->calendarTheme_.workStateFontWeight = pattern->GetAttr<std::string>("work_state_font_weight", "400");
+            theme->calendarTheme_.workStateOffset =
+                pattern->GetAttr<Dimension>("work_state_center_adjustment", 0.0_vp);
+            theme->calendarTheme_.dayYAxisOffset = pattern->GetAttr<Dimension>("day_yaxis_offset", 4.0_vp);
+            theme->calendarTheme_.lunarDayYAxisOffset = pattern->GetAttr<Dimension>("lunar_day_yaxis_offset", 23.0_vp);
+            theme->calendarTheme_.underscoreXAxisOffset =
+                pattern->GetAttr<Dimension>("underscore_xaxis_offset", 12.0_vp);
+            theme->calendarTheme_.underscoreYAxisOffset =
+                pattern->GetAttr<Dimension>("underscore_yaxis_offset", 36.0_vp);
+            theme->calendarTheme_.scheduleMarkerXAxisOffset =
+                pattern->GetAttr<Dimension>("schedule_marker_xaxis_offset", 22.0_vp);
+            theme->calendarTheme_.scheduleMarkerYAxisOffset =
+                pattern->GetAttr<Dimension>("schedule_marker_yaxis_offset", 40.0_vp);
+            theme->calendarTheme_.touchCircleStrokeWidth =
+                pattern->GetAttr<Dimension>("touch_circle_stroke_width", 1.0_vp);
+            theme->calendarTheme_.lunarHeight = pattern->GetAttr<Dimension>("lunar_height", 14.0_vp);
+            theme->calendarTheme_.underscoreWidth = pattern->GetAttr<Dimension>("underscore_width", 1.0_vp);
+            theme->calendarTheme_.underscoreLength = pattern->GetAttr<Dimension>("underscore_length", 20.0_vp);
+            theme->calendarTheme_.scheduleMarkerRadius =
+                pattern->GetAttr<Dimension>("schedule_marker_radius", 2.0_vp);
+            theme->cardCalendarTheme_.arrowHeight = pattern->GetAttr<Dimension>("arrow_height", 16.0_vp);
+            theme->cardCalendarTheme_.arrowWidth = pattern->GetAttr<Dimension>("arrow_width", 16.0_vp);
+            theme->cardCalendarTheme_.buttonHeight =
+                pattern->GetAttr<Dimension>("card_calendar_button_height", 32.0_vp);
+            theme->cardCalendarTheme_.buttonWidth =
+                pattern->GetAttr<Dimension>("card_calendar_button_width", 32.0_vp);
+            theme->cardCalendarTheme_.titleFontSize =
+                pattern->GetAttr<Dimension>("card_calendar_title_font_size", 16.0_vp);
+            theme->cardCalendarTheme_.focusedDayColor =
+                pattern->GetAttr<Color>("today_day_focus_color", Color(0xFFFFFFFF));
+            theme->cardCalendarTheme_.touchColor = pattern->GetAttr<Color>("calendar_touch_color", Color(0x320A59F7));
+            theme->cardCalendarTheme_.topPadding = pattern->GetAttr<Dimension>("card_calendar_top_padding", 0.0_vp);
+            theme->cardCalendarTheme_.weekHeight = pattern->GetAttr<Dimension>("card_calendar_week_height", 14.0_vp);
+            theme->cardCalendarTheme_.dayHeight = pattern->GetAttr<Dimension>("card_calendar_day_height", 44.0_vp);
+            theme->cardCalendarTheme_.weekWidth = pattern->GetAttr<Dimension>("card_calendar_week_width", 44.0_vp);
+            theme->cardCalendarTheme_.dayWidth = pattern->GetAttr<Dimension>("card_calendar_day_width", 44.0_vp);
+            theme->cardCalendarTheme_.focusedAreaRadius =
+                pattern->GetAttr<Dimension>("card_calendar_focus_area_radius", 22.0_vp);
+            theme->cardCalendarTheme_.weekFontSize =
+                pattern->GetAttr<Dimension>("card_calendar_week_font_size", 10.0_fp);
+            theme->cardCalendarTheme_.dayFontSize =
+                pattern->GetAttr<Dimension>("card_calendar_day_font_size", 16.0_vp);
+            theme->cardCalendarTheme_.gregorianCalendarHeight =
+                pattern->GetAttr<Dimension>("card_calendar_gregorian_height", 24.0_vp);
+            theme->cardCalendarTheme_.lunarDayFontSize =
+                pattern->GetAttr<Dimension>("card_calendar_lunar_font_size", 10.0_vp);
+            theme->cardCalendarTheme_.workDayMarkColor = pattern->GetAttr<Color>("work_mark_color", Color(0xffe83f26));
+            theme->cardCalendarTheme_.weekAndDayRowSpace =
+                pattern->GetAttr<Dimension>("card_calendar_week_day_row_space", 4.0_vp);
+            theme->cardCalendarTheme_.dailyFiveRowSpace =
+                pattern->GetAttr<Dimension>("card_calendar_daily_five_row_space", 10.0_vp);
+            theme->cardCalendarTheme_.dayYAxisOffset = pattern->GetAttr<Dimension>("day_yaxis_offset", 4.0_vp);
+            theme->cardCalendarTheme_.lunarDayYAxisOffset =
+                pattern->GetAttr<Dimension>("lunar_day_yaxis_offset", 23.0_vp);
+            theme->cardCalendarTheme_.underscoreXAxisOffset =
+                pattern->GetAttr<Dimension>("underscore_xaxis_offset", 12.0_vp);
+            theme->cardCalendarTheme_.underscoreYAxisOffset =
+                pattern->GetAttr<Dimension>("underscore_yaxis_offset", 36.0_vp);
+            theme->cardCalendarTheme_.scheduleMarkerXAxisOffset =
+                pattern->GetAttr<Dimension>("schedule_marker_xaxis_offset", 22.0_vp);
+            theme->cardCalendarTheme_.scheduleMarkerYAxisOffset =
+                pattern->GetAttr<Dimension>("schedule_marker_yaxis_offset", 40.0_vp);
+            theme->cardCalendarTheme_.lunarHeight = pattern->GetAttr<Dimension>("lunar_height", 14.0_vp);
+            theme->cardCalendarTheme_.underscoreWidth = pattern->GetAttr<Dimension>("underscore_width", 1.0_vp);
+            theme->cardCalendarTheme_.underscoreLength = pattern->GetAttr<Dimension>("underscore_length", 20.0_vp);
+            theme->cardCalendarTheme_.scheduleMarkerRadius =
+                pattern->GetAttr<Dimension>("schedule_marker_radius", 2.0_vp);
+            theme->cardCalendarTheme_.boundaryColOffset =
+                pattern->GetAttr<Dimension>("boundary_col_offset", 50.0_vp);
         }
     };
 
