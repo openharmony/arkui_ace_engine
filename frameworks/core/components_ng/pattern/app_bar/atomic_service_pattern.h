@@ -30,6 +30,7 @@ public:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
     void OnLanguageConfigurationUpdate() override;
+    void OnColorConfigurationUpdate() override;
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<AtomicServiceLayoutAlgorithm>();

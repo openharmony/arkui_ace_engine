@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
+
+#include "base/utils/utils.h"
+#include "core/common/container.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
@@ -64,4 +68,22 @@ void AtomicServicePattern::OnLanguageConfigurationUpdate()
     textLayoutProperty->UpdateContent(themeConstants->GetString(pipelineContext->GetAppLabelId()));
 }
 
+void AtomicServicePattern::OnColorConfigurationUpdate()
+{
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+    auto row = node->GetFirstChild();
+    CHECK_NULL_VOID(row);
+    row->SetNeedCallChildrenUpdate(false);
+    auto faButton = AceType::DynamicCast<FrameNode>(node->GetLastChild());
+    CHECK_NULL_VOID(faButton);
+    auto faPattern = AceType::DynamicCast<ButtonPattern>(faButton->GetPattern());
+    CHECK_NULL_VOID(faPattern);
+    faPattern->SetSkipColorConfigurationUpdate();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto appBar = container->GetAppBar();
+    CHECK_NULL_VOID(appBar);
+    appBar->IniColor();
+}
 } // namespace OHOS::Ace::NG
