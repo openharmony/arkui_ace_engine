@@ -90,6 +90,10 @@ void LayoutWrapper::AvoidKeyboard()
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto manager = pipeline->GetSafeAreaManager();
+        if (GetHostNode()->GetFocusHub() && !GetHostNode()->GetFocusHub()->IsCurrentFocus() &&
+            LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
+            return;
+        }
         GetGeometryNode()->SetFrameOffset(
             GetGeometryNode()->GetFrameOffset() + OffsetF(0, manager->GetKeyboardOffset()));
     }
