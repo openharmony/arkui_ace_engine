@@ -40,6 +40,7 @@ extern const char THEME_PATTERN_SEMI_MODAL[];
 extern const char THEME_PATTERN_BADGE[];
 extern const char THEME_PATTERN_CALENDAR[];
 extern const char THEME_PATTERN_CAMERA[];
+extern const char THEME_PATTERN_CARD[];
 extern const char THEME_PATTERN_CLOCK[];
 extern const char THEME_PATTERN_COUNTER[];
 extern const char THEME_PATTERN_DIVIDER[];
