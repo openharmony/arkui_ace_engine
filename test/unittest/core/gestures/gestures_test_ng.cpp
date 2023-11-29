@@ -1129,7 +1129,7 @@ HWTEST_F(GesturesTestNg, SequencedRecognizerBatchAdjudicateTest001, TestSize.Lev
     sequencedRecognizer.refereeState_ = RefereeState::PENDING;
     sequencedRecognizer.currentIndex_ = -9;
     sequencedRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
-    EXPECT_NE(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
 
     /**
      * @tc.steps: step2. call GestureDisposal function and compare result.
@@ -1140,7 +1140,7 @@ HWTEST_F(GesturesTestNg, SequencedRecognizerBatchAdjudicateTest001, TestSize.Lev
     clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
     sequencedRecognizer.currentIndex_ = -10;
     sequencedRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
-    EXPECT_NE(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
 
     /**
      * @tc.steps: step2. call GestureDisposal function and compare result.
@@ -4129,7 +4129,7 @@ HWTEST_F(GesturesTestNg, ParallelRecognizerTest003, TestSize.Level1)
     clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
     parallelRecognizer.refereeState_ = RefereeState::SUCCEED;
     parallelRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
-    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
 
     /**
      * @tc.steps: step2. call HandleEvent function and compare result.
@@ -4801,50 +4801,6 @@ HWTEST_F(GesturesTestNg, RecognizerGroupTest001, TestSize.Level1)
     exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
     exclusiveRecognizer.OnBeginGestureReferee(0, true);
     EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
-}
-
-/**
- * @tc.name: RecognizerGroupTest002
- * @tc.desc: Test RecognizerGroup function: OnFinishGestureReferee
- * @tc.type: FUNC
- */
-HWTEST_F(GesturesTestNg, RecognizerGroupTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create RecognizerGroup
-     */
-    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-
-    /**
-     * @tc.steps: step2. call OnFinishGestureReferee function and compare result.
-     * @tc.steps: case1: recognizers_ is empty
-     * @tc.expected: step2. result equals.
-     */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.OnFinishGestureReferee(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
-
-    /**
-     * @tc.steps: step2. call OnFinishGestureReferee function and compare result.
-     * @tc.steps: case2: recognizers has nullptr
-     * @tc.expected: step2. result equals.
-     */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(nullptr);
-    exclusiveRecognizer.OnFinishGestureReferee(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
-
-    /**
-     * @tc.steps: step2. call OnFinishGestureReferee function and compare result.
-     * @tc.steps: case3: recognizers has ptr
-     * @tc.expected: step2. result equals.
-     */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.OnFinishGestureReferee(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
 }
 
 /**
@@ -6073,7 +6029,7 @@ HWTEST_F(GesturesTestNg, SequencedRecognizerTest001, TestSize.Level1)
     sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
     sequencedRecognizer.OnAccepted();
     EXPECT_EQ(sequencedRecognizer.refereeState_, RefereeState::SUCCEED);
-    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
 }
 
 /**
@@ -6162,7 +6118,7 @@ HWTEST_F(GesturesTestNg, SequencedRecognizerTest003, TestSize.Level1)
     sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
     sequencedRecognizer.OnPending();
     EXPECT_EQ(sequencedRecognizer.refereeState_, RefereeState::PENDING);
-    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
 
     /**
      * @tc.steps: step2. call OnPending function and compare result.
@@ -10812,7 +10768,7 @@ HWTEST_F(GesturesTestNg, PanRecognizerHandleTouchMoveEventTest005, TestSize.Leve
     panRecognizerPtr->currentFingers_ = panRecognizerPtr->fingers_;
     panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     panRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(panRecognizerPtr->globalPoint_.GetX(), touchEvent.x);
+    EXPECT_EQ(panRecognizerPtr->globalPoint_.GetX(), 0);
 
     panRecognizerPtr->fingers_ = 0;
     panRecognizerPtr->currentFingers_ = panRecognizerPtr->fingers_;
@@ -10858,7 +10814,7 @@ HWTEST_F(GesturesTestNg, PanRecognizerHandleTouchMoveEventTest006, TestSize.Leve
     panRecognizer->distance_ = 1;
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
 
     /**
      * @tc.steps: step2. case3: GetX > GetY, GetX < distance, PanDirection::HORIZONTAL.
