@@ -64,7 +64,7 @@ ScreenPattern::ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession)
     screenSession_ = screenSession;
     if (screenSession_ != nullptr) {
         screenSession_->SetUpdateToInputManagerCallback(std::bind(&ScreenPattern::UpdateToInputManager,
-            this, std::placeholders::_1))
+            this, std::placeholders::_1));
     }
 }
 
@@ -92,7 +92,6 @@ void ScreenPattern::UpdateDisplayInfo()
     auto displayNode = screenSession_->GetDisplayNode();
     CHECK_NULL_VOID(displayNode);
     auto displayNodeRotation = displayNode->GetStagingProperties().GetRotation();
-    // to fix when Scree rotate
     if (displayNodeRotation < DIRECTION0) {
         displayNodeRotation = -displayNodeRotation;
     }
