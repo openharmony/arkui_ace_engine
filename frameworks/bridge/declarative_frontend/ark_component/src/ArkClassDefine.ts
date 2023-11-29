@@ -1352,3 +1352,29 @@ class ArkKeyBoardShortCut {
             (this.action === another.action);
     }
 }
+
+class ArkAlignStyle {
+    indexerAlign: number;
+    offset?: number | string | undefined | Resource;
+
+    constructor() {
+        this.indexerAlign = undefined;
+        this.offset = undefined;
+    }
+
+    isEqual(another: ArkAlignStyle): boolean {
+        return (this.indexerAlign === another.indexerAlign && this.offset === another.offset);
+    }
+}
+
+class ArkResourceColor {
+    color: ResourceColor;
+  
+    constructor() {
+        this.color = undefined;
+    }
+  
+    isEqual(another: ArkResourceColor): boolean {
+        return (this.color === another.color);
+    }
+  }

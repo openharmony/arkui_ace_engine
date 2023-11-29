@@ -61,6 +61,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/pipeline/base/element_register.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_calendar_picker_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_alphabet_indexer_modifier.h"
 
 using namespace OHOS::Ace::NG;
 
@@ -113,6 +114,7 @@ static struct ArkUINodeAPI impl = {
     GetTextInputModifier,
     GetMenuItemModifier,
     GetMenuModifier,
+    GetAlphabetIndexerModifier,
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI()
