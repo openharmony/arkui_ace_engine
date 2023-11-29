@@ -1759,9 +1759,6 @@ void TextFieldPattern::OnModifyDone()
         textRect_.SetTop(GetPaddingTop() + GetBorderTop());
     }
     CalculateDefaultCursor();
-    if (renderContext->HasBackgroundColor()) {
-        paintProperty->UpdateBackgroundColor(renderContext->GetBackgroundColorValue());
-    }
 
     auto textWidth = static_cast<int32_t>(contentController_->GetWideText().length());
     if (SelectOverlayIsOn()) {
@@ -1829,6 +1826,9 @@ void TextFieldPattern::OnModifyDone()
     }
     if (HasFocus() && IsNormalInlineState()) {
         preInputStyle_ == InputStyle::DEFAULT ? ApplyInlineStates(true) : ApplyInlineStates(false);
+    }
+    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+        ApplyUnderlineStates();
     }
     if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT) {
         if (IsTextArea() && isTextInput_) {
@@ -4535,7 +4535,11 @@ void TextFieldPattern::ApplyUnderlineStates()
     CHECK_NULL_VOID(renderContext);
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    }
     CalcSize idealSize;
     layoutProperty->UpdatePadding({ CalcLength(UNDERLINE_NORMAL_PADDING), CalcLength(UNDERLINE_NORMAL_PADDING),
         CalcLength(0.0_vp), CalcLength(0.0_vp) });
@@ -5265,9 +5269,6 @@ void TextFieldPattern::OnAttachToFrameNode()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
-        ApplyUnderlineStates();
-    }
     layoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
     auto onTextSelectorChange = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
