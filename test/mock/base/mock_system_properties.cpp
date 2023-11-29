@@ -131,4 +131,9 @@ void SystemProperties::SetDeviceOrientation(int32_t orientation)
     }
 }
 
+bool SystemProperties::Is24HourClock()
+{
+    return false;
+}
+
 } // namespace OHOS::Ace

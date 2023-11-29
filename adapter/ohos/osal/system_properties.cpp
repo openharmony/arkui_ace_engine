@@ -23,10 +23,10 @@
 
 #include "dm_common.h"
 
+#include "locale_config.h"
 #include "parameter.h"
 #include "parameters.h"
 
-#include "base/global/i18n/frameworks/intl/include/locale_config.h"
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
@@ -501,7 +501,7 @@ std::string SystemProperties::GetCustomTitleFilePath()
     return system::GetParameter(CUSTOM_TITLE_KEY, "");
 }
 
-bool SystemProperties::Is24HourClock()
+ACE_WEAK_SYM bool SystemProperties::Is24HourClock()
 {
     return Global::I18n::LocaleConfig::Is24HourClock();
 }

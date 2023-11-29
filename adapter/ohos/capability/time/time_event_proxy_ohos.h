@@ -56,6 +56,6 @@ private:
     std::shared_ptr<TimeEventSubscriber> eventFwkSubscriber_;
     ACE_DISALLOW_COPY_AND_MOVE(TimeEventProxyOhos);
 };
-
 } // namespace OHOS::Ace
+
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_EVENT_PROXY_TIME_H

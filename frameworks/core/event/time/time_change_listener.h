@@ -37,6 +37,6 @@ public:
 
     ACE_DISALLOW_COPY_AND_MOVE(TimeChangeListener);
 };
-
 } // namespace OHOS::Ace
+
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_TIME_CHANGE_LISTENER_H

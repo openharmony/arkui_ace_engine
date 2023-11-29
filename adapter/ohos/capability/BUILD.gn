@@ -29,8 +29,8 @@ template("ace_capability_ohos_source_set") {
       "clipboard/clipboard_impl.cpp",
       "environment/environment_impl.cpp",
       "environment/environment_proxy_impl.cpp",
-      "time/time_event_proxy_ohos.cpp",
       "preference/storage_impl.cpp",
+      "time/time_event_proxy_ohos.cpp",
     ]
     include_dirs = []
     external_deps = [
