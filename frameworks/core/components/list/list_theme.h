@@ -41,17 +41,31 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->gradientWidth_ = themeConstants->GetDimension(THEME_LIST_GRADIENT_WIDTH);
-            theme->backgroundColor_ = themeConstants->GetColor(THEME_LIST_BACKGROUND_COLOR);
-            theme->scrollDistance_ = themeConstants->GetDouble(THEME_LIST_SCROLL_DISTANCE);
-            theme->dividerColor_ = themeConstants->GetColor(THEME_LIST_DIVIDER_COLOR);
-            theme->chainMinSpace_ = themeConstants->GetDimension(THEME_LIST_CHAIN_MIN_SPACE);
-            theme->chainMaxSpace_ = themeConstants->GetDimension(THEME_LIST_CHAIN_MAX_SPACE);
-            theme->chainConductivity_ = themeConstants->GetDouble(THEME_LIST_CHAIN_CONDUCTIVITY);
-            theme->chainIntensity_ = themeConstants->GetDouble(THEME_LIST_CHAIN_INTENSITY);
-            theme->chainStiffness_ = themeConstants->GetDouble(THEME_LIST_CHAIN_STIFFNESS);
-            theme->chainDamping_ = themeConstants->GetDouble(THEME_LIST_CHAIN_DAMPING);
+            ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
+        }
+
+        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ListTheme>& theme) const
+        {
+            if (!themeStyle) {
+                LOGW("list theme style is null");
+                return;
+            }
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_LIST, nullptr);
+            if (!pattern) {
+                LOGW("find pattern of list fail");
+                return;
+            }
+            theme->gradientWidth_ = pattern->GetAttr<Dimension>("gradient_width", 0.0_vp);
+            theme->backgroundColor_ = pattern->GetAttr<Color>("background_color", Color(0x00FFFFFF));
+            theme->scrollDistance_ = pattern->GetAttr<double>("scroll_distance", 50.0f);
+            theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", Color(0x08000000));
+            theme->chainMinSpace_ = pattern->GetAttr<Dimension>("chain_min_space", 15.0_vp);
+            theme->chainMaxSpace_ = pattern->GetAttr<Dimension>("chain_max_space", 40.0_vp);
+            theme->chainConductivity_ = pattern->GetAttr<double>("chain_conductivity", 0.7f);
+            theme->chainIntensity_ = pattern->GetAttr<double>("chain_intensity", 0.3f);
+            theme->chainStiffness_ = pattern->GetAttr<double>("chain_stiffness", 228.0f);
+            theme->chainDamping_ = pattern->GetAttr<double>("chain_damping", 30.0f);
         }
     };
 
