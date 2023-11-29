@@ -5245,8 +5245,6 @@ HWTEST_F(TabsTestNg, TabBarPatternStopTabBarTranslateAnimation001, TestSize.Leve
     tabBarNode->GetLayoutProperty<TabBarLayoutProperty>()->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
-    tabBarPattern->tabBarTranslateController_ = AceType::MakeRefPtr<Animator>();
-    tabBarPattern->tabBarTranslateController_->status_ = Animator::Status::RUNNING;
 
     /**
      * @tc.steps: step2. Test function StopTabBarTranslateAnimation.
@@ -5254,8 +5252,8 @@ HWTEST_F(TabsTestNg, TabBarPatternStopTabBarTranslateAnimation001, TestSize.Leve
      */
     for (int i = 0; i <= 1; i++) {
         tabBarPattern->StopTabBarTranslateAnimation();
-        tabBarPattern->tabBarTranslateController_->status_ = Animator::Status::STOPPED;
     }
+    EXPECT_FALSE(tabBarPattern->tabBarTranslateAnimation_);
 }
 
 /**
@@ -6065,53 +6063,11 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayTranslateAnimation001, TestSize.Level1)
     float startPos = 0.1f;
     float endPos = 0.2f;
     float targetCurrentOffset = 0.3f;
-    double value = 0;
     auto offset = 0.1f;
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            for (int k = 0; k <= 1; k++) {
-                tabBarPattern->currentOffset_ = offset;
-                tabBarPattern->PlayTranslateAnimation(startPos, endPos, targetCurrentOffset);
-                ASSERT_NE(tabBarPattern->controller_, nullptr);
-                auto interpolator = tabBarPattern->controller_->interpolators_.front();
-                ASSERT_NE(interpolator, nullptr);
-                auto* translate = static_cast<CurveAnimation<double>*>(AceType::RawPtr(interpolator));
-                ASSERT_NE(translate, nullptr);
-                Animation<double>::ValueCallback valueCallback = translate->callbacks_.begin()->second;
-                valueCallback.callback_(value);
-                tabBarPattern->controller_->ClearInterpolators();
-                value = 0;
-                startPos = 0.0f;
-                endPos = 0.0f;
-            }
-            endPos = 0.1f;
-        }
-        endPos = 0.0f;
-        startPos = 0.1f;
-    }
-
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            for (int k = 0; k <= 1; k++) {
-                tabBarPattern->currentOffset_ = offset;
-                tabBarPattern->PlayTranslateAnimation(startPos, endPos, targetCurrentOffset);
-                ASSERT_NE(tabBarPattern->controller_, nullptr);
-                auto interpolator = tabBarPattern->controller_->interpolators_.back();
-                ASSERT_NE(interpolator, nullptr);
-                auto* tabBarTranslate = static_cast<CurveAnimation<double>*>(AceType::RawPtr(interpolator));
-                ASSERT_NE(tabBarTranslate, nullptr);
-                Animation<double>::ValueCallback valueCallback = tabBarTranslate->callbacks_.begin()->second;
-                valueCallback.callback_(value);
-                tabBarPattern->controller_->ClearInterpolators();
-                value = 0;
-                offset = 0.0f;
-                targetCurrentOffset = 0.0f;
-            }
-            offset = 0.1f;
-        }
-        offset = 0.0f;
-        targetCurrentOffset = 0.1f;
-    }
+    tabBarPattern->currentOffset_ = offset;
+    tabBarPattern->PlayTranslateAnimation(startPos, endPos, targetCurrentOffset);
+    EXPECT_FALSE(tabBarPattern->indicatorAnimationIsRunning_);
+    EXPECT_FALSE(tabBarPattern->translateAnimationIsRunning_);
 }
 
 /**
@@ -6200,47 +6156,9 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayTabBarTranslateAnimation001, TestSize.Leve
      * @tc.steps: step2. Test function PlayTabBarTranslateAnimation.
      * @tc.expected: Related function runs ok.
      */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            for (int k = 0; k <= 1; k++) {
-                tabBarPattern->PlayTabBarTranslateAnimation(targetIndex);
-                tabBarPattern->childrenMainSize_ = 2.0f;
-            }
-            AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(targetIndex - 1))
-                ->GetGeometryNode()
-                ->SetFrameSize(SizeF(2.0f, 2.0f));
-        }
-        AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(targetIndex + 1))
-            ->GetGeometryNode()
-            ->SetFrameSize(SizeF(2.0f, 2.0f));
-    }
 
-    double value = 0.0;
-    float offset = 0.0f;
-    AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(targetIndex - 1))
-        ->GetGeometryNode()
-        ->SetFrameSize(SizeF(0.0f, 0.0f));
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            for (int k = 0; k <= 1; k++) {
-                tabBarPattern->currentOffset_ = offset;
-                tabBarPattern->PlayTabBarTranslateAnimation(targetIndex);
-                ASSERT_NE(tabBarPattern->controller_, nullptr);
-                auto interpolator = tabBarPattern->controller_->interpolators_.front();
-                ASSERT_NE(interpolator, nullptr);
-                auto* tabBarTranslate = static_cast<CurveAnimation<double>*>(AceType::RawPtr(interpolator));
-                ASSERT_NE(tabBarTranslate, nullptr);
-                Animation<double>::ValueCallback valueCallback = tabBarTranslate->callbacks_.begin()->second;
-                valueCallback.callback_(value);
-                tabBarPattern->controller_->ClearInterpolators();
-                value = 1.0;
-                offset = 2.0f;
-            }
-            offset = 0.0f;
-        }
-        offset = 2.0f;
-        value = 0.0;
-    }
+    tabBarPattern->PlayTabBarTranslateAnimation(targetIndex);
+    EXPECT_FALSE(tabBarPattern->tabBarTranslateAnimationIsRunning_);
 }
 
 void FocusTest(const RefPtr<TabBarLayoutProperty>& tabBarLayoutProperty, const RefPtr<TabBarPattern>& tabBarPattern)
@@ -9440,12 +9358,9 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable005, TestSize.Level1)
     ASSERT_NE(tabBarPattern->scrollableEvent_, nullptr);
     auto scrollable = tabBarPattern->scrollableEvent_->GetScrollable();
     scrollable->callback_(0.1, SCROLL_FROM_NONE);
-    tabBarPattern->controller_ = AceType::MakeRefPtr<Animator>();
     scrollable->callback_(0.1, SCROLL_FROM_NONE);
     ASSERT_NE(tabBarPattern->scrollableEvent_, nullptr);
-    tabBarPattern->controller_->status_ = Animator::Status::RUNNING;
     scrollable->callback_(0.1, SCROLL_FROM_NONE);
-    EXPECT_EQ(tabBarPattern->controller_->IsRunning(), true);
     tabBarPattern->scrollableEvent_->scrollable_ = nullptr;
     scrollable->callback_(0.1, SCROLL_FROM_NONE);
     EXPECT_EQ(tabBarPattern->scrollableEvent_->scrollable_, nullptr);

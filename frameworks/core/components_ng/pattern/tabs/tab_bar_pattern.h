@@ -407,6 +407,14 @@ private:
     std::unordered_map<int32_t, bool> tabBarType_;
     std::optional<int32_t> animationDuration_;
 
+    std::shared_ptr<AnimationUtils::Animation> tabbarIndicatorAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> translateAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> tabBarTranslateAnimation_;
+
+    bool indicatorAnimationIsRunning_ = false;
+    bool translateAnimationIsRunning_ = false;
+    bool tabBarTranslateAnimationIsRunning_ = false;
+
     bool isRTL_ = false; // TODO Adapt RTL.
 
     bool touching_ = false; // whether the item is in touching
@@ -415,8 +423,6 @@ private:
     std::optional<int32_t> touchingIndex_;
     std::optional<int32_t> hoverIndex_;
     TabBarStyle tabBarStyle_;
-    RefPtr<Animator> controller_;
-    RefPtr<Animator> tabBarTranslateController_;
     float currentIndicatorOffset_ = 0.0f;
     std::vector<SelectedMode> selectedModes_;
     std::vector<IndicatorStyle> indicatorStyles_;
