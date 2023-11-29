@@ -873,6 +873,9 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
             }
         };
         gestureEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(clickCallback));
+        auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
+        CHECK_NULL_VOID(buttonPattern);
+        buttonPattern->SetSkipColorConfigurationUpdate();
         auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(backButtonLayoutProperty);
         backButtonLayoutProperty->UpdateUserDefinedIdealSize(

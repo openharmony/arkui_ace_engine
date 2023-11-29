@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/common/container_scope.h"
-#include "core/common/container_consts.h"
-#include "base/utils/utils.h"
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_TEXT_INPUT_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_TEXT_INPUT_MODIFIER_H
 
-namespace OHOS::Ace {
-namespace {
-// preview not support multi-instance, always using default instance id 0.
-#if defined(PREVIEW)
-thread_local int32_t currentId_ = 0;
-#else
-thread_local int32_t currentId_ = INSTANCE_ID_UNDEFINED;
-#endif
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+
+namespace OHOS::Ace::NG {
+ArkUITextInputModifierAPI GetTextInputModifier();
 }
 
-int32_t ContainerScope::CurrentId()
-{
-    return currentId_;
-}
-
-void ContainerScope::UpdateCurrent(int32_t id)
-{
-    currentId_ = id;
-}
-
-} // namespace OHOS::Ace
+#endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_TEXT_INPUT_MODIFIER_H

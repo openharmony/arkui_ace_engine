@@ -1555,6 +1555,26 @@ void TextPattern::DumpAdvanceInfo()
                                        .append(" y:")
                                        .append(std::to_string(contentRect_.GetY())));
     DumpLog::GetInstance().AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
+    if (SystemProperties::GetDebugEnabled() && paragraph_) {
+        DumpLog::GetInstance().AddDesc(std::string("from TextEngine paragraph_ info :"));
+        DumpLog::GetInstance().AddDesc(
+            std::string("DidExceedMaxLinesx:").append(std::to_string(paragraph_->DidExceedMaxLines())));
+
+        DumpLog::GetInstance().AddDesc(std::string("GetTextWidth:")
+                                           .append(std::to_string(paragraph_->GetTextWidth()))
+                                           .append(" GetHeight:")
+                                           .append(std::to_string(paragraph_->GetHeight()))
+                                           .append(" GetMaxWidth:")
+                                           .append(std::to_string(paragraph_->GetMaxWidth()))
+                                           .append(" GetMaxIntrinsicWidth:")
+                                           .append(std::to_string(paragraph_->GetMaxIntrinsicWidth())));
+        DumpLog::GetInstance().AddDesc(std::string("GetLineCount:")
+                                           .append(std::to_string(paragraph_->GetLineCount()))
+                                           .append(" GetLongestLine:")
+                                           .append(std::to_string(paragraph_->GetLongestLine()))
+                                           .append(" GetAlphabeticBaseline:")
+                                           .append(std::to_string(paragraph_->GetAlphabeticBaseline())));
+    }
 }
 
 void TextPattern::DumpInfo()

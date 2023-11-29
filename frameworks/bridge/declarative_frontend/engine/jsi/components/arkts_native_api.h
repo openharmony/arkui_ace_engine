@@ -86,6 +86,10 @@ struct ArkUIFontWeight {
     const char* valueStr;
 };
 
+struct ArkUILengthType {
+    const char* string;
+    double number;
+};
 typedef void* NodeHandle;
 struct ArkUICommonModifierAPI {
     void (*SetBackgroundColor)(NodeHandle node, uint32_t color);
@@ -219,6 +223,39 @@ struct ArkUICommonModifierAPI {
     void (*ResetAllowDrop)(NodeHandle node);
     void (*SetAccessibilityLevel)(NodeHandle node, const char* value);
     void (*ResetAccessibilityLevel)(NodeHandle node);
+    void (*SetDirection)(NodeHandle node, int32_t direction);
+    void (*ResetDirection)(NodeHandle node);
+    void (*SetLayoutWeight)(NodeHandle node, int32_t layoutWeight);
+    void (*ResetLayoutWeight)(NodeHandle node);
+    void (*SetMinWidth)(NodeHandle node, const struct StringAndDouble* minWidth);
+    void (*ResetMinWidth)(NodeHandle node);
+    void (*SetMaxWidth)(NodeHandle node, const struct StringAndDouble* maxWidth);
+    void (*ResetMaxWidth)(NodeHandle node);
+    void (*SetMinHeight)(NodeHandle node, const struct StringAndDouble* minHeight);
+    void (*ResetMinHeight)(NodeHandle node);
+    void (*SetMaxHeight)(NodeHandle node, const struct StringAndDouble* maxHeight);
+    void (*ResetMaxHeight)(NodeHandle node);
+    void (*SetSize)(NodeHandle node, const double* number, const int8_t* unit, const char** calc);
+    void (*ResetSize)(NodeHandle node);
+    void (*ClearWidthOrHeight)(NodeHandle node, bool isWidth);
+    void (*SetAlignSelf)(NodeHandle node, int32_t value);
+    void (*ResetAlignSelf)(NodeHandle node);
+    void (*SetAspectRatio)(NodeHandle node, double value);
+    void (*ResetAspectRatio)(NodeHandle node);
+    void (*SetFlexGrow)(NodeHandle node, double value);
+    void (*ResetFlexGrow)(NodeHandle node);
+    void (*SetFlexShrink)(NodeHandle node, double value);
+    void (*ResetFlexShrink)(NodeHandle node);
+    void (*SetGridOffset)(NodeHandle node, int32_t offset);
+    void (*ResetGridOffset)(NodeHandle node);
+    void (*SetGridSpan)(NodeHandle node, int32_t value);
+    void (*ResetGridSpan)(NodeHandle node);
+    void (*SetExpandSafeArea)(NodeHandle node, const char* typeStr, const char* edgesStr);
+    void (*ResetExpandSafeArea)(NodeHandle node);
+    void (*SetFlexBasis)(NodeHandle node, const struct StringAndDouble* flexBasisValue);
+    void (*ResetFlexBasis)(NodeHandle node);
+    void (*SetAlignRules)(NodeHandle node, char** anchors, int8_t* direction, int32_t length);
+    void (*ResetAlignRules)(NodeHandle node);
     void (*SetAccessibilityDescription)(NodeHandle node, const char* value);
     void (*ResetAccessibilityDescription)(NodeHandle node);
     void (*SetId)(NodeHandle node, const char* id);
@@ -796,6 +833,67 @@ struct ArkUISideBarContainerModifierAPI {
     void (*ResetSideBarContainerDivider)(NodeHandle node);
 };
 
+struct ArkUICalendarPickerModifierAPI {
+    void (*SetTextStyle)(NodeHandle node, uint32_t color, const char* fontSize, const char* fontweight);
+    void (*ResetTextStyle)(NodeHandle node);
+    void (*SetEdgeAlign)(NodeHandle node, const double* values, const int* units, int32_t size, int32_t alignType);
+    void (*ResetEdgeAlign)(NodeHandle node);
+};
+
+struct ArkUITextInputModifierAPI {
+    void (*SetTextInputCaretColor)(NodeHandle node, const struct ArkUIResourceColorType* caretColor);
+    void (*ResetTextInputCaretColor)(NodeHandle node);
+    void (*SetTextInputType)(NodeHandle node, int32_t value);
+    void (*ResetTextInputType)(NodeHandle node);
+    void (*SetTextInputMaxLines)(NodeHandle node, int32_t value);
+    void (*ResetTextInputMaxLines)(NodeHandle node);
+    void (*SetTextInputPlaceholderColor)(NodeHandle node, const struct ArkUIResourceColorType* placeholderColor);
+    void (*ResetTextInputPlaceholderColor)(NodeHandle node);
+    void (*SetTextInputCaretPosition)(NodeHandle node, int32_t caretPosition);
+    void (*ResetTextInputCaretPosition)(NodeHandle node);
+    void (*SetTextInputCopyOption)(NodeHandle node, int32_t copyOption);
+    void (*ResetTextInputCopyOption)(NodeHandle node);
+    void (*SetTextInputShowPasswordIcon)(NodeHandle node, uint32_t showPasswordIcon);
+    void (*ResetTextInputShowPasswordIcon)(NodeHandle node);
+    void (*SetTextInputPasswordIcon)(NodeHandle node, const char* onIconSrc, const char* offIconSrc);
+    void (*ResetTextInputPasswordIcon)(NodeHandle node);
+    void (*SetTextInputTextAlign)(NodeHandle node, int32_t textAlign);
+    void (*ResetTextInputTextAlign)(NodeHandle node);
+    void (*SetTextInputStyle)(NodeHandle node, int32_t style);
+    void (*ResetTextInputStyle)(NodeHandle node);
+    void (*SetTextInputSelectionMenuHidden)(NodeHandle node, uint32_t menuHiddenValue);
+    void (*ResetTextInputSelectionMenuHidden)(NodeHandle node);
+    void (*SetTextInputShowUnderline)(NodeHandle node, uint32_t showUnderLine);
+    void (*ResetTextInputShowUnderline)(NodeHandle node);
+    void (*SetTextInputCaretStyle)(NodeHandle node, const double number, const int8_t unit);
+    void (*ResetTextInputCaretStyle)(NodeHandle node);
+    void (*SetTextInputEnableKeyboardOnFocus)(NodeHandle node, uint32_t value);
+    void (*ResetTextInputEnableKeyboardOnFocus)(NodeHandle node);
+    void (*SetTextInputBarState)(NodeHandle node, int32_t value);
+    void (*ResetTextInputBarState)(NodeHandle node);
+    void (*SetTextInputEnterKeyType)(NodeHandle node, int32_t value);
+    void (*ResetTextInputEnterKeyType)(NodeHandle node);
+    void (*SetTextInputFontWeight)(NodeHandle node, const char* fontWeight);
+    void (*ResetTextInputFontWeight)(NodeHandle node);
+    void (*SetTextInputFontSize)(NodeHandle node, const struct ArkUILengthType* fontSizeStruct);
+    void (*ResetTextInputFontSize)(NodeHandle node);
+    void (*SetTextInputMaxLength)(NodeHandle node, uint32_t value);
+    void (*ResetTextInputMaxLength)(NodeHandle node);
+    void (*SetTextInputSelectedBackgroundColor)(NodeHandle node, const struct ArkUIResourceColorType* color);
+    void (*ResetTextInputSelectedBackgroundColor)(NodeHandle node);
+    void (*SetTextInputShowError)(NodeHandle node, const char* error, uint32_t visible);
+    void (*ResetTextInputShowError)(NodeHandle node);
+    void (*SetTextInputPlaceholderFont)(NodeHandle node,
+        const struct ArkUILengthType* size, int32_t weight, const char* family, int32_t style);
+    void (*ResetTextInputPlaceholderFont)(NodeHandle node);
+    void (*SetTextInputFontColor)(NodeHandle node, const struct ArkUIResourceColorType* fontColor);
+    void (*ResetTextInputFontColor)(NodeHandle node);
+    void (*SetTextInputFontStyle)(NodeHandle node, uint32_t value);
+    void (*ResetTextInputFontStyle)(NodeHandle node);
+    void (*SetTextInputFontFamily)(NodeHandle node, const char* value);
+    void (*ResetTextInputFontFamily)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -835,6 +933,8 @@ struct ArkUINodeAPI {
     ArkUISpanModifierAPI (*GetSpanModifier)();
     ArkUIImageAnimatorModifierAPI (*GetImageAnimatorModifier)();
     ArkUISideBarContainerModifierAPI (*GetSideBarContainerModifier)();
+    ArkUICalendarPickerModifierAPI (*GetCalendarPickerModifier)();
+    ArkUITextInputModifierAPI (*GetTextInputModifier)();
 };
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H

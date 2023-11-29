@@ -220,6 +220,11 @@ bool SystemProperties::GetImageFrameworkEnabled()
     return false;
 }
 
+bool SystemProperties::GetDebugPixelMapSaveEnabled()
+{
+    return false;
+}
+
 bool SystemProperties::GetResourceDecoupling()
 {
     return true;

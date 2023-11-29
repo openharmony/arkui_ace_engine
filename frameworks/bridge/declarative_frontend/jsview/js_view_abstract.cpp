@@ -2606,15 +2606,16 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
             menuParam.placement = PLACEMENT[placement];
         }
     }
-
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onAppearValue = menuOptions->GetProperty("onAppear");
     if (onAppearValue->IsFunction()) {
         RefPtr<JsFunction> jsOnAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
-        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc)]() {
+        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             LOGI("About to call onAppear method.");
             ACE_SCORING_EVENT("onAppear");
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
         menuParam.onAppear = std::move(onAppear);
@@ -2624,10 +2625,12 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     if (onDisappearValue->IsFunction()) {
         RefPtr<JsFunction> jsOnDisAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDisappearValue));
-        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc)]() {
+        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc),
+                               node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             LOGI("About to call onDisappear method.");
             ACE_SCORING_EVENT("onDisappear");
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
         menuParam.onDisappear = std::move(onDisappear);
@@ -2667,9 +2670,12 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
     } else {
         previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
         CHECK_NULL_VOID(previewBuilderFunc);
-        previewBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc)]() {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        previewBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc),
+                               node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("BuildContextMenuPreviwer");
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
@@ -2727,10 +2733,13 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             return;
         }
         auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(builderFunc);
-        auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+        auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("BuildMenu");
+            WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
             func->Execute();
         };
         ViewAbstractModel::GetInstance()->BindMenu({}, std::move(buildFunc), menuParam);
@@ -4578,6 +4587,26 @@ void JSViewAbstract::JsSetDraggable(bool draggable)
     ViewAbstractModel::GetInstance()->SetDraggable(draggable);
 }
 
+void JSViewAbstract::JsSetDragPreviewOptions(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsSetDragPreviewOptions", info, checkList)) {
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    auto mode = obj->GetProperty("mode");
+    if (!mode->IsNumber()) {
+        return;
+    }
+    int32_t dragPreviewMode = mode->ToNumber<int>();
+    if (!(dragPreviewMode >= static_cast<int32_t>(NG::DragPreviewMode::AUTO) &&
+            dragPreviewMode <= static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE))) {
+        return;
+    }
+    NG::DragPreviewOption option {static_cast<NG::DragPreviewMode>(dragPreviewMode)};
+    ViewAbstractModel::GetInstance()->SetDragPreviewOptions(option);
+}
+
 void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
@@ -4587,11 +4616,12 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
 
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
 
-    auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc), node = frameNode](
                            const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
         NG::DragDropBaseInfo dragDropInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, dragDropInfo);
-
+        PipelineContext::SetCallBackNode(node);
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
             return dragDropInfo;
@@ -4643,11 +4673,12 @@ void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-
-    auto onDragEnter = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDragEnter = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc), node = frameNode](
                            const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragEnter");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info, extraParams);
     };
 
@@ -4661,15 +4692,16 @@ void JSViewAbstract::JsOnDragEnd(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsDragFunction> jsOnDragEndFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-
-    auto onDragEnd = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEndFunc)](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDragEnd = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEndFunc), node = frameNode](
                          const RefPtr<OHOS::Ace::DragEvent>& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragEnd");
         auto extraParams = JsonUtil::Create(true);
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info, extraParams->ToString());
     };
-
+    
     ViewAbstractModel::GetInstance()->SetOnDragEnd(std::move(onDragEnd));
 }
 
@@ -4680,11 +4712,12 @@ void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-
-    auto onDragMove = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDragMove = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc), node = frameNode](
                           const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragMove");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info, extraParams);
     };
 
@@ -4698,11 +4731,12 @@ void JSViewAbstract::JsOnDragLeave(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-
-    auto onDragLeave = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDragLeave = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc), node = frameNode](
                            const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragLeave");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info, extraParams);
     };
 
@@ -4716,11 +4750,12 @@ void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-
-    auto onDrop = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDrop = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc), node = frameNode](
                       const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDrop");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info, extraParams);
     };
 
@@ -4739,10 +4774,13 @@ void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
     }
     auto jsOnAreaChangeFunction = AceType::MakeRefPtr<JsOnAreaChangeFunction>(JSRef<JSFunc>::Cast(info[0]));
 
-    auto onAreaChanged = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAreaChangeFunction)](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onAreaChanged = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAreaChangeFunction),
+                             node = frameNode](
                              const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onAreaChange");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(oldRect, oldOrigin, rect, origin);
     };
     ViewAbstractModel::GetInstance()->SetOnAreaChanged(std::move(onAreaChanged));
@@ -5260,9 +5298,12 @@ void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
         RefPtr<JsFocusFunction> jsOnFocusMove = AceType::MakeRefPtr<JsFocusFunction>(JSRef<JSFunc>::Cast(args[0]));
-        auto onFocusMove = [execCtx = args.GetExecutionContext(), func = std::move(jsOnFocusMove)](int info) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto onFocusMove = [execCtx = args.GetExecutionContext(), func = std::move(jsOnFocusMove), node = frameNode](
+                               int info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onFocusMove");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(info);
         };
         ViewAbstractModel::GetInstance()->SetOnFocusMove(std::move(onFocusMove));
@@ -5279,9 +5320,12 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
         return;
     }
     RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
-    auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent)](KeyEventInfo& info) {
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent), node = frameNode](
+                          KeyEventInfo& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onKey");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info);
     };
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
@@ -5297,9 +5341,11 @@ void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
         return;
     }
     RefPtr<JsFocusFunction> jsOnFocus = AceType::MakeRefPtr<JsFocusFunction>(JSRef<JSFunc>::Cast(args[0]));
-    auto onFocus = [execCtx = args.GetExecutionContext(), func = std::move(jsOnFocus)]() {
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onFocus = [execCtx = args.GetExecutionContext(), func = std::move(jsOnFocus), node = frameNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onFocus");
+        PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
 
@@ -5316,9 +5362,11 @@ void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)
         return;
     }
     RefPtr<JsFocusFunction> jsOnBlur = AceType::MakeRefPtr<JsFocusFunction>(JSRef<JSFunc>::Cast(args[0]));
-    auto onBlur = [execCtx = args.GetExecutionContext(), func = std::move(jsOnBlur)]() {
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onBlur = [execCtx = args.GetExecutionContext(), func = std::move(jsOnBlur), node = frameNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onBlur");
+        PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
 
@@ -5467,9 +5515,11 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     }
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     CHECK_NULL_VOID(builderFunc);
-    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("BindBackground");
+        PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
     Alignment alignment = Alignment::CENTER;
@@ -5502,9 +5552,12 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         LOGD("Set the responseType is %{public}d.", response);
         responseType = static_cast<ResponseType>(response);
     }
-    std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
+                                          node = frameNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("BuildContextMenu");
+        PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
 
@@ -5546,9 +5599,11 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     }
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     CHECK_NULL_VOID(builderFunc);
-    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("BindContentCover");
+        PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
 
@@ -5613,9 +5668,11 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     }
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     CHECK_NULL_VOID(builderFunc);
-    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("BindSheet");
+        PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
 
@@ -5878,15 +5935,22 @@ void JSViewAbstract::ParseOverlayCallback(
 {
     auto showCallback = paramObj->GetProperty("onAppear");
     auto dismissCallback = paramObj->GetProperty("onDisappear");
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (showCallback->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(showCallback));
-        onAppear = [func = std::move(jsFunc)]() { func->Execute(); };
+        onAppear = [func = std::move(jsFunc), node = frameNode]() {
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
     }
     if (dismissCallback->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(dismissCallback));
-        onDisappear = [func = std::move(jsFunc)]() { func->Execute(); };
+        onDisappear = [func = std::move(jsFunc), node = frameNode]() {
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
     }
 }
 
@@ -5900,17 +5964,18 @@ void JSViewAbstract::JSCreateAnimatableProperty(const JSCallbackInfo& info)
     if (!callback->IsFunction()) {
         return;
     }
-
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     std::string propertyName = info[0]->ToString();
     if (info[1]->IsNumber()) {
         float numValue = info[1]->ToNumber<float>();
         std::function<void(float)> onCallbackEvent;
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(callback));
-        onCallbackEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), id = Container::CurrentId()](
-                              const float val) {
+        onCallbackEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), id = Container::CurrentId(),
+                              node = frameNode](const float val) {
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto newJSVal = JSRef<JSVal>::Make(ToJSValue(val));
+            PipelineContext::SetCallBackNode(node);
             func->ExecuteJS(1, &newJSVal);
         };
         ViewAbstractModel::GetInstance()->CreateAnimatablePropertyFloat(propertyName, numValue, onCallbackEvent);
@@ -5922,8 +5987,8 @@ void JSViewAbstract::JSCreateAnimatableProperty(const JSCallbackInfo& info)
             AceType::DynamicCast<CustomAnimatableArithmetic>(animatableArithmeticImpl);
         std::function<void(const RefPtr<NG::CustomAnimatableArithmetic>&)> onCallbackEvent;
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(callback));
-        onCallbackEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), id = Container::CurrentId()](
-                              const RefPtr<NG::CustomAnimatableArithmetic>& value) {
+        onCallbackEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), id = Container::CurrentId(),
+                              node = frameNode](const RefPtr<NG::CustomAnimatableArithmetic>& value) {
             ContainerScope scope(id);
             RefPtr<JSAnimatableArithmetic> impl = AceType::DynamicCast<JSAnimatableArithmetic>(value);
             if (!impl) {
@@ -5931,6 +5996,7 @@ void JSViewAbstract::JSCreateAnimatableProperty(const JSCallbackInfo& info)
             }
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto newJSVal = JSRef<JSVal>(impl->GetObject());
+            PipelineContext::SetCallBackNode(node);
             func->ExecuteJS(1, &newJSVal);
         };
         ViewAbstractModel::GetInstance()->CreateAnimatableArithmeticProperty(
@@ -6140,6 +6206,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("bindContentCover", &JSViewAbstract::JsBindContentCover);
     JSClass<JSViewAbstract>::StaticMethod("bindSheet", &JSViewAbstract::JsBindSheet);
     JSClass<JSViewAbstract>::StaticMethod("draggable", &JSViewAbstract::JsSetDraggable);
+    JSClass<JSViewAbstract>::StaticMethod("dragPreviewOptions", &JSViewAbstract::JsSetDragPreviewOptions);
     JSClass<JSViewAbstract>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
     JSClass<JSViewAbstract>::StaticMethod("onDragEnter", &JSViewAbstract::JsOnDragEnter);
     JSClass<JSViewAbstract>::StaticMethod("onDragMove", &JSViewAbstract::JsOnDragMove);
@@ -6568,12 +6635,14 @@ bool JSViewAbstract::ParseDataDetectorConfig(
         }
         types.append(TEXT_DETECT_TYPES[index]);
     }
-
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     JSRef<JSVal> resultCallback = obj->GetProperty("onDetectResultUpdate");
     if (resultCallback->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(resultCallback));
-        onResult = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& result) {
+        onResult = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                       const std::string& result) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            PipelineContext::SetCallBackNode(node);
             func->Execute(result);
         };
     }
@@ -6853,10 +6922,12 @@ void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
     }
 
     RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onHover = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onHover = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc), node = frameNode](
                        bool isHover, HoverInfo& hoverInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onHover");
+        PipelineContext::SetCallBackNode(node);
         func->HoverExecute(isHover, hoverInfo);
     };
     ViewAbstractModel::GetInstance()->SetOnHover(std::move(onHover));
@@ -6899,11 +6970,13 @@ void JSViewAbstract::JsOnGestureJudgeBegin(const JSCallbackInfo& info)
     }
 
     auto jsOnGestureJudgeFunc = AceType::MakeRefPtr<JsGestureJudgeFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onGestureJudgefunc = [execCtx = info.GetExecutionContext(), func = jsOnGestureJudgeFunc](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onGestureJudgefunc = [execCtx = info.GetExecutionContext(), func = jsOnGestureJudgeFunc, node = frameNode](
                                   const RefPtr<NG::GestureInfo>& gestureInfo,
                                   const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, GestureJudgeResult::CONTINUE);
         ACE_SCORING_EVENT("onGestureJudgeBegin");
+        PipelineContext::SetCallBackNode(node);
         return func->Execute(gestureInfo, info);
     };
     ViewAbstractModel::GetInstance()->SetOnGestureJudgeBegin(std::move(onGestureJudgefunc));
@@ -6979,7 +7052,8 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
     }
 
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
-    auto onVisibleChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onVisibleChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                                bool visible, double ratio) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onVisibleAreaChange");
@@ -6987,6 +7061,7 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
         JSRef<JSVal> params[2];
         params[0] = JSRef<JSVal>::Make(ToJSValue(visible));
         params[1] = JSRef<JSVal>::Make(ToJSValue(ratio));
+        PipelineContext::SetCallBackNode(node);
         func->ExecuteJS(2, params);
     };
     ViewAbstractModel::GetInstance()->SetOnVisibleChange(std::move(onVisibleChange), ratioVec);
@@ -7054,9 +7129,12 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
     // KeyboardShortcut allows 3 params, the third param is function callback.
     if (info.Length() == 3 && info[2]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[2]));
-        auto onKeyboardShortcutAction = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto onKeyboardShortcutAction = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                                            node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onKeyboardShortcutAction");
+            PipelineContext::SetCallBackNode(node);
             func->ExecuteJS();
         };
         ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));

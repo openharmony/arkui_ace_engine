@@ -944,6 +944,13 @@ void ViewAbstract::SetDraggable(bool draggable)
     frameNode->SetCustomerDraggable(draggable);
 }
 
+void ViewAbstract::SetDragPreviewOptions(const DragPreviewOption& previewOption)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDragPreviewOptions(previewOption);
+}
+
 void ViewAbstract::SetOnDragStart(
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragStart)
 {
@@ -2270,6 +2277,133 @@ void ViewAbstract::SetMargin(FrameNode *frameNode, const PaddingProperty &value)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, value, frameNode);
+}
+
+void ViewAbstract::SetLayoutDirection(FrameNode* frameNode, TextDirection value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, LayoutDirection, value, frameNode);
+}
+
+void ViewAbstract::UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaExpandOpts, opts, frameNode);
+}
+
+void ViewAbstract::SetAspectRatio(FrameNode* frameNode, float ratio)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AspectRatio, ratio, frameNode);
+}
+
+void ViewAbstract::SetAlignSelf(FrameNode* frameNode, FlexAlign value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AlignSelf, value, frameNode);
+}
+
+void ViewAbstract::SetFlexBasis(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (LessNotEqual(value.Value(), 0.0f)) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, Dimension(), frameNode);
+        return;
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, value, frameNode);
+}
+
+void ViewAbstract::ResetFlexShrink(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexShrink, frameNode);
+}
+
+void ViewAbstract::SetFlexShrink(FrameNode* frameNode, float value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexShrink, value, frameNode);
+}
+
+void ViewAbstract::SetFlexGrow(FrameNode* frameNode, float value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexGrow, value, frameNode);
+}
+
+void ViewAbstract::SetLayoutWeight(FrameNode* frameNode, int32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value), frameNode);
+}
+
+void ViewAbstract::ResetMaxSize(FrameNode* frameNode, bool resetWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetCalcMaxSize(resetWidth);
+}
+
+void ViewAbstract::ResetMinSize(FrameNode* frameNode, bool resetWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetCalcMinSize(resetWidth);
+}
+
+void ViewAbstract::SetMinWidth(FrameNode* frameNode, const CalcLength& minWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMinSize(CalcSize(minWidth, std::nullopt));
+}
+
+void ViewAbstract::SetMaxWidth(FrameNode* frameNode, const CalcLength& maxWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMaxSize(CalcSize(maxWidth, std::nullopt));
+}
+
+void ViewAbstract::SetMinHeight(FrameNode* frameNode, const CalcLength& minHeight)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, minHeight));
+}
+
+void ViewAbstract::SetMaxHeight(FrameNode* frameNode, const CalcLength& maxHeight)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, maxHeight));
+}
+
+void ViewAbstract::SetAlignRules(FrameNode* frameNode, const std::map<AlignDirection, AlignRule>& alignRules)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules, frameNode);
+}
+
+void ViewAbstract::SetGrid(FrameNode* frameNode,
+    std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    // frame node is mounted to parent when pop from stack later, no grid-container is added here
+    layoutProperty->UpdateGridProperty(span, offset, type);
+}
+
+void ViewAbstract::ResetAspectRatio(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, AspectRatio, frameNode);
 }
 
 void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::set<std::string>& allowDrop)

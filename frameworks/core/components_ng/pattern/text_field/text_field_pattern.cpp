@@ -864,6 +864,9 @@ void TextFieldPattern::HandleOnRedoAction()
 
 void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern::HandleOnSelectAll");
+    }
     auto textSize = static_cast<int32_t>(contentController_->GetWideText().length());
     if (inlineStyle) {
         if (contentController_->GetWideText().rfind(L".") < textSize - FIND_TEXT_ZERO_INDEX) {
@@ -892,6 +895,9 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
 
 void TextFieldPattern::HandleOnCopy()
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern::HandleOnCopy");
+    }
     CHECK_NULL_VOID(clipboard_);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -931,6 +937,9 @@ void TextFieldPattern::HandleOnCopy()
 
 void TextFieldPattern::HandleOnPaste()
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern::HandleOnPaste");
+    }
     auto pasteCallback = [weak = WeakClaim(this)](const std::string& data) {
         if (data.empty()) {
             return;
@@ -1759,9 +1768,6 @@ void TextFieldPattern::OnModifyDone()
         textRect_.SetTop(GetPaddingTop() + GetBorderTop());
     }
     CalculateDefaultCursor();
-    if (renderContext->HasBackgroundColor()) {
-        paintProperty->UpdateBackgroundColor(renderContext->GetBackgroundColorValue());
-    }
 
     auto textWidth = static_cast<int32_t>(contentController_->GetWideText().length());
     if (SelectOverlayIsOn()) {
@@ -1829,6 +1835,9 @@ void TextFieldPattern::OnModifyDone()
     }
     if (HasFocus() && IsNormalInlineState()) {
         preInputStyle_ == InputStyle::DEFAULT ? ApplyInlineStates(true) : ApplyInlineStates(false);
+    }
+    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+        ApplyUnderlineStates();
     }
     if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT) {
         if (IsTextArea() && isTextInput_) {
@@ -3065,19 +3074,36 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
         return 0;
     }
     int32_t offset = 0;
-    int32_t strIndex = 0;
+    int32_t strIndex = directionMove == 0 ? (originCaretPosition - 1) : originCaretPosition;
     auto wideTextValue = contentController_->GetWideText();
-    for (directionMove == 0 ? strIndex = (originCaretPosition - 1) : strIndex = originCaretPosition;
-         directionMove == 0 ? strIndex >= 0 : strIndex <= textLength;) {
-        if ((wideTextValue[strIndex] >= L'0' && wideTextValue[strIndex] <= L'9') ||
-            (wideTextValue[strIndex] >= L'a' && wideTextValue[strIndex] <= L'z') ||
-            (wideTextValue[strIndex] >= L'A' && wideTextValue[strIndex] <= L'Z')) {
+    if (wideTextValue[strIndex] == L' ') {
+        int32_t wordStart = 0;
+        int32_t wordEnd = 0;
+        if (!paragraph_->GetWordBoundary(strIndex, wordStart, wordEnd)) {
+            return 0;
+        }
+        if (directionMove == 1) {
+            offset += (wordEnd - strIndex);
+            return offset;
+        } else {
+            offset += (strIndex - wordStart + 1); // when move left, actual offset should add 1
+            strIndex = (wordStart - 1);           // when move left, actual index should minus 1
+        }
+    }
+    bool hasJumpBlank = false;
+    for (; directionMove == 0 ? strIndex >= 0 : strIndex <= textLength;) {
+        auto chr = wideTextValue[strIndex];
+        if (StringUtils::IsLetterOrNumberForWchar(chr) || (chr == L' ' && directionMove == 1)) {
+            if (directionMove == 1 && hasJumpBlank && chr != L' ') {
+                return offset;
+            } else if (directionMove == 1 && !hasJumpBlank && chr == L' ') {
+                hasJumpBlank = true;
+            }
             offset++;
         } else {
-            if (offset > 0) {
-                break;
+            if (offset <= 0) {
+                offset = 1;
             }
-            offset = 1;
             break;
         }
         if (directionMove == 0) {
@@ -4518,7 +4544,11 @@ void TextFieldPattern::ApplyUnderlineStates()
     CHECK_NULL_VOID(renderContext);
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    }
     CalcSize idealSize;
     layoutProperty->UpdatePadding({ CalcLength(UNDERLINE_NORMAL_PADDING), CalcLength(UNDERLINE_NORMAL_PADDING),
         CalcLength(0.0_vp), CalcLength(0.0_vp) });
@@ -5248,9 +5278,6 @@ void TextFieldPattern::OnAttachToFrameNode()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
-        ApplyUnderlineStates();
-    }
     layoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
     auto onTextSelectorChange = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();

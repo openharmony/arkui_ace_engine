@@ -22,14 +22,13 @@
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container_consts.h"
 
 namespace OHOS::Ace {
 namespace {
 using StartRegister = void (*)(
     const std::string& processName, const std::string& pkgName, bool debugApp, const Callback& callbac);
 using StopRegister = void (*)();
-// defined in container.h
-constexpr int32_t CONTAINER_ID_DIVIDE_SIZE = 100000;
 } // namespace
 
 HdcRegister::HdcRegister(): registerHandler_(nullptr)

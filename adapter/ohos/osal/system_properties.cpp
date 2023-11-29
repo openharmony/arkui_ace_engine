@@ -21,6 +21,8 @@
 #include <string>
 #include <unistd.h>
 
+#include "dm_common.h"
+
 #include "parameter.h"
 #include "parameters.h"
 
@@ -54,6 +56,8 @@ std::shared_mutex mutex_;
 constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
 #endif
+
+using RsOrientation = Rosen::DisplayOrientation;
 
 void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 {
@@ -388,10 +392,13 @@ void SystemProperties::InitDeviceInfo(
 
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
 {
-    if (orientation == ORIENTATION_PORTRAIT && orientation_ != DeviceOrientation::PORTRAIT) {
+    int32_t newOrientation = ((orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE)) ||
+        (orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE_INVERTED))) ?
+        ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+    if (newOrientation == ORIENTATION_PORTRAIT && orientation_ != DeviceOrientation::PORTRAIT) {
         Swap(deviceWidth_, deviceHeight_);
         orientation_ = DeviceOrientation::PORTRAIT;
-    } else if (orientation == ORIENTATION_LANDSCAPE && orientation_ != DeviceOrientation::LANDSCAPE) {
+    } else if (newOrientation == ORIENTATION_LANDSCAPE && orientation_ != DeviceOrientation::LANDSCAPE) {
         Swap(deviceWidth_, deviceHeight_);
         orientation_ = DeviceOrientation::LANDSCAPE;
     }
@@ -460,6 +467,11 @@ bool SystemProperties::GetAllowWindowOpenMethodEnabled()
 bool SystemProperties::GetImageFrameworkEnabled()
 {
     return system::GetBoolParameter("persist.ace.image.framework.enabled", true);
+}
+
+bool SystemProperties::GetDebugPixelMapSaveEnabled()
+{
+    return system::GetBoolParameter("persist.ace.save.pixelmap.enabled", false);
 }
 
 ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()

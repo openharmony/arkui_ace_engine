@@ -787,6 +787,11 @@ public:
         ViewAbstract::SetDraggable(draggable);
     }
 
+    void SetDragPreviewOptions(const DragPreviewOption& previewOption) override
+    {
+        ViewAbstract::SetDragPreviewOptions(previewOption);
+    }
+
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override
     {
         auto dragStart = [dragStartFunc = std::move(onDragStart)](const RefPtr<OHOS::Ace::DragEvent>& event,

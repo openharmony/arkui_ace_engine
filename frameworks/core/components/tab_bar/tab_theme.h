@@ -43,24 +43,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->labelPadding_ = themeConstants->GetDimension(THEME_TAB_LABEL_PADDING);
-            theme->padding_ = themeConstants->GetDimension(THEME_TAB_PADDING);
-            theme->gradientWidth_ = themeConstants->GetDimension(THEME_TAB_GRADIENT_WIDTH);
-            theme->defaultHeight_ = themeConstants->GetDimension(THEME_TAB_DEFAULT_HEIGHT);
-            theme->defaultWidth_ = themeConstants->GetDimension(THEME_TAB_DEFAULT_WIDTH);
-            theme->defaultItemHeight_ = themeConstants->GetDimension(THEME_TAB_DEFAULT_ITEM_HEIGHT);
-            theme->backgroundColor_ = themeConstants->GetColor(THEME_TAB_BACKGROUND_COLOR);
-            theme->activeIndicatorColor_ = themeConstants->GetColor(THEME_TAB_ACTIVE_INDICATOR_COLOR);
-            theme->activeIndicatorWidth_ = themeConstants->GetDimension(THEME_TAB_ACTIVE_INDICATOR_WIDTH);
-            theme->activeIndicatorMinWidth_ = themeConstants->GetDimension(THEME_TAB_ACTIVE_INDICATOR_MIN_WIDTH);
-            theme->activeIndicatorPadding_ = themeConstants->GetDimension(THEME_TAB_ACTIVE_INDICATOR_PADDING);
-            theme->focusIndicatorColor_ = themeConstants->GetColor(THEME_TAB_FOCUS_INDICATOR_COLOR);
-            theme->focusIndicatorRadius_ = themeConstants->GetDimension(THEME_TAB_FOCUS_INDICATOR_RADIUS);
-            theme->focusIndicatorHorizontalPadding_ =
-                themeConstants->GetDimension(THEME_TAB_FOCUS_INDICATOR_HORIZONTAL_PADDING);
-            theme->focusIndicatorVerticalPadding_ =
-                themeConstants->GetDimension(THEME_TAB_FOCUS_INDICATOR_VERTICAL_PADDING);
-            theme->dividerColor_ = themeConstants->GetColor(THEME_DIVIDER_COLOR);
             auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {
                 return theme;
@@ -112,6 +94,20 @@ public:
                 theme->tabBarColumnMargin_ = pattern->GetAttr<Dimension>("tab_bar_column_margin", 0.0_vp);
                 theme->horizontalBottomTabMinWidth_ =
                     pattern->GetAttr<Dimension>("horizontal_bottom_tab_min_width", 0.0_vp);
+
+                theme->labelPadding_ = pattern->GetAttr<Dimension>("label_padding", 8.0_vp);
+                theme->padding_ = pattern->GetAttr<Dimension>("tab_padding", 16.0_vp);
+                theme->gradientWidth_ = pattern->GetAttr<Dimension>("tab_gradient_width", 24.0_vp);
+                theme->defaultHeight_ = pattern->GetAttr<Dimension>("tab_default_height", 56.0_vp);
+                theme->defaultWidth_ = pattern->GetAttr<Dimension>("tab_default_width", 200.0_px);
+                theme->defaultItemHeight_ = pattern->GetAttr<Dimension>("tab_default_item_height", 200.0_px);
+                theme->activeIndicatorWidth_ = pattern->GetAttr<Dimension>("active_indicator_width", 2.0_vp);
+                theme->activeIndicatorMinWidth_ = pattern->GetAttr<Dimension>("active_indicator_min_width", 32.0_vp);
+                theme->activeIndicatorPadding_ = pattern->GetAttr<Dimension>("active_indicator_padding", 3.0_vp);
+                theme->focusIndicatorHorizontalPadding_ =
+                    pattern->GetAttr<Dimension>("focus_indicator_horizontal_padding", 0.0_vp);
+                theme->focusIndicatorVerticalPadding_ =
+                    pattern->GetAttr<Dimension>("focus_indicator_vertical_padding", 0.0_vp);
             } else {
                 LOGW("find pattern of tab fail");
             }

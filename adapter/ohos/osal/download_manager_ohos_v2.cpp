@@ -37,6 +37,7 @@ bool DownloadManagerV2::DownloadAsync(DownloadCallback&& downloadCallback, const
     auto task = session.CreateTask(httpReq);
     task->OnSuccess([callback = std::move(downloadCallback.successCallback), instanceId](
                         const NetStackRequest& request, const NetStackResponse& response) {
+        ACE_SCOPED_TRACE("DownloadAsync success of %s", request.GetURL().c_str());
         ContainerScope scope(instanceId);
         LOGI("Async http task of url %{private}s success", request.GetURL().c_str());
         NG::ImageUtils::PostToUI([data = std::move(response.GetResult()), successCallback = std::move(callback)]() {
@@ -79,6 +80,7 @@ bool DownloadManagerV2::DownloadAsync(DownloadCallback&& downloadCallback, const
         });
     });
     auto result = task->Start();
+    ACE_SCOPED_TRACE("DownloadAsync start of %s", url.c_str());
     LOGI("Task of netstack with src %{private}s %{public}s", url.c_str(),
         result ? " started on another thread successfully"
                : " failed to start on another thread, please check netStack log");
