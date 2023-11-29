@@ -863,10 +863,74 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "richEditor"), richEditor);
 
     auto textArea = panda::ObjectRef::New(vm);
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetStyle));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetStyle));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectionMenuHidden"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetSelectionMenuHidden));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectionMenuHidden"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetSelectionMenuHidden));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxLines"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextAreaBridge::SetMaxLines));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetMaxLines));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLines"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetMaxLines));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetCopyOption));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetCopyOption));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPlaceholderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetPlaceholderColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPlaceholderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetPlaceholderColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetTextAreaTextAlign));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetTextAreaTextAlign));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPlaceholderFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetPlaceholderFont));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPlaceholderFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetPlaceholderFont));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBarState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetBarState));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetBarState));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableKeyboardOnFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetEnableKeyboardOnFocus));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableKeyboardOnFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetEnableKeyboardOnFocus));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFontFamily));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetFontFamily));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowCounter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetShowCounter));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShowCounter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetShowCounter));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCaretColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetCaretColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCaretColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetCaretColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxLength"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetMaxLength));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLength"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetMaxLength));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFontColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetFontColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFontStyle));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetFontStyle));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFontWeight));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetFontWeight));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFontSize));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetFontSize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
 
     auto video = panda::ObjectRef::New(vm);
