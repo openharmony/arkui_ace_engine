@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_divider_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_col_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_row_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_animator_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_span_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_nav_destination_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_navigation_modifier.h"
@@ -101,6 +102,7 @@ static struct ArkUINodeAPI impl = {
     GetPatternLockModifier,
     GetColumnSplitModifier,
     GetSpanModifier,
+    GetImageAnimatorModifier,
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI()

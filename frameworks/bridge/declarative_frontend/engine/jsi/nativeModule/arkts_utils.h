@@ -28,6 +28,7 @@
 namespace OHOS::Ace::NG {
 class ArkTSUtils {
 public:
+    static uint32_t ColorAlphaAdapt(uint32_t origin);
     static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result);
