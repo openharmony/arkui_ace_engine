@@ -15,7 +15,6 @@
 
 #include "core/image/image_cache.h"
 
-
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/image/image_object.h"
 
@@ -99,8 +98,8 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageDa
     std::scoped_lock lock(dataCacheMutex_);
     auto dataSize = imageData->GetSize();
     if (dataSize > (dataSizeLimit_ >> 1)) { // if data is longer than half limit, do not cache it.
-        LOGW("data is %{public}d, bigger than half limit %{public}d, do not cache it", static_cast<int32_t>(dataSize),
-            static_cast<int32_t>(dataSizeLimit_ >> 1));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "data is %{public}d, bigger than half limit %{public}d, do not cache it",
+            static_cast<int32_t>(dataSize), static_cast<int32_t>(dataSizeLimit_ >> 1));
         return;
     }
     auto iter = imageDataCache_.find(key);
