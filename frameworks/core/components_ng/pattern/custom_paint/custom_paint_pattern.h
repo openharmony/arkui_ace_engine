@@ -143,6 +143,8 @@ public:
     void SetFilterParam(const std::string& filterStr);
     TransformParam GetTransform() const;
 
+    void DumpAdvanceInfo() override;
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -150,7 +152,9 @@ private:
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
     bool isCanvasInit_ = false;
-    SizeF oldPixelGridRoundSize = {-1, -1};
+    SizeF oldPixelGridRoundSize_ = {-1, -1};
+    SizeF lastOldPixelGridRoundSize_ = {-1, -1};
+    DirtySwapConfig recordConfig_;
 
     RefPtr<RenderingContext2DModifier> contentModifier_;
 
