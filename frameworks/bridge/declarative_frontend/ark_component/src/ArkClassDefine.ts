@@ -1143,3 +1143,59 @@ class ArkImageFrameInfoToArray implements Equable {
       (this.arrDuration.toString() === another.arrDuration.toString());
   }
 }
+
+class ArkPickerTextStyle implements Equable {
+    color: number;
+    size: string;
+    weight: string;
+
+    constructor() {
+        this.color = undefined;
+        this.size = "16fp"
+        this.weight = "Regular";
+    }
+
+    setColor(color: number | string | Resource){
+        let arkColor = new ArkColor();
+        arkColor.parseColorValue(color);
+        this.color = arkColor.color;
+    }
+
+    setSize(size: number | string | Resource) {
+        this.size = size.toString();
+    }
+
+    setWeight(value: string | number) {
+        const valueWeightMap = {
+            [0]: 'Lighter',
+            [1]: 'Normal',
+            [2]: 'Regular',
+            [3]: 'Medium',
+            [4]: 'Bold',
+            [5]: 'Bolder'
+        };
+        if (value in valueWeightMap) {
+            this.weight = valueWeightMap[value];
+        } else {
+            this.weight = value.toString();
+        }
+    }
+
+    isEqual(another: ArkPickerTextStyle): boolean {
+        return this.color ===another.color && this.size === another.size && this.weight === another.weight;
+    }
+}
+
+class ArkEdgeAlign {
+    alignType: number;
+    offset?: number | string | undefined | Resource;
+
+    constructor() {
+        this.alignType = undefined;
+        this.offset = undefined;
+    }
+
+    isEqual(another: ArkEdgeAlign): boolean {
+        return (this.alignType === another.alignType && this.offset === another.offset);
+    }
+}

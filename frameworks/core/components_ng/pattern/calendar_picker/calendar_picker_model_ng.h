@@ -30,6 +30,9 @@ public:
     void SetChangeEvent(SelectedChangeEvent&& onChange) override;
     void SetPadding(const PaddingProperty& padding) override;
 
+    static void SetTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyle);
+    static void SetEdgeAlign(FrameNode* frameNode, const CalendarEdgeAlign& alignType, const DimensionOffset& offset);
+
 private:
     void LayoutPicker(const RefPtr<CalendarPickerPattern>& pickerPattern, RefPtr<FrameNode>& pickerNode,
         const CalendarSettingData& settingData, const RefPtr<CalendarTheme>& theme);

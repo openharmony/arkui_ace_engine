@@ -796,6 +796,13 @@ struct ArkUISideBarContainerModifierAPI {
     void (*ResetSideBarContainerDivider)(NodeHandle node);
 };
 
+struct ArkUICalendarPickerModifierAPI {
+    void (*SetTextStyle)(NodeHandle node, uint32_t color, const char* fontSize, const char* fontweight);
+    void (*ResetTextStyle)(NodeHandle node);
+    void (*SetEdgeAlign)(NodeHandle node, const double* values, const int* units, int32_t size, int32_t alignType);
+    void (*ResetEdgeAlign)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -835,6 +842,7 @@ struct ArkUINodeAPI {
     ArkUISpanModifierAPI (*GetSpanModifier)();
     ArkUIImageAnimatorModifierAPI (*GetImageAnimatorModifier)();
     ArkUISideBarContainerModifierAPI (*GetSideBarContainerModifier)();
+    ArkUICalendarPickerModifierAPI (*GetCalendarPickerModifier)();
 };
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H

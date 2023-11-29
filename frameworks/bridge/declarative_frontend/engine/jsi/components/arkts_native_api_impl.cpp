@@ -57,6 +57,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/pipeline/base/element_register.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_calendar_picker_modifier.h"
 
 using namespace OHOS::Ace::NG;
 
@@ -105,6 +106,7 @@ static struct ArkUINodeAPI impl = {
     GetSpanModifier,
     GetImageAnimatorModifier,
     GetSideBarContainerModifier,
+    GetCalendarPickerModifier,
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI()

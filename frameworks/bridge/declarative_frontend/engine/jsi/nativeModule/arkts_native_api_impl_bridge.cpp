@@ -49,6 +49,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_split_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_side_bar_container_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeById(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1040,6 +1041,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterNavigatorAttributes(object, vm);
     RegisterPanelAttributes(object, vm);
     RegisterSideBarContainerAttributes(object, vm);
+    RegisterCalendarPickerAttributes(object, vm);
     
     return object;
 }
@@ -1360,5 +1362,19 @@ void ArkUINativeModule::RegisterSideBarContainerAttributes(Local<panda::ObjectRe
     sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetDivider));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "sideBarContainer"), sideBarContainer);
+}
+
+void ArkUINativeModule::RegisterCalendarPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto calendarPicker = panda::ObjectRef::New(vm);
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetTextStyle));
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetTextStyle));
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEdgeAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetEdgeAlign));
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEdgeAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetEdgeAlign));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "calendarPicker"), calendarPicker);
 }
 } // namespace OHOS::Ace::NG
