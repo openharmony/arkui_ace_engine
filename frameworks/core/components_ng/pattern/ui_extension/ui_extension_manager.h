@@ -38,6 +38,7 @@ constexpr int32_t UI_EXTENSION_OFFSET_MAX = 10000000;
 constexpr int32_t UI_EXTENSION_OFFSET_MIN = 100000;
 constexpr int32_t UI_EXTENSION_ID_FACTOR = 10;
 constexpr int32_t UI_EXTENSION_LEVEL_MAX = 3;
+constexpr int32_t UI_EXTENSION_ROOT_ID = -1;
 };
 
 class UIExtensionPattern;
