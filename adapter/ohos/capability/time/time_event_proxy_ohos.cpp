@@ -1,0 +1,82 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "adapter/ohos/capability/time/time_event_proxy_ohos.h"
+
+#include "common_event_manager.h"
+#include "common_event_support.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<TimeEventProxy> TimeEventProxy::instance_;
+std::mutex TimeEventProxy::mutex_;
+
+TimeEventProxy* TimeEventProxy::GetInstance()
+{
+    if (!instance_) {
+        std::scoped_lock lock(mutex_);
+        if (!instance_) {
+            instance_ = std::make_unique<TimeEventProxyOhos>();
+        }
+    }
+    return instance_.get();
+}
+
+using OHOS::EventFwk::CommonEventManager;
+using OHOS::EventFwk::CommonEventSubscribeInfo;
+using OHOS::EventFwk::CommonEventSupport;
+using OHOS::EventFwk::MatchingSkills;
+
+void TimeEventSubscriber::OnReceiveEvent(const CommonEventData& /* data */)
+{
+    LOGI("Time Change Common Event Received");
+    TimeEventProxy::GetInstance()->OnTimeChange();
+}
+
+TimeEventProxyOhos::TimeEventProxyOhos()
+{
+    MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED);
+
+    CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    subscribeInfo.SetThreadMode(CommonEventSubscribeInfo::ThreadMode::HANDLER);
+
+    eventFwkSubscriber_ = std::make_shared<TimeEventSubscriber>(subscribeInfo);
+
+    // create subscription
+    CommonEventManager::SubscribeCommonEvent(eventFwkSubscriber_);
+}
+
+TimeEventProxyOhos::~TimeEventProxyOhos()
+{
+    CommonEventManager::UnSubscribeCommonEvent(eventFwkSubscriber_);
+}
+
+void TimeEventProxyOhos::OnTimeChange()
+{
+    for (auto&& wk : listeners_) {
+        auto listener = wk.Upgrade();
+        if (listener) {
+            listener->OnTimeChange();
+        } else {
+            listeners_.erase(wk);
+        }
+    }
+}
+
+void TimeEventProxyOhos::Register(const WeakPtr<TimeChangeListener>& listener)
+{
+    listeners_.insert(listener);
+}
+} // namespace OHOS::Ace
