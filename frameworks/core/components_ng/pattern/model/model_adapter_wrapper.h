@@ -64,6 +64,7 @@ public:
         bool recreateWindow);
     void OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeInfo& windowChangeInfo);
     void OnPaint3DSceneTexture(SkCanvas* skCanvas);
+    void Deinit();
 
     OHOS::Render3D::SurfaceType GetSurfaceType()
     {
