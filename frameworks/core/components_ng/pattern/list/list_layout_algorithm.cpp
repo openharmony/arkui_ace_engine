@@ -90,7 +90,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         } else {
             // use parent max size first.
             auto parentMaxSize = contentConstraint.maxSize;
-            contentMainSize_ = GetMainAxisSize(parentMaxSize, axis_) - paddingBeforeContent_ - paddingAfterContent_;
+            contentMainSize_ = GetMainAxisSize(parentMaxSize, axis_);
             mainSizeIsDefined_ = false;
         }
     } else {
