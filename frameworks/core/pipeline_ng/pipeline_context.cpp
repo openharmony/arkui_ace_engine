@@ -581,6 +581,11 @@ void PipelineContext::FlushFocus()
         dirtyDefaultFocusNode_.Reset();
         return;
     }
+    auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
+    auto curMainView = FocusHub::GetCurrentMainView();
+    if (curMainView && curMainView->GetIsViewHasFocused() && rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
+        rootFocusHub->RequestFocusImmediately();
+    }
 }
 
 void PipelineContext::FlushPipelineImmediately()
@@ -1823,26 +1828,30 @@ bool PipelineContext::RequestDefaultFocus(const RefPtr<FocusHub>& mainView)
     if (!mainView || mainView->GetFocusType() != FocusType::SCOPE) {
         return false;
     }
+    mainView->SetIsViewHasFocused(true);
     auto viewRootScope = mainView->GetMainViewRootScope();
     auto defaultFocusNode = mainView->GetChildFocusNodeByType(FocusNodeType::DEFAULT);
     if (!mainView->IsDefaultHasFocused() && defaultFocusNode && defaultFocusNode->IsFocusableWholePath()) {
         mainView->SetIsViewRootScopeFocused(viewRootScope, false);
         auto ret = defaultFocusNode->RequestFocusImmediately();
         mainView->SetIsDefaultHasFocused(true);
-        LOGI("Target view's default focus is %{public}s/%{public}d. Request default focus return: %{public}d.",
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "Target view's default focus is %{public}s/%{public}d. Request default focus return: %{public}d.",
             defaultFocusNode->GetFrameName().c_str(), defaultFocusNode->GetFrameId(), ret);
         return ret;
     }
     if (mainView->GetIsViewRootScopeFocused() && viewRootScope) {
         mainView->SetIsViewRootScopeFocused(viewRootScope, true);
         auto ret = viewRootScope->RequestFocusImmediately();
-        LOGI("Target view has no default focus. Request focus on view root: %{public}s/%{public}d return: %{public}d.",
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "Target view has no default focus. Request focus on view root: %{public}s/%{public}d return: %{public}d.",
             viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
         return ret;
     }
     mainView->SetIsViewRootScopeFocused(viewRootScope, false);
     auto ret = mainView->RequestFocusImmediately();
-    LOGI("Target view's default focus has been focused. Request view focus return: %{public}d.", ret);
+    TAG_LOGI(AceLogTag::ACE_FOCUS,
+        "Target view's default focus has been focused. Request view focus return: %{public}d.", ret);
     return ret;
 }
 
@@ -2078,11 +2087,11 @@ void PipelineContext::WindowFocus(bool isFocus)
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
         auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
-        if (rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
+        auto curMainView = FocusHub::GetCurrentMainView();
+        if (curMainView && curMainView->GetIsViewHasFocused() && rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
             rootFocusHub->RequestFocusImmediately();
         }
         if (focusWindowId_.has_value()) {
-            auto curMainView = FocusHub::GetCurrentMainView();
             if (curMainView) {
                 curMainView->HandleFocusOnMainView();
             }
