@@ -322,6 +322,8 @@ public:
 
     void CheckHandles(SelectHandleInfo& handleInfo) override;
 
+    bool IsShowSelectMenuUsingMouse();
+
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
     {
