@@ -29,6 +29,7 @@ group("core_common_unittest") {
     "rosen:rosen_test",
     "sharedata:share_data_test",
     "storage:storage_test",
+    "task:thread_test",
     "vibrator:vibrator_test",
   ]
 }
