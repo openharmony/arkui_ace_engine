@@ -410,6 +410,12 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
     draggedFrameNode_ = preTargetFrameNode_;
 }
 
+void DragDropManager::OnDragStart(const Point& point)
+{
+    dragDropState_ = DragDropMgrState::DRAGGING;
+    NotifyDragFrameNode(point, DragEventType::START);
+}
+
 void DragDropManager::PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode)
 {
     CHECK_NULL_VOID(dragFrameNode);
