@@ -233,33 +233,34 @@ ScrollAlign ListPattern::GetScrollAlignByScrollSnapAlign() const
 
 float ListPattern::CalculateTargetPos(float startPos, float endPos)
 {
-    float topOffset = 0.0f;
-    float bottomOffset = 0.0f;
-    float targetPos = 0.0f;
-
-    topOffset = std::abs(startPos);
-    bottomOffset = std::abs(endPos - contentMainSize_);
-
+    float topOffset = startPos;
+    float bottomOffset = endPos - contentMainSize_;
     if (GreatOrEqual(startPos, 0.0f) && LessOrEqual(endPos, contentMainSize_)) {
         return 0.0f;
     }
-    if (LessNotEqual(topOffset, bottomOffset)) {
-        if (Positive(startPos)) {
-            targetPos = -startPos;
+    if ((NearEqual(startPos, 0.0f) && GreatNotEqual(endPos, contentMainSize_)) ||
+        (LessNotEqual(startPos, 0.0f) && NearEqual(endPos, contentMainSize_))) {
+        return 0.0f;
+    }
+    if (LessNotEqual(startPos, 0.0f) && GreatNotEqual(endPos, contentMainSize_)) {
+        if (GreatOrEqual(std::abs(topOffset), std::abs(bottomOffset))) {
+            return bottomOffset;
         } else {
-            targetPos = startPos;
+            return topOffset;
         }
+    }
+    if (GreatNotEqual(std::abs(topOffset), std::abs(bottomOffset))) {
+        return bottomOffset;
+    } else if (LessNotEqual(std::abs(topOffset), std::abs(bottomOffset))) {
+        return topOffset;
     } else {
-        if (Positive(endPos - contentMainSize_)) {
-            targetPos = endPos - contentMainSize_;
+        if (LessNotEqual(startPos, 0.0f)) {
+            return topOffset;
         } else {
-            targetPos = contentMainSize_ - endPos;
+            return bottomOffset;
         }
     }
-    if (GreatOrEqual(endPos - startPos, contentMainSize_)) {
-        targetPos = -targetPos;
-    }
-    return targetPos;
+    return 0.0f;
 }
 
 RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
