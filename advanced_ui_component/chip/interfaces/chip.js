@@ -27,7 +27,14 @@ export const defaultTheme = {
         }
     },
     label: {
-        fontSize: {
+        normalFontSize: {
+            id: -1,
+            type: 10002,
+            params: ["sys.float.ohos_id_text_size_button2"],
+            bundleName: "",
+            moduleName: ""
+        },
+        smallFontSize: {
             id: -1,
             type: 10002,
             params: ["sys.float.ohos_id_text_size_button3"],
@@ -64,6 +71,7 @@ export const defaultTheme = {
         focusable: !1
     },
     chipNode: {
+        minLabelWidth: 12,
         normalHeight: 36,
         smallHeight: 28,
         enabled: !0,
@@ -84,14 +92,14 @@ export const defaultTheme = {
         normalBorderRadius: {
             id: -1,
             type: 10002,
-            params: ["sys.float.ohos_id_corner_radius_button"],
+            params: ["sys.float.ohos_id_corner_radius_tips_instant_tip"],
             bundleName: "",
             moduleName: ""
         },
         smallBorderRadius: {
             id: -1,
             type: 10002,
-            params: ["sys.float.ohos_id_corner_radius_small_button"],
+            params: ["sys.float.ohos_id_corner_radius_piece"],
             bundleName: "",
             moduleName: ""
         },
@@ -426,7 +434,7 @@ export class ChipComponent extends ViewPU {
     getLabelFontSize() {
         var e;
         try {
-            return void 0 !== (null === (e = this.label) || void 0 === e ? void 0 : e.fontSize) && this.label.fontSize >= 0 ? this.label.fontSize : resourceManager.getSystemResourceManager().getNumberByName(this.theme.label.fontSize.params[0].split(".")[2])
+            return void 0 !== (null === (e = this.label) || void 0 === e ? void 0 : e.fontSize) && this.label.fontSize >= 0 ? this.label.fontSize : this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL ? resourceManager.getSystemResourceManager().getNumberByName(this.theme.label.smallFontSize.params[0].split(".")[2]) : resourceManager.getSystemResourceManager().getNumberByName(this.theme.label.normalFontSize.params[0].split(".")[2])
         } catch (e) {
             return 0
         }
@@ -561,6 +569,10 @@ export class ChipComponent extends ViewPU {
         return e
     }
 
+    getReserveChipNodeWidth() {
+        return this.getCalculateChipNodeWidth() - this.getLabelWidth() + this.theme.chipNode.minLabelWidth
+    }
+
     getChipEnable() {
         return this.chipEnabled || void 0 === this.chipEnabled
     }
@@ -631,37 +643,41 @@ export class ChipComponent extends ViewPU {
     }
 
     getFocusOverlaySize() {
-        return { width: this.getChipNodeWidth() + 8, height: this.getChipNodeHeight() + 8 }
+        return {
+            width: Math.max(this.getChipNodeWidth(), this.getChipConstraintWidth().minWidth) + 8,
+            height: this.getChipNodeHeight() + 8
+        }
     }
 
     getChipConstraintWidth() {
         var e, i;
+        let t = this.getReserveChipNodeWidth();
         if (!this.isChipSizeEnum()) {
             this.chipNodeSize = this.chipSize;
             if (void 0 !== (null === (e = this.chipNodeSize) || void 0 === e ? void 0 : e.width) && this.toVp(null === (i = this.chipNodeSize) || void 0 === i ? void 0 : i.width) >= 0) return {
-                minWidth: 0,
+                minWidth: t,
                 maxWidth: this.chipNodeSize.width
             }
         }
-        let t = this.getCalculateChipNodeWidth();
+        let o = this.getCalculateChipNodeWidth();
         switch (this.chipBreakPoints) {
             case BreakPointsType.SM:
                 return {
-                    minWidth: 0,
-                    maxWidth: Math.min(t, this.theme.chipNode.breakPointConstraintWidth.breakPointSmMaxWidth)
+                    minWidth: t,
+                    maxWidth: Math.min(o, this.theme.chipNode.breakPointConstraintWidth.breakPointSmMaxWidth)
                 };
             case BreakPointsType.MD:
                 return {
-                    minWidth: Math.max(t, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
-                    maxWidth: Math.min(t, this.theme.chipNode.breakPointConstraintWidth.breakPointMdMaxWidth)
+                    minWidth: Math.max(o, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
+                    maxWidth: Math.min(o, this.theme.chipNode.breakPointConstraintWidth.breakPointMdMaxWidth)
                 };
             case BreakPointsType.LG:
                 return {
-                    minWidth: Math.max(t, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
-                    maxWidth: Math.min(t, this.theme.chipNode.breakPointConstraintWidth.breakPointLgMaxWidth)
+                    minWidth: Math.max(o, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
+                    maxWidth: Math.min(o, this.theme.chipNode.breakPointConstraintWidth.breakPointLgMaxWidth)
                 };
             default:
-                return { minWidth: 0, maxWidth: t }
+                return { minWidth: t, maxWidth: o }
         }
     }
 
