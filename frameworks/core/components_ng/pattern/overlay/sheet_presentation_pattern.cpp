@@ -78,6 +78,9 @@ void SheetPresentationPattern::InitPageHeight()
     auto manager = context->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);
     statusBarHeight_ = manager->GetSystemSafeArea().top_.Length();
+    auto sheetTheme = context->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    sheetThemeType_ = sheetTheme->GetSheetType();
 }
 
 bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
@@ -688,11 +691,6 @@ void SheetPresentationPattern::InitSheetDetents()
 SheetType SheetPresentationPattern::GetSheetType()
 {
     SheetType sheetType = SheetType::SHEET_BOTTOM;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, sheetType);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
-    CHECK_NULL_RETURN(sheetTheme, sheetType);
-    auto type = sheetTheme->GetSheetType();
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     auto rootWidth = PipelineContext::GetCurrentRootWidth();
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -701,7 +699,7 @@ SheetType SheetPresentationPattern::GetSheetType()
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (type == "auto") {
+    if (sheetThemeType_ == "auto") {
         if (IsFold()) {
             sheetType = SheetType::SHEET_CENTER;
         } else {
@@ -711,7 +709,7 @@ SheetType SheetPresentationPattern::GetSheetType()
                 sheetType = SheetType::SHEET_BOTTOM;
             }
         }
-    } else if (type == "popup") {
+    } else if (sheetThemeType_ == "popup") {
         if (windowRect.Width() >= SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
             if (sheetStyle.sheetType.has_value()) {
                 sheetType = sheetStyle.sheetType.value();

@@ -125,7 +125,6 @@ public:
 
     void InitialLayoutProps();
 
-
     void AvoidSafeArea();
     float GetSheetHeightChange();
     void ScrollTo(float height);
@@ -320,6 +319,8 @@ private:
     float centerHeight_ = 0.0f;
     bool isFirstInit_ = true;
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
+
+    std::string sheetThemeType_ = "auto";
 
     std::vector<float> sheetDetentHeight_;
 
