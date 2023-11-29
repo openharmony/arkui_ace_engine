@@ -1226,7 +1226,6 @@ void ListPattern::ScrollTo(float position)
 
 void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
-    LOGE("[%{public}d]## JASON ## ==== ListPattern::ScrollToIndex Start... ========== ==========", __LINE__);
     SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
     if ((index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM)) {
