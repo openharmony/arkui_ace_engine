@@ -56,8 +56,8 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
         if (!host->InResponseRegionList(localPoint, responseRegionBuffer_)) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "This MOVE/UP event is out of region, try to reject click gesture");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+            return false;
         }
-        return false;
     }
     return true;
 }
