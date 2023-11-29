@@ -18,6 +18,7 @@
 #include <mutex>
 #include <optional>
 #include <regex>
+#include <shared_mutex>
 #include <unistd.h>
 
 #include "dfx_jsnapi.h"
@@ -171,6 +172,7 @@ shared_ptr<JsValue> RequireNativeModule(const shared_ptr<JsRuntime>& runtime, co
 std::map<std::string, std::string> JsiDeclarativeEngineInstance::mediaResourceFileMap_;
 
 std::unique_ptr<JsonValue> JsiDeclarativeEngineInstance::currentConfigResourceData_;
+std::shared_mutex JsiDeclarativeEngineInstance::sharedMutex_;
 
 bool JsiDeclarativeEngineInstance::isModulePreloaded_ = false;
 bool JsiDeclarativeEngineInstance::isModuleInitialized_ = false;
@@ -274,6 +276,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     }
 
     // load resourceConfig
+    std::unique_lock<std::shared_mutex> lock(sharedMutex_);
     currentConfigResourceData_ = JsonUtil::CreateArray(true);
     frontendDelegate_->LoadResourceConfiguration(mediaResourceFileMap_, currentConfigResourceData_);
     isEngineInstanceInitialized_ = true;
@@ -622,6 +625,7 @@ void JsiDeclarativeEngineInstance::FlushReload()
 std::unique_ptr<JsonValue> JsiDeclarativeEngineInstance::GetI18nStringResource(
     const std::string& targetStringKey, const std::string& targetStringValue)
 {
+    std::shared_lock<std::shared_mutex> lock(sharedMutex_);
     auto resourceI18nFileNum = currentConfigResourceData_->GetArraySize();
     for (int i = 0; i < resourceI18nFileNum; i++) {
         auto priorResource = currentConfigResourceData_->GetArrayItem(i);

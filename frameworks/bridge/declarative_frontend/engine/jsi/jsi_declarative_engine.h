@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <vector>
 
@@ -203,6 +204,7 @@ private:
     std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
     static std::map<std::string, std::string> mediaResourceFileMap_;
+    static std::shared_mutex sharedMutex_;
 
     // runningPage_ is the page that is loaded and rendered successfully, while stagingPage_ is to
     // handle all page routing situation, which include two stages:
