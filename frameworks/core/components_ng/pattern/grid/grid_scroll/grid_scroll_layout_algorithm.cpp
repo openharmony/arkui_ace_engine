@@ -269,7 +269,7 @@ void GridScrollLayoutAlgorithm::InitialItemsCrossSize(
 
     if (crossCount_ != crossLens.size()) {
         crossCount_ = crossLens.size();
-        gridLayoutInfo_.crossCount_ = crossCount_;
+        gridLayoutInfo_.crossCount_ = static_cast<int32_t>(crossCount_);
     }
 
     int32_t index = 0;
@@ -477,7 +477,7 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
                 --currentIndex;
                 break;
             }
-            i += childState - 1;
+            i += static_cast<uint32_t>(childState) - 1;
             // Step3. Measure [GridItem]
             LargeItemLineHeight(itemWrapper, hasNormalItem);
             gridLayoutInfo_.endIndex_ = currentIndex;
@@ -999,11 +999,11 @@ void GridScrollLayoutAlgorithm::SkipRegularLines(bool forward)
         return;
     }
     int32_t estimatedLines = gridLayoutInfo_.currentOffset_ / lineHeight;
-    if (forward && gridLayoutInfo_.startIndex_ < (estimatedLines) * crossCount_) {
+    if (forward && gridLayoutInfo_.startIndex_ < estimatedLines * static_cast<int32_t>(crossCount_)) {
         gridLayoutInfo_.startIndex_ = 0;
         gridLayoutInfo_.currentOffset_ = 0;
     } else {
-        gridLayoutInfo_.startIndex_ -= estimatedLines * crossCount_;
+        gridLayoutInfo_.startIndex_ -= estimatedLines * static_cast<int32_t>(crossCount_);
         gridLayoutInfo_.currentOffset_ -= lineHeight * estimatedLines;
     }
 }
