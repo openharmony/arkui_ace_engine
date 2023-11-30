@@ -89,10 +89,12 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
         DynamicCast<SheetPresentationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(sheetLayoutAlgorithm, false);
     InitPageHeight();
-    pageHeight_ = sheetLayoutAlgorithm->GetSheetMaxHeight();
-    sheetMaxHeight_ = sheetLayoutAlgorithm->GetSheetMaxHeight() - statusBarHeight_;
-    sheetMaxWidth_ = sheetLayoutAlgorithm->GetSheetMaxWidth();
-    centerHeight_ = sheetLayoutAlgorithm->GetCenterHeight();
+    if (sheetLayoutAlgorithm->GetSheetMaxHeight() > 0) {
+        pageHeight_ = sheetLayoutAlgorithm->GetSheetMaxHeight();
+        sheetMaxHeight_ = sheetLayoutAlgorithm->GetSheetMaxHeight() - statusBarHeight_;
+        sheetMaxWidth_ = sheetLayoutAlgorithm->GetSheetMaxWidth();
+        centerHeight_ = sheetLayoutAlgorithm->GetCenterHeight();
+    }
     auto sheetType = GetSheetType();
     if ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOMLANDSPACE)) {
         if (windowRotate_) {
@@ -320,6 +322,9 @@ float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetSty
             auto builderGeometryNode = builderNode->GetGeometryNode();
             CHECK_NULL_RETURN(builderGeometryNode, 0.0f);
             sheetHeight = builderGeometryNode->GetFrameSize().Height() + titleGeometryNode->GetFrameSize().Height();
+            if (sheetHeight > largeHeight) {
+                sheetHeight = largeHeight;
+            }
         }
     } else {
         float height = 0.0f;
@@ -462,6 +467,7 @@ void SheetPresentationPattern::SheetInteractiveDismiss(bool isDragClose, float d
 {
     if (hasShouldDismiss()) {
         if (isDragClose) {
+            ChangeScrollHeight(height_);
             SheetTransition(true);
         }
         CallShouldDismiss();

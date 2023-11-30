@@ -186,10 +186,6 @@ RefPtr<FrameNode> SheetView::BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::She
     titleProp->UpdateFontSize(sheetTheme->GetTitleTextFontSize());
     titleProp->UpdateFontWeight(FontWeight::BOLD);
     titleProp->UpdateTextColor(sheetTheme->GetTitleTextFontColor());
-    PaddingProperty titlePadding;
-    titlePadding.right =
-        CalcLength(sheetTheme->GetTitleTextMargin() + SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
-    titleProp->UpdatePadding(titlePadding);
 
     auto titleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -227,8 +223,6 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
     titleProp->UpdateFontSize(sheetTheme->GetSubtitleTextFontSize());
     titleProp->UpdateTextColor(sheetTheme->GetSubtitleTextFontColor());
     PaddingProperty titlePadding;
-    titlePadding.right =
-        CalcLength(sheetTheme->GetTitleTextMargin() + SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
     titlePadding.top = CalcLength(sheetTheme->GetSubtitleTextMargin());
     titlePadding.bottom = CalcLength(sheetTheme->GetSubtitleTextMargin());
     titleProp->UpdatePadding(titlePadding);
@@ -255,6 +249,9 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     layoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT - SHEET_DRAG_BAR_HEIGHT)));
+    PaddingProperty padding;
+    padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
+    layoutProperty->UpdatePadding(padding);
     auto columnProps = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(columnProps, nullptr);
     columnProps->UpdateMainAxisAlign(FlexAlign::CENTER);
