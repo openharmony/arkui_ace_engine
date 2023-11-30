@@ -623,7 +623,8 @@ void TextFieldPattern::HandleFocusEvent()
     }
     NotifyOnEditChanged(true);
     auto visible = layoutProperty->GetShowErrorTextValue(false);
-    if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+    if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()
+        && !IsNormalInlineState()) {
         auto renderContext = host->GetRenderContext();
         auto textFieldTheme = GetTheme();
         CHECK_NULL_VOID(textFieldTheme);
@@ -1158,7 +1159,8 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         CHECK_NULL_VOID(textFieldTheme);
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+        if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()
+            && !IsNormalInlineState()) {
             auto radius = textFieldTheme->GetBorderRadiusSize();
             renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
         }
@@ -1186,7 +1188,8 @@ void TextFieldPattern::HandleTouchUp()
             if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
                 renderContext->UpdateBorderRadius(borderRadius_);
             }
-            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() && IsUnspecifiedOrTextType()) {
+            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() && IsUnspecifiedOrTextType()
+                && !IsNormalInlineState()) {
                 auto textFieldTheme = GetTheme();
                 CHECK_NULL_VOID(textFieldTheme);
                 auto radius = textFieldTheme->GetBorderRadiusSize();
