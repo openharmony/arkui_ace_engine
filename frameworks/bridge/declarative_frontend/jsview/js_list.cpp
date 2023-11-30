@@ -20,7 +20,6 @@
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
-#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/list_model_impl.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -661,23 +660,6 @@ void JSList::ScrollFrameBeginCallback(const JSCallbackInfo& args)
     }
 }
 
-void JSList::JsClip(const JSCallbackInfo& info)
-{
-    if (info[0]->IsUndefined()) {
-        ViewAbstractModel::GetInstance()->SetClipEdge(true);
-        return;
-    }
-    if (info[0]->IsObject()) {
-        JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
-        if (clipShape == nullptr) {
-            return;
-        }
-        ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
-    } else if (info[0]->IsBoolean()) {
-        ViewAbstractModel::GetInstance()->SetClipEdge(info[0]->ToBoolean());
-    }
-}
-
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
@@ -685,7 +667,7 @@ void JSList::JSBind(BindingTarget globalObj)
 
     JSClass<JSList>::StaticMethod("width", &JSList::JsWidth);
     JSClass<JSList>::StaticMethod("height", &JSList::JsHeight);
-    JSClass<JSList>::StaticMethod("clip", &JSList::JsClip);
+    JSClass<JSList>::StaticMethod("clip", &JSScrollable::JsClip);
     JSClass<JSList>::StaticMethod("listDirection", &JSList::SetDirection);
     JSClass<JSList>::StaticMethod("scrollBar", &JSList::SetScrollBar);
     JSClass<JSList>::StaticMethod("scrollBarWidth", &JSList::SetScrollBarWidth);

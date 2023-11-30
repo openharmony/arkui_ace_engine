@@ -16,7 +16,9 @@
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/components_ng/base/view_stack_model.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -95,5 +97,22 @@ std::string JSScrollable::ParseBarWidth(const JSCallbackInfo& info)
         scrollBarWidth = theme->GetNormalWidth();
     }
     return scrollBarWidth.ToString();
+}
+
+void JSScrollable::JsClip(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->SetClipEdge(true);
+        return;
+    }
+    if (info[0]->IsObject()) {
+        JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
+        if (clipShape == nullptr) {
+            return;
+        }
+        ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
+    } else if (info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetClipEdge(info[0]->ToBoolean());
+    }
 }
 } // namespace OHOS::Ace::Framework
