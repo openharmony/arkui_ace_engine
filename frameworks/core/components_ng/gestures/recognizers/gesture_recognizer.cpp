@@ -124,6 +124,7 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
             break;
         case TouchType::CANCEL:
             HandleTouchCancelEvent(point);
+            currentFingers_--;
             break;
         default:
             break;

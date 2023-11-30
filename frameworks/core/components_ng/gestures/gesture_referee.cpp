@@ -161,6 +161,35 @@ void GestureScope::Close(bool isBlocked)
     }
 }
 
+static bool CheckRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    if (!recognizer) {
+        return false;
+    }
+    auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+    if (!group) {
+        return recognizer->GetRefereeState() == RefereeState::PENDING;
+    }
+    auto children = group->GetGroupRecognizer();
+    for (auto iter = children.begin(); iter != children.end(); ++iter) {
+        if (CheckRecognizer(*iter)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool GestureScope::CheckRecognizerState()
+{
+    for (auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (CheckRecognizer(recognizer)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void GestureReferee::AddGestureToScope(size_t touchId, const TouchTestResult& result)
 {
     RefPtr<GestureScope> scope;
@@ -234,6 +263,16 @@ void GestureReferee::CleanAll(bool isBlocked)
         iter->second->Close(isBlocked);
     }
     gestureScopes_.clear();
+}
+
+void GestureReferee::CleanRedundanceScope()
+{
+    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
+        if (iter->second->CheckRecognizerState()) {
+            continue;
+        }
+        iter->second->Close();
+    }
 }
 
 void GestureReferee::Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
