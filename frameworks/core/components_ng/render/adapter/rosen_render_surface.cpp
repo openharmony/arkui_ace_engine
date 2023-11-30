@@ -225,6 +225,10 @@ void RosenRenderSurface::DrawBuffer()
         Rosen::RSModifierType::CONTENT_STYLE,
         [surfaceNode->buffer_, width, height](const std::shared_ptr<RSCanvas>& canvas) {
             CHECK_NULL_VOID(canvas);
+            Rosen::DrawingSurfaceBufferInfo info {surfaceBuffer, 0, 0, width, height};
+            auto* recordingCanvas = static_cast<Rosen::Drawing::RecordingCanvas*>(canvas.get());
+            CHECK_NULL_VOID(recordingCanvas);
+            recordingCanvas->DrawSurfaceBuffer(info);
 #endif
         });
     rosenRenderContext->StopRecordingIfNeeded();
@@ -352,6 +356,7 @@ void RosenRenderSurface::DrawBufferForXComponent(RSCanvas& canvas, float width, 
         TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "surfaceNode is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     ACE_SCOPED_TRACE("XComponent DrawBuffer");
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     CHECK_NULL_VOID(rsCanvas);
@@ -362,6 +367,13 @@ void RosenRenderSurface::DrawBufferForXComponent(RSCanvas& canvas, float width, 
     Rosen::RSSurfaceBufferInfo info { surfaceNode->buffer_, 0, 0, static_cast<int32_t>(width),
         static_cast<int32_t>(height) };
     recordingCanvas->DrawSurfaceBuffer(info);
+#else
+    auto* recordingCanvas = static_cast<Rosen::Drawing::RecordingCanvas*>(canvas.get());
+    CHECK_NULL_VOID(recordingCanvas);
+    Rosen::DrawingSurfaceBufferInfo info {surfaceNode->buffer_, 0, 0, static_cast<int32_t>(width),
+        static_cast<int32_t>(height)};
+    recordingCanvas->DrawSurfaceBuffer(info);
+#endif
 #endif
 }
 
