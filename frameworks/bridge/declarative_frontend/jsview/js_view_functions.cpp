@@ -38,7 +38,7 @@ namespace OHOS::Ace::Framework {
 #ifdef USE_ARK_ENGINE
 
 namespace {
-
+const std::string EMPTY_STATUS_DATA = "empty_status_data";
 JSRef<JSObject> GenConstraint(const std::optional<NG::LayoutConstraintF>& parentConstraint)
 {
     auto minSize = parentConstraint->minSize;
@@ -594,6 +594,20 @@ void ViewFunctions::InitViewFunctions(
         }
         jsRenderFunc_ = jsRenderFunction;
     }
+
+    JSRef<JSVal> jsOnFormRecycleFunc = jsObject->GetProperty("onFormRecycle");
+    if (jsOnFormRecycleFunc->IsFunction()) {
+        jsOnFormRecycleFunc_ = JSRef<JSFunc>::Cast(jsOnFormRecycleFunc);
+    } else {
+        LOGD("onFormRecycle is not a function");
+    }
+
+    JSRef<JSVal> jsOnFormRecoverFunc = jsObject->GetProperty("onFormRecover");
+    if (jsOnFormRecoverFunc->IsFunction()) {
+        jsOnFormRecoverFunc_ = JSRef<JSFunc>::Cast(jsOnFormRecoverFunc);
+    } else {
+        LOGD("onFormRecover is not a function");
+    }
 }
 
 ViewFunctions::ViewFunctions(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsRenderFunction)
@@ -879,4 +893,30 @@ ViewFunctions::ViewFunctions(const JSRef<JSObject>& jsObject)
     InitViewFunctions(jsObject, JSRef<JSFunc>(), true);
 }
 
+std::string ViewFunctions::ExecuteOnFormRecycle()
+{
+    auto ret = ExecuteFunctionWithReturn(jsOnFormRecycleFunc_, "OnFormRecycle");
+    if (!ret->IsEmpty() && ret->IsString()) {
+        return ret->ToString();
+    }
+    LOGE("ExecuteOnFormRecycle failed");
+    return "";
+}
+
+void ViewFunctions::ExecuteOnFormRecover(const std::string &statusData)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    if (jsOnFormRecoverFunc_.IsEmpty()) {
+        LOGE("jsOnFormRecoverFunc_ is null");
+        return;
+    }
+
+    std::string data;
+    if (statusData != EMPTY_STATUS_DATA) {
+        data = statusData;
+    }
+    auto jsData = JSRef<JSVal>::Make(ToJSValue(data));
+    auto func = jsOnFormRecoverFunc_.Lock();
+    func->Call(jsObject_.Lock(), 1, &jsData);
+}
 } // namespace OHOS::Ace::Framework

@@ -991,6 +991,20 @@ public:
 
     virtual void RestoreDefault() {}
 
+    void SetOnFormRecycleCallback(std::function<std::string()>&& onFormRecycle)
+    {
+        onFormRecycle_ = std::move(onFormRecycle);
+    }
+
+    std::string OnFormRecycle();
+
+    void SetOnFormRecoverCallback(std::function<void(std::string)>&& onFormRecover)
+    {
+        onFormRecover_ = std::move(onFormRecover);
+    }
+
+    void OnFormRecover(const std::string& statusData);
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1111,6 +1125,8 @@ protected:
     std::atomic<bool> onFocus_ = true;
     uint64_t lastTouchTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
+    std::function<std::string()> onFormRecycle_;
+    std::function<void(std::string)> onFormRecover_;
 
 private:
     void DumpFrontend() const;

@@ -117,7 +117,7 @@ private:
     void AddFormComponent(const RequestFormInfo& info);
     void UpdateFormComponent(const RequestFormInfo& info);
 
-    void HandleSnapshot();
+    void HandleSnapshot(const uint32_t& delayTime);
     void TakeSurfaceCaptureForUI();
     void UpdateStaticCard();
     RefPtr<FrameNode> GetOrCreateImageNode();

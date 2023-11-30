@@ -49,7 +49,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
-constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT = 10000;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
@@ -168,7 +167,7 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
     host->GetRenderContext()->UpdateBackgroundColor(unTrustBackgroundColor);
 }
 
-void FormPattern::HandleSnapshot()
+void FormPattern::HandleSnapshot(const uint32_t& delayTime)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -180,7 +179,7 @@ void FormPattern::HandleSnapshot()
             CHECK_NULL_VOID(form);
             form->TakeSurfaceCaptureForUI();
         },
-        TaskExecutor::TaskType::UI, DELAY_TIME_FOR_FORM_SNAPSHOT);
+        TaskExecutor::TaskType::UI, delayTime);
 }
 
 void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
@@ -207,7 +206,6 @@ void FormPattern::TakeSurfaceCaptureForUI()
 {
     if (isDynamic_) {
         formLinkInfos_.clear();
-        return;
     }
 
     auto host = GetHost();
@@ -259,6 +257,13 @@ void FormPattern::HideImageNode()
     CHECK_NULL_VOID(host);
     auto child = host->GetLastChild();
     CHECK_NULL_VOID(child);
+
+    std::list<RefPtr<UINode>> children = host->GetChildren();
+    if (children.size() > 0 && child->GetTag() == V2::IMAGE_ETS_TAG) {
+        host->RemoveChildAtIndex(children.size() - 1);
+        return;
+    }
+
     auto imageNode = DynamicCast<FrameNode>(child);
     CHECK_NULL_VOID(imageNode);
     auto externalContext = DynamicCast<NG::RosenRenderContext>(imageNode->GetRenderContext());
@@ -273,6 +278,11 @@ RefPtr<FrameNode> FormPattern::GetOrCreateImageNode()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto child = host->GetLastChild();
+    std::list<RefPtr<UINode>> children = host->GetChildren();
+    if (children.size() > 0 && child->GetTag() == V2::IMAGE_ETS_TAG) {
+        host->RemoveChildAtIndex(children.size() - 1);
+    }
+    child = host->GetLastChild();
     if (!child) {
         auto formNode = DynamicCast<FormNode>(host);
         CHECK_NULL_RETURN(formNode, nullptr);
@@ -671,11 +681,11 @@ void FormPattern::InitFormManagerDelegate()
         });
     });
 
-    formManagerBridge_->AddSnapshotCallback([weak = WeakClaim(this), instanceID]() {
+    formManagerBridge_->AddSnapshotCallback([weak = WeakClaim(this), instanceID](const uint32_t& delayTime) {
         ContainerScope scope(instanceID);
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
-        formPattern->HandleSnapshot();
+        formPattern->HandleSnapshot(delayTime);
     });
 
     formManagerBridge_->AddFormLinkInfoUpdateCallback(

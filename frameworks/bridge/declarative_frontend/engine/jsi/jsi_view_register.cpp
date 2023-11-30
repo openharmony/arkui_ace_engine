@@ -131,6 +131,59 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
     }
 }
 
+void SetFormCallbacks(RefPtr<Container> container, JSView* view)
+{
+    auto pipeline = container->GetPipelineContext();
+    if (pipeline != nullptr) {
+        pipeline->SetOnFormRecycleCallback([weak = Referenced::WeakClaim(view)]() {
+            auto view = weak.Upgrade();
+            std::string statusData;
+            if (view) {
+                statusData = view->FireOnFormRecycle();
+            } else {
+                LOGE("view is null");
+            }
+            return statusData;
+        });
+
+        pipeline->SetOnFormRecoverCallback([weak = Referenced::WeakClaim(view)](const std::string& statusData) {
+            auto view = weak.Upgrade();
+            if (view) {
+                view->FireOnFormRecover(statusData);
+            } else {
+                LOGE("view is null");
+            }
+        });
+    } else {
+        LOGE("execute SetOnFormRecycleCallback and SetOnFormRecoverCallback failed due to pipeline is null");
+    }
+}
+
+void UpdatePageLifeCycleFunctions(RefPtr<NG::FrameNode> pageNode, JSView* view)
+{
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->SetOnPageShow([weak = Referenced::WeakClaim(view)]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->FireOnShow();
+        }
+    });
+    pagePattern->SetOnPageHide([weak = Referenced::WeakClaim(view)]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->FireOnHide();
+        }
+    });
+    pagePattern->SetOnBackPressed([weak = Referenced::WeakClaim(view)]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            return view->FireOnBackPress();
+        }
+        return false;
+    });
+}
+
 void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
@@ -171,29 +224,8 @@ void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
         CHECK_NULL_VOID(pageRootNode);
         pageRootNode->MountToParent(pageNode);
 
-        // update page life cycle function.
-        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-        CHECK_NULL_VOID(pagePattern);
-        pagePattern->SetOnPageShow([weak = Referenced::WeakClaim(view)]() {
-            auto view = weak.Upgrade();
-            if (view) {
-                view->FireOnShow();
-            }
-        });
-        pagePattern->SetOnPageHide([weak = Referenced::WeakClaim(view)]() {
-            auto view = weak.Upgrade();
-            if (view) {
-                view->FireOnHide();
-            }
-        });
-        pagePattern->SetOnBackPressed([weak = Referenced::WeakClaim(view)]() {
-            auto view = weak.Upgrade();
-            if (view) {
-                return view->FireOnBackPress();
-            }
-            return false;
-        });
-        return;
+        SetFormCallbacks(container, view);
+        UpdatePageLifeCycleFunctions(pageNode, view);
     }
 }
 

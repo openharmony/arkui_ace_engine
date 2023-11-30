@@ -120,7 +120,12 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
     ParseWant(want);
     InitUIContent(want, formJsInfo);
     SetRenderDelegate(proxy_);
-    OnSurfaceCreate(formJsInfo);
+    if (want.HasParameter(OHOS::AppExecFwk::Constants::FORM_STATUS_DATA)) {
+        std::string statusData = want.GetStringParam(OHOS::AppExecFwk::Constants::FORM_STATUS_DATA);
+        RecoverForm(statusData);
+    }
+    OnSurfaceCreate(formJsInfo, want.GetBoolParam(
+        OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false));
 }
 
 void FormRenderer::ReloadForm(const std::string& url)
@@ -202,7 +207,8 @@ void FormRenderer::OnSurfaceChange(float width, float height)
     formRendererDelegate_->OnSurfaceChange(width, height);
 }
 
-void FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+void FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo,
+    bool isRecoverFormToHandleClickEvent)
 {
     if (!formRendererDispatcherImpl_) {
         HILOG_ERROR("form renderer dispatcher is null!");
@@ -214,6 +220,8 @@ void FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInf
     }
     OHOS::AAFwk::Want newWant;
     newWant.SetParam(FORM_RENDERER_DISPATCHER, formRendererDispatcherImpl_->AsObject());
+    newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT,
+        isRecoverFormToHandleClickEvent);
     auto rsSurfaceNode = uiContent_->GetFormRootNode();
     HILOG_INFO("Form OnSurfaceCreate!");
     formRendererDelegate_->OnSurfaceCreate(rsSurfaceNode, formJsInfo, newWant);
@@ -375,6 +383,24 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
     }
 
     uiContent_->Foreground();
+}
+
+void FormRenderer::RecycleForm(std::string& statusData)
+{
+    if (uiContent_ == nullptr) {
+        HILOG_ERROR("RecycleForm, uiContent_ is null!");
+        return;
+    }
+    statusData = uiContent_->RecycleForm();
+}
+
+void FormRenderer::RecoverForm(const std::string& statusData)
+{
+    if (uiContent_ == nullptr) {
+        HILOG_ERROR("RecoverForm, uiContent_ is null!");
+        return;
+    }
+    uiContent_->RecoverForm(statusData);
 }
 } // namespace Ace
 } // namespace OHOS

@@ -213,6 +213,10 @@ public:
 
     bool NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset) override;
+
+    std::string RecycleForm() override;
+    
+    void RecoverForm(const std::string& statusData) override;
 private:
     void InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);

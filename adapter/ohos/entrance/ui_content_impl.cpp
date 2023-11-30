@@ -2261,4 +2261,25 @@ bool UIContentImpl::NotifyExecuteAction(
     CHECK_NULL_RETURN(container, false);
     return container->NotifyExecuteAction(elementId, actionArguments, action, offset);
 }
+
+std::string UIContentImpl::RecycleForm()
+{
+    LOGD("UIContentImpl: RecycleForm");
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    std::string statusData;
+    CHECK_NULL_RETURN(container, statusData);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, statusData);
+    return pipeline->OnFormRecycle();
+}
+
+void UIContentImpl::RecoverForm(const std::string& statusData)
+{
+    LOGD("UIContentImpl: RecoverForm");
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    return pipeline->OnFormRecover(statusData);
+}
 } // namespace OHOS::Ace
