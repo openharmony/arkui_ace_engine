@@ -697,6 +697,8 @@ void NavigationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
     do {
         if (!navBarNode->GetTitle()) {
             navBarNode->UpdateTitleNodeOperation(ChildNodeOperation::ADD);
@@ -712,8 +714,6 @@ void NavigationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
         // if no subtitle, title's maxLine = 2. if has subtitle, title's maxLine = 1.
         if (!hasSubTitle) {
             if (navBarNode->GetSubtitle()) {
-                auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
-                CHECK_NULL_VOID(titleBarNode);
                 titleBarNode->RemoveChild(navBarNode->GetSubtitle());
                 titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 titleBarNode->SetSubtitle(nullptr);
@@ -737,9 +737,11 @@ void NavigationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
         titleProperty->UpdateContent(title);
         titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         navBarNode->UpdateTitleNodeOperation(ChildNodeOperation::NONE);
+        titleBarNode->MarkIsInitialTitle(true);
         navBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     } while (false);
+    titleBarNode->MarkIsInitialTitle(true);
     int32_t titleNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto titleNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, titleNodeId, AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
@@ -1201,6 +1203,8 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
     // if previous menu is custom, just remove it and create new menu, otherwise update old menu
     if (navBarNode->GetPrevMenuIsCustom().value_or(false)) {
         navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
@@ -1211,7 +1215,7 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
             navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
         }
     }
-
+    titleBarNode->MarkIsInitialTitle(true);
     auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
     CHECK_NULL_VOID(navBarPattern);
     navBarPattern->SetTitleBarMenuItems(menuItems);
@@ -1229,6 +1233,8 @@ void NavigationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
     // if previous menu exists, remove it if their ids are not the same
     // if previous node is not custom, their ids must not be the same
     if (navBarNode->GetMenu()) {
@@ -1238,9 +1244,11 @@ void NavigationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
         }
         navBarNode->SetMenu(customMenu);
         navBarNode->UpdatePrevMenuIsCustom(true);
+        titleBarNode->MarkIsInitialTitle(true);
         navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
         return;
     }
+    titleBarNode->MarkIsInitialTitle(true);
     navBarNode->SetMenu(customMenu);
     navBarNode->UpdatePrevMenuIsCustom(true);
     navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);

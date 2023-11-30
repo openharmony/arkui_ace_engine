@@ -116,6 +116,7 @@ public:
         return isHideToolbar_;
     }
 
+    bool IsTitleBarHide();
     void ResetAssociatedScroll();
     bool UpdateAssociatedScrollOffset(float offset, const RefPtr<FrameNode>& node);
     bool IsTitleModeFree();
