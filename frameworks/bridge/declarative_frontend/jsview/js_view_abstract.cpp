@@ -1887,7 +1887,7 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && (info[0]->IsUndefined())) {
         ViewAbstractModel::GetInstance()->SetOverlay(
-            "", nullptr, Alignment::CENTER, CalcDimension(0), CalcDimension(0));
+            "", nullptr, Alignment::TOP_LEFT, CalcDimension(0), CalcDimension(0));
         return;
     }
 
@@ -1919,10 +1919,6 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
                 offsetY = y;
             }
         }
-    } else if (info[1]->IsUndefined()) {
-        align = Alignment::CENTER;
-        offsetX = CalcDimension(0);
-        offsetY = CalcDimension(0);
     }
 
     if (info[0]->IsString()) {
