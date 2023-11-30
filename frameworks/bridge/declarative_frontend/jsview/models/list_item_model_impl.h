@@ -42,9 +42,6 @@ public:
     void SetDeleteArea(std::function<void()>&& builderAction, OnDeleteEvent&& onDelete,
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
         OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea) override;
-
-private:
-    static std::unique_ptr<ListItemModel> instance_;
 };
 
 } // namespace OHOS::Ace::Framework
