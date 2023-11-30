@@ -47,35 +47,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->textStyle_.SetTextColor(themeConstants->GetColor(THEME_STEPPER_TEXT_COLOR));
-            theme->textStyle_.SetFontSize(themeConstants->GetDimension(THEME_STEPPER_TEXT_FONTSIZE));
-            theme->textStyle_.SetFontWeight(FontWeight(themeConstants->GetInt(THEME_STEPPER_TEXT_FONTWEIGHT)));
-            theme->textStyle_.SetFontStyle(FontStyle::NORMAL);
-            theme->textStyle_.SetTextDecoration(TextDecoration::NONE);
-            std::vector<std::string> families;
-            families.emplace_back("sans-serif");
-            theme->textStyle_.SetFontFamilies(families);
-            theme->minFontSize_ = themeConstants->GetDimension(THEME_STEPPER_TEXT_FONTSIZE_MIN);
-            uint32_t maxlines = static_cast<uint32_t>(themeConstants->GetInt(THEME_STEPPER_TEXT_MAX_LINES));
-            theme->textMaxLines_ = maxlines < 0 ? theme->textMaxLines_ : maxlines;
-            theme->defaultPaddingStart_ = themeConstants->GetDimension(THEME_STEPPER_DEFAULT_PADDING_START);
-            theme->defaultPaddingEnd_ = themeConstants->GetDimension(THEME_STEPPER_DEFAULT_PADDING_END);
-            theme->progressColor_ = themeConstants->GetColor(THEME_STEPPER_PROGRESS_COLOR);
-            theme->progressDiameter_ = themeConstants->GetDimension(THEME_STEPPER_PROGRESS_DIAMETER);
-            theme->arrowWidth_ = themeConstants->GetDimension(THEME_STEPPER_ARROW_WIDTH_DIAMETER);
-            theme->arrowHeight_ = themeConstants->GetDimension(THEME_STEPPER_ARROW_HEIGHT_DIAMETER);
-            theme->arrowColor_ = themeConstants->GetColor(THEME_STEPPER_ARROW_COLOR);
-            theme->disabledColor_ = themeConstants->GetColor(THEME_STEPPER_DISABLED_COLOR);
-            theme->radius_ = themeConstants->GetDimension(THEME_STEPPER_RADIUS);
-            theme->buttonPressedColor_ = themeConstants->GetColor(THEME_STEPPER_BUTTON_PRESSED_COLOR);
-            theme->buttonPressedHeight_ = themeConstants->GetDimension(THEME_STEPPER_BUTTON_PRESSED_HEIGHT);
-            theme->controlHeight_ = themeConstants->GetDimension(THEME_STEPPER_CONTROL_HEIGHT);
-            theme->controlMargin_ = themeConstants->GetDimension(THEME_STEPPER_CONTROL_MARGIN);
-            theme->controlPadding_ = themeConstants->GetDimension(THEME_STEPPER_CONTROL_PADDING);
-            theme->focusColor_ = themeConstants->GetColor(THEME_STEPPER_FOCUS_COLOR);
-            theme->focusBorderWidth_ = themeConstants->GetDimension(THEME_STEPPER_FOCUS_BORDER_WIDTH);
-            theme->mouseHoverColor_ = themeConstants->GetColor(THEME_STEPPER_MOUSE_HOVER_COLOR);
-            theme->disabledAlpha_ = themeConstants->GetDouble(THEME_STEPPER_DISABLED_ALPHA);
+            
             auto themeStyle = themeConstants->GetThemeStyle();
             if (themeStyle) {
                 auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("stepper_pattern", nullptr);
@@ -95,6 +67,23 @@ public:
                     theme->focusColor_ = pattern->GetAttr<Color>(STEPPER_FOCUS_COLOR, Color::RED);
                     theme->focusBorderWidth_ = STEPPER_FOCUSED_BORDER_WIDTH;
                     theme->controlMargin_ = STEPPER_SCREEN_MARGIN;
+
+                    theme->textStyle_.SetFontWeight(FontWeight(pattern->GetAttr<int>("stepper_text_fontweight",
+                        static_cast<int32_t>(FontWeight::W500))));
+                    theme->textStyle_.SetFontStyle(FontStyle::NORMAL);
+                    theme->textStyle_.SetTextDecoration(TextDecoration::NONE);
+                    std::vector<std::string> families;
+                    families.emplace_back("sans-serif");
+                    theme->textStyle_.SetFontFamilies(families);
+                    theme->minFontSize_ = pattern->GetAttr<Dimension>("text_fontsize_min", 9.0_fp);
+                    uint32_t maxlines = static_cast<uint32_t>(pattern->GetAttr<int>("text_max_lines", 2));
+                    theme->textMaxLines_ = maxlines < 0 ? theme->textMaxLines_ : maxlines;
+                    theme->progressDiameter_ = pattern->GetAttr<Dimension>("progress_diameter", 24.0_vp);
+                    theme->arrowWidth_ = pattern->GetAttr<Dimension>("arrow_width_diameter", 12.0_vp);
+                    theme->arrowHeight_ = pattern->GetAttr<Dimension>("arrow_height_diameter", 24.0_vp);
+                    theme->buttonPressedHeight_ = pattern->GetAttr<Dimension>("button_pressed_height", 40.0_vp);
+                    theme->controlHeight_ = pattern->GetAttr<Dimension>("control_height", 48.0_vp);
+                    theme->controlPadding_ = pattern->GetAttr<Dimension>("control_padding", 8.0_vp);
                 }
             }
             return theme;
