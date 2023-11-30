@@ -47,27 +47,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->textStyle_.SetFontSize(themeConstants->GetDimension(THEME_TOOL_BAR_TEXT_FONTSIZE));
-            theme->textStyle_.SetFontFamilies({ themeConstants->GetString(THEME_OHOS_TEXT_FONT_FAMILY_MEDIUM) });
-            theme->textStyle_.SetAdaptTextSize(themeConstants->GetDimension(THEME_TOOL_BAR_TEXT_FONTSIZE),
-                themeConstants->GetDimension(THEME_TOOL_BAR_TEXT_MIN_FONTSIZE));
-            theme->iconSize_ = Size(themeConstants->GetDimension(THEME_TOOL_BAR_ITEM_ICON_WIDTH).Value(),
-                themeConstants->GetDimension(THEME_TOOL_BAR_ITEM_ICON_HEIGHT).Value());
-            theme->imageEdge_ = Edge(themeConstants->GetDimension(THEME_TOOL_BAR_ITEM_PADDING_ICON_LEFT),
-                themeConstants->GetDimension(THEME_TOOL_BAR_ITEM_PADDING_ICON_TOP),
-                themeConstants->GetDimension(THEME_TOOL_BAR_ITEM_PADDING_ICON_RIGHT),
-                themeConstants->GetDimension(THEME_TOOL_BAR_ITEM_PADDING_ICON_BOTTOM));
-            theme->textEdge_ = Edge(themeConstants->GetDimension(THEME_TOOL_BAR_ITEM_PADDING_TEXT_LEFT),
-                themeConstants->GetDimension(THEME_TOOL_BAR_ITEM_PADDING_TEXT_TOP),
-                themeConstants->GetDimension(THEME_TOOL_BAR_ITEM_PADDING_TEXT_RIGHT),
-                themeConstants->GetDimension(THEME_TOOL_BAR_ITEM_PADDING_TEXT_BOTTOM));
-            theme->toolBarBgColor_ = themeConstants->GetColor(THEME_TOOL_BAR_BG_COLOR);
-            theme->focusColor_ = themeConstants->GetColor(THEME_TOOL_BAR_ITEM_FOCUS_COLOR);
-            theme->hoverColor_ = themeConstants->GetColor(THEME_TOOL_BAR_ITEM_HOVER_COLOR);
-            theme->toolBarItemBgColor_ = themeConstants->GetColor(THEME_TOOL_BAR_ITEM_BACKGROUND_COLOR);
-            theme->pressColor_ = themeConstants->GetColor(THEME_OHOS_CONTROL_NORMAL);
-            theme->radius_ = themeConstants->GetDimension(THEME_TOOL_BAR_ITEM_RADIUS);
-            theme->iconMoreColor_ = themeConstants->GetColor(THEME_TOOL_BAR_ENDITEM_COLOR);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -88,6 +67,25 @@ public:
             theme->iconColor_ = toolbarPattern->GetAttr<Color>("icon_color", Color());
             theme->toolBarBgColor_ = toolbarPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
             theme->toolBarItemBgColor_ = toolbarPattern->GetAttr<Color>("item_bg_color", Color());
+            theme->textStyle_.SetFontSize(toolbarPattern->GetAttr<Dimension>("text_fontsize", 10.0_fp));
+            theme->textStyle_.SetFontFamilies({ toolbarPattern->GetAttr<std::string>("text_font_family_medium",
+                "HwChinese-medium") });
+            theme->textStyle_.SetAdaptTextSize(toolbarPattern->GetAttr<Dimension>("text_fontsize", 10.0_fp),
+                toolbarPattern->GetAttr<Dimension>("text_min_fontsize", 9.0_vp));
+            theme->iconSize_ = Size(toolbarPattern->GetAttr<Dimension>("item_icon_width", 24.0_vp).Value(),
+                toolbarPattern->GetAttr<Dimension>("item_icon_height", 24.0_vp).Value());
+            theme->imageEdge_ = Edge(toolbarPattern->GetAttr<Dimension>("item_padding_icon_left", 1.0_vp),
+                toolbarPattern->GetAttr<Dimension>("item_padding_icon_top", 8.0_vp),
+                toolbarPattern->GetAttr<Dimension>("item_padding_icon_right", 1.0_vp),
+                toolbarPattern->GetAttr<Dimension>("item_padding_icon_bottom", 1.0_vp));
+            theme->textEdge_ = Edge(toolbarPattern->GetAttr<Dimension>("item_padding_text_left", 1.0_vp),
+                toolbarPattern->GetAttr<Dimension>("item_padding_text_top", 1.0_vp),
+                toolbarPattern->GetAttr<Dimension>("item_padding_text_right", 1.0_vp),
+                toolbarPattern->GetAttr<Dimension>("item_padding_text_bottom", 8.0_vp));
+            theme->focusColor_ = toolbarPattern->GetAttr<Color>("item_focus_color", Color(0xe6254ff7));
+            theme->hoverColor_ = toolbarPattern->GetAttr<Color>("item_hover_color", Color(0x0c000000));
+            theme->pressColor_ = toolbarPattern->GetAttr<Color>("control_normal", Color(0x19000000));
+            theme->radius_ = toolbarPattern->GetAttr<Dimension>("item_radius", 8.0_vp);
         }
     };
 
