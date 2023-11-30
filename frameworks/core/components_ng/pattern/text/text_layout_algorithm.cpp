@@ -114,13 +114,13 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         heightFinal =
             std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
     }
+    ACE_SCOPED_TRACE("TextHeightFinal [%f], TextContentWidth [%f], FontSize [%lf]",
+        heightFinal, paragraph_->GetMaxWidth(), textStyle.GetFontSize().ConvertToPx());
     if (frameNode->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or("").empty() &&
         NonPositive(static_cast<double>(paragraph_->GetLongestLine()))) {
         // text content is empty
         return SizeF {};
-    }
-    ACE_SCOPED_TRACE("TextHeightFinal [%f], TextContentWidth [%f], FontSize [%lf]",
-        heightFinal, paragraph_->GetMaxWidth(), textStyle.GetFontSize().ConvertToPx());
+    }    
     return SizeF(paragraph_->GetMaxWidth(), heightFinal);
 }
 
