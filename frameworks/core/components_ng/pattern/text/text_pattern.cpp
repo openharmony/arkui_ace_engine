@@ -621,8 +621,7 @@ bool TextPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSpan)
     paragraph_->GetRectsForRange(aiSpan.start, aiSpan.end, aiRects);
     for (auto&& rect : aiRects) {
         if (rect.IsInRegion(textOffset)) {
-            ShowUIExtensionMenu(aiSpan);
-            return true;
+            return ShowUIExtensionMenu(aiSpan);
         }
     }
     return false;
@@ -662,16 +661,12 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
     };
 }
 
-void TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
+bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
     const ShowSelectOverlayFunc& showSelectOverlayFunc)
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     SetOnClickMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
-    CHECK_NULL_VOID(textOverlayTheme);
-    auto menuSpacing =
-        textOverlayTheme->GetMenuSpacingWithText().ConvertToPx() + textOverlayTheme->GetHandleDiameter().ConvertToPx();
     auto baseOffset = textSelector_.baseOffset;
     auto destinationOffset = textSelector_.destinationOffset;
     textSelector_.Update(aiSpan.start, aiSpan.end);
@@ -681,10 +676,18 @@ void TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
         calculateHandleFunc();
     }
     CalculateHandleOffsetAndShowOverlay();
-    RectF handleBound = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
     textSelector_.Update(baseOffset, destinationOffset);
-    RectF safeArea(handleBound.GetX(), handleBound.GetY() - menuSpacing, handleBound.Width(),
-        handleBound.Height() + menuSpacing * 2);
+    RectF aiRect;
+    if (textSelector_.firstHandle.Top() != textSelector_.secondHandle.Top()) {
+        auto top = std::min(textSelector_.firstHandle.Top(), textSelector_.secondHandle.Top());
+        auto bottom = std::max(textSelector_.firstHandle.Bottom(), textSelector_.secondHandle.Bottom());
+        auto paintRect = host->GetPaintRectWithTransform();
+        auto left = paintRect.Left();
+        auto right = paintRect.Right();
+        aiRect = RectT(left, top, right - left, bottom - top);
+    } else {
+        aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
+    }
     std::map<std::string, std::string> paramaters;
     paramaters["entityType"] = TEXT_DETECT_MAP.at(aiSpan.type);
     paramaters["entityText"] = aiSpan.content;
@@ -696,9 +699,9 @@ void TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
     std::vector<std::string> menuOptions = aiMenuOptionsMap_.at(TEXT_DETECT_MAP.at(aiSpan.type));
     if (menuOptions.empty()) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "Menu option is empty");
-        return;
+        return false;
     }
-    DataDetectorMgr::GetInstance().ShowUIExtensionMenu(paramaters, safeArea, onClickMenu_, menuOptions, GetHost());
+    return DataDetectorMgr::GetInstance().ShowUIExtensionMenu(paramaters, aiRect, onClickMenu_, menuOptions, host);
 }
 
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
