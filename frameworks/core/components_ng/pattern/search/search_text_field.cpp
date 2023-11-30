@@ -57,6 +57,9 @@ void SearchTextFieldPattern::InitDragEvent()
     CHECK_NULL_VOID(host);
     host->SetDraggable(true);
     TextFieldPattern::InitDragEvent();
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetTextDraggable(true);
 }
 #endif
 } // namespace OHOS::Ace::NG
