@@ -2781,7 +2781,7 @@ void WebPattern::CalculateVerticalDrawRect(SizeF frameSize)
     }
 
     int32_t stepGear = (-relativeOffsetOfScroll_.GetY()) / DEFAULT_WEB_DRAW_HEIGHT;
-    if (stepGear >= DEFAULT_HEIGHT_GEAR.size()) {
+    if (stepGear >= static_cast<int32_t>(DEFAULT_HEIGHT_GEAR.size())) {
         TAG_LOGE(AceLogTag::ACE_WEB, "stepGear out of DEFAULT_HEIGHT_GEAR orign");
         return;
     }
