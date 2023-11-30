@@ -394,7 +394,8 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
 {
     ShowSelectOverlay(firstHandle, secondHandle, false);
 }
-void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool animation)
+void TextPattern::ShowSelectOverlay(
+    const RectF& firstHandle, const RectF& secondHandle, bool animation, bool isUsingMouse)
 {
     SelectOverlayInfo selectInfo;
     selectInfo.firstHandle.paintRect = firstHandle;
@@ -409,6 +410,8 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         CHECK_NULL_VOID(pattern);
         pattern->OnHandleMoveDone(handleRect, isFirst);
     };
+    selectInfo.rightClickOffset = GetRightClickOffset();
+    selectInfo.isUsingMouse = isUsingMouse;
     selectInfo.menuInfo.menuIsShow = selectInfo.firstHandle.isShow || selectInfo.secondHandle.isShow;
     selectInfo.menuInfo.showCut = false;
     selectInfo.menuInfo.showPaste = false;
@@ -444,9 +447,14 @@ void TextPattern::HandleOnSelectAll()
 {
     auto textSize = static_cast<int32_t>(GetWideText().length()) + imageCount_;
     textSelector_.Update(0, textSize);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectOverlayInfo = pipeline->GetSelectOverlayManager()->GetSelectOverlayInfo();
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
-    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
+    if (!selectOverlayInfo.isUsingMouse) {
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
+    }
     selectMenuInfo_.showCopyAll = false;
     selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
     auto host = GetHost();
@@ -762,13 +770,14 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
     if (copyOption_ == CopyOptions::None) {
         return;
     }
-    if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::PRESS) {
-        auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
-        Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
-            info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
-        InitSelection(textOffset);
+    if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == OHOS::Ace::MouseAction::RELEASE) {
+        rightClickOffset_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
+            static_cast<float>(info.GetGlobalLocation().GetY()));
         CalculateHandleOffsetAndShowOverlay(true);
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
+        if (SelectOverlayIsOn()) {
+            CloseSelectOverlay(true);
+        }
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true, true);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
