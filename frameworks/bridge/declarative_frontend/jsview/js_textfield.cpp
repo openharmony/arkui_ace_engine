@@ -1201,6 +1201,7 @@ void JSTextField::SetSelectAllValue(const JSCallbackInfo& info)
 {
     auto infoValue = info[0];
     if (!infoValue->IsBoolean() || infoValue->IsUndefined() || infoValue->IsNull()) {
+        TextFieldModel::GetInstance()->SetSelectAllValue(false);
         return;
     }
 
