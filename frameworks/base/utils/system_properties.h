@@ -251,6 +251,11 @@ public:
         return svgTraceEnable_;
     }
 
+    static bool GetLayoutTraceEnabled()
+    {
+        return layoutTraceEnable_;
+    }
+
     static bool GetAccessibilityEnabled()
     {
         return accessibilityEnabled_;
@@ -405,6 +410,7 @@ public:
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
+    static bool layoutTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
     static bool isDeviceAccess_;
