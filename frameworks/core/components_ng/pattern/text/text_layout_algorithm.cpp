@@ -120,7 +120,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         NonPositive(static_cast<double>(paragraph_->GetLongestLine()))) {
         // text content is empty
         return SizeF {};
-    }    
+    }
     return SizeF(paragraph_->GetMaxWidth(), heightFinal);
 }
 
