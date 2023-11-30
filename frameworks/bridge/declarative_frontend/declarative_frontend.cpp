@@ -546,6 +546,16 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         delegate_->InitializeRouterManager(std::move(loadPageCallback), std::move(loadPageByBufferCallback),
                                            std::move(loadNamedRouterCallback),
                                            std::move(updateRootComponentCallback));
+#if defined(PREVIEW)
+        auto isComponentPreviewCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return false;
+            }
+            return jsEngine->IsComponentPreview();
+        };
+        delegate_->SetIsComponentPreview(isComponentPreviewCallback);
+#endif
 
         auto moduleNamecallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& pageName)->
         std::string {

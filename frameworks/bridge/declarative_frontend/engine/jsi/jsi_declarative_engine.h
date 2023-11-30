@@ -393,6 +393,7 @@ public:
     void SetHspBufferTrackerCallback(std::function<bool(const std::string&, uint8_t**, size_t*)>&& callback);
     // Support to execute the ets code mocked by developer
     void SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo);
+    bool IsComponentPreview() override;
 #endif
     static void AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
         const std::string& namedRoute, panda::Local<panda::ObjectRef> params);

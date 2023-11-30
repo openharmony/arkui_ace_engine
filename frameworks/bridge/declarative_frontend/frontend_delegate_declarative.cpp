@@ -823,6 +823,13 @@ void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&&
     pageRouterManager_->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
 }
 
+#if defined(PREVIEW)
+void FrontendDelegateDeclarative::SetIsComponentPreview(NG::IsComponentPreviewCallback&& callback)
+{
+    pageRouterManager_->SetIsComponentPreview(std::move(callback));
+}
+#endif
+
 // Start FrontendDelegate overrides.
 void FrontendDelegateDeclarative::Push(const std::string& uri, const std::string& params)
 {
