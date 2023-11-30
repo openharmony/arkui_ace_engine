@@ -97,6 +97,7 @@ private:
         fingerDeadlineTimer_.Cancel();
         tapDeadlineTimer_.Cancel();
         currentTouchPointsNum_ = 0;
+        responseRegionBuffer_.clear();
     }
 
     void HandleOverdueDeadline();
