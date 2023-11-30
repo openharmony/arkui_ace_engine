@@ -67,6 +67,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -1470,6 +1471,11 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         }
         if (InstanceOf<MenuWrapperPattern>(pattern)) {
             return RemoveMenu(overlay);
+        }
+        if (InstanceOf<VideoFullScreenPattern>(pattern)) {
+            auto videoPattern = DynamicCast<VideoFullScreenPattern>(pattern);
+            CHECK_NULL_RETURN(videoPattern, false);
+            return videoPattern->ExitFullScreen();
         }
 
         // remove navDestination in navigation first

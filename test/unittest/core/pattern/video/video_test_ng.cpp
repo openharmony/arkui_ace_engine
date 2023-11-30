@@ -720,11 +720,11 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
     auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string startCheck;
-    EventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
+    VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
     std::string pauseCheck;
-    EventCallback onPause = [&pauseCheck](const std::string& /* param */) { pauseCheck = VIDEO_PAUSE_EVENT; };
+    VideoEventCallback onPause = [&pauseCheck](const std::string& /* param */) { pauseCheck = VIDEO_PAUSE_EVENT; };
     std::string finishCheck;
-    EventCallback onFinish = [&finishCheck](const std::string& /* param */) { finishCheck = VIDEO_FINISH_EVENT; };
+    VideoEventCallback onFinish = [&finishCheck](const std::string& /* param */) { finishCheck = VIDEO_FINISH_EVENT; };
     videoEventHub->SetOnStart(std::move(onStart));
     videoEventHub->SetOnPause(std::move(onPause));
     videoEventHub->SetOnFinish(std::move(onFinish));
@@ -801,8 +801,8 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
     auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string preparedCheck;
-    EventCallback onPrepared = [&preparedCheck](
-                                   const std::string& /* param */) { preparedCheck = VIDEO_PREPARED_EVENT; };
+    VideoEventCallback onPrepared = [&preparedCheck](
+                                        const std::string& /* param */) { preparedCheck = VIDEO_PREPARED_EVENT; };
     videoEventHub->SetOnPrepared(std::move(onPrepared));
     auto videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
 
@@ -865,10 +865,10 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     // set video event
     auto videoEventHub = pattern->GetEventHub<VideoEventHub>();
     std::string pauseCheck;
-    EventCallback onPause = [&pauseCheck](const std::string& /* param */) { pauseCheck = VIDEO_PAUSE_EVENT; };
+    VideoEventCallback onPause = [&pauseCheck](const std::string& /* param */) { pauseCheck = VIDEO_PAUSE_EVENT; };
     videoEventHub->SetOnPause(std::move(onPause));
     std::string updateCheck;
-    EventCallback onUpdate = [&updateCheck](const std::string& /* param */) { updateCheck = VIDEO_UPDATE_EVENT; };
+    VideoEventCallback onUpdate = [&updateCheck](const std::string& /* param */) { updateCheck = VIDEO_UPDATE_EVENT; };
     videoEventHub->SetOnUpdate(std::move(onUpdate));
 
     /**
@@ -970,10 +970,11 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
     auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string seekingCheck;
-    EventCallback onSeeking = [&seekingCheck](const std::string& /* param */) { seekingCheck = VIDEO_SEEKING_EVENT; };
+    VideoEventCallback onSeeking = [&seekingCheck](
+                                       const std::string& /* param */) { seekingCheck = VIDEO_SEEKING_EVENT; };
     videoEventHub->SetOnSeeking(std::move(onSeeking));
     std::string seekedCheck;
-    EventCallback onSeeked = [&seekedCheck](const std::string& /* param */) { seekedCheck = VIDEO_SEEKED_EVENT; };
+    VideoEventCallback onSeeked = [&seekedCheck](const std::string& /* param */) { seekedCheck = VIDEO_SEEKED_EVENT; };
     videoEventHub->SetOnSeeked(std::move(onSeeked));
 
     /**
@@ -1647,7 +1648,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest016, TestSize.Level1)
     ASSERT_TRUE(videoEventHub);
 
     std::string fullScreenCheck;
-    EventCallback onFullScreenChange = [&fullScreenCheck](const std::string& param) { fullScreenCheck = param; };
+    VideoEventCallback onFullScreenChange = [&fullScreenCheck](const std::string& param) { fullScreenCheck = param; };
     videoEventHub->SetOnFullScreenChange(std::move(onFullScreenChange));
 
     /**
