@@ -1075,6 +1075,13 @@ void ViewAbstract::SetAllowDrop(const std::set<std::string> &allowDrop)
     frameNode->SetAllowDrop(allowDrop);
 }
 
+void ViewAbstract::SetDragPreview(const NG::DragDropInfo& info)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDragPreview(info);
+}
+
 void ViewAbstract::SetPosition(const OffsetT<Dimension> &value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

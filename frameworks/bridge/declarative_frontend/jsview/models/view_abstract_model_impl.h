@@ -237,6 +237,7 @@ public:
     void SetForegroundColor(const Color& color) override {}
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override {}
     void SetAllowDrop(const std::set<std::string>& allowDrop) override {}
+    void SetDragPreview(const NG::DragDropInfo& info) override {}
 
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent) override {};

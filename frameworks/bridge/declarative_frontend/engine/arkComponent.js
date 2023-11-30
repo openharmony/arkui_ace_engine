@@ -3135,6 +3135,9 @@ class ArkComponent {
     draggable(value) {
         throw new Error("Method not implemented.");
     }
+    dragPreview(value) {
+        throw new Error("Method not implemented.");
+    }
     overlay(value, options) {
         throw new Error("Method not implemented.");
     }

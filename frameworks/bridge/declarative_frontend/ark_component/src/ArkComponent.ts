@@ -2538,6 +2538,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         return this;
     }
 
+    dragPreview(value: CustomBuilder | DragItemInfo): this {
+        throw new Error("Method not implemented.");
+    }
+
     overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number } }): this {
         if (typeof value === 'string') {
             let arkOverlay = new ArkOverlay(value, options.align, options.offset.x, options.offset.y);
