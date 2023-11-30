@@ -40,7 +40,7 @@
 #include "core/components_ng/test/pattern/custom_paint/common_constants.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_interface.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -59,7 +59,7 @@ public:
 RefPtr<CustomPaintPattern> CustomPaintPatternTestNg::CreateCustomPaintPattern()
 {
     ContainerScope scope(DEFAULT_INSTANCE_ID);
-    RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineBase>();
+    RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineContext>();
     RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(pipelineContext);
     AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
     CanvasModelNG CanvasModelNG;

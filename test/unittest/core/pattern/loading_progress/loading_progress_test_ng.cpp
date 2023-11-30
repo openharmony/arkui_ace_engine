@@ -28,7 +28,7 @@
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -49,12 +49,12 @@ protected:
 
 void LoadingProgressTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void LoadingProgressTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 RefPtr<FrameNode> LoadingProgressTestNg::CreateLoadingProgressNode(const Color& color)
@@ -219,7 +219,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest003, TestSize.Level1)
      * @tc.steps: step2. when enableLoading property is false, loadingProgress will StopAnimation and not onDraw.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
     modelNg.SetEnableLoading(false);
     loadingProgressPattern->OnModifyDone();
@@ -311,7 +311,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPaintMethodTest001, TestSize.Leve
     geometryNode->SetContentOffset(OffsetF());
     PaintWrapper paintWrapper(renderContext, geometryNode, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     progressTheme->loadingColor_ = COLOR_DEFAULT;
     /**
@@ -363,7 +363,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPaintMethodTest001, TestSize.Leve
 HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest001, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     progressTheme->loadingColor_ = COLOR_DEFAULT;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
@@ -623,7 +623,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest008, TestSize.Level1)
     /**
      * @tc.step: step1. set isFormRender_ is true.
      */
-    MockPipelineBase::GetCurrent()->SetIsFormRender(true);
+    MockPipelineContext::GetCurrent()->SetIsFormRender(true);
     /**
      * @tc.step: step2. create LoadingProgressModifier pointer.
      */

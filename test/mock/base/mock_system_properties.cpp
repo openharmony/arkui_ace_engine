@@ -44,6 +44,8 @@ bool SystemProperties::debugEnabled_ = false;
 ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 int32_t SystemProperties::deviceWidth_ = 720;
 int32_t SystemProperties::deviceHeight_ = 1280;
+bool SystemProperties::downloadByNetworkEnabled_ = false;
+bool SystemProperties::traceEnabled_ = false;
 
 int32_t AceChecker::pageNodes_ = 0;
 int32_t AceChecker::pageDepth_ = 0;
@@ -136,4 +138,8 @@ bool SystemProperties::Is24HourClock()
     return false;
 }
 
+bool SystemProperties::GetImageFrameworkEnabled()
+{
+    return true;
+}
 } // namespace OHOS::Ace

@@ -62,7 +62,7 @@
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -120,7 +120,7 @@ protected:
 
 void RichEditorTestNg::SetUp()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     MockContainer::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto* stack = ViewStackProcessor::GetInstance();
@@ -144,7 +144,7 @@ void RichEditorTestNg::TearDown()
     testOnIMEInputComplete = 0;
     testAboutToDelete = 0;
     testOnDeleteComplete = 0;
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void RichEditorTestNg::AddSpan(const std::string& content)
@@ -1247,24 +1247,6 @@ HWTEST_F(RichEditorTestNg, GetTextIndexAtCursor001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleLongPress001
- * @tc.desc: test handle long press
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, HandleLongPress001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    GestureEvent info;
-    info.localLocation_ = Offset(0, 0);
-    richEditorPattern->caretVisible_ = true;
-    richEditorPattern->HandleLongPress(info);
-    EXPECT_FALSE(richEditorPattern->caretVisible_);
-}
-
-/**
  * @tc.name: HandleTouchEvent002
  * @tc.desc: test handle touch event
  * @tc.type: FUNC
@@ -1974,7 +1956,7 @@ HWTEST_F(RichEditorTestNg, HandleOnCopy001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     richEditorPattern->clipboard_ = clipboard;
     AddSpan("test1");

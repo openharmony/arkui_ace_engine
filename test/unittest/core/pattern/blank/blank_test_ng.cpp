@@ -18,6 +18,8 @@
 #include "gtest/gtest.h"
 
 #define private public
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -27,11 +29,11 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#undef private
 
 using namespace testing;
 using namespace testing::ext;
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float COLUMN_HEIGHT = 200.0f;
@@ -41,11 +43,9 @@ constexpr float ZERO = 0.0f;
 constexpr float ROW_HEIGHT = 120.0f;
 constexpr float SMALL_ITEM_WIDTH = 150.0f;
 constexpr float SMALL_ITEM_HEIGHT = 60.0f;
-
 constexpr Dimension BLANK_MIN(10.0f);
 constexpr Dimension SMALL_BLANK_HEIGHT(5.0f);
 constexpr Dimension LARGE_BLANK_HEIGHT(20.0f);
-
 const OffsetF ORIGIN_POINT(ZERO, ZERO);
 const SizeF SMALL_ITEM_SIZE(SMALL_ITEM_WIDTH, SMALL_ITEM_HEIGHT);
 const std::string COLOR_WHITE = "#00000000";
@@ -55,16 +55,16 @@ constexpr int32_t PLATFORM_VERSION_9 = 9;
 constexpr Dimension NEGATIVE_BLANK_MIN(-10.0f);
 } // namespace
 
-class BlackTestNg : public testing::Test {
+class BlankTestNg : public testing::Test {
 public:
-    static void SetUpTestCase()
+    static void SetUpTestSuite()
     {
-        MockPipelineBase::SetUp();
+        MockPipelineContext::SetUp();
     }
 
-    static void TearDownTestCase()
+    static void TearDownTestSuite()
     {
-        MockPipelineBase::TearDown();
+        MockPipelineContext::TearDown();
     }
 
 protected:
@@ -75,7 +75,7 @@ protected:
     PaddingProperty CreatePadding(float left, float top, float right, float bottom);
 };
 
-std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlackTestNg::CreateRow()
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlankTestNg::CreateRow()
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto rowFrameNode =
@@ -105,7 +105,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlackTestNg::CreateRow()
     return { rowFrameNode, layoutWrapper };
 }
 
-std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlackTestNg::CreateColumn()
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlankTestNg::CreateColumn()
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto columnFrameNode =
@@ -135,7 +135,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlackTestNg::CreateColum
     return { columnFrameNode, layoutWrapper };
 }
 
-std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlackTestNg::CreateFlexRow()
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlankTestNg::CreateFlexRow()
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto rowFrameNode =
@@ -168,7 +168,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlackTestNg::CreateFlexR
     return { rowFrameNode, layoutWrapper };
 }
 
-std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlackTestNg::CreateFlexColumn()
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlankTestNg::CreateFlexColumn()
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto columnFrameNode =
@@ -201,7 +201,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlackTestNg::CreateFlexC
     return { columnFrameNode, layoutWrapper };
 }
 
-PaddingProperty BlackTestNg::CreatePadding(float left, float top, float right, float bottom)
+PaddingProperty BlankTestNg::CreatePadding(float left, float top, float right, float bottom)
 {
     PaddingProperty padding;
     padding.left = CalcLength(left);
@@ -217,11 +217,11 @@ PaddingProperty BlackTestNg::CreatePadding(float left, float top, float right, f
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlackTestNg, BlankFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankFrameNodeCreator001, TestSize.Level1)
 {
     std::vector<int32_t> platformVersions = { PLATFORM_VERSION_9, PLATFORM_VERSION_10 };
-    for (int32_t i = 0; i < platformVersions.size(); i++) {
-        PipelineBase::GetCurrentContext()->SetMinPlatformVersion(platformVersions[i]);
+    for (int platformVersion : platformVersions) {
+        PipelineBase::GetCurrentContext()->SetMinPlatformVersion(platformVersion);
         BlankModelNG blank;
         blank.Create();
         blank.SetBlankMin(BLANK_MIN);
@@ -240,11 +240,11 @@ HWTEST_F(BlackTestNg, BlankFrameNodeCreator001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlackTestNg, BlankFrameNodeCreator002, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankFrameNodeCreator002, TestSize.Level1)
 {
     std::vector<int32_t> platformVersions = { PLATFORM_VERSION_9, PLATFORM_VERSION_10 };
-    for (int32_t i = 0; i < platformVersions.size(); i++) {
-        PipelineBase::GetCurrentContext()->SetMinPlatformVersion(platformVersions[i]);
+    for (int platformVersion : platformVersions) {
+        PipelineBase::GetCurrentContext()->SetMinPlatformVersion(platformVersion);
         BlankModelNG blank;
         blank.Create();
         blank.SetBlankMin(NEGATIVE_BLANK_MIN);
@@ -263,11 +263,11 @@ HWTEST_F(BlackTestNg, BlankFrameNodeCreator002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlackTestNg, BlankFrameNodeCreator003, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankFrameNodeCreator003, TestSize.Level1)
 {
     std::vector<int32_t> platformVersions = { PLATFORM_VERSION_9, PLATFORM_VERSION_10 };
-    for (int32_t i = 0; i < platformVersions.size(); i++) {
-        PipelineBase::GetCurrentContext()->SetMinPlatformVersion(platformVersions[i]);
+    for (int platformVersion : platformVersions) {
+        PipelineBase::GetCurrentContext()->SetMinPlatformVersion(platformVersion);
         BlankModelNG blank;
         blank.Create();
         blank.SetHeight(SMALL_BLANK_HEIGHT);
@@ -293,11 +293,11 @@ HWTEST_F(BlackTestNg, BlankFrameNodeCreator003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlackTestNg, BlankPatternTest001, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankPatternTest001, TestSize.Level1)
 {
     std::vector<int32_t> platformVersions = { PLATFORM_VERSION_9, PLATFORM_VERSION_10 };
-    for (int32_t i = 0; i < platformVersions.size(); i++) {
-        PipelineBase::GetCurrentContext()->SetMinPlatformVersion(platformVersions[i]);
+    for (int platformVersion : platformVersions) {
+        PipelineBase::GetCurrentContext()->SetMinPlatformVersion(platformVersion);
         auto row = CreateRow();
         auto rowFrameNode = row.first;
         EXPECT_NE(rowFrameNode, nullptr);
@@ -361,7 +361,7 @@ HWTEST_F(BlackTestNg, BlankPatternTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlackTestNg, BlankPatternTest002, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankPatternTest002, TestSize.Level1)
 {
     auto column = CreateColumn();
     auto columnFrameNode = column.first;
@@ -420,7 +420,7 @@ HWTEST_F(BlackTestNg, BlankPatternTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlackTestNg, BlankPatternTest003, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankPatternTest003, TestSize.Level1)
 {
     auto flexRow = CreateFlexRow();
     auto flexRowFrameNode = flexRow.first;
@@ -479,7 +479,7 @@ HWTEST_F(BlackTestNg, BlankPatternTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlackTestNg, BlankPatternTest004, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankPatternTest004, TestSize.Level1)
 {
     auto flexColumn = CreateFlexColumn();
     auto flexColumnFrameNode = flexColumn.first;
@@ -538,7 +538,7 @@ HWTEST_F(BlackTestNg, BlankPatternTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlackTestNg, BlankPatternTest005, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankPatternTest005, TestSize.Level1)
 {
     BlankModelNG blank;
     Dimension blankMin;
@@ -606,7 +606,7 @@ HWTEST_F(BlackTestNg, BlankPatternTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlackTestNg, BlankPatternTest006, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankPatternTest006, TestSize.Level1)
 {
     BlankModelNG blank;
     Dimension blankMin;
@@ -672,7 +672,7 @@ HWTEST_F(BlackTestNg, BlankPatternTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlackTestNg, BlankPatternTest007, TestSize.Level1)
+HWTEST_F(BlankTestNg, BlankPatternTest007, TestSize.Level1)
 {
     BlankModelNG blank;
     blank.Create();
@@ -690,7 +690,7 @@ HWTEST_F(BlackTestNg, BlankPatternTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BlackTestNg, ToJsonValue001, TestSize.Level1)
+HWTEST_F(BlankTestNg, ToJsonValue001, TestSize.Level1)
 {
     BlankModelNG blank;
     blank.Create();

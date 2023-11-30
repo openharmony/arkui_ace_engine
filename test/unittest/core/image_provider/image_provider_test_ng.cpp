@@ -39,7 +39,7 @@
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "test/mock/core/image_provider/mock_image_loader.h"
 #include "core/image/image_source_info.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -67,7 +67,7 @@ public:
 
 void ImageProviderTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     g_threads = std::vector<std::thread>();
 }
 
@@ -83,7 +83,7 @@ void ImageProviderTestNg::TearDown()
 
 void ImageProviderTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
     g_loader = nullptr;
 }
 

@@ -55,10 +55,17 @@ public:
     MOCK_METHOD3(Paint, void(RSCanvas& canvas, float x, float y));
     MOCK_METHOD3(Paint, void(SkCanvas* skCanvas, float x, float y));
     MOCK_METHOD3(GetWordBoundary, bool(int32_t offset, int32_t& start, int32_t& end));
-    MOCK_METHOD3(
-        CalcCaretMetricsByPosition, bool(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity));
-    MOCK_METHOD3(CalcCaretMetricsByPosition,
-        bool(int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffsetF));
+
+    bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) override
+    {
+        return false;
+    }
+
+    bool CalcCaretMetricsByPosition(
+        int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffsetF) override
+    {
+        return false;
+    }
 
     static RefPtr<MockParagraph> GetOrCreateMockParagraph();
     static void TearDown();

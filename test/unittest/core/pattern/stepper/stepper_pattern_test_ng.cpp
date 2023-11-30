@@ -24,7 +24,7 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/stepper/stepper_pattern.h"
 #include "core/components_ng/pattern/stepper/stepper_item_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
@@ -70,16 +70,16 @@ public:
 
 void StepperPatternTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     // set StepperTheme to themeManager before using themeManager to get StepperTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<StepperTheme>()));
 }
 
 void StepperPatternTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 RefPtr<LayoutWrapperNode> StepperPatternTestNg::CreateChildLayoutWrapper(

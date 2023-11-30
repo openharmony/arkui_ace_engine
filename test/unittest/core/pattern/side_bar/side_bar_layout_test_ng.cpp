@@ -33,7 +33,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "frameworks/base/geometry/ng/size_t.h"
 #include "frameworks/core/components_ng/property/property.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_paint_method.h"
@@ -72,12 +72,12 @@ public:
 
 void SideBarLayoutTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void SideBarLayoutTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**

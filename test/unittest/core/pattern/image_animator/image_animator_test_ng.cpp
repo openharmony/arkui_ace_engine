@@ -27,7 +27,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -81,12 +81,12 @@ public:
 
 void ImageAnimatorTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void ImageAnimatorTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void ImageAnimatorTestNg::SetUp() {}
@@ -946,7 +946,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest012, TestSize.Level1)
      * @tc.expected: pipeline and animator is not nullptr
      */
     CreateImageAnimator(0);
-    auto pipeline = MockPipelineBase::GetCurrentContext();
+    auto pipeline = MockPipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     auto animator = pattern_->animator_;
     ASSERT_NE(animator, nullptr);
@@ -987,7 +987,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest013, TestSize.Level1)
      * @tc.expected: pipeline and animator is not nullptr
      */
     CreateImageAnimator(0);
-    auto pipeline = MockPipelineBase::GetCurrentContext();
+    auto pipeline = MockPipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     auto animator = pattern_->animator_;
     ASSERT_NE(animator, nullptr);
@@ -1012,7 +1012,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest014, TestSize.Level1)
      * @tc.expected: pipeline and animator is not nullptr
      */
     CreateImageAnimator(0);
-    auto pipeline = MockPipelineBase::GetCurrentContext();
+    auto pipeline = MockPipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     auto animator = pattern_->animator_;
     ASSERT_NE(animator, nullptr);
@@ -1046,7 +1046,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest015, TestSize.Level1)
      * @tc.expected: pipeline and animator is not nullptr
      */
     CreateImageAnimator(0);
-    auto pipeline = MockPipelineBase::GetCurrentContext();
+    auto pipeline = MockPipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     auto animator = pattern_->animator_;
     ASSERT_NE(animator, nullptr);
@@ -1073,7 +1073,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest016, TestSize.Level1)
      * @tc.expected: pipeline and animator is not nullptr
      */
     CreateImageAnimator(0);
-    auto pipeline = MockPipelineBase::GetCurrentContext();
+    auto pipeline = MockPipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     auto animator = pattern_->animator_;
     ASSERT_NE(animator, nullptr);

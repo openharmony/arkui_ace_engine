@@ -389,6 +389,7 @@ ohos_source_set("ace_engine_unittest_flutter_deps") {
 source_set("ace_components_mock") {
   testonly = true
   sources = [
+    "$ace_root/test/mock/adapter/mock_view_data_wrap_ohos.cpp",
     "$ace_root/test/mock/base/mock_ace_trace.cpp",
     "$ace_root/test/mock/base/mock_drag_window.cpp",
     "$ace_root/test/mock/base/mock_foldable_window.cpp",
@@ -412,7 +413,7 @@ source_set("ace_components_mock") {
     "$ace_root/test/mock/core/image_provider/mock_image_loading_context.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
     "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
-    "$ace_root/test/mock/core/pipeline/mock_pipeline_base.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
     "$ace_root/test/mock/core/render/mock_font_collection.cpp",
     "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
@@ -911,8 +912,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.cpp",
   ]
-
-  sources += [ "$ace_root/test/mock/adapter/mock_view_data_wrap_ohos.cpp" ]
 
   deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
   configs = [ ":ace_unittest_config" ]

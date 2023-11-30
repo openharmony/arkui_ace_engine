@@ -26,6 +26,11 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "core/components/scroll/scrollable.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -46,12 +51,8 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -90,24 +91,19 @@ class TabsTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    void MockPipelineContextGetTheme();
 };
 
 void TabsTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TabTheme>()));
 }
 
 void TabsTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
-}
-
-void TabsTestNg::MockPipelineContextGetTheme()
-{
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TabTheme>()));
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -117,7 +113,6 @@ void TabsTestNg::MockPipelineContextGetTheme()
  */
 HWTEST_F(TabsTestNg, TabsModelSetDivider001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
     TabsItemDivider divider;
     Dimension strokeWidth = 10.0_vp;
@@ -171,7 +166,6 @@ HWTEST_F(TabsTestNg, TabsModelSetDivider001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabsModelSetDivider002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
     TabsItemDivider divider;
     divider.isNull = true;
@@ -203,8 +197,6 @@ HWTEST_F(TabsTestNg, TabsModelSetDivider002, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabsModelSetFadingEdge001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     TabsModelNG tabsModel;
     bool fadingEdge = true;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -236,7 +228,6 @@ HWTEST_F(TabsTestNg, TabsModelMeasure001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -342,7 +333,6 @@ HWTEST_F(TabsTestNg, TabsModelMeasure002, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -467,7 +457,6 @@ HWTEST_F(TabsTestNg, TabsModelMeasure003, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -592,7 +581,6 @@ HWTEST_F(TabsTestNg, TabsModelMeasure004, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -714,7 +702,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmMeasure001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -800,7 +787,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayout001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -905,7 +891,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmGetSpace001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call GetSpace and
@@ -970,7 +955,6 @@ HWTEST_F(TabsTestNg, TabsModelOnUpdateShowDivider001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -1107,7 +1091,7 @@ HWTEST_F(TabsTestNg, TabContentModelSetIndicator001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
 
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TabTheme>()));
 
     TabContentModelNG tabContentModel;
@@ -1146,8 +1130,6 @@ HWTEST_F(TabsTestNg, TabContentModelSetIndicator001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabContentModelSetIndicator002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     TabContentModelNG tabContentModel;
     IndicatorStyle indicator;
     Dimension width = 0.0_vp;
@@ -1172,8 +1154,6 @@ HWTEST_F(TabsTestNg, TabContentModelSetIndicator002, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabContentModelCreate001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     TabContentModelNG tabContentModel;
     tabContentModel.Create([]() {});
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -1190,7 +1170,7 @@ HWTEST_F(TabsTestNg, TabContentModelSetSubTabBorderRadius001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
 
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TabTheme>()));
     TabContentModelNG tabContentModel;
     BoardStyle boardStyle;
@@ -1213,7 +1193,6 @@ HWTEST_F(TabsTestNg, TabContentModelSetSubTabBorderRadius001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabContentModelSetSubTabBorderRadius002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabContentModelNG tabContentModel;
     BoardStyle boardStyle;
     boardStyle.borderRadius = 10.0_vp;
@@ -1235,7 +1214,6 @@ HWTEST_F(TabsTestNg, TabContentModelSetSubTabBorderRadius002, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabContentModelSetSelectedMode001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabContentModelNG tabContentModel;
     SelectedMode selectedMode = SelectedMode::INDICATOR;
     tabContentModel.Create();
@@ -1255,8 +1233,6 @@ HWTEST_F(TabsTestNg, TabContentModelSetSelectedMode001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabContentModelSetLabelStyle001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     TabContentModelNG tabContentModel;
     LabelStyle labelStyle;
     tabContentModel.Create();
@@ -1284,8 +1260,6 @@ HWTEST_F(TabsTestNg, TabContentModelSetLabelStyle001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabContentModelSetLabelStyle002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     TabContentModelNG tabContentModel;
     LabelStyle labelStyle;
     labelStyle.textOverflow = TextOverflow::CLIP;
@@ -1323,7 +1297,6 @@ HWTEST_F(TabsTestNg, TabContentModelSetLabelStyle002, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabContentModelUpdateLabelStyle001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     auto layoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
 
     TabContentModelNG tabContentModel;
@@ -1358,8 +1331,6 @@ HWTEST_F(TabsTestNg, TabContentModelUpdateLabelStyle001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabContentModelToJsonValue001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     LabelStyle labelStyle;
     labelStyle.textOverflow = TextOverflow::CLIP;
     labelStyle.maxLines = 0;
@@ -1388,7 +1359,6 @@ HWTEST_F(TabsTestNg, TabContentModelToJsonValue001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabContentModelAddTabBarItem001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     const std::string text_test = "text_test";
     TabContentModelNG tabContentModel;
     SelectedMode selectedMode = SelectedMode::INDICATOR;
@@ -1432,7 +1402,6 @@ HWTEST_F(TabsTestNg, TabContentModelAddTabBarItem001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
     bool fadingEdge = true;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -1492,7 +1461,6 @@ HWTEST_F(TabsTestNg, TabBarPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     const std::string text_test = "text_test";
 
     TabContentModelNG tabContentModel;
@@ -1585,7 +1553,6 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternUpdateGradientRegions001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     const std::string text_test = "text_test";
 
     TabContentModelNG tabContentModel;
@@ -1678,7 +1645,6 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateGradientRegions001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternSetSelectedMode001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
     bool fadingEdge = true;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -1729,7 +1695,6 @@ HWTEST_F(TabsTestNg, TabBarPatternSetSelectedMode001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternUpdateIndicator001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
     bool fadingEdge = true;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -1788,7 +1753,6 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateIndicator001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternPlayPressAnimation001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
     bool fadingEdge = true;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -1853,10 +1817,6 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayPressAnimation001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternHandleClick001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     const std::string text_test = "text_test";
 
     TabContentModelNG tabContentModel;
@@ -1918,10 +1878,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleClick001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternHandleSubTabBarClick001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     const std::string text_test = "text_test";
 
     TabContentModelNG tabContentModel;
@@ -2021,10 +1977,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleSubTabBarClick001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternGetIndicatorRect001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     const std::string text_test = "text_test";
 
     TabContentModelNG tabContentModel;
@@ -2073,10 +2025,6 @@ HWTEST_F(TabsTestNg, TabBarPatternGetIndicatorRect001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternGetSelectedMode001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     const std::string text_test = "text_test";
 
     TabContentModelNG tabContentModel;
@@ -2240,7 +2188,6 @@ HWTEST_F(TabsTestNg, TabBarModifierSetSelectedMode001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarModifierOnDraw001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
     EXPECT_FALSE(tabBarModifier == nullptr);
 
@@ -2304,7 +2251,6 @@ HWTEST_F(TabsTestNg, TabBarModifierOnDraw001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPaintMethodGetForegroundDrawFunction001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
 
@@ -2353,7 +2299,6 @@ HWTEST_F(TabsTestNg, TabBarPaintMethodGetForegroundDrawFunction001, TestSize.Lev
  */
 HWTEST_F(TabsTestNg, TabBarPaintMethodGetContentModifier001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
 
@@ -2398,7 +2343,6 @@ HWTEST_F(TabsTestNg, TabBarPaintMethodGetContentModifier001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPaintMethodUpdateContentModifier001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
 
@@ -2440,7 +2384,6 @@ HWTEST_F(TabsTestNg, TabBarPaintMethodUpdateContentModifier001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPaintMethodPaintGradient001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
 
@@ -2664,10 +2607,6 @@ HWTEST_F(TabsTestNg, TabBarAccessibilityPropertyTestNg004, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabsModelSetBarOverlap001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).WillRepeatedly(Return());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -2709,7 +2648,6 @@ HWTEST_F(TabsTestNg, TabsModelSetBarOverlap001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabsEventHubChangeEvent001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
     TabsItemDivider divider;
     Dimension strokeWidth = 10.0_vp;
@@ -2781,9 +2719,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleBottomTabBarChange001, TestSize.Level1)
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -2817,9 +2752,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleBottomTabBarChange002, TestSize.Level1)
     /**
      * @tc.steps: step1. build a bottom style tabbar and a sub style tabbar.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -2853,9 +2785,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleBottomTabBarChange003, TestSize.Level1)
     /**
      * @tc.steps: step1. build a bottom style tabbar and a sub style tabbar.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 0, nullptr, nullptr);
@@ -2889,9 +2818,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleBottomTabBarChange004, TestSize.Level1)
     /**
      * @tc.steps: step1. build a sub style tabbar and a bottom style tabbar.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -2925,9 +2851,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleBottomTabBarChange005, TestSize.Level1)
     /**
      * @tc.steps: step1. build two sub style tabbar.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -2961,9 +2884,6 @@ HWTEST_F(TabsTestNg, TabBarPatternMaskAnimationFinish001, TestSize.Level1)
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -2997,9 +2917,6 @@ HWTEST_F(TabsTestNg, TabBarPatternMaskAnimationFinish002, TestSize.Level1)
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -3033,9 +2950,6 @@ HWTEST_F(TabsTestNg, TabBarPatternChangeMask001, TestSize.Level1)
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -3108,9 +3022,6 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateImageColor001, TestSize.Level1)
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -3146,9 +3057,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask001, TestSize.Level1)
     /**
      * @tc.steps: step1. call UpdateSelectedMask and UpdateUnselectedMask.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -3212,9 +3120,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask002, TestSize.Level1)
     /**
      * @tc.steps: step1. build selectedMaskNode and unselectedMaskNode.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -3273,9 +3178,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask003, TestSize.Level1)
     /**
      * @tc.steps: step1. build layoutWrapper.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -3315,9 +3217,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint001, TestSize.Lev
     /**
      * @tc.steps: step1. build tabBarNode and ideaSize.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     LayoutConstraintF childConstraint = LayoutConstraintF();
     std::optional<int32_t> tabBarTestId_(1);
@@ -3366,7 +3265,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmMeasureMaxHeight002, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(tabsFrameNode, nullptr);
@@ -3422,7 +3320,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmMeasureItemWidths002, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(tabsFrameNode, nullptr);
@@ -3476,7 +3373,7 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutStyle003
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
+
     auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(tabsFrameNode, nullptr);
     auto pattern = tabsFrameNode->GetPattern<TabsPattern>();
@@ -3530,7 +3427,7 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmHandleSpaceBetweenOrCenterLayoutStyle0
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
+
     auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(tabsFrameNode, nullptr);
     auto pattern = tabsFrameNode->GetPattern<TabsPattern>();
@@ -3584,7 +3481,7 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmGetGridSizeType002, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
+
     auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(tabsFrameNode, nullptr);
     auto pattern = tabsFrameNode->GetPattern<TabsPattern>();
@@ -3623,9 +3520,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCalculateBackChildrenMainSize001, Test
     /**
      * @tc.steps: step1. call UpdateSelectedMask and UpdateUnselectedMask.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -3682,10 +3576,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCalculateBackChildrenMainSize001, Test
  */
 HWTEST_F(TabsTestNg, TabsModelSetBarBackgroundColor001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -3795,7 +3685,7 @@ HWTEST_F(TabsTestNg, TabsModelSetTabBarWidth001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create tabsModel
      */
-    MockPipelineContextGetTheme();
+
     TabsModelNG tabsModel;
     Dimension tabBarWidth = 10.0_vp;
     Dimension tabBarHeight = 3.0_vp;
@@ -3822,7 +3712,7 @@ HWTEST_F(TabsTestNg, TabsModelSetAnimationDuration001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create tabsModel
      */
-    MockPipelineContextGetTheme();
+
     TabsModelNG tabsModel;
     bool duration = true;
 
@@ -3846,7 +3736,7 @@ HWTEST_F(TabsTestNg, TabsModelGetOrCreateTabsNode001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create tabsModel
      */
-    MockPipelineContextGetTheme();
+
     TabsModelNG tabsModel;
     const std::string tag = "TabsID";
     int32_t nodeId = 1;
@@ -3869,9 +3759,6 @@ HWTEST_F(TabsTestNg, TabBarPatternInitClick001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -3907,9 +3794,6 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -3950,9 +3834,6 @@ HWTEST_F(TabsTestNg, TabBarPatternInitTouche001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -3989,9 +3870,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleMouseEvent001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -4035,7 +3913,6 @@ HWTEST_F(TabsTestNg, TabBarmodifieronDraw002, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create tabBarmodifier
      */
-    MockPipelineContextGetTheme();
 
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
     ASSERT_NE(tabBarModifier, nullptr);
@@ -4068,9 +3945,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleMouseEvent002, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -4114,9 +3988,6 @@ HWTEST_F(TabsTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset001, TestSize
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -4170,9 +4041,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleMouseEvent003, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -4217,9 +4085,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleBottomTabBarClick001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -4249,9 +4114,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleSubTabBarClick002, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -4306,10 +4168,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleSubTabBarClick002, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -4364,10 +4222,6 @@ HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -4424,7 +4278,6 @@ HWTEST_F(TabsTestNg, TabBarmodifierPaintIndicator001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create tabBarmodifier
      */
-    MockPipelineContextGetTheme();
 
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
     Testing::MockCanvas rsCanvas;
@@ -4464,9 +4317,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleHoverEvent001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -4527,9 +4377,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleHoverOnEvent001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -4575,7 +4422,7 @@ HWTEST_F(TabsTestNg, TabsModelSetOnChange001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create tabsModel
      */
-    MockPipelineContextGetTheme();
+
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
 
@@ -4645,7 +4492,7 @@ HWTEST_F(TabsTestNg, TabsModelSetScrollable001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create tabsModel
      */
-    MockPipelineContextGetTheme();
+
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
 
@@ -4667,9 +4514,7 @@ HWTEST_F(TabsTestNg, TabsModelSetClipEdge001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create tabsModel
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
 
@@ -4690,9 +4535,6 @@ HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent002, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -4758,10 +4600,6 @@ HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent002, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -4818,9 +4656,6 @@ HWTEST_F(TabsTestNg, TabBarPatternFocusIndexChange001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -4853,9 +4688,6 @@ HWTEST_F(TabsTestNg, TabBarPatternOnModifyDone001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -4887,9 +4719,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleClick002, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -4957,9 +4786,6 @@ HWTEST_F(TabsTestNg, TabBarPatternMaskAnimationFinish003, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -4990,9 +4816,7 @@ HWTEST_F(TabsTestNg, TabBarDistributedTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create frameNode and get pattern.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
     TabsItemDivider divider;
@@ -5042,9 +4866,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchDown001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -5079,9 +4900,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchUp001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -5117,9 +4935,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchUp002, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -5183,9 +4998,6 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayPressAnimation002, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -5230,9 +5042,6 @@ HWTEST_F(TabsTestNg, TabBarPatternStopTabBarTranslateAnimation001, TestSize.Leve
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -5268,9 +5077,6 @@ HWTEST_F(TabsTestNg, TabBarPatternSetEdgeEffect001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -5302,10 +5108,6 @@ HWTEST_F(TabsTestNg, TabBarPatternSetEdgeEffect001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent003, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -5362,9 +5164,7 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColor001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
     TabsItemDivider divider;
@@ -5397,9 +5197,7 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColor002, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
     TabsItemDivider divider;
@@ -5439,9 +5237,6 @@ HWTEST_F(TabsTestNg, TabBarPatternInitClick002, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -5476,9 +5271,6 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable002, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -5526,9 +5318,6 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable003, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -5592,9 +5381,6 @@ HWTEST_F(TabsTestNg, TabBarPatternInitHoverEvent001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -5631,9 +5417,6 @@ HWTEST_F(TabsTestNg, TabBarPatternInitOnKeyEvent001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -5667,9 +5450,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleMouseEvent004, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -5754,9 +5534,6 @@ HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent003, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -5799,7 +5576,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayout002, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call Layout function.
@@ -5839,7 +5615,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayout003, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call Layout function.
@@ -5924,9 +5699,6 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayMaskAnimation001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -5982,9 +5754,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent004, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -6045,9 +5814,6 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayTranslateAnimation001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -6124,9 +5890,6 @@ HWTEST_F(TabsTestNg, TabBarPatternSetEdgeEffect002, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -6162,9 +5925,6 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayTabBarTranslateAnimation001, TestSize.Leve
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -6293,10 +6053,6 @@ void FocusTest(const RefPtr<TabBarLayoutProperty>& tabBarLayoutProperty, const R
  */
 HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent004, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -6343,10 +6099,6 @@ HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent004, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent005, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -6382,10 +6134,6 @@ HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent005, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent006, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -6422,10 +6170,6 @@ HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent006, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent007, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -6471,10 +6215,6 @@ HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent007, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabsPatternGetScopeFocusAlgorithm001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -6512,10 +6252,6 @@ HWTEST_F(TabsTestNg, TabsPatternGetScopeFocusAlgorithm001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternAdjustFocusPosition001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -6559,10 +6295,6 @@ HWTEST_F(TabsTestNg, TabBarPatternAdjustFocusPosition001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternAdjustFocusPosition002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -6607,8 +6339,6 @@ HWTEST_F(TabsTestNg, TabBarPatternAdjustFocusPosition002, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternCreateNodePaintMethod001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -6650,10 +6380,6 @@ HWTEST_F(TabsTestNg, TabBarPatternCreateNodePaintMethod001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabsModelSetOnTabBarClick001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -6682,10 +6408,6 @@ HWTEST_F(TabsTestNg, TabsModelSetOnTabBarClick001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternGetNextFocusNode001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -6777,9 +6499,6 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable004, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -6833,10 +6552,6 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable004, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternGetIndicatorStyle001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -6901,10 +6616,6 @@ HWTEST_F(TabsTestNg, TabBarPatternGetIndicatorStyle001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternCheckSwiperDisable001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -6933,10 +6644,6 @@ HWTEST_F(TabsTestNg, TabBarPatternCheckSwiperDisable001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternApplyTurnPageRateToIndicator001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -6986,9 +6693,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask004, TestSize.Level1)
     /**
      * @tc.steps: step1. Create tabsModel.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -7065,10 +6769,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask004, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmGetGridWidth001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -7112,10 +6812,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmGetGridWidth001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmApplyBarGridAlign001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -7177,10 +6873,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmApplyBarGridAlign001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmConfigHorizontal001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -7241,10 +6933,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmConfigHorizontal001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutStyle001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -7309,10 +6997,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutStyle001
  */
 HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmHandleSpaceBetweenOrCenterLayoutStyle001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -7396,10 +7080,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmHandleSpaceBetweenOrCenterLayoutStyle0
  */
 HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmMeasureItemWidths001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -7479,10 +7159,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmMeasureItemWidths001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmMeasureMaxHeight001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -7540,10 +7216,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmMeasureMaxHeight001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmApplyLayoutMode001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -7632,10 +7304,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmApplyLayoutMode001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutChildren001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -7685,10 +7353,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutChildren001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmGetContentWidth001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -7736,7 +7400,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmApplySymmetricExtensible001, TestSize.
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -7859,7 +7522,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetricExtensi
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -7991,8 +7653,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetricExtensi
  */
 HWTEST_F(TabsTestNg, TabBarPaintMethodGetForegroundDrawFunction002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -8057,10 +7717,6 @@ HWTEST_F(TabsTestNg, TabBarPaintMethodGetForegroundDrawFunction002, TestSize.Lev
  */
 HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutStyle002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -8098,8 +7754,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutStyle002
  */
 HWTEST_F(TabsTestNg, TabContentModelAddTabBarItem002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -8153,8 +7807,6 @@ HWTEST_F(TabsTestNg, TabContentModelAddTabBarItem002, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabContentModelSetPadding001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -8192,8 +7844,6 @@ HWTEST_F(TabsTestNg, TabContentModelSetPadding001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabContentModelSetLayoutMode001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -8221,8 +7871,6 @@ HWTEST_F(TabsTestNg, TabContentModelSetLayoutMode001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabContentModelSetVerticalAlign001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -8250,8 +7898,6 @@ HWTEST_F(TabsTestNg, TabContentModelSetVerticalAlign001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabContentModelSetSymmetricExtensible001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -8279,8 +7925,6 @@ HWTEST_F(TabsTestNg, TabContentModelSetSymmetricExtensible001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabContentNodelConvertFlexAlignToString001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -8308,8 +7952,6 @@ HWTEST_F(TabsTestNg, TabContentNodelConvertFlexAlignToString001, TestSize.Level1
  */
 HWTEST_F(TabsTestNg, TabContentNodelConvertLayoutModeToString001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -8343,8 +7985,6 @@ HWTEST_F(TabsTestNg, TabContentNodelConvertLayoutModeToString001, TestSize.Level
  */
 HWTEST_F(TabsTestNg, TabBarPatternAdjustFocusPosition003, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -8397,10 +8037,6 @@ HWTEST_F(TabsTestNg, TabBarPatternAdjustFocusPosition003, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabsModelSetBarAdaptiveHeight001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -8431,10 +8067,6 @@ HWTEST_F(TabsTestNg, TabsModelSetBarAdaptiveHeight001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabsModelSetScrollableBarModeOptions001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -8469,10 +8101,6 @@ HWTEST_F(TabsTestNg, TabsModelSetScrollableBarModeOptions001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabsModelSetBarGridAlign001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
@@ -8600,7 +8228,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmApplySymmetricExtensible002, TestSize.
     /**
      * @tc.steps: steps1. Create tabsModel.
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -8681,7 +8308,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmAdjustFixedItem001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create tabsModel.
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -8737,7 +8363,6 @@ HWTEST_F(TabsTestNg, TabsLayoutAlgorithmMeasure001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create tabsModel
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -8808,7 +8433,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetricExtensi
     /**
      * @tc.steps: step1. Create tabsModel.
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -8948,7 +8572,7 @@ HWTEST_F(TabsTestNg, AddChildToGroup001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create TabContentNode.
      */
-    MockPipelineContextGetTheme();
+
     TabsModelNG tabsModel;
     TabsItemDivider divider;
     Dimension strokeWidth = 10.0_vp;
@@ -8968,7 +8592,7 @@ HWTEST_F(TabsTestNg, AddChildToGroup001, TestSize.Level1)
     auto tabsNode =
         TabsModelNG::GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     ASSERT_NE(tabsNode, nullptr);
-    MockPipelineContextGetTheme();
+
     const std::string text_test = "text_test";
     TabContentModelNG tabContentModel;
     SelectedMode selectedMode = SelectedMode::INDICATOR;
@@ -9050,7 +8674,6 @@ HWTEST_F(TabsTestNg, SetOnChangeEvent001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -9086,7 +8709,6 @@ HWTEST_F(TabsTestNg, TabPatternOnModifyDone001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -9126,7 +8748,6 @@ HWTEST_F(TabsTestNg, SetOnIndexChangeEvent001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -9170,7 +8791,7 @@ HWTEST_F(TabsTestNg, TabsModelSetAnimationDuration002, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create tabsModel
      */
-    MockPipelineContextGetTheme();
+
     TabsModelNG tabsModel;
     float duration = 1;
 
@@ -9194,7 +8815,6 @@ HWTEST_F(TabsTestNg, SetOnChangeEvent002, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    MockPipelineContextGetTheme();
 
     TabsModelNG instance;
     instance.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -9247,10 +8867,6 @@ HWTEST_F(TabsTestNg, SetOnChangeEvent002, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternHandleClick003, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     const std::string text_test = "text_test";
 
     TabContentModelNG tabContentModel;
@@ -9374,9 +8990,6 @@ HWTEST_F(TabsTestNg, TabBarPatternGetInnerFocusPaintRect001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -9411,9 +9024,6 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable005, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -9461,9 +9071,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleClick005, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -9546,7 +9153,6 @@ HWTEST_F(TabsTestNg, TabsModelNGSetIndex001, TestSize.Level2)
  */
 HWTEST_F(TabsTestNg, GetOrCreateTabContentNode001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabContentModelNG tabContentModel;
     tabContentModel.Create([]() {});
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -9569,9 +9175,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleClick006, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -9627,9 +9230,6 @@ HWTEST_F(TabsTestNg, TabBarPatternCalculateSelectedIndex001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -9671,10 +9271,6 @@ HWTEST_F(TabsTestNg, TabBarPatternCalculateSelectedIndex001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternGetIndicatorStyle002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -9746,9 +9342,6 @@ HWTEST_F(TabsTestNg, TabBarPatternOnModifyDone002, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -9793,9 +9386,6 @@ HWTEST_F(TabsTestNg, TabBarPatternIsAtBottom001, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -9824,10 +9414,6 @@ HWTEST_F(TabsTestNg, TabBarPatternIsAtBottom001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternApplyTurnPageRateToIndicator002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -9877,10 +9463,6 @@ HWTEST_F(TabsTestNg, TabBarPatternApplyTurnPageRateToIndicator002, TestSize.Leve
  */
 HWTEST_F(TabsTestNg, TabBarPatternApplyTurnPageRateToIndicator003, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -9952,10 +9534,6 @@ HWTEST_F(TabsTestNg, TabBarPatternApplyTurnPageRateToIndicator003, TestSize.Leve
  */
 HWTEST_F(TabsTestNg, TabBarPatternInitTurnPageRateEvent001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -10002,7 +9580,7 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateIndicator002, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create tabsModel
      */
-    MockPipelineContextGetTheme();
+
     TabsModelNG tabsModel;
     bool fadingEdge = true;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -10049,7 +9627,6 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateIndicator002, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabsModelPop001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -10078,8 +9655,6 @@ HWTEST_F(TabsTestNg, TabsModelPop001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabContentModelCreate002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-
     TabContentModelNG tabContentModel;
     auto deepRenderFunc = []() { AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); };
     tabContentModel.Create(deepRenderFunc);
@@ -10109,7 +9684,7 @@ HWTEST_F(TabsTestNg, TabsModelGetOrCreateTabsNode002, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create tabsModel
      */
-    MockPipelineContextGetTheme();
+
     TabsModelNG tabsModel;
     const std::string tag = "TabsID";
     int32_t nodeId = 1;
@@ -10135,9 +9710,7 @@ HWTEST_F(TabsTestNg, TabBarPatternOnRestoreInfo001, TestSize.Level1)
     /**
      * @tc.steps: step1. create frameNode and get pattern.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
     TabsItemDivider divider;
@@ -10199,10 +9772,6 @@ HWTEST_F(TabsTestNg, TabBarPatternOnRestoreInfo001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternInitTurnPageRateEvent002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel
      */
@@ -10258,7 +9827,6 @@ HWTEST_F(TabsTestNg, TabBarPatternInitTurnPageRateEvent002, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternOnDirtyLayoutWrapperSwap002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
     bool fadingEdge = true;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -10314,9 +9882,6 @@ HWTEST_F(TabsTestNg, TabBarPatternSetEdgeEffect003, TestSize.Level1)
     /**
      * @tc.steps: steps1. Create TabBarPattern
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
@@ -10352,9 +9917,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint002, TestSize.Lev
     /**
      * @tc.steps: step1. build tabBarNode and ideaSize.
      */
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     LayoutConstraintF childConstraint = LayoutConstraintF();
     TabsModelNG instance;
@@ -10395,10 +9957,6 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint002, TestSize.Lev
  */
 HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCheckMarqueeForScrollable001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create tabsModel.
      */

@@ -35,7 +35,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -67,14 +67,14 @@ public:
 
 void GestureEventHubTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     MOCK_DRAG_WINDOW = DragWindow::CreateDragWindow("", 0, 0, 0, 0);
     GTEST_LOG_(INFO) << "GestureEventHubTestNg SetUpTestCase";
 }
 
 void GestureEventHubTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
     MOCK_DRAG_WINDOW = nullptr;
     GTEST_LOG_(INFO) << "GestureEventHubTestNg TearDownTestCase";
 }

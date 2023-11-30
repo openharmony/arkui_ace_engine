@@ -23,7 +23,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -102,10 +102,10 @@ protected:
 
 void OverlayManagerTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
-    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+    MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockContainer::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
@@ -130,11 +130,11 @@ void OverlayManagerTestNg::SetUpTestCase()
             return nullptr;
         }
     });
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 void OverlayManagerTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 RefPtr<FrameNode> OverlayManagerTestNg::CreateTargetNode()
@@ -1494,7 +1494,7 @@ HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest002, TestSize.Level1)
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
-    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+    MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
 
     /**
      * @tc.steps: step2. create modal page node.
@@ -1541,7 +1541,7 @@ HWTEST_F(OverlayManagerTestNg, ToastShowModeTest001, TestSize.Level1)
      * @tc.steps: step1. create toast node with showMode, and show it.
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    MockPipelineBase::GetCurrent()->rootNode_ = rootNode;
+    MockPipelineContext::GetCurrent()->rootNode_ = rootNode;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true, ToastShowMode::TOP_MOST);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
@@ -1625,7 +1625,7 @@ HWTEST_F(OverlayManagerTestNg, ToastTest002, TestSize.Level1)
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    MockPipelineBase::GetCurrent()->rootNode_ = rootNode;
+    MockPipelineContext::GetCurrent()->rootNode_ = rootNode;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
@@ -2207,11 +2207,11 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea1, TestSize.Level1)
     auto geometryNode = sheetNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetFrameSize(SizeF(800, 2000));
-    MockPipelineBase::GetCurrent()->safeAreaManager_ = safeAreaManager;
-    MockPipelineBase::GetCurrent()->SetRootSize(800, 2000);
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
+    MockPipelineContext::GetCurrent()->SetRootSize(800, 2000);
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     textFieldManager->SetHeight(20);
-    MockPipelineBase::GetCurrent()->SetTextFieldManager(textFieldManager);
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     SafeAreaInsets::Inset upKeyboard { 0, 200 };
     sheetPattern->pageHeight_ = 2000;
     sheetPattern->sheetHeight_ = 2000;
@@ -2235,7 +2235,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea1, TestSize.Level1)
     EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()),
         2000 - sheetPattern->height_ -
             (200 + HSAFE.ConvertToPx() -
-                (MockPipelineBase::GetCurrent()->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
+                (MockPipelineContext::GetCurrent()->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
                     textFieldManager->GetHeight())));
     /**
      * @tc.cases: case3. sheet height = 1900 - 8vp, sheet goes up to LARGE and need to scroll.
@@ -2297,8 +2297,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea2, TestSize.Level1)
     ASSERT_NE(sheetLayoutProperty, nullptr);
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
     geometryNode->SetFrameSize(SizeF(800, 2000));
-    MockPipelineBase::GetCurrent()->safeAreaManager_ = safeAreaManager;
-    MockPipelineBase::GetCurrent()->SetRootSize(800, 2000);
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
+    MockPipelineContext::GetCurrent()->SetRootSize(800, 2000);
     sheetPattern->pageHeight_ = 2000;
     sheetPattern->sheetHeight_ = 2000;
     sheetPattern->height_ = 500;

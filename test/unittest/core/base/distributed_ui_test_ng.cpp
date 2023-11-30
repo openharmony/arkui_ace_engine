@@ -25,7 +25,7 @@
 #include "base/json/node_object.h"
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,11 +40,11 @@ class DistributedUiTestNg : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
-        MockPipelineBase::SetUp();
+        MockPipelineContext::SetUp();
     }
     static void TearDownTestSuite()
     {
-        MockPipelineBase::TearDown();
+        MockPipelineContext::TearDown();
     }
 
     void Init();
@@ -58,7 +58,7 @@ void DistributedUiTestNg::Init()
         "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     parentNode->AddChild(childNode);
     auto stageManager = AceType::MakeRefPtr<StageManager>(parentNode);
-    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+    MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
 }
 
 /**
@@ -76,7 +76,7 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg001, TestSize.Level1)
     auto thirdGenerationNode = FrameNode::CreateFrameNode(
         "thirdGenerationNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     auto stageManager = AceType::MakeRefPtr<StageManager>(parentNode);
-    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+    MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
 
     /**
      * @tc.steps: step1. creat distributedUI and creat parentNode add childNode
@@ -235,7 +235,7 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg005, TestSize.Level1)
         "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     parentNode->AddChild(childNode);
     auto stageManager = AceType::MakeRefPtr<StageManager>(parentNode);
-    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+    MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
     /**
      * @tc.steps: step1. creat distributedUI and creat parentNode add childNode
      * @tc.expected: step1. call DumpUITree() return SerializeableObjectArray
@@ -282,7 +282,7 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg006, TestSize.Level1)
         "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     parentNode->AddChild(childNode);
     auto stageManager = AceType::MakeRefPtr<StageManager>(parentNode);
-    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+    MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
     /**
      * @tc.steps: step1. creat distributedUI and creat parentNode add childNode
      * @tc.expected: step1. call DumpUITree() return SerializeableObjectArray
@@ -343,7 +343,7 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg007, TestSize.Level1)
         "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     parentNode->AddChild(childNode);
     auto stageManager = AceType::MakeRefPtr<StageManager>(parentNode);
-    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+    MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
 
     auto nodeObject = std::make_unique<OHOS::Ace::NodeObject>();
     /**
@@ -373,7 +373,7 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg008, TestSize.Level1)
     auto childNode = FrameNode::CreateFrameNode("child", childNodeId, AceType::MakeRefPtr<Pattern>());
     parentNode->AddChild(childNode);
     auto stageManager = AceType::MakeRefPtr<StageManager>(parentNode);
-    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+    MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
 
     auto nodeObject = std::make_unique<OHOS::Ace::NodeObject>();
     nodeObject->Put(DISTRIBUTE_UI_ID, childNodeId);
@@ -407,7 +407,7 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg009, TestSize.Level1)
     auto childNode = FrameNode::CreateFrameNode("child", childNodeId, AceType::MakeRefPtr<Pattern>());
     parentNode->AddChild(childNode);
     auto stageManager = AceType::MakeRefPtr<StageManager>(parentNode);
-    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+    MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
 
     auto nodeObject = std::make_unique<OHOS::Ace::NodeObject>();
     nodeObject->Put(DISTRIBUTE_UI_ID, childNodeId);

@@ -27,7 +27,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -51,11 +51,11 @@ public:
 
 void CounterTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 void CounterTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 void CounterTestNg::SetUp() {}
 void CounterTestNg::TearDown() {}
@@ -69,7 +69,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest001, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
 
@@ -91,7 +91,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest002, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
 
@@ -114,7 +114,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest003, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
 
@@ -140,7 +140,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest004, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
 
@@ -205,7 +205,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest006, TestSize.Level1)
 HWTEST_F(CounterTestNg, CounterPatternTest007, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
 
@@ -238,7 +238,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest007, TestSize.Level1)
 HWTEST_F(CounterTestNg, CounterPatternTest008, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
 

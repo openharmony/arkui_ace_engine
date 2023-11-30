@@ -23,7 +23,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/grid_col/grid_col_layout_pattern.h"
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,12 +40,12 @@ protected:
 
 void GridColTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void GridColTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**

@@ -173,9 +173,8 @@ public:
     {
         if (IsTextArea()) {
             return MakeRefPtr<TextAreaLayoutAlgorithm>();
-        } else {
-            return MakeRefPtr<TextInputLayoutAlgorithm>();
         }
+        return MakeRefPtr<TextInputLayoutAlgorithm>();
     }
 
     void OnModifyDone() override;

@@ -819,7 +819,7 @@ void TextFieldPattern::HandleOnUndoAction()
     }
     auto value = operationRecords_.back();
     operationRecords_.pop_back();
-    if (redoOperationRecords_.size() >= RECORD_MAX_LENGTH && !(redoOperationRecords_.empty())) {
+    if (redoOperationRecords_.size() >= RECORD_MAX_LENGTH) {
         redoOperationRecords_.erase(redoOperationRecords_.begin());
     }
     redoOperationRecords_.push_back(value);
@@ -2990,10 +2990,6 @@ void TextFieldPattern::UltralimitShake()
 void TextFieldPattern::UpdateEditingValueToRecord()
 {
     if (operationRecords_.size() >= RECORD_MAX_LENGTH) {
-        // case of max length is 0
-        if (operationRecords_.empty()) {
-            return;
-        }
         operationRecords_.erase(operationRecords_.begin());
     }
     TextEditingValueNG record {
@@ -3815,7 +3811,7 @@ void TextFieldPattern::HandleSelectionLeftWord()
 
 void TextFieldPattern::HandleSelectionLineBegin()
 {
-    if (selectController_->GetCaretIndex()) {
+    if (selectController_->GetCaretIndex() == 0) {
         return;
     }
     int32_t textLength = static_cast<int32_t>(contentController_->GetWideText().length());
