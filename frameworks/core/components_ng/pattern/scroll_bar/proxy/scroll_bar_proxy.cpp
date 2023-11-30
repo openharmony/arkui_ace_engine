@@ -162,6 +162,7 @@ void ScrollBarProxy::StopScrollBarAnimator() const
             continue;
         }
         scrollBar->StopDisappearAnimator();
+        scrollBar->StopMotion();
         scrollBar->SendAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     }
 }

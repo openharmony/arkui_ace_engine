@@ -21,10 +21,10 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_accessibility_property.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_property.h"
-#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -122,6 +122,15 @@ public:
     bool IsAtBottom() const;
     bool UpdateCurrentOffset(float offset, int32_t source);
 
+    /**
+     * @brief Stops the motion animator of the scroll bar.
+     */
+    inline void StopMotion()
+    {
+        if (frictionController_ && frictionController_->IsRunning()) {
+            frictionController_->Stop();
+        }
+    }
     // disappear Animator
     void StartDisappearAnimator();
     void StopDisappearAnimator();
