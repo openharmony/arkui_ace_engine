@@ -1601,8 +1601,11 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (eventManager_) {
             eventManager_->DumpEvent();
         }
+    } else if (params[0] == "-imagecache") {
+        if (imageCache_) {
+            imageCache_->DumpCacheInfo();
+        }
     }
-
     return true;
 }
 
