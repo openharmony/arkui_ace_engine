@@ -17,8 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCREEN_PATTERN_H
 
 #include "session/screen/include/screen_session.h"
-
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "input_manager.h"
 
 namespace OHOS::Ace::NG {
 class ScreenPattern : public StackPattern {

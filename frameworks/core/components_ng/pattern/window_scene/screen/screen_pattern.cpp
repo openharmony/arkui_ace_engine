@@ -17,7 +17,6 @@
 
 #include <mutex>
 
-#include "input_manager.h"
 #include "ipc_skeleton.h"
 #include "root_scene.h"
 #include "ui/rs_display_node.h"
