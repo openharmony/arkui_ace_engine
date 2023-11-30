@@ -623,7 +623,6 @@ void TextFieldPattern::HandleFocusEvent()
     }
     NotifyOnEditChanged(true);
     auto visible = layoutProperty->GetShowErrorTextValue(false);
-    
     if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()
         && !IsNormalInlineState()) {
         auto renderContext = host->GetRenderContext();
