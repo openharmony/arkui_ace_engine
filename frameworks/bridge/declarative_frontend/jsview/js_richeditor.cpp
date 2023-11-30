@@ -75,8 +75,15 @@ namespace {
 std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
 {
     std::optional<NG::MarginProperty> marginProp = std::nullopt;
-
-    if (marginAttr->IsObject()) {
+    CalcDimension length;
+    if (!marginAttr->IsObject() && !marginAttr->IsNumber() && !marginAttr->IsString()) {
+        length.Reset();
+        marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
+        return marginProp;
+    }
+    if (JSViewAbstract::ParseJsDimensionVp(marginAttr, length)) {
+        marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
+    } else if (marginAttr->IsObject()) {
         auto marginObj = JSRef<JSObject>::Cast(marginAttr);
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
@@ -84,17 +91,6 @@ std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
         std::optional<CalcDimension> bottom;
         JSViewAbstract::ParseMarginOrPaddingCorner(marginObj, top, bottom, left, right);
         marginProp = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
-    } else if (marginAttr->IsNumber() || marginAttr->IsString()) {
-        CalcDimension length;
-        if (!JSViewAbstract::ParseJsDimensionVp(marginAttr, length)) {
-            // use default value.
-            length.Reset();
-        }
-        marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
-    } else {
-        CalcDimension length;
-        length.Reset();
-        marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
     }
     return marginProp;
 }
