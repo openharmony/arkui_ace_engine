@@ -583,7 +583,7 @@ int32_t SwiperPattern::GetLoopIndex(int32_t originalIndex) const
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (!isDragging_) {
-        SetLazyForEachLongPredict(true);
+        SetLazyLoadFeature(true);
     }
 
     auto isNotInit = true;
