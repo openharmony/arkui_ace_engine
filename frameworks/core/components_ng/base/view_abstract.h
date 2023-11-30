@@ -364,6 +364,14 @@ public:
     static void SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient);
+    static void SetOverlay(FrameNode* frameNode, const NG::OverlayOptions& overlay);
+    static void SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage);
+    static void SetBorderImageSource(FrameNode* frameNode, const std::string& bdImageSrc);
+    static void SetHasBorderImageSlice(FrameNode* frameNode, bool tag);
+    static void SetHasBorderImageWidth(FrameNode* frameNode, bool tag);
+    static void SetHasBorderImageOutset(FrameNode* frameNode, bool tag);
+    static void SetHasBorderImageRepeat(FrameNode* frameNode, bool tag);
+    static void SetBorderImageGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle);
     static void SetLinearGradientBlur(FrameNode* frameNode, NG::LinearGradientBlurPara blurPara);
     static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
@@ -426,6 +434,12 @@ public:
     static void SetObscured(FrameNode* frameNode, const std::vector< ObscuredReasons>& reasons);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);
+    static void SetSharedTransition(
+        FrameNode* frameNode, const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
+    static void SetTransition(FrameNode* frameNode, const TransitionOptions& options);
+    static void SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect);
+    static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
+    static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);

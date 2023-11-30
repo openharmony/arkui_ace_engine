@@ -115,7 +115,8 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
         return this;
     }
     blockStyle(value: SliderBlockStyle): this {
-        throw new Error("Method not implemented.");
+        modifierWithKey(this._modifiersWithKeys, BlockStyleModifier.identity, BlockStyleModifier, value);
+        return this
     }
     stepSize(value: Length): this {
         if (typeof value !== "number" && typeof value !== "string") {
@@ -135,6 +136,22 @@ globalThis.Slider.attributeModifier = function (modifier) {
     });
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
+}
+
+class BlockStyleModifier extends ModifierWithKey<boolean | object> {
+    static identity: Symbol = Symbol("sliderBlockStyle");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().slider.resetBlockStyle(node);
+        }
+        else {
+            GetUINativeModule().slider.setBlockStyle(node, this.value);
+        }
+    }
+
+    checkObjectDiff(): boolean {
+        return false;
+    }
 }
 
 class ShowTipsModifier extends Modifier<ArkSliderTips> {

@@ -474,6 +474,41 @@ class SweepGradientModifier extends Modifier<ArkSweepGradient> {
     }
 }
 
+class OverlayModifier extends Modifier<ArkOverlay> {
+    static identity: Symbol = Symbol("overlay");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetOverlay(node);
+        } else {
+            GetUINativeModule().common.setOverlay(node,
+                this.value.value, this.value.align,
+                this.value.offsetX, this.value.offsetY);
+        }
+    }
+}
+
+class BorderImageModifier extends Modifier<ArkBorderImage> {
+    static identity: Symbol = Symbol("borderImage");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetBorderImage(node);
+        } else {
+            GetUINativeModule().common.setBorderImage(node,
+                this.value.sliceTop, this.value.sliceRight,
+                this.value.sliceBottom, this.value.sliceLeft,
+                this.value.repeat,
+                this.value.source,
+                this.value.sourceAngle, this.value.sourceDirection,
+                this.value.sourceColors, this.value.sourceRepeating,
+                this.value.widthTop, this.value.widthRight,
+                this.value.widthBottom, this.value.widthLeft,
+                this.value.outsetTop, this.value.outsetRight,
+                this.value.outsetBottom, this.value.outsetLeft,
+                this.value.fill);
+        }
+    }
+}
+
 class BorderModifier extends Modifier<ArkBorder>{
     static identity: Symbol = Symbol("border");
     applyPeer(node: KNode, reset: boolean): void {
@@ -623,6 +658,22 @@ class ClipModifier extends ModifierWithKey<boolean | object> {
         }
         else {
             GetUINativeModule().common.setClip(node, this.value);
+        }
+    }
+
+    checkObjectDiff(): boolean {
+        return false;
+    }
+}
+
+class MaskModifier extends ModifierWithKey<boolean | object> {
+    static identity: Symbol = Symbol("mask");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetMask(node);
+        }
+        else {
+            GetUINativeModule().common.setMask(node, this.value);
         }
     }
 
@@ -1201,6 +1252,36 @@ class KeyBoardShortCutModifier extends Modifier<ArkKeyBoardShortCut> {
         }else {
             GetUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys);
         }
+    }
+}
+
+class TransitionModifier extends ModifierWithKey<object> {
+    static identity: Symbol = Symbol("transition");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetTransition(node);
+        }
+        else {
+            GetUINativeModule().common.setTransition(node, this.value);
+        }
+    }
+    checkObjectDiff(): boolean {
+        return false;
+    }
+}
+
+class SharedTransitionModifier extends ModifierWithKey<ArkSharedTransition> {
+    static identity: Symbol = Symbol("sharedTransition");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().common.resetSharedTransition(node);
+        }
+        else {
+            GetUINativeModule().common.setSharedTransition(node, this.value.id, this.value.options);
+        }
+    }
+    checkObjectDiff(): boolean {
+        return false;
     }
 }
 
@@ -1805,7 +1886,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     borderImage(value: BorderImageOption): this {
-        throw new Error("Method not implemented.");
+        let arkBorderImage = new ArkBorderImage();
+        if (!arkBorderImage.parseOption(value)) {
+            modifier(this._modifiers, BorderImageModifier, undefined);
+            return this;
+        }
+        modifier(this._modifiers, BorderImageModifier, arkBorderImage);
+        return this;
     }
 
     foregroundColor(value: ResourceColor | ColoringStrategy): this {
@@ -1912,7 +1999,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     transition(value: TransitionOptions | TransitionEffect): this {
-        throw new Error("Method not implemented.");
+        modifierWithKey(this._modifiersWithKeys, TransitionModifier.identity, TransitionModifier, value);
+        return this
     }
 
     gesture(gesture: GestureType, mask?: GestureMask): this {
@@ -2217,7 +2305,16 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     sharedTransition(id: string, options?: sharedTransitionOptions): this {
-        throw new Error("Method not implemented.");
+        let arkSharedTransition = new ArkSharedTransition()
+        if (isString(id)) {
+            arkSharedTransition.id = id
+        }
+        if (typeof options === "object") {
+            arkSharedTransition.options = options;
+        }
+        modifierWithKey(
+            this._modifiersWithKeys, SharedTransitionModifier.identity, SharedTransitionModifier, arkSharedTransition);
+        return this
     }
 
   direction(value: Direction): this {
@@ -2442,7 +2539,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number } }): this {
-        throw new Error("Method not implemented.");
+        if (typeof value === 'string') {
+            let arkOverlay = new ArkOverlay(value, options.align, options.offset.x, options.offset.y);
+            modifier(this._modifiers, OverlayModifier, arkOverlay);
+        } else {
+            modifier(this._modifiers, OverlayModifier, undefined);
+        }
+        return this;
     }
 
     linearGradient(value: {
@@ -2509,7 +2612,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
 
     mask(value: CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute | ProgressMask): this {
-        throw new Error("Method not implemented.");
+        modifierWithKey(this._modifiersWithKeys, MaskModifier.identity, MaskModifier, value);
+        return this
     }
 
     key(value: string): this {

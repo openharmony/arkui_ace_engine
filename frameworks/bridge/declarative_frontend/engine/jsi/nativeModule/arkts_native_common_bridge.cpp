@@ -20,6 +20,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
@@ -33,6 +34,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+constexpr uint32_t ALIGNMENT_CENTER = 4;
+constexpr float DEFAULT_PROGRESS_TOTAL = 100.0f;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -60,6 +63,9 @@ constexpr int SIZE_ARRAY_NUM = 2;
 constexpr int32_t ALIGN_DIRECTION_DEFAULT = 2;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
+constexpr uint32_t DEFAULT_DURATION = 1000;
+constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
+constexpr SharedTransitionEffectType DEFAULT_SHARED_EFFECT = SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE;
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
@@ -210,7 +216,7 @@ void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef> &value, s
         }
         Color color;
         auto colorParams = panda::ArrayRef::GetValueAt(vm, itemArray, NUM_0);
-        if (!ParseJsColor(vm, colorParams, color)) {
+        if (!ArkTSUtils::ParseJsColor(vm, colorParams, color)) {
             continue;
         }
         bool hasDimension = false;
@@ -225,6 +231,519 @@ void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef> &value, s
         colors.push_back(static_cast<double>(hasDimension));
         colors.push_back(dimension);
     }
+}
+
+bool ParseCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset, uint32_t count,
+    std::vector<std::optional<CalcDimension>>& results, const CalcDimension& defValue)
+{
+    auto end = offset + count;
+    auto argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (end > argsNumber) {
+        return false;
+    }
+    bool hasValue = false;
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    for (uint32_t index = offset; index < end; index++) {
+        auto arg = runtimeCallInfo->GetCallArgRef(index);
+        std::optional<CalcDimension> optCalcDimension;
+        CalcDimension dimension(defValue);
+        if (ArkTSUtils::ParseJsDimensionVp(vm, arg, dimension)) {
+            optCalcDimension = dimension;
+            hasValue = true;
+        }
+        results.push_back(optCalcDimension);
+    }
+    return hasValue;
+}
+
+void ResetCalcDimensions(std::vector<std::optional<CalcDimension>>& optDimensions)
+{
+    for (uint32_t index = 0; index < optDimensions.size(); index++) {
+        auto optDimension = optDimensions[index];
+        optDimension.reset();
+    }
+}
+
+void PushDimensionsToVector(std::vector<StringAndDouble>& results,
+    const std::vector<std::optional<CalcDimension>>& optDimensions)
+{
+    for (uint32_t index = 0; index < optDimensions.size(); index++) {
+        auto optDimension = optDimensions[index];
+        auto hasValue = optDimension.has_value();
+        DimensionUnit unit = DimensionUnit::PX;
+        StringAndDouble value = { 0.0, nullptr };
+        if (hasValue) {
+            unit = optDimension.value().Unit();
+            if (unit == DimensionUnit::CALC) {
+                value.valueStr = optDimension.value().CalcValue().c_str();
+            } else {
+                value.value = optDimension.value().Value();
+            }
+        }
+        results.push_back(StringAndDouble { static_cast<double>(hasValue), nullptr });
+        results.push_back(value);
+        results.push_back(StringAndDouble { static_cast<double>(unit), nullptr });
+    }
+}
+
+void ParseBorderImageSlice(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& offset,
+    std::vector<std::optional<CalcDimension>>& optDimensions, uint8_t& bitsets)
+{
+    if (ParseCalcDimensions(runtimeCallInfo, offset, NUM_4, optDimensions, CalcDimension(0.0))) {
+        bitsets |= BorderImage::SLICE_BIT;
+    }
+    offset += NUM_4;
+}
+
+void ParseBorderImageWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& offset,
+    std::vector<std::optional<CalcDimension>>& optDimensions, uint8_t& bitsets)
+{
+    if (ParseCalcDimensions(runtimeCallInfo, offset, NUM_4, optDimensions, CalcDimension(0.0))) {
+        bitsets |= BorderImage::WIDTH_BIT;
+    }
+    offset += NUM_4;
+}
+
+void ParseBorderImageOutset(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& offset,
+    std::vector<std::optional<CalcDimension>>& optDimensions, uint8_t& bitsets)
+{
+    if (ParseCalcDimensions(runtimeCallInfo, offset, NUM_4, optDimensions, CalcDimension(0.0))) {
+        bitsets |= BorderImage::OUTSET_BIT;
+    }
+    offset += NUM_4;
+}
+
+bool ParseBorderImageRepeat(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& offset,
+    std::vector<StringAndDouble>& options, uint8_t& bitsets)
+{
+    auto argsNumber = runtimeCallInfo->GetArgsNumber();
+    if ((offset + NUM_1) > argsNumber) {
+        return false;
+    }
+    auto vm = runtimeCallInfo->GetVM();
+    auto repeatArg = runtimeCallInfo->GetCallArgRef(offset);
+    auto repeatHasValue = repeatArg->IsString();
+    auto repeatValue = BorderImageRepeat::STRETCH;
+    if (repeatHasValue) {
+        auto repeatStr = repeatArg->ToString(vm)->ToString();
+        if (repeatStr == "Repeat") {
+            repeatValue = BorderImageRepeat::REPEAT;
+        } else if (repeatStr == "Round") {
+            repeatValue = BorderImageRepeat::ROUND;
+        } else if (repeatStr == "Space") {
+            repeatValue = BorderImageRepeat::SPACE;
+        } else {
+            repeatValue = BorderImageRepeat::STRETCH;
+        }
+    }
+    options.push_back(StringAndDouble { static_cast<double>(repeatHasValue), nullptr });
+    options.push_back(StringAndDouble { static_cast<double>(repeatValue), nullptr });
+    if (repeatHasValue) {
+        bitsets |= BorderImage::REPEAT_BIT;
+    }
+    offset += NUM_1;
+    return true;
+}
+
+bool ParseBorderImageFill(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& offset,
+    std::vector<StringAndDouble>& options)
+{
+    auto argsNumber = runtimeCallInfo->GetArgsNumber();
+    if ((offset + NUM_1) > argsNumber) {
+        return false;
+    }
+    auto fillArg = runtimeCallInfo->GetCallArgRef(offset);
+    auto hasValue = fillArg->IsBoolean();
+    auto fill = (hasValue) ? fillArg->BooleaValue() : false;
+    options.push_back(StringAndDouble {static_cast<double>(hasValue), nullptr });
+    options.push_back(StringAndDouble {static_cast<double>(fill), nullptr });
+    offset += NUM_1;
+    return true;
+}
+
+void ParseBorderImageLinearGradient(NodeHandle node,
+    ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset,
+    uint8_t& bitsets)
+{
+    auto argsNumber = runtimeCallInfo->GetArgsNumber();
+    if ((offset + NUM_4) > argsNumber) {
+        return;
+    }
+    auto angleArg = runtimeCallInfo->GetCallArgRef(offset);
+    auto directionArg = runtimeCallInfo->GetCallArgRef(offset + NUM_1);
+    auto colorsArg = runtimeCallInfo->GetCallArgRef(offset + NUM_2);
+    auto repeatingArg = runtimeCallInfo->GetCallArgRef(offset + NUM_3);
+    if (angleArg->IsUndefined() && directionArg->IsUndefined() &&
+        colorsArg->IsUndefined() && repeatingArg->IsUndefined()) {
+        return;
+    }
+    auto vm = runtimeCallInfo->GetVM();
+    std::vector<double> options;
+    ParseGradientAngle(vm, angleArg, options);
+    int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
+    ParseJsInt32(vm, directionArg, direction);
+    options.push_back(static_cast<double>(direction));
+    std::vector<double> colors;
+    ParseGradientColorStops(vm, colorsArg, colors);
+    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
+    options.push_back(static_cast<double>(repeating));
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBorderImageGradient(node,
+        options.data(), options.size(), colors.data(), colors.size());
+    bitsets |= BorderImage::GRADIENT_BIT;
+}
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedMoveTransition(
+    const Framework::JSRef<Framework::JSVal>& effectOption, const JSExecutionContext& context)
+{
+    int32_t edge = 0;
+    if (JSViewAbstract::ParseJsInt32(effectOption, edge)) {
+        if (edge < static_cast<int32_t>(NG::TransitionEdge::TOP) ||
+            edge > static_cast<int32_t>(NG::TransitionEdge::END)) {
+            edge = static_cast<int32_t>(NG::TransitionEdge::START);
+        }
+        return AceType::MakeRefPtr<NG::ChainedMoveEffect>(static_cast<NG::TransitionEdge>(edge));
+    }
+    return nullptr;
+}
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedOpacityTransition(
+    const Framework::JSRef<Framework::JSVal>& effectOption, const JSExecutionContext& context)
+{
+    double opacity = 1.0;
+    if (Framework::JSViewAbstract::ParseJsDouble(effectOption, opacity)) {
+        if ((LessNotEqual(opacity, 0.0)) || opacity > 1.0) {
+            opacity = 1.0;
+        }
+        return AceType::MakeRefPtr<NG::ChainedOpacityEffect>(opacity);
+    }
+    return nullptr;
+}
+
+void ParseJsTranslate(const Framework::JSRef<Framework::JSVal>& jsValue, CalcDimension& translateX,
+    CalcDimension& translateY, CalcDimension& translateZ)
+{
+    if (!jsValue->IsObject()) {
+        return;
+    }
+    Framework::JSRef<Framework::JSObject> jsObj = Framework::JSRef<Framework::JSObject>::Cast(jsValue);
+    Framework::JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("x"), translateX);
+    Framework::JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("y"), translateY);
+    Framework::JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("z"), translateZ);
+}
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedTranslateTransition(
+    const Framework::JSRef<Framework::JSVal>& effectOption, const JSExecutionContext& context)
+{
+    if (effectOption->IsObject()) {
+        // default: x, y, z (0.0, 0.0, 0.0)
+        NG::TranslateOptions translate;
+        ParseJsTranslate(effectOption, translate.x, translate.y, translate.z);
+        return AceType::MakeRefPtr<NG::ChainedTranslateEffect>(translate);
+    }
+    return nullptr;
+}
+
+void GetDefaultRotateVector(double& dx, double& dy, double& dz)
+{
+    dx = 0.0;
+    dy = 0.0;
+    dz = 0.0;
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_NINE)) {
+        dz = 1.0;
+    }
+}
+
+void ParseJsRotate(
+    const Framework::JSRef<Framework::JSVal>& jsValue, NG::RotateOptions& rotate, std::optional<float>& angle)
+{
+    if (!jsValue->IsObject()) {
+        return;
+    }
+    // default: dx, dy, dz (0.0, 0.0, 0.0)
+    double dxVal = 0.0;
+    double dyVal = 0.0;
+    double dzVal = 0.0;
+    Framework::JSRef<Framework::JSObject> jsObj = Framework::JSRef<Framework::JSObject>::Cast(jsValue);
+    if (!jsObj->HasProperty("x") && !jsObj->HasProperty("y") && !jsObj->HasProperty("z")) {
+        GetDefaultRotateVector(dxVal, dyVal, dzVal);
+    } else {
+        Framework::JSViewAbstract::ParseJsDouble(jsObj->GetProperty("x"), dxVal);
+        Framework::JSViewAbstract::ParseJsDouble(jsObj->GetProperty("y"), dyVal);
+        Framework::JSViewAbstract::ParseJsDouble(jsObj->GetProperty("z"), dzVal);
+    }
+    rotate.xDirection = static_cast<float>(dxVal);
+    rotate.yDirection = static_cast<float>(dyVal);
+    rotate.zDirection = static_cast<float>(dzVal);
+    // if specify centerX
+    if (!Framework::JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("centerX"), rotate.centerX)) {
+        rotate.centerX = Dimension(0.5f, DimensionUnit::PERCENT);
+    }
+    // if specify centerY
+    if (!Framework::JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("centerY"), rotate.centerY)) {
+        rotate.centerY = Dimension(0.5f, DimensionUnit::PERCENT);
+    }
+    // if specify centerZ
+    if (!Framework::JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("centerZ"), rotate.centerZ)) {
+        rotate.centerZ = Dimension(0.5f, DimensionUnit::PERCENT);
+    }
+    // if specify angle
+    Framework::JSViewAbstract::GetJsAngle("angle", jsObj, angle);
+    rotate.perspective = 0.0f;
+    Framework::JSViewAbstract::GetJsPerspective("perspective", jsObj, rotate.perspective);
+}
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedRotateTransition(
+    const Framework::JSRef<Framework::JSVal>& effectOption, const JSExecutionContext& context)
+{
+    RefPtr<NG::ChainedTransitionEffect> effect;
+    if (effectOption->IsObject()) {
+        NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
+        std::optional<float> angle;
+        ParseJsRotate(effectOption, rotate, angle);
+        if (angle.has_value()) {
+            rotate.angle = angle.value();
+            return AceType::MakeRefPtr<NG::ChainedRotateEffect>(rotate);
+        }
+    }
+    return nullptr;
+}
+
+void ParseJsScale(const Framework::JSRef<Framework::JSVal>& jsValue, float& scaleX, float& scaleY, float& scaleZ,
+    CalcDimension& centerX, CalcDimension& centerY)
+{
+    double xVal = 1.0;
+    double yVal = 1.0;
+    double zVal = 1.0;
+    if (!jsValue->IsObject()) {
+        scaleX = static_cast<float>(xVal);
+        scaleY = static_cast<float>(yVal);
+        scaleZ = static_cast<float>(zVal);
+        CalcDimension length;
+        centerX = length;
+        centerY = length;
+        return;
+    }
+    Framework::JSRef<Framework::JSObject> jsObj = Framework::JSRef<Framework::JSObject>::Cast(jsValue);
+    Framework::JSViewAbstract::ParseJsDouble(jsObj->GetProperty("x"), xVal);
+    Framework::JSViewAbstract::ParseJsDouble(jsObj->GetProperty("y"), yVal);
+    Framework::JSViewAbstract::ParseJsDouble(jsObj->GetProperty("z"), zVal);
+    scaleX = static_cast<float>(xVal);
+    scaleY = static_cast<float>(yVal);
+    scaleZ = static_cast<float>(zVal);
+    // if specify centerX
+    Framework::JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("centerX"), centerX);
+    // if specify centerY
+    Framework::JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("centerY"), centerY);
+}
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedScaleTransition(
+    const Framework::JSRef<Framework::JSVal>& effectOption, const JSExecutionContext& context)
+{
+    if (effectOption->IsObject()) {
+        // default: x, y, z (1.0, 1.0, 1.0), centerX, centerY 50% 50%;
+        NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+        ParseJsScale(effectOption, scale.xScale, scale.yScale, scale.zScale, scale.centerX, scale.centerY);
+        return AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+    }
+    return nullptr;
+}
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
+    const JSRef<JSObject>& object, const JSExecutionContext& context);
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedAsymmetricTransition(
+    const Framework::JSRef<Framework::JSVal>& effectOption, const JSExecutionContext& context)
+{
+    if (effectOption->IsObject()) {
+        auto effectObj = Framework::JSRef<Framework::JSObject>::Cast(effectOption);
+        auto appearJsVal = effectObj->GetProperty("appear");
+        auto disappearJsVal = effectObj->GetProperty("disappear");
+        RefPtr<NG::ChainedTransitionEffect> appearEffect;
+        RefPtr<NG::ChainedTransitionEffect> disappearEffect;
+        if (appearJsVal->IsObject()) {
+            auto appearObj = Framework::JSRef<Framework::JSObject>::Cast(appearJsVal);
+            appearEffect = ParseChainedTransition(appearObj, context);
+        }
+        if (disappearJsVal->IsObject()) {
+            auto disappearObj = Framework::JSRef<Framework::JSObject>::Cast(disappearJsVal);
+            disappearEffect = ParseChainedTransition(disappearObj, context);
+        }
+        return AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearEffect, disappearEffect);
+    }
+    return nullptr;
+}
+
+int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext)
+{
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    return (GetMicroTickCount() - pipelineContext->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
+}
+
+using ChainedTransitionEffectCreator = RefPtr<NG::ChainedTransitionEffect> (*)(
+    const Framework::JSRef<Framework::JSVal>&, const JSExecutionContext&);
+
+void GetAnimationOptionResult(shared_ptr<AnimationOption>& animationOptionResult,
+    const JSRef<JSObject>& propAnimationOption, const RefPtr<PipelineBase>& pipelineContext,
+    const JSExecutionContext& context)
+{
+    // The maximum of the form-animation-playback duration value is 1000 ms.
+    if (pipelineContext->IsFormRender() && pipelineContext->IsFormAnimation()) {
+        auto formAnimationTimeInterval = GetFormAnimationTimeInterval(pipelineContext);
+        // If the duration exceeds 1000ms, init it to 0 ms.
+        if (formAnimationTimeInterval > DEFAULT_DURATION) {
+            animationOptionResult->SetDuration(0);
+        } else if (animationOptionResult->GetDuration() > (DEFAULT_DURATION - formAnimationTimeInterval)) {
+            // If remaining time is less than 1000ms, check for update duration.
+            animationOptionResult->SetDuration(DEFAULT_DURATION - formAnimationTimeInterval);
+            TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation]  Form Transition SetDuration: %{public}lld ms",
+                static_cast<long long>(DEFAULT_DURATION - formAnimationTimeInterval));
+        }
+    }
+    auto animationOptionObj = Framework::JSRef<Framework::JSObject>::Cast(propAnimationOption);
+    Framework::JSRef<Framework::JSVal> onFinish = animationOptionObj->GetProperty("onFinish");
+    if (onFinish->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(Framework::JSRef<Framework::JSObject>(), JSRef<JSFunc>::Cast(onFinish));
+        std::function<void()> onFinishEvent = [execCtx = context, func = std::move(jsFunc),
+                                                  id = Container::CurrentId()]() {
+            ContainerScope scope(id);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Execute();
+        };
+        animationOptionResult->SetOnFinishEvent(onFinishEvent);
+    }
+}
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
+    const Framework::JSRef<Framework::JSObject>& object, const JSExecutionContext& context)
+{
+    auto propType = object->GetProperty("type_");
+    if (!propType->IsString()) {
+        return nullptr;
+    }
+    std::string type = propType->ToString();
+    auto propEffectOption = object->GetProperty("effect_");
+    auto propAnimationOption = object->GetProperty("animation_");
+    auto propSuccessor = object->GetProperty("successor_");
+    static const LinearMapNode<ChainedTransitionEffectCreator> creatorMap[] = {
+        { "asymmetric", ParseChainedAsymmetricTransition },
+        { "identity",
+            [](const Framework::JSRef<Framework::JSVal>& effectOption, const JSExecutionContext& context)
+                -> RefPtr<NG::ChainedTransitionEffect> { return AceType::MakeRefPtr<NG::ChainedIdentityEffect>(); } },
+        { "move", ParseChainedMoveTransition },
+        { "opacity", ParseChainedOpacityTransition },
+        { "rotate", ParseChainedRotateTransition },
+        { "scale", ParseChainedScaleTransition },
+        { "slideSwitch",
+            [](const Framework::JSRef<Framework::JSVal>& effectOption,
+                const JSExecutionContext& context) -> RefPtr<NG::ChainedTransitionEffect> {
+                return AceType::MakeRefPtr<NG::ChainedSlideSwitchEffect>();
+            } },
+        { "translate", ParseChainedTranslateTransition },
+    };
+    int64_t index = BinarySearchFindIndex(creatorMap, ArraySize(creatorMap), type.c_str());
+    if (index < 0) {
+        return nullptr;
+    }
+    RefPtr<NG::ChainedTransitionEffect> result = creatorMap[index].value(propEffectOption, context);
+    if (!result) {
+        return nullptr;
+    }
+    if (propAnimationOption->IsObject()) {
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, nullptr);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        auto animationOptionResult = std::make_shared<AnimationOption>(
+            JSViewContext::CreateAnimation(propAnimationOption, nullptr, pipelineContext->IsFormRender()));
+        GetAnimationOptionResult(animationOptionResult, propAnimationOption, pipelineContext, context);
+        result->SetAnimationOption(animationOptionResult);
+    }
+    if (propSuccessor->IsObject()) {
+        result->SetNext(ParseChainedTransition(Framework::JSRef<Framework::JSObject>::Cast(propSuccessor), context));
+    }
+    return result;
+}
+
+NG::TransitionOptions ParseJsTransition(const Framework::JSRef<Framework::JSVal>& transitionArgs)
+{
+    NG::TransitionOptions transitionOption;
+    if (!transitionArgs->IsObject()) {
+        return transitionOption;
+    }
+    Framework::JSRef<Framework::JSObject> jsObj = Framework::JSRef<Framework::JSObject>::Cast(transitionArgs);
+    bool hasEffect = false;
+    transitionOption.Type = ParseTransitionType(jsObj->GetPropertyValue<std::string>("type", "All"));
+    if (jsObj->HasProperty("opacity")) {
+        double opacity = 1.0;
+        Framework::JSViewAbstract::ParseJsDouble(jsObj->GetProperty("opacity"), opacity);
+        if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
+            opacity = 1.0;
+        }
+        transitionOption.UpdateOpacity(static_cast<float>(opacity));
+        hasEffect = true;
+    }
+    if (jsObj->HasProperty("translate")) {
+        // default: x, y, z (0.0, 0.0, 0.0)
+        NG::TranslateOptions translate;
+        ParseJsTranslate(jsObj->GetProperty("translate"), translate.x, translate.y, translate.z);
+        transitionOption.UpdateTranslate(translate);
+        hasEffect = true;
+    }
+    if (jsObj->HasProperty("scale")) {
+        // default: x, y, z (1.0, 1.0, 1.0), centerX, centerY 50% 50%;
+        NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+        ParseJsScale(
+            jsObj->GetProperty("scale"), scale.xScale, scale.yScale, scale.zScale, scale.centerX, scale.centerY);
+        transitionOption.UpdateScale(scale);
+        hasEffect = true;
+    }
+    if (jsObj->HasProperty("rotate")) {
+        // default: dx, dy, dz (0.0, 0.0, 0.0), angle 0, centerX, centerY 50% 50%;
+        NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
+        std::optional<float> angle;
+        ParseJsRotate(jsObj->GetProperty("rotate"), rotate, angle);
+        if (angle.has_value()) {
+            rotate.angle = angle.value();
+            transitionOption.UpdateRotate(rotate);
+            hasEffect = true;
+        }
+    }
+    if (!hasEffect) {
+        // default transition
+        transitionOption = NG::TransitionOptions::GetDefaultTransition(transitionOption.Type);
+    }
+    return transitionOption;
+}
+
+bool ParseMotionPath(const Framework::JSRef<Framework::JSVal>& jsValue, MotionPathOption& option)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+
+    Framework::JSRef<Framework::JSObject> jsObj = Framework::JSRef<Framework::JSObject>::Cast(jsValue);
+    auto path = jsObj->GetPropertyValue<std::string>("path", "");
+    if (path.empty()) {
+        return false;
+    }
+    option.SetPath(path);
+    double from = 0.0;
+    double to = 1.0;
+    Framework::JSViewAbstract::ParseJsDouble(jsObj->GetProperty("from"), from);
+    Framework::JSViewAbstract::ParseJsDouble(jsObj->GetProperty("to"), to);
+    if (GreatNotEqual(from, 1.0) || LessNotEqual(from, 0.0)) {
+        from = 0.0;
+    }
+    if (GreatNotEqual(to, 1.0) || LessNotEqual(to, 0.0)) {
+        to = 1.0;
+    } else if (to < from) {
+        to = from;
+    }
+    option.SetBegin(static_cast<float>(from));
+    option.SetEnd(static_cast<float>(to));
+    option.SetRotate(jsObj->GetPropertyValue<bool>("rotatable", false));
+    return true;
 }
 
 bool ParseJsDoublePair(const EcmaVM *vm, const Local<JSValueRef> &value, double &first, double &second)
@@ -995,7 +1514,7 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
             std::clamp(shadowType, static_cast<uint32_t>(ShadowType::COLOR), static_cast<uint32_t>(ShadowType::BLUR)));
     }
     Color color;
-    if (ParseJsColor(vm, colorArg, color)) {
+    if (ArkTSUtils::ParseJsColor(vm, colorArg, color)) {
         shadows[NUM_5] = color.GetValue();
     }
     shadows[NUM_6] = static_cast<uint32_t>((fillArg->IsBoolean()) ? fillArg->BooleaValue() : false);
@@ -1469,6 +1988,106 @@ ArkUINativeModuleValue CommonBridge::ResetRadialGradient(ArkUIRuntimeCallInfo *r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetCommonModifier().ResetRadialGradient(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOverlay(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto valueArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto alignArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto offsetXArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto offsetYArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+
+    std::optional<std::string> text;
+    if (valueArg->IsString()) {
+        text = valueArg->ToString(vm)->ToString();
+    }
+    int32_t align = ALIGNMENT_CENTER;
+    ParseJsInteger(vm, alignArg, align);
+    std::optional<CalcDimension> offsetX = CalcDimension(0);
+    std::optional<CalcDimension> offsetY = CalcDimension(0);
+    CalcDimension dimensionX;
+    if (ParseJsDimensionVp(vm, offsetXArg, dimensionX)) {
+        offsetX = dimensionX;
+    }
+    CalcDimension dimensionY;
+    if (ParseJsDimensionVp(vm, offsetYArg, dimensionY)) {
+        offsetY = dimensionY;
+    }
+    std::vector<double> options;
+    options.push_back(static_cast<double>(true));
+    options.push_back(static_cast<double>(align));
+    options.push_back(static_cast<double>(offsetX.has_value()));
+    options.push_back(static_cast<double>(offsetX.value().Value()));
+    options.push_back(static_cast<double>(offsetX.value().Unit()));
+    options.push_back(static_cast<double>(offsetY.has_value()));
+    options.push_back(static_cast<double>(offsetY.value().Value()));
+    options.push_back(static_cast<double>(offsetY.value().Unit()));
+    auto textPtr = (text.has_value()) ? text.value().c_str() : nullptr;
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetOverlay(nativeNode, textPtr, options.data(), options.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOverlay(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetOverlay(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetBorderImage(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    std::string src;
+    std::vector<StringAndDouble> options;
+    uint8_t bitsets = 0;
+    uint32_t offset = NUM_1;
+    std::vector<std::optional<CalcDimension>> sliceDimensions;
+    ParseBorderImageSlice(runtimeCallInfo, offset, sliceDimensions, bitsets); // use 4 args
+    PushDimensionsToVector(options, sliceDimensions);
+    ParseBorderImageRepeat(runtimeCallInfo, offset, options, bitsets); // use 1 args
+    auto sourceArg = runtimeCallInfo->GetCallArgRef(offset); // use 1 args
+    offset += NUM_1;
+    if (sourceArg->IsString()) {
+        src = sourceArg->ToString(vm)->ToString();
+        bitsets |= BorderImage::SOURCE_BIT;
+    } else {
+        ParseBorderImageLinearGradient(nativeNode, runtimeCallInfo, offset, bitsets);
+    }
+    offset += NUM_4; // skip 4 args
+    std::vector<std::optional<CalcDimension>> widthDimensions;
+    ParseBorderImageWidth(runtimeCallInfo, offset, widthDimensions, bitsets); // use 4 args
+    PushDimensionsToVector(options, widthDimensions);
+    std::vector<std::optional<CalcDimension>> outsetDimensions;
+    ParseBorderImageOutset(runtimeCallInfo, offset, outsetDimensions, bitsets); // use 4 args
+    PushDimensionsToVector(options, outsetDimensions);
+    ParseBorderImageFill(runtimeCallInfo, offset, options); // use 1 args
+    options.push_back(StringAndDouble { static_cast<double>(bitsets), nullptr });
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBorderImage(nativeNode,
+        src.c_str(), options.data(), options.size());
+    ResetCalcDimensions(sliceDimensions);
+    ResetCalcDimensions(widthDimensions);
+    ResetCalcDimensions(outsetDimensions);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetBorderImage(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBorderImage(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1970,20 +2589,20 @@ ArkUINativeModuleValue CommonBridge::SetClip(ArkUIRuntimeCallInfo *runtimeCallIn
     auto *frameNode = reinterpret_cast<FrameNode *>(nativeNode);
 
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-    if (info[1]->IsUndefined()) {
+    if (info[NUM_1]->IsUndefined()) {
         ViewAbstract::SetClipEdge(frameNode, false);
         return panda::JSValueRef::Undefined(vm);
     }
-    if (info[1]->IsObject()) {
+    if (info[NUM_1]->IsObject()) {
         Framework::JSShapeAbstract *clipShape =
-            Framework::JSRef<Framework::JSObject>::Cast(info[1])->Unwrap<Framework::JSShapeAbstract>();
+            Framework::JSRef<Framework::JSObject>::Cast(info[NUM_1])->Unwrap<Framework::JSShapeAbstract>();
         if (clipShape == nullptr) {
             LOGD("clipShape is null");
             return panda::JSValueRef::Undefined(vm);
         }
         ViewAbstract::SetClipShape(frameNode, clipShape->GetBasicShape());
-    } else if (info[1]->IsBoolean()) {
-        ViewAbstract::SetClipEdge(frameNode, info[1]->ToBoolean());
+    } else if (info[NUM_1]->IsBoolean()) {
+        ViewAbstract::SetClipEdge(frameNode, info[NUM_1]->ToBoolean());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -3269,6 +3888,177 @@ ArkUINativeModuleValue CommonBridge::ResetResponseRegion(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetCommonModifier().ResetResponseRegion(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    ViewAbstract::SetTransition(frameNode, NG::TransitionOptions::GetDefaultTransition(TransitionType::ALL));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[1]->IsObject()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto obj = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
+    if (!obj->GetProperty("successor_")->IsUndefined()) {
+        auto chainedEffect = ParseChainedTransition(obj, info.GetExecutionContext());
+        ViewAbstract::SetChainedTransition(frameNode, chainedEffect);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto options = ParseJsTransition(info[1]);
+    ViewAbstract::SetTransition(frameNode, options);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetSharedTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto id = info[1]->ToString();
+    if (id.empty()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::shared_ptr<SharedTransitionOption> sharedOption;
+    sharedOption = std::make_shared<SharedTransitionOption>();
+    sharedOption->duration = DEFAULT_DURATION;
+    sharedOption->delay = NUM_0;
+    sharedOption->curve = Curves::LINEAR;
+    sharedOption->zIndex = NUM_0;
+    sharedOption->type = DEFAULT_SHARED_EFFECT;
+
+    ViewAbstract::SetSharedTransition(frameNode, id, sharedOption);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetSharedTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto id = info[NUM_1]->ToString();
+    if (id.empty()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::shared_ptr<SharedTransitionOption> sharedOption;
+    if (info[NUM_2]->IsObject()) {
+        Framework::JSRef<Framework::JSObject> jsObj = Framework::JSRef<Framework::JSObject>::Cast(info[NUM_2]);
+        sharedOption = std::make_shared<SharedTransitionOption>();
+        sharedOption->duration = jsObj->GetPropertyValue<int32_t>("duration", DEFAULT_DURATION);
+        if (sharedOption->duration < 0) {
+            sharedOption->duration = DEFAULT_DURATION;
+        }
+        sharedOption->delay = jsObj->GetPropertyValue<int32_t>("delay", 0);
+        if (sharedOption->delay < 0) {
+            sharedOption->delay = 0;
+        }
+        RefPtr<Curve> curve;
+        Framework::JSRef<Framework::JSVal> curveArgs = jsObj->GetProperty("curve");
+        if (curveArgs->IsString()) {
+            curve = Framework::CreateCurve(jsObj->GetPropertyValue<std::string>("curve", "linear"), false);
+        } else if (curveArgs->IsObject()) {
+            Framework::JSRef<Framework::JSVal> curveString =
+                Framework::JSRef<Framework::JSObject>::Cast(curveArgs)->GetProperty("__curveString");
+            if (!curveString->IsString()) {
+                return panda::JSValueRef::Undefined(vm);
+            }
+            curve = Framework::CreateCurve(curveString->ToString(), false);
+        }
+        if (!curve) {
+            curve = Curves::LINEAR;
+        }
+        sharedOption->curve = curve;
+        if (jsObj->HasProperty("motionPath")) {
+            MotionPathOption motionPathOption;
+            if (ParseMotionPath(jsObj->GetProperty("motionPath"), motionPathOption)) {
+                sharedOption->motionPathOption = motionPathOption;
+            }
+        }
+        sharedOption->zIndex = jsObj->GetPropertyValue<int32_t>("zIndex", 0);
+        int32_t type = jsObj->GetPropertyValue<int32_t>("type", static_cast<int32_t>(DEFAULT_SHARED_EFFECT));
+        sharedOption->type = static_cast<SharedTransitionEffectType>(type);
+    }
+    ViewAbstract::SetSharedTransition(frameNode, id, sharedOption);
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue CommonBridge::SetMask(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[NUM_1]->IsObject()) {
+        ViewAbstract::SetProgressMask(frameNode, nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto paramObject = Framework::JSRef<Framework::JSObject>::Cast(info[NUM_1]);
+    Framework::JSRef<Framework::JSVal> typeParam = paramObject->GetProperty("type");
+    if (!typeParam->IsNull() && !typeParam->IsUndefined() && typeParam->IsString() &&
+        typeParam->ToString() == "ProgressMask") {
+        auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+        Framework::JSRef<Framework::JSVal> jValue = paramObject->GetProperty("value");
+        auto value = jValue->IsNumber() ? jValue->ToNumber<float>() : 0.0f;
+        if (value < 0.0f) {
+            value = 0.0f;
+        }
+        progressMask->SetValue(value);
+        Framework::JSRef<Framework::JSVal> jTotal = paramObject->GetProperty("total");
+        auto total = jTotal->IsNumber() ? jTotal->ToNumber<float>() : DEFAULT_PROGRESS_TOTAL;
+        if (total < 0.0f) {
+            total = DEFAULT_PROGRESS_TOTAL;
+        }
+        progressMask->SetMaxValue(total);
+        Framework::JSRef<Framework::JSVal> jColor = paramObject->GetProperty("color");
+        Color colorVal;
+        if (Framework::JSViewAbstract::ParseJsColor(jColor, colorVal)) {
+            progressMask->SetColor(colorVal);
+        } else {
+            auto theme = Framework::JSShapeAbstract::GetTheme<ProgressTheme>();
+            progressMask->SetColor(theme->GetMaskColor());
+        }
+        ViewAbstract::SetProgressMask(frameNode, progressMask);
+    } else {
+        Framework::JSShapeAbstract* maskShape =
+            Framework::JSRef<Framework::JSObject>::Cast(info[NUM_1])->Unwrap<Framework::JSShapeAbstract>();
+        if (maskShape == nullptr) {
+            return panda::JSValueRef::Undefined(vm);
+        };
+        ViewAbstract::SetMask(frameNode, maskShape->GetBasicShape());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetMask(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    ViewAbstract::SetProgressMask(frameNode, nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 

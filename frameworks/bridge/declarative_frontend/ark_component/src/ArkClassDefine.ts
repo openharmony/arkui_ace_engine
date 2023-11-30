@@ -281,23 +281,69 @@ function ArkDeepCompareArrays(arr1: Array<any>, arr2: Array<any>): boolean {
   );
 }
 
+function ArkDeepSimpleCopy(obj: any): any {
+  if (typeof obj === 'object') {
+    if (Array.isArray(obj)) {
+      let result = [];
+      for (let i = 0; i < obj.length; i++) {
+        result[i] = ArkDeepSimpleCopy(obj[i]);
+      }
+      return result;
+    } else {
+      let result = {};
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          result[key] = ArkDeepSimpleCopy(obj[key]);
+        }
+      }
+      return result;
+    }
+  }
+  return obj;
+}
+
+function ArkCopyColorStop(colorStop: any): any {
+  if (Array.isArray(colorStop)) {
+    let result = [];
+    for (let index = 0; index < colorStop.length; index++) {
+      let value = colorStop[index];
+      if (index === 0) {
+        let arkColor = new ArkColor();
+        if (arkColor.parseColorValue(value)) {
+          result[0] = arkColor.getColor();
+        }
+        continue;
+      }
+      result[index] = ArkDeepSimpleCopy(value);
+    };
+    return result;
+  }
+  return ArkDeepSimpleCopy(colorStop);
+}
+
+function ArkCopyColorStops(colorStops: Array<any>) : Array<any> {
+	let result = [];
+	for (let index = 0; index < colorStops.length; index++) {
+		result[index] = ArkCopyColorStop(colorStops[index]);
+	};
+	return result;
+}
+
 class ArkLinearGradient {
   angle: number | string | undefined;
   direction: number | undefined;
   colors: Array<any>;
   repeating: boolean | undefined;
 
-  constructor(
-    angle: number | string | undefined,
-    direction: number | undefined,
-    colors: Array<any>,
-    repeating: boolean | undefined
-  ) {
-    this.angle = angle;
-    this.direction = direction;
-    this.colors = colors;
-    this.repeating = repeating;
-  }
+    constructor(angle: number | string | undefined,
+        direction: number | undefined,
+        colors: Array<any>,
+        repeating: boolean | undefined) {
+        this.angle = angle;
+        this.direction = direction;
+        this.colors = ArkCopyColorStops(colors);
+        this.repeating = repeating;
+    }
 
   isEqual(another: ArkLinearGradient): boolean {
     return (
@@ -315,12 +361,15 @@ class ArkRadialGradient {
   colors: Array<any>;
   repeating: boolean | undefined;
 
-  constructor(center: Array<any>, radius: number | string, colors: Array<any>, repeating: boolean | undefined) {
-    this.center = center;
-    this.radius = radius;
-    this.colors = colors;
-    this.repeating = repeating;
-  }
+    constructor(center: Array<any>,
+        radius: number | string,
+        colors: Array<any>,
+        repeating: boolean | undefined) {
+        this.center = center;
+        this.radius = radius;
+        this.colors = ArkCopyColorStops(colors);
+        this.repeating = repeating;
+    }
 
   isEqual(another: ArkRadialGradient): boolean {
     return (
@@ -340,21 +389,19 @@ class ArkSweepGradient {
   colors: Array<any>;
   repeating: boolean | undefined;
 
-  constructor(
-    center: Array<any>,
-    start: number | string | undefined,
-    end: number | string | undefined,
-    rotation: number | string | undefined,
-    colors: Array<any>,
-    repeating: boolean | undefined
-  ) {
-    this.center = center;
-    this.start = start;
-    this.end = end;
-    this.rotation = rotation;
-    this.colors = colors;
-    this.repeating = repeating;
-  }
+    constructor(center: Array<any>,
+        start: number | string | undefined,
+        end: number | string | undefined,
+        rotation: number | string | undefined,
+        colors: Array<any>,
+        repeating: boolean | undefined) {
+        this.center = center;
+        this.start = start;
+        this.end = end;
+        this.rotation = rotation;
+        this.colors = ArkCopyColorStops(colors);
+        this.repeating = repeating;
+    }
 
   isEqual(another: ArkSweepGradient): boolean {
     return (
@@ -409,6 +456,233 @@ class ArkLinearGradientBlur {
       this.direction === another.direction
     );
   }
+}
+
+class ArkOverlay {
+    value: string | CustomBuilder | undefined;
+    align: number | undefined;
+    offsetX: number | undefined;
+    offsetY: number | undefined;
+    constructor(value: string | CustomBuilder | undefined,
+        align: number | undefined, offsetX: number | undefined, offsetY: number | undefined) {
+        this.value = value;
+        this.align = align;
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
+    }
+    isEqual(another: ArkOverlay): boolean {
+        return ((this.value === another.value) && (this.align === another.align) &&
+            (this.offsetX === another.offsetX) && (this.offsetY === another.offsetY));
+    }
+}
+
+class ArkSharedTransition implements Equable {
+    id: string | undefined
+    options: sharedTransitionOptions | undefined
+    constructor() {
+        this.id = undefined
+        this.options = undefined
+    }
+    isEqual(another: ArkSharedTransition): boolean {
+        return (this.id === another.id) && (this.options === another.options);
+    }
+}
+
+class ArkBorderImage {
+    sliceTop: Length | undefined;
+    sliceRight: Length | undefined;
+    sliceBottom: Length | undefined;
+    sliceLeft: Length | undefined;
+    repeat: RepeatMode | undefined;
+    source: string | Resource | LinearGradient | undefined;
+    sourceAngle: number | string | undefined;
+    sourceDirection: GradientDirection | undefined;
+    sourceColors: Array<any> | undefined;
+    sourceRepeating: boolean | undefined;
+    widthTop: Length | undefined;
+    widthRight: Length | undefined;
+    widthBottom: Length | undefined;
+    widthLeft: Length | undefined;
+    outsetTop: Length | undefined;
+    outsetRight: Length | undefined;
+    outsetBottom: Length | undefined;
+    outsetLeft: Length | undefined;
+    fill: boolean | undefined;
+    constructor() {
+        this.sliceTop = undefined;
+        this.sliceRight = undefined;
+        this.sliceBottom = undefined;
+        this.sliceLeft = undefined;
+        this.repeat = undefined;
+        this.source = undefined;
+        this.sourceAngle = undefined;
+        this.sourceDirection = undefined;
+        this.sourceColors = undefined;
+        this.sourceRepeating = undefined;
+        this.widthTop = undefined;
+        this.widthRight = undefined;
+        this.widthBottom = undefined;
+        this.widthLeft = undefined;
+        this.outsetTop = undefined;
+        this.outsetRight = undefined;
+        this.outsetBottom = undefined;
+        this.outsetLeft = undefined;
+        this.fill = undefined;
+    }
+    private isLength(val: any): boolean {
+        return (isNumber(val) || isString(val) || isResource(val));
+    }
+    private parseSliceOption(slice?: Length | EdgeWidths): boolean {
+        if (isUndefined(slice)) {
+            return true;
+        }
+        if (this.isLength(slice)) {
+            if (isResource(slice)) {
+                return true;
+            }
+            let tmpSlice = slice as Length;
+            this.sliceTop = tmpSlice;
+            this.sliceRight = tmpSlice;
+            this.sliceBottom = tmpSlice;
+            this.sliceLeft = tmpSlice;
+            return true;
+        }
+        let tmpSlice = slice as EdgeWidths;
+        if (!isResource(tmpSlice.top)) {
+            this.sliceTop = tmpSlice.top;
+        }
+        if (!isResource(tmpSlice.right)) {
+            this.sliceRight = tmpSlice.right;
+        }
+        if (!isResource(tmpSlice.bottom)) {
+            this.sliceBottom = tmpSlice.bottom;
+        }
+        if (!isResource(tmpSlice.left)) {
+            this.sliceLeft = tmpSlice.left;
+        }
+        return true;
+    }
+    private parseSourceOption(source?: string | Resource | LinearGradient): boolean {
+        if (isUndefined(source)) {
+            return true;
+        }
+        if (isString(source)) {
+            this.source = source;
+            return true;
+        }
+        if (isResource(source)) {
+            return true;
+        }
+        let tmpSource = source as LinearGradient;
+        this.sourceAngle = tmpSource.angle;
+        this.sourceDirection = tmpSource.direction;
+        this.sourceColors = ArkCopyColorStops(tmpSource.colors);
+        this.sourceRepeating = tmpSource.repeating;
+        return true;
+    }
+    private parseWidthOption(width?: Length | EdgeWidths): boolean {
+        if (isUndefined(width)) {
+            return true;
+        }
+        if (this.isLength(width)) {
+            if (isResource(width)) {
+                return true;
+            }
+            let tmpWidth = width as Length;
+            this.widthTop = tmpWidth;
+            this.widthRight = tmpWidth;
+            this.widthBottom = tmpWidth;
+            this.widthLeft = tmpWidth;
+            return true;
+        }
+        let tmpWidth = width as EdgeWidths;
+        if (!isResource(tmpWidth.top)) {
+            this.widthTop = tmpWidth.top;
+        }
+        if (!isResource(tmpWidth.right)) {
+            this.widthRight = tmpWidth.right;
+        }
+        if (!isResource(tmpWidth.bottom)) {
+            this.widthBottom = tmpWidth.bottom;
+        }
+        if (!isResource(tmpWidth.left)) {
+            this.widthLeft = tmpWidth.left;
+        }
+        return true;
+    }
+    private parseOutsetOption(outset?: Length | EdgeWidths): boolean {
+        if (isUndefined(outset)) {
+            return true;
+        }
+        if (this.isLength(outset)) {
+            if (isResource(outset)) {
+                return true;
+            }
+            let tmpOutset = outset as Length;
+            this.outsetTop = tmpOutset;
+            this.outsetRight = tmpOutset;
+            this.outsetBottom = tmpOutset;
+            this.outsetLeft = tmpOutset;
+            return true;
+        }
+        let tmpOutset = outset as EdgeWidths;
+        if (!isResource(tmpOutset.top)) {
+            this.outsetTop = tmpOutset.top;
+        }
+        if (!isResource(tmpOutset.right)) {
+            this.outsetRight = tmpOutset.right;
+        }
+        if (!isResource(tmpOutset.bottom)) {
+            this.outsetBottom = tmpOutset.bottom;
+        }
+        if (!isResource(tmpOutset.left)) {
+            this.outsetLeft = tmpOutset.left;
+        }
+        return true;
+    }
+    parseOption(value: BorderImageOption): boolean {
+        if (!this.parseSliceOption(value.slice)) {
+            return false;
+        }
+        this.repeat = value.repeat;
+        if (!this.parseSourceOption(value.source)) {
+            return false;
+        }
+        if (!this.parseWidthOption(value.width)) {
+            return false;
+        }
+        if (!this.parseOutsetOption(value.outset)) {
+            return false;
+        }
+        this.fill = value.fill;
+        return true;
+    }
+    private isSliceEqual(another: ArkBorderImage): boolean {
+        return ((this.sliceTop === another.sliceTop) && (this.sliceRight === another.sliceRight) &&
+            (this.sliceBottom === another.sliceBottom) && (this.sliceLeft === another.sliceLeft));
+    }
+    private isLinearGradientEqual(another: ArkBorderImage): boolean {
+        return ((this.sourceAngle === another.sourceAngle) &&
+            (this.sourceDirection === another.sourceDirection) &&
+            (ArkDeepCompareArrays(this.sourceColors, another.sourceColors)) &&
+            (this.sourceRepeating === another.sourceRepeating));
+    }
+    private isSourceEqual(another: ArkBorderImage): boolean {
+        return ((this.source === another.source) && this.isLinearGradientEqual(another));
+    }
+    private isWidthEqual(another: ArkBorderImage): boolean {
+        return ((this.widthTop === another.widthTop) && (this.widthRight === another.widthRight) &&
+            (this.widthBottom === another.widthBottom) && (this.widthLeft === another.widthLeft));
+    }
+    private isOutsetEqual(another: ArkBorderImage): boolean {
+        return ((this.outsetTop === another.outsetTop) && (this.outsetRight === another.outsetRight) &&
+            (this.outsetBottom === another.outsetBottom) && (this.outsetLeft === another.outsetLeft));
+    }
+    isEqual(another: ArkBorderImage): boolean {
+        return (this.isSliceEqual(another) && (this.repeat = another.repeat) &&
+            this.isSourceEqual(another) && this.isWidthEqual(another) &&
+            this.isOutsetEqual(another) && (this.fill === another.fill));
+    }
 }
 
 class ArkFont implements Equable {
@@ -1255,71 +1529,68 @@ class ArkImageFrameInfoToArray implements Equable {
     this.arrDuration = [];
   }
   isEqual(another: ArkImageFrameInfoToArray): boolean {
-    return (
-      this.arrSrc.toString() === another.arrSrc.toString() &&
-      this.arrWidth.toString() === another.arrWidth.toString() &&
-      this.arrHeight.toString() === another.arrHeight.toString() &&
-      this.arrTop.toString() === another.arrTop.toString() &&
-      this.arrLeft.toString() === another.arrLeft.toString() &&
-      this.arrDuration.toString() === another.arrDuration.toString()
-    );
+    return (this.arrSrc.toString() === another.arrSrc.toString()) &&
+      (this.arrWidth.toString() === another.arrWidth.toString()) &&
+      (this.arrHeight.toString() === another.arrHeight.toString()) &&
+      (this.arrTop.toString() === another.arrTop.toString()) &&
+      (this.arrLeft.toString() === another.arrLeft.toString()) &&
+      (this.arrDuration.toString() === another.arrDuration.toString());
+  }
+}
+class ArkPickerTextStyle implements Equable {
+  color: number;
+  size: string;
+  weight: string;
+
+  constructor() {
+    this.color = undefined;
+    this.size = "16fp"
+    this.weight = "Regular";
+  }
+
+  setColor(color: number | string | Resource){
+    let arkColor = new ArkColor();
+    arkColor.parseColorValue(color);
+    this.color = arkColor.color;
+  }
+
+  setSize(size: number | string | Resource) {
+    this.size = size.toString();
+  }
+
+  setWeight(value: string | number) {
+    const valueWeightMap = {
+      [0]: 'Lighter',
+      [1]: 'Normal',
+      [2]: 'Regular',
+      [3]: 'Medium',
+      [4]: 'Bold',
+      [5]: 'Bolder'
+    };
+    if (value in valueWeightMap) {
+      this.weight = valueWeightMap[value];
+    } else {
+      this.weight = value.toString();
+    }
+  }
+
+  isEqual(another: ArkPickerTextStyle): boolean {
+    return this.color ===another.color && this.size === another.size && this.weight === another.weight;
   }
 }
 
-class ArkPickerTextStyle implements Equable {
-    color: number;
-    size: string;
-    weight: string;
-
-    constructor() {
-        this.color = undefined;
-        this.size = "16fp"
-        this.weight = "Regular";
-    }
-
-    setColor(color: number | string | Resource){
-        let arkColor = new ArkColor();
-        arkColor.parseColorValue(color);
-        this.color = arkColor.color;
-    }
-
-    setSize(size: number | string | Resource) {
-        this.size = size.toString();
-    }
-
-    setWeight(value: string | number) {
-        const valueWeightMap = {
-            [0]: 'Lighter',
-            [1]: 'Normal',
-            [2]: 'Regular',
-            [3]: 'Medium',
-            [4]: 'Bold',
-            [5]: 'Bolder'
-        };
-        if (value in valueWeightMap) {
-            this.weight = valueWeightMap[value];
-        } else {
-            this.weight = value.toString();
-        }
-    }
-
-    isEqual(another: ArkPickerTextStyle): boolean {
-        return this.color ===another.color && this.size === another.size && this.weight === another.weight;
-    }
-}
-
 class ArkEdgeAlign {
-    alignType: number;
-    offset?: number | string | undefined | Resource;
+  alignType: number;
+  offset?: number | string | undefined | Resource;
 
-    constructor() {
-        this.alignType = undefined;
-        this.offset = undefined;
-    }
+  constructor() {
+    this.alignType = undefined;
+    this.offset = undefined;
+  }
 
-    isEqual(another: ArkEdgeAlign): boolean {
-        return (this.alignType === another.alignType && this.offset === another.offset);
-    }
+  isEqual(another: ArkEdgeAlign): boolean {
+    return (this.alignType === another.alignType && this.offset === another.offset);
+  }
 }
 
 class ArkPickerTextStyle implements Equable{
