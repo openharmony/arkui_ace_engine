@@ -107,6 +107,31 @@ void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
 
 } // namespace
 
+void TitleBarPattern::InitTitleParam()
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    if (titleBarNode->GetSubtitle()) {
+        tempTitleBarHeight_ = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    } else {
+        tempTitleBarHeight_ = static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    }
+    overDragOffset_ = 0.0f;
+    tempTitleOffsetY_ = 0.0f;
+    fontSize_.reset();
+    opacity_.reset();
+}
+
+bool TitleBarPattern::IsHidden()
+{
+    auto host = GetHost();
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(host->GetParent());
+    CHECK_NULL_RETURN(navBarNode, false);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_RETURN(navBarLayoutProperty, false);
+    return navBarLayoutProperty->GetHideTitleBar().value_or(false);
+}
+
 void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
 {
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
@@ -171,6 +196,9 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
 void TitleBarPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    if (isInitialTitle_) {
+        InitTitleParam();
+    }
     auto hostNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     MountBackButton(hostNode);
@@ -311,7 +339,8 @@ void TitleBarPattern::ProcessTitleDragStart(float offset)
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
+        IsHidden()) {
         return;
     }
     if (springController_ && !springController_->IsStopped()) {
@@ -357,7 +386,8 @@ void TitleBarPattern::ProcessTitleDragUpdate(float offset, float dragOffsetY)
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
+        IsHidden()) {
         return;
     }
     SetTitleStyleByOffset(offset);
@@ -378,7 +408,8 @@ void TitleBarPattern::SetTitleStyleByOffset(float offset)
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
+        IsHidden()) {
         return;
     }
     SetTempTitleBarHeight(offset);
@@ -403,7 +434,8 @@ void TitleBarPattern::ProcessTitleDragEnd()
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
+        IsHidden()) {
         return;
     }
 
@@ -779,7 +811,7 @@ void TitleBarPattern::ResetAssociatedScroll()
     associatedScrollOffsetMax_ = 0.0f;
     enableAssociatedScroll_ =
         (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) &&
-        !IsTitleFullStatus();
+        !IsHidden() && !IsTitleFullStatus();
     SetMaxTitleBarHeight();
 }
 
@@ -839,7 +871,8 @@ bool TitleBarPattern::ProcessTitleAssociatedUpdate(float offset)
     CHECK_NULL_RETURN(titleBarNode, true);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_RETURN(titleBarLayoutProperty, true);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
+        IsHidden()) {
         return true;
     }
     SetTitleStyleByOffset(offset);

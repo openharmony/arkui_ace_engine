@@ -799,6 +799,15 @@ bool NavBarPattern::IsTitleModeFree()
     return navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE;
 }
 
+bool NavBarPattern::IsTitleBarHide()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto navBarLayoutProperty = frameNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_RETURN(navBarLayoutProperty, false);
+    return navBarLayoutProperty->GetHideTitleBar().value_or(false);
+}
+
 void NavBarPattern::WindowFocus(bool isFocus)
 {
     auto theme = NavigationGetTheme();
