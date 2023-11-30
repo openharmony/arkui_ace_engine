@@ -125,7 +125,7 @@ void BubblePattern::InitTouchEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto bubbleRenderProp = host->GetPaintProperty<BubbleRenderProperty>();
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         CHECK_NULL_VOID(bubbleRenderProp);
         if (!bubbleRenderProp->GetAutoCancel().value_or(true)) {
             return;
