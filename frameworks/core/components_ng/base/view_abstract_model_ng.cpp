@@ -26,6 +26,7 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
@@ -142,7 +143,9 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             auto containerId = Container::CurrentId();
             auto taskExecutor = Container::CurrentTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
-            info.SetStopPropagation(true);
+            if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+                info.SetStopPropagation(true);
+            }
             taskExecutor->PostTask(
                 [containerId, builder = builderF, weakTarget, menuParam, info]() mutable {
                     auto targetNode = weakTarget.Upgrade();
