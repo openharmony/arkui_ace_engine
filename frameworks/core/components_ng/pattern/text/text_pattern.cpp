@@ -1071,14 +1071,20 @@ void TextPattern::OnModifyDone()
         auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
         bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
             [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
-        if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE || ifHaveObscured) {
+        if (ifHaveObscured) {
             CloseSelectOverlay();
             ResetSelection();
             copyOption_ = CopyOptions::None;
             return;
         }
     }
-    copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+        CloseSelectOverlay();
+        ResetSelection();
+        copyOption_ = CopyOptions::None;
+    } else {
+        copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
+    }
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     if (copyOption_ != CopyOptions::None) {
