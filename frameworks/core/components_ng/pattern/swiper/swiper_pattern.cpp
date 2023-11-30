@@ -59,7 +59,9 @@ constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 constexpr Dimension SWIPER_MARGIN = 16.0_vp;
 constexpr Dimension SWIPER_GUTTER = 16.0_vp;
 constexpr float PX_EPSILON = 0.01f;
+constexpr float FADE_DURATION = 500.0f;
 const std::string SWIPER_DRAG_SCENE = "swiper_drag_scene";
+const std::string FADE_PROPERTY_NAME = "fade";
 // TODO define as common method
 float CalculateFriction(float gamma)
 {
@@ -1001,8 +1003,9 @@ void SwiperPattern::StopSpringAnimation()
 
 void SwiperPattern::StopFadeAnimation()
 {
-    if (fadeController_ && !fadeController_->IsStopped()) {
-        fadeController_->Stop();
+    AnimationUtils::StopAnimation(fadeAnimation_);
+    if (fadeAnimationIsRunning_) {
+        fadeAnimationIsRunning_ = false;
     }
 }
 
@@ -2091,6 +2094,7 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     UpdateItemRenderGroup(false);
     NotifyParentScrollEnd();
     StartAutoPlay();
+    fadeAnimationIsRunning_ = false;
 }
 
 void SwiperPattern::OnFadeAnimationStart()
@@ -2105,6 +2109,45 @@ void SwiperPattern::OnFadeAnimationStart()
     }
 
     FireAnimationStartEvent(GetLoopIndex(currentIndex_), GetLoopIndex(nextIndex_), info);
+    fadeAnimationIsRunning_ = true;
+}
+
+void SwiperPattern::PlayFadeAnimation()
+{
+    if (NearZero(fadeOffset_)) {
+        fadeAnimationIsRunning_ = false;
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto weak = AceType::WeakClaim(this);
+    host->CreateAnimatablePropertyFloat(FADE_PROPERTY_NAME, 0, Animation<double>::ValueCallback([weak](float value) {
+        auto swiper = weak.Upgrade();
+        if (swiper && swiper->GetHost()) {
+            swiper->fadeOffset_ = value;
+            swiper->GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }));
+
+    AnimationOption option;
+    option.SetDuration(FADE_DURATION);
+    option.SetCurve(Curves::LINEAR);
+
+    host->UpdateAnimatablePropertyFloat(FADE_PROPERTY_NAME, fadeOffset_);
+    constexpr float end = 0.0f;
+    fadeAnimation_ = AnimationUtils::StartAnimation(option,
+        [weak, host, end]() {
+            auto swiperPattern = weak.Upgrade();
+            CHECK_NULL_VOID(swiperPattern);
+            swiperPattern->OnFadeAnimationStart();
+            host->UpdateAnimatablePropertyFloat(FADE_PROPERTY_NAME, end);
+        },
+        [weak]() {
+            auto swiperPattern = weak.Upgrade();
+            CHECK_NULL_VOID(swiperPattern);
+            swiperPattern->OnSpringAndFadeAnimationFinish();
+        });
 }
 
 void SwiperPattern::PlaySpringAnimation(double dragVelocity)
@@ -2152,47 +2195,6 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         swiperPattern->OnSpringAndFadeAnimationFinish();
     });
     springController_->PlayMotion(springMotion);
-}
-
-void SwiperPattern::PlayFadeAnimation()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    if (NearZero(fadeOffset_)) {
-        return;
-    }
-
-    if (!fadeController_) {
-        fadeController_ = CREATE_ANIMATOR(host->GetContext());
-    }
-    fadeController_->ClearAllListeners();
-
-    auto translate = AceType::MakeRefPtr<CurveAnimation<double>>(fadeOffset_, 0.0, Curves::LINEAR);
-    auto weak = AceType::WeakClaim(this);
-    translate->AddListener(Animation<double>::ValueCallback([weak](double value) {
-        auto swiper = weak.Upgrade();
-        if (swiper && swiper->GetHost()) {
-            swiper->fadeOffset_ = static_cast<float>(value);
-            swiper->GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        }
-    }));
-
-    nextIndex_ = currentIndex_;
-    fadeController_->AddStartListener([weak]() {
-        auto swiperPattern = weak.Upgrade();
-        CHECK_NULL_VOID(swiperPattern);
-        swiperPattern->OnFadeAnimationStart();
-    });
-    fadeController_->AddStopListener([weak]() {
-        auto swiperPattern = weak.Upgrade();
-        CHECK_NULL_VOID(swiperPattern);
-        swiperPattern->OnSpringAndFadeAnimationFinish();
-    });
-    constexpr float FADE_DURATION = 500.0f;
-    fadeController_->SetDuration(FADE_DURATION);
-    fadeController_->AddInterpolator(translate);
-    fadeController_->Play();
 }
 
 bool SwiperPattern::IsOutOfBoundary(float mainOffset) const
@@ -3367,7 +3369,7 @@ void SwiperPattern::NotifyParentScrollEnd()
 inline bool SwiperPattern::AnimationRunning() const
 {
     return (controller_ && controller_->IsRunning()) || (springController_ && springController_->IsRunning()) ||
-           (fadeController_ && fadeController_->IsRunning()) || targetIndex_ || usePropertyAnimation_;
+           fadeAnimationIsRunning_ || targetIndex_ || usePropertyAnimation_;
 }
 
 bool SwiperPattern::HandleScrollVelocity(float velocity)
