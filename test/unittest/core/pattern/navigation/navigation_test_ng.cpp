@@ -3142,9 +3142,7 @@ HWTEST_F(NavigationTestNg, NavigationStackTest002, TestSize.Level1)
     RefPtr<FrameNode> replaceNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
     stack->Remove();
     stack->Add("B", replaceNode);
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "tongshijia current size is %{public}d", stack->Size());
     navigationPattern->OnModifyDone();
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "tongshijia current1111 size is %{public}d", stack->Size());
     ASSERT_EQ(stack->Size(), 1);
 
     /**
