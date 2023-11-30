@@ -1544,7 +1544,7 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
 {
     auto parent = parent_.Upgrade();
     if (!parent || !nestedScroll_.NeedParent(velocity < 0)) {
-        if (GetEdgeEffect() == EdgeEffect::SPRING) {
+        if (GetEdgeEffect() == EdgeEffect::SPRING && AnimateStoped()) {
             // trigger onScrollEnd later, when spring animation finishes
             ProcessSpringEffect(velocity);
             return true;
