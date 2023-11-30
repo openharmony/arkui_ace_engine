@@ -1236,6 +1236,25 @@ struct ArkUIDataPanelModifierAPI {
     void (*ResetDataPanelStrokeWidth)(NodeHandle node);
 };
 
+struct ArkUIGaugeModifierAPI {
+    void (*SetGaugeVaule)(NodeHandle node, float vaule);
+    void (*ResetGaugeVaule)(NodeHandle node);
+    void (*SetGaugeStartAngle)(NodeHandle node, float vaule);
+    void (*ResetGaugeStartAngle)(NodeHandle node);
+    void (*SetGaugeEndAngle)(NodeHandle node, float vaule);
+    void (*ResetGaugeEndAngle)(NodeHandle node);
+    void (*SetGaugeStrokeWidth)(NodeHandle node, double value, int32_t unit);
+    void (*ResetGaugeStrokeWidth)(NodeHandle node);
+    void (*SetShadowOptions)(NodeHandle node, double radius, double offsetX, double offsetY, bool isShadowVisible);
+    void (*ResetShadowOptions)(NodeHandle node);
+    void (*SetIsShowIndicator)(NodeHandle node, bool isShowIndicator);
+    void (*SetIndicatorIconPath)(NodeHandle node, const char* iconPath,
+        const char* bundleName, const char* moduleName);
+    void (*ResetIndicatorIconPath)(NodeHandle node);
+    void (*SetIndicatorSpace)(NodeHandle node, const char* spaceStrValue, double spaceValue, int32_t spaceUnit);
+    void (*ResetIndicatorSpace)(NodeHandle node);
+};
+
 struct ArkUIScrollModifierAPI {
     void (*SetScrollScrollable)(NodeHandle node, uint32_t scrollDirection);
     void (*ResetScrollScrollable)(NodeHandle node);
@@ -1473,6 +1492,7 @@ struct ArkUINodeAPI {
     ArkUIWaterFlowModifierAPI (*GetWaterFlowModifier)();
     ArkUIAlphabetIndexerModifierAPI (*GetAlphabetIndexerModifier)();
     ArkUIDataPanelModifierAPI (*GetDataPanelModifier)();
+    ArkUIGaugeModifierAPI (*GetGaugeModifier)();
     ArkUIScrollModifierAPI (*GetScrollModifier)();
     ArkUIGridItemModifierAPI (*GetGridItemModifier)();
     ArkUICommonShapeModifierAPI(*GetCommonShapeModifier)();

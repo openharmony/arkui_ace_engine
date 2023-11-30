@@ -76,6 +76,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_calendar_picker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_alphabet_indexer_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_data_panel_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_gauge_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_scroll_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_common_shape_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_shape_modifier.h"
@@ -154,6 +155,7 @@ static struct ArkUINodeAPI impl = {
     GetWaterFlowModifier,
     GetAlphabetIndexerModifier,
     GetDataPanelModifier,
+    GetGaugeModifier,
     GetScrollModifier,
     GetGridItemModifier,
     GetCommonShapeModifier,
