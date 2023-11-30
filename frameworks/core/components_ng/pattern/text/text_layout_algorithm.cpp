@@ -122,7 +122,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             heightFinal, paragraph_->GetMaxWidth(), textStyle.GetFontSize().ConvertToPx());
         return SizeF {};
     }
-    ACE_SCOPED_TRACE("TextHeightFinal[%f], TextContentWidth[%f], FontSize[%lf]",
+    ACE_SCOPED_TRACE("TextHeightFinal [%f], TextContentWidth [%f], FontSize [%lf]",
         heightFinal, paragraph_->GetMaxWidth(), textStyle.GetFontSize().ConvertToPx());
     return SizeF(paragraph_->GetMaxWidth(), heightFinal);
 }
