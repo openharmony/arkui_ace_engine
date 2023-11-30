@@ -371,7 +371,9 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
                 textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
                 return;
             }
-            if (!ifHaveObscured && eventHub->IsEnabled()) {
+            auto host = textPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            if ((!host->GetChildren().empty() || !ifHaveObscured) && eventHub->IsEnabled()) {
                 textPattern->ActSetSelection(selectionStart, selectionEnd);
             }
         });
@@ -525,39 +527,44 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     lastClickTimeStamp_ = info.GetTimeStamp();
     if (textSelector_.IsValid()) {
         CloseSelectOverlay(true);
-        ResetSelection();
     }
 
     RectF textContentRect = contentRect_;
     textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
     textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
     bool isClickOnSpan = false;
+    bool isClickOnAISpan = false;
     PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
         info.GetLocalLocation().GetY() - textContentRect.GetY() };
-    HandleSpanSingleClickEvent(info, textContentRect, textOffset, isClickOnSpan);
-    if (isClickOnSpan) {
+    HandleSpanSingleClickEvent(info, textContentRect, textOffset, isClickOnSpan, isClickOnAISpan);
+    if (isClickOnSpan || isClickOnAISpan) {
+        if (isClickOnSpan && textSelector_.IsValid()) {
+            ResetSelection();
+        }
         return;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (textDetectEnable_ && host->GetChildren().empty() && !aiSpanMap_.empty() && paragraph_) {
-        bool isClickOnAISpan = false;
         for (const auto& kv : aiSpanMap_) {
             auto aiSpan = kv.second;
-            isClickOnAISpan = ClickAISpan(info, textOffset, aiSpan);
+            isClickOnAISpan = ClickAISpan(textOffset, aiSpan);
             if (isClickOnAISpan) {
                 return;
             }
         }
     }
-    if (onClick_ && !isClickOnSpan) {
+    if (textSelector_.IsValid()) {
+        ResetSelection();
+    }
+    if (onClick_) {
         auto onClick = onClick_;
         onClick(info);
     }
 }
 
 void TextPattern::HandleSpanSingleClickEvent(
-    GestureEvent& info, RectF textContentRect, PointF textOffset, bool& isClickOnSpan)
+    GestureEvent& info, RectF textContentRect, PointF textOffset, bool& isClickOnSpan, bool& isClickOnAISpan)
 {
     if (textContentRect.IsInRegion(PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY())) &&
         !spans_.empty() && paragraph_) {
@@ -574,8 +581,8 @@ void TextPattern::HandleSpanSingleClickEvent(
                     ++aiSpanIterator;
                     continue;
                 }
-                isClickOnSpan = ClickAISpan(info,  textOffset, aiSpanIterator->second);
-                if (isClickOnSpan) {
+                isClickOnAISpan = ClickAISpan(textOffset, aiSpanIterator->second);
+                if (isClickOnAISpan) {
                     return;
                 }
                 if (aiSpanIterator->second.end >= item->position) {
@@ -606,7 +613,7 @@ void TextPattern::HandleSpanSingleClickEvent(
     }
 }
 
-bool TextPattern::ClickAISpan(GestureEvent& info, PointF textOffset, AISpan aiSpan)
+bool TextPattern::ClickAISpan(PointF textOffset, const AISpan& aiSpan)
 {
     std::vector<RectF> aiRects;
     paragraph_->GetRectsForRange(aiSpan.start, aiSpan.end, aiRects);
@@ -619,11 +626,14 @@ bool TextPattern::ClickAISpan(GestureEvent& info, PointF textOffset, AISpan aiSp
     return false;
 }
 
-void TextPattern::ShowUIExtensionMenu(AISpan aiSpan)
+void TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan)
 {
     auto onClickMenu = [aiSpan, weak = WeakClaim(this)](const std::string& action) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->copyOption_ == CopyOptions::None) {
+            return;
+        }
         if (action == std::string(COPY_ACTION)) {
             pattern->textSelector_.Update(aiSpan.start, aiSpan.end);
             pattern->HandleOnCopy();
@@ -653,6 +663,7 @@ void TextPattern::ShowUIExtensionMenu(AISpan aiSpan)
     std::map<std::string, std::string> paramaters;
     paramaters["entityType"] = TEXT_DETECT_MAP.at(aiSpan.type);
     paramaters["entityText"] = aiSpan.content;
+    paramaters["copyOption"] = copyOption_ == CopyOptions::None ? "false" : "true";
     if (TEXT_DETECT_MAP.find(aiSpan.type) == TEXT_DETECT_MAP.end() ||
         aiMenuOptionsMap_.find(TEXT_DETECT_MAP.at(aiSpan.type)) == aiMenuOptionsMap_.end()) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "Error menu options");
@@ -1056,16 +1067,16 @@ void TextPattern::OnModifyDone()
         if (textDetectEnable_ && (aiDetectTypesChanged_ || !aiDetectInitialized_ || textCache != textForDisplay_)) {
             StartAITask();
         }
-    }
 
-    auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
-    bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
-        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
-    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE || ifHaveObscured) {
-        CloseSelectOverlay();
-        ResetSelection();
-        copyOption_ = CopyOptions::None;
-        return;
+        auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
+        bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+            [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+        if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE || ifHaveObscured) {
+            CloseSelectOverlay();
+            ResetSelection();
+            copyOption_ = CopyOptions::None;
+            return;
+        }
     }
     copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
