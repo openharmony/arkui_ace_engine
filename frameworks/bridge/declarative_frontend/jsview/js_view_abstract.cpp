@@ -134,6 +134,7 @@ constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
+constexpr float DEFAULT_BIAS = 0.5f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "address" };
 const std::string SHEET_HEIGHT_MEDIUM = "medium";
@@ -6301,8 +6302,9 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
     if (valueObj->IsEmpty()) {
         return;
     }
-    const char* keys[] = { "left", "middle", "right", "top", "center", "bottom" };
+    const char* keys[] = { "left", "middle", "right", "top", "center", "bottom", "bias" };
     std::map<AlignDirection, AlignRule> alignRules;
+    BiasPair biasPair(DEFAULT_BIAS, DEFAULT_BIAS);
     for (uint32_t i = 0; i < sizeof(keys) / sizeof(const char*); i++) {
         auto rule = valueObj->GetProperty(keys[i]);
         if (rule->IsObject()) {
@@ -6316,10 +6318,20 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
                 alignRule.vertical = static_cast<VerticalAlign>(val->GetProperty("align")->ToNumber<int32_t>());
             }
             alignRules[static_cast<AlignDirection>(i)] = alignRule;
+
+            auto biasX = val->GetProperty("horizontal");
+            if (biasX->IsNumber()) {
+                biasPair.first = biasX->ToNumber<float>();
+            }
+            auto biasY = val->GetProperty("vertical");
+            if (biasY->IsNumber()) {
+                biasPair.second = biasY->ToNumber<float>();
+            }
         }
     }
 
     ViewAbstractModel::GetInstance()->SetAlignRules(alignRules);
+    ViewAbstractModel::GetInstance()->SetBias(biasPair);
 }
 
 void JSViewAbstract::SetMarginTop(const JSCallbackInfo& info)
