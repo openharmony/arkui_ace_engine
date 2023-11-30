@@ -30,7 +30,7 @@ class MockLazyForEachBuilder : public NG::LazyForEachBuilder, public MockLazyFor
 public:
     void ReleaseChildGroupById(const std::string& id) override {}
     void RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) override {}
-    void UnregisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) override {}
+    void UnregisterDataChangeListener(V2::DataChangeListener* listener) override {}
 
 protected:
     int32_t OnGetTotalCount() override
