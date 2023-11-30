@@ -25,6 +25,7 @@
 #include "wm/window.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
+#include "core/common/asset_manager_impl.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Ace {

@@ -29,7 +29,10 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
+#include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
+#include "adapter/ohos/entrance/hap_asset_provider_impl.h"
+#include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "base/i18n/localization.h"
@@ -52,6 +55,7 @@
 #include "bridge/js_frontend/js_frontend.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
+#include "core/common/asset_manager_impl.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -1134,29 +1138,57 @@ void AceContainer::AddAssetPath(int32_t instanceId, const std::string& packagePa
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
-    RefPtr<FlutterAssetManager> flutterAssetManager;
-    if (container->assetManager_) {
-        flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        RefPtr<AssetManagerImpl> assetManagerImpl;
+        if (container->assetManager_) {
+            assetManagerImpl = AceType::DynamicCast<AssetManagerImpl>(container->assetManager_);
+        } else {
+            assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+            container->assetManager_ = assetManagerImpl;
+            if (container->type_ != FrontendType::DECLARATIVE_JS) {
+                container->frontend_->SetAssetManager(assetManagerImpl);
+            }
+        }
+        CHECK_NULL_VOID(assetManagerImpl);
+        if (!hapPath.empty()) {
+            auto assetProvider = AceType::MakeRefPtr<HapAssetProviderImpl>();
+            if (assetProvider->Initialize(hapPath, paths)) {
+                LOGI("Push AssetProvider to queue.");
+                assetManagerImpl->PushBack(std::move(assetProvider));
+            }
+        }
+        if (!packagePath.empty()) {
+            auto assetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+            if (assetProvider->Initialize(packagePath, paths)) {
+                LOGI("Push AssetProvider to queue.");
+                assetManagerImpl->PushBack(std::move(assetProvider));
+            }
+        }
     } else {
-        flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-        container->assetManager_ = flutterAssetManager;
-        if (container->type_ != FrontendType::DECLARATIVE_JS) {
-            container->frontend_->SetAssetManager(flutterAssetManager);
+        RefPtr<FlutterAssetManager> flutterAssetManager;
+        if (container->assetManager_) {
+            flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
+        } else {
+            flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+            container->assetManager_ = flutterAssetManager;
+            if (container->type_ != FrontendType::DECLARATIVE_JS) {
+                container->frontend_->SetAssetManager(flutterAssetManager);
+            }
         }
-    }
-    CHECK_NULL_VOID(flutterAssetManager);
-    if (!hapPath.empty()) {
-        auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
-        if (assetProvider->Initialize(hapPath, paths)) {
-            LOGI("Push AssetProvider to queue.");
-            flutterAssetManager->PushBack(std::move(assetProvider));
+        CHECK_NULL_VOID(flutterAssetManager);
+        if (!hapPath.empty()) {
+            auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
+            if (assetProvider->Initialize(hapPath, paths)) {
+                LOGI("Push AssetProvider to queue.");
+                flutterAssetManager->PushBack(std::move(assetProvider));
+            }
         }
-    }
-    if (!packagePath.empty()) {
-        auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-        if (assetProvider->Initialize(packagePath, paths)) {
-            LOGI("Push AssetProvider to queue.");
-            flutterAssetManager->PushBack(std::move(assetProvider));
+        if (!packagePath.empty()) {
+            auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+            if (assetProvider->Initialize(packagePath, paths)) {
+                LOGI("Push AssetProvider to queue.");
+                flutterAssetManager->PushBack(std::move(assetProvider));
+            }
         }
     }
 }
@@ -1165,18 +1197,33 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
-    RefPtr<FlutterAssetManager> flutterAssetManager;
-    if (container->assetManager_) {
-        flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
-    } else {
-        flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-        container->assetManager_ = flutterAssetManager;
-        if (container->type_ != FrontendType::DECLARATIVE_JS) {
-            container->frontend_->SetAssetManager(flutterAssetManager);
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        RefPtr<AssetManager> assetManagerImpl;
+        if (container->assetManager_) {
+            assetManagerImpl = AceType::DynamicCast<AssetManagerImpl>(container->assetManager_);
+        } else {
+            assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+            container->assetManager_ = assetManagerImpl;
+            if (container->type_ != FrontendType::DECLARATIVE_JS) {
+                container->frontend_->SetAssetManager(assetManagerImpl);
+            }
         }
+        CHECK_NULL_VOID(assetManagerImpl);
+        assetManagerImpl->SetLibPath("default", libPath);
+    } else {
+        RefPtr<FlutterAssetManager> flutterAssetManager;
+        if (container->assetManager_) {
+            flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
+        } else {
+            flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+            container->assetManager_ = flutterAssetManager;
+            if (container->type_ != FrontendType::DECLARATIVE_JS) {
+                container->frontend_->SetAssetManager(flutterAssetManager);
+            }
+        }
+        CHECK_NULL_VOID(flutterAssetManager);
+        flutterAssetManager->SetLibPath("default", libPath);
     }
-    CHECK_NULL_VOID(flutterAssetManager);
-    flutterAssetManager->SetLibPath("default", libPath);
 }
 
 void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width,
