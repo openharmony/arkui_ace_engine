@@ -228,5 +228,21 @@ private:
     std::mutex mtx_;
     std::vector<uint8_t> data_;
 };
+class AstcImageLoader : public ImageLoader {
+public:
+    AstcImageLoader() = default;
+    ~AstcImageLoader() override = default;
+#ifndef USE_ROSEN_DRAWING
+    sk_sp<SkData> LoadImageData(
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
+#else
+    std::shared_ptr<RSData> LoadImageData(
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
+#endif
+    RefPtr<NG::ImageData> LoadDecodedImageData(
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
+private:
+    static std::string GetThumbnailOrientation(const ImageSourceInfo& src);
+};
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_LOADER_H
