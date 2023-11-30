@@ -473,7 +473,6 @@ private:
     bool imeAttached_ = false;
     bool imeShown_ = false;
 #endif
-
     bool isTextChange_ = false;
     bool caretVisible_ = false;
     bool isRichEditorInit_ = false;

@@ -1638,6 +1638,7 @@ void RichEditorPattern::InitDragDropEvent()
         auto eventHub = pattern->GetEventHub<RichEditorEventHub>();
         eventHub->SetTimestamp(pattern->GetTimestamp());
         CHECK_NULL_RETURN(eventHub, itemInfo);
+        pattern->showSelect_ = false;
         return pattern->OnDragStart(event);
     };
     eventHub->SetOnDragStart(std::move(onDragStart));
@@ -1645,6 +1646,7 @@ void RichEditorPattern::InitDragDropEvent()
                           const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->showSelect_ = false;
         pattern->OnDragMove(event);
     };
     eventHub->SetOnDragMove(std::move(onDragMove));
@@ -1653,6 +1655,7 @@ void RichEditorPattern::InitDragDropEvent()
         ContainerScope scope(scopeId);
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->showSelect_ = true;
         pattern->OnDragEnd();
     };
     eventHub->SetOnDragEnd(std::move(onDragEnd));
@@ -1676,7 +1679,9 @@ NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEven
     auto host = GetHost();
     CHECK_NULL_RETURN(host, itemInfo);
     auto selectStart = textSelector_.GetTextStart();
+    recoverStart_ = selectStart;
     auto selectEnd = textSelector_.GetTextEnd();
+    recoverEnd_ = selectEnd;
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     dragResultObjects_ = textSelectInfo.GetSelection().resultObjects;
     if (dragResultObjects_.empty()) {
@@ -1710,6 +1715,7 @@ NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEven
     for (const auto& resultObj : dragResultObjects_) {
         resultProcessor(resultObj);
     }
+    UpdateSpanItemDragStatus(dragResultObjects_, true);
     event->SetData(unifiedData);
 
     AceEngineExt::GetInstance().DragStartExt();
@@ -1727,6 +1733,7 @@ void RichEditorPattern::OnDragEnd()
     StopAutoScroll();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    textSelector_.Update(recoverStart_, recoverEnd_);
     if (dragResultObjects_.empty()) {
         return;
     }

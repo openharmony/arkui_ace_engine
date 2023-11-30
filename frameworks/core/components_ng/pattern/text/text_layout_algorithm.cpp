@@ -321,30 +321,62 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
 
 bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper)
 {
-    auto paraStyle = GetParagraphStyle(textStyle, content);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spanItemChildren_.empty()) {
-        paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
-    }
-    paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
-    CHECK_NULL_RETURN(paragraph_, false);
-    paragraph_->PushStyle(textStyle);
-
     auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, -1);
+    auto pipeline = frameNode->GetContext();
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto pattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(pattern, -1);
-    if (spanItemChildren_.empty()) {
-        if (pattern->GetTextDetectEnable() && !pattern->GetAISpanMap().empty()) {
-            UpdateParagraphForAISpan(textStyle, layoutWrapper);
-        } else {
-            StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-            paragraph_->AddText(StringUtils::Str8ToStr16(content));
-        }
+    if (pattern->IsDragging()) {
+        auto dragContents = pattern->GetDragContents();
+        CreateParagraphDrag(textStyle, dragContents, content);
     } else {
-        UpdateParagraph(layoutWrapper);
+        auto paraStyle = GetParagraphStyle(textStyle, content);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spanItemChildren_.empty()) {
+            paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
+        }
+        paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
+        paragraph_->PushStyle(textStyle);
+        CHECK_NULL_RETURN(pattern, -1);
+        if (spanItemChildren_.empty()) {
+            if (pattern->GetTextDetectEnable() && !pattern->GetAISpanMap().empty()) {
+                UpdateParagraphForAISpan(textStyle, layoutWrapper);
+            } else {
+                StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
+                paragraph_->AddText(StringUtils::Str8ToStr16(content));
+            }
+        } else {
+            UpdateParagraph(layoutWrapper);
+        }
+        paragraph_->Build();
+    }
+    return true;
+}
+
+void TextLayoutAlgorithm::CreateParagraphDrag(const TextStyle& textStyle,
+    const std::vector<std::string>& contents, const std::string content)
+{
+    TextStyle dragTextStyle = textStyle;
+    Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY);
+    dragTextStyle.SetTextColor(color);
+    std::vector<TextStyle> textStyles { textStyle, dragTextStyle, textStyle };
+    auto style = textStyles.begin();
+    ParagraphStyle paraStyle { .direction = GetTextDirection(content),
+        .maxLines = style->GetMaxLines(),
+        .fontLocale = Localization::GetInstance()->GetFontLocale(),
+        .wordBreak = style->GetWordBreak(),
+        .textOverflow = style->GetTextOverflow(),
+        .fontSize = style->GetFontSize().ConvertToPx()};
+
+    paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
+    CHECK_NULL_VOID(paragraph_);
+    for (size_t i = 0; i < contents.size(); i++) {
+        std::string splitStr = contents[i];
+        auto& style = textStyles[i];
+        paragraph_->PushStyle(style);
+        StringUtils::TransformStrCase(splitStr, static_cast<int32_t>(style.GetTextCase()));
+        paragraph_->AddText(StringUtils::Str8ToStr16(splitStr));
+        paragraph_->PopStyle();
     }
     paragraph_->Build();
-    return true;
 }
 
 bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,

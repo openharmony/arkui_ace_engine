@@ -118,6 +118,7 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         TextBase::CalculateSelectedRect(selectedRects, contentRect.Width());
     }
     textOverlayModifier_->SetContentRect(contentRect);
+    textOverlayModifier_->SetShowSelect(textPattern->GetShowSelect());
     textOverlayModifier_->SetSelectedRects(selectedRects);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);

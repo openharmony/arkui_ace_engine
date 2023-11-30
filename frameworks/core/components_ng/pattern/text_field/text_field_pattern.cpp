@@ -1280,6 +1280,8 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
             pattern->CloseKeyboard(true);
         }
         pattern->dragStatus_ = DragStatus::DRAGGING;
+        pattern->showSelect_ = false;
+        pattern->selectionMode_ = SelectionMode::SELECT;
         pattern->textFieldContentModifier_->ChangeDragStatus();
         auto contentController = pattern->contentController_;
         auto selectController = pattern->selectController_;
@@ -1335,6 +1337,8 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         if (pattern->dragStatus_ == DragStatus::NONE) {
             pattern->InsertValue(str);
         } else {
+            pattern->showSelect_ = true;
+            pattern->ShowSelectOverlayAfterDrag();
             auto current = pattern->selectController_->GetCaretIndex();
             auto dragTextStart = pattern->dragTextStart_;
             auto dragTextEnd = pattern->dragTextEnd_;
@@ -1374,6 +1378,7 @@ void TextFieldPattern::InitDragDropEvent()
                            const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->showSelect_ = true;
         if (pattern->dragStatus_ == DragStatus::ON_DROP) {
             pattern->dragStatus_ = DragStatus::NONE;
         }
@@ -1402,6 +1407,7 @@ void TextFieldPattern::InitDragDropEvent()
                            const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->showSelect_ = false;
         pattern->StopTwinkling();
     };
     eventHub->SetOnDragLeave(std::move(onDragLeave));
@@ -1418,8 +1424,10 @@ void TextFieldPattern::InitDragDropEvent()
             pattern->MarkContentChange();
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
+            pattern->showSelect_ = true;
             auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
+            pattern->ShowSelectOverlayAfterDrag();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         pattern->selectController_->ResetHandles();
@@ -2106,6 +2114,16 @@ void TextFieldPattern::ShowSelectOverlay(const ShowSelectOverlayParams& showOver
     } else {
         StartRequestSelectOverlay(showOverlayParams);
     }
+}
+
+void TextFieldPattern::ShowSelectOverlayAfterDrag()
+{
+    ShowSelectOverlayParams showOverlayParams = {
+        .animation = true, .isShowMenu = true, .isUpdateMenu = true,
+        .firstHandle = selectController_->GetFirstHandleRect(),
+        .secondHandle = selectController_->GetSecondHandleRect()
+    };
+    ShowSelectOverlay(showOverlayParams);
 }
 
 void TextFieldPattern::StartRequestSelectOverlay(const ShowSelectOverlayParams& params, bool isShowPaste)

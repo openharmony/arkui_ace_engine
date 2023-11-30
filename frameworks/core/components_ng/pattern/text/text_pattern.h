@@ -45,6 +45,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+enum class Status {DRAGGING, ON_DROP, NONE };
 // TextPattern is the base class for text render node to perform paint text.
 class TextPattern : public ScrollablePattern, public TextDragBase, public TextBase {
     DECLARE_ACE_TYPE(TextPattern, ScrollablePattern, TextDragBase, TextBase);
@@ -73,6 +74,11 @@ public:
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<TextEventHub>();
+    }
+
+    bool IsDragging() const
+    {
+        return status_ == Status::DRAGGING;
     }
 
     bool IsAtomicNode() const override
@@ -282,9 +288,15 @@ public:
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
+    void OnDragMove(const RefPtr<Ace::DragEvent>& event);
     void InitDragEvent();
     virtual std::function<void(Offset)> GetThumbnailCallback();
 #endif
+
+    const std::vector<std::string>& GetDragContents() const
+    {
+        return dragContents_;
+    }
 
     void InitSpanImageLayout(const std::vector<int32_t>& placeholderIndex,
         const std::vector<RectF>& rectsForPlaceholders, OffsetF contentOffset) override
@@ -365,6 +377,36 @@ public:
         return paragraph_;
     }
 
+    void MarkContentChange()
+    {
+        contChange_ = true;
+    }
+
+    void ResetContChange()
+    {
+        contChange_ = false;
+    }
+
+    bool GetContChange() const
+    {
+        return contChange_;
+    }
+
+    bool GetShowSelect() const
+    {
+        return showSelect_;
+    }
+
+    int32_t GetRecoverStart() const
+    {
+        return recoverStart_;
+    }
+
+    int32_t GetRecoverEnd() const
+    {
+        return recoverEnd_;
+    }
+
     void OnAreaChangedInner() override;
     void RemoveAreaChangeInner();
     bool IsAtBottom() const override
@@ -404,6 +446,7 @@ protected:
     virtual void HandleOnCopy();
     void InitMouseEvent();
     void ResetSelection();
+    void RecoverSelection();
     virtual void HandleOnSelectAll();
     void InitSelection(const Offset& pos);
     void HandleLongPress(GestureEvent& info);
@@ -432,6 +475,10 @@ protected:
     void CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
 
+    Status status_ = Status::NONE;
+    bool contChange_ = false;
+    int32_t recoverStart_ = 0;
+    int32_t recoverEnd_ = 0;
     bool showSelectOverlay_ = false;
     bool mouseEventInitialized_ = false;
     bool panEventInitialized_ = false;
