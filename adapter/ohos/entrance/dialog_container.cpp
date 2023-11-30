@@ -295,11 +295,11 @@ void DialogContainer::SetView(
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
-    std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
 #else
     auto platformWindow = PlatformWindow::Create(view);
     CHECK_NULL_VOID(platformWindow);
-    std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
+    auto window = std::make_shared<Window>(std::move(platformWindow));
 #endif
     container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId());
 }
@@ -314,13 +314,13 @@ void DialogContainer::SetViewNew(
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
-    std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
     container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId());
 #endif
 }
 
 void DialogContainer::AttachView(
-    std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height, uint32_t windowId)
+    std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height, uint32_t windowId)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
@@ -376,7 +376,7 @@ void DialogContainer::AttachView(
 #endif
 }
 
-void DialogContainer::InitPipelineContext(std::unique_ptr<Window> window, int32_t instanceId, double density,
+void DialogContainer::InitPipelineContext(std::shared_ptr<Window> window, int32_t instanceId, double density,
     int32_t width, int32_t height, uint32_t windowId)
 {
 #ifdef NG_BUILD

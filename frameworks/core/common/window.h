@@ -35,7 +35,7 @@ namespace OHOS::Ace {
 namespace NG {
 class FrameNode;
 } // namespace NG
-class ACE_EXPORT Window {
+class ACE_EXPORT Window : public std::enable_shared_from_this<Window> {
 public:
     Window() = default;
     explicit Window(std::unique_ptr<PlatformWindow> platformWindow);
