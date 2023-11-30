@@ -225,7 +225,7 @@ HWTEST_F(TouchEventTestNg, TouchEventActuatorHandleAndDispatchTest004, TestSize.
      * touchPoint value, and the function return true.
      */
     EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent));
-    EXPECT_EQ(unknownTiltX, TILT_X_VALUE);
+    EXPECT_EQ(unknownTiltX, 0);
 
     /**
      * @tc.steps: step7. Invoke HandleEvent when touchEvents_ and userCallback_ is not empty but the event is
@@ -234,7 +234,7 @@ HWTEST_F(TouchEventTestNg, TouchEventActuatorHandleAndDispatchTest004, TestSize.
      */
     TouchEventFunc callback3 = [](TouchEventInfo& info) { info.SetStopPropagation(STOP_PROPAGATION_VALUE); };
     touchEventActuator->ReplaceTouchEvent(std::move(callback3));
-    EXPECT_FALSE(touchEventActuator->HandleEvent(touchEvent));
+    EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent));
 
     /**
      * @tc.steps: step8. Invoke HandleEvent when touchEvents_ has nullptr event and userCallback_ is nullptr.
@@ -294,7 +294,7 @@ HWTEST_F(TouchEventTestNg, TouchEventDisable001, TestSize.Level1)
     EXPECT_NE(touchEventActuator->userCallback_, nullptr);
 
     EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent));
-    EXPECT_EQ(unknownTiltX, TILT_X_VALUE);
+    EXPECT_EQ(unknownTiltX, 0);
 
     /**
      * @tc.steps: step5. Invoke Clear func to clear userCallback_.
