@@ -52,6 +52,7 @@ constexpr Dimension ARROW_WIDTH = 32.0_vp;
 constexpr Dimension ARROW_ZERO_PERCENT_VALUE = Dimension(0.0, DimensionUnit::PERCENT);
 constexpr Dimension ARROW_HALF_PERCENT_VALUE = Dimension(0.5, DimensionUnit::PERCENT);
 constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = Dimension(1.0, DimensionUnit::PERCENT);
+constexpr float BLUR_MASK_FILTER = 0.55f;
 
 } // namespace
 
@@ -154,10 +155,14 @@ void BubblePaintMethod::PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper
     RSPen paint;
     paint.SetColor(backgroundColor_.GetValue());
     paint.SetAntiAlias(true);
+    RSFilter filter;
+    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::SOLID, BLUR_MASK_FILTER));
+    paint.SetFilter(filter);
     // TODO: color is not correct
     RSBrush brush;
     brush.SetColor(static_cast<int>(backgroundColor_.GetValue()));
     brush.SetAntiAlias(true);
+    brush.SetFilter(filter);
     canvas.AttachPen(paint);
     canvas.AttachBrush(brush);
     if (enableArrow_ && showArrow_) {
