@@ -46,6 +46,7 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     CHECK_NULL_VOID(pattern);
     std::string navigationId = GetNavigationId(pattern);
     std::string navDestinationName = pattern->GetName();
+    CHECK_NULL_VOID(handleFunc_);
     handleFunc_(navigationId, navDestinationName, state);
 }
 

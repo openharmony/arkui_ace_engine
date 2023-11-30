@@ -152,7 +152,7 @@ UnderdampedModel::UnderdampedModel(double distance, double velocity, const RefPt
     if (spring && spring->IsValid()) {
         w_ = sqrt(HIGH_RATIO * spring->Mass() * spring->Stiffness() - spring->Damping() * spring->Damping()) /
              (LOW_RATIO * spring->Mass());
-        r_ = -(spring->Damping() / LOW_RATIO * spring->Mass());
+        r_ = -spring->Damping() / (LOW_RATIO * spring->Mass());
         c1_ = distance;
         if (!NearEqual(w_, 0.0)) {
             c2_ = (velocity - r_ * distance) / w_;

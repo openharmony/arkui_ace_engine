@@ -585,6 +585,12 @@ var FormDimension;
   FormDimension["DIMENSION_1_1"] = 6;
 })(FormDimension || (FormDimension = {}));
 
+let FormRenderingMode;
+(function (FormRenderingMode) {
+  FormRenderingMode.FULL_COLOR = 0;
+  FormRenderingMode.SINGLE_COLOR = 1;
+})(FormRenderingMode || (FormRenderingMode = {}));
+
 var TransitionType;
 (function (TransitionType) {
   TransitionType["All"] = "All";
@@ -1247,7 +1253,15 @@ var SheetSize;
 (function (SheetSize) {
   SheetSize['MEDIUM'] = "MEDIUM";
   SheetSize['LARGE'] = "LARGE";
+  SheetSize['FIT_CONTENT'] = "FIT_CONTENT";
 })(SheetSize || (SheetSize = {}));
+
+var SheetType;
+(function (SheetType) {
+  SheetType[SheetType["BOTTOM"] = 0] = "BOTTOM";
+  SheetType[SheetType["CENTER"] = 1] = "CENTER";
+  SheetType[SheetType["POPUP"] = 2] = "POPUP";
+})(SheetType || (SheetType = {}));
 
 var FunctionKey;
 (function (FunctionKey) {
@@ -1587,42 +1601,45 @@ class NavPathStack {
     this.pathArray = [];
     // indicate class has changed.
     this.changeFlag = 0;
-    this.isReplace = false;
+    // replace value 0: don't do anything;
+    // 1: replace value and do replace animation;
+    // 2: don't replace value but do replace animation
+    this.isReplace = 0;
     this.type = this.constructor.name;
   }
   pushName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   push(info) {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   pushPathByName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   pushPath(info) {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   replacePath(info) {
     if (this.pathArray.length !== 0) {
       this.pathArray.pop();
     }
     this.pathArray.push(info);
-    this.isReplace = true;
+    this.isReplace = 1;
     this.changeFlag = this.changeFlag + 1;
   }
   replacePathByName(name, param) {
     if (this.pathArray.length !== 0) {
       this.pathArray.pop();
     }
-    this.isReplace = true;
+    this.isReplace = 1;
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
   }
@@ -1635,7 +1652,7 @@ class NavPathStack {
     }
     let pathInfo = this.pathArray.pop();
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
     return pathInfo;
   }
   popTo(name) {
@@ -1644,7 +1661,7 @@ class NavPathStack {
       return -1;
     }
     this.pathArray.splice(index + 1);
-    this.isReplace = false;
+    this.isReplace = 0;
     this.changeFlag = this.changeFlag + 1;
     return index;
   }
@@ -1655,7 +1672,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
     return index;
   }
   popToIndex(index) {
@@ -1664,7 +1681,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   moveToTop(name) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -1674,7 +1691,7 @@ class NavPathStack {
     let info = this.pathArray.splice(index, 1);
     this.pathArray.push(info[0]);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
     return index;
   }
   moveIndexToTop(index) {
@@ -1684,12 +1701,12 @@ class NavPathStack {
     let info = this.pathArray.splice(index, 1);
     this.pathArray.push(info[0]);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   clear() {
     this.pathArray.splice(0);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   removeName(name) {
     var removed = false;
@@ -1701,7 +1718,7 @@ class NavPathStack {
     }
     if (removed) {
       this.changeFlag = this.changeFlag + 1;
-      this.isReplace = false;
+      this.isReplace = 0;
     }
   }
   removeIndex(index) {
@@ -1710,7 +1727,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index, 1);
     this.changeFlag = this.changeFlag + 1;
-    this.isReplace = false;
+    this.isReplace = 0;
   }
   getAllPathName() {
     let array = this.pathArray.flatMap(element => element.name);
@@ -2068,3 +2085,16 @@ var OptionWidthMode;
   OptionWidthMode["FIT_CONTENT"] = "fit_content";
   OptionWidthMode["FIT_TRIGGER"] = "fit_trigger";
 })(OptionWidthMode || (OptionWidthMode = {}));
+
+var ArrowPointPosition;
+(function (ArrowPointPosition) {
+  ArrowPointPosition["START"] = "Start";
+  ArrowPointPosition["CENTER"] = "Center";
+  ArrowPointPosition["END"] = "End";
+})(ArrowPointPosition || (ArrowPointPosition = {}));
+
+var DragPreviewMode;
+(function (DragPreviewMode) {
+  DragPreviewMode["AUTO"] = 1;
+  DragPreviewMode["DISABLE_SCALE"] = 2;
+})(DragPreviewMode || (DragPreviewMode = {}));

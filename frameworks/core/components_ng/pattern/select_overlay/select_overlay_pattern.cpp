@@ -136,6 +136,7 @@ void SelectOverlayPattern::BeforeCreateLayoutWrapper()
     layoutProperty->UpdateTargetSize(safeArea.GetSize());
     OffsetF offset(safeArea.GetX(), safeArea.Bottom());
     layoutProperty->UpdateMenuOffset(offset);
+    layoutProperty->UpdateAlignType(MenuAlignType::CENTER);
 }
 
 void SelectOverlayPattern::AddMenuResponseRegion(std::vector<DimensionRect>& responseRegion)
@@ -333,6 +334,11 @@ void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
         }
     } else {
         LOGW("the move point is not in drag area");
+    }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (host->IsLayoutDirtyMarked()) {
+        context->AddDirtyLayoutNode(host);
     }
 }
 

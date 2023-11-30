@@ -63,7 +63,7 @@ RefPtr<CanvasImage> AnimatedImage::Create(
     CHECK_NULL_RETURN(data, nullptr);
     auto rsData = data->GetRSData();
     CHECK_NULL_RETURN(rsData, nullptr);
-    auto skData = rsData->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto skData = SkData::MakeWithoutCopy(rsData->GetData(), rsData->GetSize());
     auto codec = SkCodec::MakeFromData(skData);
     CHECK_NULL_RETURN(codec, nullptr);
     if (SystemProperties::GetImageFrameworkEnabled()) {

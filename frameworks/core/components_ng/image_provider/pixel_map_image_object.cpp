@@ -36,7 +36,8 @@ RefPtr<PixelMapImageObject> PixelMapImageObject::Create(const ImageSourceInfo& s
     CHECK_NULL_RETURN(pixmapData, nullptr);
     auto&& pixelMap = pixmapData->GetPixmap();
     if (!pixelMap) {
-        LOGW("ImageData has no pixel map data when try CreateImageEncodedInfoForDecodedPixelMap, src: %{public}s",
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "ImageData has no pixel map data when try CreateImageEncodedInfoForDecodedPixelMap, src: %{public}s",
             src.ToString().c_str());
         return nullptr;
     }

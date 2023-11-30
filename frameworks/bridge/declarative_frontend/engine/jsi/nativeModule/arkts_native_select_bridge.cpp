@@ -15,7 +15,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
-
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
@@ -28,15 +27,6 @@ constexpr int NUM_4 = 4;
 const int SIZE_OF_TWO = 2;
 const std::string FORMAT_FONT = "%s|%s|%s";
 const std::string DEFAULT_STR = "-1";
-
-std::string GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value)
-{
-    std::string result = DEFAULT_STR;
-    if (!value->IsNull() && value->IsString()) {
-        result = value->ToString(vm)->ToString();
-    }
-    return result;
-}
 
 bool ParseJsDimensionFp(const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension &result)
 {
@@ -51,6 +41,16 @@ bool ParseJsDimensionFp(const EcmaVM *vm, const Local<JSValueRef> &value, CalcDi
     // resouce ignore by design
     return false;
 }
+
+std::string GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value)
+{
+    std::string result = DEFAULT_STR;
+    if (!value->IsNull() && value->IsString()) {
+        result = value->ToString(vm)->ToString();
+    }
+    return result;
+}
+
 ArkUINativeModuleValue SelectBridge::SelectBridge::SetSpace(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

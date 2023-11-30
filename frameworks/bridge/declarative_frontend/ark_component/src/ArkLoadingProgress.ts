@@ -14,8 +14,8 @@ class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgres
 // @ts-ignore
 globalThis.LoadingProgress.attributeModifier = function(modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () =>
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () =>
     {
         return new ArkLoadingProgressComponent(nativeNode);
     });

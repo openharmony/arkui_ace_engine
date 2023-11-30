@@ -234,6 +234,11 @@ public:
         return resourceInfo_.GetHapPath();
     }
 
+    const ResourceInfo& GetResourceInfo() const
+    {
+        return resourceInfo_;
+    }
+
     void SetHapPath(const std::string& hapPath);
 
     void Dispatch(

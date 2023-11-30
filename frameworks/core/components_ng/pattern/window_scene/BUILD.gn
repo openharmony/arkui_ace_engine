@@ -28,6 +28,7 @@ if (is_ohos_standard_system) {
 
 build_component_ng("window_scene") {
   sources = [
+    "helper/window_scene_helper.cpp",
     "root/root_scene_model.cpp",
     "scene/system_window_scene.cpp",
     "scene/window_event_process.cpp",
@@ -38,6 +39,12 @@ build_component_ng("window_scene") {
     "screen/screen_model.cpp",
     "screen/screen_node.cpp",
     "screen/screen_pattern.cpp",
+  ]
+
+  standard_input_deps = [
+    "hilog:libhilog",
+    "imf:inputmethod_client",
+    "input:libmmi-client",
   ]
 
   if (is_ohos_standard_system) {

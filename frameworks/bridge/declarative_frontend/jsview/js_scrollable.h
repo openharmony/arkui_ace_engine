@@ -24,6 +24,9 @@ class JSScrollable {
 public:
     static EdgeEffect ParseEdgeEffect(const JSCallbackInfo& info, EdgeEffect defaultValue);
     static bool ParseAlwaysEnable(const JSCallbackInfo& info, bool defaultValue);
+    static DisplayMode ParseDisplayMode(const JSCallbackInfo& info, DisplayMode defaultValue);
+    static std::string ParseBarColor(const std::string& color);
+    static std::string ParseBarWidth(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SCROLLABLE_H

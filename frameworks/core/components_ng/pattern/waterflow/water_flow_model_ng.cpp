@@ -229,4 +229,17 @@ void WaterFlowModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
 {
     ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);
 }
+
+void WaterFlowModelNG::SetScrollBarMode(DisplayMode value)
+{
+    ScrollableModelNG::SetScrollBarMode(value);
+}
+void WaterFlowModelNG::SetScrollBarColor(const std::string& value)
+{
+    ScrollableModelNG::SetScrollBarColor(value);
+}
+void WaterFlowModelNG::SetScrollBarWidth(const std::string& value)
+{
+    ScrollableModelNG::SetScrollBarWidth(value);
+}
 } // namespace OHOS::Ace::NG

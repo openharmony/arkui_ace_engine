@@ -437,6 +437,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
 
     auto customMenuNode = AceType::DynamicCast<FrameNode>(customNode);
     if (customMenuNode) {
+        customMenuNode->SetDraggable(false);
         auto menuLayoutProperty = customMenuNode->GetLayoutProperty<MenuLayoutProperty>();
         auto renderContext = scroll->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, nullptr);

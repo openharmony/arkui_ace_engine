@@ -930,6 +930,10 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
         return;
     }
 
+    if (target.isNamedRouterMode) {
+        manifestParser_->SetPagePath(target.url);
+    }
+
     if (target.errorCallback != nullptr) {
         target.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
     }

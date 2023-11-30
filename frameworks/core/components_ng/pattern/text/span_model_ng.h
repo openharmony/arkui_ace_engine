@@ -35,11 +35,24 @@ public:
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextCase(TextCase value) override;
+    void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetLetterSpacing(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
     // TODO: add extra event for span.
     void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) override;
     void ClearOnClick() override;
+    static void SetFontWeight(FrameNode* frameNode, FontWeight value);
+    static void SetTextCase(FrameNode* frameNode, TextCase value);
+    static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
+    static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
+    static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
+    static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
+    static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
+    static void SetTextColor(FrameNode* frameNode, const Color& value);
+    static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
+    static void SetFont(FrameNode* frameNode, const Font& value);
 };
 } // namespace OHOS::Ace::NG
 

@@ -45,6 +45,8 @@ public:
     static ArkUINativeModuleValue ResetShowSteps(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetThickness(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetThickness(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetBlockStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBlockStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

@@ -2140,7 +2140,7 @@ class ObservedObject extends ExtendableProxy {
                     const self = this;
                     const prop = property.toString();
                     // prop is the function name here
-                    if (prop == "splice") {
+                    if (prop == "splice" || prop == "pop") {
                         // 'splice' self modifies the array, returns deleted array items
                         // means, alike other self-modifying functions, splice does not return the array itself.
                         return function () {
@@ -4470,7 +4470,6 @@ class ViewPU extends NativeViewPartialUpdate {
         if (extraInfo) {
             this.extraInfo_ = extraInfo;
         }
-
         if (parent) {
             // this View is not a top-level View
             this.setCardId(parent.getCardId());

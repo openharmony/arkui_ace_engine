@@ -25,7 +25,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/custom/custom_measure_layout_param.h"
 #include "frameworks/core/components_ng/pattern/custom/custom_node_base.h"
 
 namespace OHOS::Ace {
@@ -51,6 +50,7 @@ struct NodeInfoPU {
 
     bool hasMeasureOrLayout = false;
     bool isStatic = false;
+    bool isCustomTitle = false;
     int32_t codeRow = -1;
     int32_t codeCol = -1;
 
@@ -70,7 +70,6 @@ public:
     virtual void FlushUpdateTask(const UpdateTask& task) = 0;
     virtual void FinishUpdate(
         const WeakPtr<AceType>& viewNode, int32_t id, std::function<void(const UpdateTask&)>&& emplaceTaskFunc) = 0;
-    virtual void InvalidateLayout(const WeakPtr<AceType>& node) = 0;
 
 private:
     static std::unique_ptr<ViewPartialUpdateModel> instance_;

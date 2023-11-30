@@ -48,6 +48,7 @@
 #include "core/event/mouse_event.h"
 #include "core/event/rotation_event.h"
 #include "core/event/touch_event.h"
+#include "core/event/pointer_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
@@ -105,6 +106,8 @@ public:
 
     static RefPtr<ThemeManager> CurrentThemeManager();
 
+    static void SetCallBackNode(const WeakPtr<NG::FrameNode>& node);
+
     virtual void SetupRootElement() = 0;
 
     virtual uint64_t GetTimeFromExternalTimer();
@@ -161,7 +164,7 @@ public:
     virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
 
     // Called by view
-    virtual void OnDragEvent(int32_t x, int32_t y, DragEventAction action) = 0;
+    virtual void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) = 0;
 
     // Called by view when idle event.
     virtual void OnIdle(int64_t deadline) = 0;
@@ -897,6 +900,7 @@ public:
     void RemoveJsFormVsyncCallback(int32_t subWindowId);
 
     virtual void SetIsLayoutFullScreen(bool isLayoutFullScreen) {}
+    virtual void SetIsNeedAvoidWindow(bool isLayoutFullScreen) {}
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) {}
 
     void SetIsAppWindow(bool isAppWindow)
@@ -983,20 +987,9 @@ public:
     virtual std::string GetCurrentExtraInfo() { return ""; }
     virtual void UpdateTitleInTargetPos(bool isShow = true, int32_t height = 0) {}
 
-    virtual void SetCursor(int32_t cursorValue)
-    {
-        cursor_ = static_cast<MouseFormat>(cursorValue);
-    }
+    virtual void SetCursor(int32_t cursorValue) {}
 
-    virtual void RestoreDefault()
-    {
-        cursor_ = MouseFormat::DEFAULT;
-    }
-
-    MouseFormat GetCursor() const
-    {
-        return cursor_;
-    }
+    virtual void RestoreDefault() {}
 
 protected:
     virtual bool MaybeRelease() override;
@@ -1118,7 +1111,6 @@ protected:
     std::atomic<bool> onFocus_ = true;
     uint64_t lastTouchTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
-    MouseFormat cursor_ = MouseFormat::DEFAULT;
 
 private:
     void DumpFrontend() const;

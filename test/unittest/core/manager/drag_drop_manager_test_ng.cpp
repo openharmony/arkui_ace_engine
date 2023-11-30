@@ -668,101 +668,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragDropManagerTest010
- * @tc.desc: Test OnDragEnd
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(DragDropManagerTestNg, DragDropManagerTest010, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct a DragDropManager and create a DragWindow
-     */
-    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    GestureEvent gestureEvent;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
-    auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
-    EXPECT_TRUE(dragDropProxy);
-
-    /**
-     * @tc.steps: step2. construct a frameNode and set its GeometryNode
-     */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    ASSERT_TRUE(eventHub);
-
-    // Set geometry node to make sure (GLOBAL_X, GLOBAL_Y) in geoNode.frameRect_
-    auto geoNode = AceType::MakeRefPtr<GeometryNode>();
-    geoNode->SetMarginFrameOffset(FRAME_OFFSET);
-    geoNode->SetFrameSize(FRAME_SIZE);
-    frameNode->SetGeometryNode(geoNode);
-
-    /**
-     * @tc.steps: step3. call OnDragEnd
-     *                   case: dragFrameNodes_ is empty
-     * @tc.expected: step3. preTargetFrameNode_ is null and draggedFrameNode_ is not null
-     */
-    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
-    dragDropManager->extraInfo_ = EXTRA_INFO;
-    dragDropManager->OnDragEnd({ GLOBAL_X, GLOBAL_Y }, EXTRA_INFO);
-    auto preTargetFrameNode = dragDropManager->preTargetFrameNode_;
-    auto draggedFrameNode = dragDropManager->draggedFrameNode_;
-    EXPECT_FALSE(preTargetFrameNode);
-    EXPECT_TRUE(draggedFrameNode);
-
-    /**
-     * @tc.steps: step4. call AddDragFrameNode
-     *                   after that, dragFrameNodes_ is not empty
-     */
-    dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
-
-    /**
-     * @tc.steps: step5. call OnDragEnd
-     *                   case: eventHub dose not have onDrop_
-     * @tc.expected: step5. preTargetFrameNode_ is null and draggedFrameNode_ is not null
-     */
-    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
-    dragDropManager->OnDragEnd({ GLOBAL_X, GLOBAL_Y }, EXTRA_INFO);
-    preTargetFrameNode = dragDropManager->preTargetFrameNode_;
-    draggedFrameNode = dragDropManager->draggedFrameNode_;
-    EXPECT_FALSE(preTargetFrameNode);
-    EXPECT_TRUE(draggedFrameNode);
-
-    /**
-     * @tc.steps: step6. call OnDragEnd
-     *                   case: eventHub dose have onDrop_, dragFrameNode == draggedFrameNode_
-     * @tc.expected: step6. preTargetFrameNode_ is null and draggedFrameNode_ is not null
-     */
-    std::string extraInfoDrop;
-    auto onDrop = [&extraInfoDrop](const RefPtr<OHOS::Ace::DragEvent>& /* info */, const std::string& extraParams) {
-        extraInfoDrop = extraParams;
-    };
-    eventHub->SetOnDrop(std::move(onDrop));
-    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
-    dragDropManager->OnDragEnd({ GLOBAL_X, GLOBAL_Y }, EXTRA_INFO);
-    preTargetFrameNode = dragDropManager->preTargetFrameNode_;
-    draggedFrameNode = dragDropManager->draggedFrameNode_;
-    EXPECT_FALSE(preTargetFrameNode);
-    EXPECT_TRUE(draggedFrameNode);
-
-    /**
-     * @tc.steps: step7. call OnDragEnd
-     *                   case: eventHub dose have onDrop_, dragFrameNode != draggedFrameNode_
-     * @tc.expected: step7. frameNode's OnDrop_ will be called
-     *                      extraInfoDrop will be assigned to EXTRA_INFO
-     *                      preTargetFrameNode_ and draggedFrameNode_ will be assigned to nullptr
-     */
-    auto frameNodeNew = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNodeNew);
-    dragDropManager->OnDragEnd({ GLOBAL_X, GLOBAL_Y }, EXTRA_INFO);
-    preTargetFrameNode = dragDropManager->preTargetFrameNode_;
-    draggedFrameNode = dragDropManager->draggedFrameNode_;
-    EXPECT_FALSE(preTargetFrameNode);
-    EXPECT_TRUE(draggedFrameNode);
-}
-
-/**
  * @tc.name: DragDropManagerTest011
  * @tc.desc: Test OnItemDragEnd type is grid
  * @tc.type: FUNC
@@ -1309,7 +1214,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerOnDragMoveTest001, TestSize.Level
      * @tc.steps: step1. construct a DragDropManager
      */
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    Point point;
+    PointerEvent point;
 
     /**
      * @tc.steps: step2. call OnDragStart

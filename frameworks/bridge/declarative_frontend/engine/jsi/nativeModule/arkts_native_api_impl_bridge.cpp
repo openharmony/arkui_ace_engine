@@ -17,21 +17,44 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkbox_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkboxgroup_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_animator_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_col_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_row_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_router_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_item_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_date_picker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigator_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_panel_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_pattern_lock_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_area_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_input_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_radio_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rating_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_split_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_search_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_slider_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_split_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_side_bar_container_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_alphabet_indexer_bridge.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeById(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -160,6 +183,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetRadialGradient));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadialGradient"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetRadialGradient));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOverlay"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOverlay));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOverlay"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOverlay));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderImage"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBorderImage));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderImage"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBorderImage));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setForegroundBlurStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetForegroundBlurStyle));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetForegroundBlurStyle"),
@@ -264,6 +295,158 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDisplayPriority));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDisplayPriority"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetDisplayPriority));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMask"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetMask));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMask"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetMask));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::SetOffset));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::ResetOffset));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::SetPadding));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::ResetPadding));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMargin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::SetMargin));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMargin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::ResetMargin));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarkAnchor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::SetMarkAnchor));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMarkAnchor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::ResetMarkAnchor));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVisibility"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::SetVisibility));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVisibility"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::ResetVisibility));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityText"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityText));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityText"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityText));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAllowDrop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAllowDrop));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAllowDrop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAllowDrop));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityLevel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityLevel));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityLevel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityLevel));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDirection));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetDirection));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLayoutWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetLayoutWeight));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLayoutWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetLayoutWeight));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetSize));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetSize));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignSelf"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAlignSelf));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignSelf"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAlignSelf));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAspectRatio"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAspectRatio));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAspectRatio"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAspectRatio));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFlexGrow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetFlexGrow));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFlexGrow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetFlexGrow));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFlexShrink"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetFlexShrink));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFlexShrink"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetFlexShrink));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setConstraintSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetConstraintSize));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetConstraintSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetConstraintSize));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGridOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetGridOffset));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGridOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetGridOffset));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGridSpan"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetGridSpan));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGridSpan"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetGridSpan));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setExpandSafeArea"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetExpandSafeArea));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetExpandSafeArea"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetExpandSafeArea));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignRules"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAlignRules));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignRules"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAlignRules));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFlexBasis"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetFlexBasis));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFlexBasis"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetFlexBasis));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityDescription"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityDescription));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityDescription"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityDescription));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetId));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetId));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setKey"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetKey));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetKey"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetKey));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRestoreId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetRestoreId));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRestoreId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetRestoreId));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabIndex"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetTabIndex));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabIndex"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetTabIndex));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setObscured"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetObscured));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObscured"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetObscured));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetResponseRegion));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetResponseRegion));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMouseResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetMouseResponseRegion));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMouseResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetMouseResponseRegion));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetTransition));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetTransition));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSharedTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetSharedTransition));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSharedTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetSharedTransition));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnabled"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetEnabled));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnabled"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetEnabled));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDraggable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDraggable));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDraggable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetDraggable));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHoverEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetHoverEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHoverEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetHoverEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setClickEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetClickEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetClickEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetClickEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setKeyBoardShortCut"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetKeyBoardShortCut));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetKeyBoardShortCut"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetKeyBoardShortCut));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto counter = panda::ObjectRef::New(vm);
@@ -319,6 +502,24 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetShow));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "panel"), panel);
 
+    auto row = panda::ObjectRef::New(vm);
+    row->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignItems"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::SetAlignItems));
+    row->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignItems"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::ResetAlignItems));
+    row->Set(vm, panda::StringRef::NewFromUtf8(vm, "setJustifyContent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::SetJustifyContent));
+    row->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetJustifyContent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::ResetJustifyContent));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "row"), row);
+
+    auto rowSplit = panda::ObjectRef::New(vm);
+    rowSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResizeable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowSplitBridge::SetResizeable));
+    rowSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResizeable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowSplitBridge::ResetResizeable));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "rowSplit"), rowSplit);
+
     auto text = panda::ObjectRef::New(vm);
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetFontColor));
@@ -352,7 +553,110 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetDecoration));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDecoration"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetDecoration));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextCase"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTextCase));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextCase"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetTextCase));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxLines"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetMaxLines));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLines"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetMaxLines));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetMinFontSize));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ReSetMinFontSize));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDraggable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetDraggable));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDraggable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetDraggable));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetMaxFontSize));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetMaxFontSize));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetFontFamily));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetFontFamily));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetCopyOption));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetCopyOption));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextShadow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTextShadow));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextShadow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetTextShadow));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeightAdaptivePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetHeightAdaptivePolicy));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeightAdaptivePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetHeightAdaptivePolicy));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextIndent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTextIndent));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextIndent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetTextIndent));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBaselineOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetBaselineOffset));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBaselineOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetBaselineOffset));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLetterSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetLetterSpacing));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLetterSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetLetterSpacing));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetFont));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetFont));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
+
+    auto search = panda::ObjectRef::New(vm);
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetTextFont));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetTextFont));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPlaceholderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetPlaceholderColor));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPlaceholderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetPlaceholderColor));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectionMenuHidden"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSelectionMenuHidden));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectionMenuHidden"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSelectionMenuHidden));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCaretStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetCaretStyle));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCaretStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetCaretStyle));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchTextAlign));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchTextAlign));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCancelButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetCancelButton));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCancelButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetCancelButton));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableKeyboardOnFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetEnableKeyboardOnFocus));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableKeyboardOnFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetEnableKeyboardOnFocus));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPlaceholderFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetPlaceholderFont));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPlaceholderFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetPlaceholderFont));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchIcon));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchIcon));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchButton));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchButton));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetFontColor));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetFontColor));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetCopyOption));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetCopyOption));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "search"), search);
 
     auto select = panda::ObjectRef::New(vm);
     select->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSpace"),
@@ -561,18 +865,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetThickness));
     slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetThickness"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetThickness));
+    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlockStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetBlockStyle));
+    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlockStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetBlockStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "slider"), slider);
 
-    auto imageSpan = panda::ObjectRef::New(vm);
-    imageSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVerticalAlign"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::SetVerticalAlign));
-    imageSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVerticalAlign"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::ResetVerticalAlign));
-    imageSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setObjectFit"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::SetObjectFit));
-    imageSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObjectFit"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::ResetObjectFit));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "imageSpan"), imageSpan);
+    auto stack = panda::ObjectRef::New(vm);
+    stack->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignContent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StackBridge::SetAlignContent));
+    stack->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignContent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StackBridge::ResetAlignContent));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "stack"), stack);
 
     auto blank = panda::ObjectRef::New(vm);
     blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColor"),
@@ -581,6 +885,49 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::ResetColor));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "blank"), blank);
 
+    auto span = panda::ObjectRef::New(vm);
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextCase"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetTextCase));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextCase"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ResetTextCase));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetFontWeight));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ResetFontWeight));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLineHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetLineHeight));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLineHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ReSetLineHeight));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetFontStyle));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ReSetFontStyle));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetFontSize));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ResetFontSize));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetFontFamily));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ResetFontFamily));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDecoration"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetDecoration));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDecoration"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ResetDecoration));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetFontColor));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ResetFontColor));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLetterSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetLetterSpacing));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLetterSpacing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ResetLetterSpacing));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetFont));
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ResetFont));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "span"), span);
+    
     auto gridCol = panda::ObjectRef::New(vm);
     gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSpan"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::SetSpan));
@@ -596,85 +943,438 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::ResetOrder));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "gridCol"), gridCol);
 
+    auto column = panda::ObjectRef::New(vm);
+    column->Set(vm, panda::StringRef::NewFromUtf8(vm, "setJustifyContent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ColumnBridge::SetJustifyContent));
+    column->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetJustifyContent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ColumnBridge::ResetJustifyContent));
+    column->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignItems"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ColumnBridge::SetAlignItems));
+    column->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignItems"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ColumnBridge::ResetAlignItems));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "column"), column);
+
+    auto gridRow = panda::ObjectRef::New(vm);
+    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignItems"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::SetAlignItems));
+    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignItems"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::ResetAlignItems));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "gridRow"), gridRow);
+
+    auto richEditor = panda::ObjectRef::New(vm);
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetCopyOptions));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetCopyOptions));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "richEditor"), richEditor);
+
+    auto textArea = panda::ObjectRef::New(vm);
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetStyle));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetStyle));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectionMenuHidden"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetSelectionMenuHidden));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectionMenuHidden"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetSelectionMenuHidden));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxLines"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetMaxLines));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLines"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetMaxLines));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetCopyOption));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetCopyOption));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPlaceholderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetPlaceholderColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPlaceholderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetPlaceholderColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetTextAreaTextAlign));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetTextAreaTextAlign));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPlaceholderFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetPlaceholderFont));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPlaceholderFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetPlaceholderFont));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBarState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetBarState));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetBarState));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableKeyboardOnFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetEnableKeyboardOnFocus));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableKeyboardOnFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetEnableKeyboardOnFocus));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFontFamily));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetFontFamily));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowCounter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetShowCounter));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShowCounter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetShowCounter));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCaretColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetCaretColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCaretColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetCaretColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxLength"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetMaxLength));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLength"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetMaxLength));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFontColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetFontColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFontStyle));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetFontStyle));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFontWeight));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetFontWeight));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFontSize));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetFontSize));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
+
+    auto video = panda::ObjectRef::New(vm);
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoPlay"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetAutoPlay));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoPlay"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetAutoPlay));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setControls"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetControls));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetControls"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetControls));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setObjectFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetObjectFit));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObjectFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetObjectFit));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLoop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetLoop));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLoop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetLoop));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMuted"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetMuted));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMuted"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetMuted));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "video"), video);
+
+    auto patternLock = panda::ObjectRef::New(vm);
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSideLength"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetSideLength));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSideLength"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetSideLength));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoReset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetAutoReset));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoReset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetAutoReset));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPathStrokeWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPathStrokeWidth));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPathStrokeWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPathStrokeWidth));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRegularColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetRegularColor));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRegularColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetRegularColor));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPathColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPathColor));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPathColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPathColor));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setActiveColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockActiveColor));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetActiveColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockActiveColor));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCircleRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockCircleRadius));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCircleRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockCircleRadius));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockSelectedColor));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockSelectedColor));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "patternLock"), patternLock);
+
+    auto columnSplit = panda::ObjectRef::New(vm);
+    columnSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::SetDivider));
+    columnSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::ResetDivider));
+    columnSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResizeable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::SetResizeable));
+    columnSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResizeable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::ResetResizeable));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "columnSplit"), columnSplit);
+    
+    auto imageAnimator = panda::ObjectRef::New(vm);
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetState));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetState));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDuration"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetDuration));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFixedSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetFixedSize));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFixedSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetFixedSize));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFillMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetFillMode));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFillMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetFillMode));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setReverse"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetReverse));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetReverse"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetReverse));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImages"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetImages));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImages"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetImages));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIterations"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetIteration));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIterations"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetIteration));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "imageAnimator"), imageAnimator);
+
+    auto textInput = panda::ObjectRef::New(vm);
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCaretColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetCaretColor));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCaretColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetCaretColor));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetType));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetType));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxLines"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetMaxLines));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLines"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetMaxLines));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPlaceholderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetPlaceholderColor));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPlaceholderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetPlaceholderColor));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCaretPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetCaretPosition));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCaretPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetCaretPosition));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetCopyOption));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetCopyOption));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowPasswordIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetShowPasswordIcon));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShowPasswordIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetShowPasswordIcon));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPasswordIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetPasswordIcon));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPasswordIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetPasswordIcon));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetTextAlign));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetTextAlign));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetStyle));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetStyle));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectionMenuHidden"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetSelectionMenuHidden));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectionMenuHidden"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetSelectionMenuHidden));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowUnderline"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetTextInputShowUnderline));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShowUnderline"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetTextInputShowUnderline));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCaretStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetCaretStyle));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCaretStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetCaretStyle));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableKeyboardOnFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetEnableKeyboardOnFocus));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableKeyboardOnFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetEnableKeyboardOnFocus));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBarState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetBarState));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetBarState));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnterKeyType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetTextInputEnterKeyType));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnterKeyType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetTextInputEnterKeyType));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetTextInputFontWeight));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetTextInputFontWeight));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetFontSize));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetFontSize));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxLength"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetMaxLength));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLength"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetMaxLength));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetSelectedBackgroundColor));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetSelectedBackgroundColor));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetShowError));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShowError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetShowError));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPlaceholderFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetPlaceholderFont));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPlaceholderFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetPlaceholderFont));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetFontColor));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetFontColor));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetFontStyle));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetFontStyle));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetFontFamily));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetFontFamily));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textInput"), textInput);
+
     RegisterButtonAttributes(object, vm);
     RegisterToggleAttributes(object, vm);
     RegisterDividerAttributes(object, vm);
     RegisterNavigationAttributes(object, vm);
+    RegisterImageAttributes(object, vm);
+    RegisterNavRouterAttributes(object, vm);
+    RegisterNavigatorAttributes(object, vm);
+    RegisterPanelAttributes(object, vm);
+    RegisterSideBarContainerAttributes(object, vm);
+    RegisterCalendarPickerAttributes(object, vm);
+    RegisterMenuItemAttributes(object, vm);
+    RegisterMenuAttributes(object, vm);
+    RegisterDatePickerAttributes(object, vm);
+    RegisterAlphabetIndexerAttributes(object, vm);
 
     return object;
 }
 
-void ArkUINativeModule::RegisterButtonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+void ArkUINativeModule::RegisterPanelAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
+    auto panel = panda::ObjectRef::New(vm);
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetPanelMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetPanelMode));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetPanelMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetPanelMode));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetPanelFullHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetPanelFullHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetPanelFullHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetPanelFullHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetPanelHalfHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetPanelHalfHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetPanelHalfHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetPanelHalfHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetPanelMiniHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetPanelMiniHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetPanelMiniHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetPanelMiniHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetPanelBackgroundMask"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetPanelBackgroundMask));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetPanelBackgroundMask"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetPanelBackgroundMask));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetPanelType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetPanelType));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetPanelType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetPanelType));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetPanelCustomHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetPanelCustomHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetPanelCustomHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetPanelCustomHeight));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowCloseIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetShowCloseIcon));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShowCloseIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetShowCloseIcon));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDragBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetDragBar));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDragBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetDragBar));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::SetShow));
+    panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PanelBridge::ResetShow));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "panel"), panel);
+}
+
+void ArkUINativeModule::RegisterButtonAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
 {
     auto button = panda::ObjectRef::New(vm);
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setType"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetType));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::SetType));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetType"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetType));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::ResetType));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStateEffect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetStateEffect));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::SetStateEffect));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStateEffect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetStateEffect));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::ResetStateEffect));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetFontColor));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::SetFontColor));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetFontColor));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::ResetFontColor));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetFontSize));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::SetFontSize));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetFontSize));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::ResetFontSize));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontWeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetFontWeight));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::SetFontWeight));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetFontWeight));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::ResetFontWeight));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetFontStyle));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::SetFontStyle));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetFontStyle));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::ResetFontStyle));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFamily"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetFontFamily));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::SetFontFamily));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFamily"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetFontFamily));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::ResetFontFamily));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLabelStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetLabelStyle));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::SetLabelStyle));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLabelStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetLabelStyle));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::ResetLabelStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "button"), button);
 }
 
-void ArkUINativeModule::RegisterToggleAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+void ArkUINativeModule::RegisterToggleAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
 {
     auto toggle = panda::ObjectRef::New(vm);
     toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ToggleBridge::SetSelectedColor));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetSelectedColor));
     toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ToggleBridge::ResetSelectedColor));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetSelectedColor));
     toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwitchPointColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ToggleBridge::SetSwitchPointColor));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetSwitchPointColor));
     toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwitchPointColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ToggleBridge::ResetSwitchPointColor));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetSwitchPointColor));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "toggle"), toggle);
 }
 
-void ArkUINativeModule::RegisterDividerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+void ArkUINativeModule::RegisterDividerAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
 {
     auto divider = panda::ObjectRef::New(vm);
     divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStrokeWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::SetStrokeWidth));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::SetStrokeWidth));
     divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::ResetStrokeWidth));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::ResetStrokeWidth));
     divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLineCap"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::SetLineCap));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::SetLineCap));
     divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLineCap"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::ResetLineCap));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::ResetLineCap));
     divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::SetColor));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::SetColor));
     divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::ResetColor));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::ResetColor));
     divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVertical"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::SetVertical));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::SetVertical));
     divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVertical"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::ResetVertical));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::ResetVertical));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "divider"), divider);
 }
 
@@ -685,6 +1385,352 @@ void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetHideToolBar));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideToolBar"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetHideToolBar));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTitleMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetTitleMode));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTitleMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetTitleMode));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHideBackButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetHideBackButton));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideBackButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetHideBackButton));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSubTitle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetSubtitle));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSubTitle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetSubtitle));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHideNavBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetHideNavBar));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideNavBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetHideNavBar));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetUsrNavigationMode));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetUsrNavigationMode));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setNavBarPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetNavBarPosition));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetNavBarPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetNavBarPosition));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinNavBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetMinNavBarWidth));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinNavBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetMinNavBarWidth));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxNavBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetMaxNavBarWidth));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxNavBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetMaxNavBarWidth));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHideTitleBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetHideTitleBar));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideTitleBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetHideTitleBar));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackButtonIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetBackButtonIcon));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackButtonIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetBackButtonIcon));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigation"), navigation);
+}
+
+void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto image = panda::ObjectRef::New(vm);
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetCopyOption));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetCopyOption));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoResize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetAutoResize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoResize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetAutoResize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setObjectRepeat"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetObjectRepeat));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObjectRepeat"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetObjectRepeat));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRenderMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetRenderMode));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRenderMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetRenderMode));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSyncLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetSyncLoad));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSyncLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetSyncLoad));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setObjectFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetObjectFit));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObjectFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetObjectFit));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFitOriginalSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetFitOriginalSize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFitOriginalSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetFitOriginalSize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSourceSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetSourceSize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSourceSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetSourceSize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMatchTextDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetMatchTextDirection));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMatchTextDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetMatchTextDirection));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFillColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetFillColor));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFillColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetFillColor));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlt"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetAlt));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlt"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetAlt));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImageInterpolation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetImageInterpolation));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImageInterpolation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetImageInterpolation));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColorFilter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetColorFilter));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColorFilter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetColorFilter));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSyncLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetSyncLoad));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSyncLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetSyncLoad));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setObjectFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetObjectFit));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObjectFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetObjectFit));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFitOriginalSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetFitOriginalSize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFitOriginalSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetFitOriginalSize));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDraggable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetDraggable));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDraggable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetDraggable));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "image"), image);
+}
+
+void ArkUINativeModule::RegisterNavRouterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto navRouter = panda::ObjectRef::New(vm);
+    navRouter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavRouterBridge::SetMode));
+    navRouter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavRouterBridge::ResetMode));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navRouter"), navRouter);
+}
+
+void ArkUINativeModule::RegisterNavigatorAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto navigator = panda::ObjectRef::New(vm);
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTarget"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::SetTarget));
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTarget"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::ResetTarget));
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::SetType));
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::ResetType));
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setActive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::SetActive));
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetActive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::ResetActive));
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setParams"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::SetParams));
+    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetParams"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::ResetParams));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigator"), navigator);
+}
+
+void ArkUINativeModule::RegisterSideBarContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto sideBarContainer = panda::ObjectRef::New(vm);
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSideBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::SetSideBarWidth));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSideBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetSideBarWidth));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinSideBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::SetMinSideBarWidth));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinSideBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetMinSideBarWidth));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setControlButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::SetControlButton));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetControlButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetControlButton));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowControlButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::SetShowControlButton));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShowControlButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetShowControlButton));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoHide"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::SetAutoHide));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoHide"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetAutoHide));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxSideBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::SetMaxSideBarWidth));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxSideBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetMaxSideBarWidth));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinContentWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::SetMinContentWidth));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinContentWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetMinContentWidth));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSideBarPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::SetSideBarPosition));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSideBarPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetSideBarPosition));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowSideBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::SetShowSideBar));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShowSideBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetShowSideBar));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::SetDivider));
+    sideBarContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetDivider));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "sideBarContainer"), sideBarContainer);
+}
+
+void ArkUINativeModule::RegisterCalendarPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto calendarPicker = panda::ObjectRef::New(vm);
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetTextStyle));
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetTextStyle));
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEdgeAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetEdgeAlign));
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEdgeAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetEdgeAlign));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "calendarPicker"), calendarPicker);
+}
+
+void ArkUINativeModule::RegisterMenuItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto menuitem = panda::ObjectRef::New(vm);
+    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelected"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetMenuItemSelected));
+    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelected"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetMenuItemSelected));
+    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLabelFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetLabelFontColor));
+    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLabelFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetLabelFontColor));
+    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetContentFontColor));
+    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetContentFontColor));
+    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLabelFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetLabelFont));
+    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLabelFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetLabelFont));
+    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetContentFont));
+    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetContentFont));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "menuitem"), menuitem);
+}
+
+void ArkUINativeModule::RegisterMenuAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto menu = panda::ObjectRef::New(vm);
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetMenuFontColor));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetMenuFontColor));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetFont));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetFont));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetRadius));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetRadius));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "menu"), menu);
+}
+
+void ArkUINativeModule::RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto datePicker = panda::ObjectRef::New(vm);
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedTextStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetSelectedTextStyle));
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedTextStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetSelectedTextStyle));
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetTextStyle));
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetTextStyle));
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDisappearTextStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetDisappearTextStyle));
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDisappearTextStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetDisappearTextStyle));
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLunar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetLunar));
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLunar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetLunar));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "datePicker"), datePicker);
+}
+
+void ArkUINativeModule::RegisterAlphabetIndexerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto alphabetIndexer = panda::ObjectRef::New(vm);
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupItemFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupItemFont));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupItemFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupItemFont));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetSelectedFont));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetSelectedFont));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupFont));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupFont));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetFont));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFont"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetFont));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupItemBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupItemBackgroundColor));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupItemBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupItemBackgroundColor));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetColor));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetColor));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupColor));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupColor));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetSelectedColor));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetSelectedColor));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupBackground"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupBackground));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupBackground"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupBackground));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetSelectedBackgroundColor));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetSelectedBackgroundColor));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupUnselectedColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupUnselectedColor));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupUnselectedColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupUnselectedColor));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupSelectedColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupSelectedColor));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupSelectedColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupSelectedColor));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetAlignStyle));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetAlignStyle));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setUsingPopup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetUsingPopup));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetUsingPopup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetUsingPopup));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelected"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetSelected));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelected"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetSelected));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setItemSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetItemSize));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetItemSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetItemSize));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupPosition));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetPopupPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupPosition));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "alphabetIndexer"), alphabetIndexer);
 }
 } // namespace OHOS::Ace::NG

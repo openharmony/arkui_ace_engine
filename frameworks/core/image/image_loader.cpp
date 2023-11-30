@@ -305,11 +305,17 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(
     }
     char realPath[PATH_MAX] = { 0x00 };
     if (realpath(filePath.c_str(), realPath) == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "realpath fail! filePath: %{private}s, fail reason: %{public}s src:%{public}s",
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "realpath fail! filePath: %{public}s, fail reason: %{public}s src:%{public}s",
             filePath.c_str(), strerror(errno), src.c_str());
         return nullptr;
     }
     auto result = SkData::MakeFromFileName(realPath);
+    if (!result) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "read data failed, filePath: %{public}s, src: %{public}s, skData size: %{public}zu, fail reason: "
+            "%{public}s",
+            filePath.c_str(), src.c_str(), result->size(), strerror(errno));
+    }
 #ifndef USE_ROSEN_DRAWING
 #ifdef PREVIEW
     // on Windows previewer, SkData::MakeFromFile keeps the file open during SkData's lifetime

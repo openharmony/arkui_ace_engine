@@ -49,13 +49,20 @@ bool GestureScope::CheckNeedBlocked(const RefPtr<NGGestureRecognizer>& recognize
 {
     for (const auto& weak : recognizers_) {
         auto member = weak.Upgrade();
+        if (!member || member->GetRefereeState() != RefereeState::PENDING) {
+            continue;
+        }
         if (member == recognizer) {
             return false;
         }
-
-        if (member && member->GetRefereeState() == RefereeState::PENDING) {
-            return true;
+        RefPtr<NGGestureRecognizer> group = member->GetGestureGroup().Upgrade();
+        while (group) {
+            if (group == recognizer) {
+                return false;
+            }
+            group = group->GetGestureGroup().Upgrade();
         }
+        return true;
     }
     return false;
 }
@@ -188,13 +195,23 @@ void GestureReferee::CleanGestureScope(size_t touchId)
 
 bool GestureReferee::QueryAllDone(size_t touchId)
 {
-    bool ret = false;
+    bool ret = true;
     const auto iter = gestureScopes_.find(touchId);
     if (iter != gestureScopes_.end()) {
         const auto& scope = iter->second;
         ret = scope->QueryAllDone(touchId);
     }
     return ret;
+}
+
+bool GestureReferee::QueryAllDone()
+{
+    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); ++iter) {
+        if (!iter->second->QueryAllDone(iter->first)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool GestureReferee::CheckSourceTypeChange(SourceType type, bool isAxis_)
@@ -258,7 +275,7 @@ void GestureReferee::HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& rec
         return;
     }
     auto prevState = recognizer->GetRefereeState();
-    recognizer->OnAccepted();
+    recognizer->AboutToAccept();
     std::list<size_t> delayIds;
     for (const auto& scope : gestureScopes_) {
         scope.second->OnAcceptGesture(recognizer);
@@ -323,7 +340,7 @@ void GestureReferee::HandleRejectDisposal(const RefPtr<NGGestureRecognizer>& rec
         if (newBlockRecognizer->GetRefereeState() == RefereeState::PENDING_BLOCKED) {
             newBlockRecognizer->OnPending();
         } else if (newBlockRecognizer->GetRefereeState() == RefereeState::SUCCEED_BLOCKED) {
-            newBlockRecognizer->OnAccepted();
+            newBlockRecognizer->AboutToAccept();
             for (const auto& scope : gestureScopes_) {
                 scope.second->OnAcceptGesture(newBlockRecognizer);
             }

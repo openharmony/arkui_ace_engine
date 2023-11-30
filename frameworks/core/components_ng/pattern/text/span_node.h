@@ -160,6 +160,7 @@ public:
     // when paragraph ends with a \n, it causes the paragraph height to gain an extra line
     // to have normal spacing between paragraphs, remove \n from every paragraph except the last one.
     bool needRemoveNewLine = false;
+    bool hasResourceFontColor = false;
     std::optional<LeadingMargin> leadingMargin;
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t selectedStart = -1;
@@ -220,6 +221,7 @@ enum class PropertyInfo {
     TEXT_ALIGN,
     LEADING_MARGIN,
     NONE,
+    TEXTSHADOW,
 };
 
 class ACE_EXPORT SpanNode : public UINode {
@@ -264,6 +266,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);
     DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
@@ -310,7 +313,7 @@ public:
         const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
             PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
             PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::LINEHEIGHT, PropertyInfo::TEXT_ALIGN,
-            PropertyInfo::LEADING_MARGIN };
+            PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW };
         set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
             propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
         return inheritPropertyInfo;

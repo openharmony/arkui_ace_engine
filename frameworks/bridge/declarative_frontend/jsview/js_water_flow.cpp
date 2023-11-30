@@ -128,6 +128,10 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("onScrollStop", &JSWaterFlow::JsOnScrollStop);
     JSClass<JSWaterFlow>::StaticMethod("onScrollIndex", &JSWaterFlow::JsOnScrollIndex);
 
+    JSClass<JSWaterFlow>::StaticMethod("scrollBar", &JSWaterFlow::SetScrollBar, opt);
+    JSClass<JSWaterFlow>::StaticMethod("scrollBarWidth", &JSWaterFlow::SetScrollBarWidth, opt);
+    JSClass<JSWaterFlow>::StaticMethod("scrollBarColor", &JSWaterFlow::SetScrollBarColor, opt);
+
     JSClass<JSWaterFlow>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -394,5 +398,27 @@ void JSWaterFlow::JsOnScrollIndex(const JSCallbackInfo& args)
         WaterFlowModel::GetInstance()->SetOnScrollIndex(std::move(onScrollIndex));
     }
     args.ReturnSelf();
+}
+
+void JSWaterFlow::SetScrollBar(const JSCallbackInfo& info)
+{
+    auto displayMode = JSScrollable::ParseDisplayMode(info, WaterFlowModel::GetDisplayMode());
+    WaterFlowModel::GetInstance()->SetScrollBarMode(displayMode);
+}
+
+void JSWaterFlow::SetScrollBarColor(const std::string& color)
+{
+    auto scrollBarColor = JSScrollable::ParseBarColor(color);
+    if (!scrollBarColor.empty()) {
+        WaterFlowModel::GetInstance()->SetScrollBarColor(scrollBarColor);
+    }
+}
+
+void JSWaterFlow::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
+{
+    auto scrollBarWidth = JSScrollable::ParseBarWidth(scrollWidth);
+    if (!scrollBarWidth.empty()) {
+        WaterFlowModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
+    }
 }
 } // namespace OHOS::Ace::Framework

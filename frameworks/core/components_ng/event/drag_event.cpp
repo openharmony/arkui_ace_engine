@@ -169,12 +169,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                     HideFilter();
                     SubwindowManager::GetInstance()->HideMenuNG(false, true);
-                    AnimationOption option;
-                    option.SetDuration(PIXELMAP_ANIMATION_DURATION);
-                    option.SetCurve(Curves::SHARP);
-                    AnimationUtils::Animate(
-                        option, [renderContext]() { renderContext->UpdateOpacity(SCALE_NUMBER); },
-                        option.GetOnFinishEvent());
                 }
             }
         }
@@ -547,6 +541,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     // create imageNode
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
     auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
     renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -816,7 +811,8 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     auto pixelMap = gestureHub->GetPixelMap();
     float scale = 1.0f;
     if (pixelMap) {
-        scale = gestureHub->GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
+        scale =
+            gestureHub->GetPixelMapScale(dragNode->GetDragPreviewOption(), pixelMap->GetHeight(), pixelMap->GetWidth());
     }
     auto context = dragNode->GetRenderContext();
     CHECK_NULL_VOID(context);

@@ -39,6 +39,7 @@ public:
     RenderingContext2DModifier();
     ~RenderingContext2DModifier() override = default;
     void onDraw(DrawingContext& drawingContext) override;
+    std::string GetDumpInfo();
 
     void MarkModifierDirty()
     {
@@ -62,6 +63,8 @@ private:
 #else
     std::shared_ptr<RSRecordingCanvas> rsRecordingCanvas_;
 #endif
+    SizeT<int32_t> recordingCanvasDrawSize_ = {0.0f, 0.0f};
+    SizeT<int32_t> drawCmdSize_ = {0.0f, 0.0f};
     ACE_DISALLOW_COPY_AND_MOVE(RenderingContext2DModifier);
 };
 } // namespace OHOS::Ace::NG

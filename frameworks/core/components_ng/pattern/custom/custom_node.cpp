@@ -58,8 +58,8 @@ void CustomNode::Render()
             FireOnAppear();
         }
         {
-            ACE_SCOPED_TRACE("CustomNode:BuildItem [%s][self:%d][parent:%d]", GetJSViewName().c_str(),
-                GetId(), GetParent() ? GetParent()->GetId() : 0);
+            ACE_SCOPED_TRACE("CustomNode:BuildItem [%s][self:%d][parent:%d]", GetJSViewName().c_str(), GetId(),
+                GetParent() ? GetParent()->GetId() : 0);
             // first create child node and wrapper.
             ScopedViewStackProcessor scopedViewStackProcessor;
             auto child = renderFunction();

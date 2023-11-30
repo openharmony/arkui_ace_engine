@@ -221,6 +221,24 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
+panda::Local<panda::JSValueRef> JsLoadCustomTitleBar(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    if (argc != 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsObject()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+    AddCustomTitleBarComponent(obj);
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
 panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1249,6 +1267,8 @@ void JsRegisterViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsRegisterNamedRoute));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getArkUINativeModule"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NG::ArkUINativeModule::GetArkUINativeModule));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomTitleBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomTitleBar));
 
     BindingTarget cursorControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
     cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCursor"),

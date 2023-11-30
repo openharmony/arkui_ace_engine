@@ -21,6 +21,8 @@
 #include <string>
 #include <unistd.h>
 
+#include "dm_common.h"
+
 #include "parameter.h"
 #include "parameters.h"
 
@@ -43,6 +45,7 @@ constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
+constexpr char CUSTOM_TITLE_KEY[] = "persist.sys.arkui.customtitle";
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int DEFAULT_THRESHOLD_JANK = 15;
@@ -53,6 +56,8 @@ std::shared_mutex mutex_;
 constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
 #endif
+
+using RsOrientation = Rosen::DisplayOrientation;
 
 void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 {
@@ -387,10 +392,13 @@ void SystemProperties::InitDeviceInfo(
 
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
 {
-    if (orientation == ORIENTATION_PORTRAIT && orientation_ != DeviceOrientation::PORTRAIT) {
+    int32_t newOrientation = ((orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE)) ||
+        (orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE_INVERTED))) ?
+        ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+    if (newOrientation == ORIENTATION_PORTRAIT && orientation_ != DeviceOrientation::PORTRAIT) {
         Swap(deviceWidth_, deviceHeight_);
         orientation_ = DeviceOrientation::PORTRAIT;
-    } else if (orientation == ORIENTATION_LANDSCAPE && orientation_ != DeviceOrientation::LANDSCAPE) {
+    } else if (newOrientation == ORIENTATION_LANDSCAPE && orientation_ != DeviceOrientation::LANDSCAPE) {
         Swap(deviceWidth_, deviceHeight_);
         orientation_ = DeviceOrientation::LANDSCAPE;
     }
@@ -461,6 +469,11 @@ bool SystemProperties::GetImageFrameworkEnabled()
     return system::GetBoolParameter("persist.ace.image.framework.enabled", true);
 }
 
+bool SystemProperties::GetDebugPixelMapSaveEnabled()
+{
+    return system::GetBoolParameter("persist.ace.save.pixelmap.enabled", false);
+}
+
 ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 {
     static bool isUseMemoryMonitor = IsUseMemoryMonitor();
@@ -480,5 +493,10 @@ bool SystemProperties::GetResourceDecoupling()
 int32_t SystemProperties::GetJankFrameThreshold()
 {
     return system::GetIntParameter<int>("persist.sys.arkui.perf.threshold", DEFAULT_THRESHOLD_JANK);
+}
+
+std::string SystemProperties::GetCustomTitleFilePath()
+{
+    return system::GetParameter(CUSTOM_TITLE_KEY, "");
 }
 } // namespace OHOS::Ace

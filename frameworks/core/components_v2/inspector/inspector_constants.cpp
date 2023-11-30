@@ -160,6 +160,12 @@ const char FLEX_ETS_TAG[] = "Flex";
 const char WRAP_COMPONENT_TAG[] = "WrapComponent";
 const char WRAP_ETS_TAG[] = "Flex";
 
+// folderStack
+const char FOLDER_STACK_COMPONENT_TAG[] = "FolderStackComponent";
+const char FOLDER_STACK_ETS_TAG[] = "Folder";
+const char HOVER_STACK_ETS_TAG[] = "Hover";
+const char CONTROL_PARTS_STACK_ETS_TAG[] = "ControlParts";
+
 // grid
 const char GRID_COMPONENT_TAG[] = "GridLayoutComponent";
 const char GRID_ETS_TAG[] = "Grid";

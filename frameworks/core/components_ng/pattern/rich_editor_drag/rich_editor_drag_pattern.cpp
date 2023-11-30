@@ -27,12 +27,15 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
 {
     CHECK_NULL_RETURN(hostNode, nullptr);
     auto hostPattern = hostNode->GetPattern<TextDragBase>();
+    CHECK_NULL_RETURN(hostPattern, nullptr);
     const auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto dragNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_DRAG_ETS_TAG, nodeId, [hostPattern]() {
         return MakeRefPtr<RichEditorDragPattern>(DynamicCast<RichEditorPattern>(hostPattern));
     });
     auto dragContext = dragNode->GetRenderContext();
+    CHECK_NULL_RETURN(dragContext, nullptr);
     auto hostContext = hostNode->GetRenderContext();
+    CHECK_NULL_RETURN(hostContext, nullptr);
     if (hostContext->HasForegroundColor()) {
         dragContext->UpdateForegroundColor(hostContext->GetForegroundColor().value());
     }
@@ -40,6 +43,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
         dragContext->UpdateForegroundColorStrategy(hostContext->GetForegroundColorStrategy().value());
     }
     auto dragPattern = dragNode->GetPattern<RichEditorDragPattern>();
+    CHECK_NULL_RETURN(dragPattern, nullptr);
     auto data = CalculateTextDragData(hostPattern, dragNode);
     dragPattern->Initialize(data);
     dragPattern->SetLastLineHeight(data.lineHeight_);
@@ -52,10 +56,15 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
 RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren)
 {
+    CHECK_NULL_RETURN(hostNode, nullptr);
     auto hostPattern = hostNode->GetPattern<TextDragBase>();
+    CHECK_NULL_RETURN(hostPattern, nullptr);
     auto dragNode = CreateDragNode(hostNode);
+    CHECK_NULL_RETURN(dragNode, nullptr);
     auto dragPattern = dragNode->GetPattern<RichEditorDragPattern>();
+    CHECK_NULL_RETURN(dragPattern, nullptr);
     auto richEditor = hostNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(richEditor, nullptr);
     auto placeholderIndex = richEditor->GetPlaceHolderIndex();
     auto rectsForPlaceholders = richEditor->GetRectsForPlaceholders();
 
@@ -76,7 +85,9 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
         }
         ++index;
     }
-    dragPattern->SetLastLineHeight(boxes.back().Height());
+    if (!boxes.empty()) {
+        dragPattern->SetLastLineHeight(boxes.back().Height());
+    }
     dragPattern->InitSpanImageLayout(realImageChildren, realRectsForPlaceholders);
     return dragNode;
 }

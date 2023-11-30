@@ -53,23 +53,6 @@ public:
                 return theme;
             }
             // init theme from global data
-            theme->outsetBlockSize_ = themeConstants->GetDimension(THEME_SLIDER_OUTSET_BLOCK_SIZE);
-            theme->outsetBlockHotSize_ = themeConstants->GetDimension(THEME_SLIDER_OUTSET_BLOCK_HOT_REGION_SIZE);
-            theme->blockColor_ = themeConstants->GetColor(THEME_SLIDER_BLOCK_COLOR);
-            theme->outsetTrackThickness_ = themeConstants->GetDimension(THEME_SLIDER_OUTSET_TRACK_THICKNESS);
-            theme->insetTrackThickness_ = themeConstants->GetDimension(THEME_SLIDER_INSET_TRACK_THICKNESS);
-            theme->trackSelectedColor_ = themeConstants->GetColor(THEME_SLIDER_TRACK_SELECTED);
-            theme->trackBgColor_ = themeConstants->GetColor(THEME_SLIDER_TRACK_BG);
-            theme->insetBlockSize_ = themeConstants->GetDimension(THEME_SLIDER_INSET_BLOCK_SIZE);
-            theme->insetBlockHotSize_ = themeConstants->GetDimension(THEME_SLIDER_INSET_BLOCK_HOT_REGION_SIZE);
-            theme->markerSize_ = themeConstants->GetDimension(THEME_SLIDER_MARKER_SIZE);
-            theme->markerColor_ = themeConstants->GetColor(THEME_SLIDER_MARKER_COLOR);
-            theme->tipColor_ = themeConstants->GetColor(THEME_SLIDER_TIP_COLOR);
-            theme->tipTextColor_ = themeConstants->GetColor(THEME_SLIDER_TIP_TEXT_COLOR);
-            theme->tipFontSize_ = themeConstants->GetDimension(THEME_SLIDER_TIP_FONT_SIZE);
-            theme->tipTextPadding_ = themeConstants->GetDimension(THEME_SLIDER_TIP_TEXT_PADDING_SIZE);
-            theme->blockHoverColor_ = themeConstants->GetColor(THEME_SLIDER_BLOCK_HOVER_COLOR);
-            theme->blockShadowColor_ = BLOCK_SHADOW_COLOR;
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -107,6 +90,17 @@ public:
                 theme->hoverAnimationDuration_ = pattern->GetAttr<double>("hover_animation_duration", 0.0);
                 theme->pressAnimationDuration_ = pattern->GetAttr<double>("press_animation_duration", 0.0);
                 theme->moveAnimationDuration_ = pattern->GetAttr<double>("move_animation_duration", 0.0);
+                theme->outsetBlockSize_ = pattern->GetAttr<Dimension>("outset_block_size", 16.0_vp);
+                theme->outsetBlockHotSize_ = pattern->GetAttr<Dimension>("outset_block_hot_region_size", 40.0_vp);
+                theme->blockColor_ = pattern->GetAttr<Color>("block_color", Color(0xffffffff));
+                theme->outsetTrackThickness_ = pattern->GetAttr<Dimension>("outset_track_thickness", 4.0_vp);
+                theme->insetTrackThickness_ = pattern->GetAttr<Dimension>("inset_track_thickness", 20.0_vp);
+                theme->insetBlockSize_ = pattern->GetAttr<Dimension>("inset_block_size", 12.0_vp);
+                theme->insetBlockHotSize_ = pattern->GetAttr<Dimension>("inset_block_hot_region_size", 32.0_vp);
+                theme->markerSize_ = pattern->GetAttr<Dimension>("marker_size", 4.0_vp);
+                theme->tipFontSize_ = pattern->GetAttr<Dimension>("tip_font_size", 14.0_fp);
+                theme->tipTextPadding_ = pattern->GetAttr<Dimension>("tip_text_padding_size", 8.0_vp);
+                theme->blockShadowColor_ = BLOCK_SHADOW_COLOR;
             } else {
                 LOGW("find pattern of slider fail");
             }

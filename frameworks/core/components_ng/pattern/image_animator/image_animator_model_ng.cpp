@@ -133,4 +133,49 @@ RefPtr<ImageAnimatorPattern> ImageAnimatorModelNG::GetImageAnimatorPattern()
     CHECK_NULL_RETURN(frameNode, nullptr);
     return AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern());
 }
+
+RefPtr<ImageAnimatorPattern> ImageAnimatorModelNG::GetImageAnimatorPattern(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern());
+}
+
+void ImageAnimatorModelNG::SetImages(FrameNode* frameNode, const std::vector<ImageProperties>& images)
+{
+    CHECK_NULL_VOID(frameNode);
+    std::vector<ImageProperties> imageList = images;
+    auto imageAnimatorPattern = AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern());
+    imageAnimatorPattern->SetImages(std::move(imageList));
+}
+
+void ImageAnimatorModelNG::SetIsReverse(FrameNode* frameNode, bool isReverse)
+{
+    GetImageAnimatorPattern(frameNode)->SetIsReverse(isReverse);
+}
+
+void ImageAnimatorModelNG::SetDuration(FrameNode* frameNode, int32_t duration)
+{
+    CHECK_NULL_VOID(frameNode);
+    AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern())->SetDuration(duration);
+}
+
+void ImageAnimatorModelNG::SetState(FrameNode* frameNode, int32_t state)
+{
+    GetImageAnimatorPattern(frameNode)->SetStatus(static_cast<Animator::Status>(state));
+}
+
+void ImageAnimatorModelNG::SetFixedSize(FrameNode* frameNode, bool fixedSize)
+{
+    GetImageAnimatorPattern(frameNode)->SetFixedSize(fixedSize);
+}
+
+void ImageAnimatorModelNG::SetFillMode(FrameNode* frameNode, int32_t fillMode)
+{
+    GetImageAnimatorPattern(frameNode)->SetFillMode(static_cast<FillMode>(fillMode));
+}
+
+void ImageAnimatorModelNG::SetIteration(FrameNode* frameNode, int32_t iteration)
+{
+    GetImageAnimatorPattern(frameNode)->SetIteration(iteration);
+}
 } // namespace OHOS::Ace::NG

@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -446,8 +447,10 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         if (index >= placeholderIndex.size() ||
             (index >= rectsForPlaceholders.size() && child->GetHostTag() != V2::PLACEHOLDER_SPAN_ETS_TAG)) {
-            return;
+            child->SetActive(false);
+            continue;
         }
+        child->SetActive(true);
         auto rect = rectsForPlaceholders.at(index);
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {

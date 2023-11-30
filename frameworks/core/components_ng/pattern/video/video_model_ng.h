@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_MODEL_NG_H
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/video/video_model.h"
 
 namespace OHOS::Ace::NG {
@@ -42,6 +43,11 @@ public:
     void SetOnSeeked(VideoEventFunc&& onSeeked) override;
     void SetOnUpdate(VideoEventFunc&& onUpdate) override;
     void SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange) override;
+    static void SetAutoPlay(FrameNode* frameNode, bool autoPlay);
+    static void SetControls(FrameNode* frameNode, bool controls);
+    static void SetObjectFit(FrameNode* frameNode, ImageFit objectFit);
+    static void SetLoop(FrameNode* frameNode, bool loop);
+    static void SetMuted(FrameNode* frameNode, bool muted);
 private:
     void AddDragFrameNodeToManager() const;
 };

@@ -154,10 +154,9 @@ void JSScroller::ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsVa
             curve = CURVE_MAP[index].value;
         }
     } else if (jsValue->IsObject()) {
-        auto icurveArgs = JsonUtil::ParseJsonString(jsValue->ToString());
-        if (icurveArgs->IsObject()) {
-            auto curveString = icurveArgs->GetValue("__curveString");
-            curve = CreateCurve(curveString->GetString());
+        JSRef<JSVal> curveString = JSRef<JSObject>::Cast(jsValue)->GetProperty("__curveString");
+        if (curveString->IsString()) {
+            curve = CreateCurve(curveString->ToString());
         }
     }
 }

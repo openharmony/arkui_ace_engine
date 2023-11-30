@@ -214,9 +214,19 @@ public:
         return targetSpace_;
     }
 
+    const std::optional<Dimension>& GetChildWidth() const
+    {
+        return childwidth_;
+    }
+
     void SetTargetSpace(const Dimension& targetSpace)
     {
         targetSpace_ = targetSpace;
+    }
+
+    void SetChildWidth(const Dimension& childWidth)
+    {
+        childwidth_ = childWidth;
     }
 
     void SetMessage(const std::string& msg)
@@ -349,6 +359,7 @@ private:
     std::optional<Dimension> arrowOffset_;
     ComposeId targetId_;
     std::optional<Dimension> targetSpace_;
+    std::optional<Dimension> childwidth_;
     std::string message_;
     Offset targetOffset_;
     Size targetSize_;

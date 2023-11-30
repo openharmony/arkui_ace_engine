@@ -21,7 +21,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   fontColor(value: ResourceColor): this {
-    var arkColor = new ArkColor();
+    let arkColor = new ArkColor();
     if (arkColor.parseColorValue(value)) {
       modifier(this._modifiers, ButtonFontColorModifier, arkColor.color);
     } else {
@@ -193,8 +193,8 @@ class ButtonFontWeightModifier extends Modifier<string> {
 // @ts-ignore
 globalThis.Button.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  var component = this.createOrGetNode(elmtId, ()=> {
+  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, ()=> {
     return new ArkButtonComponent(nativeNode);
   });
   modifier.applyNormalAttribute(component);

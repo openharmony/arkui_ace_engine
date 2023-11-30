@@ -435,28 +435,23 @@ HWTEST_F(GridTestNg, Property001, TestSize.Level1)
     EXPECT_EQ(json->GetInt("maxCount"), 5);
     EXPECT_EQ(json->GetInt("minCount"), 2);
     EXPECT_EQ(json->GetInt("cellLength"), 100);
-    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect.Spring");
     EXPECT_FALSE(json->GetBool("enableScrollInteraction"));
 
     /**
      * @tc.steps: step2. Test ToJsonValue, change some property
      */
     layoutProperty_->UpdateGridDirection(FlexDirection::ROW_REVERSE);
-    layoutProperty_->UpdateEdgeEffect(EdgeEffect::FADE);
     json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json);
     EXPECT_EQ(json->GetString("layoutDirection"), "GridDirection.RowReverse");
-    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect.Fade");
 
     /**
      * @tc.steps: step3. Test ToJsonValue, change some property
      */
     layoutProperty_->UpdateGridDirection(FlexDirection::COLUMN);
-    layoutProperty_->UpdateEdgeEffect(EdgeEffect::NONE);
     json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json);
     EXPECT_EQ(json->GetString("layoutDirection"), "GridDirection.Column");
-    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect.None");
 
     /**
      * @tc.steps: step4. Test ToJsonValue, change some property

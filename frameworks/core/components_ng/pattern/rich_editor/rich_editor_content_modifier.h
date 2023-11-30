@@ -41,11 +41,23 @@ public:
         richTextRectY_->Set(value);
     }
 
+    void SetClipOffset(OffsetF offset)
+    {
+        clipOffset_->Set(offset);
+    }
+
+    void SetClipSize(SizeF size)
+    {
+        clipSize_->Set(size);
+    }
+
 private:
     const ParagraphManager* pManager_;
     WeakPtr<OHOS::Ace::NG::Pattern> pattern_;
     RefPtr<PropertyFloat> richTextRectX_;
     RefPtr<PropertyFloat> richTextRectY_;
+    RefPtr<AnimatablePropertyOffsetF> clipOffset_;
+    RefPtr<AnimatablePropertySizeF> clipSize_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorContentModifier);
 };
 } // namespace OHOS::Ace::NG

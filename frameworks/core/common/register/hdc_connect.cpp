@@ -22,6 +22,16 @@ namespace OHOS::Ace {
 std::unique_ptr<ConnectManagement> g_connectManagement = nullptr;
 static HdcJdwpSimulator *clsHdcJdwpSimulator = nullptr;
 
+void ConnectManagement::SetProcessName(const std::string &processName)
+{
+    processName_ = processName;
+}
+
+std::string ConnectManagement::GetProcessName()
+{
+    return processName_;
+}
+
 void ConnectManagement::SetPkgName(const std::string &pkgName)
 {
     pkgName_ = pkgName;
@@ -30,6 +40,26 @@ void ConnectManagement::SetPkgName(const std::string &pkgName)
 std::string ConnectManagement::GetPkgName()
 {
     return pkgName_;
+}
+
+void ConnectManagement::SetDebug(bool isDebug)
+{
+    isDebug_ = isDebug;
+}
+
+bool ConnectManagement::GetDebug()
+{
+    return isDebug_;
+}
+
+void ConnectManagement::SetCallback(Callback cb)
+{
+    cb_ = cb;
+}
+
+Callback ConnectManagement::GetCallback()
+{
+    return cb_;
 }
 
 void FreeInstance()
@@ -60,8 +90,11 @@ void* HdcConnectRun(void* pkgContent)
     if (signal(SIGINT, Stop) == SIG_ERR) {
         LOGE("jdwp_process signal fail.");
     }
+    std::string processName = static_cast<ConnectManagement*>(pkgContent)->GetProcessName();
     std::string pkgName = static_cast<ConnectManagement*>(pkgContent)->GetPkgName();
-    clsHdcJdwpSimulator = new (std::nothrow) HdcJdwpSimulator(pkgName);
+    bool isDebug = static_cast<ConnectManagement*>(pkgContent)->GetDebug();
+    Callback cb = static_cast<ConnectManagement*>(pkgContent)->GetCallback();
+    clsHdcJdwpSimulator = new (std::nothrow) HdcJdwpSimulator(processName, pkgName, isDebug, cb);
     if (!clsHdcJdwpSimulator->Connect()) {
         LOGE("Connect fail.");
         return nullptr;
@@ -69,14 +102,17 @@ void* HdcConnectRun(void* pkgContent)
     return nullptr;
 }
 
-void StartConnect(const std::string& pkgName)
+void StartConnect(const std::string& processName, const std::string& pkgName, bool isDebug, Callback cb)
 {
     if (clsHdcJdwpSimulator != nullptr) {
         return;
     }
     pthread_t tid;
     g_connectManagement = std::make_unique<ConnectManagement>();
+    g_connectManagement->SetProcessName(processName);
     g_connectManagement->SetPkgName(pkgName);
+    g_connectManagement->SetDebug(isDebug);
+    g_connectManagement->SetCallback(cb);
     if (pthread_create(&tid, nullptr, &HdcConnectRun, static_cast<void*>(g_connectManagement.get())) != 0) {
         LOGE("pthread_create fail!");
         return;

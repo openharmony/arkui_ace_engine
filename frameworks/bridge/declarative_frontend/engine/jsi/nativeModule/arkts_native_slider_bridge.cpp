@@ -353,4 +353,64 @@ ArkUINativeModuleValue SliderBridge::ResetThickness(ArkUIRuntimeCallInfo* runtim
     GetArkUIInternalNodeAPI()->GetSliderModifier().ResetThickness(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+ArkUINativeModuleValue SliderBridge::SetBlockStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[1]->IsObject()) {
+        SliderBridge::ResetBlockStyle(runtimeCallInfo);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto jsObj = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
+    auto getType = jsObj->GetProperty("type");
+    if (getType->IsNull() || !getType->IsNumber()) {
+        SliderBridge::ResetBlockStyle(runtimeCallInfo);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto type = static_cast<SliderModel::BlockStyleType>(getType->ToNumber<int32_t>());
+    if (type == SliderModel::BlockStyleType::IMAGE) {
+        std::string src;
+        auto image = jsObj->GetProperty("image");
+        if (!Framework::JSShapeAbstract::ParseJsMedia(image, src)) {
+            SliderBridge::ResetBlockStyle(runtimeCallInfo);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        std::string bundleName;
+        std::string moduleName;
+        Framework::JSViewAbstract::GetJsMediaBundleInfo(image, bundleName, moduleName);
+        SliderModelNG::SetBlockImage(frameNode, src, bundleName, moduleName);
+    } else if (type == SliderModel::BlockStyleType::SHAPE) {
+        auto shape = jsObj->GetProperty("shape");
+        if (!shape->IsObject()) {
+            SliderBridge::ResetBlockStyle(runtimeCallInfo);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        Framework::JSShapeAbstract* shapeAbstract =
+            Framework::JSRef<Framework::JSObject>::Cast(shape)->Unwrap<Framework::JSShapeAbstract>();
+        if (shapeAbstract == nullptr) {
+            SliderBridge::ResetBlockStyle(runtimeCallInfo);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        SliderModelNG::SetBlockShape(frameNode, shapeAbstract->GetBasicShape());
+    }
+    SliderModelNG::SetBlockType(frameNode, type);
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue SliderBridge::ResetBlockStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    SliderModelNG::ResetBlockType(frameNode);
+    SliderModelNG::ResetBlockImage(frameNode);
+    SliderModelNG::ResetBlockShape(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

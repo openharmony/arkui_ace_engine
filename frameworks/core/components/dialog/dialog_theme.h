@@ -29,6 +29,8 @@ namespace OHOS::Ace {
 namespace {
 constexpr double PRIMARY_RGBA_OPACITY = 0.9f;
 constexpr double SECONDARY_RGBA_OPACITY = 0.6f;
+constexpr int DEFAULT_ANIMATION_DURATION_OUT = 220;
+constexpr int DEFAULT_ANIMATION_DURATION_IN = 250;
 } // namespace
 /**
  * DialogTheme defines color and styles of DialogComponent. DialogTheme should be built
@@ -50,78 +52,7 @@ public:
                 return theme;
             }
             // init theme from global data
-            theme->backgroundColor_ = themeConstants->GetColor(THEME_DIALOG_BACKGROUND_COLOR);
-            theme->titleTextStyle_.SetTextColor(themeConstants->GetColor(THEME_DIALOG_TITLE_TEXT_COLOR));
-            theme->titleTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_DIALOG_TITLE_TEXT_FONTSIZE));
-            theme->titleTextStyle_.SetFontWeight(
-                FontWeight(themeConstants->GetInt(THEME_DIALOG_TITLE_TEXT_FONTWEIGHT)));
-            theme->subtitleTextStyle_.SetTextColor(themeConstants->GetColor(THEME_DIALOG_TITLE_TEXT_COLOR));
-            theme->subtitleTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_OHOS_TEXT_SIZE_SUBTITLE3));
-            theme->titleMinFontSize_ = themeConstants->GetDimension(THEME_DIALOG_TITLE_TEXT_FONTSIZE_MIN);
-            theme->contentMinFontSize_ = themeConstants->GetDimension(THEME_DIALOG_CONTENT_TEXT_FONTSIZE_MIN);
-            auto titleMaxLines = themeConstants->GetInt(THEME_DIALOG_TITLE_TEXT_MAX_LINES);
-            theme->titleMaxLines_ = titleMaxLines < 0 ? theme->titleMaxLines_ : static_cast<uint32_t>(titleMaxLines);
-            theme->contentTextStyle_.SetTextColor(themeConstants->GetColor(THEME_DIALOG_CONTENT_TEXT_COLOR));
-            theme->contentTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_DIALOG_CONTENT_TEXT_FONTSIZE));
-            theme->defaultPadding_ = Edge(themeConstants->GetDimension(THEME_DIALOG_PADDING_LEFT),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_TOP),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_RIGHT),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_BOTTOM));
-            theme->adjustPadding_ = Edge(themeConstants->GetDimension(THEME_DIALOG_PADDING_LEFT_ADJUST),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_TOP_ADJUST),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_RIGHT_ADJUST),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_BOTTOM_ADJUST));
-            theme->titleDefaultPadding_ = Edge(themeConstants->GetDimension(THEME_DIALOG_PADDING_LEFT),
-                themeConstants->GetDimension(THEME_DIALOG_TITLE_PADDING_VERTICAL),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_RIGHT),
-                themeConstants->GetDimension(THEME_DIALOG_TITLE_PADDING_VERTICAL));
-            theme->titleAdjustPadding_ = Edge(themeConstants->GetDimension(THEME_DIALOG_PADDING_LEFT_ADJUST),
-                themeConstants->GetDimension(THEME_DIALOG_TITLE_PADDING_VERTICAL),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_RIGHT_ADJUST),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_BOTTOM_ADJUST));
-            theme->contentDefaultPadding_ = Edge(themeConstants->GetDimension(THEME_DIALOG_PADDING_LEFT),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_BOTTOM),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_RIGHT),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_BOTTOM));
-            theme->contentAdjustPadding_ = Edge(themeConstants->GetDimension(THEME_DIALOG_PADDING_LEFT_ADJUST),
-                themeConstants->GetDimension(THEME_DIALOG_TITLE_PADDING_VERTICAL),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_RIGHT_ADJUST),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_BOTTOM_ADJUST));
-            theme->actionsPadding_ = Edge(themeConstants->GetDimension(THEME_DIALOG_PADDING_ACTIONS_LEFT),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_ACTIONS_TOP),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_ACTIONS_RIGHT),
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_ACTIONS_BOTTOM));
-            theme->buttonPaddingLeft_ =
-                Edge(themeConstants->GetDimension(THEME_DIALOG_PADDING_MIN).Value(), 0.0, 0.0, 0.0, DimensionUnit::VP);
-            theme->buttonPaddingRight_ =
-                Edge(0.0, 0.0, themeConstants->GetDimension(THEME_DIALOG_PADDING_MIN).Value(), 0.0, DimensionUnit::VP);
-            theme->buttonPaddingCenter_ = Edge(0.0, themeConstants->GetDimension(THEME_DIALOG_PADDING_MID).Value(), 0.0,
-                themeConstants->GetDimension(THEME_DIALOG_PADDING_MID).Value(), DimensionUnit::VP);
-            theme->buttonSpacingHorizontal_ = themeConstants->GetDimension(THEME_DIALOG_BUTTON_SPACING_HORIZONTAL);
-            theme->buttonSpacingVertical_ = themeConstants->GetDimension(THEME_DIALOG_BUTTON_SPACING_VERTICAL);
-            theme->buttonBackgroundColor_ = themeConstants->GetColor(THEME_DIALOG_BUTTON_BG_COLOR);
-            theme->buttonClickedColor_ = themeConstants->GetColor(THEME_DIALOG_BUTTON_CLICKED_COLOR);
-            theme->frameStart_ = themeConstants->GetDouble(THEME_DIALOG_FRAME_START);
-            theme->frameEnd_ = themeConstants->GetDouble(THEME_DIALOG_FRAME_END);
-            theme->scaleStart_ = themeConstants->GetDouble(THEME_DIALOG_SCALE_START);
-            theme->scaleEnd_ = themeConstants->GetDouble(THEME_DIALOG_SCALE_END);
-            theme->opacityStart_ = themeConstants->GetDouble(THEME_DIALOG_OPACITY_START);
-            theme->opacityEnd_ = themeConstants->GetDouble(THEME_DIALOG_OPACITY_END);
-            theme->maskColorStart_ = themeConstants->GetColor(THEME_DIALOG_MASK_COLOR_START);
-            theme->maskColorEnd_ = themeConstants->GetColor(THEME_DIALOG_MASK_COLOR_END);
-            theme->animationDurationIn_ = themeConstants->GetInt(THEME_DIALOG_ANIMATION_DURATION_IN);
-            theme->animationDurationOut_ = themeConstants->GetInt(THEME_DIALOG_ANIMATION_DURATION_OUT);
-            theme->translateValue_ = Dimension(themeConstants->GetDouble(THEME_DIALOG_TRANSLATE), DimensionUnit::PX);
-            theme->dividerColor_ = themeConstants->GetColor(THEME_DIALOG_DIVIDER_COLOR);
-            theme->dividerWidth_ = themeConstants->GetDimension(THEME_DIALOG_DIVIDER_WIDTH);
-            theme->dividerHeight_ = themeConstants->GetDimension(THEME_DIALOG_DIVIDER_HEIGHT);
-            theme->dividerPadding_ = Edge(themeConstants->GetDimension(THEME_DIALOG_DIVIDER_PADDING_HORIZON),
-                themeConstants->GetDimension(THEME_DIALOG_DIVIDER_PADDING_VERTICAL),
-                themeConstants->GetDimension(THEME_DIALOG_DIVIDER_PADDING_HORIZON),
-                themeConstants->GetDimension(THEME_DIALOG_DIVIDER_PADDING_VERTICAL));
-            theme->marginBottom_ = themeConstants->GetDimension(THEME_OHOS_DIMENS_DIALOG_BOTTOM);
-            theme->marginLeft_ = themeConstants->GetDimension(THEME_OHOS_DIMENS_DIALOG_START);
-            theme->marginRight_ = themeConstants->GetDimension(THEME_OHOS_DIMENS_DIALOG_END);
+            ParseNewPattern(themeConstants->GetThemeStyle(), theme);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -129,7 +60,7 @@ public:
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<DialogTheme>& theme) const
         {
             if (!themeStyle) {
-                LOGI("progress theme style is null");
+                LOGI("dialog theme style is null");
                 return;
             }
             auto dialogPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DIALOG, nullptr);
@@ -137,13 +68,10 @@ public:
                 return;
             }
             theme->backgroundColor_ = dialogPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color(0xd9ffffff));
-            auto textColor = dialogPattern->GetAttr<Color>("title_text_color", Color::BLACK);
-            auto textOpacity = dialogPattern->GetAttr<double>("attribute_alpha_content_primary", PRIMARY_RGBA_OPACITY);
-            theme->titleTextStyle_.SetTextColor(textColor.BlendOpacity(textOpacity));
+            theme->titleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("title_text_color", Color::BLACK));
             theme->titleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_fp));
             theme->titleTextStyle_.SetFontWeight(FontWeight::MEDIUM);
-            textOpacity = dialogPattern->GetAttr<double>("attribute_alpha_content_secondary", SECONDARY_RGBA_OPACITY);
-            theme->subtitleTextStyle_.SetTextColor(textColor.BlendOpacity(textOpacity));
+            theme->subtitleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("subtitle_text_color", Color::BLACK));
             theme->subtitleTextStyle_.SetFontSize(
                 dialogPattern->GetAttr<Dimension>("subtitle_text_font_size", 14.0_fp));
             theme->contentTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("content_text_color", Color::BLACK));
@@ -212,6 +140,77 @@ public:
             theme->buttonClickedColor_ = dialogPattern->GetAttr<Color>("button_bg_color_clicked", Color::BLACK);
             theme->contentTextStyle_.SetFontSize(themeStyle->GetAttr<Dimension>("content_text_font_size", 16.0_vp));
             theme->contentMinFontSize_ = themeStyle->GetAttr<Dimension>("content_text_font_size_min", 16.0_vp);
+        }
+
+        void ParseNewPattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<DialogTheme>& theme) const
+        {
+            if (!themeStyle) {
+                LOGI("dialog theme style is null");
+                return;
+            }
+            auto dialogPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DIALOG, nullptr);
+            if (!dialogPattern) {
+                return;
+            }
+            theme->titleMinFontSize_ = dialogPattern->GetAttr<Dimension>("dialog_title_text_font_size_min", 15.0_fp);
+            theme->contentMinFontSize_ = dialogPattern->GetAttr<Dimension>("content_text_font_size_min", 16.0_fp);
+            auto titleMaxLines = dialogPattern->GetAttr<int>("dialog_title_text_max_lines", 2);
+            theme->titleMaxLines_ = titleMaxLines < 0 ? theme->titleMaxLines_ : static_cast<uint32_t>(titleMaxLines);
+            theme->defaultPadding_ = Edge(dialogPattern->GetAttr<Dimension>("dialog_padding_left", 24.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_padding_top", 24.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_padding_right", 24.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_padding_bottom", 24.0_vp));
+            theme->adjustPadding_ = Edge(dialogPattern->GetAttr<Dimension>("dialog_padding_left_adjust", 24.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_padding_top_adjust", 24.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_padding_right_adjust", 24.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_padding_bottom_adjust", 0.0_vp));
+            theme->titleDefaultPadding_ = Edge(dialogPattern->GetAttr<Dimension>("dialog_padding_left", 24.0_vp),
+                dialogPattern->GetAttr<Dimension>("button_title_padding_vertical", 14.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_padding_right", 24.0_vp),
+                dialogPattern->GetAttr<Dimension>("button_title_padding_vertical", 14.0_vp));
+            theme->titleAdjustPadding_ = Edge(dialogPattern->GetAttr<Dimension>("dialog_padding_left_adjust", 24.0_vp),
+                dialogPattern->GetAttr<Dimension>("button_title_padding_vertical", 14.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_padding_right_adjust", 24.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_padding_bottom_adjust", 0.0_vp));
+            theme->contentDefaultPadding_ = Edge(dialogPattern->GetAttr<Dimension>("dialog_padding_left", 24.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_padding_top", 24.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_padding_right", 24.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_padding_bottom", 24.0_vp));
+            theme->buttonPaddingLeft_ = Edge(dialogPattern->GetAttr<Dimension>("dialog_padding_min", 4.0_vp).Value(),
+                0.0, 0.0, 0.0, DimensionUnit::VP);
+            theme->buttonPaddingRight_ = Edge(0.0, 0.0,
+                dialogPattern->GetAttr<Dimension>("dialog_padding_min", 4.0_vp).Value(), 0.0, DimensionUnit::VP);
+            theme->buttonPaddingCenter_ = Edge(0.0,
+                dialogPattern->GetAttr<Dimension>("dialog_padding_mid", 8.0_vp).Value(),
+                0.0, dialogPattern->GetAttr<Dimension>("dialog_padding_mid", 8.0_vp).Value(), DimensionUnit::VP);
+            theme->buttonSpacingHorizontal_ = dialogPattern->GetAttr<Dimension>("dialog_button_spacing_vertical",
+                8.0_vp);
+            theme->buttonSpacingVertical_ = dialogPattern->GetAttr<Dimension>("dialog_button_spacing_vertical",
+                8.0_vp);
+            theme->buttonClickedColor_ = dialogPattern->GetAttr<Color>("button_color_clicked", Color(0x19182431));
+            theme->frameStart_ = dialogPattern->GetAttr<double>("dialog_frame_start", 0.0f);
+            theme->frameEnd_ = dialogPattern->GetAttr<double>("dialog_frame_end", 1.0f);
+            theme->scaleStart_ = dialogPattern->GetAttr<double>("dialog_scale_start", 0.85f);
+            theme->scaleEnd_ = dialogPattern->GetAttr<double>("dialog_scale_end", 1.0f);
+            theme->opacityStart_ = dialogPattern->GetAttr<double>("dialog_opacity_start", 0.0f);
+            theme->opacityEnd_ = dialogPattern->GetAttr<double>("dialog_opacity_end", 1.0f);
+            theme->maskColorStart_ = dialogPattern->GetAttr<Color>("dialog_mask_color_start", Color(0x00000000));
+            theme->maskColorEnd_ = dialogPattern->GetAttr<Color>("dialog_mask_color_end", Color(0x33000000));
+            theme->animationDurationIn_ = dialogPattern->GetAttr<int>("dialog_animation_duration_in",
+                DEFAULT_ANIMATION_DURATION_IN);
+            theme->animationDurationOut_ = dialogPattern->GetAttr<int>("dialog_animation_duration_out",
+                DEFAULT_ANIMATION_DURATION_OUT);
+            theme->translateValue_ = Dimension(dialogPattern->GetAttr<double>("dialog_translate", 500.0f),
+                DimensionUnit::PX);
+            theme->dividerWidth_ = dialogPattern->GetAttr<Dimension>("dialog_divider_width", 1.0_vp);
+            theme->dividerHeight_ = dialogPattern->GetAttr<Dimension>("dialog_divider_height", 24.0_vp);
+            theme->dividerPadding_ = Edge(dialogPattern->GetAttr<Dimension>("dialog_divider_padding_horizon", 4.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_divider_padding_vertical", 6.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_divider_padding_horizon", 4.0_vp),
+                dialogPattern->GetAttr<Dimension>("dialog_divider_padding_vertical", 6.0_vp));
+            theme->marginBottom_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_bottom", 16.0_vp);
+            theme->marginLeft_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_start", 12.0_vp);
+            theme->marginRight_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_end", 12.0_vp);
         }
     };
 

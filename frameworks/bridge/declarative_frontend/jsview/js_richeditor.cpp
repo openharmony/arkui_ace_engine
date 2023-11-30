@@ -75,8 +75,15 @@ namespace {
 std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
 {
     std::optional<NG::MarginProperty> marginProp = std::nullopt;
-
-    if (marginAttr->IsObject()) {
+    CalcDimension length;
+    if (!marginAttr->IsObject() && !marginAttr->IsNumber() && !marginAttr->IsString()) {
+        length.Reset();
+        marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
+        return marginProp;
+    }
+    if (JSViewAbstract::ParseJsDimensionVp(marginAttr, length)) {
+        marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
+    } else if (marginAttr->IsObject()) {
         auto marginObj = JSRef<JSObject>::Cast(marginAttr);
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
@@ -84,17 +91,6 @@ std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
         std::optional<CalcDimension> bottom;
         JSViewAbstract::ParseMarginOrPaddingCorner(marginObj, top, bottom, left, right);
         marginProp = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
-    } else if (marginAttr->IsNumber() || marginAttr->IsString()) {
-        CalcDimension length;
-        if (!JSViewAbstract::ParseJsDimensionVp(marginAttr, length)) {
-            // use default value.
-            length.Reset();
-        }
-        marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
-    } else {
-        CalcDimension length;
-        length.Reset();
-        marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
     }
     return marginProp;
 }
@@ -604,10 +600,12 @@ void JSRichEditor::SetOnPaste(const JSCallbackInfo& info)
     CHECK_NULL_VOID(info[0]->IsFunction());
     auto jsTextFunc = AceType::MakeRefPtr<JsCitedEventFunction<NG::TextCommonEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), CreateJSTextCommonEvent);
-
-    auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc)](NG::TextCommonEvent& info) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                       NG::TextCommonEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info);
     };
     RichEditorModel::GetInstance()->SetOnPaste(std::move(onPaste));
@@ -700,6 +698,7 @@ void JSRichEditorController::ParseJsTextStyle(
     if (!fontColor->IsNull() && JSContainerBase::ParseJsColor(fontColor, textColor)) {
         updateSpanStyle.updateTextColor = textColor;
         style.SetTextColor(textColor);
+        updateSpanStyle.hasResourceFontColor = fontColor->IsObject();
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
@@ -735,6 +734,22 @@ void JSRichEditorController::ParseJsTextStyle(
         style.SetFontFamilies(family);
     }
     ParseTextDecoration(styleObject, style, updateSpanStyle);
+    ParseTextShadow(styleObject, style, updateSpanStyle);
+}
+
+void JSRichEditorController::ParseTextShadow(
+    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
+{
+    auto shadowObject = styleObject->GetProperty("textShadow");
+    if (shadowObject->IsNull()) {
+        return;
+    }
+    std::vector<Shadow> shadows;
+    ParseTextShadowFromShadowObject(shadowObject, shadows);
+    if (!shadows.empty()) {
+        updateSpanStyle.updateTextShadows = shadows;
+        style.SetTextShadows(shadows);
+    }
 }
 
 void JSRichEditorController::ParseTextDecoration(
@@ -954,6 +969,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsTextStyle(styleObject, style, updateSpanStyle_);
             options.style = style;
+            options.hasResourceFontColor = updateSpanStyle_.hasResourceFontColor;
         }
         auto paraStyle = spanObject->GetProperty("paragraphStyle");
         auto paraStyleObj = JSRef<JSObject>::Cast(paraStyle);

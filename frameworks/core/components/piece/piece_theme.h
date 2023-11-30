@@ -42,20 +42,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->height_ = themeConstants->GetDimension(THEME_PIECE_HEIGHT);
-            theme->textStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
-            auto maxlines = themeConstants->GetInt(THEME_PIECE_TEXT_LINES);
-            theme->textStyle_.SetMaxLines(maxlines < 0 ? UINT32_MAX : maxlines);
-            theme->textStyle_.SetTextColor(themeConstants->GetColor(THEME_PIECE_TEXT_COLOR));
-            theme->textStyle_.SetFontSize(themeConstants->GetDimension(THEME_PIECE_FONT_SIZE));
-            theme->textStyle_.SetFontWeight(FontWeight(themeConstants->GetInt(THEME_PIECE_FONT_WEIGHT)));
-            theme->hoverColor_ = themeConstants->GetColor(THEME_PIECE_HOVER_COLOR);
-            theme->backgroundColor_ = themeConstants->GetColor(THEME_PIECE_BACKGROUND_COLOR);
-            theme->paddingHorizontal_ = themeConstants->GetDimension(THEME_PIECE_PADDING_HORIZONTAL);
-            theme->paddingVertical_ = themeConstants->GetDimension(THEME_PIECE_PADDING_VERTICAL);
             theme->iconResource_ = themeConstants->GetResourceId(THEME_PIECE_ICON_SOURCE);
-            theme->iconSize_ = themeConstants->GetDimension(THEME_PIECE_ICON_SIZE);
-            theme->interval_ = themeConstants->GetDimension(THEME_PIECE_INTERVAL);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -71,6 +58,16 @@ public:
                 LOGW("find pattern of piece fail");
                 return;
             }
+            theme->height_ = pattern->GetAttr<Dimension>("piece_height", 0.0_vp);
+            theme->textStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
+            auto maxlines = static_cast<int32_t>(pattern->GetAttr<double>("piece_text_lines", 0.0));
+            theme->textStyle_.SetMaxLines(maxlines < 0 ? UINT32_MAX : maxlines);
+            theme->textStyle_.SetFontWeight(
+                FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("piece_font_weight", 0.0))));
+            theme->paddingHorizontal_ = pattern->GetAttr<Dimension>("piece_padding_horizontal", 0.0_vp);
+            theme->paddingVertical_ = pattern->GetAttr<Dimension>("piece_padding_vertical", 0.0_vp);
+            theme->iconSize_ = pattern->GetAttr<Dimension>("piece_icon_size", 0.0_vp);
+            theme->interval_ = pattern->GetAttr<Dimension>("piece_interval", 0.0_vp);
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
             theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp));
             theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color())

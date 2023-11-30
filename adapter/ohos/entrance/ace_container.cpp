@@ -32,7 +32,9 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
+#include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
+#include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
@@ -57,12 +59,11 @@
 #include "bridge/js_frontend/js_frontend.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
-#include "core/common/connect_server_manager.h"
+#include "core/common/asset_manager_impl.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
-#include "core/common/hdc_register.h"
 #include "core/common/platform_window.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/resource/resource_manager.h"
@@ -808,10 +809,11 @@ void AceContainer::InitializeCallback()
 
     if (!isFormRender_) {
         auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
-                                       int32_t x, int32_t y, const DragEventAction& action) {
+                                        const PointerEvent& pointerEvent, const DragEventAction& action) {
             ContainerScope scope(id);
             context->GetTaskExecutor()->PostTask(
-                [context, x, y, action]() { context->OnDragEvent(x, y, action); }, TaskExecutor::TaskType::UI);
+                [context, pointerEvent, action]() { context->OnDragEvent(pointerEvent, action); },
+                TaskExecutor::TaskType::UI);
         };
         aceView_->RegisterDragEventCallback(dragEventCallback);
     }
@@ -824,8 +826,6 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, const 
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(
         instanceId, type, aceAbility, std::move(callback), useCurrentEventRunner, useNewPipeline);
     AceEngine::Get().AddContainer(instanceId, aceContainer);
-    ConnectServerManager::Get().SetDebugMode();
-    HdcRegister::Get().StartHdcRegister(instanceId);
     aceContainer->Initialize();
     ContainerScope scope(instanceId);
     auto front = aceContainer->GetFrontend();
@@ -844,7 +844,6 @@ void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void
     SubwindowManager::GetInstance()->CloseDialog(instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
-    HdcRegister::Get().StopHdcRegister(instanceId);
     container->Destroy();
     // unregister watchdog before stop thread to avoid UI_BLOCK report
     AceEngine::Get().UnRegisterFromWatchDog(instanceId);
@@ -858,7 +857,6 @@ void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void
         LOGI("Remove on Platform thread...");
         EngineHelper::RemoveEngine(instanceId);
         AceEngine::Get().RemoveContainer(instanceId);
-        ConnectServerManager::Get().RemoveInstance(instanceId);
         CHECK_NULL_VOID(destroyCallback);
         destroyCallback();
     };
@@ -1254,29 +1252,57 @@ void AceContainer::AddAssetPath(int32_t instanceId, const std::string& packagePa
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
-    RefPtr<FlutterAssetManager> flutterAssetManager;
-    if (container->assetManager_) {
-        flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        RefPtr<AssetManagerImpl> assetManagerImpl;
+        if (container->assetManager_) {
+            assetManagerImpl = AceType::DynamicCast<AssetManagerImpl>(container->assetManager_);
+        } else {
+            assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+            container->assetManager_ = assetManagerImpl;
+            if (container->type_ != FrontendType::DECLARATIVE_JS) {
+                container->frontend_->SetAssetManager(assetManagerImpl);
+            }
+        }
+        CHECK_NULL_VOID(assetManagerImpl);
+        if (!hapPath.empty()) {
+            auto assetProvider = AceType::MakeRefPtr<HapAssetProviderImpl>();
+            if (assetProvider->Initialize(hapPath, paths)) {
+                LOGI("Push AssetProvider to queue.");
+                assetManagerImpl->PushBack(std::move(assetProvider));
+            }
+        }
+        if (!packagePath.empty()) {
+            auto assetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+            if (assetProvider->Initialize(packagePath, paths)) {
+                LOGI("Push AssetProvider to queue.");
+                assetManagerImpl->PushBack(std::move(assetProvider));
+            }
+        }
     } else {
-        flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-        container->assetManager_ = flutterAssetManager;
-        if (container->type_ != FrontendType::DECLARATIVE_JS) {
-            container->frontend_->SetAssetManager(flutterAssetManager);
+        RefPtr<FlutterAssetManager> flutterAssetManager;
+        if (container->assetManager_) {
+            flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
+        } else {
+            flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+            container->assetManager_ = flutterAssetManager;
+            if (container->type_ != FrontendType::DECLARATIVE_JS) {
+                container->frontend_->SetAssetManager(flutterAssetManager);
+            }
         }
-    }
-    CHECK_NULL_VOID(flutterAssetManager);
-    if (!hapPath.empty()) {
-        auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
-        if (assetProvider->Initialize(hapPath, paths)) {
-            LOGI("Push AssetProvider to queue.");
-            flutterAssetManager->PushBack(std::move(assetProvider));
+        CHECK_NULL_VOID(flutterAssetManager);
+        if (!hapPath.empty()) {
+            auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
+            if (assetProvider->Initialize(hapPath, paths)) {
+                LOGI("Push AssetProvider to queue.");
+                flutterAssetManager->PushBack(std::move(assetProvider));
+            }
         }
-    }
-    if (!packagePath.empty()) {
-        auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-        if (assetProvider->Initialize(packagePath, paths)) {
-            LOGI("Push AssetProvider to queue.");
-            flutterAssetManager->PushBack(std::move(assetProvider));
+        if (!packagePath.empty()) {
+            auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+            if (assetProvider->Initialize(packagePath, paths)) {
+                LOGI("Push AssetProvider to queue.");
+                flutterAssetManager->PushBack(std::move(assetProvider));
+            }
         }
     }
 }
@@ -1285,18 +1311,33 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
-    RefPtr<FlutterAssetManager> flutterAssetManager;
-    if (container->assetManager_) {
-        flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
-    } else {
-        flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-        container->assetManager_ = flutterAssetManager;
-        if (container->type_ != FrontendType::DECLARATIVE_JS) {
-            container->frontend_->SetAssetManager(flutterAssetManager);
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        RefPtr<AssetManager> assetManagerImpl;
+        if (container->assetManager_) {
+            assetManagerImpl = AceType::DynamicCast<AssetManagerImpl>(container->assetManager_);
+        } else {
+            assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+            container->assetManager_ = assetManagerImpl;
+            if (container->type_ != FrontendType::DECLARATIVE_JS) {
+                container->frontend_->SetAssetManager(assetManagerImpl);
+            }
         }
+        CHECK_NULL_VOID(assetManagerImpl);
+        assetManagerImpl->SetLibPath("default", libPath);
+    } else {
+        RefPtr<FlutterAssetManager> flutterAssetManager;
+        if (container->assetManager_) {
+            flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
+        } else {
+            flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+            container->assetManager_ = flutterAssetManager;
+            if (container->type_ != FrontendType::DECLARATIVE_JS) {
+                container->frontend_->SetAssetManager(flutterAssetManager);
+            }
+        }
+        CHECK_NULL_VOID(flutterAssetManager);
+        flutterAssetManager->SetLibPath("default", libPath);
     }
-    CHECK_NULL_VOID(flutterAssetManager);
-    flutterAssetManager->SetLibPath("default", libPath);
 }
 
 void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width,
@@ -1857,6 +1898,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     if (!parsedConfig.themeTag.empty()) {
         if (ParseThemeConfig(parsedConfig.themeTag)) {
+            configurationChange.defaultFontUpdate = true;
             CheckAndSetFontFamily();
         } else {
             LOGE("AceContainer::ParseThemeConfig false");
@@ -2021,7 +2063,6 @@ void AceContainer::UpdateResource()
     CHECK_NULL_VOID(pipelineContext_);
 
     if (SystemProperties::GetResourceDecoupling()) {
-        ResourceManager::GetInstance().Reset();
         auto context = runtimeContext_.lock();
         auto abilityInfo = abilityInfo_.lock();
         InitResourceAndThemeManager(pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo);

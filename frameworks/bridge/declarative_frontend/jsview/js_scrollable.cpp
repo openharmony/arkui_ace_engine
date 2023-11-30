@@ -15,12 +15,14 @@
 
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
 const int32_t EDGE_EFFECT_PARAM_COUNT = 2;
-}
+const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
+} // namespace
 
 EdgeEffect JSScrollable::ParseEdgeEffect(const JSCallbackInfo& info, EdgeEffect defaultValue)
 {
@@ -46,5 +48,52 @@ bool JSScrollable::ParseAlwaysEnable(const JSCallbackInfo& info, bool defaultVal
         }
     }
     return alwaysEnabled;
+}
+
+DisplayMode JSScrollable::ParseDisplayMode(const JSCallbackInfo& info, DisplayMode defaultValue)
+{
+    if (info.Length() < 1) {
+        return defaultValue;
+    }
+    auto displayMode = static_cast<int32_t>(defaultValue);
+    if (!info[0]->IsUndefined() && info[0]->IsNumber()) {
+        JSViewAbstract::ParseJsInt32(info[0], displayMode);
+        if (displayMode < 0 || displayMode >= static_cast<int32_t>(DISPLAY_MODE.size())) {
+            displayMode = static_cast<int32_t>(defaultValue);
+        }
+    }
+    return static_cast<DisplayMode>(displayMode);
+}
+
+std::string JSScrollable::ParseBarColor(const std::string& color)
+{
+    if (!color.empty() && color != "undefined") {
+        return color;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, "");
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_RETURN(theme, "");
+    Color defaultColor(theme->GetForegroundColor());
+    return defaultColor.ColorToString();
+}
+
+std::string JSScrollable::ParseBarWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return "";
+    }
+
+    CalcDimension scrollBarWidth;
+    if (!JSViewAbstract::ParseJsDimensionVp(info[0], scrollBarWidth) || info[0]->IsNull() || info[0]->IsUndefined() ||
+        (info[0]->IsString() && info[0]->ToString().empty()) || LessNotEqual(scrollBarWidth.Value(), 0.0) ||
+        scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, "");
+        auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+        CHECK_NULL_RETURN(theme, "");
+        scrollBarWidth = theme->GetNormalWidth();
+    }
+    return scrollBarWidth.ToString();
 }
 } // namespace OHOS::Ace::Framework

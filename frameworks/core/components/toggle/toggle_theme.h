@@ -43,19 +43,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->backgroundColor_ = themeConstants->GetColor(THEME_TOGGLE_BACKGROUND_COLOR);
-            theme->checkedColor_ = themeConstants->GetColor(THEME_TOGGLE_CHECKED_COLOR);
-            theme->textStyle_.SetTextColor(themeConstants->GetColor(THEME_TOGGLE_TEXT_COLOR));
-            theme->textStyle_.SetFontSize(themeConstants->GetDimension(THEME_TOGGLE_TEXT_FONTSIZE));
-            theme->textStyle_.SetFontWeight(FontWeight(themeConstants->GetInt(THEME_TOGGLE_TEXT_FONTWEIGHT)));
-            theme->height_ = themeConstants->GetDimension(THEME_TOGGLE_HEIGHT);
-            theme->padding_ = Edge(themeConstants->GetDimension(THEME_TOGGLE_PADDING_HORIZONTAL).Value(),
-                themeConstants->GetDimension(THEME_TOGGLE_PADDING_VERTICAL).Value(),
-                themeConstants->GetDimension(THEME_TOGGLE_PADDING_HORIZONTAL).Value(),
-                themeConstants->GetDimension(THEME_TOGGLE_PADDING_VERTICAL).Value(),
-                themeConstants->GetDimension(THEME_TOGGLE_PADDING_VERTICAL).Unit());
-            theme->disabledAlpha_ = themeConstants->GetDouble(THEME_TOGGLE_DISABLED_ALPHA);
-            theme->pressedBlendColor_ = themeConstants->GetColor(THEME_TOGGLE_PRESSED_BLEND_COLOR);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -70,6 +57,16 @@ public:
             if (!togglePattern) {
                 return;
             }
+            theme->textStyle_.SetFontSize(togglePattern->GetAttr<Dimension>("toggle_text_font_size", 0.0_fp));
+            theme->textStyle_.SetFontWeight(
+                FontWeight(static_cast<int32_t>(togglePattern->GetAttr<double>("toggle_text_font_weight", 0.0))));
+            theme->height_ = togglePattern->GetAttr<Dimension>("toggle_height", 0.0_vp);
+            theme->padding_ = Edge(togglePattern->GetAttr<Dimension>("toggle_padding_horizontal", 0.0_vp).Value(),
+                togglePattern->GetAttr<Dimension>("toggle_padding_vertical", 0.0_vp).Value(),
+                togglePattern->GetAttr<Dimension>("toggle_padding_horizontal", 0.0_vp).Value(),
+                togglePattern->GetAttr<Dimension>("toggle_padding_vertical", 0.0_vp).Value(),
+                togglePattern->GetAttr<Dimension>("toggle_padding_vertical", 0.0_vp).Unit());
+            theme->disabledAlpha_ = togglePattern->GetAttr<double>("toggle_disable_alpha", 0.0);
             theme->backgroundColor_ = togglePattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
             theme->checkedColor_ = togglePattern->GetAttr<Color>("bg_color_checked", Color())
                 .BlendOpacity(togglePattern->GetAttr<double>("bg_color_checked_alpha", 0.0));

@@ -107,8 +107,6 @@ public:
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
-
     double GetStoredOffset() const
     {
         return layoutInfo_.storedOffset_;
@@ -124,6 +122,10 @@ public:
     Rect GetItemRect(int32_t index) const override;
 
 private:
+    DisplayMode GetDefaultScrollBarDisplayMode() const override
+    {
+        return DisplayMode::OFF;
+    }
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitScrollableEvent();

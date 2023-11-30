@@ -28,6 +28,7 @@
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/common/asset_manager_impl.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Accessibility {
@@ -212,7 +213,6 @@ public:
 
     bool NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset) override;
-    
 private:
     void InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);

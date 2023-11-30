@@ -219,6 +219,8 @@ public:
 
     static bool GetImageFrameworkEnabled();
 
+    static bool GetDebugPixelMapSaveEnabled();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;
@@ -392,6 +394,8 @@ public:
     static bool GetTitleStyleEnabled() {
         return changeTitleStyleEnabled_;
     }
+
+    static std::string GetCustomTitleFilePath();
 
     static bool GetFlutterDecouplingEnabled()
     {

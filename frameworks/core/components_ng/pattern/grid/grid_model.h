@@ -45,7 +45,7 @@ public:
     virtual void SetColumnsGap(const Dimension& value) = 0;
     virtual void SetRowsGap(const Dimension& value) = 0;
     virtual void SetGridHeight(const Dimension& value) = 0;
-    virtual void SetScrollBarMode(int32_t value) = 0;
+    virtual void SetScrollBarMode(DisplayMode value) = 0;
     virtual void SetScrollBarColor(const std::string& value) = 0;
     virtual void SetScrollBarWidth(const std::string& value) = 0;
     virtual void SetCachedCount(int32_t value) = 0;
@@ -80,6 +80,8 @@ public:
     virtual void SetOnScrollIndex(std::function<void(int32_t, int32_t)>&& onScrollIndex) = 0;
     virtual void SetOnReachStart(std::function<void()>&& onReachStart) = 0;
     virtual void SetOnReachEnd(std::function<void()>&& onReachEnd) = 0;
+
+    virtual DisplayMode GetDisplayMode() const = 0;
 
 private:
     static std::unique_ptr<GridModel> instance_;

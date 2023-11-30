@@ -80,7 +80,7 @@
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
-constexpr uint64_t INTERPOLATION_THRESHOLD = 300 * 1000 * 1000; // 300ms
+constexpr uint64_t INTERPOLATION_THRESHOLD = 100 * 1000 * 1000; // 100ms
 constexpr int32_t INDEX_X = 0;
 constexpr int32_t INDEX_Y = 1;
 constexpr int32_t INDEX_TIME = 2;
@@ -581,6 +581,11 @@ void PipelineContext::FlushFocus()
         dirtyDefaultFocusNode_.Reset();
         return;
     }
+    auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
+    auto curMainView = FocusHub::GetCurrentMainView();
+    if (curMainView && curMainView->GetIsViewHasFocused() && rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
+        rootFocusHub->RequestFocusImmediately();
+    }
 }
 
 void PipelineContext::FlushPipelineImmediately()
@@ -730,6 +735,7 @@ void PipelineContext::SetupRootElement()
         auto overlay = weakOverlayManger.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->HideAllMenus();
+        SubwindowManager::GetInstance()->HideMenuNG(false);
         overlay->HideCustomPopups();
     };
     rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
@@ -922,7 +928,11 @@ void PipelineContext::StartWindowMaximizeAnimation(
     int32_t duration = 400;
     MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
     if (maximizeMode == MaximizeMode::MODE_FULL_FILL || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        duration = 0;
+        int32_t preWidth = GetRootRect().Width();
+        int32_t preHeight = GetRootRect().Height();
+        if (width > preWidth && height > preHeight) {
+            duration = 0;
+        }
     }
     option.SetDuration(duration);
     auto curve = Curves::EASE_OUT;
@@ -1018,6 +1028,13 @@ void PipelineContext::SetIgnoreViewSafeArea(bool value)
 void PipelineContext::SetIsLayoutFullScreen(bool value)
 {
     if (safeAreaManager_->SetIsFullScreen(value)) {
+        SyncSafeArea();
+    }
+}
+
+void PipelineContext::SetIsNeedAvoidWindow(bool value)
+{
+    if (safeAreaManager_->SetIsNeedAvoidWindow(value)) {
         SyncSafeArea();
     }
 }
@@ -1227,17 +1244,6 @@ bool PipelineContext::OnBackPressed()
         return true;
     }
 
-    auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
-    if (textfieldManager && textfieldManager->OnBackPressed()) {
-        return true;
-    }
-
-#ifdef WINDOW_SCENE_SUPPORTED
-    if (uiExtensionManager_->OnBackPressed()) {
-        return true;
-    }
-#endif
-
     // if has popup, back press would hide popup and not trigger page back
     auto hasOverlay = false;
     taskExecutor_->PostSyncTask(
@@ -1255,6 +1261,17 @@ bool PipelineContext::OnBackPressed()
     if (hasOverlay) {
         return true;
     }
+
+    auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    if (textfieldManager && textfieldManager->OnBackPressed()) {
+        return true;
+    }
+
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_->OnBackPressed()) {
+        return true;
+    }
+#endif
 
     auto result = false;
     taskExecutor_->PostSyncTask(
@@ -1375,6 +1392,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             "type=%{public}d", scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type);
     }
     eventManager_->SetInstanceId(GetInstanceId());
+    if (scalePoint.type != TouchType::MOVE && historyPointsById_.find(scalePoint.id) != historyPointsById_.end()) {
+        historyPointsById_.erase(scalePoint.id);
+    }
     if (scalePoint.type == TouchType::DOWN) {
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false);
@@ -1455,7 +1475,7 @@ void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint)
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
     if (manager->IsDragging() && manager->IsSameDraggingPointer(touchPoint.id)) {
-        manager->OnDragEnd({ touchPoint.x, touchPoint.y }, "");
+        manager->OnDragEnd(PointerEvent(touchPoint.x, touchPoint.y), "");
     }
 }
 
@@ -1743,6 +1763,10 @@ void PipelineContext::FlushMouseEvent()
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
+    auto window = GetWindow();
+    if (window && window->IsUserSetCursor()) {
+        return false;
+    }
     if (mouseStyleNodeId_ != nodeId) {
         return false;
     }
@@ -1762,7 +1786,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         auto manager = GetDragDropManager();
         if (manager) {
             manager->SetIsDragCancel(true);
-            manager->OnDragEnd({ 0.0f, 0.0f }, "");
+            manager->OnDragEnd(PointerEvent(0, 0), "");
         }
     }
 
@@ -1801,29 +1825,33 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 
 bool PipelineContext::RequestDefaultFocus(const RefPtr<FocusHub>& mainView)
 {
-    if (mainView->GetFocusType() != FocusType::SCOPE) {
+    if (!mainView || mainView->GetFocusType() != FocusType::SCOPE) {
         return false;
     }
+    mainView->SetIsViewHasFocused(true);
     auto viewRootScope = mainView->GetMainViewRootScope();
     auto defaultFocusNode = mainView->GetChildFocusNodeByType(FocusNodeType::DEFAULT);
     if (!mainView->IsDefaultHasFocused() && defaultFocusNode && defaultFocusNode->IsFocusableWholePath()) {
         mainView->SetIsViewRootScopeFocused(viewRootScope, false);
         auto ret = defaultFocusNode->RequestFocusImmediately();
         mainView->SetIsDefaultHasFocused(true);
-        LOGI("Target view's default focus is %{public}s/%{public}d. Request default focus return: %{public}d.",
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "Target view's default focus is %{public}s/%{public}d. Request default focus return: %{public}d.",
             defaultFocusNode->GetFrameName().c_str(), defaultFocusNode->GetFrameId(), ret);
         return ret;
     }
     if (mainView->GetIsViewRootScopeFocused() && viewRootScope) {
         mainView->SetIsViewRootScopeFocused(viewRootScope, true);
         auto ret = viewRootScope->RequestFocusImmediately();
-        LOGI("Target view's default focus is %{public}s/%{public}d. Request view root focus return: %{public}d.",
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "Target view has no default focus. Request focus on view root: %{public}s/%{public}d return: %{public}d.",
             viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
         return ret;
     }
     mainView->SetIsViewRootScopeFocused(viewRootScope, false);
     auto ret = mainView->RequestFocusImmediately();
-    LOGI("Target view's default focus has been focused. Request view focus return: %{public}d.", ret);
+    TAG_LOGI(AceLogTag::ACE_FOCUS,
+        "Target view's default focus has been focused. Request view focus return: %{public}d.", ret);
     return ret;
 }
 
@@ -2051,22 +2079,19 @@ void PipelineContext::WindowFocus(bool isFocus)
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
-        LOGD("WindowFocus: window - %{public}d on blur.", windowId_);
-        auto mouseStyle = MouseStyle::CreateMouseStyle();
-        if (mouseStyle) {
-            mouseStyle->ChangePointerStyle(static_cast<int32_t>(GetWindowId()), MouseFormat::DEFAULT);
-        }
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d lost focus.", windowId_);
+        RestoreDefault();
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     } else {
-        LOGD("WindowFocus: window - %{public}d on focus.", windowId_);
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
         auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
-        if (rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
+        auto curMainView = FocusHub::GetCurrentMainView();
+        if (curMainView && curMainView->GetIsViewHasFocused() && rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
             rootFocusHub->RequestFocusImmediately();
         }
         if (focusWindowId_.has_value()) {
-            auto curMainView = FocusHub::GetCurrentMainView();
             if (curMainView) {
                 curMainView->HandleFocusOnMainView();
             }
@@ -2101,19 +2126,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
-    auto callback = [weakPattern = WeakClaim(RawPtr(containerPattern)), isShow, hasDeco, needUpdate]() {
-        auto pattern = weakPattern.Upgrade();
-        if (pattern != nullptr) {
-            pattern->ShowTitle(isShow, hasDeco, needUpdate);
-        }
-    };
-    MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
-    if (maximizeMode == MaximizeMode::MODE_FULL_FILL || maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        constexpr int32_t delayedTime = 50;
-        taskExecutor_->PostDelayedTask(callback, TaskExecutor::TaskType::UI, delayedTime);
-    } else {
-        callback();
-    }
+    containerPattern->ShowTitle(isShow, hasDeco);
 }
 
 void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)
@@ -2324,7 +2337,7 @@ void PipelineContext::FlushWindowSizeChangeCallback(int32_t width, int32_t heigh
     }
 }
 
-void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
+void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action)
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -2335,6 +2348,10 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
             manager->SetIsWindowConsumed(false);
             return;
         }
+    }
+    if (action == DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER) {
+        manager->OnDragStart(pointerEvent.GetPoint());
+        return;
     }
     if (action == DragEventAction::DRAG_EVENT_OUT) {
         manager->ClearSummary();
@@ -2353,13 +2370,13 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     manager->GetExtraInfoFromClipboard(extraInfo);
 #endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
-        manager->OnDragEnd(Point(x, y, x, y), extraInfo);
+        manager->OnDragEnd(pointerEvent, extraInfo);
 #ifndef ENABLE_DRAG_FRAMEWORK
         manager->RestoreClipboardData();
 #endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
-    manager->OnDragMove(Point(x, y, x, y), extraInfo);
+    manager->OnDragMove(pointerEvent, extraInfo);
 }
 
 void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId)
@@ -2586,18 +2603,25 @@ std::string PipelineContext::GetCurrentExtraInfo()
 void PipelineContext::SetCursor(int32_t cursorValue)
 {
     if (cursorValue >= 0 && cursorValue <= static_cast<int32_t>(MouseFormat::RUNNING)) {
-        cursor_ = static_cast<MouseFormat>(cursorValue);
+        auto window = GetWindow();
+        CHECK_NULL_VOID(window);
         auto mouseStyle = MouseStyle::CreateMouseStyle();
         CHECK_NULL_VOID(mouseStyle);
-        mouseStyle->ChangePointerStyle(GetWindowId(), cursor_);
+        auto cursor = static_cast<MouseFormat>(cursorValue);
+        window->SetCursor(cursor);
+        window->SetUserSetCursor(true);
+        mouseStyle->ChangePointerStyle(GetWindowId(), cursor);
     }
 }
 
 void PipelineContext::RestoreDefault()
 {
-    cursor_ = MouseFormat::DEFAULT;
+    auto window = GetWindow();
+    CHECK_NULL_VOID(window);
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     CHECK_NULL_VOID(mouseStyle);
+    window->SetCursor(MouseFormat::DEFAULT);
+    window->SetUserSetCursor(false);
     mouseStyle->ChangePointerStyle(GetWindowId(), MouseFormat::DEFAULT);
 }
 

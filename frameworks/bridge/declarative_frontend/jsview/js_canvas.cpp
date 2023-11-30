@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/jsview/models/canvas_model_impl.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom_paint/canvas_model_ng.h"
 
 namespace OHOS::Ace {
@@ -85,17 +86,21 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
 
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     if (Container::IsCurrentUsePartialUpdate()) {
-        auto readyEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto readyEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Canvas.onReady");
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
         CanvasModel::GetInstance()->SetOnReady(std::move(readyEvent));
     } else {
-        auto readyEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto readyEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                               uint32_t accountableCanvasElement) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Canvas.onReady");
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
         CanvasModel::GetInstance()->SetOnReady(std::move(readyEvent));

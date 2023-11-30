@@ -89,6 +89,7 @@ template("ace_core_source_set") {
       "common/storage/storage_proxy.cpp",
       "common/task_executor_impl.cpp",
       "common/task_runner_adapter_factory.cpp",
+      "common/task_runner_adapter_impl.cpp",
       "common/task_runners.cpp",
       "common/text_field_manager.cpp",
       "common/thread_checker.cpp",
@@ -273,13 +274,16 @@ template("ace_core_source_set") {
       sources += [
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
-        "common/task_runner_adapter_impl.cpp",
       ]
     } else {
       sources += [
         "$flutter_root/engine/flutter/common/task_runners.cc",
         "$flutter_root/engine/flutter/shell/common/thread_host.cc",
       ]
+    }
+
+    if (defined(config.build_for_preview) && config.build_for_preview) {
+      sources -= [ "common/task_runner_adapter_impl.cpp" ]
     }
 
     deps += [
@@ -664,6 +668,7 @@ template("ace_core_ng_source_set") {
       "common/storage/storage_proxy.cpp",
       "common/task_executor_impl.cpp",
       "common/task_runner_adapter_factory.cpp",
+      "common/task_runner_adapter_impl.cpp",
       "common/task_runners.cpp",
       "common/text_field_manager.cpp",
       "common/thread_checker.cpp",
@@ -854,8 +859,11 @@ template("ace_core_ng_source_set") {
       sources += [
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
-        "common/task_runner_adapter_impl.cpp",
       ]
+    }
+
+    if (defined(config.build_for_preview) && config.build_for_preview) {
+      sources -= [ "common/task_runner_adapter_impl.cpp" ]
     }
 
     external_deps = []

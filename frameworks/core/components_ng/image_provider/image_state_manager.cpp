@@ -46,7 +46,7 @@ void ImageStateManager::HandleCommand(ImageLoadingCommand command)
             HandleCommandByLoadFailState(command);
             break;
         default:
-            LOGE("unknown command: %{public}d", command);
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "unknown command: %{public}d", command);
             break;
     }
 }

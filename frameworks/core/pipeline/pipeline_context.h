@@ -653,7 +653,7 @@ public:
     }
     void StartSystemDrag(const std::string& str, const RefPtr<PixelMap>& pixmap);
     void InitDragListener();
-    void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override;
+    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) override;
     void SetPreTargetRenderNode(const RefPtr<DragDropEvent>& preDragDropNode);
     const RefPtr<DragDropEvent>& GetPreTargetRenderNode() const;
     void SetInitRenderNode(const RefPtr<RenderNode>& initRenderNode);

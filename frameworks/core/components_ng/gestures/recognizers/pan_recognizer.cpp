@@ -277,7 +277,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         LOGI("Delta is x %{public}f, y %{public}f ", delta_.GetX(), delta_.GetY());
     }
     mainDelta_ = GetMainAxisDelta();
-    UpdateTouchPointInVelocityTracker(event);
+    UpdateTouchPointInVelocityTracker(event.history.empty() ? event : event.history.back());
     averageDistance_ += delta_ / static_cast<double>(touchPoints_.size());
     touchPoints_[event.id] = event;
     touchPointsDistance_[event.id] += delta_;

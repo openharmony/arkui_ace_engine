@@ -270,7 +270,7 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage
 void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
     errorMsg_ = errorMsg;
-    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(),
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, source = %{public}s, reason: %{public}s", src_.ToString().c_str(),
         errorMsg.c_str());
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
 }

@@ -108,6 +108,7 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
         auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
         if (recognizer) {
             recognizer->BeginReferee(touchId);
+            recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
             recognizer->SetTargetComponent(targetComponent);
             if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
                 auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
@@ -211,6 +212,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             for (const auto& groupRecognizer : groupRecognizers) {
                 if (groupRecognizer) {
                     groupRecognizer->SetCoordinateOffset(offset);
+                    groupRecognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
                     groupRecognizer->SetTargetComponent(targetComponent);
                 }
             }
@@ -551,9 +553,13 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     return result;
 }
 
-float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t width) const
+float GestureEventHub::GetPixelMapScale(
+    const DragPreviewOption& option, const int32_t height, const int32_t width) const
 {
     float scale = 1.0f;
+    if (option.mode == DragPreviewMode::DISABLE_SCALE) {
+        return scale;
+    }
     int32_t deviceHeight = SystemProperties::GetDevicePhysicalHeight();
     int32_t deviceWidth = SystemProperties::GetDevicePhysicalWidth();
     int32_t maxDeviceLength = std::max(deviceHeight, deviceWidth);
@@ -602,7 +608,8 @@ std::function<void()> GestureEventHub::GetMousePixelMapCallback(const GestureEve
             pixelMap = thumbnailPixelMap->GetPixelMapSharedPtr();
         }
         CHECK_NULL_VOID(pixelMap);
-        float scale = gestureHub->GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
+        float scale = gestureHub->GetPixelMapScale(
+            frameNode->GetDragPreviewOption(), pixelMap->GetHeight(), pixelMap->GetWidth());
         pixelMap->scale(scale, scale, Media::AntiAliasingOption::NONE);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -624,6 +631,7 @@ std::function<void()> GestureEventHub::GetMousePixelMapCallback(const GestureEve
         }
         InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         dragDropManager->SetIsDragWindowShow(true);
+        dragDropManager->SetPreviewRect(Rect(pixelMapOffset.GetX(), pixelMapOffset.GetY(), width, height));
     };
     return callback;
 }
@@ -749,6 +757,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
+    pattern->ResetDragOption();
     if (pattern->GetDragRecordSize() >= 0) {
         recordsSize = pattern->GetDragRecordSize();
     } else if (unifiedData) {
@@ -784,7 +793,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     float defaultPixelMapScale =
         info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
-    float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth()) * defaultPixelMapScale;
+    float scale = GetPixelMapScale(frameNode->GetDragPreviewOption(), pixelMap->GetHeight(), pixelMap->GetWidth()) *
+                  defaultPixelMapScale;
     pixelMap->scale(scale, scale, Media::AntiAliasingOption::HIGH);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -809,6 +819,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         return;
     }
     dragDropManager->SetDraggingPointer(info.GetPointerId());
+    dragDropManager->SetPreviewRect(Rect(pixelMapOffset.GetX(), pixelMapOffset.GetY(), width, height));
     dragDropManager->ResetRecordSize(static_cast<uint32_t>(recordsSize));
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
@@ -1181,6 +1192,16 @@ bool GestureEventHub::IsAccessibilityLongClickable()
         }
     }
     return ret;
+}
+
+bool GestureEventHub::GetMonopolizeEvents() const
+{
+    return monopolizeEvents_;
+}
+
+void GestureEventHub::SetMonopolizeEvents(bool monopolizeEvents)
+{
+    monopolizeEvents_ = monopolizeEvents;
 }
 
 void GestureEventHub::ClearUserOnClick()

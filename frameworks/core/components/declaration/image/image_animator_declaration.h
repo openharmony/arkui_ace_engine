@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_IMAGE_ANIMATOR_IMAGE_ANIMATOR_DECLARATION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_IMAGE_ANIMATOR_IMAGE_ANIMATOR_DECLARATION_H
 
+#include <string>
 #include "core/components/common/properties/border.h"
 #include "core/components/declaration/common/declaration.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
@@ -25,6 +26,8 @@ namespace OHOS::Ace {
 
 struct ImageProperties {
     std::string src;
+    std::string bundleName;
+    std::string moduleName;
     CalcDimension width;
     CalcDimension height;
     CalcDimension top;

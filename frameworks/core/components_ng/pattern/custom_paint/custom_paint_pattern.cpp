@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 #include "core/components_ng/pattern/custom_paint/rendering_context2d_modifier.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "base/log/dump_log.h"
 
 namespace {} // namespace
 
@@ -60,18 +61,18 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto customPaintEventHub = GetEventHub<CustomPaintEventHub>();
     CHECK_NULL_RETURN(customPaintEventHub, false);
 
-    if (config.contentSizeChange || config.frameSizeChange) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            isCanvasInit_ = !config.frameSizeChange;
-        } else {
-            isCanvasInit_ = false;
-        }
-    } else if (config.frameOffsetChange || config.contentOffsetChange) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            isCanvasInit_ = true;
-        } else {
-            isCanvasInit_ = false;
-        }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        isCanvasInit_ = geometryNode->GetPixelGridRoundSize() == oldPixelGridRoundSize_;
+        lastOldPixelGridRoundSize_ = oldPixelGridRoundSize_;
+        oldPixelGridRoundSize_ = geometryNode->GetPixelGridRoundSize();
+    } else if (config.contentSizeChange || config.frameSizeChange || config.frameOffsetChange ||
+               config.contentOffsetChange) {
+        isCanvasInit_ = false;
+        recordConfig_ = config;
     }
 
     if (!isCanvasInit_) {
@@ -895,5 +896,32 @@ void CustomPaintPattern::SetFilterParam(const std::string& filterStr)
 TransformParam CustomPaintPattern::GetTransform() const
 {
     return paintMethod_->GetTransform();
+}
+
+void CustomPaintPattern::OnPixelRoundFinish(const SizeF& pixelGridRoundSize)
+{
+    CHECK_NULL_VOID(paintMethod_);
+    paintMethod_->UpdateRecordingCanvas(pixelGridRoundSize.Width(), pixelGridRoundSize.Height());
+}
+
+void CustomPaintPattern::DumpAdvanceInfo()
+{
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("PixelGridRoundSize: ")
+                .append(oldPixelGridRoundSize_.ToString())
+                .append(", lase PixelGridRoundSize: ")
+                .append(lastOldPixelGridRoundSize_.ToString()));
+    } else {
+        DumpLog::GetInstance().AddDesc(
+            std::string("contentSizeChange: ").append(recordConfig_.contentSizeChange ? "true" : "false"));
+        DumpLog::GetInstance().AddDesc(
+            std::string("frameSizeChange: ").append(recordConfig_.frameSizeChange ? "true" : "false"));
+        DumpLog::GetInstance().AddDesc(
+            std::string("frameOffsetChange: ").append(recordConfig_.frameOffsetChange ? "true" : "false"));
+        DumpLog::GetInstance().AddDesc(
+            std::string("contentOffsetChange: ").append(recordConfig_.contentOffsetChange ? "true" : "false"));
+    }
+    DumpLog::GetInstance().AddDesc(contentModifier_->GetDumpInfo());
 }
 } // namespace OHOS::Ace::NG

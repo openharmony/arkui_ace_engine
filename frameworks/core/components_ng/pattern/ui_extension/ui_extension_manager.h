@@ -38,6 +38,7 @@ constexpr int32_t UI_EXTENSION_OFFSET_MAX = 10000000;
 constexpr int32_t UI_EXTENSION_OFFSET_MIN = 100000;
 constexpr int32_t UI_EXTENSION_ID_FACTOR = 10;
 constexpr int32_t UI_EXTENSION_LEVEL_MAX = 3;
+constexpr int32_t UI_EXTENSION_ROOT_ID = -1;
 };
 
 class UIExtensionPattern;
@@ -53,7 +54,7 @@ public:
     bool IsWrapExtensionAbilityId(int32_t elementId);
     bool IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pipeline);
     bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-        std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline);
+        const std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline);
     std::pair<int32_t, int32_t> UnWrapExtensionAbilityId(int32_t extensionOffset, int32_t elementId);
     int32_t ApplyExtensionId();
     void RecycleExtensionId(int32_t id);

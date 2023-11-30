@@ -247,11 +247,16 @@ public:
 #endif // ENABLE_DRAG_FRAMEWORK
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear, int32_t targetId);
+        std::function<void()>&& onDisappear, const RefPtr<FrameNode>& targetNode, int32_t sessionId = 0);
 
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear, int32_t targetId);
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildTitleNodeFunc,
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& shouldDismiss, const RefPtr<FrameNode>& targetNode);
+
+    void CloseSheet(int32_t targetId);
+
+    void DismissSheet();
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId);
 
@@ -278,6 +283,22 @@ public:
 
     void MarkDirty(PropertyChangeFlag flag);
     float GetRootHeight() const;
+
+    void PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn);
+
+    void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true,
+        bool isModeChangeToAuto = false);
+
+    void ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
+
+    void ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
+
+    void ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
+
+    void SetSheetHeight(float height)
+    {
+        sheetHeight_ = height;
+    }
 
     const WeakPtr<UINode>& GetRootNode() const
     {
@@ -323,18 +344,16 @@ private:
     void FireModalPageHide();
     void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
-    void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true,
-        bool isModeChangeToAuto = false);
-    void PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn);
+    void SetSheetBackgroundBlurStyle(const RefPtr<FrameNode>& sheetNode, const BlurStyleOption& bgBlurStyle);
 
-    void ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
     bool ModalExitProcess(const RefPtr<FrameNode>& topModalNode);
 
     void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
     bool DialogInMapHoldingFocus();
     void PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bool isTransitionIn);
-    void FireNavigationStateChange(bool show, const RefPtr<UINode>& node = nullptr);
+    void FireNavigationStateChange(const RefPtr<UINode>& root, bool show, const RefPtr<UINode>& node = nullptr);
+    void PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn);
 
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
@@ -366,6 +385,8 @@ private:
     std::function<bool()> backPressEvent_ = nullptr;
 
     std::set<WeakPtr<UINode>> windowSceneSet_;
+
+    RefPtr<NG::ClickEvent> sheetMaskClickEvent_;
 
     // native modal ui extension
     bool isProhibitBack_ = false;

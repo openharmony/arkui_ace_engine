@@ -39,6 +39,7 @@ namespace OHOS::Ace {
 namespace {
 
 using StartServer = bool (*)(const std::string& packageName);
+using StartServerForSocketPair = void (*)(int32_t);
 using SendMessage = void (*)(const std::string& message);
 using SendLayoutMessage = void (*)(const std::string& message);
 using StopServer = void (*)(const std::string& packageName);
@@ -162,6 +163,17 @@ void ConnectServerManager::InitConnectServer()
     g_setDebugModeCallBack([]() {
         AceApplicationInfo::GetInstance().SetNeedDebugBreakPoint(false);
     });
+}
+
+void ConnectServerManager::StartConnectServerWithSocketPair(int32_t socketFd)
+{
+    handlerConnectServerSo_ = dlopen("libconnectserver_debugger.z.so", RTLD_LAZY);
+    CHECK_NULL_VOID(handlerConnectServerSo_);
+
+    auto startServerForSocketPair =
+        reinterpret_cast<StartServerForSocketPair>(dlsym(handlerConnectServerSo_, "StartServerForSocketPair"));
+    CHECK_NULL_VOID(startServerForSocketPair);
+    startServerForSocketPair(socketFd);
 }
 
 void ConnectServerManager::CloseConnectServerSo()

@@ -220,6 +220,11 @@ bool SystemProperties::GetImageFrameworkEnabled()
     return false;
 }
 
+bool SystemProperties::GetDebugPixelMapSaveEnabled()
+{
+    return false;
+}
+
 bool SystemProperties::GetResourceDecoupling()
 {
     return true;
@@ -228,5 +233,10 @@ bool SystemProperties::GetResourceDecoupling()
 int32_t SystemProperties::GetJankFrameThreshold()
 {
     return 0;
+}
+
+std::string SystemProperties::GetCustomTitleFilePath()
+{
+    return UNDEFINED_PARAM;
 }
 } // namespace OHOS::Ace

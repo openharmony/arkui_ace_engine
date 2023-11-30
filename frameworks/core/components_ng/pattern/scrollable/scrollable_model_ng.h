@@ -25,6 +25,10 @@ class ACE_EXPORT ScrollableModelNG {
 public:
     static void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled);
 
+    static void SetScrollBarMode(DisplayMode value);
+    static void SetScrollBarColor(const std::string& value);
+    static void SetScrollBarWidth(const std::string& value);
+
     static void SetOnScroll(OnScrollEvent&& onScroll);
     static void SetOnScrollStart(OnScrollStartEvent&& onScrollStart);
     static void SetOnScrollStop(OnScrollStopEvent&& onScrollStop);

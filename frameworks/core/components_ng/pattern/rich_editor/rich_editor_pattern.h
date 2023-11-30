@@ -86,6 +86,14 @@ public:
     RichEditorPattern();
     ~RichEditorPattern() override;
 
+    // RichEditor needs softkeyboard, override function.
+    bool NeedSoftKeyboard() const override
+    {
+        return true;
+    }
+
+    uint32_t GetSCBSystemWindowId();
+    
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<RichEditorEventHub>();
@@ -121,11 +129,6 @@ public:
     long long GetTimestamp() const
     {
         return timestamp_;
-    }
-
-    bool NeedSoftKeyboard() const override
-    {
-        return true;
     }
 
     void ResetBeforePaste();
@@ -283,7 +286,7 @@ public:
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
-    void OnColorConfigurationUpdate() override {}
+    void OnColorConfigurationUpdate() override;
     bool IsDisabled() const;
     float GetLineHeight() const override;
     std::vector<RectF> GetTextBoxes() override;
@@ -316,6 +319,8 @@ public:
     {
         return true;
     }
+
+    void CheckHandles(SelectHandleInfo& handleInfo) override;
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
@@ -463,6 +468,7 @@ private:
     bool isMousePressed_ = false;
     bool isFirstMouseSelect_ = true;
     bool leftMousePress_ = false;
+    bool isLongPress_ = false;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
     bool imeShown_ = false;
