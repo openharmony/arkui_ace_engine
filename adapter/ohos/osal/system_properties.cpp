@@ -23,6 +23,7 @@
 
 #include "dm_common.h"
 
+#include "locale_config.h"
 #include "parameter.h"
 #include "parameters.h"
 
@@ -498,5 +499,10 @@ int32_t SystemProperties::GetJankFrameThreshold()
 std::string SystemProperties::GetCustomTitleFilePath()
 {
     return system::GetParameter(CUSTOM_TITLE_KEY, "");
+}
+
+ACE_WEAK_SYM bool SystemProperties::Is24HourClock()
+{
+    return Global::I18n::LocaleConfig::Is24HourClock();
 }
 } // namespace OHOS::Ace

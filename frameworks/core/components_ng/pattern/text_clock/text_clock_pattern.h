@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/text_clock/text_clock_layout_algorithm.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/event/time/time_change_listener.h"
 
 namespace OHOS::Ace::NG {
 struct TextClockFormatElement {
@@ -39,7 +40,7 @@ struct TextClockFormatElement {
 };
 
 using TimeCallback = std::function<void()>;
-class TextClockPattern : public Pattern {
+class TextClockPattern : public Pattern, public TimeChangeListener {
     DECLARE_ACE_TYPE(TextClockPattern, Pattern);
 
 public:
@@ -81,6 +82,8 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
 
+    void OnTimeChange() override;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -113,9 +116,10 @@ private:
     RefPtr<FrameNode> GetTextNode();
 
     RefPtr<TextClockController> textClockController_;
-    bool isStart_ = true;
     int32_t hourWest_ = 0;
     std::optional<int32_t> textId_;
+    bool isStart_ = true;
+    bool is24H_ = SystemProperties::Is24HourClock();
     bool isSetVisible_ = true;
     bool isInVisibleArea_ = true;
     bool isFormVisible_ = true;

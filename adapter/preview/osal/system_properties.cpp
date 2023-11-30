@@ -239,4 +239,9 @@ std::string SystemProperties::GetCustomTitleFilePath()
 {
     return UNDEFINED_PARAM;
 }
+
+bool SystemProperties::Is24HourClock()
+{
+    return false;
+}
 } // namespace OHOS::Ace

@@ -155,7 +155,7 @@ frameworks/core/components/camera/  @cc520bf
 frameworks/core/components/chart/  @luoying_ace_admin
 frameworks/core/components/checkable/  @luoying_ace_admin
 frameworks/core/components/clip/  @cc520bf
-frameworks/core/components/clock/  @zhoutianer
+frameworks/core/components/clock/  @aryawang
 frameworks/core/components/common/  @yan-shuifeng
 frameworks/core/components/container_modal/  @catpoison
 frameworks/core/components/counter/  @luoying_ace_admin
@@ -265,6 +265,7 @@ frameworks/core/components_ng/animation/  @hehongyang9
 
 [Event source]
 frameworks/core/event/  @zhaojian2021 @catpoison
+frameworks/core/event/time/  @zhoutianer
 frameworks/core/focus/  @catpoison
 frameworks/core/components_ng/event/  @zhaojian2021 @catpoison
 frameworks/core/components_ng/event/drag_event.cpp  @zhaojian2021

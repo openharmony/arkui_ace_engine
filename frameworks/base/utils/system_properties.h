@@ -402,6 +402,8 @@ public:
         return flutterDecouplingEnabled_;
     }
 
+    static bool Is24HourClock();
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
