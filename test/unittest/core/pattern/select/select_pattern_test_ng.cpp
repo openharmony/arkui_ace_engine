@@ -20,6 +20,11 @@
 
 #define protected public
 #define private public
+#include <iostream>
+
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
+
 #include "core/components/common/layout/constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
@@ -30,14 +35,16 @@
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -978,5 +985,141 @@ HWTEST_F(SelectPropertyTestNg, SelectPattern001, TestSize.Level1)
     pattern->OnColorConfigurationUpdate();
     auto selectColor = optionPattern->GetBgColor();
     EXPECT_EQ(selectColor, Color::BLACK);
+}
+
+/**
+ * @tc.name: SelectOption001
+ * @tc.desc: Test SetOptionWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectOption001, TestSize.Level1)
+{
+    Dimension OPTION_WIDTH = Dimension(150.0f, DimensionUnit::VP);
+    Dimension OPTION_MARGIN = Dimension(8.0f, DimensionUnit::VP);
+    SelectModelNG selectModelInstance;
+
+    selectModelInstance.SetOptionWidth(OPTION_WIDTH);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto selectPattern = select->GetPattern<SelectPattern>();
+
+    auto menu = selectPattern->GetMenuNode();
+    auto menuLayoutProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+    EXPECT_EQ(menuLayoutProperty->GetSelectMenuModifiedWidth().value(),
+        OPTION_WIDTH.ConvertToPx() + OPTION_MARGIN.ConvertToPx());
+
+    auto scroll = AceType::DynamicCast<FrameNode>(menu->GetFirstChild());
+    auto scrollLayoutProperty = scroll->GetLayoutProperty<ScrollLayoutProperty>();
+    EXPECT_EQ(scrollLayoutProperty->GetScrollWidth().value(), OPTION_WIDTH.ConvertToPx() + OPTION_MARGIN.ConvertToPx());
+
+    auto options = selectPattern->GetOptions();
+    if (options.size() > 0) {
+        auto optionPaintProperty = options[0]->GetPaintProperty<OptionPaintProperty>();
+        EXPECT_EQ(optionPaintProperty->GetSelectModifiedWidth().value(), OPTION_WIDTH.ConvertToPx());
+    }
+}
+
+/**
+ * @tc.name: SelectOption002
+ * @tc.desc: Test SetOptionHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectOption002, TestSize.Level1)
+{
+    Dimension OPTION_HEIGHT = Dimension(100.0f, DimensionUnit::VP);
+    SelectModelNG selectModelInstance;
+    selectModelInstance.SetOptionHeight(OPTION_HEIGHT);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    auto options = selectPattern->GetOptions();
+    if (options.size() > 0) {
+        auto optionPaintProperty = options[0]->GetPaintProperty<OptionPaintProperty>();
+        EXPECT_EQ(optionPaintProperty->GetSelectModifiedHeight().value(), OPTION_HEIGHT.ConvertToPx());
+    }
+}
+
+/**
+ * @tc.name: SelectFont001
+ * @tc.desc: Test GetFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectFont001, TestSize.Level1)
+{
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    auto props = selectPattern->text_->GetLayoutProperty<TextLayoutProperty>();
+}
+
+/**
+ * @tc.name: ShowSelectMenuTest002
+ * @tc.desc: Test SelectPattern ShowSelectMenu when fit trigger.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, ShowSelectMenuTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get selectModel, frameNode and pattern, set the options to fit the trigger.
+     */
+    SelectModelNG selectModelInstance;
+    selectModelInstance.SetOptionWidthFitTrigger(true);
+
+    TestProperty testProperty;
+    testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE);
+    auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    EXPECT_TRUE(pattern);
+
+    pattern->ShowSelectMenu();
+    auto offset = pattern->GetHost()->GetPaintRectOffset();
+    EXPECT_EQ(offset.GetY(), pattern->selectSize_.Height());
+}
+
+/**
+ * @tc.name: SetSelectDefaultThemeTest001
+ * @tc.desc: Test SelectPattern SetSelectDefaultTheme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SetSelectDefaultThemeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build select theme, select pattern and render context.
+     * @tc.expected: objects created successfully.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectDefaultTheme();
+
+    auto renderContext = select->GetRenderContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+
+    EXPECT_EQ(
+        renderContext->GetBorderRadius().value().radiusTopLeft.value(), selectTheme->GetSelectDefaultBorderRadius());
+    EXPECT_EQ(
+        renderContext->GetBorderRadius().value().radiusTopRight.value(), selectTheme->GetSelectDefaultBorderRadius());
+    EXPECT_EQ(renderContext->GetBorderRadius().value().radiusBottomRight.value(),
+        selectTheme->GetSelectDefaultBorderRadius());
+    EXPECT_EQ(
+        renderContext->GetBorderRadius().value().radiusBottomLeft.value(), selectTheme->GetSelectDefaultBorderRadius());
+}
+
+/**
+ * @tc.name: GetFontSizeTest001
+ * @tc.desc: Test SelectPattern SetSelectDefaultTheme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, GetFontSizeTest001, TestSize.Level1)
+{
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    selectPattern->text_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textLayoutProps = selectPattern->text_->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(textLayoutProps->GetFontSize().value_or(selectTheme->GetFontSize()), selectPattern->GetFontSize());
 }
 } // namespace OHOS::Ace::NG
