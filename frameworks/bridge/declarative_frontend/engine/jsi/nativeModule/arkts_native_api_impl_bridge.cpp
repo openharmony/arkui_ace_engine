@@ -131,7 +131,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetZIndex));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOpacity"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOpacity));
-    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetOpacity"),
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOpacity"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOpacity));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlign"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAlign));

@@ -1,5 +1,5 @@
 /// <reference path="./import.ts" />
-class FontColorModifier extends Modifier<number | undefined> {
+class FontColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('fontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -8,15 +8,31 @@ class FontColorModifier extends Modifier<number | undefined> {
       GetUINativeModule().text.setFontColor(node, this.value);
     }
   }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
 }
 
-class FontSizeModifier extends Modifier<number | string> {
+class FontSizeModifier extends ModifierWithKey<number | string | Resource> {
   static identity: Symbol = Symbol('fontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().text.resetFontSize(node);
     } else {
       GetUINativeModule().text.setFontSize(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
@@ -269,20 +285,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     return this;
   }
   fontColor(value: ResourceColor): TextAttribute {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, FontColorModifier, arkColor.color);
-    } else {
-      modifier(this._modifiers, FontColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, FontColorModifier.identity, FontColorModifier, value);
     return this;
   }
   fontSize(value: any): TextAttribute {
-    if (!isNumber(value) && !isString(value)) {
-      modifier(this._modifiers, FontSizeModifier, undefined);
-    } else {
-      modifier(this._modifiers, FontSizeModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, FontSizeModifier.identity, FontSizeModifier, value);
     return this;
   }
   minFontSize(value: number | string | Resource): TextAttribute {

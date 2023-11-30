@@ -1,5 +1,14 @@
 /// <reference path="./import.ts" />
 class ArkTabsComponent extends ArkComponent implements TabsAttribute {
+    onAnimationStart(handler: (index: number, targetIndex: number, event: TabsAnimationEvent) => void): TabsAttribute {
+        throw new Error("Method not implemented.");
+    }
+    onAnimationEnd(handler: (index: number, event: TabsAnimationEvent) => void): TabsAttribute {
+        throw new Error("Method not implemented.");
+    }
+    onGestureSwipe(handler: (index: number, event: TabsAnimationEvent) => void): TabsAttribute {
+        throw new Error("Method not implemented.");
+    }
     vertical(value: boolean): TabsAttribute {
         modifier(this._modifiers, VerticalModifier, value);
         return this;
