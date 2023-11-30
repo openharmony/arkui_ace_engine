@@ -364,6 +364,9 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
 void TextClockPattern::ParseInputFormat(bool& is24H)
 {
     std::string inputFormat = (GetFormat() == DEFAULT_FORMAT) ? "aa h:m:s" : GetFormat();
+    if (inputFormat == FORM_FORMAT && isForm_) {
+        inputFormat = "h:m";
+    }
     std::vector<std::string> formatSplitter;
     auto i = 0;
     auto j = 0;
