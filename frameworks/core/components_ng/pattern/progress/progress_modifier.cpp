@@ -1006,10 +1006,11 @@ void ProgressModifier::PaintRingProgressOrShadow(
         centerPt = centerPt + OffsetF(RING_SHADOW_OFFSET_X, RING_SHADOW_OFFSET_Y);
         RSFilter filter;
 #ifndef USE_ROSEN_DRAWING
-        filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, ringProgressData.shadowBlurSigma));
+        filter.SetImageFilter(RSImageFilter::CreateBlurImageFilter(
+            ringProgressData.shadowBlurSigma, ringProgressData.shadowBlurSigma, RSTileMode::DECAL, nullptr));
 #else
-        filter.SetMaskFilter(
-            RSRecordingMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, ringProgressData.shadowBlurSigma));
+        filter.SetImageFilter(RSRecordingImageFilter::CreateBlurImageFilter(
+            ringProgressData.shadowBlurSigma, ringProgressData.shadowBlurSigma, RSTileMode::DECAL, nullptr));
 #endif
         pen.SetFilter(filter);
         startCirclePaint.SetFilter(filter);
