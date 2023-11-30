@@ -117,7 +117,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     if (frameNode->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or("").empty() &&
         NonPositive(static_cast<double>(paragraph_->GetLongestLine()))) {
         // text content is empty
-        TAG_LOGW(AceLogTag::ACE_TEXT, 
+        TAG_LOGW(AceLogTag::ACE_TEXT,
             "TextHeightFinal: %{pubilc}f, TextContentWidth: %{pubilc}f, FontSize: %{pubilc}lf",
             heightFinal, paragraph_->GetMaxWidth(), textStyle.GetFontSize().ConvertToPx());
         return SizeF {};
