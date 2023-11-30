@@ -2105,7 +2105,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
-    containerPattern->ShowTitle(isShow, hasDeco);
+    containerPattern->ShowTitle(isShow, hasDeco, needUpdate);
 }
 
 void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)
