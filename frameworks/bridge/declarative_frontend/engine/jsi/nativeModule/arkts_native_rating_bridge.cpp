@@ -15,7 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rating_bridge.h"
 
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
-#include "arkts_native_rating_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr double STEPS_DEFAULT = 0.5;
@@ -25,14 +25,6 @@ constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
-std::string GetStringFromJS(EcmaVM* vm, Local<JSValueRef> value, std::string defaultValue)
-{
-    std::string result = defaultValue;
-    if (value->IsString()) {
-        result = value->ToString(vm)->ToString();
-    }
-    return result;
-}
 
 ArkUINativeModuleValue RatingBridge::SetStars(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -98,9 +90,9 @@ ArkUINativeModuleValue RatingBridge::SetStarStyle(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    std::string backgroundUri = GetStringFromJS(vm, secondArg, "");
-    std::string foregroundUri = GetStringFromJS(vm, thirdArg, "");
-    std::string secondaryUri = GetStringFromJS(vm, forthArg, "");
+    std::string backgroundUri = ArkTSUtils::GetStringFromJS(vm, secondArg);
+    std::string foregroundUri = ArkTSUtils::GetStringFromJS(vm, thirdArg);
+    std::string secondaryUri = ArkTSUtils::GetStringFromJS(vm, forthArg);
 
     GetArkUIInternalNodeAPI()->GetRatingModifier().SetStarStyle(nativeNode,
         backgroundUri.c_str(), foregroundUri.c_str(), secondaryUri.c_str());

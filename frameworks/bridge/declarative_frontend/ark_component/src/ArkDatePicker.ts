@@ -29,43 +29,43 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
 
     modifier(this._modifiers, DatePickerSelectedTextStyleModifier, pickerText);
 
-    return this;
-  }
-  onChange(callback: (value: DatePickerResult) => void): DatePickerAttribute {
-    throw new Error('Method not implemented.');
-  }
-  onDateChange(callback: (value: Date) => void): DatePickerAttribute {
-    throw new Error('Method not implemented.');
-  }
+        return this;
+    }
+    onChange(callback: (value: DatePickerResult) => void): DatePickerAttribute {
+        throw new Error('Method not implemented.');
+    }
+    onDateChange(callback: (value: Date) => void): DatePickerAttribute {
+        throw new Error('Method not implemented.');
+    }
 }
 
 class DatePickerLunarModifier extends Modifier<boolean> {
-  static identity: Symbol = Symbol('lunar');
-  applyPeer(node: KNode, reset: boolean) {
-    if (reset) {
-      GetUINativeModule().datePicker.resetShowLunar(node);
+    static identity: Symbol = Symbol('lunar');
+    applyPeer(node: KNode, reset: boolean) {
+        if (reset) {
+            GetUINativeModule().datePicker.resetShowLunar(node);
+        }
+        else {
+            GetUINativeModule().datePicker.setShowLunar(node, this.value);
+        }
     }
-    else {
-      GetUINativeModule().datePicker.setShowLunar(node, this.value);
-    }
-  }
 }
 
 class DatePickerTextStyleModifier extends Modifier<ArkDatePickerTextStyle> {
-  static identity: Symbol = Symbol('textStyle');
-  applyPeer(node: KNode, reset: boolean) {
-    if (reset) {
-      GetUINativeModule().datePicker.resetNormalTextStyle(node);
+    static identity: Symbol = Symbol('textStyle');
+    applyPeer(node: KNode, reset: boolean) {
+        if (reset) {
+            GetUINativeModule().datePicker.resetNormalTextStyle(node);
+        }
+        else {
+            GetUINativeModule().datePicker.setNormalTextStyle(node,
+                this.value.color,
+                this.value.font.size,
+                this.value.font.weight,
+                this.value.font.family,
+                this.value.font.style);
+        }
     }
-    else {
-      GetUINativeModule().datePicker.setNormalTextStyle(node,
-        this.value.color,
-        this.value.font.size,
-        this.value.font.weight,
-        this.value.font.family,
-        this.value.font.style);
-    }
-  }
 }
 
 class DatePickerSelectedTextStyleModifier extends Modifier<ArkDatePickerTextStyle> {

@@ -15,6 +15,8 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_date_picker_bridge.h"
 
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -22,18 +24,7 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
-constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
-constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 const double PLACE_HOLDER_ARRAY = -10001;
-
-uint32_t DataPickerColorAlphaAdapt(uint32_t origin)
-{
-    uint32_t result = origin;
-    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
-        result = origin | COLOR_ALPHA_VALUE;
-    }
-    return result;
-}
 
 bool DataPickerParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
 {
@@ -41,7 +32,7 @@ bool DataPickerParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Co
         return false;
     }
     if (value->IsNumber()) {
-        result = Color(DataPickerColorAlphaAdapt(value->Uint32Value(vm)));
+        result = Color(ArkTSUtils::ColorAlphaAdapt(value->Uint32Value(vm)));
         return true;
     }
     if (value->IsString()) {
@@ -62,25 +53,12 @@ void DataPickerParseJsWeight(const EcmaVM* vm, const Local<JSValueRef>& value, s
     }
 }
 
-bool DataPickerParseJsDimensionFp(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
-{
-    if (value->IsNumber()) {
-        result = CalcDimension(value->ToNumber(vm)->Value(), DimensionUnit::FP);
-        return true;
-    }
-    if (value->IsString()) {
-        result = StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::FP);
-        return true;
-    }
-    return false;
-}
-
 void DataPickerParseJsSize(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& size)
 {
     if (value->IsNull() || value->IsUndefined()) {
         size = Dimension(-1);
     } else {
-        if (!DataPickerParseJsDimensionFp(vm, value, size) || size.Unit() == DimensionUnit::PERCENT) {
+        if (!ArkTSUtils::ParseJsDimensionFp(vm, value, size) || size.Unit() == DimensionUnit::PERCENT) {
             size = Dimension(-1);
         }
     }
