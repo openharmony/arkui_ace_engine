@@ -76,9 +76,10 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupItemFont(ArkUIRuntimeCallI
     CalcDimension fontSize;
     if (!ParseJsDimensionFp(vm, secondArg, fontSize) || thirdArg->IsNull()) {
         GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().ResetPopupItemFont(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetPopupItemFont(nativeNode, fontSize.Value(),
+            static_cast<int>(fontSize.Unit()), thirdArg->ToString(vm)->ToString().c_str());
     }
-    GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetPopupItemFont(
-        nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()), thirdArg->ToString(vm)->ToString().c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -441,15 +442,6 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupSelectedColor(ArkUIRuntime
     } else {
         GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetPopupSelectedColor(nativeNode, color.GetValue());
     }
-    Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(secondArg);
-    CalcDimension popupHorizontalSpace;
-    if (transArray->Length(vm) > 1 &&
-        ParseJsDimensionVp(vm, transArray->GetValueAt(vm, secondArg, 1), popupHorizontalSpace)) {
-        GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetPopupHorizontalSpace(
-            nativeNode, popupHorizontalSpace.Value(), static_cast<int>(popupHorizontalSpace.Unit()));
-    } else {
-        GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().ResetPopupHorizontalSpace(nativeNode);
-    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -521,8 +513,9 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetItemSize(ArkUIRuntimeCallInfo* 
         itemSize.Unit() != DimensionUnit::PERCENT) {
         GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetItemSize(
             nativeNode, itemSize.Value(), static_cast<int>(itemSize.Unit()));
+    } else {
+        GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().ResetItemSize(nativeNode);
     }
-    GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().ResetItemSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
