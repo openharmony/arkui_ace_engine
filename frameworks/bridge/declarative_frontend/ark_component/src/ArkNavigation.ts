@@ -4,7 +4,7 @@ const NAV_BAR_POSITION_RANGE = 1;
 const NAVIGATION_MODE_RANGE = 2;
 const DEFAULT_NAV_BAR_WIDTH = 240;
 const MIN_NAV_BAR_WIDTH_DEFAULT = "0vp";
-const NAVUGATION_TITLE_MODE_DEFAULT = 0
+const NAVIGATION_TITLE_MODE_DEFAULT = 0
 const DEFAULT_UNIT = "vp";
 
 class ArkNavigationComponent extends ArkComponent implements NavigationAttribute {
@@ -27,7 +27,7 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     }
     navBarWidthRange(value: [Dimension, Dimension]): NavigationAttribute {
         if (!value) {
-            return;
+            return this;
         }
 
         if (!!value && value?.length > 0 && !!value[0]) {
@@ -84,7 +84,8 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
         return this;
     }
     backButtonIcon(value: any): NavigationAttribute {
-        throw new Error("Method not implemented.");
+        modifierWithKey(this._modifiersWithKeys, BackButtonIconModifier.identity, BackButtonIconModifier, value);
+        return this
     }
     hideNavBar(value: boolean): NavigationAttribute {
         modifier(this._modifiers, HideNavBarModifier, isBoolean(value) ? value : false);
@@ -106,7 +107,7 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
         return this;
     }
     titleMode(value: NavigationTitleMode): NavigationAttribute {
-        if (value >= NAVUGATION_TITLE_MODE_DEFAULT && value <= TITLE_MODE_RANGE) {
+        if (value >= NAVIGATION_TITLE_MODE_DEFAULT && value <= TITLE_MODE_RANGE) {
             modifier(this._modifiers, TitleModeModifier, value);
         }
         return this;
@@ -135,6 +136,22 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     }
     navDestination(builder: (name: string, param: unknown) => void): NavigationAttribute {
         throw new Error("Method not implemented.");
+    }
+}
+
+class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
+    static identity: Symbol = Symbol("backButtonIcon");
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().navigation.resetBackButtonIcon(node);
+        }
+        else {
+            GetUINativeModule().navigation.setBackButtonIcon(node, this.value);
+        }
+    }
+
+    checkObjectDiff(): boolean {
+        return false;
     }
 }
 

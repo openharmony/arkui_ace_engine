@@ -1816,6 +1816,30 @@ void ViewAbstract::SetSharedTransition(const std::string &shareId,
     }
 }
 
+void ViewAbstract::SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->HasProgressMask()) {
+            target->UpdateProgressMask(nullptr);
+        }
+        target->UpdateClipMask(basicShape);
+    }
+}
+
+void ViewAbstract::SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->HasClipMask()) {
+            target->UpdateClipMask(nullptr);
+        }
+        target->UpdateProgressMask(progress);
+    }
+}
+
 void ViewAbstract::SetUseEffect(bool useEffect)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2065,6 +2089,47 @@ void ViewAbstract::SetSweepGradient(FrameNode *frameNode, const NG::Gradient &gr
 void ViewAbstract::SetRadialGradient(FrameNode *frameNode, const NG::Gradient &gradient)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradient, frameNode);
+}
+
+void ViewAbstract::SetOverlay(FrameNode* frameNode, const NG::OverlayOptions& overlay)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OverlayText, overlay, frameNode);
+}
+
+void ViewAbstract::SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderImage, borderImage, frameNode);
+}
+
+void ViewAbstract::SetBorderImageSource(FrameNode* frameNode, const std::string& bdImageSrc)
+{
+    ImageSourceInfo imageSourceInfo(bdImageSrc);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderImageSource, imageSourceInfo, frameNode);
+}
+
+void ViewAbstract::SetHasBorderImageSlice(FrameNode* frameNode, bool tag)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(HasBorderImageSlice, tag, frameNode);
+}
+
+void ViewAbstract::SetHasBorderImageWidth(FrameNode* frameNode, bool tag)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(HasBorderImageWidth, tag, frameNode);
+}
+
+void ViewAbstract::SetHasBorderImageOutset(FrameNode* frameNode, bool tag)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(HasBorderImageOutset, tag, frameNode);
+}
+
+void ViewAbstract::SetHasBorderImageRepeat(FrameNode* frameNode, bool tag)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(HasBorderImageRepeat, tag, frameNode);
+}
+
+void ViewAbstract::SetBorderImageGradient(FrameNode* frameNode, const NG::Gradient& gradient)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderImageGradient, gradient, frameNode);
 }
 
 void ViewAbstract::SetForegroundBlurStyle(FrameNode *frameNode, const BlurStyleOption &fgBlurStyle)
@@ -2456,6 +2521,26 @@ void ViewAbstract::SetMouseResponseRegion(FrameNode* frameNode, const std::vecto
     CHECK_NULL_VOID(gestureHub);
     gestureHub->MarkResponseRegion(true);
     gestureHub->SetMouseResponseRegion(mouseResponseRegion);
+}
+
+void ViewAbstract::SetSharedTransition(FrameNode *frameNode, const std::string &shareId,
+    const std::shared_ptr<SharedTransitionOption> &option)
+{
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->SetSharedTransitionOptions(option);
+        target->SetShareId(shareId);
+    }
+}
+
+void ViewAbstract::SetTransition(FrameNode* frameNode, const TransitionOptions& options)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Transition, options, frameNode);
+}
+
+void ViewAbstract::SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ChainedTransition, effect, frameNode);
 }
 
 void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)

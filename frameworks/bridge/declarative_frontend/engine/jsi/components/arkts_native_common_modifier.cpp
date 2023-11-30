@@ -304,6 +304,136 @@ void SetRadialGradientValues(NG::Gradient& gradient, const double* values, int32
     gradient.SetRepeat(static_cast<bool>(repeating));
 }
 
+bool SetCalcDimension(std::optional<CalcDimension>& optDimension,
+    const StringAndDouble* options, int32_t optionsLength, int32_t offset,
+    const CalcDimension* defDimension)
+{
+    if ((options == nullptr) || (offset < 0) || ((offset + NUM_3) >= optionsLength)) {
+        return false;
+    }
+    auto hasValue = options[offset];
+    auto value = options[offset + NUM_1];
+    auto unit = options[offset + NUM_2];
+    if (static_cast<bool>(hasValue.value)) {
+        DimensionUnit unitValue = static_cast<DimensionUnit>(unit.value);
+        if (unitValue == DimensionUnit::CALC) {
+            std::string str = value.valueStr;
+            CalcDimension calcDimension(str, unitValue);
+            optDimension = calcDimension;
+        } else {
+            CalcDimension calcDimension(value.value, unitValue);
+            optDimension = calcDimension;
+        }
+    } else if (defDimension != nullptr) {
+        optDimension = *defDimension;
+    }
+    return true;
+}
+
+void SetBorderImageSlice(RefPtr<BorderImage>& borderImage,
+    const std::vector<BorderImageDirection> directions,
+    const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
+{
+    std::unique_ptr<CalcDimension> defDimension = std::make_unique<CalcDimension>(0.0);
+    for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
+        std::optional<CalcDimension> optDimension;
+        SetCalcDimension(optDimension, options, optionsLength, offset + index, defDimension.get());
+        auto direction = directions[index / NUM_3];
+        if (optDimension.has_value()) {
+            borderImage->SetEdgeSlice(direction, optDimension.value());
+        }
+    }
+    offset += NUM_12;
+}
+
+void SetBorderImageRepeat(RefPtr<BorderImage>& borderImage,
+    const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
+{
+    if ((options == nullptr) || (offset < 0) || ((offset + NUM_2) >= optionsLength)) {
+        return;
+    }
+    auto hasValue = options[offset];
+    auto value = options[offset + NUM_1];
+    if (static_cast<bool>(hasValue.value)) {
+        auto repeatMode = static_cast<BorderImageRepeat>(value.value);
+        borderImage->SetRepeatMode(repeatMode);
+    }
+    offset += NUM_2;
+}
+
+void SetBorderImageWidth(RefPtr<BorderImage>& borderImage,
+    const std::vector<BorderImageDirection> directions,
+    const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
+{
+    std::unique_ptr<CalcDimension> defDimension = std::make_unique<CalcDimension>(0.0);
+    for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
+        std::optional<CalcDimension> optDimension;
+        SetCalcDimension(optDimension, options, optionsLength, offset + index, defDimension.get());
+        auto direction = directions[index / NUM_3];
+        if (optDimension.has_value()) {
+            borderImage->SetEdgeWidth(direction, optDimension.value());
+        }
+    }
+    offset += NUM_12;
+}
+
+void SetBorderImageOutset(RefPtr<BorderImage>& borderImage,
+    const std::vector<BorderImageDirection> directions,
+    const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
+{
+    std::unique_ptr<CalcDimension> defDimension = std::make_unique<CalcDimension>(0.0);
+    for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
+        std::optional<CalcDimension> optDimension;
+        SetCalcDimension(optDimension, options, optionsLength, offset + index, defDimension.get());
+        auto direction = directions[index / NUM_3];
+        if (optDimension.has_value()) {
+            borderImage->SetEdgeOutset(direction, optDimension.value());
+        }
+    }
+    offset += NUM_12;
+}
+
+void SetBorderImageFill(RefPtr<BorderImage>& borderImage,
+    const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
+{
+    if ((options == nullptr) || (offset < 0) || ((offset + NUM_2) >= optionsLength)) {
+        return;
+    }
+    auto hasValue = options[offset];
+    auto value = options[offset + NUM_1];
+    if (static_cast<bool>(hasValue.value)) {
+        borderImage->SetNeedFillCenter(static_cast<bool>(value.value));
+    }
+    offset += NUM_2;
+}
+
+/**
+ * @param values value value
+ * values[0], values[1] : angle: hasValue, angle value
+ * values[2] : direction
+ * values[3] : repeating
+ * @param valuesLength values length
+ */
+void SetBorderImageGradientValues(NG::Gradient& gradient, const double* values, int32_t valuesLength)
+{
+    if ((values == nullptr) || (valuesLength != NUM_4)) {
+        return;
+    }
+    auto angleHasValue = values[NUM_0];
+    auto angleValue = values[NUM_1];
+    auto directionValue = values[NUM_2];
+    auto repeating = values[NUM_3];
+    auto linearGradient = gradient.GetLinearGradient();
+    if (linearGradient == nullptr) {
+        return;
+    }
+    if (static_cast<bool>(angleHasValue)) {
+        linearGradient->angle = CalcDimension(angleValue, DimensionUnit::PX);
+    }
+    SetLinearGradientDirectionTo(linearGradient, static_cast<GradientDirection>(directionValue));
+    gradient.SetRepeat(static_cast<bool>(repeating));
+}
+
 void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, const double valueX, const double valueY,
     BackgroundImagePosition& bgImgPosition)
 {
@@ -879,7 +1009,6 @@ void SetSweepGradient(NodeHandle node, const double* values, int32_t valuesLengt
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if ((values == nullptr) || (valuesLength != NUM_13) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
-        LOGE("sweepGradient value error. %{public}d, %{public}d", valuesLength, colorsLength);
         return;
     }
     NG::Gradient gradient;
@@ -917,7 +1046,6 @@ void SetRadialGradient(NodeHandle node, const double* values, int32_t valuesLeng
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if ((values == nullptr) || (valuesLength != NUM_10) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
-        LOGE("radialGradient value error. %{public}d, %{public}d", valuesLength, colorsLength);
         return;
     }
     NG::Gradient gradient;
@@ -934,6 +1062,145 @@ void ResetRadialGradient(NodeHandle node)
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::RADIAL);
     ViewAbstract::SetRadialGradient(frameNode, gradient);
+}
+
+/**
+ * @param text text value
+ * @param options option value
+ * option[0], option[1]: align(hasValue, value)
+ * option[2], option[3], option[4]: offsetX(hasValue, value, unit)
+ * option[5], option[6], option[7]: offsetY(hasValue, value, unit)
+ * @param optionsLength options length
+ */
+void SetOverlay(NodeHandle node, const char* text, const double* options, int32_t optionsLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((options == nullptr) || (optionsLength != NUM_8)) {
+        return;
+    }
+    auto alignHasValue = options[NUM_0];
+    auto alignValue = options[NUM_1];
+    auto offsetXHasValue = options[NUM_2];
+    auto offsetXValue = options[NUM_3];
+    auto offsetXUnit = options[NUM_4];
+    auto offsetYHasValue = options[NUM_5];
+    auto offsetYValue = options[NUM_6];
+    auto offsetYUnit = options[NUM_7];
+    NG::OverlayOptions overlay;
+    if (text != nullptr) {
+        overlay.content = text;
+    }
+    overlay.align = Alignment::CENTER;
+    if (static_cast<bool>(alignHasValue)) {
+        overlay.align = ParseAlignment(static_cast<int32_t>(alignValue));
+    } else {
+        overlay.align = Alignment::TOP_LEFT;
+    }
+    overlay.x = CalcDimension(0);
+    overlay.y = CalcDimension(0);
+    if (static_cast<bool>(offsetXHasValue)) {
+        overlay.x = CalcDimension(offsetXValue, static_cast<DimensionUnit>(offsetXUnit));
+    }
+    if (static_cast<bool>(offsetYHasValue)) {
+        overlay.y = CalcDimension(offsetYValue, static_cast<DimensionUnit>(offsetYUnit));
+    }
+    ViewAbstract::SetOverlay(frameNode, overlay);
+}
+
+void ResetOverlay(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::OverlayOptions overlay;
+    overlay.align = Alignment::TOP_LEFT;
+    overlay.x = CalcDimension(0);
+    overlay.y = CalcDimension(0);
+    ViewAbstract::SetOverlay(frameNode, overlay);
+}
+
+/**
+ * @param src source value
+ * @param options option value
+ * option[offset + 0], option[offset + 1], option[offset + 2]: sliceTop(hasValue, value, unit)
+ * option[offset + 3], option[offset + 4], option[offset + 5]: sliceRight(hasValue, value, unit)
+ * option[offset + 6], option[offset + 7], option[offset + 8]: sliceBottom(hasValue, value, unit)
+ * option[offset + 9], option[offset + 10], option[offset + 11]: sliceLeft(hasValue, value, unit)
+ * option[offset + 12], option[offset + 13]: repeat(hasValue, value)
+ * option[offset + 14], option[offset + 15], option[offset + 16]: widthTop(hasValue, value, unit)
+ * option[offset + 17], option[offset + 18], option[offset + 19]: widthRight(hasValue, value, unit)
+ * option[offset + 20], option[offset + 21], option[offset + 22]: widthBottom(hasValue, value, unit)
+ * option[offset + 23], option[offset + 24], option[offset + 25]: widthLeft(hasValue, value, unit)
+ * option[offset + 26], option[offset + 27], option[offset + 28]: outsetTop(hasValue, value, unit)
+ * option[offset + 29], option[offset + 30], option[offset + 31]: outsetRight(hasValue, value, unit)
+ * option[offset + 32], option[offset + 33], option[offset + 34]: outsetBottom(hasValue, value, unit)
+ * option[offset + 35], option[offset + 36], option[offset + 37]: outsetLeft(hasValue, value, unit)
+ * option[offset + 38], option[offset + 39]: fill(hasValue, value)
+ * option[offset + 40]: bitset
+ * @param optionsLength options length
+ */
+void SetBorderImage(NodeHandle node, const char* src, const StringAndDouble* options, int32_t optionsLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // slice:12 double, repeat:2 double, width:12 double, outset:12 double, fill:2 double, bitset:1 double
+    auto desireLength = NUM_12 + NUM_2 + NUM_12 + NUM_12 + NUM_2 + NUM_1;
+    if ((options == nullptr) || (optionsLength != desireLength)) {
+        return;
+    }
+    RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
+    if (src != nullptr) {
+        borderImage->SetSrc(std::string(src));
+    }
+    int32_t loc = 0;
+    std::vector<BorderImageDirection> directions = { BorderImageDirection::TOP,
+        BorderImageDirection::RIGHT, BorderImageDirection::BOTTOM, BorderImageDirection::LEFT };
+    SetBorderImageSlice(borderImage, directions, options, optionsLength, loc); // read 12 double
+    SetBorderImageRepeat(borderImage, options, optionsLength, loc); // read 2 double
+    SetBorderImageWidth(borderImage, directions, options, optionsLength, loc); // read 12 double
+    SetBorderImageOutset(borderImage, directions, options, optionsLength, loc); // read 12 double
+    SetBorderImageFill(borderImage, options, optionsLength, loc); // read 2 double
+    auto bitsetValue = options[loc].value;
+    uint8_t bitset = static_cast<uint8_t>(bitsetValue);
+    if (bitset | BorderImage::SOURCE_BIT) {
+        ViewAbstract::SetBorderImageSource(frameNode, borderImage->GetSrc());
+    }
+    if (bitset | BorderImage::OUTSET_BIT) {
+        ViewAbstract::SetHasBorderImageOutset(frameNode, true);
+    }
+    if (bitset | BorderImage::SLICE_BIT) {
+        ViewAbstract::SetHasBorderImageSlice(frameNode, true);
+    }
+    if (bitset | BorderImage::REPEAT_BIT) {
+        ViewAbstract::SetHasBorderImageRepeat(frameNode, true);
+    }
+    if (bitset | BorderImage::WIDTH_BIT) {
+        ViewAbstract::SetHasBorderImageWidth(frameNode, true);
+    }
+    ViewAbstract::SetBorderImage(frameNode, borderImage);
+}
+
+void ResetBorderImage(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
+    ViewAbstract::SetBorderImage(frameNode, borderImage);
+}
+
+void SetBorderImageGradient(NodeHandle node, const double* values, int32_t valuesLength,
+    const double* colors, int32_t colorsLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesLength != NUM_4) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
+        return;
+    }
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    SetBorderImageGradientValues(gradient, values, valuesLength);
+    SetGradientColors(gradient, colors, colorsLength);
+    ViewAbstract::SetBorderImageGradient(gradient);
 }
 
 void SetForegroundBlurStyle(NodeHandle node, int32_t blurStyle, int32_t colorMode,
@@ -2430,7 +2697,10 @@ ArkUICommonModifierAPI GetCommonModifier()
         ResetInvert, SetSepia, ResetSepia, SetSaturate, ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale,
         ResetGrayscale, SetContrast, ResetContrast, SetBrightness, ResetBrightness, SetBlur, ResetBlur,
         SetLinearGradient, ResetLinearGradient, SetSweepGradient, ResetSweepGradient, SetRadialGradient,
-        ResetRadialGradient, SetForegroundBlurStyle, ResetForegroundBlurStyle, SetLinearGradientBlur,
+        ResetRadialGradient,
+        SetOverlay, ResetOverlay,
+        SetBorderImage, ResetBorderImage, SetBorderImageGradient,
+        SetForegroundBlurStyle, ResetForegroundBlurStyle, SetLinearGradientBlur,
         ResetLinearGradientBlur, SetBackgroundBlurStyle, ResetBackgroundBlurStyle, SetBorder, ResetBorder,
         SetBackgroundImagePosition, ResetBackgroundImagePosition, SetBackgroundImageSize, ResetBackgroundImageSize,
         SetBackgroundImage, ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale, ResetScale, SetRotate,

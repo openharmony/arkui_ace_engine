@@ -35,6 +35,7 @@ namespace OHOS::Ace::NG {} // namespace OHOS::Ace::NG
  */
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
@@ -350,6 +351,46 @@ ArkUINativeModuleValue NavigationBridge::ResetMinContentWidth(ArkUIRuntimeCallIn
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMinContentWidth(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavigationBridge::SetBackButtonIcon(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    std::string src;
+    auto noPixMap = Framework::JSViewAbstract::ParseJsMedia(info[1], src);
+
+    RefPtr<PixelMap> pixMap = nullptr;
+#if defined(PIXEL_MAP_SUPPORTED)
+    if (!noPixMap) {
+        pixMap = CreatePixelMapFromNapiValue(info[1]);
+    }
+#endif
+    std::string bundleName;
+    std::string moduleName;
+    Framework::JSViewAbstract::GetJsMediaBundleInfo(info[1], bundleName, moduleName);
+
+    NavigationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavigationBridge::ResetBackButtonIcon(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    bool noPixMap = false;
+    RefPtr<PixelMap> pixMap = nullptr;
+    std::string src;
+    NavigationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
