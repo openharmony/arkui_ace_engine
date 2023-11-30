@@ -100,7 +100,7 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_BORDER_IMAGE, "AceBorderImage" },
     { AceLogTag::ACE_LINEAR_SPLIT, "AceLinearSplit" },
     { AceLogTag::ACE_GRID, "AceGrid" },
-    { AceLogTag::ACE_PLUGINCOMPONENT, "AcePluginComponent" },
+    { AceLogTag::ACE_PLUGIN_COMPONENT, "AcePluginComponent" },
     { AceLogTag::ACE_UIEXTENSIONCOMPONENT, "AceUiExtensionComponent" },
     { AceLogTag::ACE_IF, "AceIf" },
     { AceLogTag::ACE_FOREACH, "AceForEach" },
