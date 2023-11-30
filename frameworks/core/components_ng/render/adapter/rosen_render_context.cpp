@@ -4300,4 +4300,9 @@ void RosenRenderContext::AddUpdateCallBack(const std::function<void(std::vector<
 #endif
 }
 
+bool RosenRenderContext::IsUniRenderEnabled()
+{
+    return Rosen::RSSystemProperties::GetUniRenderEnabled();
+}
+
 } // namespace OHOS::Ace::NG

@@ -54,6 +54,9 @@ namespace {
 #ifdef ENABLE_DRAG_FRAMEWORK
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
 #endif
+
+constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
+
 // create menuWrapper and menu node, update menu props
 std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, const std::string& targetTag = "",
     MenuType type = MenuType::MENU, const RefPtr<UINode>& previewCustomNode = nullptr)
@@ -65,6 +68,16 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuNode = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetId, targetTag, type));
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
+    auto renderContext = menuNode->GetRenderContext();
+    if (currentPlatformVersion >= PLATFORM_VERSION_ELEVEN || renderContext->IsUniRenderEnabled()) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        renderContext->UpdateBackBlurStyle(styleOption);
+    }
 
     menuNode->MountToParent(wrapperNode);
     if (previewCustomNode) {

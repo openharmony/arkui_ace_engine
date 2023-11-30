@@ -519,6 +519,11 @@ public:
         return 0;
     }
 
+    virtual bool IsUniRenderEnabled()
+    {
+        return true;
+    }
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
