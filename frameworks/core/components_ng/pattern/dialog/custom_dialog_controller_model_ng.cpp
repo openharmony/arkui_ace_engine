@@ -120,7 +120,9 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
             SubwindowManager::GetInstance()->DeleteHotAreas(parentOverlay->GetSubwindowId(), dialog->GetId());
             SubwindowManager::GetInstance()->HideDialogSubWindow(parentOverlay->GetSubwindowId());
             if (dialogProperties.isModal) {
-                parentOverlay->CloseMask();
+                auto maskNode = parentOverlay->GetDialog(parentOverlay->GetMaskNodeId());
+                CHECK_NULL_VOID(maskNode);
+                parentOverlay->CloseDialog(maskNode);
             }
         }
     };

@@ -643,6 +643,8 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 return nullptr;
             }
             napi_get_named_property(env, argv[0], "title", &asyncContext->titleNApi);
+            napi_get_named_property(env, argv[0], "showInSubWindow", &asyncContext->showInSubWindow);
+            napi_get_named_property(env, argv[0], "isModal", &asyncContext->isModal);
             GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString, valueType);
             if (!HasProperty(env, argv[0], "buttons")) {
                 DeleteContextAndThrowError(env, asyncContext, "Required input parameters are missing.");
@@ -747,11 +749,16 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         asyncContext = nullptr;
     };
 
+    PromptDialogAttr promptDialogAttr = {
+        .title = asyncContext->titleString,
+        .showInSubWindow = asyncContext->showInSubWindowBool,
+        .isModal = asyncContext->isModalBool,
+    };
 #ifdef OHOS_STANDARD_SYSTEM
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (delegate) {
-            delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));
+            delegate->ShowActionMenu(promptDialogAttr, asyncContext->buttons, std::move(callBack));
         } else {
             napi_value code = nullptr;
             std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
@@ -779,7 +786,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 #else
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate) {
-        delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));
+        delegate->ShowActionMenu(promptDialogAttr, asyncContext->buttons, std::move(callBack));
     } else {
         napi_value code = nullptr;
         std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);

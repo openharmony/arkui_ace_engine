@@ -1266,7 +1266,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
     if (dialogProps.isMask) {
-        maskNode_ = dialog;
+        maskNodeId_ = dialog->GetId();
     }
     BeforeShowDialog(dialog);
     OpenDialogAnimation(dialog);
@@ -1361,25 +1361,17 @@ bool OverlayManager::DialogInMapHoldingFocus()
     }
     return false;
 }
-void OverlayManager::CloseMask()
+
+RefPtr<FrameNode> OverlayManager::GetDialog(int32_t dialogId)
 {
-    CHECK_NULL_VOID(maskNode_);
-    RemoveDialogFromMap(maskNode_);
-    if (maskNode_->IsRemoving()) {
-        // already in close animation
-        return;
+    for (auto it = dialogMap_.begin(); it != dialogMap_.end(); it++) {
+        if (dialogId == it->second->GetId()) {
+            return it->second;
+        }
     }
-    maskNode_->MarkRemoving();
-    CloseDialogAnimation(maskNode_);
-    dialogCount_--;
-    // set close button enable
-    if (dialogCount_ == 0) {
-        SetContainerButtonEnable(true);
-    }
-    maskNode_->OnAccessibilityEvent(
-        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-    CallOnHideDialogCallback();
+    return nullptr;
 }
+
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
     RemoveDialogFromMap(dialogNode);
