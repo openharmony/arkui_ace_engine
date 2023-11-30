@@ -662,6 +662,14 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 DeleteContextAndThrowError(env, asyncContext, "The type of the button parameters is incorrect.");
                 return nullptr;
             }
+            napi_typeof(env, asyncContext->showInSubWindow, &valueType);
+            if (valueType == napi_boolean) {
+                napi_get_value_bool(env, asyncContext->showInSubWindow, &asyncContext->showInSubWindowBool);
+            }
+            napi_typeof(env, asyncContext->isModal, &valueType);
+            if (valueType == napi_boolean) {
+                napi_get_value_bool(env, asyncContext->isModal, &asyncContext->isModalBool);
+            }
         } else if (valueType == napi_function) {
             napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
         } else {
