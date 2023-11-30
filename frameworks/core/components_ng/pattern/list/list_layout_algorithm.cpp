@@ -709,7 +709,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             jumpIndex_.reset();
             jumpIndexInGroup_.reset();
         } else {
-            if (jumpIndex_ && jumpIndexInGroup_ && scrollAlign_ == ScrollAlign::CENTER) {
+            if (jumpIndex_ && scrollAlign_ == ScrollAlign::CENTER) {
                 ClearAllItemPosition(layoutWrapper);
             }
         }

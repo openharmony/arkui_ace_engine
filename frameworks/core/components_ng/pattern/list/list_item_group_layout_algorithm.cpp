@@ -330,7 +330,7 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
     } else if (scrollAlign_ == ScrollAlign::END) {
         endIndex = GetLanesCeil(endIndex);
         MeasureEnd(layoutWrapper, layoutConstraint, endIndex);
-    } else if (scrollAlign_ == ScrollAlign::AUTO) {
+    } else if (jumpIndex_.has_value() && scrollAlign_ == ScrollAlign::AUTO) {
         startIndex = GetLanesFloor(startIndex);
         MeasureAuto(layoutWrapper, layoutConstraint, startIndex);
     } else if (forwardLayout_) {
