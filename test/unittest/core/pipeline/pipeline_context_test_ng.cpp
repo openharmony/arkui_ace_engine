@@ -2901,5 +2901,73 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg063, TestSize.Level1)
     context_->CloseFrontendAnimation();
     EXPECT_EQ(context_->pendingFrontendAnimation_.size(), 0);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg064
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: history and current timestamps are equal to nanoTimeStamp
+     * @tc.expected: Expect the result to be (0.0, 0.0)
+     */
+    std::tuple<float, float, uint64_t> history_fs = std::make_tuple(1.0f, 1.0f, 1000);
+    std::tuple<float, float, uint64_t> current_fs = std::make_tuple(2.0f, 2.0f, 2000);
+    uint64_t nanoTimeStampFs = 1000;
+    auto result_fs = context_->LinearInterpolation(history_fs, current_fs, nanoTimeStampFs);
+    EXPECT_EQ(result_fs, std::make_pair(0.0f, 0.0f));
+
+    /**
+     * @tc.steps2: history and current timestamps are equal to nanoTimeStamp
+     * @tc.expected: Expect the result to be (0.0, 0.0)
+     */
+    std::tuple<float, float, uint64_t> history_se = std::make_tuple(1.0f, 1.0f, 2000);
+    std::tuple<float, float, uint64_t> current_se = std::make_tuple(2.0f, 2.0f, 1000);
+    uint64_t nanoTimeStampSe = 1500;
+    auto result_se = context_->LinearInterpolation(history_se, current_se, nanoTimeStampSe);
+    EXPECT_EQ(result_se, std::make_pair(0.0f, 0.0f));
+
+    /**
+     * @tc.steps3: history and current timestamps are equal to nanoTimeStamp
+     * @tc.expected: Expect the result to be (1.75, 1.75)
+     */
+    std::tuple<float, float, uint64_t> history_th = std::make_tuple(1.0f, 1.0f, 1000);
+    std::tuple<float, float, uint64_t> current_th = std::make_tuple(2.0f, 2.0f, 3000);
+    uint64_t nanoTimeStampTh = 2500;
+    auto result_th = context_->LinearInterpolation(history_th, current_th, nanoTimeStampTh);
+    EXPECT_EQ(result_th, std::make_pair(1.75f, 1.75f));
+
+    /**
+     * @tc.steps4: nanoTimeStamp is less than history timestamp
+     * @tc.expected: Expect the result to be (0.0, 0.0)
+     */
+    std::tuple<float, float, uint64_t> history_for = std::make_tuple(1.0f, 1.0f, 1000);
+    std::tuple<float, float, uint64_t> current_for = std::make_tuple(2.0f, 2.0f, 2000);
+    uint64_t nanoTimeStampFor = 500;
+    auto result_for = context_->LinearInterpolation(history_for, current_for, nanoTimeStampFor);
+    EXPECT_EQ(result_for, std::make_pair(0.0f, 0.0f));
+
+    /**
+     * @tc.steps5: nanoTimeStamp is less than current timestamp
+     * @tc.expected: Expect non-zero value
+     */
+    std::tuple<float, float, uint64_t> history_fie = std::make_tuple(1.0f, 1.0f, 1000);
+    std::tuple<float, float, uint64_t> current_fie = std::make_tuple(2.0f, 2.0f, 2000);
+    uint64_t nanoTimeStampFie = 1500;
+    auto result_fie = context_->LinearInterpolation(history_fie, current_fie, nanoTimeStampFie);
+    EXPECT_NE(result_fie, std::make_pair(0.0f, 0.0f));
+
+    /**
+     * @tc.steps6: nanoTimeStamp is greater than current timestamp
+     * @tc.expected: Expect non-zero value
+     */
+    std::tuple<float, float, uint64_t> history_six = std::make_tuple(1.0f, 1.0f, 1000);
+    std::tuple<float, float, uint64_t> current_six = std::make_tuple(2.0f, 2.0f, 2000);
+    uint64_t nanoTimeStampSix = 2500;
+    auto result_six = context_->LinearInterpolation(history_six, current_six, nanoTimeStampSix);
+    EXPECT_NE(result_six, std::make_pair(0.0f, 0.0f));
+}
 } // namespace NG
 } // namespace OHOS::Ace
