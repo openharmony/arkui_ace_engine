@@ -1123,6 +1123,7 @@ void RefreshPattern::InitChildNode()
         }
     } else if (!progressChild_) {
         progressChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 1));
+        CHECK_NULL_VOID(progressChild_);
         auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
         CHECK_NULL_VOID(progressPaintProperty);
         progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
