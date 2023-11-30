@@ -40,7 +40,6 @@ public:
         value->propMaxCount_ = CloneMaxCount();
         value->propMinCount_ = CloneMinCount();
         value->propCellLength_ = CloneCellLength();
-        value->propEdgeEffect_ = CloneEdgeEffect();
         value->propScrollEnabled_ = CloneScrollEnabled();
         value->propLayoutOptions_ = CloneLayoutOptions();
         return value;
@@ -58,7 +57,6 @@ public:
         ResetMaxCount();
         ResetMinCount();
         ResetCellLength();
-        ResetEdgeEffect();
         ResetScrollEnabled();
         ResetLayoutOptions();
     }
@@ -140,7 +138,6 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Editable, bool, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EdgeEffect, EdgeEffect, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
 
 private:

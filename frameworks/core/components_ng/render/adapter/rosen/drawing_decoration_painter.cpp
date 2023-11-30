@@ -398,7 +398,7 @@ public:
         radius0_ = std::max(radius0_, 0.0f);
         radius1_ = std::max(radius1_, 0.0f);
         return RSRecordingShaderEffect::CreateTwoPointConical(
-            center_, radius0_, center_, radius1_, colors, pos, tileMode);
+            center_, radius0_, center_, radius1_, colors, pos, tileMode, &matrix);
     }
 
     static std::unique_ptr<GradientShader> CreateRadialGradient(const NG::Gradient& gradient, const RSSize& size)

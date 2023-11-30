@@ -37,6 +37,17 @@ private:
     static void RegisterButtonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterToggleAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDividerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterNavigationAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterImageAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterNavRouterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterNavigatorAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterSideBarContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterCalendarPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterMenuItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterMenuAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterAlphabetIndexerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H

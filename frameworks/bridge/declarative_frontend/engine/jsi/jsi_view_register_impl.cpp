@@ -63,6 +63,7 @@
 #include "bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "bridge/declarative_frontend/jsview/js_environment.h"
 #include "bridge/declarative_frontend/jsview/js_flex_impl.h"
+#include "bridge/declarative_frontend/jsview/js_folder_stack.h"
 #include "bridge/declarative_frontend/jsview/js_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_form_link.h"
 #include "bridge/declarative_frontend/jsview/js_gauge.h"
@@ -162,7 +163,7 @@
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
@@ -234,6 +235,65 @@
 #endif
 
 namespace OHOS::Ace::Framework {
+
+void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
+{
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
+    if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
+        return;
+    }
+    auto uiNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode(true));
+    CHECK_NULL_VOID(uiNode);
+    auto customNode = AceType::DynamicCast<NG::CustomTitleNode>(uiNode);
+    CHECK_NULL_VOID(customNode);
+
+    const auto object = JSRef<JSObject>::Make(obj);
+    auto id = ContainerScope::CurrentId();
+    const JSRef<JSVal> setAppTitle = object->GetProperty("setAppTitle");
+    if (setAppTitle->IsFunction()) {
+        JSRef<JSFunc> jsSetAppTitleFunc = JSRef<JSFunc>::Cast(setAppTitle);
+        auto callback = [obj = object, jsFunc = jsSetAppTitleFunc, id](const std::string& title) {
+            ContainerScope scope(id);
+            const EcmaVM* vm = obj->GetEcmaVM();
+            CHECK_NULL_VOID(vm);
+            JSRef<JSVal> param = JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, title));
+            jsFunc->Call(obj, 1, &param);
+        };
+        customNode->SetAppTitleCallback(callback);
+    }
+#ifdef PIXEL_MAP_SUPPORTED
+    const JSRef<JSVal> setAppIcon = object->GetProperty("setAppIcon");
+    if (setAppIcon->IsFunction()) {
+        JSRef<JSFunc> jsSetAppIconFunc = JSRef<JSFunc>::Cast(setAppIcon);
+        auto callback = [obj = object, jsFunc = jsSetAppIconFunc, id](const RefPtr<PixelMap>& icon) {
+            ContainerScope scope(id);
+            JSRef<JSVal> param = ConvertPixmap(icon);
+            jsFunc->Call(obj, 1, &param);
+        };
+        customNode->SetAppIconCallback(callback);
+    }
+#endif
+    const JSRef<JSVal> onWindowFocused = object->GetProperty("onWindowFocused");
+    if (onWindowFocused->IsFunction()) {
+        JSRef<JSFunc> jsOnWindowFocusedFunc = JSRef<JSFunc>::Cast(onWindowFocused);
+        auto callback = [obj = object, jsFunc = jsOnWindowFocusedFunc, id]() {
+            ContainerScope scope(id);
+            jsFunc->Call(obj);
+        };
+        customNode->SetOnWindowFocusedCallback(callback);
+    }
+
+    const JSRef<JSVal> onWindowUnfocused = object->GetProperty("onWindowUnfocused");
+    if (onWindowUnfocused->IsFunction()) {
+        JSRef<JSFunc> jsOnWindowUnfocusedFunc = JSRef<JSFunc>::Cast(onWindowUnfocused);
+        auto callback = [obj = object, jsFunc = jsOnWindowUnfocusedFunc, id]() {
+            ContainerScope scope(id);
+            jsFunc->Call(obj);
+        };
+        customNode->SetOnWindowUnfocusedCallback(callback);
+    }
+    NG::ViewStackProcessor::GetInstance()->SetCustomTitleNode(customNode);
+}
 
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
@@ -433,6 +493,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Row", JSRow::JSBind },
     { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
+    { "FolderStack", JSFolderStack::JSBind},
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "If", JSIfElse::JSBind },
@@ -509,6 +570,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GridContainer", JSGridContainer::JSBind },
     { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
+    { "FolderStack", JSFolderStack::JSBind},
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },

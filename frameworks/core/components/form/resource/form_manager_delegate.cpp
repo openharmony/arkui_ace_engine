@@ -141,6 +141,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     if (info.dimension != -1) {
         wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
     }
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, info.renderingMode);
 
     if (formInfo.uiSyntax == AppExecFwk::FormType::ETS) {
         CHECK_NULL_VOID(renderDelegate_);

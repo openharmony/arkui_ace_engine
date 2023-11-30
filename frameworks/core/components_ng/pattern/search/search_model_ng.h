@@ -61,7 +61,26 @@ public:
     void SetMaxLength(uint32_t value) override;
     void ResetMaxLength() override;
     void SetType(TextInputType value) override;
-
+    static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
+    static void SetPlaceholderFont(FrameNode* frameNode, const Font& font);
+    static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);
+    static void SetSearchSrcPath(FrameNode* frameNode, const std::string& src);
+    static void SetSearchIconColor(FrameNode* frameNode, const Color& color);
+    static void SetSearchButton(FrameNode* frameNode, const std::string& text);
+    static void SetSearchButtonFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetSearchButtonFontColor(FrameNode* frameNode, const Color& color);
+    static void SetTextColor(FrameNode* frameNode, const Color& color);
+    static void SetCopyOption(FrameNode* frameNode, const CopyOptions& copyOptions);
+    static void SetTextFont(FrameNode* frameNode, const Font& font);
+    static void SetPlaceholderColor(FrameNode* frameNode, const Color& color);
+    static void SetSelectionMenuHidden(FrameNode* frameNode, bool selectionMenuHidden);
+    static void SetCaretWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetCaretColor(FrameNode* frameNode, const Color& color);
+    static void SetTextAlign(FrameNode* frameNode, const TextAlign& textAlign);
+    static void SetRightIconSrcPath(FrameNode* frameNode, const std::string& src);
+    static void SetCancelIconColor(FrameNode* frameNode, const Color& color);
+    static void SetCancelIconSize(FrameNode* frameNode, const Dimension& value);
+    static void SetCancelButtonStyle(FrameNode* frameNode, CancelButtonStyle style);
 private:
     void CreateTextField(const RefPtr<SearchNode>& parentNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);

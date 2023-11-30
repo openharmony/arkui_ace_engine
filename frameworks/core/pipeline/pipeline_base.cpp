@@ -101,6 +101,13 @@ PipelineBase::~PipelineBase()
     LOG_DESTROY();
 }
 
+void PipelineBase::SetCallBackNode(const WeakPtr<NG::FrameNode>& node)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(node);
+}
+
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 {
     auto currentContainer = Container::Current();
@@ -494,16 +501,17 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 
 std::function<void()> PipelineBase::GetWrappedAnimationCallback(const std::function<void()>& finishCallback)
 {
-    auto wrapFinishCallback = [weak = AceType::WeakClaim(this), finishCallback]() {
+    auto wrapFinishCallback = [weak = AceType::WeakClaim(this),
+                                  finishPtr = std::make_shared<std::function<void()>>(finishCallback)]() mutable {
         auto context = weak.Upgrade();
         if (!context) {
             return;
         }
         context->GetTaskExecutor()->PostTask(
-            [finishCallback, weak]() {
+            [finishPtr = std::move(finishPtr), weak]() mutable {
                 auto context = weak.Upgrade();
                 CHECK_NULL_VOID(context);
-                if (!finishCallback) {
+                if (!(*finishPtr)) {
                     if (context->IsFormRender()) {
                         TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
                         context->SetIsFormAnimation(false);
@@ -513,13 +521,13 @@ std::function<void()> PipelineBase::GetWrappedAnimationCallback(const std::funct
                 if (context->IsFormRender()) {
                     TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
                     context->SetFormAnimationFinishCallback(true);
-                    finishCallback();
+                    (*finishPtr)();
                     context->FlushBuild();
                     context->SetFormAnimationFinishCallback(false);
                     context->SetIsFormAnimation(false);
                     return;
                 }
-                finishCallback();
+                (*finishPtr)();
             },
             TaskExecutor::TaskType::UI);
     };

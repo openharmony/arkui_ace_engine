@@ -130,8 +130,7 @@ void GridPattern::OnModifyDone()
         InitScrollableEvent();
     }
 
-    auto edgeEffect = gridLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
-    SetEdgeEffect(edgeEffect);
+    SetEdgeEffect();
 
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -271,15 +270,6 @@ void GridPattern::FireOnScrollStart()
     auto onScrollStart = hub->GetOnScrollStart();
     CHECK_NULL_VOID(onScrollStart);
     onScrollStart();
-}
-
-bool GridPattern::OnScrollCallback(float offset, int32_t source)
-{
-    if (source == SCROLL_FROM_START) {
-        FireOnScrollStart();
-        return true;
-    }
-    return ScrollablePattern::OnScrollCallback(offset, source);
 }
 
 SizeF GridPattern::GetContentSize() const
@@ -556,9 +546,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
             }
             StartScrollBarAnimatorByProxy();
         }
-        if (!GetScrollAbort()) {
-            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-        }
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
         scrollStop_ = false;
         SetScrollAbort(false);
     }
@@ -576,11 +564,6 @@ void GridPattern::OnScrollEndCallback()
     SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
-}
-
-void GridPattern::OnScrollStartCallback()
-{
-    FireOnScrollStart();
 }
 
 std::pair<bool, bool> GridPattern::IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex)
@@ -1261,10 +1244,9 @@ void GridPattern::ScrollBy(float offset)
 
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    Pattern::ToJsonValue(json);
+    ScrollablePattern::ToJsonValue(json);
     json->Put("multiSelectable", multiSelectable_ ? "true" : "false");
     json->Put("supportAnimation", supportAnimation_ ? "true" : "false");
-    json->Put("friction", GetFriction());
 }
 
 void GridPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
@@ -1355,11 +1337,7 @@ void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     if (!isConfigScrollable_) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     ScrollablePattern::AnimateTo(position, duration, curve, smooth);
-    FireOnScrollStart();
 }
 
 void GridPattern::ScrollTo(float position)
@@ -1475,16 +1453,13 @@ void GridPattern::UpdateScrollBarOffset()
     UpdateScrollBarRegion(offset, estimatedHeight, Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 }
 
-RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
+DisplayMode GridPattern::GetDefaultScrollBarDisplayMode() const
 {
     auto defaultDisplayMode = DisplayMode::OFF;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         defaultDisplayMode = DisplayMode::AUTO;
     }
-    auto property = MakeRefPtr<ScrollablePaintProperty>();
-    // default "scrollBar" attribute of Grid is BarState.Off
-    property->UpdateScrollBarMode(defaultDisplayMode);
-    return property;
+    return defaultDisplayMode;
 }
 
 int32_t GridPattern::GetOriginalIndex() const

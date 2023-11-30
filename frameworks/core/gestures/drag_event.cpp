@@ -27,46 +27,6 @@ RefPtr<UnifiedData>& DragEvent::GetData()
     return unifiedData_;
 }
 
-void DragEvent::SetSummary(std::map<std::string, int64_t>& summary)
-{
-    summary_ = summary;
-}
-
-std::map<std::string, int64_t>& DragEvent::GetSummary()
-{
-    return summary_;
-}
-
-void DragEvent::SetResult(DragRet dragRet)
-{
-    dragRet_ = dragRet;
-}
-
-DragRet DragEvent::GetResult()
-{
-    return dragRet_;
-}
-
-Rect DragEvent::GetPreviewRect()
-{
-    return previewRect_;
-}
-
-void DragEvent::SetPreviewRect(Rect previewRect)
-{
-    previewRect_ = previewRect;
-}
-
-void DragEvent::UseCustomAnimation(bool useCustomAnimation)
-{
-    useCustomAnimation_ = useCustomAnimation;
-}
-
-bool DragEvent::IsUseCustomAnimation()
-{
-    return useCustomAnimation_;
-}
-
 void DragEvent::SetDragInfo(const RefPtr<UnifiedData>& dragInfo)
 {
     dragInfo_ = dragInfo;
@@ -75,36 +35,6 @@ void DragEvent::SetDragInfo(const RefPtr<UnifiedData>& dragInfo)
 RefPtr<UnifiedData>& DragEvent::GetDragInfo()
 {
     return dragInfo_;
-}
-
-void DragEvent::SetCopy(bool copy)
-{
-    copy_ = copy;
-}
-
-bool DragEvent::IsCopy()
-{
-    return copy_;
-}
-
-void DragEvent::SetUdKey(const std::string udKey)
-{
-    udKey_ = udKey;
-}
-
-std::string DragEvent::GetUdKey()
-{
-    return udKey_;
-}
-
-void DragEvent::SetIsGetDataSuccess(bool isGetDataSuccess)
-{
-    isGetDataSuccess_ = isGetDataSuccess;
-}
-
-bool DragEvent::IsGetDataSuccess()
-{
-    return isGetDataSuccess_;
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace

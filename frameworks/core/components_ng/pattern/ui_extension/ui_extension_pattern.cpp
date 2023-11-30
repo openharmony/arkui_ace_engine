@@ -26,6 +26,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
+#include "base/geometry/offset.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -97,18 +98,9 @@ public:
     void OnAccessibilityEvent(
         const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList) override
     {
-        ContainerScope scope(instanceId_);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [weak = uiExtensionPattern_, &info, uiExtensionIdLevelList]() {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->OnAccessibilityEvent(info, uiExtensionIdLevelList);
-            },
-            TaskExecutor::TaskType::UI);
+        auto pattern = uiExtensionPattern_.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnAccessibilityEvent(info, uiExtensionIdLevelList);
     }
 
 private:
@@ -238,7 +230,6 @@ void UIExtensionPattern::OnConnect()
 void UIExtensionPattern::OnAccessibilityEvent(
     const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList)
 {
-    CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(session_);
     ContainerScope scope(instanceId_);
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
@@ -256,7 +247,7 @@ void UIExtensionPattern::OnAccessibilityEvent(
         auto accessibilityManager = frontend->GetAccessibilityManager();
         CHECK_NULL_VOID(accessibilityManager);
         if (accessibilityManager) {
-            accessibilityManager->SendAccessibilitySyncEvent(info, uiExtensionIdLevelListNew);
+            accessibilityManager->SendExtensionAccessibilityEvent(info, uiExtensionIdLevelListNew);
         }
     }
 }
@@ -517,6 +508,7 @@ bool UIExtensionPattern::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
+        DisPatchFocusActiveEvent(true);
         // tab trigger consume the key event
         return pipeline->IsTabJustTriggerOnKeyEvent();
     } else {
@@ -619,6 +611,33 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
         UpdateTextFieldManager({ rectToWindow.GetOffset().GetX(), mouseOffsetToWindow.GetY() },
             rectToWindow.Height() - mouseOffsetToFrameNode.GetY());
     }
+    DispatchPointerEvent(pointerEvent);
+}
+
+void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
+{
+    const auto pointerEvent = info.rawPointerEvent;
+    CHECK_NULL_VOID(pointerEvent);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selfGlobalOffset = host->GetTransformRelativeOffset();
+    auto scale = host->GetTransformScale();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto window = static_cast<RosenWindow*>(pipeline->GetWindow());
+    CHECK_NULL_VOID(window);
+    auto rsWindow = window->GetRSWindow();
+    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
+    if (rsWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
+        Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
+    } else {
+        Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
+    }
+    Offset touchOffsetToWindow {info.windowX, info.windowY};
+    Offset touchOffsetToFrameNode {info.displayX, info.displayY};
+    auto rectToWindow = host->GetTransformRectRelativeToWindow();
+    UpdateTextFieldManager(
+        { rectToWindow.GetOffset().GetX(), rectToWindow.GetOffset().GetY() }, rectToWindow.Height());
     DispatchPointerEvent(pointerEvent);
 }
 

@@ -2346,4 +2346,23 @@ HWTEST_F(TextFieldUXTest, TabGetFocus001, TestSize.Level1)
     EXPECT_EQ(pattern_->GetTextSelectController()->GetFirstHandleOffset().GetX(),
         pattern_->GetTextSelectController()->GetSecondHandleOffset().GetX());
 }
+
+/**
+ * @tc.name: NeedSoftKeyboard001
+ * @tc.desc: Test NeedSoftKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, NeedSoftKeyboard001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Test whether text field need soft keyboard.
+     */
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_TRUE(pattern_->NeedSoftKeyboard());
+}
 } // namespace OHOS::Ace::NG

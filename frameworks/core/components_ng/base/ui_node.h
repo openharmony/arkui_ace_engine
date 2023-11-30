@@ -36,6 +36,11 @@
 
 namespace OHOS::Ace::NG {
 
+struct ExtraInfo {
+    std::string page;
+    int32_t line = 0;
+};
+
 class PipelineContext;
 constexpr int32_t DEFAULT_NODE_SLOT = -1;
 
@@ -276,7 +281,7 @@ public:
     virtual void OnWindowShow() {}
 
     virtual void OnWindowHide() {}
-    virtual void Build();
+    virtual void Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos);
 
     virtual void OnWindowFocused() {}
 
@@ -483,6 +488,7 @@ public:
         }
     }
 
+    std::string GetCurrentCustomNodeInfo();
     static int32_t GenerateAccessibilityId();
 
 protected:

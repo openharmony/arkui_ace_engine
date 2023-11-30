@@ -1726,7 +1726,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    auto navigator = FrameNode::CreateFrameNode("navigator", 33, AceType::MakeRefPtr<NavigatorPattern>());
     auto menu = FrameNode::CreateFrameNode("menu", 34, AceType::MakeRefPtr<ButtonPattern>());
     auto subtitle = FrameNode::CreateFrameNode("subtitle", 35, AceType::MakeRefPtr<TextPattern>());
     auto title = FrameNode::CreateFrameNode("title", 36, AceType::MakeRefPtr<TextPattern>());
@@ -1735,15 +1734,12 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
     auto buttonNode = FrameNode::CreateFrameNode("BackButton", 55, AceType::MakeRefPtr<ButtonPattern>());
     auto backButtonImageNode = FrameNode::CreateFrameNode("Image", 66, AceType::MakeRefPtr<ImagePattern>());
 
-
+    navBar->AddChild(titleBarNode);
     auto pattern = titleBarNode->GetPattern<TitleBarPattern>();
-    titleBarNode->backButton_ = navigator;
+    titleBarNode->backButton_ = buttonNode;
     titleBarNode->AddChild(titleBarNode->GetBackButton());
     titleBarNode->title_ = title;
 
-    ASSERT_TRUE(navigator->children_.empty());
-    navigator->children_.emplace_back(buttonNode);
-    buttonNode->MountToParent(navigator);
     ASSERT_TRUE(buttonNode->children_.empty());
     backButtonImageNode->MountToParent(buttonNode);
     backButtonImageNode->MarkModifyDone();
@@ -1772,7 +1768,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
     navBar->GetLayoutProperty<NavBarLayoutProperty>()->propHideBackButton_ = true;
     pattern->OnModifyDone();
-    ASSERT_EQ(buttonNode->GetLayoutProperty<TitleBarLayoutProperty>()->propVisibility_.value(), VisibleType::GONE);
+    EXPECT_EQ(buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->propVisibility_.value(), VisibleType::GONE);
 
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto layoutProperty = AceType::MakeRefPtr<NavBarLayoutProperty>();

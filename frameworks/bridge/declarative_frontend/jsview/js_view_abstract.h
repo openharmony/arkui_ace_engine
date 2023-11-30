@@ -120,6 +120,14 @@ public:
     static void ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle);
     static void JsBindSheet(const JSCallbackInfo& info);
     static void ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
+    static bool ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents);
+    static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
+    static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
+    static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
+        std::function<void()>& onDisappear, std::function<void()>& shouldDismiss);
+    static void ParseSheetTitle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle,
+        std::function<void()>& titleBuilderFunction);
+    static panda::Local<panda::JSValueRef> JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo);
     static void ParseOverlayCallback(
         const JSRef<JSObject>& paramObj, std::function<void()>& onAppear, std::function<void()>& onDisappear);
     static void JsBorderColor(const JSCallbackInfo& info);
@@ -172,6 +180,12 @@ public:
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
+
+    // outer border
+    static void ParseOuterBorderColor(const JSRef<JSVal>& args);
+    static void ParseOuterBorderWidth(const JSRef<JSVal>& args);
+    static void ParseOuterBorderRadius(const JSRef<JSVal>& args);
+    static void ParseOuterBorderStyle(const JSRef<JSVal>& args);
 
     // response region
     static void JsResponseRegion(const JSCallbackInfo& info);
@@ -243,6 +257,7 @@ public:
     static void Pop();
 
     static void JsSetDraggable(bool draggable);
+    static void JsSetDragPreviewOptions(const JSCallbackInfo& info);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static bool ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, NG::DragDropBaseInfo& dragInfo);
     static RefPtr<AceType> ParseDragNode(const JSRef<JSVal>& info);

@@ -200,10 +200,11 @@ void RosenSvgPainter::SetGradientStyle(RSBrush& brush, const FillState& fillStat
         auto info = gradient->GetRadialGradientInfo();
         auto center = RSPoint(info.cx, info.cy);
         auto focal = RSPoint(info.fx, info.fx);
+        RSMatrix matrix;
         return center == focal ? brush.SetShaderEffect(RSRecordingShaderEffect::CreateRadialGradient(center,
             info.r, colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())))
             : brush.SetShaderEffect(RSRecordingShaderEffect::CreateTwoPointConical(focal, 0, center,
-            info.r, colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())));
+            info.r, colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod()), &matrix));
     }
 }
 #endif

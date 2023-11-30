@@ -32,18 +32,18 @@ public:
     explicit RecognizerGroup(const std::vector<RefPtr<NGGestureRecognizer>>& recognizers)
     {
         for (const auto& recognizer : recognizers) {
-            if (recognizer) {
-                recognizer->SetGestureGroup(AceType::WeakClaim(this));
+            if (recognizer && recognizer->SetGestureGroup(AceType::WeakClaim(this))) {
                 recognizers_.emplace_back(recognizer);
             }
         }
     }
 
-    explicit RecognizerGroup(std::list<RefPtr<NGGestureRecognizer>>&& recognizers) : recognizers_(std::move(recognizers))
+    explicit RecognizerGroup(std::list<RefPtr<NGGestureRecognizer>>&& recognizers)
     {
-        for (const auto& recognizer : recognizers_) {
-            if (recognizer) {
-                recognizer->SetGestureGroup(AceType::WeakClaim(this));
+        recognizers_.clear();
+        for (const auto& recognizer : recognizers) {
+            if (recognizer && recognizer->SetGestureGroup(AceType::WeakClaim(this))) {
+                recognizers_.emplace_back(recognizer);
             }
         }
     }

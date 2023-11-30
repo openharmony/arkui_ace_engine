@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/event/click_event.h"
@@ -105,10 +106,14 @@ void MenuWrapperPattern::HideSubMenu()
     if (focusMenu) {
         auto menuHub = DynamicCast<FrameNode>(focusMenu);
         CHECK_NULL_VOID(menuHub);
-        auto focusHub = menuHub->GetFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetParentFocusable(true);
-        focusHub->RequestFocusImmediately();
+        // SelectOverlay's custom menu does not need to be focused.
+        auto isCustomMenu = IsSelectOverlayCustomMenu(menuHub);
+        if (!isCustomMenu) {
+            auto focusHub = menuHub->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetParentFocusable(true);
+            focusHub->RequestFocusImmediately();
+        }
     }
     host->RemoveChild(subMenu);
     auto menuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
@@ -191,7 +196,12 @@ void MenuWrapperPattern::CheckAndShowAnimation()
 
 bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (IsContextMenu() && !IsHided()) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto expandDisplay = theme->GetExpandDisplay();
+    if ((IsContextMenu() && !IsHided()) || (expandDisplay && !IsHided())) {
         SetHotAreas(dirty);
     }
     CheckAndShowAnimation();
@@ -200,7 +210,12 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 
 void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    if (layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto expandDisplay = theme->GetExpandDisplay();
+    if ((layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) && !expandDisplay) {
         return;
     }
     auto layoutProps = layoutWrapper->GetLayoutProperty();
@@ -289,5 +304,12 @@ OffsetT<Dimension> MenuWrapperPattern::GetAnimationOffset()
             break;
     }
     return offset;
+}
+
+bool MenuWrapperPattern::IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const
+{
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, false);
+    return menuPattern->IsSelectOverlayCustomMenu();
 }
 } // namespace OHOS::Ace::NG

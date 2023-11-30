@@ -92,8 +92,12 @@ public:
     void DeregisterInteractionOperation();
     bool SendAccessibilitySyncEvent(
         const AccessibilityEvent& accessibilityEvent, Accessibility::AccessibilityEventInfo eventInfo);
-    bool SendAccessibilitySyncEvent(
-        const Accessibility::AccessibilityEventInfo& eventInfo, std::vector<int32_t>& uiExtensionIdLevelList) override;
+    bool TransferAccessibilityAsyncEvent(
+        const Accessibility::AccessibilityEventInfo& eventInfo,
+        const std::vector<int32_t>& uiExtensionIdLevelList) override;
+    void SendExtensionAccessibilityEvent(
+        const Accessibility::AccessibilityEventInfo& eventInfo,
+        const std::vector<int32_t>& uiExtensionIdLevelList) override;
     void SearchElementInfoByAccessibilityId(const int32_t elementId, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode, const int32_t windowId);
     void SearchElementInfosByText(const int32_t elementId, const std::string& text, const int32_t requestId,
@@ -123,7 +127,11 @@ public:
         const RefPtr<PipelineBase>& context, const int32_t uiExtensionOffset = 0) override;
     bool ExecuteExtensionActionNG(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, const RefPtr<PipelineBase>& context, int32_t uiExtensionOffset) override;
+#ifdef WEB_SUPPORTED
+    bool ExecuteWebActionNG(int32_t elementId, Accessibility::ActionType action, const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<NG::PipelineContext>& ngPipeline);
     void SetWebAccessibilityState(bool state);
+#endif
 
     std::string GetPagePath();
 

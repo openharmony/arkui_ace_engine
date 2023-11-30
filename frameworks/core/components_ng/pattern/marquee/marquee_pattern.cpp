@@ -151,9 +151,13 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
     CHECK_NULL_VOID(textNode);
     auto textGeoNode = textNode->GetGeometryNode();
     CHECK_NULL_VOID(textGeoNode);
+    auto textWidth = textGeoNode->GetFrameSize().Width();
     auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto step = paintProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx());
+    if (GreatNotEqual(step, textWidth)) {
+        step = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
+    }
     auto end = CalculateEnd();
     auto duration = static_cast<int32_t>(std::abs(end - start) * DEFAULT_MARQUEE_SCROLL_DELAY);
     if (GreatNotEqual(step, 0.0)) {

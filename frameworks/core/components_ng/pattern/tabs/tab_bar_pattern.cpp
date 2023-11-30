@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -68,6 +69,8 @@ void TabBarPattern::OnAttachToFrameNode()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToFrame(true);
+    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(
+        SafeAreaExpandOpts { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
 
     swiperController_->SetTabBarFinishCallback([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -560,6 +563,13 @@ void TabBarPattern::OnModifyDone()
         gestureHub->AddTouchEvent(tabBarPattern->touchEvent_);
     };
     swiperController_->SetAddTabBarEventCallback(std::move(addEventCallback));
+
+    auto surfaceChangeCallback = [weak = WeakClaim(this)]() {
+        auto tabBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(tabBarPattern);
+        tabBarPattern->isTouchingSwiper_ = false;
+    };
+    swiperController_->SetSurfaceChangeCallback(std::move(surfaceChangeCallback));
 }
 
 bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

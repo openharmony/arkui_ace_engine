@@ -19,11 +19,13 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/text_timer_model_impl.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/declaration/texttimer/texttimer_declaration.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 
@@ -112,6 +114,7 @@ void JSTextTimer::JSBind(BindingTarget globalObj)
     JSClass<JSTextTimer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextTimer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTextTimer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSTextTimer>::StaticMethod("textShadow", &JSTextTimer::SetTextShadow, opt);
     JSClass<JSTextTimer>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -202,6 +205,18 @@ void JSTextTimer::SetTextColor(const JSCallbackInfo& info)
     TextTimerModel::GetInstance()->SetTextColor(textColor);
 }
 
+void JSTextTimer::SetTextShadow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    std::vector<Shadow> shadows;
+    ParseTextShadowFromShadowObject(info[0], shadows);
+    if (!shadows.empty()) {
+        TextTimerModel::GetInstance()->SetTextShadow(shadows);
+    }
+}
+
 void JSTextTimer::SetFontWeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -252,10 +267,12 @@ void JSTextTimer::OnTimer(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         const std::string& utc, const std::string& elapsedTime) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("TextTimer.onTimer");
+        PipelineContext::SetCallBackNode(node);
         JSRef<JSVal> newJSVal[2];
         newJSVal[0] = JSRef<JSVal>::Make(ToJSValue(utc));
         newJSVal[1] = JSRef<JSVal>::Make(ToJSValue(elapsedTime));

@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_video_controller.h"
 #include "bridge/declarative_frontend/jsview/models/video_model_impl.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
 #ifdef SUPPORT_JSSTACK
 #include "xpower_event_jsvm.h"
@@ -164,9 +165,12 @@ void JSVideo::JsOnStart(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onStart = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onStart = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                       const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onStart");
+        PipelineContext::SetCallBackNode(node);
         std::vector<std::string> keys = { "start" };
         func->Execute(keys, param);
     };
@@ -179,9 +183,12 @@ void JSVideo::JsOnPause(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onPause = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onPause = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                       const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onPause");
+        PipelineContext::SetCallBackNode(node);
         std::vector<std::string> keys = { "pause" };
         func->Execute(keys, param);
     };
@@ -194,9 +201,12 @@ void JSVideo::JsOnFinish(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                        const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onFinish");
+        PipelineContext::SetCallBackNode(node);
         std::vector<std::string> keys = { "finish" };
         func->Execute(keys, param);
     };
@@ -209,10 +219,12 @@ void JSVideo::JsOnFullscreenChange(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto OnFullScreenChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto OnFullScreenChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                   const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.OnFullScreenChange");
+        PipelineContext::SetCallBackNode(node);
         std::vector<std::string> keys = { "fullscreen" };
         func->Execute(keys, param);
     };
@@ -225,9 +237,12 @@ void JSVideo::JsOnPrepared(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onPrepared = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onPrepared = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                          const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onPrepared");
+        PipelineContext::SetCallBackNode(node);
         std::vector<std::string> keys = { "duration" };
         func->Execute(keys, param);
     };
@@ -240,9 +255,12 @@ void JSVideo::JsOnSeeking(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onSeeking = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onSeeking = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                         const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onSeeking");
+        PipelineContext::SetCallBackNode(node);
         std::vector<std::string> keys = { "time" };
         func->Execute(keys, param);
     };
@@ -255,9 +273,12 @@ void JSVideo::JsOnSeeked(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onSeeked = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onSeeked = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                        const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onSeeked");
+        PipelineContext::SetCallBackNode(node);
         std::vector<std::string> keys = { "time" };
         func->Execute(keys, param);
     };
@@ -270,9 +291,12 @@ void JSVideo::JsOnUpdate(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onUpdate = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onUpdate = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                        const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onUpdate");
+        PipelineContext::SetCallBackNode(node);
         std::vector<std::string> keys = { "time" };
         func->Execute(keys, param);
     };
@@ -285,9 +309,12 @@ void JSVideo::JsOnError(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                       const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onError");
+        PipelineContext::SetCallBackNode(node);
         std::vector<std::string> keys = { "error" };
         func->Execute(keys, param);
     };
@@ -301,11 +328,13 @@ EventMarker JSVideo::GetEventMarker(const JSCallbackInfo& info, const std::vecto
     }
 
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto eventMarker =
-        EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](const std::string& param) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute(keys, param);
-        });
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto eventMarker = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys,
+                                       node = targetNode](const std::string& param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(keys, param);
+    });
     return eventMarker;
 }
 

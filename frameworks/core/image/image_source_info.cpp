@@ -57,7 +57,7 @@ bool ImageSourceInfo::IsValidBase64Head(const std::string& uri, const std::strin
 {
     auto iter = uri.find_first_of(',');
     if (iter == std::string::npos) {
-        LOGE("wrong base64 head format.");
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageSourceInfo: wrong base64 head format.");
         return false;
     }
     std::string base64Head = uri.substr(0, iter);
@@ -134,7 +134,7 @@ ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, s
         ++count;
     }
     if (count > 1) {
-        LOGW("multi image source set, only one will be load.");
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageSourceInfo: multi image source set, only one will be load.");
     }
     GenerateCacheKey();
 }

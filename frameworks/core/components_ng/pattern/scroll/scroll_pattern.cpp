@@ -23,7 +23,6 @@
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
-#include "core/components_ng/pattern/scroll/scroll_paint_property.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -61,7 +60,7 @@ void ScrollPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto paintProperty = host->GetPaintProperty<ScrollPaintProperty>();
+    auto paintProperty = host->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     if (axis != GetAxis()) {
@@ -72,7 +71,7 @@ void ScrollPattern::OnModifyDone()
         AddScrollEvent();
         RegisterScrollEventTask();
     }
-    SetEdgeEffect(layoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE));
+    SetEdgeEffect();
     SetScrollBar(paintProperty->GetScrollBarProperty());
     SetAccessibilityAction();
     if (scrollSnapUpdate_) {
@@ -84,7 +83,7 @@ void ScrollPattern::RegisterScrollEventTask()
 {
     auto eventHub = GetHost()->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto scrollFrameBeginEvent = eventHub->GetScrollFrameBeginEvent();
+    auto scrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
     SetScrollFrameBeginCallback(scrollFrameBeginEvent);
 }
 
@@ -118,14 +117,28 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             GetScrollBar()->ScheduleDisappearDelayTask();
         }
     }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto eventHub = host->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    if (IsCrashTop()) {
+        auto onReachStart = eventHub->GetOnReachStart();
+        if (onReachStart) {
+            onReachStart();
+        }
+    }
+    if (IsCrashBottom()) {
+        auto onReachEnd = eventHub->GetOnReachEnd();
+        if (onReachEnd) {
+            onReachEnd();
+        }
+    }
     if (scrollStop_) {
         FireOnScrollStop();
         scrollStop_ = false;
     }
     ScrollSnapTrigger();
     CheckScrollable();
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto offsetRelativeToWindow = host->GetOffsetRelativeToWindow();
@@ -180,7 +193,7 @@ void ScrollPattern::FireOnScrollStart()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(hub);
-    auto onScrollStart = hub->GetScrollStartEvent();
+    auto onScrollStart = hub->GetOnScrollStart();
     CHECK_NULL_VOID(onScrollStart);
     onScrollStart();
 }
@@ -200,7 +213,7 @@ void ScrollPattern::FireOnScrollStop()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(hub);
-    auto onScrollStop = hub->GetScrollStopEvent();
+    auto onScrollStop = hub->GetOnScrollStop();
     CHECK_NULL_VOID(onScrollStop);
     onScrollStop();
 }
@@ -221,11 +234,6 @@ bool ScrollPattern::OnScrollCallback(float offset, int32_t source)
         FireOnScrollStart();
     }
     return true;
-}
-
-void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
-{
-    json->Put("friction", GetFriction());
 }
 
 void ScrollPattern::OnScrollEndCallback()
@@ -469,15 +477,6 @@ void ScrollPattern::OnAnimateStop()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     scrollStop_ = true;
-}
-
-void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
-    ScrollablePattern::AnimateTo(position, duration, curve, smooth);
-    FireOnScrollStart();
 }
 
 void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)

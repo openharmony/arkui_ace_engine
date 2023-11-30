@@ -2140,7 +2140,7 @@ class ObservedObject extends ExtendableProxy {
                     const self = this;
                     const prop = property.toString();
                     // prop is the function name here
-                    if (prop == "splice") {
+                    if (prop == "splice" || prop == "pop") {
                         // 'splice' self modifies the array, returns deleted array items
                         // means, alike other self-modifying functions, splice does not return the array itself.
                         return function () {
@@ -4433,7 +4433,7 @@ class ViewPU extends NativeViewPartialUpdate {
      *    - localStorage do not specify, will inherit from parent View.
      *
     */
-    constructor(parent, localStorage, elmtId = -1) {
+    constructor(parent, localStorage, elmtId = -1, extraInfo = undefined) {
         super();
         this.parent_ = undefined;
         this.childrenWeakrefMap_ = new Map();
@@ -4447,6 +4447,7 @@ class ViewPU extends NativeViewPartialUpdate {
         this.isDeleting_ = false;
         this.watchedProps = new Map();
         this.recycleManager = undefined;
+        this.extraInfo_ = undefined;
         // Set of dependent elmtIds that need partial update
         // during next re-render
         this.dirtDescendantElementIds_ = new Set();
@@ -4466,6 +4467,9 @@ class ViewPU extends NativeViewPartialUpdate {
             : new Map();
         this.localStoragebackStore_ = undefined;
         
+        if (extraInfo) {
+            this.extraInfo_ = extraInfo;
+        }
         if (parent) {
             // this View is not a top-level View
             this.setCardId(parent.getCardId());

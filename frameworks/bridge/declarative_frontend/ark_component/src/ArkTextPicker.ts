@@ -80,8 +80,8 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
 // @ts-ignore
 globalThis.TextPicker.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, ()=> {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, ()=> {
       return new ArkTextPickerComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);

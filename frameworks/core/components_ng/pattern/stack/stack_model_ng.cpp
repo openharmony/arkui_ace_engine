@@ -46,4 +46,8 @@ void StackModelNG::SetAlignment(Alignment alignment)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
 }
 
+void StackModelNG::SetAlignment(FrameNode* frameNode, Alignment alignment)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment, frameNode);
+}
 } // namespace OHOS::Ace::NG

@@ -70,6 +70,7 @@ build_component_ng("pattern_ng") {
     "common_view/common_view_model_ng.cpp",
     "container_modal/container_modal_accessibility_property.cpp",
     "container_modal/container_modal_pattern.cpp",
+    "container_modal/container_modal_utils.cpp",
     "container_modal/container_modal_view.cpp",
     "container_modal/enhance/container_modal_pattern_enhance.cpp",
     "container_modal/enhance/container_modal_view_enhance.cpp",
@@ -77,11 +78,11 @@ build_component_ng("pattern_ng") {
     "counter/counter_model_ng.cpp",
     "counter/counter_node.cpp",
     "custom/custom_measure_layout_node.cpp",
-    "custom/custom_measure_layout_param.cpp",
     "custom/custom_node.cpp",
     "custom/custom_node_base.cpp",
     "custom/custom_node_layout_algorithm.cpp",
     "custom/custom_node_pattern.cpp",
+    "custom/custom_title_node.cpp",
     "custom_paint/canvas_model_ng.cpp",
     "custom_paint/canvas_paint_method.cpp",
     "custom_paint/custom_paint_layout_algorithm.cpp",
@@ -110,6 +111,8 @@ build_component_ng("pattern_ng") {
     "flex/flex_layout_algorithm.cpp",
     "flex/flex_model_ng.cpp",
     "flex/wrap_layout_algorithm.cpp",
+    "folder_stack/folder_stack_group_node.cpp",
+    "folder_stack/folder_stack_model_ng.cpp",
     "form_link/form_link_model_ng.cpp",
     "form_link/form_link_pattern.cpp",
     "gauge/gauge_accessibility_property.cpp",
@@ -252,6 +255,7 @@ build_component_ng("pattern_ng") {
     "overlay/popup_base_pattern.cpp",
     "overlay/sheet_drag_bar_paint_method.cpp",
     "overlay/sheet_drag_bar_pattern.cpp",
+    "overlay/sheet_presentation_layout_algorithm.cpp",
     "overlay/sheet_presentation_pattern.cpp",
     "overlay/sheet_view.cpp",
     "panel/close_icon_layout_algorithm.cpp",
@@ -322,6 +326,7 @@ build_component_ng("pattern_ng") {
     "scrollable/nestable_scroll_container.cpp",
     "scrollable/refresh_coordination.cpp",
     "scrollable/scrollable_controller.cpp",
+    "scrollable/scrollable_model_ng.cpp",
     "scrollable/scrollable_paint_property.cpp",
     "scrollable/scrollable_pattern.cpp",
     "scrollable/scrollable_utils.cpp",
@@ -481,6 +486,8 @@ build_component_ng("pattern_ng") {
     "waterflow/water_flow_pattern.cpp",
   ]
 
+  deps = [ "container_modal/interfaces:customtitle" ]
+
   if (defined(vendor_configs.ace_engine_advanced)) {
     sources += vendor_configs.ace_engine_advanced_pattern
   }
@@ -488,6 +495,6 @@ build_component_ng("pattern_ng") {
   if (is_ohos_standard_system) {
     external_deps = [ "graphic_2d:librender_service_client" ]
   } else if (is_arkui_x) {
-    deps = [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
+    deps += [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
   }
 }

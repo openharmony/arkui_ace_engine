@@ -482,15 +482,17 @@ public:
         std::stringstream oss;
         oss << "frameNodeId: " << nodeId << ", "
             << "type: " << type << ", "
-            << "id: " << id << ", "
-            << "parentId: " << parentId;
+            << "depth: " << this->depth << ", "
+            << std::hex
+            << "id: 0x" << id << ", "
+            << "parentId: 0x" << parentId;
         if (!customInfo.empty()) {
             oss << ", " << "customInfo: " << customInfo;
         }
-        dumpList.emplace_back(std::make_pair(depth, oss.str()));
-        dumpList.emplace_back(std::make_pair(depth + 1, "stateHistory:"));
+        dumpList.emplace_back(std::make_pair(depth + this->depth, oss.str()));
+        dumpList.emplace_back(std::make_pair(depth + 1 + this->depth, "stateHistory:"));
         for (const auto& state : stateHistory) {
-            state.Dump(dumpList, depth + 1 + 1);
+            state.Dump(dumpList, depth + 1 + 1 + this->depth);
         }
     }
 
@@ -514,6 +516,7 @@ public:
     std::string type;
     uint64_t id = 0;
     uint64_t parentId = 0;
+    int32_t depth = 0;
     std::string customInfo;
     std::list<StateRecord> stateHistory;
 };
@@ -649,6 +652,8 @@ public:
     {
         return targetComponent_;
     }
+private:
+    virtual bool ShouldResponse() { return true; };
 
 protected:
     Offset coordinateOffset_;

@@ -234,6 +234,11 @@ public:
         return resourceInfo_.GetHapPath();
     }
 
+    const ResourceInfo& GetResourceInfo() const
+    {
+        return resourceInfo_;
+    }
+
     void SetHapPath(const std::string& hapPath);
 
     void Dispatch(
@@ -327,15 +332,7 @@ public:
         }
     }
 
-    void SetIsTransparentForm(bool isTransparentForm)
-    {
-        isTransparentForm_ = isTransparentForm;
-    }
-
-    bool IsTransparentForm() const
-    {
-        return isTransparentForm_;
-    }
+    bool IsTransparentBg() const;
 
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
@@ -547,7 +544,6 @@ private:
     bool isFormRender_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
-    bool isTransparentForm_ = false;
 
     mutable std::mutex frontendMutex_;
     mutable std::mutex pipelineMutex_;

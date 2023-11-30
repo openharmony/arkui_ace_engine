@@ -50,6 +50,8 @@ template("ace_osal_ohos_source_set") {
       "//base/hiviewdfx/hicollie/interfaces/native/innerkits/include",
       "//commonlibrary/c_utils/base/include",
       "//foundation/window/window_manager/interfaces/innerkits",
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
     ]
 
     sources = [
@@ -150,6 +152,7 @@ template("ace_osal_ohos_source_set") {
       "netstack:http_client",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
+      "window_manager:libdm",
       "window_manager:scene_session",
     ]
     deps += [
@@ -157,10 +160,7 @@ template("ace_osal_ohos_source_set") {
     ]
 
     if (ability_runtime_graphics) {
-      external_deps += [
-        "image_framework:image_native",
-        "window_manager:libdm",
-      ]
+      external_deps += [ "image_framework:image_native" ]
     }
   }
 }

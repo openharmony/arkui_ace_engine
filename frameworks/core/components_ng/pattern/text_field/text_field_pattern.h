@@ -141,6 +141,12 @@ public:
     TextFieldPattern();
     ~TextFieldPattern() override;
 
+    // TextField needs softkeyboard, override function.
+    bool NeedSoftKeyboard() const override
+    {
+        return true;
+    }
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -172,11 +178,6 @@ public:
         }
     }
 
-    bool NeedSoftKeyboard() const override
-    {
-        return true;
-    }
-
     void OnModifyDone() override;
     void UpdateSelectionOffset();
     void CalcCaretMetricsByPosition(
@@ -184,14 +185,34 @@ public:
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
     int32_t ConvertTouchOffsetToCaretPositionNG(const Offset& localOffset);
 
+    // Obtain the systemWindowsId when switching between windows
+    uint32_t GetSCBSystemWindowId();
+
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
+    void UpdateAreaTextColor();
+    void UltralimitShake();
     void DeleteBackward(int32_t length) override;
     void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
+
+    WeakPtr<LayoutWrapper> GetCounterNode()
+    {
+        return counterTextNode_;
+    }
+
+    bool GetCounterState() const
+    {
+        return counterChange_;
+    }
+
+    void SetCounterState(bool counterChange)
+    {
+        counterChange_ = counterChange;
+    }
 
     float GetTextOrPlaceHolderFontSize();
 
@@ -1041,7 +1062,8 @@ private:
 
     void CursorMoveOnClick(const Offset& offset);
 
-    void ProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
+    void ProcessOverlay(
+        bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true, bool isHiddenHandle = false);
     void DelayProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
     SelectHandleInfo GetSelectHandleInfo(OffsetF info);
     void UpdateSelectOverlaySecondHandle(bool needLayout = false);
@@ -1189,6 +1211,9 @@ private:
     bool needToRequestKeyboardOnFocus_ = false;
     bool isTransparent_ = false;
     bool contChange_ = false;
+    bool counterChange_ = false;
+    WeakPtr<LayoutWrapper> counterTextNode_;
+    bool hasCounterMargin_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 

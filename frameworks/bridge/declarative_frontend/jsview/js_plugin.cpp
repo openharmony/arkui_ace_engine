@@ -20,6 +20,7 @@
 #include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/jsview/models/plugin_model_impl.h"
 #include "core/components/common/properties/clip_path.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/plugin/plugin_model.h"
 #include "core/components_ng/pattern/plugin/plugin_model_ng.h"
 #include "core/components_ng/pattern/plugin/plugin_pattern.h"
@@ -137,11 +138,14 @@ void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
 {
 #if defined(PLUGIN_COMPONENT_SUPPORTED)
     if (info[0]->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto OnComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+        auto OnComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                              const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             TAG_LOGD(AceLogTag::ACE_PLUGINCOMPONENT, "plugin send onComplete event.");
             ACE_SCORING_EVENT("Plugin.OnComplete");
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
         PluginModel::GetInstance()->SetOnComplete(std::move(OnComplete));
@@ -153,12 +157,15 @@ void JSPlugin::JsOnError(const JSCallbackInfo& info)
 {
 #if defined(PLUGIN_COMPONENT_SUPPORTED)
     if (info[0]->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+        auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                           const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             TAG_LOGD(AceLogTag::ACE_PLUGINCOMPONENT, "plugin send onError event.");
             ACE_SCORING_EVENT("Plugin.OnComplete");
             std::vector<std::string> keys = { "errcode", "msg" };
+            PipelineContext::SetCallBackNode(node);
             func->Execute(keys, param);
         };
         PluginModel::GetInstance()->SetOnError(std::move(onError));

@@ -132,7 +132,7 @@ public:
         return false;
     }
 
-    void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override;
+    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) override;
 
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
@@ -432,6 +432,7 @@ public:
 
     void SetIgnoreViewSafeArea(bool value) override;
     void SetIsLayoutFullScreen(bool value) override;
+    void SetIsNeedAvoidWindow(bool value) override;
 
     void AddAnimationClosure(std::function<void()>&& animation);
     void FlushAnimationClosure();
@@ -464,8 +465,29 @@ public:
         }
     }
 
+    void SetScreenNode(const RefPtr<FrameNode>& node)
+    {
+        CHECK_NULL_VOID(node);
+        screenNode_ = AceType::WeakClaim(AceType::RawPtr(node));
+    }
+    RefPtr<FrameNode> GetScreenNode() const
+    {
+        return screenNode_.Upgrade();
+    }
+
     void SetJSViewActive(bool active, WeakPtr<CustomNode> custom);
 
+    void UpdateCurrentActiveNode(const WeakPtr<FrameNode>& node) override
+    {
+        activeNode_ = std::move(node);
+    }
+
+    const WeakPtr<FrameNode>& GetCurrentActiveNode() const
+    {
+        return activeNode_;
+    }
+
+    std::string GetCurrentExtraInfo() override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
 
     void SetCursor(int32_t cursorValue) override;
@@ -526,7 +548,7 @@ private:
 
     // only used for static form.
     void UpdateFormLinkInfos();
-    
+
     void FlushFrameRate();
 
     template<typename T>
@@ -604,6 +626,7 @@ private:
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     WeakPtr<FrameNode> dirtyDefaultFocusNode_;
+    WeakPtr<FrameNode> screenNode_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
     uint64_t resampleTimeStamp_ = 0;
@@ -616,6 +639,7 @@ private:
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;
+    WeakPtr<FrameNode> activeNode_;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;

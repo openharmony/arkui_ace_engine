@@ -27,6 +27,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/core/components_ng/pattern/canvas_renderer/canvas_renderer_model.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -137,9 +138,35 @@ public:
     void JsGetDirection(const JSCallbackInfo& info);
     void JsSetDirection(const JSCallbackInfo& info);
 
-    void SetCanvasPattern(const RefPtr<AceType>& canvas);
+    void SetCanvasPattern(const RefPtr<AceType>& canvas)
+    {
+        canvasPattern_ = canvas;
+        isOffscreen_ = false;
+        if (isInitializeShadow_) {
+            return;
+        }
+        BaseInfo baseInfo;
+        baseInfo.canvasPattern = canvasPattern_;
+        baseInfo.offscreenPattern = offscreenPattern_;
+        baseInfo.isOffscreen = isOffscreen_;
+        CanvasRendererModel::GetInstance()->SetShadowColor(baseInfo, Color::TRANSPARENT);
+        isInitializeShadow_ = true;
+    }
 
-    void SetOffscreenPattern(const RefPtr<AceType>& offscreenCanvas);
+    void SetOffscreenPattern(const RefPtr<AceType>& offscreenCanvas)
+    {
+        offscreenPattern_ = offscreenCanvas;
+        isOffscreen_ = true;
+        if (isOffscreenInitializeShadow_) {
+            return;
+        }
+        BaseInfo baseInfo;
+        baseInfo.canvasPattern = canvasPattern_;
+        baseInfo.offscreenPattern = offscreenPattern_;
+        baseInfo.isOffscreen = isOffscreen_;
+        CanvasRendererModel::GetInstance()->SetShadowColor(baseInfo, Color::TRANSPARENT);
+        isOffscreenInitializeShadow_ = true;
+    }
 
     std::vector<uint32_t> GetLineDash() const
     {
@@ -189,6 +216,8 @@ private:
     ImageData imageData_;
     bool isOffscreen_ = false;
     std::shared_ptr<Pattern> GetPatternPtr(int32_t id);
+    bool isInitializeShadow_ = false;
+    bool isOffscreenInitializeShadow_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

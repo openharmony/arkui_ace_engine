@@ -258,6 +258,7 @@ void JSImageAnimator::ParseImages(const JSRef<JSVal>& image, ImageProperties& im
     }
     JSRef<JSObject> jsObjImage = JSRef<JSObject>::Cast(image);
     ParseJsMedia(jsObjImage->GetProperty("src"), imageProperties.src);
+    GetJsMediaBundleInfo(jsObjImage->GetProperty("src"), imageProperties.bundleName, imageProperties.moduleName);
     ParseJsDimensionVp(jsObjImage->GetProperty("width"), imageProperties.width);
     ParseJsDimensionVp(jsObjImage->GetProperty("height"), imageProperties.height);
     ParseJsDimensionVp(jsObjImage->GetProperty("top"), imageProperties.top);

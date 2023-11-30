@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_property.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_paint_method.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -69,6 +70,15 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<XComponentLayoutAlgorithm>();
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        if (type_ == XComponentType::TEXTURE) {
+            auto paint = MakeRefPtr<XComponentPaintMethod>(renderSurface_);
+            return paint;
+        }
+        return nullptr;
     }
 
     FocusPattern GetFocusPattern() const override

@@ -38,6 +38,18 @@ public:
     void SetLabelFontColor(const std::optional<Color>& color) override;
     void SetLabelFontFamily(const std::vector<std::string> &families) override;
     void SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent) override;
+
+    static void SetSelected(FrameNode* frameNode, bool isSelected = false);
+    static void SetLabelFontColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetLabelFontSize(FrameNode* frameNode, const Dimension& fontSize);
+    static void SetLabelFontWeight(FrameNode* frameNode, FontWeight weight);
+    static void SetLabelFontFamily(FrameNode* frameNode, const std::vector<std::string>& families);
+    static void SetLabelFontStyle(FrameNode* frameNode, Ace::FontStyle style);
+    static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
+    static void SetFontWeight(FrameNode* frameNode, FontWeight weight);
+    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& families);
+    static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle style);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_MODEL_NG_H

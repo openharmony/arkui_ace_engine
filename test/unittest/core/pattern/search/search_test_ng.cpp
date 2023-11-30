@@ -1497,4 +1497,25 @@ HWTEST_F(SearchTestNg, Pattern014, TestSize.Level1)
     ASSERT_NE(cancelButtonTextLayout, nullptr);
     EXPECT_EQ(cancelButtonTextLayout->GetTextColor(), Color::RED);
 }
+
+/**
+ * @tc.name: Pattern015
+ * @tc.desc: test NeedSoftKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, Pattern015, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Get frameNode and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test whether search need soft keyboard.
+     */
+    EXPECT_TRUE(pattern->NeedSoftKeyboard());
+}
 } // namespace OHOS::Ace::NG

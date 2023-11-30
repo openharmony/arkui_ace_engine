@@ -87,9 +87,7 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();
     CHECK_NULL_VOID(scrollBarOverlayModifier);
     auto scrollBar = scrollBar_.Upgrade();
-    if (!scrollBar || !scrollBar->NeedPaint()) {
-        return;
-    }
+    CHECK_NULL_VOID(scrollBar);
     if (scrollBar->GetPositionModeUpdate()) {
         scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
     }

@@ -17,46 +17,58 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
 
 #include "core/components_ng/pattern/image/image_model.h"
+
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
-
 // ImageModel is essentially the same class as ImageView
 // there should be only one left in the final implementation
 
 class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
-    void Create(const std::string& src, RefPtr<PixelMap>& pixMap, const std::string& bundleName,
-        const std::string& moduleName) override;
-    void SetAlt(const ImageSourceInfo& src) override;
-    void SetBorder(const Border& border) override;
+    void Create(const std::string &src, RefPtr<PixelMap> &pixMap, const std::string &bundleName,
+        const std::string &moduleName) override;
+    void SetAlt(const ImageSourceInfo &src) override;
+    void SetBorder(const Border &border) override;
     void SetBackBorder() override;
     void SetBlur(double blur) override;
     void SetImageFit(ImageFit value) override;
     void SetMatchTextDirection(bool value) override;
     void SetFitOriginSize(bool value) override;
-    void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) override;
-    void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) override;
-    void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) override;
-    void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) override;
-    void SetImageFill(const Color& color) override;
+    void SetOnComplete(std::function<void(const LoadImageSuccessEvent &info)> &&callback) override;
+    void SetOnError(std::function<void(const LoadImageFailEvent &info)> &&callback) override;
+    void SetSvgAnimatorFinishEvent(std::function<void()> &&callback) override;
+    void SetImageSourceSize(const std::pair<Dimension, Dimension> &size) override;
+    void SetImageFill(const Color &color) override;
     void SetImageInterpolation(ImageInterpolation interpolation) override;
     void SetImageRepeat(ImageRepeat imageRepeat) override;
     void SetImageRenderMode(ImageRenderMode imageRenderMode) override;
     bool IsSrcSvgImage() override;
     void SetAutoResize(bool autoResize) override;
     void SetSyncMode(bool syncMode) override;
-    void SetColorFilterMatrix(const std::vector<float>& matrix) override;
+    void SetColorFilterMatrix(const std::vector<float> &matrix) override;
     void SetDraggable(bool draggable) override;
-    void SetOnDragStart(OnDragStartFunc&& onDragStart) override;
-    void SetOnDragEnter(OnDragDropFunc&& onDragEnter) override;
-    void SetOnDragLeave(OnDragDropFunc&& onDragLeave) override;
-    void SetOnDragMove(OnDragDropFunc&& onDragMove) override;
-    void SetOnDrop(OnDragDropFunc&& onDrop) override;
-    void SetCopyOption(const CopyOptions& copyOption) override;
-    bool UpdateDragItemInfo(DragItemInfo& itemInfo) override;
-    static void SetImageFit(FrameNode* frameNode, ImageFit value);
+    void SetOnDragStart(OnDragStartFunc &&onDragStart) override;
+    void SetOnDragEnter(OnDragDropFunc &&onDragEnter) override;
+    void SetOnDragLeave(OnDragDropFunc &&onDragLeave) override;
+    void SetOnDragMove(OnDragDropFunc &&onDragMove) override;
+    void SetOnDrop(OnDragDropFunc &&onDrop) override;
+    void SetCopyOption(const CopyOptions &copyOption) override;
+    bool UpdateDragItemInfo(DragItemInfo &itemInfo) override;
+    static void SetCopyOption(FrameNode *frameNode, CopyOptions copyOption);
+    static void SetAutoResize(FrameNode *frameNode, bool autoResize);
+    static void SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat);
+    static void SetImageRenderMode(FrameNode *frameNode, ImageRenderMode imageRenderMode);
+    static void SetSyncMode(FrameNode *frameNode, bool syncMode);
+    static void SetImageFit(FrameNode *frameNode, ImageFit value);
+    static void SetFitOriginSize(FrameNode *framNode, bool value);
+    static void SetImageSourceSize(FrameNode *frameNode, const std::pair<Dimension, Dimension> &size);
+    static void SetMatchTextDirection(FrameNode *frameNode, bool value);
+    static void SetImageFill(FrameNode *frameNode, const Color &color);
+    static void SetAlt(FrameNode *frameNode, const std::string &src);
+    static void SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation);
+    static void SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix);
+    static void SetDraggable(FrameNode *frameNode, bool draggable);
 };
-
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H

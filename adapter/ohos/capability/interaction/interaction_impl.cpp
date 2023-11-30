@@ -20,6 +20,7 @@
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "interaction_manager.h"
+#include "start_drag_listener_impl.h"
 
 using namespace OHOS::Msdp::DeviceStatus;
 
@@ -55,12 +56,14 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
             dragNotifyMsg.displayY, dragNotifyMsg.targetPid, TranslateDragResult(dragNotifyMsg.result) };
         callback(msg);
     };
-    Msdp::DeviceStatus::DragData msdpDragData {
-        Msdp::DeviceStatus::ShadowInfo { dragData.shadowInfo.pixelMap, dragData.shadowInfo.x, dragData.shadowInfo.y },
+    Msdp::DeviceStatus::ShadowInfo shadowInfo { dragData.shadowInfo.pixelMap,
+        dragData.shadowInfo.x, dragData.shadowInfo.y };
+    Msdp::DeviceStatus::DragData msdpDragData { { shadowInfo },
         dragData.buffer, dragData.udKey, dragData.filterInfo, dragData.extraInfo,
         dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX, dragData.displayY,
         dragData.displayId, dragData.hasCanceledAnimation, dragData.summary };
-    return InteractionManager::GetInstance()->StartDrag(msdpDragData, callbackCore);
+    return InteractionManager::GetInstance()->StartDrag(msdpDragData,
+        std::make_shared<StartDragListenerImpl>(callbackCore));
 }
 
 int32_t InteractionImpl::UpdateDragStyle(OHOS::Ace::DragCursorStyleCore style)

@@ -74,8 +74,8 @@ private:
 
     DataDetectorInstance engine_ = nullptr;
 
-    std::string bundleName_ = "";
-    std::string abilityName_ = "";
+    std::string bundleName_;
+    std::string abilityName_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_DATA_DETECTOR_MGR_H

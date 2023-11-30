@@ -558,7 +558,7 @@ void JSSceneView::JsRenderHeight(const JSCallbackInfo& info)
     LOGD("JSRenderHeight() info[0]: %s", info[0]->ToString().c_str());
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
-        LOGE("invalid args for render width");
+        LOGE("invalid args for render height");
         value.SetValue(1.0f);
         return;
     }
@@ -571,7 +571,7 @@ void JSSceneView::JsRenderHeight(const JSCallbackInfo& info)
         value.SetValue(0.0f);
     }
     LOGD("JSRenderHeight() get: %f", value.Value());
-    ModelView::GetInstance()->SetRenderWidth(value);
+    ModelView::GetInstance()->SetRenderHeight(value);
 }
 
 void JSSceneView::JsRenderFrameRate(const JSCallbackInfo& info)

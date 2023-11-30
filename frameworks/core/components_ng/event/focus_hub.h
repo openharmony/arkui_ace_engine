@@ -428,6 +428,7 @@ public:
     {
         return focusStyleType_;
     }
+
     void SetFocusPaintParamsPtr(const std::unique_ptr<FocusPaintParam>& paramsPtr)
     {
         CHECK_NULL_VOID(paramsPtr);
@@ -557,7 +558,7 @@ public:
     bool IsFocusableScopeByTab();
 
     bool IsFocusableWholePath();
-    bool IsOnRootTree();
+    bool IsOnRootTree() const;
 
     bool IsFocusable();
     bool IsFocusableNode();
@@ -863,6 +864,15 @@ public:
         focusDepend_ = focusDepend;
     }
 
+    void SetIsViewHasFocused(bool isViewHasFocused)
+    {
+        isViewHasFocused_ = isViewHasFocused;
+    }
+    bool GetIsViewHasFocused() const
+    {
+        return isViewHasFocused_;
+    }
+
     static inline bool IsFocusStepVertical(FocusStep step)
     {
         return (static_cast<uint32_t>(step) & 0x1) == 0;
@@ -948,6 +958,7 @@ private:
     bool currentFocus_ { false };
     bool isFocusUnit_ { false };
     bool isViewRootScopeFocused_ { true };
+    bool isViewHasFocused_ { false };
 
     FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;

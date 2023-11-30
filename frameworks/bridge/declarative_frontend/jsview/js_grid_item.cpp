@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_mouse_function.h"
 #include "bridge/declarative_frontend/jsview/models/grid_item_model_impl.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 
 namespace OHOS::Ace {
@@ -130,8 +131,11 @@ void JSGridItem::SelectCallback(const JSCallbackInfo& args)
     }
 
     RefPtr<JsMouseFunction> jsOnSelectFunc = AceType::MakeRefPtr<JsMouseFunction>(JSRef<JSFunc>::Cast(args[0]));
-    auto onSelectId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnSelectFunc)](bool isSelected) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onSelectId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnSelectFunc), node = targetNode](
+                          bool isSelected) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        PipelineContext::SetCallBackNode(node);
         func->SelectExecute(isSelected);
     };
     GridItemModel::GetInstance()->SetOnSelect(std::move(onSelectId));
@@ -151,10 +155,13 @@ void JSGridItem::SetSelected(const JSCallbackInfo& info)
 
     if (info.Length() > 1 && info[1]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
-        auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool param) {
+        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                               bool param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("GridItem.ChangeEvent");
             auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+            PipelineContext::SetCallBackNode(node);
             func->ExecuteJS(1, &newJSVal);
         };
         GridItemModel::GetInstance()->SetSelectChangeEvent(std::move(changeEvent));

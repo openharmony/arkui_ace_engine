@@ -179,6 +179,7 @@ void WindowPattern::CreateStartingNode()
 
 void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::PixelMap>> snapshot)
 {
+    session_->SetNeedSnapshot(false);
     snapshotNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();

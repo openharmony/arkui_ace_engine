@@ -536,4 +536,48 @@ HWTEST_F(EventHubTestNg, EventHubDisableDisAppear001, TestSize.Level1)
     eventHub->onDisappear_();
     EXPECT_EQ(result, RESULT_SUCCESS_TWO);
 }
+
+/**
+ * @tc.name: SetCurrentUIState001
+ * @tc.desc: Create EventHub and test disable onDisAppear function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, SetCurrentUIState002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    bool temp = true;
+
+    /**
+     * @tc.steps: Use SetCurrentUIState to set the UIState state
+     * @tc.expected: Use 'GetCurrentUIState' to obtain the already set UIState
+     */
+    eventHub->AddSupportedState(UI_STATE_NORMAL);
+    eventHub->SetSupportedStates(UI_STATE_NORMAL);
+    eventHub->MarkModifyDone();
+
+    eventHub->SetCurrentUIState(UI_STATE_NORMAL, temp);
+    EXPECT_EQ(eventHub->GetCurrentUIState(), UI_STATE_NORMAL);
+
+    eventHub->IsCurrentStateOn(UI_STATE_NORMAL);
+    eventHub->CreateGetEventTargetImpl();
+
+    eventHub->SetCurrentUIState(UI_STATE_PRESSED, temp);
+    EXPECT_EQ(eventHub->GetCurrentUIState(), UI_STATE_PRESSED);
+
+    eventHub->SetCurrentUIState(UI_STATE_FOCUSED, temp);
+    EXPECT_EQ(eventHub->GetCurrentUIState(), UI_STATE_NORMAL | UI_STATE_PRESSED | UI_STATE_FOCUSED);
+    eventHub->MarkModifyDone();
+
+    eventHub->SetCurrentUIState(UI_STATE_DISABLED, temp);
+    EXPECT_EQ(eventHub->GetCurrentUIState(), UI_STATE_NORMAL | UI_STATE_PRESSED | UI_STATE_FOCUSED | UI_STATE_DISABLED);
+
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, temp);
+    EXPECT_EQ(eventHub->GetCurrentUIState(),
+        UI_STATE_SELECTED | UI_STATE_NORMAL | UI_STATE_PRESSED | UI_STATE_FOCUSED | UI_STATE_DISABLED);
+}
 } // namespace OHOS::Ace::NG

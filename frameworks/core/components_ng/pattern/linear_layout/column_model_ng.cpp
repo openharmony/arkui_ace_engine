@@ -39,8 +39,6 @@ void ColumnModelNG::Create(const std::optional<Dimension>& space, AlignDeclarati
     CHECK_NULL_VOID(space);
     if (GreatOrEqual(space->Value(), 0.0)) {
         ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, space.value());
-    } else {
-        LOGE("Column: the space value is illegal due to space is less than zero");
     }
 }
 
@@ -52,5 +50,15 @@ void ColumnModelNG::SetAlignItems(FlexAlign flexAlign)
 void ColumnModelNG::SetJustifyContent(FlexAlign flexAlign)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign);
+}
+
+void ColumnModelNG::SetJustifyContent(FrameNode* frameNode, FlexAlign flexAlign)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign, frameNode);
+}
+
+void ColumnModelNG::SetAlignItems(FrameNode* frameNode, FlexAlign flexAlign)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, flexAlign, frameNode);
 }
 } // namespace OHOS::Ace::NG

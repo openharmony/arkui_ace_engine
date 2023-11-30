@@ -167,6 +167,10 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
             pos + GetGraphemeClusterLength(contentController_->GetWideText(), pos, true));
     }
 
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT,
+            "current word position = %{public}d, select position {start:%{public}d, end:%{public}d}", pos, start, end);
+    }
     UpdateHandleIndex(start, end);
     auto index = ConvertTouchOffsetToPosition(localOffset);
     auto textLength = static_cast<int32_t>(contentController_->GetWideText().length());
@@ -273,8 +277,8 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boun
             auto dx = contentRect_.GetX() - handleRect.GetX();
             textRect.SetOffset(OffsetF(textRect.GetX() + dx, textRect.GetY()));
             handleRect.SetOffset(OffsetF(handleRect.GetX() + dx, handleRect.GetY()));
-        } else if (handleRect.GetX() > contentRightBoundary) {
-            auto dx = handleRect.GetX() - contentRightBoundary;
+        } else if (handleRect.GetX() + handleRect.Width() > contentRightBoundary) {
+            auto dx = handleRect.GetX() + handleRect.Width() - contentRightBoundary;
             textRect.SetOffset(OffsetF(textRect.GetX() - dx, textRect.GetY()));
             handleRect.SetOffset(OffsetF(handleRect.GetX() - dx, handleRect.GetY()));
         }
@@ -346,6 +350,10 @@ void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity te
     if (GreatNotEqual(textRect.Width(), contentRect_.Width()) && GreatNotEqual(contentRect_.Width(), 0.0) &&
         caretInfo_.index < static_cast<int32_t>(contentController_->GetWideText().length())) {
         boundaryAdjustment = paragraph_->GetCharacterWidth(caretInfo_.index);
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_TEXT, "caretInfo_.index = %{public}d, boundaryAdjustment =%{public}f",
+                caretInfo_.index, boundaryAdjustment);
+        }
     }
 
     MoveHandleToContentRect(caretRect, boundaryAdjustment);

@@ -156,6 +156,7 @@ RefPtr<PasteDataMix> ClipboardImpl::CreatePasteDataMix()
 
 void ClipboardImpl::AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap)
 {
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
     CHECK_NULL_VOID(taskExecutor_);
     auto peData = AceType::DynamicCast<PasteDataImpl>(pasteData);
     CHECK_NULL_VOID(peData);
@@ -163,24 +164,29 @@ void ClipboardImpl::AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, con
     CHECK_NULL_VOID(pixmapOhos);
     LOGI("add pixelMap record to pasteData");
     peData->GetPasteDataData()->AddPixelMapRecord(pixmapOhos->GetPixelMapSharedPtr());
+#endif
 }
 
 void ClipboardImpl::AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri)
 {
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
     CHECK_NULL_VOID(taskExecutor_);
     auto peData = AceType::DynamicCast<PasteDataImpl>(pasteData);
     CHECK_NULL_VOID(peData);
     LOGI("add url record to pasteData, url:  %{public}s", uri.c_str());
     peData->GetPasteDataData()->AddUriRecord(OHOS::Uri(uri));
+#endif
 }
 
 void ClipboardImpl::AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr)
 {
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
     CHECK_NULL_VOID(taskExecutor_);
     auto peData = AceType::DynamicCast<PasteDataImpl>(pasteData);
     CHECK_NULL_VOID(peData);
     LOGI("add text record to pasteData, text:  %{public}s", selectedStr.c_str());
     peData->GetPasteDataData()->AddTextRecord(selectedStr);
+#endif
 }
 
 void ClipboardImpl::SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption)

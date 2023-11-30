@@ -29,6 +29,7 @@ public:
     void SetPattern(const WeakPtr<RichEditorPattern>& pattern);
     int32_t AddImageSpan(const ImageSpanOptions& options) override;
     int32_t AddTextSpan(const TextSpanOptions& options) override;
+    int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options) override;
     int32_t GetCaretOffset() override;
     bool SetCaretOffset(int32_t caretPosition) override;
     void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) override;

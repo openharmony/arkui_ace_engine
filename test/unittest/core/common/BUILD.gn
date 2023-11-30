@@ -14,6 +14,7 @@
 group("core_common_unittest") {
   testonly = true
   deps = [
+    "asset:asset_test",
     "clipboard:clip_board_test",
     "connect_server:ace_connect_server_manager_test",
     "environment:environment_test",
@@ -27,6 +28,7 @@ group("core_common_unittest") {
     "rosen:rosen_test",
     "sharedata:share_data_test",
     "storage:storage_test",
+    "task:thread_test",
     "vibrator:vibrator_test",
   ]
 }

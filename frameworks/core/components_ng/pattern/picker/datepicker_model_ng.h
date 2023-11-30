@@ -40,6 +40,13 @@ public:
     void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(DateChangeEvent&& onChange) override;
+    static void SetSelectedTextStyle(
+        FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
+    static void SetNormalTextStyle(
+        FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
+    static void SetDisappearTextStyle(
+        FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
+    static void SetShowLunar(FrameNode* frameNode, bool lunar);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();

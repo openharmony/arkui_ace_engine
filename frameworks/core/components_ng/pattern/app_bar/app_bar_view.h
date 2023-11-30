@@ -60,7 +60,7 @@ private:
     static RefPtr<FrameNode> BuildBarTitle();
     static RefPtr<FrameNode> BuildIconButton(
         InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isBackButton);
-    static void BindContentCover(int32_t targetId);
+    static void BindContentCover(const RefPtr<FrameNode>& targetNode);
     static RefPtr<FrameNode> BuildFaButton();
     static void SetEachIconColor(
         RefPtr<FrameNode> icon, const std::optional<Color>& color, InternalResource::ResourceId image);

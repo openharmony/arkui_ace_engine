@@ -29,6 +29,12 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
+namespace {
+std::string MakeCacheKey(const std::string& bundleName, const std::string& moduleName)
+{
+    return bundleName + "." + moduleName;
+}
+}
 class ResourceManagerTest : public testing::Test {};
 
 /**
@@ -57,9 +63,9 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest001, TestSize.Level1)
     std::string moduleName = "entry";
     auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName);
     auto resAdapterCreate = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-    EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.size(), 2);
-    EXPECT_NE(ResourceManager::GetInstance().resourceAdapters_.find(std::make_pair(bundleName, moduleName)),
-        ResourceManager::GetInstance().resourceAdapters_.end());
+    EXPECT_EQ(ResourceManager::GetInstance().cache_.size(), 1);
+    EXPECT_NE(ResourceManager::GetInstance().cache_.find(MakeCacheKey(bundleName, moduleName)),
+        ResourceManager::GetInstance().cache_.end());
 
     /**
      * @tc.steps: step5. Get resource adapter by bundleName and moduleName.

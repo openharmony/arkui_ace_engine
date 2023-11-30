@@ -23,6 +23,7 @@ class JSSelect : public JSViewAbstract {
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
+    static bool IsPercentStr(std::string& percent);
 
     static void Selected(const JSCallbackInfo& info);
     static void Value(const JSCallbackInfo& info);

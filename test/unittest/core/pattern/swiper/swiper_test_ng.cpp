@@ -5279,6 +5279,51 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnVisibleChange001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperPatternPlayFadeAnimation001
+ * @tc.desc: PlayFadeAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternPlayFadeAnimation001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    pattern_->fadeOffset_ = 0.0f;
+    pattern_->fadeAnimationIsRunning_ = true;
+    pattern_->PlayFadeAnimation();
+    EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
+}
+
+/**
+ * @tc.name: SwiperPatternPlayFadeAnimation002
+ * @tc.desc: PlayFadeAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternPlayFadeAnimation002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    pattern_->fadeOffset_ = 100.0f;
+    pattern_->fadeAnimationIsRunning_ = true;
+    pattern_->PlayFadeAnimation();
+    EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
+    pattern_->fadeOffset_ = -100.0f;
+    pattern_->fadeAnimationIsRunning_ = true;
+    pattern_->PlayFadeAnimation();
+    EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
+}
+
+/**
+ * @tc.name: SwiperPatternStopFadeAnimation001
+ * @tc.desc: StopFadeAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternStopFadeAnimation001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    pattern_->fadeAnimationIsRunning_ = true;
+    pattern_->StopFadeAnimation();
+    EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
+}
+
+/**
  * @tc.name: SwiperPatternPlaySpringAnimation001
  * @tc.desc: PlaySpringAnimation
  * @tc.type: FUNC
@@ -5318,45 +5363,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternPlaySpringAnimation001, TestSize.Level1)
     Animator::StatusCallback statusCallback1 = pattern_->springController_->startCallbacks_.begin()->second;
     statusCallback1.callback_();
     Animator::StatusCallback statusCallback2 = pattern_->springController_->stopCallbacks_.begin()->second;
-    statusCallback2.callback_();
-}
-
-/**
- * @tc.name: SwiperPatternPlayFadeAnimation001
- * @tc.desc: PlayFadeAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternPlayFadeAnimation001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->fadeOffset_ = 0.0f;
-    pattern_->fadeController_ = nullptr;
-
-    /**
-     * @tc.steps: step2. call PlayFadeAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->PlayFadeAnimation();
-            if (i == 1) {
-                break;
-            }
-            pattern_->fadeOffset_ = 1.0f;
-            pattern_->fadeController_ = nullptr;
-        }
-        pattern_->fadeController_ = AceType::MakeRefPtr<Animator>();
-    }
-    double position = 1.0;
-    pattern_->PlayFadeAnimation();
-    Animation<double>::ValueCallback valueCallback =
-        static_cast<CurveAnimation<double>*>(AceType::RawPtr(pattern_->fadeController_->interpolators_.front()))
-            ->callbacks_.begin()
-            ->second;
-    valueCallback.callback_(position);
-    Animator::StatusCallback statusCallback1 = pattern_->fadeController_->startCallbacks_.begin()->second;
-    statusCallback1.callback_();
-    Animator::StatusCallback statusCallback2 = pattern_->fadeController_->stopCallbacks_.begin()->second;
     statusCallback2.callback_();
 }
 
@@ -6414,7 +6420,9 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnSpringAndFadeAnimationFinish001, TestSize.
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
+        pattern_->fadeAnimationIsRunning_ = true;
         pattern_->OnSpringAndFadeAnimationFinish();
+        EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
         pattern_->currentIndex_ = 0;
     }
 }
@@ -6442,7 +6450,9 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnFadeAnimationStart001, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
+        pattern_->fadeAnimationIsRunning_ = false;
         pattern_->OnFadeAnimationStart();
+        EXPECT_TRUE(pattern_->fadeAnimationIsRunning_);
         pattern_->currentIndex_ = 0;
     }
 }
@@ -10626,6 +10636,25 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll006, TestSize.Level1)
 
     auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_ANIMATION, NestedState::CHILD_SCROLL);
     EXPECT_EQ(res.remain, 5.0f);
+}
+
+/**
+ * @tc.name: SwiperPatternHandleScroll007
+ * @tc.desc: test HandleScroll from child mouse scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll007, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+
+    // showPrevious
+    auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_AXIS, NestedState::CHILD_SCROLL);
+    EXPECT_EQ(res.remain, 0.0f);
+
+    // showNext
+    res = pattern_->HandleScroll(-5.0f, SCROLL_FROM_AXIS, NestedState::CHILD_SCROLL);
+    EXPECT_EQ(res.remain, 0.0f);
 }
 
 /**

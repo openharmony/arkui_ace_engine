@@ -26,6 +26,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_task_executor.h"
+#include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
@@ -38,9 +39,15 @@
 namespace OHOS::Ace::Platform {
 DialogContainer::DialogContainer(int32_t instanceId, FrontendType type) : instanceId_(instanceId), type_(type)
 {
-    auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    flutterTaskExecutor->InitPlatformThread(true);
-    taskExecutor_ = flutterTaskExecutor;
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        auto taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>();
+        taskExecutorImpl->InitPlatformThread(true);
+        taskExecutor_ = taskExecutorImpl;
+    } else {
+        auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+        flutterTaskExecutor->InitPlatformThread(true);
+        taskExecutor_ = flutterTaskExecutor;
+    }
     GetSettings().useUIAsJSThread = true;
     GetSettings().usePlatformAsUIThread = true;
     GetSettings().usingSharedRuntime = true;
@@ -182,10 +189,11 @@ void DialogContainer::InitializeDragEventCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
-                                   int32_t x, int32_t y, const DragEventAction& action) {
+                                    const PointerEvent& pointerEvent, const DragEventAction& action) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, x, y, action]() { context->OnDragEvent(x, y, action); }, TaskExecutor::TaskType::UI);
+            [context, pointerEvent, action]() { context->OnDragEvent(pointerEvent, action); },
+            TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterDragEventCallback(dragEventCallback);
 }
@@ -287,11 +295,11 @@ void DialogContainer::SetView(
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
-    std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
 #else
     auto platformWindow = PlatformWindow::Create(view);
     CHECK_NULL_VOID(platformWindow);
-    std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
+    auto window = std::make_shared<Window>(std::move(platformWindow));
 #endif
     container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId());
 }
@@ -306,23 +314,33 @@ void DialogContainer::SetViewNew(
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
-    std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
     container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId());
 #endif
 }
 
 void DialogContainer::AttachView(
-    std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height, uint32_t windowId)
+    std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height, uint32_t windowId)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
-    auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
-    auto* aceView = static_cast<AceViewOhos*>(aceView_);
-    ACE_DCHECK(aceView != nullptr);
-    flutterTaskExecutor->InitOtherThreads(aceView->GetThreadModel());
-    ContainerScope scope(instanceId);
-    // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
-    flutterTaskExecutor->InitJsThread(false);
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        auto taskExecutorImpl = AceType::DynamicCast<TaskExecutorImpl>(taskExecutor_);
+        auto* aceView = static_cast<AceViewOhos*>(aceView_);
+        ACE_DCHECK(aceView != nullptr);
+        taskExecutorImpl->InitOtherThreads(aceView->GetThreadModelImpl());
+        ContainerScope scope(instanceId);
+        // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
+        taskExecutorImpl->InitJsThread(false);
+    } else {
+        auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
+        auto* aceView = static_cast<AceViewOhos*>(aceView_);
+        ACE_DCHECK(aceView != nullptr);
+        flutterTaskExecutor->InitOtherThreads(aceView->GetThreadModel());
+        ContainerScope scope(instanceId);
+        // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
+        flutterTaskExecutor->InitJsThread(false);
+    }
     InitializeFrontend();
     SetUseNewPipeline();
 
@@ -358,7 +376,7 @@ void DialogContainer::AttachView(
 #endif
 }
 
-void DialogContainer::InitPipelineContext(std::unique_ptr<Window> window, int32_t instanceId, double density,
+void DialogContainer::InitPipelineContext(std::shared_ptr<Window> window, int32_t instanceId, double density,
     int32_t width, int32_t height, uint32_t windowId)
 {
 #ifdef NG_BUILD

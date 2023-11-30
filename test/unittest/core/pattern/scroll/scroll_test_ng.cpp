@@ -27,6 +27,10 @@
 #define protected public
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/animation/animator.h"
 #include "core/components/common/properties/color.h"
@@ -40,15 +44,11 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
-#include "core/components_ng/pattern/scroll/scroll_paint_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/unittest/core/pattern/test_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -99,7 +99,7 @@ public:
     RefPtr<ScrollPattern> pattern_;
     RefPtr<ScrollEventHub> eventHub_;
     RefPtr<ScrollLayoutProperty> layoutProperty_;
-    RefPtr<ScrollPaintProperty> paintProperty_;
+    RefPtr<ScrollablePaintProperty> paintProperty_;
     RefPtr<ScrollAccessibilityProperty> accessibilityProperty_;
 };
 
@@ -140,7 +140,7 @@ void ScrollTestNg::GetInstance()
     pattern_ = frameNode_->GetPattern<ScrollPattern>();
     eventHub_ = frameNode_->GetEventHub<ScrollEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<ScrollLayoutProperty>();
-    paintProperty_ = frameNode_->GetPaintProperty<ScrollPaintProperty>();
+    paintProperty_ = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ScrollAccessibilityProperty>();
 }
 
@@ -352,13 +352,13 @@ HWTEST_F(ScrollTestNg, AttrScrollBar001, TestSize.Level1)
     /**
      * @tc.steps: step2. Text set value: OFF
      */
-    CreateWithContent([](ScrollModelNG model) {  model.SetDisplayMode(static_cast<int>(NG::DisplayMode::OFF)); });
+    CreateWithContent([](ScrollModelNG model) {  model.SetDisplayMode(static_cast<int>(DisplayMode::OFF)); });
     EXPECT_EQ(paintProperty_->GetBarStateString(), "BarState.Off");
 
     /**
      * @tc.steps: step3. Text set value: ON
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetDisplayMode(static_cast<int>(NG::DisplayMode::ON)); });
+    CreateWithContent([](ScrollModelNG model) { model.SetDisplayMode(static_cast<int>(DisplayMode::ON)); });
     EXPECT_EQ(paintProperty_->GetBarStateString(), "BarState.On");
 }
 
@@ -402,19 +402,19 @@ HWTEST_F(ScrollTestNg, AttrEdgeEffect001, TestSize.Level1)
      * @tc.steps: step1. Text default value: NONE
      */
     CreateWithContent();
-    EXPECT_EQ(layoutProperty_->GetEdgeEffectValue(), EdgeEffect::NONE);
+    EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::NONE);
 
     /**
      * @tc.steps: step2. Text set value: SPRING
      */
     CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
-    EXPECT_EQ(layoutProperty_->GetEdgeEffectValue(), EdgeEffect::SPRING);
+    EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::SPRING);
 
     /**
      * @tc.steps: step3. Text set width value: FADE
      */
     CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::FADE, true); });
-    EXPECT_EQ(layoutProperty_->GetEdgeEffectValue(), EdgeEffect::FADE);
+    EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::FADE);
 }
 
 /**
@@ -455,7 +455,7 @@ HWTEST_F(ScrollTestNg, Event001, TestSize.Level1)
      * @tc.steps: step1. When set event
      * @tc.expected: scrollableEvent would has event that setted
      */
-    ASSERT_NE(eventHub_->GetScrollFrameBeginEvent(), nullptr);
+    ASSERT_NE(eventHub_->GetOnScrollFrameBegin(), nullptr);
     ASSERT_NE(eventHub_->GetScrollBeginEvent(), nullptr);
 }
 
@@ -1058,7 +1058,7 @@ HWTEST_F(ScrollTestNg, ScrollTest002, TestSize.Level1)
 {
     CreateWithContent([](ScrollModelNG model) {
         model.SetAxis(Axis::HORIZONTAL);
-        model.SetDisplayMode(static_cast<int>(NG::DisplayMode::OFF));
+        model.SetDisplayMode(static_cast<int>(DisplayMode::OFF));
         auto scrollProxy = model.CreateScrollBarProxy();
         model.SetScrollBarProxy(scrollProxy);
     });

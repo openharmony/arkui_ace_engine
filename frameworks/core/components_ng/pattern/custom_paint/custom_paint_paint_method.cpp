@@ -296,8 +296,9 @@ void CustomPaintPaintMethod::UpdatePaintShader(
         if (gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint) {
             shaderEffect = RSShaderEffect::CreateRadialGradient(endPoint, gradient.GetOuterRadius(), colors, pos, mode);
         } else {
-            shaderEffect = RSShaderEffect::CreateTwoPointConical(
-                beginPoint, gradient.GetInnerRadius(), endPoint, gradient.GetOuterRadius(), colors, pos, mode);
+            RSMatrix matrix;
+            shaderEffect = RSShaderEffect::CreateTwoPointConical(beginPoint, gradient.GetInnerRadius(), endPoint,
+                gradient.GetOuterRadius(), colors, pos, mode, &matrix);
         }
     }
     if (pen != nullptr) {
@@ -772,7 +773,7 @@ void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace:
     bitmap.SetPixels(data);
     auto contentOffset = GetContentOffset(paintWrapper);
     RSBrush brush;
-    brush.SetBlendMode(RSBlendMode::SRC_OVER);
+    brush.SetBlendMode(RSBlendMode::SRC);
     rsCanvas_->AttachBrush(brush);
     rsCanvas_->DrawBitmap(bitmap, imageData.x + contentOffset.GetX(), imageData.y + contentOffset.GetY());
     rsCanvas_->DetachBrush();
@@ -834,11 +835,6 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
     }
     RSRect rsRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(), rect.Right() + offset.GetX(),
         offset.GetY() + rect.Bottom());
-    if (HasShadow()) {
-        RSRecordingPath path;
-        path.AddRect(rsRect);
-        PaintShadow(path, shadow_, rsCanvas_.get());
-    }
     if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, nullptr, &brush, fillState_.GetGradient());
     }
@@ -852,6 +848,11 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
         } else {
             brush.SetAlphaF(globalState_.GetAlpha()); // update the global alpha after setting the color
         }
+    }
+    if (HasShadow()) {
+        RSRecordingPath path;
+        path.AddRect(rsRect);
+        PaintShadow(path, shadow_, rsCanvas_.get(), &brush, nullptr);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         rsCanvas_->AttachBrush(brush);
@@ -913,7 +914,7 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
     if (HasShadow()) {
         RSRecordingPath path;
         path.AddRect(rsRect);
-        PaintShadow(path, shadow_, rsCanvas_.get());
+        PaintShadow(path, shadow_, rsCanvas_.get(), nullptr, &pen);
     }
     if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, &pen, nullptr, strokeState_.GetGradient());
@@ -1048,9 +1049,6 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
     if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
         brush.SetColor(fillState_.GetColor().GetValue());
     }
-    if (HasShadow()) {
-        PaintShadow(rsPath_, shadow_, rsCanvas_.get());
-    }
     if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, nullptr, &brush, fillState_.GetGradient());
     }
@@ -1064,6 +1062,9 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
         } else {
             brush.SetAlphaF(globalState_.GetAlpha());
         }
+    }
+    if (HasShadow()) {
+        PaintShadow(rsPath_, shadow_, rsCanvas_.get(), &brush, nullptr);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         rsCanvas_->AttachBrush(brush);
@@ -1143,9 +1144,6 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
     if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
         brush.SetColor(fillState_.GetColor().GetValue());
     }
-    if (HasShadow()) {
-        PaintShadow(rsPath2d_, shadow_, rsCanvas_.get());
-    }
     if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, nullptr, &brush, fillState_.GetGradient());
     }
@@ -1159,6 +1157,9 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
         } else {
             brush.SetAlphaF(globalState_.GetAlpha());
         }
+    }
+    if (HasShadow()) {
+        PaintShadow(rsPath2d_, shadow_, rsCanvas_.get(), &brush, nullptr);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         rsCanvas_->AttachBrush(brush);
@@ -1211,14 +1212,14 @@ void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper)
     RSSamplingOptions options;
     GetStrokePaint(pen, options);
     pen.SetAntiAlias(antiAlias_);
-    if (HasShadow()) {
-        PaintShadow(rsPath_, shadow_, rsCanvas_.get());
-    }
     if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, &pen, nullptr, strokeState_.GetGradient());
     }
     if (strokeState_.GetPatternValue().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(strokeState_.GetPatternValue(), &pen, nullptr);
+    }
+    if (HasShadow()) {
+        PaintShadow(rsPath_, shadow_, rsCanvas_.get(), nullptr, &pen);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         rsCanvas_->AttachPen(pen);
@@ -1283,14 +1284,14 @@ void CustomPaintPaintMethod::Path2DStroke(const OffsetF& offset)
     RSSamplingOptions options;
     GetStrokePaint(pen, options);
     pen.SetAntiAlias(antiAlias_);
-    if (HasShadow()) {
-        PaintShadow(rsPath2d_, shadow_, rsCanvas_.get());
-    }
     if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, &pen, nullptr, strokeState_.GetGradient());
     }
     if (strokeState_.GetPatternValue().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(strokeState_.GetPatternValue(), &pen, nullptr);
+    }
+    if (HasShadow()) {
+        PaintShadow(rsPath2d_, shadow_, rsCanvas_.get(), nullptr, &pen);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         rsCanvas_->AttachPen(pen);

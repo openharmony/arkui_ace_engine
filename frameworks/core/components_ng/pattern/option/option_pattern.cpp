@@ -67,6 +67,9 @@ void OptionPattern::OnModifyDone()
         UpdatePasteFontColor(selectTheme_->GetDisabledMenuFontColor());
         CHECK_NULL_VOID(text_);
         text_->GetRenderContext()->UpdateForegroundColor(selectTheme_->GetDisabledMenuFontColor());
+        auto textLayoutProperty = text_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColor(selectTheme_->GetDisabledMenuFontColor());
         text_->MarkModifyDone();
     } else {
         UpdatePasteFontColor(selectTheme_->GetMenuFontColor());

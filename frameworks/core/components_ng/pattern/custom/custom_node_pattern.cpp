@@ -16,36 +16,23 @@
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 
 #include "base/utils/utils.h"
-#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 
 namespace OHOS::Ace::NG {
 
 bool CustomNodePattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/)
 {
-    if (config.skipMeasure && config.skipLayout) {
-        return false;
-    }
     CHECK_NULL_RETURN(dirty, false);
-    renderFunction_ = nullptr;
-    auto host = AceType::DynamicCast<CustomMeasureLayoutNode>(GetHost());
+    auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto children = host->GetMeasureLayoutParam();
-    if (children) {
-        UpdateActiveChildren(children->GetLayoutedList());
-    }
+    auto customNodeLayoutAlgorithm =
+        DynamicCast<CustomNodeLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(customNodeLayoutAlgorithm, false);
+    auto uiNode = customNodeLayoutAlgorithm->MoveBuildItem();
+    CHECK_NULL_RETURN(uiNode, false);
+    uiNode->MountToParent(host);
+    renderFunction_ = nullptr;
     return false;
 }
 
-void CustomNodePattern::UpdateActiveChildren(const std::set<int32_t>& activeChildren)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    for (auto index : activeChildren_) {
-        if (activeChildren.find(index) == activeChildren.end()) {
-            host->RemoveChildInRenderTree(index);
-        }
-    }
-    activeChildren_ = activeChildren;
-}
 } // namespace OHOS::Ace::NG

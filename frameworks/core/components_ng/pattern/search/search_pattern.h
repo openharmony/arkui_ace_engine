@@ -43,6 +43,7 @@ public:
         return false;
     }
 
+    // search pattern needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
         return true;
@@ -133,6 +134,7 @@ public:
         textField_ = textField;
     }
 
+    void ResetDragOption() override;
     void OnColorConfigurationUpdate() override;
 
 private:
@@ -155,7 +157,6 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void RequestKeyboard();
     // Init touch and hover event
-    void InitTextFieldMouseEvent();
     void InitTextFieldValueChangeEvent();
     void InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int32_t childId);
     void InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId);
@@ -163,6 +164,7 @@ private:
     void OnButtonTouchDown(int32_t childId);
     void OnButtonTouchUp(int32_t childId);
     void HandleButtonMouseEvent(bool isHover, int32_t childId);
+    void ClearButtonStyle(int32_t childId);
 
     void ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) const;
     void ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) const;

@@ -113,6 +113,8 @@ public:
     void ProcessTitleDragUpdate(float offset, float dragOffsetY);
     void ProcessTitleDragEnd();
     
+    void OnColorConfigurationUpdate() override;
+
     float GetCurrentOffset()
     {
         return tempTitleBarHeight_ - defaultTitleBarHeight_;

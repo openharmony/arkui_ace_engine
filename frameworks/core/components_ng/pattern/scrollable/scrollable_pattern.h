@@ -22,6 +22,7 @@
 #include "core/animation/select_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
@@ -40,23 +41,39 @@ constexpr double FRICTION = 0.6;
 #else
 constexpr double FRICTION = 0.9;
 #endif
+enum class ModalSheetCoordinationMode : char {
+    UNKNOWN = 0,
+    SHEET_SCROLL = 1,
+    SCROLLABLE_SCROLL = 2,
+};
 class ScrollablePattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
     ScrollablePattern() = default;
-    ScrollablePattern(bool alwaysEnabled) : edgeEffectAlwaysEnabled_(alwaysEnabled) {}
+    ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
+        : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
+    {}
 
     bool IsAtomicNode() const override
     {
         return false;
     }
 
+    RefPtr<PaintProperty> CreatePaintProperty() override;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
     // scrollable
     Axis GetAxis() const override
     {
         return axis_;
     }
+
+    virtual bool IsReverse() const
+    {
+        return false;
+    };
 
     virtual bool ShouldDelayChildPressedState() const override
     {
@@ -90,7 +107,8 @@ public:
         return scrollableEvent_;
     }
     virtual bool OnScrollCallback(float offset, int32_t source);
-    virtual void OnScrollStartCallback() {};
+    virtual void OnScrollStartCallback();
+    virtual void FireOnScrollStart();
     bool ScrollableIdle()
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
@@ -105,7 +123,7 @@ public:
             scrollableEvent_->SetAxis(axis_);
         }
     }
-    void SetScrollableAxis(Axis axis);
+
     RefPtr<GestureEventHub> GetGestureHub();
     RefPtr<InputEventHub> GetInputHub();
 
@@ -116,7 +134,7 @@ public:
     }
     void SetEdgeEffect(EdgeEffect edgeEffect);
     void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> edgeEffect);
-    bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size);
+    bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size, bool reverse = false);
     virtual void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
     bool IsRestrictBoundary()
     {
@@ -201,6 +219,7 @@ public:
 
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
     void GetParentNavigation();
+    void GetParentModalSheet();
 
     virtual OverScrollOffset GetOverScrollOffset(double delta) const
     {
@@ -309,6 +328,8 @@ public:
         return scrollSource_;
     }
 
+    ScrollState GetScrollState() const;
+
     static float CalculateFriction(float gamma)
     {
         constexpr float RATIO = 1.848f;
@@ -346,6 +367,17 @@ public:
         return Rect();
     };
 
+    void SetEdgeEffect()
+    {
+        SetEdgeEffect(edgeEffect_);
+    }
+
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+    {
+        edgeEffect_ = edgeEffect;
+        edgeEffectAlwaysEnabled_ = alwaysEnabled;
+    }
+
     bool GetAlwaysEnabled() const
     {
         return edgeEffectAlwaysEnabled_;
@@ -355,7 +387,12 @@ public:
     {
         edgeEffectAlwaysEnabled_ = alwaysEnabled;
     }
+
 protected:
+    virtual DisplayMode GetDefaultScrollBarDisplayMode() const
+    {
+        return DisplayMode::AUTO;
+    }
     RefPtr<ScrollBar> GetScrollBar() const
     {
         return scrollBar_;
@@ -365,6 +402,12 @@ protected:
         return scrollBarProxy_;
     }
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
+
+    EdgeEffect GetEdgeEffect() const;
+
+    virtual void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const;
+
+    virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, bool withPerf);
 
     // select with mouse
     struct ItemSelectedStatus {
@@ -408,6 +451,8 @@ protected:
     // just for hold ScrollableController
     RefPtr<ScrollableController> positionController_;
 
+    bool scrollStop_ = false;
+
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -437,6 +482,7 @@ private:
     float GetOutOfScrollableOffset() const;
     float GetOffsetWithLimit(float offset) const;
     void LimitMouseEndOffset();
+    void UpdateBorderRadius();
 
     bool ProcessAssociatedScroll(double offset, int32_t source);
 
@@ -455,8 +501,6 @@ private:
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
-
-    EdgeEffect GetEdgeEffect() const;
 
     void SetCanOverScroll(bool val);
     bool GetCanOverScroll() const;
@@ -489,6 +533,7 @@ private:
     RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);
     bool CoordinateWithNavigation(bool isAtTop, bool isDraggedDown, double& offset, int32_t source);
     void NotifyFRCSceneInfo(double velocity, SceneStatus sceneStatus);
+    ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -503,6 +548,7 @@ private:
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
     bool isRefreshInReactive_ = false;
+    bool isSheetInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
     double friction_ = FRICTION;
@@ -518,6 +564,7 @@ private:
     enum SelectDirection { SELECT_DOWN, SELECT_UP, SELECT_NONE };
     SelectDirection selectDirection_ = SELECT_NONE;
     bool mousePressed_ = false;
+    bool canMultiSelect_ = false;
     OffsetF mouseEndOffset_;
     OffsetF mousePressOffset_;
     OffsetF lastMouseStart_;
@@ -526,8 +573,10 @@ private:
     RefPtr<InputEvent> mouseEvent_;
 
     RefPtr<NavBarPattern> navBarPattern_;
-
+    RefPtr<SheetPresentationPattern> sheetPattern_;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
+
+    EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool edgeEffectAlwaysEnabled_ = false;
 };
 } // namespace OHOS::Ace::NG

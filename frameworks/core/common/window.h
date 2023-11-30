@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -34,7 +35,7 @@ namespace OHOS::Ace {
 namespace NG {
 class FrameNode;
 } // namespace NG
-class ACE_EXPORT Window {
+class ACE_EXPORT Window : public std::enable_shared_from_this<Window> {
 public:
     Window() = default;
     explicit Window(std::unique_ptr<PlatformWindow> platformWindow);
@@ -138,10 +139,32 @@ public:
         return 0;
     };
 
+    void SetCursor(MouseFormat cursor)
+    {
+        cursor_ = cursor;
+    }
+
+    MouseFormat GetCursor() const
+    {
+        return cursor_;
+    }
+
+    void SetUserSetCursor(bool isUserSetCursor)
+    {
+        isUserSetCursor_ = isUserSetCursor;
+    }
+
+    bool IsUserSetCursor() const
+    {
+        return isUserSetCursor_;
+    }
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
     double density_ = 1.0;
+    MouseFormat cursor_ = MouseFormat::DEFAULT;
+    bool isUserSetCursor_ = false;
 
     struct VsyncCallback {
         AceVsyncCallback callback_ = nullptr;

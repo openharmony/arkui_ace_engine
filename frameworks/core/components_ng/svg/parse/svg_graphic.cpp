@@ -158,8 +158,10 @@ void SvgGraphic::SetGradientStyle(double opacity)
             fillBrush_.SetShaderEffect(RSRecordingShaderEffect::CreateRadialGradient(center,
                 static_cast<RSScalar>(info.r), colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())));
         } else {
+            RSMatrix matrix;
             fillBrush_.SetShaderEffect(RSRecordingShaderEffect::CreateTwoPointConical(focal, 0, center,
-                static_cast<RSScalar>(info.r), colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())));
+                static_cast<RSScalar>(info.r), colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod()),
+                &matrix));
         }
     }
 #endif

@@ -219,6 +219,8 @@ public:
 
     static bool GetImageFrameworkEnabled();
 
+    static bool GetDebugPixelMapSaveEnabled();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;
@@ -393,6 +395,13 @@ public:
         return changeTitleStyleEnabled_;
     }
 
+    static std::string GetCustomTitleFilePath();
+
+    static bool GetFlutterDecouplingEnabled()
+    {
+        return flutterDecouplingEnabled_;
+    }
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
@@ -433,6 +442,7 @@ private:
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;
     static bool changeTitleStyleEnabled_;
+    static bool flutterDecouplingEnabled_;
 };
 
 } // namespace OHOS::Ace

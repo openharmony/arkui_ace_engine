@@ -67,9 +67,8 @@ public:
 
     explicit TestNode(int32_t nodeId) : UINode("TestNode", nodeId) {}
 
-    HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-        const PointF& parentRevertPoint, const TouchRestrict& touchRestrict,
-        TouchTestResult& result, int32_t touchId) override
+    HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
+        const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId) override
     {
         return hitTestResult_;
     }
@@ -790,8 +789,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg023, TestSize.Level1)
     const PointF LOCAL_POINT { 15.0f, 15.0f };
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
-    HitTestResult retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT,
-        std::move(restrict), result, 1);
+    HitTestResult retResult =
+        ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, std::move(restrict), result, 1);
     EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
     retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, std::move(restrict), result, 1);
@@ -919,7 +918,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg027, TestSize.Level1)
      * @tc.expected: the Build function is run ok
      */
     ZERO->AddChild(ONE, 1, false);
-    ZERO->Build();
+    ZERO->Build(nullptr);
     EXPECT_EQ(ZERO->children_.size(), 1);
     ZERO->Clean();
 }
@@ -1250,5 +1249,181 @@ HWTEST_F(UINodeTestNg, UINodeTestNg043, TestSize.Level1)
     parent->UINode::GetFrameChildByIndex(0, false);
     EXPECT_FALSE(parent->UINode::GetDisappearingChildById(""));
     EXPECT_FALSE(parent->UINode::GetFrameChildByIndex(5, false));
+}
+
+/**
+ * @tc.name: GetCurrentCustomNodeInfo001
+ * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetCurrentCustomNodeInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = FrameNode::CreateFrameNode("parent_test", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("child_test", childId, AceType::MakeRefPtr<Pattern>());
+    parent->AddChild(child);
+
+    /**
+     * @tc.steps: step2. call GetCurrentCustomNodeInfo
+     * @tc.expected: return ""
+     */
+    std::string rusult = parent->UINode::GetCurrentCustomNodeInfo();
+    EXPECT_EQ(rusult, "");
+}
+
+/**
+ * @tc.name: GetCurrentCustomNodeInfo002
+ * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetCurrentCustomNodeInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create custome node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childTwoId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = CustomNode::CreateCustomNode(parentId, "parent");
+    auto child = CustomNode::CreateCustomNode(childId, "child");
+    auto childTwo = CustomNode::CreateCustomNode(childTwoId, "child_two");
+    parent->AddChild(child);
+    parent->AddChild(childTwo);
+
+    /**
+     * @tc.steps: step2. cover branch parent is custome and call GetCurrentCustomNodeInfo
+     * @tc.expected: return ""
+     */
+    std::string rusult = parent->UINode::GetCurrentCustomNodeInfo();
+    EXPECT_EQ(rusult, "");
+}
+
+/**
+ * @tc.name: GetPerformanceCheckData001
+ * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetPerformanceCheckData001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = FrameNode::CreateFrameNode("parent", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    parent->tag_ = V2::COMMON_VIEW_ETS_TAG;
+    parent->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+
+    /**
+     * @tc.steps: step2. construct parameter performanceCheckNodeMap and call GetPerformanceCheckData
+     * @tc.expected: isBuildByJS_ is false
+     */
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    PerformanceCheckNodeMap nodeMap;
+    PerformanceCheckNode performanceCheckNode = PerformanceCheckNode();
+    nodeMap.emplace(nodeId, performanceCheckNode);
+
+    parent->UINode::GetPerformanceCheckData(nodeMap);
+    EXPECT_FALSE(parent->isBuildByJS_);
+
+    /**
+     * @tc.steps: step3. change parent tag_ and call GetPerformanceCheckData
+     * @tc.expected: isBuildByJS_ is true
+     */
+    parent->tag_ = V2::MENU_ETS_TAG;
+    parent->SetBuildByJs(true);
+    parent->UINode::GetPerformanceCheckData(nodeMap);
+    EXPECT_TRUE(parent->isBuildByJS_);
+}
+
+/**
+ * @tc.name: GetPerformanceCheckData002
+ * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetPerformanceCheckData002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent and childframe node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = FrameNode::CreateFrameNode("parent", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("child", childId, AceType::MakeRefPtr<Pattern>(), true);
+
+    parent->tag_ = V2::JS_FOR_EACH_ETS_TAG;
+    parent->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    child->tag_ = V2::COMMON_VIEW_ETS_TAG;
+    child->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    parent->AddChild(child);
+
+    /**
+     * @tc.steps: step2.  construct parameter performanceCheckNodeMap and call GetPerformanceCheckData
+     * @tc.expected: isBuildByJS_ is false
+     */
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    PerformanceCheckNodeMap nodeMap;
+    PerformanceCheckNode performanceCheckNode = PerformanceCheckNode();
+    nodeMap.emplace(nodeId, performanceCheckNode);
+
+    parent->UINode::GetPerformanceCheckData(nodeMap);
+    EXPECT_FALSE(parent->isBuildByJS_);
+
+    /**
+     * @tc.steps: step3. change child tag_ and call GetPerformanceCheckData
+     * @tc.expected: isBuildByJS_ is false
+     */
+    child->tag_ = V2::JS_FOR_EACH_ETS_TAG;
+    parent->UINode::GetPerformanceCheckData(nodeMap);
+    EXPECT_FALSE(parent->isBuildByJS_);
+}
+
+/**
+ * @tc.name: GetPerformanceCheckData003
+ * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetPerformanceCheckData003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childTwoId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = FrameNode::CreateFrameNode("parent", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("child", childId, AceType::MakeRefPtr<Pattern>(), true);
+    auto childTwo = FrameNode::CreateFrameNode("childTwo", childTwoId, AceType::MakeRefPtr<Pattern>(), true);
+    parent->tag_ = V2::JS_FOR_EACH_ETS_TAG;
+    parent->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    child->tag_ = V2::COMMON_VIEW_ETS_TAG;
+    child->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    childTwo->tag_ = V2::COMMON_VIEW_ETS_TAG;
+    childTwo->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    parent->AddChild(child);
+    parent->AddChild(childTwo);
+
+    /**
+     * @tc.steps: step2.  construct parameter performanceCheckNodeMap and call GetPerformanceCheckData
+     * @tc.expected: isBuildByJS_ is false
+     */
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    PerformanceCheckNodeMap nodeMap;
+    PerformanceCheckNode performanceCheckNode = PerformanceCheckNode();
+    nodeMap.emplace(nodeId, performanceCheckNode);
+
+    parent->UINode::GetPerformanceCheckData(nodeMap);
+    EXPECT_FALSE(parent->isBuildByJS_);
+
+    /**
+     * @tc.steps: step3. change child tag_ and call GetPerformanceCheckData
+     * @tc.expected: isBuildByJS_ is false
+     */
+    child->tag_ = V2::JS_FOR_EACH_ETS_TAG;
+    parent->UINode::GetPerformanceCheckData(nodeMap);
+    EXPECT_FALSE(parent->isBuildByJS_);
 }
 } // namespace OHOS::Ace::NG

@@ -435,28 +435,23 @@ HWTEST_F(GridTestNg, Property001, TestSize.Level1)
     EXPECT_EQ(json->GetInt("maxCount"), 5);
     EXPECT_EQ(json->GetInt("minCount"), 2);
     EXPECT_EQ(json->GetInt("cellLength"), 100);
-    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect.Spring");
     EXPECT_FALSE(json->GetBool("enableScrollInteraction"));
 
     /**
      * @tc.steps: step2. Test ToJsonValue, change some property
      */
     layoutProperty_->UpdateGridDirection(FlexDirection::ROW_REVERSE);
-    layoutProperty_->UpdateEdgeEffect(EdgeEffect::FADE);
     json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json);
     EXPECT_EQ(json->GetString("layoutDirection"), "GridDirection.RowReverse");
-    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect.Fade");
 
     /**
      * @tc.steps: step3. Test ToJsonValue, change some property
      */
     layoutProperty_->UpdateGridDirection(FlexDirection::COLUMN);
-    layoutProperty_->UpdateEdgeEffect(EdgeEffect::NONE);
     json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json);
     EXPECT_EQ(json->GetString("layoutDirection"), "GridDirection.Column");
-    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect.None");
 
     /**
      * @tc.steps: step4. Test ToJsonValue, change some property
@@ -2922,9 +2917,10 @@ HWTEST_F(GridTestNg, PositionController002, TestSize.Level1)
      * @tc.steps: step4. Test GetCurrentOffset func.
      * @tc.expected: Verify return value.
      */
+    // When finger moves up, offset is negative.
     pattern_->UpdateCurrentOffset(-20.f, SCROLL_FROM_UPDATE);
     Offset currentOffset = controller->GetCurrentOffset();
-    EXPECT_TRUE(IsEqual(currentOffset, Offset(0, 20.f)));
+    EXPECT_EQ(currentOffset, Offset(0, 20.f));
 
     /**
      * @tc.steps: step5. Test ScrollToEdge func.
@@ -2944,11 +2940,13 @@ HWTEST_F(GridTestNg, PositionController002, TestSize.Level1)
      * @tc.expected: Verify currentOffset.
      */
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
+    // scroll to next page
     controller->ScrollPage(false, true);
-    EXPECT_TRUE(IsEqual(controller->GetCurrentOffset(), Offset(0, DEVICE_HEIGHT)));
+    EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, DEVICE_HEIGHT));
 
+    // scroll to previous page
     controller->ScrollPage(true, true);
-    EXPECT_TRUE(IsEqual(controller->GetCurrentOffset(), Offset(0, 0)));
+    EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, 0));
 
     /**
      * @tc.steps: step7. Test IsAtEnd func.

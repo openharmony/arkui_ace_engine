@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/grid_row_model_impl.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
 
@@ -276,11 +277,13 @@ void JSGridRow::JsBreakpointEvent(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onBreakpointChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onBreakpointChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                   const std::string& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("GridRow.onBreakpointChange");
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+        PipelineContext::SetCallBackNode(node);
         func->ExecuteJS(1, &newJSVal);
     };
     GridRowModel::GetInstance()->SetOnBreakPointChange(onBreakpointChange);

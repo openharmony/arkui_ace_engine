@@ -18,6 +18,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/models/menu_item_model_impl.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
@@ -48,12 +49,8 @@ MenuItemModel* MenuItemModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSMenuItem::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || (!info[0]->IsObject() && !info[0]->IsFunction())) {
-        LOGW("JSMenuItem The arg is wrong");
-        return;
-    }
     // custom menu item
-    if (info[0]->IsFunction()) {
+    if (info.Length() >= 1 && info[0]->IsFunction()) {
         auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
         CHECK_NULL_VOID(builderFunc);
         RefPtr<NG::UINode> customNode;
@@ -64,15 +61,15 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         }
         CHECK_NULL_VOID(customNode);
         MenuItemModel::GetInstance()->Create(customNode);
-    } else {
+        return;
+    }
+    std::string startIconPath;
+    std::string contentStr;
+    std::string endIconPath;
+    std::string labelStr;
+    MenuItemProperties menuItemProps;
+    if (info.Length() >= 1) {
         auto menuItemObj = JSRef<JSObject>::Cast(info[0]);
-
-        std::string startIconPath;
-        std::string contentStr;
-        std::string endIconPath;
-        std::string labelStr;
-        MenuItemProperties menuItemProps;
-
         auto startIcon = menuItemObj->GetProperty("startIcon");
         auto content = menuItemObj->GetProperty("content");
         auto endIcon = menuItemObj->GetProperty("endIcon");
@@ -105,15 +102,20 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         if (!builder.IsEmpty() && builder->IsFunction()) {
             auto subBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
             CHECK_NULL_VOID(subBuilderFunc);
-            auto subBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(subBuilderFunc)]() {
+            auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            auto subBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(subBuilderFunc),
+                                    node = targetNode]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("MenuItem SubBuilder");
+                PipelineContext::SetCallBackNode(node);
                 func->ExecuteJS();
             };
             menuItemProps.buildFunc = std::move(subBuildFunc);
         }
-        MenuItemModel::GetInstance()->Create(menuItemProps);
+    } else {
+        LOGW("JSMenuItem The arg is null");
     }
+    MenuItemModel::GetInstance()->Create(menuItemProps);
 }
 
 void JSMenuItem::JSBind(BindingTarget globalObj)
@@ -140,9 +142,12 @@ void ParseIsSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& chang
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto onSelected = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool selected) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onSelected = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                          bool selected) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("MenuItem.SelectedChangeEvent");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(selected));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -195,9 +200,11 @@ void JSMenuItem::OnChange(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool selected) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool selected) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("MenuItem.onChange");
+        PipelineContext::SetCallBackNode(node);
         JSRef<JSVal> params[1];
         params[0] = JSRef<JSVal>::Make(ToJSValue(selected));
         func->ExecuteJS(1, params);

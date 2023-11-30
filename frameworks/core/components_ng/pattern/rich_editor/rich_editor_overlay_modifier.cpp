@@ -44,6 +44,8 @@ RichEditorOverlayModifier::RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG
     AttachProperty(frameSize_);
     scrollBarOpacityType_ = AceType::MakeRefPtr<PropertyInt>(-1);
     AttachProperty(scrollBarOpacityType_);
+    textHeight_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
+    AttachProperty(textHeight_);
 }
 
 void RichEditorOverlayModifier::SetCaretOffsetAndHeight(const OffsetF& cursorOffset, float height)
@@ -86,6 +88,11 @@ void RichEditorOverlayModifier::SetScrollOffset(float value)
 void RichEditorOverlayModifier::SetScrollBarOpacityType(int32_t value)
 {
     scrollBarOpacityType_->Set(value);
+}
+
+void RichEditorOverlayModifier::SetTextHeight(float value)
+{
+    textHeight_->Set(value);
 }
 
 void RichEditorOverlayModifier::SetFrameSize(const SizeF& value)

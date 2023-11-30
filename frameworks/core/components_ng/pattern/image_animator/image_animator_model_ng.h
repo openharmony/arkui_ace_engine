@@ -37,8 +37,16 @@ public:
     void SetOnCancel(std::function<void()>&& OnCancel) override;
     void SetOnFinish(std::function<void()>&& OnFinish) override;
 
+    static void SetImages(FrameNode* frameNode, const std::vector<ImageProperties>& images);
+    static void SetIsReverse(FrameNode* frameNode, bool isReverse);
+    static void SetDuration(FrameNode* frameNode, int32_t duration);
+    static void SetState(FrameNode* frameNode, int32_t state);
+    static void SetFixedSize(FrameNode* frameNode, bool fixedSize);
+    static void SetFillMode(FrameNode* frameNode, int32_t fillMode);
+    static void SetIteration(FrameNode* frameNode, int32_t iteration);
 private:
     static RefPtr<ImageAnimatorPattern> GetImageAnimatorPattern();
+    static RefPtr<ImageAnimatorPattern> GetImageAnimatorPattern(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 
