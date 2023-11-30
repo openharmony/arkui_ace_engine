@@ -2092,3 +2092,9 @@ var ArrowPointPosition;
   ArrowPointPosition["CENTER"] = "Center";
   ArrowPointPosition["END"] = "End";
 })(ArrowPointPosition || (ArrowPointPosition = {}));
+
+var DragPreviewMode;
+(function (DragPreviewMode) {
+  DragPreviewMode["AUTO"] = 1;
+  DragPreviewMode["DISABLE_SCALE"] = 2;
+})(DragPreviewMode || (DragPreviewMode = {}));
