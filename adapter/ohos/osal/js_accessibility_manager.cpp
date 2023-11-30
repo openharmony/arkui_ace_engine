@@ -608,7 +608,7 @@ RefPtr<NG::FrameNode> FindAccessibilityFocus(const RefPtr<NG::UINode>& node,
             (((extensionNode->GetUiExtensionId() <= NG::UI_EXTENSION_ID_FIRST_MAX) &&
             (NG::UI_EXTENSION_OFFSET_MAX == uiExtensionOffset)) ||
             (extensionNode->GetUiExtensionId() <= NG::UI_EXTENSION_ID_OTHER_MAX))) {
-            SearchParameter transferSearchParam {0, "", focusType, uiExtensionOffset};
+            SearchParameter transferSearchParam {NG::UI_EXTENSION_ROOT_ID, "", focusType, uiExtensionOffset};
             OHOS::Ace::Framework::FindFocusedExtensionElementInfoNG(
                 transferSearchParam, extensionNode, info);
             if (info.GetAccessibilityId() > -1) {
@@ -701,7 +701,7 @@ RefPtr<NG::FrameNode> FindInputFocus(const RefPtr<NG::UINode>& node, int32_t foc
             (((extensionNode->GetUiExtensionId() <= NG::UI_EXTENSION_ID_FIRST_MAX) &&
             (NG::UI_EXTENSION_OFFSET_MAX == uiExtensionOffset)) ||
             (extensionNode->GetUiExtensionId() <= NG::UI_EXTENSION_ID_OTHER_MAX))) {
-            SearchParameter transferSearchParam {0, "", focusType, uiExtensionOffset};
+            SearchParameter transferSearchParam {NG::UI_EXTENSION_ROOT_ID, "", focusType, uiExtensionOffset};
             OHOS::Ace::Framework::FindFocusedExtensionElementInfoNG(
                 transferSearchParam, extensionNode, info);
             if (info.GetAccessibilityId() > -1) {
@@ -2658,13 +2658,17 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int32_t elementId, const
         return;
     }
 #endif
+    if (elementId == NG::UI_EXTENSION_ROOT_ID) {
+        elementId = rootNode->GetAccessibilityId();
+    }
     auto node = GetInspectorById(rootNode, elementId);
     CHECK_NULL_VOID(node);
     std::list<RefPtr<NG::FrameNode>> frameNodesWithText;
     std::list<RefPtr<NG::FrameNode>> uiExtensionsNodes;
     FindText(node, text, frameNodesWithText, uiExtensionsNodes);
     for (const auto& node : uiExtensionsNodes) {
-        auto infosByIPC = SearchElementInfosByTextNG(0, text, node, uiExtensionOffset / NG::UI_EXTENSION_ID_FACTOR);
+        auto infosByIPC = SearchElementInfosByTextNG(NG::UI_EXTENSION_ROOT_ID, text,
+            node, uiExtensionOffset / NG::UI_EXTENSION_ID_FACTOR);
         if (!infosByIPC.empty()) {
             AccessibilityElementInfo nodeInfo;
             CommonProperty commonProperty;
@@ -2845,7 +2849,7 @@ void JsAccessibilityManager::FindFocusedElementInfoNG(int32_t elementId, int32_t
         return info.SetValidElement(false);
     }
     if (V2::UI_EXTENSION_COMPONENT_TAG == node->GetTag()) {
-        SearchParameter transferSearchParam {0, "", focusType, uiExtensionOffset};
+        SearchParameter transferSearchParam {NG::UI_EXTENSION_ROOT_ID, "", focusType, uiExtensionOffset};
         OHOS::Ace::Framework::FindFocusedExtensionElementInfoNG(transferSearchParam, node, info);
         AccessibilityElementInfo parentInfo;
         return ConvertExtensionAccessibilityId(info, node, uiExtensionOffset, parentInfo);
