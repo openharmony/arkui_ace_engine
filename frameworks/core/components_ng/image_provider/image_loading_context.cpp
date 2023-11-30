@@ -58,7 +58,7 @@ RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
     auto drawingData = ImageLoader::LoadDataFromCachedFile(src.GetSrc());
     if (drawingData) {
         auto data = std::make_shared<RSData>();
-        data->BuildWithCopy(drawingData->data(), drawingData->size());
+        data->BuildWithCopy(drawingData->GetData(), drawingData->GetSize());
         return AceType::MakeRefPtr<NG::DrawingImageData>(data);
     }
 #endif

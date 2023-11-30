@@ -90,6 +90,7 @@ using RSXform = Rosen::Drawing::RSXform;
 using RSTextBlob = Rosen::Drawing::TextBlob;
 using RSTextEncoding = Rosen::Drawing::TextEncoding;
 using RSTypeface = Rosen::Drawing::Typeface;
+using RSEncodedImageFormat = Rosen::Drawing::EncodedImageFormat;
 #ifdef USE_ROSEN_DRAWING
 using RSAutoCanvasRestore = Rosen::Drawing::AutoCanvasRestore;
 using RSCubicResampler = Rosen::Drawing::CubicResampler;

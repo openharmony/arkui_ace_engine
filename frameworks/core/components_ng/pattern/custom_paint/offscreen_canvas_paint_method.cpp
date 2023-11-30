@@ -463,7 +463,7 @@ void OffscreenCanvasPaintMethod::GetImageData(const std::shared_ptr<Ace::ImageDa
     RSBitmap subBitmap;
     auto rect = RSRect(scaledLeft, scaledTop,
         dirtyWidth * viewScale + scaledLeft, dirtyHeight * viewScale + scaledTop);
-    bool ret = bitmap_.ExtractSubSet(subBitmap, rect);
+    bool ret = bitmap_.ExtractSubset(subBitmap, rect);
     if (!ret) {
         return;
     }
