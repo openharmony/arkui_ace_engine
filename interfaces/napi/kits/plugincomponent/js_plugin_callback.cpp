@@ -17,11 +17,11 @@
 #include <memory>
 #include <mutex>
 
-#include "hilog_wrapper.h"
 #include "js_plugin_callback_mgr.h"
 #include "js_plugin_util.h"
 #include "js_plugin_want.h"
 
+#include "base/log/log_wrapper.h"
 #include "core/common/ace_engine.h"
 #include "core/components/plugin/plugin_component_manager.h"
 
@@ -136,13 +136,11 @@ void JSPluginCallback::SendRequestEventResult(napi_value jsObject)
 
     auto container = AceEngine::Get().GetContainer(cbInfo_.containerId);
     if (!container) {
-        HILOG_INFO("%{public}s called, container is null. %{public}d", __func__, cbInfo_.containerId);
         return;
     }
 
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
-        HILOG_INFO("%{public}s called, taskExecutor is null.", __func__);
         return;
     }
     taskExecutor->PostTask(
@@ -188,7 +186,7 @@ napi_value JSPluginCallback::MakeCallbackParamForRequest(
 
 napi_value JSPluginCallback::MakePluginTemplateObject(const PluginComponentTemplate& pluginTemplate)
 {
-    HILOG_INFO("%{public}s called.", __func__);
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called.", __func__);
     napi_value jsPluginTemplate = AceCreateJSObject(cbInfo_.env);
     if (jsPluginTemplate != nullptr) {
         napi_value jsSource = AceWrapStringToJS(cbInfo_.env, pluginTemplate.GetSource());
@@ -205,7 +203,7 @@ void JSPluginCallback::OnPushEventInner(const OnPluginUvWorkData* workData)
     napi_value jsCallback = nullptr;
     napi_value undefined = nullptr;
     napi_value jsResult = nullptr;
-    napi_value callbackParam[ACE_ARGS_FOUR] = {nullptr};
+    napi_value callbackParam[ACE_ARGS_FOUR] = { nullptr };
     napi_handle_scope scope = nullptr;
     std::string dataTmp("{}");
     std::string extraDataTmp("{}");
@@ -215,13 +213,13 @@ void JSPluginCallback::OnPushEventInner(const OnPluginUvWorkData* workData)
     if (!workData->extraData.empty()) {
         extraDataTmp = workData->extraData;
     }
-    
+
     napi_open_handle_scope(cbInfo_.env, &scope);
     if (scope == nullptr) {
         napi_close_handle_scope(cbInfo_.env, scope);
         return;
     }
-    
+
     PluginComponentTemplate componentTemplate;
     componentTemplate.SetSource(workData->sourceName);
     componentTemplate.SetAbility(workData->abilityName);
@@ -240,21 +238,18 @@ void JSPluginCallback::OnPushEventInner(const OnPluginUvWorkData* workData)
 void JSPluginCallback::OnPushEvent(const AAFwk::Want& want, const PluginComponentTemplate& pluginTemplate,
     const std::string& data, const std::string& extraData)
 {
-    HILOG_INFO("%{public}s called.", __func__);
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called.", __func__);
     if (cbInfo_.env == nullptr || cbInfo_.callback == nullptr) {
-        HILOG_INFO("%{public}s called, env or callback is null.", __func__);
         return;
     }
 
     auto container = AceEngine::Get().GetContainer(cbInfo_.containerId);
     if (!container) {
-        HILOG_INFO("%{public}s called, container is null. %{public}d", __func__, cbInfo_.containerId);
         return;
     }
 
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
-        HILOG_INFO("%{public}s called, taskExecutor is null.", __func__);
         return;
     }
     std::weak_ptr<PluginComponentCallBack> weak = weak_from_this();
@@ -292,7 +287,7 @@ void JSPluginCallback::OnRequestEventInner(const OnPluginUvWorkData* workData)
         napi_close_handle_scope(cbInfo_.env, scope);
         return;
     }
-    napi_value callbackParam[ACE_ARGS_THREE] = {nullptr};
+    napi_value callbackParam[ACE_ARGS_THREE] = { nullptr };
     callbackParam[ACE_PARAM0] = AceWrapWant(cbInfo_.env, workData->want);
     callbackParam[ACE_PARAM1] = AceWrapStringToJS(cbInfo_.env, workData->name);
     callbackParam[ACE_PARAM2] = AceStringToKVObject(cbInfo_.env, dataTmp);
@@ -307,28 +302,24 @@ void JSPluginCallback::OnRequestEventInner(const OnPluginUvWorkData* workData)
     napi_close_handle_scope(cbInfo_.env, scope);
 }
 
-void JSPluginCallback::OnRequestEvent(const AAFwk::Want& want, const std::string& name,
-    const std::string& data)
+void JSPluginCallback::OnRequestEvent(const AAFwk::Want& want, const std::string& name, const std::string& data)
 {
     if (cbInfo_.env == nullptr || cbInfo_.callback == nullptr) {
-        HILOG_INFO("%{public}s called, env or callback is null.", __func__);
         return;
     }
 
-    uvWorkData_.that = (void *)this;
+    uvWorkData_.that = (void*)this;
     uvWorkData_.want = want;
     uvWorkData_.data = data;
     uvWorkData_.name = name;
 
     auto container = AceEngine::Get().GetContainer(cbInfo_.containerId);
     if (!container) {
-        HILOG_INFO("%{public}s called, container is null. %{public}d", __func__, cbInfo_.containerId);
         return;
     }
 
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
-        HILOG_INFO("%{public}s called, taskExecutor is null.", __func__);
         return;
     }
     taskExecutor->PostTask(
@@ -343,7 +334,6 @@ void JSPluginCallback::OnRequestEvent(const AAFwk::Want& want, const std::string
 
 void JSPluginCallback::OnRequestCallBackInner(const OnPluginUvWorkData* workData)
 {
-    HILOG_INFO("%{public}s called.", __func__);
     napi_value jsCallback = nullptr;
     napi_value undefined = nullptr;
     napi_value jsResult = nullptr;
@@ -358,10 +348,9 @@ void JSPluginCallback::OnRequestCallBackInner(const OnPluginUvWorkData* workData
     componentTemplate.SetAbility(workData->abilityName);
 
     if (cbInfo_.callback != nullptr) {
-        napi_value callbackParam[ACE_ARGS_TWO] = {nullptr};
+        napi_value callbackParam[ACE_ARGS_TWO] = { nullptr };
         callbackParam[ACE_PARAM0] = AceGetCallbackErrorValue(cbInfo_.env, 0);
-        callbackParam[ACE_PARAM1] = MakeCallbackParamForRequest(componentTemplate, workData->data,
-            workData->extraData);
+        callbackParam[ACE_PARAM1] = MakeCallbackParamForRequest(componentTemplate, workData->data, workData->extraData);
         napi_get_undefined(cbInfo_.env, &undefined);
         napi_get_reference_value(cbInfo_.env, cbInfo_.callback, &jsCallback);
         napi_call_function(cbInfo_.env, undefined, jsCallback, ACE_ARGS_TWO, callbackParam, &jsResult);
@@ -369,13 +358,12 @@ void JSPluginCallback::OnRequestCallBackInner(const OnPluginUvWorkData* workData
     napi_close_handle_scope(cbInfo_.env, scope);
 }
 
-void JSPluginCallback::OnRequestCallBack(const PluginComponentTemplate& pluginTemplate,
-    const std::string& data, const std::string& extraData)
+void JSPluginCallback::OnRequestCallBack(
+    const PluginComponentTemplate& pluginTemplate, const std::string& data, const std::string& extraData)
 {
-    HILOG_INFO("%{public}s called.", __func__);
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called.", __func__);
     JSPluginCallbackMgr::Instance().UnRegisterEvent(GetID());
     if (cbInfo_.env == nullptr) {
-        HILOG_INFO("%{public}s called, env or callback is null.", __func__);
         return;
     }
 
@@ -399,13 +387,11 @@ void JSPluginCallback::OnRequestCallBack(const PluginComponentTemplate& pluginTe
 
             auto container = AceEngine::Get().GetContainer(cbInfo_.containerId);
             if (!container) {
-                HILOG_INFO("%{public}s called, container is null. %{public}d", __func__, cbInfo_.containerId);
                 return;
             }
 
             auto taskExecutor = container->GetTaskExecutor();
             if (!taskExecutor) {
-                HILOG_INFO("%{public}s called, taskExecutor is null.", __func__);
                 return;
             }
             taskExecutor->PostTask(
@@ -438,8 +424,7 @@ void JSPluginCallback::OnRequestCallBack(const PluginComponentTemplate& pluginTe
     }
 }
 
-bool JSPluginCallback::OnEventStrictEquals(CallBackType eventType, const AAFwk::Want& want,
-    ACECallbackInfo& cbInfo)
+bool JSPluginCallback::OnEventStrictEquals(CallBackType eventType, const AAFwk::Want& want, ACECallbackInfo& cbInfo)
 {
     if (eventType != eventType_) {
         return false;
@@ -453,8 +438,8 @@ bool JSPluginCallback::OnEventStrictEquals(CallBackType eventType, const AAFwk::
     }
 }
 
-bool JSPluginCallback::RequestStrictEquals(CallBackType eventType, const AAFwk::Want& want,
-    ACECallbackInfo& cbInfo, const std::shared_ptr<AceJSPluginRequestParam>& param)
+bool JSPluginCallback::RequestStrictEquals(CallBackType eventType, const AAFwk::Want& want, ACECallbackInfo& cbInfo,
+    const std::shared_ptr<AceJSPluginRequestParam>& param)
 {
     if (eventType != eventType_) {
         return false;
@@ -472,4 +457,4 @@ bool JSPluginCallback::RequestStrictEquals(CallBackType eventType, const AAFwk::
     }
     return AceIsSameFuncFromJS(cbInfo, cbInfo_);
 }
-}  // namespace OHOS::Ace::Napi
+} // namespace OHOS::Ace::Napi
