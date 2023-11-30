@@ -199,7 +199,8 @@ public:
     virtual void BindSelectionMenu(RichEditorType& editorType, RichEditorResponseType& responseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) = 0;
     virtual void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
-
+    virtual void SetTextDetectEnable(bool value) = 0;
+    virtual void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) = 0;
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;
