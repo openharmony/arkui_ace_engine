@@ -1710,7 +1710,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutW
     CHECK_NULL_VOID(pipelineContext);
     InitHierarchicalParameters();
     targetOffset_ = targetNode->GetPaintRectOffset();
-    if (isContextMenu) {
+    if (isContextMenu || hierarchicalParameters_) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
         float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
