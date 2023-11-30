@@ -930,6 +930,20 @@ struct ArkUIMenuModifierAPI {
     void (*ResetRadius)(NodeHandle node);
 };
 
+struct ArkUIDatePickerModifierAPI {
+    void (*SetSelectedTextStyle)(
+        NodeHandle node, const char* weightChar, const char* familiesChar, const int* values, double size);
+    void (*ResetSelectedTextStyle)(NodeHandle node);
+    void (*SetDatePickerTextStyle)(
+        NodeHandle node, const char* weightChar, const char* familiesChar, const int* values, double size);
+    void (*ResetDatePickerTextStyle)(NodeHandle node);
+    void (*SetDisappearTextStyle)(
+        NodeHandle node, const char* weightChar, const char* familiesChar, const int* values, double size);
+    void (*ResetDisappearTextStyle)(NodeHandle node);
+    void (*SetLunar)(NodeHandle node, bool isLunar);
+    void (*ResetLunar)(NodeHandle node);
+};
+
 struct ArkUIAlphabetIndexerModifierAPI {
     void (*SetPopupItemFont)(NodeHandle node, double size, int unit, const char* weight);
     void (*ResetPopupItemFont)(NodeHandle node);
@@ -1012,6 +1026,7 @@ struct ArkUINodeAPI {
     ArkUITextInputModifierAPI (*GetTextInputModifier)();
     ArkUIMenuItemModifierAPI (*GetMenuItemModifier)();
     ArkUIMenuModifierAPI (*GetMenuModifier)();
+    ArkUIDatePickerModifierAPI (*GetDatePickerModifier)();
     ArkUIAlphabetIndexerModifierAPI (*GetAlphabetIndexerModifier)();
 };
 

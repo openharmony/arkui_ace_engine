@@ -1322,6 +1322,20 @@ class ArkEdgeAlign {
     }
 }
 
+class ArkPickerTextStyle implements Equable{
+    color?: ResourceColor;
+    font?: Font;
+
+    constructor() {
+        this.color = undefined;
+        this.font = undefined;
+    }
+
+    isEqual(another: ArkPickerTextStyle): boolean {
+        return (this.color === another.color && this.font === another.font);
+    }
+}
+
 class ArkClickEffect implements Equable {
     level: number | undefined;
     scale: number | undefined;
