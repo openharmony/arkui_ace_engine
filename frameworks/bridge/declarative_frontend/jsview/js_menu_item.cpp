@@ -49,8 +49,12 @@ MenuItemModel* MenuItemModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSMenuItem::Create(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || (!info[0]->IsObject() && !info[0]->IsFunction())) {
+        LOGW("JSMenuItem The arg is wrong");
+        return;
+    }
     // custom menu item
-    if (info.Length() >= 1 && info[0]->IsFunction()) {
+    if (info[0]->IsFunction()) {
         auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
         CHECK_NULL_VOID(builderFunc);
         RefPtr<NG::UINode> customNode;
@@ -61,15 +65,15 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         }
         CHECK_NULL_VOID(customNode);
         MenuItemModel::GetInstance()->Create(customNode);
-        return;
-    }
-    std::string startIconPath;
-    std::string contentStr;
-    std::string endIconPath;
-    std::string labelStr;
-    MenuItemProperties menuItemProps;
-    if (info.Length() >= 1) {
+    } else {
         auto menuItemObj = JSRef<JSObject>::Cast(info[0]);
+
+        std::string startIconPath;
+        std::string contentStr;
+        std::string endIconPath;
+        std::string labelStr;
+        MenuItemProperties menuItemProps;
+
         auto startIcon = menuItemObj->GetProperty("startIcon");
         auto content = menuItemObj->GetProperty("content");
         auto endIcon = menuItemObj->GetProperty("endIcon");
@@ -112,10 +116,8 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
             };
             menuItemProps.buildFunc = std::move(subBuildFunc);
         }
-    } else {
-        LOGW("JSMenuItem The arg is null");
+        MenuItemModel::GetInstance()->Create(menuItemProps);
     }
-    MenuItemModel::GetInstance()->Create(menuItemProps);
 }
 
 void JSMenuItem::JSBind(BindingTarget globalObj)
