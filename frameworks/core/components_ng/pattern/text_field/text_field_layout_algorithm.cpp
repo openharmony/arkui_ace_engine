@@ -246,7 +246,8 @@ void TextFieldLayoutAlgorithm::UpdateCounterNode(
 
     std::string counterText = "";
     TextStyle countTextStyle = (textLength != maxLength) ? theme->GetCountTextStyle() : theme->GetOverCountTextStyle();
-    auto counterType = textFieldLayoutProperty->GetSetCounterValue(-1);
+    auto counterType = textFieldLayoutProperty->GetSetCounterValue();
+    pattern->CleanCounterNode();
     uint32_t limitsize = maxLength * counterType / SHOW_COUNTER_PERCENT;
     if ((pattern->GetCounterState() == true) && (counterType != INVAILD_VALUE)) {
         countTextStyle = theme->GetOverCountTextStyle();
@@ -259,7 +260,6 @@ void TextFieldLayoutAlgorithm::UpdateCounterNode(
         countTextStyle.SetTextColor(theme->GetDefaultCounterColor());
     } else if (textFieldLayoutProperty->GetShowCounterValue(false) && counterType == INVAILD_VALUE) {
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
-        pattern->HandleCounterBorder();
     }
     textLayoutProperty->UpdateContent(counterText);
     textLayoutProperty->UpdateFontSize(countTextStyle.GetFontSize());
@@ -296,8 +296,12 @@ void TextFieldLayoutAlgorithm::CounterLayout(LayoutWrapper* layoutWrapper)
         const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
         CHECK_NULL_VOID(content);
         if (!pattern->IsTextArea()) {
-            textGeometryNode->SetFrameOffset(
-                OffsetF(content->GetRect().GetX(), frameRect.Height() + textGeometryNode->GetFrameRect().Height()));
+            auto contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
+            auto counterWidth = counterNode->GetGeometryNode()->GetFrameSize().Width();
+            auto textGeometryNode = counterNode->GetGeometryNode();
+            CHECK_NULL_VOID(textGeometryNode);
+            textGeometryNode->SetFrameOffset(OffsetF(
+                contentRect.Width() - counterWidth, frameRect.Height() + textGeometryNode->GetFrameRect().Height()));
             counterNode->Layout();
         } else {
             textGeometryNode->SetFrameOffset(OffsetF(content->GetRect().GetX(),
@@ -322,7 +326,9 @@ float TextFieldLayoutAlgorithm::CounterNodeMeasure(float contentWidth, LayoutWra
     auto isInlineStyle = pattern->IsNormalInlineState();
     if (textFieldLayoutProperty->GetShowCounterValue(false) && textFieldLayoutProperty->HasMaxLength() &&
         !isInlineStyle) {
-        auto counterNodeLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+        auto counterNode = DynamicCast<UINode>(pattern->GetCounterNode().Upgrade());
+        CHECK_NULL_RETURN(counterNode, 0.0f);
+        auto counterNodeLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(frameNode->GetChildIndex(counterNode));
         if (counterNodeLayoutWrapper) {
             auto textLength =
                 static_cast<uint32_t>(showPlaceHolder_ ? 0 : StringUtils::ToWstring(textContent_).length());

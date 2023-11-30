@@ -199,8 +199,13 @@ public:
 
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
-    void UpdateAreaTextColor();
+    void UpdateCounterTextColor();
+    void UpdateCounterMargin();
+    void CleanCounterNode();
     void UltralimitShake();
+    void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength);
+    void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
+    BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
     void DeleteBackward(int32_t length) override;
     void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
