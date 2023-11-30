@@ -265,7 +265,7 @@ void RosenRenderSurface::ConsumeWebBuffer()
         auto iterator = std::find(DEFAULT_HEIGHT_GEAR.begin(), DEFAULT_HEIGHT_GEAR.end(), bufferHeight);
         int32_t index = iterator - DEFAULT_HEIGHT_GEAR.begin();
         LOGD("RSRecordingCanvas->onDrawRect, index = %{public}d", index);
-        if (index >= (int32_t)DEFAULT_HEIGHT_GEAR.size()) {
+        if (index >= static_cast<int32_t>(DEFAULT_HEIGHT_GEAR.size())) {
             LOGE("surfaceBuffer'height out of range");
             return;
         }
