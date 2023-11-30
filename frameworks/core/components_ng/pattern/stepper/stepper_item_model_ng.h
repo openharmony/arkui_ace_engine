@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STEPPER_STEPPER_ITEM_MODEL_NG_H
 
 #include "core/components_ng/pattern/stepper/stepper_item_model.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -28,6 +29,8 @@ public:
     void SetStatus(const std::string& labelStatus) override;
     void ResetPrevLabel() override;
     void ResetNextLabel() override;
+    static void SetNextLabel(FrameNode* frameNode, const std::string& rightLabel);
+    static void ResetNextLabel(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

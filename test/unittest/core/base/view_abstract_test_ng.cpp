@@ -36,12 +36,14 @@
 #include "core/components_ng/pattern/navigator/navigator_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "frameworks/core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 #include "frameworks/core/pipeline/base/element.h"
+
 #undef private
 #undef protected
 using namespace testing;

@@ -1237,16 +1237,48 @@ class ArkAllowDrop {
     return this.allowDropArray === another.allowDropArray;
   }
 }
-enum TabBarMode {
-  FIXED,
-  SCROLLABLE,
-  FIXED_START
-}
 
 class ArkBarMode {
-  convertStrToTabBarMode(value: string): number {
-    return value.toLowerCase() == 'fixed' ? TabBarMode.FIXED : TabBarMode.FIXED_START;
-  }
+    barMode: number;
+    options?: ArkScrollableBarModeOptions | undefined
+
+    isEqual(another: ArkBarMode): boolean {
+        return (this.barMode === another.barMode) && (this.options === another.options);
+    }
+}
+
+class ArkDivider {
+    value: DividerStyle;
+
+    isEqual(another: ArkDivider): boolean {
+        return (this.value === another.value);
+    }
+}
+
+
+class ArkBarBackgroundColor {
+    value: ResourceColor;
+
+    isEqual(another: ArkBarBackgroundColor): boolean {
+        return (this.value === another.value);
+    }
+}
+
+class ArkBarGridAlign {
+    value: BarGridColumnOptions;
+
+    isEqual(another: ArkBarGridAlign): boolean {
+        return (this.value === another.value);
+    }
+}
+
+
+class ArkScrollableBarModeOptions {
+    value: ScrollableBarModeOptions;
+
+    isEqual(another: ArkBarGridAlign): boolean {
+        return (this.value === another.value);
+    }
 }
 
 class ArkObscured {
@@ -1593,7 +1625,7 @@ class ArkEdgeAlign {
   }
 }
 
-class ArkPickerTextStyle implements Equable{
+class ArkDatePickerTextStyle implements Equable{
     color?: ResourceColor;
     font?: Font;
 
