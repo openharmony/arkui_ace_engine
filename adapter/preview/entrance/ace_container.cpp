@@ -697,12 +697,10 @@ void AceContainer::AddAssetPath(
                 container->frontend_->SetAssetManager(assetManagerImpl);
             }
         }
-        if (!packagePath.empty()) {
-            auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
-            if (fileAssetProvider->Initialize(packagePath, paths)) {
-                LOGI("Push AssetProvider to queue.");
-                container->assetManager_->PushBack(std::move(fileAssetProvider));
-            }
+        auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+        if (fileAssetProvider->Initialize("", paths)) {
+            LOGI("Push AssetProvider to queue.");
+            container->assetManager_->PushBack(std::move(fileAssetProvider));
         }
     } else {
         if (!container->assetManager_) {
