@@ -17,6 +17,9 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 
+#include "frameworks/core/common/container.h"
+#include "frameworks/core/common/container_scope.h"
+
 namespace OHOS::Ace {
 std::unique_ptr<TimeEventProxy> TimeEventProxy::instance_;
 std::mutex TimeEventProxy::mutex_;
@@ -53,9 +56,6 @@ TimeEventProxyOhos::TimeEventProxyOhos()
     subscribeInfo.SetThreadMode(CommonEventSubscribeInfo::ThreadMode::HANDLER);
 
     eventFwkSubscriber_ = std::make_shared<TimeEventSubscriber>(subscribeInfo);
-
-    // create subscription
-    CommonEventManager::SubscribeCommonEvent(eventFwkSubscriber_);
 }
 
 TimeEventProxyOhos::~TimeEventProxyOhos()
@@ -65,18 +65,25 @@ TimeEventProxyOhos::~TimeEventProxyOhos()
 
 void TimeEventProxyOhos::OnTimeChange()
 {
-    for (auto&& wk : listeners_) {
-        auto listener = wk.Upgrade();
+    for (auto&& pair : listeners_) {
+        auto listener = pair.first.Upgrade();
         if (listener) {
+            ContainerScope scope(pair.second);
             listener->OnTimeChange();
         } else {
-            listeners_.erase(wk);
+            listeners_.erase(pair);
+            if (listeners_.empty()) {
+                CommonEventManager::UnSubscribeCommonEvent(eventFwkSubscriber_);
+            }
         }
     }
 }
 
 void TimeEventProxyOhos::Register(const WeakPtr<TimeChangeListener>& listener)
 {
-    listeners_.insert(listener);
+    if (listeners_.empty()) {
+        CommonEventManager::SubscribeCommonEvent(eventFwkSubscriber_);
+    }
+    listeners_.insert({ listener, Container::CurrentId() });
 }
 } // namespace OHOS::Ace

@@ -52,8 +52,15 @@ public:
     void OnTimeChange() override;
 
 private:
-    std::set<WeakPtr<TimeChangeListener>> listeners_;
+    /**
+     * @brief A set of time change listeners paired with their Container IDs.
+     * 
+     * Need to switch to the correct container ID before notifying the listener.
+     */
+    std::set<std::pair<WeakPtr<TimeChangeListener>, int32_t>> listeners_;
+
     std::shared_ptr<TimeEventSubscriber> eventFwkSubscriber_;
+
     ACE_DISALLOW_COPY_AND_MOVE(TimeEventProxyOhos);
 };
 } // namespace OHOS::Ace
