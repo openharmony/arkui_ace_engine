@@ -267,24 +267,20 @@ void GridTestNg::UpdateLayoutWrapper(RefPtr<FrameNode>& frameNode, float width, 
 
 void GridTestNg::MouseSelect(Offset start, Offset end)
 {
-    MouseInfo info;
-    info.SetButton(MouseButton::LEFT_BUTTON);
-    info.SetAction(MouseAction::PRESS);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::MOUSE_BUTTON);
     info.SetLocalLocation(start);
-    pattern_->HandleMouseEventWithoutKeyboard(info);
+    pattern_->HandleDragStart(info);
     if (start != end) {
-        info.SetAction(MouseAction::MOVE);
         info.SetLocalLocation(end);
-        pattern_->HandleMouseEventWithoutKeyboard(info);
+        pattern_->HandleDragUpdate(info);
     }
 }
 
 void GridTestNg::MouseSelectRelease()
 {
-    MouseInfo info;
-    info.SetButton(MouseButton::LEFT_BUTTON);
-    info.SetAction(MouseAction::RELEASE);
-    pattern_->HandleMouseEventWithoutKeyboard(info);
+    GestureEvent info;
+    pattern_->HandleDragEnd(info);
 }
 
 int32_t GridTestNg::CalculateGridColumnsOrRows(float contentWidth, float gridWidth, float gutter, float margin)
@@ -3390,38 +3386,9 @@ HWTEST_F(GridTestNg, MouseSelect005, TestSize.Level1)
         model.SetMultiSelectable(true);
         CreateColItem(8);
     });
-    const Offset startOffset = Offset(225.f, 50.f);
-    const Offset endOffset = Offset(315.f, 150.f);
 
     /**
-     * @tc.steps: step1. Select (225, 50) - (315, 150) zone with RIGHT_BUTTON.
-     * @tc.expected: The item is not selected.
-     */
-    MouseInfo info;
-    info.SetButton(MouseButton::RIGHT_BUTTON); // Use RIGHT_BUTTON to select.
-    info.SetAction(MouseAction::PRESS);
-    info.SetLocalLocation(startOffset);
-    pattern_->HandleMouseEventWithoutKeyboard(info);
-    info.SetAction(MouseAction::MOVE);
-    info.SetLocalLocation(endOffset);
-    pattern_->HandleMouseEventWithoutKeyboard(info);
-    EXPECT_FALSE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
-
-    /**
-     * @tc.steps: step2. Select (225, 50) - (315, 150) zone with HOVER
-     * @tc.expected: The item is not Selected
-     */
-    info.SetButton(MouseButton::LEFT_BUTTON);
-    info.SetAction(MouseAction::HOVER); // HOVER
-    info.SetLocalLocation(startOffset);
-    pattern_->HandleMouseEventWithoutKeyboard(info);
-    info.SetAction(MouseAction::MOVE);
-    info.SetLocalLocation(endOffset);
-    pattern_->HandleMouseEventWithoutKeyboard(info);
-    EXPECT_FALSE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
-
-    /**
-     * @tc.steps: step3. Move distance < FRAME_SELECTION_DISTANCE
+     * @tc.steps: step1. Move distance < FRAME_SELECTION_DISTANCE
      * @tc.expected: The item is not Selected
      */
     MouseSelect(Offset(0.f, 0.f), Offset(1.f, 1.f));

@@ -226,7 +226,7 @@ private:
     bool HandleDirectionKey(KeyCode code);
 
     void ClearMultiSelect() override;
-    bool IsItemSelected(const MouseInfo& info) override;
+    bool IsItemSelected(const GestureEvent& info) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);

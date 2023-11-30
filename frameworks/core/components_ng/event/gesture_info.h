@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
+#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -47,6 +48,11 @@ public:
         return type_;
     }
 
+    InputEventType GetInputEventType() const
+    {
+        return inputEventType_;
+    }
+
     bool IsSystemGesture() const
     {
         return isSystemGesture_;
@@ -62,6 +68,11 @@ public:
         type_ = type;
     }
 
+    void SetInputEventType(InputEventType type)
+    {
+        inputEventType_ = type;
+    }
+
     void SetIsSystemGesture(bool isSystemGesture)
     {
         isSystemGesture_ = isSystemGesture;
@@ -70,6 +81,7 @@ public:
 private:
     std::optional<std::string> tag_;
     GestureTypeName type_;
+    InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
     bool isSystemGesture_ = false;
 };
 } // namespace OHOS::Ace::NG

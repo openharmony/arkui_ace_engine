@@ -1837,7 +1837,7 @@ void ListPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
-bool ListPattern::IsItemSelected(const MouseInfo& info)
+bool ListPattern::IsItemSelected(const GestureEvent& info)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);

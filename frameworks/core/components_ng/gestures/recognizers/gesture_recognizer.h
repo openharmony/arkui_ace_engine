@@ -255,6 +255,14 @@ public:
         return gestureInfo_;
     }
 
+    RefPtr<GestureInfo> GetOrCreateGestureInfo()
+    {
+        if (!gestureInfo_) {
+            gestureInfo_ = MakeRefPtr<GestureInfo>();
+        }
+        return gestureInfo_;
+    }
+
     void SetIsSystemGesture(bool isSystemGesture)
     {
         if (gestureInfo_) {

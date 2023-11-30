@@ -223,9 +223,16 @@ public:
 
     void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
 
+    void SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJudgeFunc);
+
     GestureJudgeFunc GetOnGestureJudgeBeginCallback() const
     {
         return gestureJudgeFunc_;
+    }
+
+    GestureJudgeFunc GetOnGestureJudgeNativeBeginCallback() const
+    {
+        return gestureJudgeNativeFunc_;
     }
 
     // When the event param is undefined, it will clear the callback.
@@ -295,6 +302,12 @@ public:
             return;
         }
         panEventActuator_->RemovePanEvent(panEvent);
+    }
+
+    void SetPanEventType(GestureTypeName typeName)
+    {
+        CHECK_NULL_VOID(panEventActuator_);
+        panEventActuator_->SetPanEventType(typeName);
     }
 
     // Set by user define, which will replace old one.
@@ -549,6 +562,7 @@ private:
     bool isReceivedDragGestureInfo_ = false;
 
     GestureJudgeFunc gestureJudgeFunc_;
+    GestureJudgeFunc gestureJudgeNativeFunc_;
 
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     bool textDraggable_ = false;

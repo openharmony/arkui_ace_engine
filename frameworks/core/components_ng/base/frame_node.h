@@ -244,6 +244,8 @@ public:
 
     static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
 
+    void AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetComponent);
+
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId) override;
