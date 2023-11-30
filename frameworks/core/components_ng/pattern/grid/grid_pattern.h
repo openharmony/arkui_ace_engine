@@ -246,7 +246,6 @@ private:
     void ResetAllDirectionsStep();
 
     float animatorOffset_ = 0.0f;
-    bool initialIndex_ = false;
     float prevHeight_ = 0;
     float currentHeight_ = 0;
 
@@ -255,7 +254,6 @@ private:
 
     bool scrollable_ = true;
 
-    bool firstShow_ = true;
     float endHeight_ = 0.0f;
 
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;

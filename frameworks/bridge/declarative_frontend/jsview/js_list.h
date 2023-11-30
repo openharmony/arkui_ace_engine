@@ -78,7 +78,6 @@ public:
     static void ItemDragMoveCallback(const JSCallbackInfo& info);
     static void ItemDragLeaveCallback(const JSCallbackInfo& info);
     static void ItemDropCallback(const JSCallbackInfo& info);
-    static void JsClip(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

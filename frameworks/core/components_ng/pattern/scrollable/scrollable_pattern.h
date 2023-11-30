@@ -453,6 +453,9 @@ protected:
 
     bool scrollStop_ = false;
 
+    // for onReachStart of the first layout
+    bool isInitialized_ = false;
+
 private:
     virtual void OnScrollEndCallback() {};
 

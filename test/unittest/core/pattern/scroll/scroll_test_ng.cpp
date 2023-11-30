@@ -639,6 +639,47 @@ HWTEST_F(ScrollTestNg, Event004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Event005
+ * @tc.desc: Test attribute about onReachStart/onReachEnd,
+ * Event is triggered while scroll to edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, Event005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test event in VERTICAL
+     * @tc.expected: reachStart is true on first layout
+     */
+    bool reachStart = false;
+    bool reachEnd = false;
+    CreateWithContent([&reachStart, &reachEnd](ScrollModelNG model) {
+        auto reachStartEvent = [&reachStart]() { reachStart = true; };
+        model.SetOnReachStart(std::move(reachStartEvent));
+        auto reachEndEvent = [&reachEnd]() { reachEnd = true; };
+        model.SetOnReachEnd(std::move(reachEndEvent));
+    });
+    RunMeasureAndLayout(frameNode_);
+    EXPECT_TRUE(reachStart);
+    EXPECT_TRUE(pattern_->isInitialized_);
+
+    /**
+     * @tc.steps: step2. Trigger event by UpdateCurrentOffset
+     * @tc.expected: reachEnd is true
+     */
+    UpdateCurrentOffset(-(ITEM_HEIGHT * TOTAL_LINE_NUMBER - DEVICE_HEIGHT));
+    EXPECT_TRUE(reachEnd);
+
+    /**
+     * @tc.steps: step3. Trigger event by ScrollToEdge
+     * @tc.expected: reachStart is true
+     */
+    reachStart = false;
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    RunMeasureAndLayout(frameNode_);
+    EXPECT_TRUE(reachStart);
+}
+
+/**
  * @tc.name: ScrollPositionController001
  * @tc.desc: Test ScrollPositionController with Axis::VERTICAL
  * @tc.type: FUNC

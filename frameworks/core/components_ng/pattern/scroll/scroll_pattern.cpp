@@ -144,6 +144,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto offsetRelativeToWindow = host->GetOffsetRelativeToWindow();
     auto globalViewPort = RectF(offsetRelativeToWindow, geometryNode->GetFrameRect().GetSize());
     host->SetViewPort(globalViewPort);
+    isInitialized_ = true;
     return false;
 }
 
@@ -263,9 +264,7 @@ bool ScrollPattern::IsAtTop() const
 
 bool ScrollPattern::IsAtBottom() const
 {
-    bool atBottom = LessOrEqual(currentOffset_, -scrollableDistance_);
-    // TODO: ignore ReachMaxCount
-    return atBottom;
+    return LessOrEqual(currentOffset_, -scrollableDistance_);
 }
 
 OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
@@ -361,7 +360,7 @@ void ScrollPattern::ValidateOffset(int32_t source)
         float scrollBarOutBoundaryExtent = 0.0f;
         if (currentOffset_ > 0) {
             scrollBarOutBoundaryExtent = currentOffset_;
-        } else if ((-currentOffset_) >= (GetMainSize(viewPortExtent_) - GetMainSize(viewPort_)) && ReachMaxCount()) {
+        } else if ((-currentOffset_) >= (GetMainSize(viewPortExtent_) - GetMainSize(viewPort_))) {
             scrollBarOutBoundaryExtent = -currentOffset_ - (GetMainSize(viewPortExtent_) - GetMainSize(viewPort_));
         }
         HandleScrollBarOutBoundary(scrollBarOutBoundaryExtent);
@@ -389,7 +388,7 @@ void ScrollPattern::HandleScrollPosition(float scroll, int32_t scrollState)
 
 bool ScrollPattern::IsCrashTop() const
 {
-    bool scrollUpToReachTop = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
+    bool scrollUpToReachTop = (LessNotEqual(lastOffset_, 0.0) || !isInitialized_) && GreatOrEqual(currentOffset_, 0.0);
     bool scrollDownToReachTop = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
     return scrollUpToReachTop || scrollDownToReachTop;
 }
@@ -399,7 +398,7 @@ bool ScrollPattern::IsCrashBottom() const
     float minExtent = -scrollableDistance_;
     bool scrollDownToReachEnd = GreatNotEqual(lastOffset_, minExtent) && LessOrEqual(currentOffset_, minExtent);
     bool scrollUpToReachEnd = LessNotEqual(lastOffset_, minExtent) && GreatOrEqual(currentOffset_, minExtent);
-    return (scrollUpToReachEnd || scrollDownToReachEnd) && ReachMaxCount();
+    return (scrollUpToReachEnd || scrollDownToReachEnd);
 }
 
 void ScrollPattern::HandleCrashTop() const
