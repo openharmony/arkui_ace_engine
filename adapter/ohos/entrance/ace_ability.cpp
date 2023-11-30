@@ -694,7 +694,7 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
             Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
         auto isNeedAvoidWindowMode = (Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
                                       Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-                                      Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN) &&
+                                      Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
                                      (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
                                       SystemProperties::GetDeviceType() == DeviceType::TABLET);
         pipelineContext->SetIsNeedAvoidWindow(isNeedAvoidWindowMode);
