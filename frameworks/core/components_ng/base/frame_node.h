@@ -589,7 +589,6 @@ public:
     }
 
     virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
-    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     bool IsFirstBuilding() const
     {
@@ -622,6 +621,9 @@ public:
         int32_t offset, Accessibility::AccessibilityElementInfo& output);
     bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset);
+    std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
+    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
+
     bool GetMonopolizeEvents() const;
 
 private:
