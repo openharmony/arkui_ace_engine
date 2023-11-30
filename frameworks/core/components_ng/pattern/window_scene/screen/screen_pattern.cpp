@@ -102,7 +102,6 @@ void ScreenPattern::UpdateDisplayInfo()
 void ScreenPattern::UpdateToInputManager(float rotation)
 {
     CHECK_NULL_VOID(screenSession_);
-
     auto pid = getprocpid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto screenId = screenSession_->GetScreenId();
@@ -128,7 +127,6 @@ void ScreenPattern::UpdateToInputManager(float rotation)
         tempWidth,
         tempHeight,
     };
-
     MMI::WindowInfo windowInfo = {
         .id = 0,    // root scene id 0
         .pid = pid,
@@ -139,7 +137,6 @@ void ScreenPattern::UpdateToInputManager(float rotation)
         .agentWindowId = 0, // root scene id 0
         .flags = 0  // touchable
     };
-
     MMI::DisplayInfo displayInfo = {
         .id = screenId,
         .x = paintRect.Left(),
@@ -151,7 +148,12 @@ void ScreenPattern::UpdateToInputManager(float rotation)
         .uniq = "default" + std::to_string(screenId),
         .direction = ConvertDegreeToMMIRotation(rotation)
     };
+    InputManagerUpdateDisplayInfo(paintRect, displayInfo, windowInfo);
+}
 
+void ScreenPattern::InputManagerUpdateDisplayInfo(RectF paintRect,
+    MMI::DisplayInfo displayInfo, MMI::WindowInfo windowInfo)
+{
     std::lock_guard<std::mutex> lock(g_vecLock);
     DeduplicateDisplayInfo();
     g_displayInfoVector.insert(g_displayInfoVector.begin(), displayInfo);

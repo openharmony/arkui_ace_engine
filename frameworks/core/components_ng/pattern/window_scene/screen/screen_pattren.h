@@ -46,6 +46,7 @@ private:
     void UpdateDisplayInfo();
     void DeduplicateDisplayInfo();
     void UpdateToInputManager(float rotation);
+    void InputManagerUpdateDisplayInfo(RectF paintRect, MMI::DisplayInfo displayInfo, MMI::WindowInfo windowInfo);
 
     sptr<Rosen::ScreenSession> screenSession_;
 
