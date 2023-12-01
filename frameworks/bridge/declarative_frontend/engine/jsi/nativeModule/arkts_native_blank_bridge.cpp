@@ -15,6 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blank_bridge.h"
 
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue BlankBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -23,9 +24,9 @@ ArkUINativeModuleValue BlankBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCallIn
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
-    if (secondArg->IsNumber()) {
-        uint32_t value = secondArg->Uint32Value(vm);
+    Color color;
+    if (ArkTSUtils::ParseJsColor(vm, secondArg, color)) {
+        uint32_t value = color.GetValue();
         GetArkUIInternalNodeAPI()->GetBlankModifier().SetColor(nativeNode, value);
     } else {
         GetArkUIInternalNodeAPI()->GetBlankModifier().ResetColor(nativeNode);
