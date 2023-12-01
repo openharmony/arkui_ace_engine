@@ -70,7 +70,7 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
     if (drawCmdList->IsEmpty()) {
         return;
     }
-    if (recordingCanvas.GetDrawingType() == Rosen::Drawing::Drawing::Type::RECORDING) {
+    if (recordingCanvas.GetDrawingType() == Rosen::Drawing::DrawingType::RECORDING) {
         recordingCanvasDrawSize_.SetWidth(recordingCanvas->GetDrawCmdList()->GetWidth());
         recordingCanvasDrawSize_.SetHeight(recordingCanvas->GetDrawCmdList()->GetHeight());
         drawCmdSize_.SetWidth(drawCmdList->GetWidth());

@@ -86,7 +86,7 @@ public:
             desRSRect.SetBottom(context.height);
         }
         recordingCanvas.AttachBrush(brush);
-        recordingCanvas.DrawPixelMapRect(mediaPixelMap, srcSKRect, desSKRect, samplingOptions);
+        recordingCanvas.DrawPixelMapRect(mediaPixelMap, srcRSRect, desRSRect, samplingOptions);
         recordingCanvas.DetachBrush();
     }
 #endif
