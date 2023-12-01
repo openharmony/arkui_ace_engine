@@ -25,7 +25,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model.h"
 #include "core/components_ng/pattern/linear_split/linear_split_pattern.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -58,12 +58,12 @@ public:
 };
 void LinearSplitTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void LinearSplitTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**

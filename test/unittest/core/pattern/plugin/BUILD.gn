@@ -101,10 +101,9 @@ ohos_unittest("plugin_pattern_test_ng") {
     "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
-    "$ace_root/test/mock/core/pipeline/mock_pipeline_base.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
     "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
-    "$ace_root/test/mock/core/render/mock_render_context.cpp",
     "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
     "$ace_root/test/mock/core/render/mock_render_surface_creator.cpp",
     "$ace_root/test/unittest/core/pattern/plugin/mock/mock_plugin_component_manager.cpp",
@@ -127,6 +126,12 @@ ohos_unittest("plugin_pattern_test_ng") {
     "//third_party/googletest:gmock_main",
     "//third_party/zlib:shared_libz",
   ]
+
+  if (ace_use_rosen_drawing) {
+    deps += [
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics::2d_graphics",
+    ]
+  }
 
   external_deps = [
     "c_utils:utils",

@@ -67,7 +67,7 @@ public:
     {
         return true;
     }
-    
+
     void UpdateMuted(bool muted)
     {
         muted_ = muted;
@@ -118,7 +118,7 @@ public:
     }
 
     RefPtr<FrameNode> CreateControlBar(int32_t nodeId = -1);
-    
+
     void SetHiddenChangeEvent(HiddenChangeEvent&& hiddenChangeEvent)
     {
         hiddenChangeEvent_ = std::move(hiddenChangeEvent);
@@ -168,9 +168,14 @@ public:
         isDrag_ = isDrag;
     }
 
-    bool isInitialState() const
+    bool IsInitialState() const
     {
         return isInitialState_;
+    }
+
+    void SetIsDragEndAutoPlay(bool isDragEndAutoPlay)
+    {
+        dragEndAutoPlay_ = isDragEndAutoPlay;
     }
 
     void UpdateMediaParam(const RefPtr<MediaPlayer>& mediaPlayer, const RefPtr<RenderSurface>& renderSurface,
@@ -229,7 +234,7 @@ protected:
     std::string src_;
     bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
     bool isPlaying_ = false;
-    
+
     RefPtr<MediaPlayer> mediaPlayer_ = MediaPlayer::Create();
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<RenderContext> renderContextForMediaPlayer_ = RenderContext::Create();
@@ -248,7 +253,7 @@ private:
     // Set properties for media player.
     void PrepareMediaPlayer();
     void SetMethodCall();
-    
+
     bool SetSourceForMediaPlayer();
     void UpdateLooping();
     void UpdateSpeed();
@@ -262,7 +267,7 @@ private:
     void Pause();
     void Stop();
     void FullScreen();
-    
+
     void SetCurrentTime(float currentPos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC);
     void SetFullScreenButtonCallBack(RefPtr<FrameNode>& fullScreenBtn);
 
@@ -273,13 +278,13 @@ private:
     void UpdatePreviewImage();
     void UpdateControllerBar();
     void UpdateVideoProperty();
-    
+
     static RefPtr<FrameNode> CreateSVG();
     RefPtr<FrameNode> CreateText(uint32_t time);
     RefPtr<FrameNode> CreateSlider();
     void ChangePlayButtonTag();
     void ChangePlayButtonTag(RefPtr<FrameNode>& playBtn);
-    
+
     void ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn);
     void ResetStatus();
     void HiddenChange(bool hidden);
@@ -318,7 +323,7 @@ private:
     bool muted_ = false;
     bool autoPlay_ = false;
     bool loop_ = false;
-    
+
     bool pastPlayingStatus_ = false;
 
     bool dragEndAutoPlay_ = false;

@@ -32,7 +32,7 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -73,12 +73,12 @@ protected:
 
 void ScrollBarTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void ScrollBarTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void ScrollBarTestNg::SetUp() {}
@@ -538,10 +538,10 @@ HWTEST_F(ScrollBarTestNg, AccessibilityEventTest001, TestSize.Level1)
     ASSERT_NE(pattern_->scrollableEvent_, nullptr);
     auto callback = pattern_->scrollEndCallback_;
     ASSERT_NE(callback, nullptr);
-    MockPipelineBase::SetUp();
-    auto context = MockPipelineBase::GetCurrent();
+    MockPipelineContext::SetUp();
+    auto context = MockPipelineContext::GetCurrent();
     ASSERT_NE(context, nullptr);
-    MockPipelineBase::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 
     /**
      * @tc.steps: step3. DisplayMode::ON

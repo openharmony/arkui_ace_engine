@@ -31,7 +31,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -58,12 +58,12 @@ protected:
 
 void DragDropProxyTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void DragDropProxyTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**

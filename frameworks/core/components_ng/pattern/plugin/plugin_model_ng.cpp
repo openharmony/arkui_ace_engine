@@ -33,7 +33,7 @@ void PluginModelNG::Create(const RequestPluginInfo& pluginInfo)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::PLUGIN_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::PLUGIN_ETS_TAG, nodeId);
     auto frameNode = PluginNode::GetOrCreatePluginNode(
         V2::PLUGIN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<PluginPattern>(); });
     stack->Push(frameNode);

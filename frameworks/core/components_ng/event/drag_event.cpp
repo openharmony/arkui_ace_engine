@@ -406,13 +406,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             CHECK_NULL_VOID(frameNode);
             auto dragPreviewInfo = frameNode->GetDragPreview();
             if (dragPreviewInfo.pixelMap != nullptr) {
-                LOGI("dragPreviewInfo.pixelMap is not nullptr");
-
                 gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
             } else if (dragPreviewInfo.customNode != nullptr) {
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)
-                LOGI("dragPreviewInfo.pixelMap is nullptr, dragPreviewInfo.customNode is not nullptr");
-
                 auto callback = [id = Container::CurrentId(), gestureHub, frameNode, dragPreviewInfo]
                     (std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
                     ContainerScope scope(id);
@@ -430,8 +426,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 OHOS::Ace::NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
 #endif
             } else {
-                LOGI("dragPreviewInfo.pixelMap is nullptr, dragPreviewInfo.customNode is nullptr");
-
                 auto context = frameNode->GetRenderContext();
                 CHECK_NULL_VOID(context);
                 auto pixelMap = context->GetThumbnailPixelMap();

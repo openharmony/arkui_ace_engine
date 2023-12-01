@@ -35,7 +35,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -80,7 +80,7 @@ public:
 
 void IndexerTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<IndexerTheme>()));
@@ -88,7 +88,7 @@ void IndexerTestNg::SetUpTestSuite()
 
 void IndexerTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void IndexerTestNg::SetUp() {}

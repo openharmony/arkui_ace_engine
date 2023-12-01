@@ -156,6 +156,10 @@ std::string UIContent::GetCurrentUIStackInfo()
     }
 
     auto content = entry();
+    if (content == nullptr) {
+        return std::string();
+    }
+    
     return content;
 }
 } // namespace OHOS::Ace

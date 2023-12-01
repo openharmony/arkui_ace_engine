@@ -178,6 +178,7 @@ public:
     // layout
     static void SetAlign(Alignment alignment);
     static void SetAlignRules(const std::map<AlignDirection, AlignRule> &alignRules);
+    static void SetBias(const BiasPair& biasPair);
     static void SetVisibility(VisibleType visible);
     static void SetGrid(std::optional<int32_t> span, std::optional<int32_t> offset,
         GridSizeType type = GridSizeType::UNDEFINED);

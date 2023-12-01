@@ -79,6 +79,8 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("enableKeyboardOnFocus", &JSTextField::SetEnableKeyboardOnFocus);
     JSClass<JSTextArea>::StaticMethod("selectionMenuHidden", &JSTextField::SetSelectionMenuHidden);
     JSClass<JSTextArea>::StaticMethod("customKeyboard", &JSTextField::SetCustomKeyboard);
+    JSClass<JSTextArea>::StaticMethod("onSubmit", &JSTextField::SetOnSubmit);
+    JSClass<JSTextArea>::StaticMethod("enterKeyType", &JSTextField::SetEnterKeyType);
     JSClass<JSTextArea>::StaticMethod("type", &JSTextField::SetType);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }

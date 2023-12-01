@@ -104,7 +104,7 @@ RefPtr<NG::FrameNode> DataDetectorMgr::CreateUIExtensionMenu(
     return uiExtNode;
 }
 
-bool DataDetectorMgr::ShowUIExtensionMenu(const std::map<std::string, std::string>& paramaters, NG::RectF safeArea,
+bool DataDetectorMgr::ShowUIExtensionMenu(const std::map<std::string, std::string>& paramaters, NG::RectF aiRect,
     std::function<void(const std::string&)> onClickMenu, std::vector<std::string> aiMenuOptions,
     const RefPtr<NG::FrameNode>& targetNode)
 {
@@ -114,7 +114,7 @@ bool DataDetectorMgr::ShowUIExtensionMenu(const std::map<std::string, std::strin
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
-    return overlayManager->ShowUIExtensionMenu(uiExtNode, safeArea, aiMenuOptions, targetNode);
+    return overlayManager->ShowUIExtensionMenu(uiExtNode, aiRect, aiMenuOptions, targetNode);
 }
 
 void DataDetectorMgr::AdjustCursorPosition(

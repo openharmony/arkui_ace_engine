@@ -16,9 +16,6 @@
 #include "frameworks/bridge/common/manifest/manifest_router.h"
 
 #include <algorithm>
-#include <cstdint>
-#include <iterator>
-#include <string>
 
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -81,12 +78,10 @@ const std::list<std::string>& ManifestRouter::GetPageList()
     return pages_;
 }
 
-#if defined(PREVIEW)
 void ManifestRouter::InsertPageList(const std::string& uri)
 {
     pages_.emplace_back(uri);
 }
-#endif
 
 void ManifestRouter::RouterParse(const std::unique_ptr<JsonValue>& root)
 {

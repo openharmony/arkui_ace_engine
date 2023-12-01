@@ -63,6 +63,11 @@ public:
     {
         rsUIDirector_->FlushModifier();
     }
+
+    bool HasUIAnimation() override
+    {
+        return rsUIDirector_->HasUIAnimation();
+    }
 #endif
 
     void OnShow() override;

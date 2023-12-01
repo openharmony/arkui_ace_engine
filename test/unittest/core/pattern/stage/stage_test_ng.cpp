@@ -18,23 +18,24 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/common/ace_engine.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/stage/stage_pattern.h"
-#include "core/pipeline/base/element_register.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
-#include "core/common/container.h"
-#include "core/common/ace_engine.h"
-#include "core/common/container_scope.h"
-#include "test/mock/core/common/mock_container.h"
-#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/stage/page_transition_effect.h"
 #include "core/components_ng/pattern/stage/page_transition_model_ng.h"
 #include "core/components_ng/pattern/stage/stage_layout_algorithm.h"
-#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/pipeline/base/element_register.h"
 #undef private
 #undef protected
 
@@ -80,12 +81,11 @@ class StageTestNg : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
-        MockPipelineBase::SetUp();
-        auto pipeline = AceType::DynamicCast<NG::MockPipelineBase>(PipelineBase::GetCurrentContext());
+        MockPipelineContext::SetUp();
+        auto pipeline = AceType::DynamicCast<NG::MockPipelineContext>(PipelineBase::GetCurrentContext());
         auto stageNode = FrameNode::CreateFrameNode(
             V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
         pipeline->sharedTransitionManager_ = AceType::MakeRefPtr<SharedOverlayManager>(stageNode);
-        EXPECT_CALL(*pipeline, FlushPipelineImmediately()).Times(testing::AtLeast(AT_LEAST_TIME));
         MockContainer::SetUp();
         EXPECT_CALL(*MockContainer::Current(), WindowIsShow())
             .Times(testing::AtLeast(AT_LEAST_TIME))
@@ -94,7 +94,7 @@ public:
     }
     static void TearDownTestSuite()
     {
-        MockPipelineBase::TearDown();
+        MockPipelineContext::TearDown();
         MockContainer::TearDown();
     }
     void SetUp()

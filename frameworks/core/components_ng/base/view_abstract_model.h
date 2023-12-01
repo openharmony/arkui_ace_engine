@@ -50,7 +50,7 @@ namespace OHOS::Ace {
 using ClickEventFunc = std::function<void(const ClickInfo* info)>;
 using RemoteCallback = std::function<void(const BaseEventInfo* info)>;
 using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
-
+using BiasPair = std::pair<float, float>;
 enum class ResponseType : int32_t {
     RIGHT_CLICK = 0,
     LONG_PRESS,
@@ -132,6 +132,7 @@ public:
     virtual void ResetAspectRatio() = 0;
     virtual void SetAlign(const Alignment& alignment) = 0;
     virtual void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) = 0;
+    virtual void SetBias(const BiasPair& biasPair) = 0;
     virtual void SetUseAlign(
         AlignDeclarationPtr declaration, AlignDeclaration::Edge edge, const std::optional<Dimension>& offset) = 0;
     virtual void SetGrid(

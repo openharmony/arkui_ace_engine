@@ -32,6 +32,8 @@ class ACE_EXPORT RichEditorModelImpl : public RichEditorModel {
     void BindSelectionMenu(RichEditorType& editorType, RichEditorResponseType& responseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;
     void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) override;
+    void SetTextDetectEnable(bool value) override;
+    void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
 };
 } // namespace OHOS::Ace::Framework
 

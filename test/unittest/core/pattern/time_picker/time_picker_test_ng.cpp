@@ -25,7 +25,7 @@
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_default.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"
@@ -176,12 +176,12 @@ public:
 
 void TimePickerPatternTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void TimePickerPatternTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void TimePickerPatternTestNg::SetUp()
@@ -199,18 +199,18 @@ void TimePickerPatternTestNg::SetUp()
                 return nullptr;
             }
         });
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
 void TimePickerPatternTestNg::TearDown()
 {
-    MockPipelineBase::GetCurrent()->themeManager_ = nullptr;
+    MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     ViewStackProcessor::GetInstance()->ClearStack();
 }
 
 void TimePickerPatternTestNg::CreateTimePickerColumnNode()
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -238,7 +238,7 @@ void TimePickerPatternTestNg::CreateTimePickerColumnNode()
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGCreateTimePicker001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -256,7 +256,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGCreateTimePicker001, TestSize
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     TimePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
@@ -276,7 +276,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle001, Tes
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     data.fontSize = Dimension(10);
@@ -299,7 +299,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle002, Tes
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     data.fontSize = Dimension(0);
@@ -318,7 +318,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle003, Tes
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     TimePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
@@ -338,7 +338,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle001, TestSi
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     data.fontSize = Dimension(10);
@@ -361,7 +361,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle002, TestSi
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
@@ -382,7 +382,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle003, TestSi
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
@@ -404,7 +404,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle001, Test
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
@@ -429,7 +429,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle002, Test
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
@@ -450,7 +450,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle003, Test
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -474,7 +474,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern001, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
 
@@ -504,7 +504,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern002, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
 
     PickerTextStyle data;
@@ -534,7 +534,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern003, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern004, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -556,7 +556,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern004, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern005, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
 
     PickerTextStyle data;
@@ -623,7 +623,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow001, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerLayoutPropertyToJsonValue001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -643,7 +643,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerLayoutPropertyToJsonValue001, TestSi
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerLayoutPropertyReset001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -661,7 +661,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerLayoutPropertyReset001, TestSize.Lev
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerLayoutPropertyClone001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -679,7 +679,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerLayoutPropertyClone001, TestSize.Lev
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -710,7 +710,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg001, Test
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -740,7 +740,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg002, Test
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -785,7 +785,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg003, Test
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg004, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -822,7 +822,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg004, Test
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg005, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -861,7 +861,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg005, Test
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg006, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -899,7 +899,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg006, Test
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg007, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -949,7 +949,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg007, Test
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern006, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
@@ -1031,7 +1031,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern006, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern007, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
@@ -1066,7 +1066,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern007, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern008, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
@@ -1095,7 +1095,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern008, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern009, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
@@ -1121,7 +1121,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern009, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
@@ -1231,7 +1231,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern012, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
@@ -1276,7 +1276,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern012, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern013, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
@@ -1307,7 +1307,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern013, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern014, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
@@ -1336,7 +1336,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern014, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern015, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
@@ -1371,7 +1371,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern015, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1412,7 +1412,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1442,7 +1442,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern002, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1470,7 +1470,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern003, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern004, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1516,7 +1516,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern004, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern005, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1547,7 +1547,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern005, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern006, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1569,7 +1569,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern006, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern007, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetHour24(false);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1592,7 +1592,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern007, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern008, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetHour24(false);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1632,7 +1632,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern008, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern009, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetHour24(false);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1652,7 +1652,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern009, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern010, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetHour24(false);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1675,7 +1675,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern010, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetHour24(false);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1740,7 +1740,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     auto frameWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
     auto childSize = frameNode->GetChildren().size();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
     ASSERT_NE(pickerTheme, nullptr);
     pickerTheme->dividerSpacing_ = Dimension(OFFSET_X);
@@ -1793,7 +1793,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern012, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetHour24(false);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1816,7 +1816,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern012, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern013, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetHour24(false);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1880,7 +1880,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern014, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerFireChangeEventTest001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
 
     auto changeEvent = [](const BaseEventInfo* info) { EXPECT_EQ(info->GetType(), "DatePickerChangeEvent"); };
@@ -1901,7 +1901,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerFireChangeEventTest001, TestSize.Lev
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerHasSecond001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
     TimePickerModelNG::GetInstance()->SetHour24(true);
     TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED);
@@ -1941,7 +1941,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerHasSecond001, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerHasSecond002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme, false);
     TimePickerModelNG::GetInstance()->SetHour24(false);
     TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED);
@@ -1983,7 +1983,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerHasSecond002, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerHasSecond003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
      * @tc.steps: step1. create FrameNode and SetHasSecond(true).
      */
@@ -2019,7 +2019,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerHasSecond003, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetWheelModeEnabled(false);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -2044,7 +2044,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode001, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -2068,7 +2068,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode002, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetWheelModeEnabled(false);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -2094,7 +2094,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode003, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode004, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     TimePickerModelNG::GetInstance()->SetWheelModeEnabled(true);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -2123,7 +2123,7 @@ HWTEST_F(TimePickerPatternTestNg, PerformActionTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create timePicker and initialize related properties.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -2184,7 +2184,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAlgorithmTest001, TestSize.Level1)
     /**
      * @tc.step: step1. create frameNode and pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
 
     /**
@@ -2270,7 +2270,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern016, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern019, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
 
     /**
@@ -2346,7 +2346,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern019, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern020, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
 
     /**
@@ -2382,7 +2382,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern020, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern021, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
 
     /**
@@ -2515,7 +2515,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern022, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -2534,7 +2534,7 @@ HWTEST_F(TimePickerPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1
      * @tc.cases: case. cover branch dialogTheme pass non null check .
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
 
@@ -2564,7 +2564,7 @@ HWTEST_F(TimePickerPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1
  */
 HWTEST_F(TimePickerPatternTestNg, OnColorConfigurationUpdate002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -2583,7 +2583,7 @@ HWTEST_F(TimePickerPatternTestNg, OnColorConfigurationUpdate002, TestSize.Level1
      * @tc.cases: case. cover branch dialogTheme pass non null check .
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
 

@@ -44,7 +44,7 @@
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #undef protected
 #undef private
@@ -134,9 +134,9 @@ void SecurityComponentModelTestNg::InitDefaultTheme(RefPtr<SecurityComponentThem
 
 void SecurityComponentModelTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto scTheme = AceType::MakeRefPtr<SecurityComponentTheme>();
     InitDefaultTheme(scTheme);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(scTheme));
@@ -144,7 +144,7 @@ void SecurityComponentModelTestNg::SetUpTestCase()
 
 void SecurityComponentModelTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 RefPtr<FrameNode> SecurityComponentModelTestNg::CreateSecurityComponent(int32_t text, int32_t icon,

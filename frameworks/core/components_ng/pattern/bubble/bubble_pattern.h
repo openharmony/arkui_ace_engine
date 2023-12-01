@@ -126,6 +126,11 @@ public:
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    bool AvoidTop() const override
+    {
+        // popups  need to avoid status bar
+        return true;
+    }
 
 private:
     void OnModifyDone() override;

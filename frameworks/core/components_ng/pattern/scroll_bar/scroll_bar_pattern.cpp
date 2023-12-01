@@ -306,9 +306,7 @@ void ScrollBarPattern::InitPanRecognizer()
 
 void ScrollBarPattern::HandleDragStart(const GestureEvent& info)
 {
-    if (frictionController_ && frictionController_->IsRunning()) {
-        frictionController_->Stop();
-    }
+    StopMotion();
     if (scrollPositionCallback_) {
         if (scrollBarProxy_) {
             scrollBarProxy_->NotifyScrollStart();

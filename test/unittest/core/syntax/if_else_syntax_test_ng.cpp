@@ -24,7 +24,7 @@
 
 #define private public
 #include "core/components_ng/syntax/if_else_node.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -60,12 +60,12 @@ void IfElseSyntaxTestNg::TearDownTestSuite()
 
 void IfElseSyntaxTestNg::SetUp()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void IfElseSyntaxTestNg::TearDown()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**

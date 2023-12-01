@@ -281,7 +281,7 @@ bool ScrollablePattern::CoordinateWithNavigation(bool isAtTop, bool isDraggedDow
     if (isReactInParentMovement_ && navBarPattern_) {
         auto needMove = ProcessNavBarReactOnUpdate(offset);
         auto minTitle = navBarPattern_->GetCurrentNavBarStatus();
-        if (navBarPattern_ && navBarPattern_->IsTitleModeFree()) {
+        if (navBarPattern_ && navBarPattern_->IsTitleModeFree() && !navBarPattern_->IsTitleBarHide()) {
             if (minTitle && LessNotEqual(offset, 0.0)) {
                 reactiveIn = needMove;
             } else {
@@ -1544,7 +1544,7 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
 {
     auto parent = parent_.Upgrade();
     if (!parent || !nestedScroll_.NeedParent(velocity < 0)) {
-        if (GetEdgeEffect() == EdgeEffect::SPRING) {
+        if (GetEdgeEffect() == EdgeEffect::SPRING && AnimateStoped()) {
             // trigger onScrollEnd later, when spring animation finishes
             ProcessSpringEffect(velocity);
             return true;

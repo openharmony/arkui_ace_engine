@@ -19,7 +19,7 @@
 
 #define protected public
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
@@ -110,11 +110,11 @@ class LayoutPropertyTestNg : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
-        MockPipelineBase::SetUp();
+        MockPipelineContext::SetUp();
     }
     static void TeardownTestSuite()
     {
-        MockPipelineBase::TearDown();
+        MockPipelineContext::TearDown();
     }
 };
 

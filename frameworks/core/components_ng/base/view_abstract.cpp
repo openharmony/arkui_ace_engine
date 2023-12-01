@@ -393,6 +393,14 @@ void ViewAbstract::SetAlignRules(const std::map<AlignDirection, AlignRule> &alig
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules);
 }
 
+void ViewAbstract::SetBias(const BiasPair& biasPair)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Bias, biasPair);
+}
+
 void ViewAbstract::SetAlignSelf(FlexAlign value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

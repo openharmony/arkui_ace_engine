@@ -24,7 +24,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -50,12 +50,12 @@ public:
 
 void FullScreenManagerTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void FullScreenManagerTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -92,7 +92,7 @@ HWTEST_F(FullScreenManagerTestNg, FullScreenManagerTest001, TestSize.Level1)
      * @tc.steps: step4. call RequestFullScreen function
      */
     CalcSize idealSizeFS = { CalcLength(ROOT_WIDTH), CalcLength(ROOT_HEIGHT) };
-    MockPipelineBase::GetCurrent()->SetRootSize(ROOT_WIDTH, ROOT_HEIGHT);
+    MockPipelineContext::GetCurrent()->SetRootSize(ROOT_WIDTH, ROOT_HEIGHT);
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSizeFS;
     layoutConstraint.maxSize = idealSizeFS;
@@ -213,7 +213,7 @@ HWTEST_F(FullScreenManagerTestNg, FullScreenManagerTest003, TestSize.Level1)
      * @tc.expected: step4. the layout property of the FrameNode match the demand of full screen and
      *                      the parent node of the FrameNode is the root
      */
-    MockPipelineBase::GetCurrent()->SetRootSize(ROOT_WIDTH, ROOT_HEIGHT);
+    MockPipelineContext::GetCurrent()->SetRootSize(ROOT_WIDTH, ROOT_HEIGHT);
     CalcSize idealSizeFS = { CalcLength(ROOT_WIDTH), CalcLength(ROOT_HEIGHT) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSizeFS;

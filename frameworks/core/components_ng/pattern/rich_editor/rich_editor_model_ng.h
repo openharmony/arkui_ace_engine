@@ -35,6 +35,8 @@ public:
     void BindSelectionMenu(RichEditorType& editorType, RichEditorResponseType& RichEditorResponseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;
     void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) override;
+    void SetTextDetectEnable(bool value) override;
+    void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
 
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
 

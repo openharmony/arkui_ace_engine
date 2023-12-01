@@ -24,32 +24,72 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
-void ParseWebViewValueToJsValue(std::shared_ptr<WebJSValue> value, std::vector<JSRef<JSVal>>& argv)
+panda::Local<panda::JSValueRef> ToJsValueHelper(const EcmaVM* vm, std::shared_ptr<WebJSValue> argument)
 {
-    auto type = value->GetType();
-    switch (type) {
+    if (!argument || !vm) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "ToJsValueHelper: argument or vm is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    switch (argument->GetType()) {
         case WebJSValue::Type::INTEGER:
-            argv.push_back(JSRef<JSVal>::Make(ToJSValue(value->GetInt())));
-            break;
-        case WebJSValue::Type::DOUBLE: {
-            argv.push_back(JSRef<JSVal>::Make(ToJSValue(value->GetDouble())));
-            break;
-        }
+            return ToJSValue(argument->GetInt());
+        case WebJSValue::Type::DOUBLE:
+            return ToJSValue(argument->GetDouble());
         case WebJSValue::Type::BOOLEAN:
-            argv.push_back(JSRef<JSVal>::Make(ToJSValue(value->GetBoolean())));
-            break;
+            return ToJSValue(argument->GetBoolean());
         case WebJSValue::Type::STRING:
-            argv.push_back(JSRef<JSVal>::Make(ToJSValue(value->GetString())));
-            break;
+            return ToJSValue(argument->GetString());
+        case WebJSValue::Type::LIST: {
+            size_t length = argument->GetListValueSize();
+            auto arr = panda::ArrayRef::New(vm, length);
+            for (size_t i = 0; i < length; ++i) {
+                auto nPtr = std::make_shared<WebJSValue>(argument->GetListValue(i));
+                if (!panda::ArrayRef::SetValueAt(vm, arr, i, ToJsValueHelper(vm, nPtr))) {
+                    TAG_LOGE(AceLogTag::ACE_WEB, "ToJsValueHelper: SetValueAt api call failed");
+                    return panda::JSValueRef::Undefined(vm);
+                }
+            }
+            return arr;
+        }
+        case WebJSValue::Type::DICTIONARY: {
+            auto obj = panda::ObjectRef::New(vm);
+            auto dict = argument->GetDictionaryValue();
+            for (auto& item : dict) {
+                auto nPtr = std::make_shared<WebJSValue>(item.second);
+                obj->Set(vm, panda::StringRef::NewFromUtf8(vm, item.first.c_str()), ToJsValueHelper(vm, nPtr));
+            }
+            return obj;
+        }
+        case WebJSValue::Type::BINARY: {
+            auto size = argument->GetBinaryValueSize();
+            auto buff = argument->GetBinaryValue();
+            return panda::ArrayBufferRef::New(vm, (void*)buff, (int32_t)size, nullptr, (void*)buff);
+        }
         case WebJSValue::Type::NONE:
-            break;
+            return panda::JSValueRef::Undefined(vm);
         default:
+            TAG_LOGE(AceLogTag::ACE_WEB, "ToJsValueHelper: jsvalue type not support!");
             break;
     }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+void ParseWebViewValueToJsValue(std::shared_ptr<WebJSValue> value, std::vector<JSRef<JSVal>>& argv)
+{
+    if (!value) {
+        return;
+    }
+    auto vm = GetEcmaVm();
+    argv.push_back(JSRef<JSVal>::Make(ToJsValueHelper(vm, value)));
 }
 
 std::shared_ptr<WebJSValue> ParseValue(const JSRef<JSVal>& resultValue, std::shared_ptr<WebJSValue> webviewValue)
 {
+    if (!webviewValue) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "ParseValue: webviewValue or resultValue is null");
+        return std::make_shared<WebJSValue>();
+    }
+
     webviewValue->error_ = static_cast<int>(WebJavaScriptBridgeError::NO_ERROR);
     if (resultValue->IsBoolean()) {
         webviewValue->SetType(WebJSValue::Type::BOOLEAN);
@@ -62,7 +102,34 @@ std::shared_ptr<WebJSValue> ParseValue(const JSRef<JSVal>& resultValue, std::sha
     } else if (resultValue->IsNumber()) {
         webviewValue->SetType(WebJSValue::Type::DOUBLE);
         webviewValue->SetDouble(resultValue->ToNumber<double>());
-    } else if (resultValue->IsArray() || resultValue->IsObject() || resultValue->IsUndefined()) {
+    } else if (resultValue->IsArray()) {
+        webviewValue->SetType(WebJSValue::Type::LIST);
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(resultValue);
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> value = array->GetValueAt(i);
+            auto nVal = std::make_shared<WebJSValue>();
+            webviewValue->AddListValue(*ParseValue(value, nVal));
+        }
+    } else if (resultValue->IsObject()) {
+        webviewValue->SetType(WebJSValue::Type::DICTIONARY);
+        JSRef<JSObject> dic = JSRef<JSObject>::Cast(resultValue);
+        auto names = dic->GetPropertyNames();
+        for (size_t i = 0; i < names->Length(); i++) {
+            JSRef<JSVal> key = names->GetValueAt(i);
+            if (!(key->IsString())) {
+                continue;
+            }
+            JSRef<JSVal> property = dic->GetProperty(key->ToString().c_str());
+            auto nwebValueTmp = std::make_shared<WebJSValue>();
+            auto nwebKeyTmp = std::make_shared<WebJSValue>();
+            ParseValue(key, nwebKeyTmp);
+            ParseValue(property, nwebValueTmp);
+            webviewValue->AddDictionaryValue(nwebKeyTmp->GetString(), *nwebValueTmp);
+        }
+    } else if (resultValue->IsFunction()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "ParseValue: object is not supported");
+        webviewValue->SetType(WebJSValue::Type::NONE);
+    } else if (resultValue->IsUndefined()) {
         webviewValue->SetType(WebJSValue::Type::NONE);
         webviewValue->error_ = static_cast<int>(WebJavaScriptBridgeError::OBJECT_IS_GONE);
     }
@@ -914,7 +981,7 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
             }
         }
     }
-    
+
     webController_->AddJavascriptInterface(objName, methods);
 }
 

@@ -45,4 +45,5 @@ void ImageCache::Purge() {}
 
 void ImageCache::ClearCacheImage(const std::string& key) {}
 void ImageCache::Clear() {}
+void ImageCache::DumpCacheInfo() {}
 } // namespace OHOS::Ace

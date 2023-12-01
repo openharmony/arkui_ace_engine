@@ -25,7 +25,7 @@
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_bitmap.h"
@@ -69,24 +69,19 @@ class QRCodeTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    void MockPipelineContextGetTheme();
 };
 
 void QRCodeTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<QrcodeTheme>()));
 }
 
 void QRCodeTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
-}
-
-void QRCodeTestNg::MockPipelineContextGetTheme()
-{
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<QrcodeTheme>()));
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -96,10 +91,9 @@ void QRCodeTestNg::MockPipelineContextGetTheme()
  */
 HWTEST_F(QRCodeTestNg, QRCodePaintPropertyTest001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
-    MockPipelineContextGetTheme();
+
     QRCodeModelNG qrCodeModelNG;
     qrCodeModelNG.Create(CREATE_VALUE);
 
@@ -125,7 +119,6 @@ HWTEST_F(QRCodeTestNg, QRCodePaintPropertyTest001, TestSize.Level1)
  */
 HWTEST_F(QRCodeTestNg, QRCodePatternTest002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     QRCodeModelNG qrCodeModelNG;
     qrCodeModelNG.Create(CREATE_VALUE);
     qrCodeModelNG.SetQRCodeColor(QR_CODE_COLOR_VALUE);
@@ -163,7 +156,6 @@ HWTEST_F(QRCodeTestNg, QRCodePatternTest002, TestSize.Level1)
  */
 HWTEST_F(QRCodeTestNg, QRCodePatternTest003, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
@@ -212,7 +204,6 @@ HWTEST_F(QRCodeTestNg, QRCodePatternTest003, TestSize.Level1)
  */
 HWTEST_F(QRCodeTestNg, QRCodePatternTest004, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create qrcode and get frameNode.
      */
@@ -285,7 +276,6 @@ HWTEST_F(QRCodeTestNg, QRCodePatternTest004, TestSize.Level1)
  */
 HWTEST_F(QRCodeTestNg, QRCodePatternTest005, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create qrcode and get frameNode.
      */
@@ -334,7 +324,6 @@ HWTEST_F(QRCodeTestNg, QRCodePatternTest005, TestSize.Level1)
  */
 HWTEST_F(QRCodeTestNg, QRCodePatternTest006, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create qrcode and get frameNode.
      */
@@ -363,10 +352,6 @@ HWTEST_F(QRCodeTestNg, QRCodePatternTest006, TestSize.Level1)
  */
 HWTEST_F(QRCodeTestNg, QRCodeModelSetContentOpacity001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create qrCodeModel
      */
@@ -406,10 +391,6 @@ HWTEST_F(QRCodeTestNg, QRCodeModelSetContentOpacity001, TestSize.Level1)
  */
 HWTEST_F(QRCodeTestNg, QRCodePatternGetFocusPattern001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create qrCodeModel
      */
@@ -440,10 +421,6 @@ HWTEST_F(QRCodeTestNg, QRCodePatternGetFocusPattern001, TestSize.Level1)
  */
 HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create qrCodeModel
      */
@@ -499,10 +476,6 @@ HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent001, TestSize.Level1)
  */
 HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create qrCodeModel
      */
@@ -542,10 +515,6 @@ HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent002, TestSize.Level1)
  */
 HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create qrCodeModel
      */
@@ -593,10 +562,6 @@ HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw001, TestSize.Level1)
  */
 HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw002, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create qrCodeModel
      */
@@ -643,10 +608,6 @@ HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw002, TestSize.Level1)
  */
 HWTEST_F(QRCodeTestNg, UpdateContentModifier001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
-
     /**
      * @tc.steps: steps1. Create qrCodeModel
      */

@@ -218,17 +218,13 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
             onScrollIndex(layoutInfo.startIndex_, layoutInfo.endIndex_);
         }
     }
-    if (layoutInfo.itemStart_ && !layoutInfo_.itemStart_) {
-        auto onReachStart = eventHub->GetOnReachStart();
-        if (onReachStart) {
-            onReachStart();
-        }
+    auto onReachStart = eventHub->GetOnReachStart();
+    if (onReachStart && layoutInfo.ReachStart(!isInitialized_)) {
+        onReachStart();
     }
-    if (layoutInfo.offsetEnd_ && !layoutInfo_.offsetEnd_) {
-        auto onReachEnd = eventHub->GetOnReachEnd();
-        if (onReachEnd) {
-            onReachEnd();
-        }
+    auto onReachEnd = eventHub->GetOnReachEnd();
+    if (onReachEnd && layoutInfo.ReachEnd()) {
+        onReachEnd();
     }
     OnScrollStop(eventHub->GetOnScrollStop(), false);
 
@@ -237,6 +233,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     UpdateScrollBarOffset();
     CheckScrollable();
 
+    isInitialized_ = true;
     auto property = host->GetLayoutProperty();
     CHECK_NULL_RETURN(host, false);
     return property->GetPaddingProperty() != nullptr;

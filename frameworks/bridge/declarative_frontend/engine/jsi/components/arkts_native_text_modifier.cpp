@@ -330,7 +330,7 @@ void SetTextTextShadow(NodeHandle node, struct TextShadowStruct* shadows, uint32
         shadow.SetOffsetX(shadowStruct->offsetX);
         shadow.SetOffsetY(shadowStruct->offsetY);
         shadow.SetIsFilled(static_cast<bool>(shadowStruct->fill));
-        shadowList.emplace_back(shadow);
+        shadowList.at(i) = shadow;
     }
     TextModelNG::SetTextShadow(frameNode, shadowList);
 }
@@ -409,10 +409,10 @@ void SetTextLetterSpacing(NodeHandle node, const struct StringAndDouble* letterS
             return;
         } else {
             letterSpacing = StringUtils::StringToCalcDimension(
-                std::string(letterSpacingStruct->valueStr), false, DimensionUnit::PX);
+                std::string(letterSpacingStruct->valueStr), false, DimensionUnit::FP);
         }
     } else {
-        letterSpacing = CalcDimension(letterSpacingStruct->value, DimensionUnit::VP);
+        letterSpacing = CalcDimension(letterSpacingStruct->value, DimensionUnit::FP);
     }
     TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
 }

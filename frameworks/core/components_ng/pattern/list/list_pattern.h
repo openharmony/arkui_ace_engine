@@ -291,7 +291,6 @@ private:
     int32_t centerIndex_ = -1;
     float startMainPos_;
     float endMainPos_;
-    bool isInitialized_ = false;
     float currentOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     float contentMainSize_ = 0.0f;

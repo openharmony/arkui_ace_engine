@@ -31,7 +31,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/pattern_lock/pattern_lock_component.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -85,12 +85,12 @@ public:
 
 void PatternLockTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void PatternLockTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -471,7 +471,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest005, TestSize.Level1)
     ASSERT_NE(pattern->patternLockModifier_, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
     ASSERT_NE(patternlockTheme, nullptr);
     patternlockTheme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
@@ -764,7 +764,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest011, TestSize.Level1)
     ASSERT_NE(focushub, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
     ASSERT_NE(patternlockTheme, nullptr);
     patternlockTheme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
@@ -992,7 +992,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest014, TestSize.Level1)
     patternLockPaintProperty->UpdateCircleRadius(Dimension(CIRCLE_RADIUS_FLOAT));
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
     ASSERT_NE(patternlockTheme, nullptr);
     patternlockTheme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
@@ -1187,7 +1187,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPaintMethodTest001, TestSize.Level1)
     geometryNode->SetContentSize(SizeF());
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
     patternlockTheme->regularColor_ = REGULAR_COLOR;
     patternlockTheme->selectedColor_ = SELECTED_COLOR;

@@ -87,6 +87,10 @@ public:
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    void InitTitleParam();
+
+    bool IsHidden();
+
     bool IsInitialTitle() const
     {
         return isInitialTitle_;

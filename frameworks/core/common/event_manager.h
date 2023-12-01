@@ -239,6 +239,7 @@ private:
     std::vector<KeyCode> pressedKeyCodes_;
     NG::EventTreeRecord eventTree_;
     RefPtr<NG::ResponseCtrl> responseCtrl_;
+    TimeStamp lastEventTime_;
 };
 
 } // namespace OHOS::Ace

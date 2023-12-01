@@ -30,7 +30,7 @@
 #include "core/common/lru/count_limit_lru.h"
 
 namespace OHOS::Ace {
-    
+
 struct CachedImage;
 class ImageObject;
 
@@ -86,6 +86,7 @@ public:
     static void Purge();
 
     void ClearCacheImage(const std::string& key);
+    void DumpCacheInfo();
 
 private:
     bool ProcessImageDataCacheInner(size_t dataSize);

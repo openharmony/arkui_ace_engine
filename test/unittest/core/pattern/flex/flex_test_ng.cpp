@@ -33,7 +33,7 @@
 #include "core/components_ng/pattern/flex/wrap_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -107,12 +107,12 @@ public:
 
 void FlexTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void FlexTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 struct WrapProperties {
@@ -1813,7 +1813,7 @@ HWTEST_F(FlexTestNg, wrapRowLayoutTest002, TestSize.Level1)
     auto firstChildSize = firstChildWrapper->GetGeometryNode()->GetFrameSize();
     auto firstChildOffset = firstChildWrapper->GetGeometryNode()->GetFrameOffset();
     EXPECT_EQ(firstChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
-    if (MockPipelineBase::GetCurrent() && MockPipelineBase::GetCurrent()->GetMinPlatformVersion() > 9) {
+    if (MockPipelineContext::GetCurrent() && MockPipelineContext::GetCurrent()->GetMinPlatformVersion() > 9) {
         EXPECT_EQ(firstChildOffset, OffsetF(0.0f, verticalRemaining / 2 + SMALL_ITEM_HEIGHT));
     } else {
         EXPECT_EQ(firstChildOffset, OffsetF(HALF_PERCENT_WIDTH, verticalRemaining / 2));
@@ -1822,7 +1822,7 @@ HWTEST_F(FlexTestNg, wrapRowLayoutTest002, TestSize.Level1)
     auto secondChildSize = secondChildWrapper->GetGeometryNode()->GetFrameSize();
     auto secondChildOffset = secondChildWrapper->GetGeometryNode()->GetFrameOffset();
     EXPECT_EQ(secondChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
-    if (MockPipelineBase::GetCurrent() && MockPipelineBase::GetCurrent()->GetMinPlatformVersion() > 9) {
+    if (MockPipelineContext::GetCurrent() && MockPipelineContext::GetCurrent()->GetMinPlatformVersion() > 9) {
         EXPECT_EQ(secondChildOffset, OffsetF(HALF_PERCENT_WIDTH, verticalRemaining / 2 + SMALL_ITEM_HEIGHT));
     } else {
         EXPECT_EQ(secondChildOffset, OffsetF(0.0f, verticalRemaining / 2));
@@ -1831,7 +1831,7 @@ HWTEST_F(FlexTestNg, wrapRowLayoutTest002, TestSize.Level1)
     auto thirdChildSize = thirdChildWrapper->GetGeometryNode()->GetFrameSize();
     auto thirdChildOffset = thirdChildWrapper->GetGeometryNode()->GetFrameOffset();
     EXPECT_EQ(thirdChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
-    if (MockPipelineBase::GetCurrent() && MockPipelineBase::GetCurrent()->GetMinPlatformVersion() > 9) {
+    if (MockPipelineContext::GetCurrent() && MockPipelineContext::GetCurrent()->GetMinPlatformVersion() > 9) {
         EXPECT_EQ(thirdChildOffset, OffsetF(HALF_PERCENT_WIDTH / 2, verticalRemaining / 2));
     } else {
         EXPECT_EQ(thirdChildOffset, OffsetF(HALF_PERCENT_WIDTH / 2, verticalRemaining / 2 + SMALL_ITEM_HEIGHT));
@@ -2013,7 +2013,7 @@ HWTEST_F(FlexTestNg, wrapRowLayoutTest004, TestSize.Level1)
     auto firstChildOffset = firstChildWrapper->GetGeometryNode()->GetFrameOffset();
     auto verticalRemaining = COLUMN_HEIGHT - 2 * SMALL_ITEM_HEIGHT;
     EXPECT_EQ(firstChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
-    if (MockPipelineBase::GetCurrent() && MockPipelineBase::GetCurrent()->GetMinPlatformVersion() > 9) {
+    if (MockPipelineContext::GetCurrent() && MockPipelineContext::GetCurrent()->GetMinPlatformVersion() > 9) {
         EXPECT_EQ(firstChildOffset, OffsetF(HALF_PERCENT_WIDTH, verticalRemaining / 4));
     } else {
         EXPECT_EQ(firstChildOffset, OffsetF(0.0f, COLUMN_HEIGHT - verticalRemaining / 4 - SMALL_ITEM_HEIGHT));
@@ -2023,7 +2023,7 @@ HWTEST_F(FlexTestNg, wrapRowLayoutTest004, TestSize.Level1)
     auto secondChildOffset = secondChildWrapper->GetGeometryNode()->GetFrameOffset();
     EXPECT_EQ(secondChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
 
-    if (MockPipelineBase::GetCurrent() && MockPipelineBase::GetCurrent()->GetMinPlatformVersion() > 9) {
+    if (MockPipelineContext::GetCurrent() && MockPipelineContext::GetCurrent()->GetMinPlatformVersion() > 9) {
         EXPECT_EQ(secondChildOffset,
             OffsetF(HALF_PERCENT_WIDTH, COLUMN_HEIGHT - verticalRemaining / 4 - SMALL_ITEM_HEIGHT));
     } else {
@@ -2033,7 +2033,7 @@ HWTEST_F(FlexTestNg, wrapRowLayoutTest004, TestSize.Level1)
     auto thirdChildSize = thirdChildWrapper->GetGeometryNode()->GetFrameSize();
     auto thirdChildOffset = thirdChildWrapper->GetGeometryNode()->GetFrameOffset();
     EXPECT_EQ(thirdChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
-    if (MockPipelineBase::GetCurrent() && MockPipelineBase::GetCurrent()->GetMinPlatformVersion() > 9) {
+    if (MockPipelineContext::GetCurrent() && MockPipelineContext::GetCurrent()->GetMinPlatformVersion() > 9) {
         EXPECT_EQ(thirdChildOffset, OffsetF(0.0f, (COLUMN_HEIGHT - SMALL_ITEM_HEIGHT) / 2));
     } else {
         EXPECT_EQ(thirdChildOffset, OffsetF(HALF_PERCENT_WIDTH, (COLUMN_HEIGHT - SMALL_ITEM_HEIGHT) / 2));

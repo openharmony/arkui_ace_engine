@@ -134,6 +134,7 @@ constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
+constexpr float DEFAULT_BIAS = 0.5f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "address" };
 const std::string SHEET_HEIGHT_MEDIUM = "medium";
@@ -957,7 +958,9 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
     if (!childWidthVal->IsNull()) {
         CalcDimension width;
         if (JSViewAbstract::ParseJsDimensionVp(childWidthVal, width)) {
-            popupParam->SetChildWidth(width);
+            if (width.Value() > 0) {
+                popupParam->SetChildWidth(width);
+            }
         }
     }
 }
@@ -1112,7 +1115,9 @@ void ParseCustomPopupParam(
     if (!childWidthVal->IsNull()) {
         CalcDimension width;
         if (JSViewAbstract::ParseJsDimensionVp(childWidthVal, width)) {
-            popupParam->SetChildWidth(width);
+            if (width.Value() > 0) {
+                popupParam->SetChildWidth(width);
+            }
         }
     }
 }
@@ -1888,7 +1893,7 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && (info[0]->IsUndefined())) {
         ViewAbstractModel::GetInstance()->SetOverlay(
-            "", nullptr, Alignment::CENTER, CalcDimension(0), CalcDimension(0));
+            "", nullptr, Alignment::TOP_LEFT, CalcDimension(0), CalcDimension(0));
         return;
     }
 
@@ -1920,10 +1925,6 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
                 offsetY = y;
             }
         }
-    } else if (info[1]->IsUndefined()) {
-        align = Alignment::CENTER;
-        offsetX = CalcDimension(0);
-        offsetY = CalcDimension(0);
     }
 
     if (info[0]->IsString()) {
@@ -6298,8 +6299,7 @@ void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsDragPreview(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("Invalid parameter type");
+    if (!info[0]->IsObject()) {
         return;
     }
     NG::DragDropInfo dragPreviewInfo;
@@ -6318,7 +6318,6 @@ void JSViewAbstract::JsDragPreview(const JSCallbackInfo& info)
         extraInfo = dragItemInfo->GetProperty("extraInfo");
         ParseJsString(extraInfo, dragPreviewInfo.extraInfo);
     } else {
-        LOGE("Parameter no customBuilder and pixelMap");
         return;
     }
 
@@ -6347,8 +6346,9 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
     if (valueObj->IsEmpty()) {
         return;
     }
-    const char* keys[] = { "left", "middle", "right", "top", "center", "bottom" };
+    const char* keys[] = { "left", "middle", "right", "top", "center", "bottom", "bias" };
     std::map<AlignDirection, AlignRule> alignRules;
+    BiasPair biasPair(DEFAULT_BIAS, DEFAULT_BIAS);
     for (uint32_t i = 0; i < sizeof(keys) / sizeof(const char*); i++) {
         auto rule = valueObj->GetProperty(keys[i]);
         if (rule->IsObject()) {
@@ -6362,10 +6362,20 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
                 alignRule.vertical = static_cast<VerticalAlign>(val->GetProperty("align")->ToNumber<int32_t>());
             }
             alignRules[static_cast<AlignDirection>(i)] = alignRule;
+
+            auto biasX = val->GetProperty("horizontal");
+            if (biasX->IsNumber()) {
+                biasPair.first = biasX->ToNumber<float>();
+            }
+            auto biasY = val->GetProperty("vertical");
+            if (biasY->IsNumber()) {
+                biasPair.second = biasY->ToNumber<float>();
+            }
         }
     }
 
     ViewAbstractModel::GetInstance()->SetAlignRules(alignRules);
+    ViewAbstractModel::GetInstance()->SetBias(biasPair);
 }
 
 void JSViewAbstract::SetMarginTop(const JSCallbackInfo& info)

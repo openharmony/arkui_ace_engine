@@ -29,10 +29,15 @@ TextOverlayModifier::TextOverlayModifier()
     AttachProperty(changeSelectedRects_);
     isClip_ = AceType::MakeRefPtr<PropertyBool>(true);
     AttachProperty(isClip_);
+    showSelect_ = AceType::MakeRefPtr<PropertyBool>(false);
+    AttachProperty(showSelect_);
 }
 
 void TextOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
+    if (!showSelect_->Get()) {
+        return;
+    }
     drawingContext.canvas.Save();
     RSBrush brush;
     brush.SetAntiAlias(true);
@@ -92,5 +97,9 @@ bool TextOverlayModifier::IsSelectedRectsChanged(const std::vector<RectF>& selec
         result = true;
     }
     return result;
+}
+void TextOverlayModifier::SetShowSelect(bool value)
+{
+    showSelect_->Set(value);
 }
 } // namespace OHOS::Ace::NG

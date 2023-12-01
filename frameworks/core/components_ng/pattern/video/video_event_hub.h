@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 
-using EventCallback = std::function<void(const std::string&)>;
+using VideoEventCallback = std::function<void(const std::string&)>;
 
 class VideoEventHub : public EventHub {
     DECLARE_ACE_TYPE(VideoEventHub, EventHub)
@@ -33,7 +33,7 @@ public:
     VideoEventHub() = default;
     ~VideoEventHub() override = default;
 
-    void SetOnStart(EventCallback&& onStart)
+    void SetOnStart(VideoEventCallback&& onStart)
     {
         onStart_ = std ::move(onStart);
     }
@@ -46,7 +46,7 @@ public:
         }
     }
 
-    void SetOnPause(EventCallback&& onPause)
+    void SetOnPause(VideoEventCallback&& onPause)
     {
         onPause_ = std ::move(onPause);
     }
@@ -59,7 +59,7 @@ public:
         }
     }
 
-    void SetOnFinish(EventCallback&& onFinish)
+    void SetOnFinish(VideoEventCallback&& onFinish)
     {
         onFinish_ = std ::move(onFinish);
     }
@@ -72,7 +72,7 @@ public:
         }
     }
 
-    void SetOnError(EventCallback&& onError)
+    void SetOnError(VideoEventCallback&& onError)
     {
         onError_ = std ::move(onError);
     }
@@ -85,7 +85,7 @@ public:
         }
     }
 
-    void SetOnPrepared(EventCallback&& onPrepared)
+    void SetOnPrepared(VideoEventCallback&& onPrepared)
     {
         onPrepared_ = std ::move(onPrepared);
     }
@@ -98,7 +98,7 @@ public:
         }
     }
 
-    void SetOnSeeking(EventCallback&& onSeeking)
+    void SetOnSeeking(VideoEventCallback&& onSeeking)
     {
         onSeeking_ = std ::move(onSeeking);
     }
@@ -111,7 +111,7 @@ public:
         }
     }
 
-    void SetOnSeeked(EventCallback&& onSeeked)
+    void SetOnSeeked(VideoEventCallback&& onSeeked)
     {
         onSeeked_ = std ::move(onSeeked);
     }
@@ -124,7 +124,7 @@ public:
         }
     }
 
-    void SetOnUpdate(EventCallback&& onUpdate)
+    void SetOnUpdate(VideoEventCallback&& onUpdate)
     {
         onUpdate_ = std ::move(onUpdate);
     }
@@ -137,7 +137,7 @@ public:
         }
     }
 
-    void SetOnFullScreenChange(EventCallback&& onFullScreenChange)
+    void SetOnFullScreenChange(VideoEventCallback&& onFullScreenChange)
     {
         onFullScreenChange_ = std ::move(onFullScreenChange);
     }
@@ -151,15 +151,15 @@ public:
     }
 
 private:
-    EventCallback onStart_;
-    EventCallback onPause_;
-    EventCallback onFinish_;
-    EventCallback onError_;
-    EventCallback onPrepared_;
-    EventCallback onSeeking_;
-    EventCallback onSeeked_;
-    EventCallback onUpdate_;
-    EventCallback onFullScreenChange_;
+    VideoEventCallback onStart_;
+    VideoEventCallback onPause_;
+    VideoEventCallback onFinish_;
+    VideoEventCallback onError_;
+    VideoEventCallback onPrepared_;
+    VideoEventCallback onSeeking_;
+    VideoEventCallback onSeeked_;
+    VideoEventCallback onUpdate_;
+    VideoEventCallback onFullScreenChange_;
 };
 
 } // namespace OHOS::Ace::NG

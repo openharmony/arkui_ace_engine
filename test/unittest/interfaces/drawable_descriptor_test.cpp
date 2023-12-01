@@ -20,7 +20,7 @@
 #include "interfaces/inner_api/drawable_descriptor/drawable_descriptor.h"
 #include "interfaces/inner_api/drawable_descriptor/image_converter.h"
 
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;

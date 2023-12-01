@@ -90,6 +90,8 @@ public:
         queryStateFunc_ = queryStateFunc;
     }
     bool QueryAllDone(size_t touchId);
+
+    void ForceCleanGestureScope();
 private:
     bool Existed(const RefPtr<NGGestureRecognizer>& recognizer);
     std::list<WeakPtr<NGGestureRecognizer>> recognizers_;
@@ -127,6 +129,7 @@ public:
     bool QueryAllDone();
     bool CheckSourceTypeChange(SourceType type, bool isAxis = false);
     void CleanAll(bool isBlocked = false);
+    void ForceCleanGestureReferee();
 private:
     void HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
     void HandlePendingDisposal(const RefPtr<NGGestureRecognizer>& recognizer);

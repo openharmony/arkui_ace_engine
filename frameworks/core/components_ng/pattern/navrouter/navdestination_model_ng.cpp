@@ -43,7 +43,7 @@ void NavDestinationModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     // navDestination node
     int32_t nodeId = stack->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     if (!navDestinationNode->GetTitleBarNode()) {
@@ -56,7 +56,7 @@ void NavDestinationModelNG::Create()
     // content node
     if (!navDestinationNode->GetTitleBarNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
         auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId,
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navDestinationNode->AddChild(contentNode);
@@ -69,7 +69,7 @@ void NavDestinationModelNG::Create()
 void NavDestinationModelNG::CreateImageButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
 {
     int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TITLE_BAR_ETS_TAG, titleBarNodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TITLE_BAR_ETS_TAG, titleBarNodeId);
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     navDestinationNode->AddChild(titleBarNode);
@@ -98,7 +98,7 @@ void NavDestinationModelNG::CreateImageButton(const RefPtr<NavDestinationGroupNo
 void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
 {
     int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TITLE_BAR_ETS_TAG, titleBarNodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TITLE_BAR_ETS_TAG, titleBarNodeId);
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     navDestinationNode->AddChild(titleBarNode);
@@ -176,7 +176,7 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
         ViewStackProcessor::GetInstance()->Finish();
         return parent;
     };
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId,
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
             return AceType::MakeRefPtr<NavDestinationPattern>(shallowBuilder);
@@ -191,7 +191,7 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
     // content node
     if (!navDestinationNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
         auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId,
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navDestinationNode->AddChild(contentNode);

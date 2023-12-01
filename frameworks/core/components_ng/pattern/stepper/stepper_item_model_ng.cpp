@@ -25,7 +25,7 @@ void StepperItemModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::STEPPER_ITEM_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::STEPPER_ITEM_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::STEPPER_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StepperItemPattern>(); });
     stack->Push(frameNode);
@@ -56,4 +56,13 @@ void StepperItemModelNG::ResetNextLabel()
     ACE_RESET_LAYOUT_PROPERTY(StepperItemLayoutProperty, RightLabel);
 }
 
+void StepperItemModelNG::SetNextLabel(FrameNode* frameNode, const std::string& rightLabel)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(StepperItemLayoutProperty, RightLabel, rightLabel, frameNode);
+}
+
+void StepperItemModelNG::ResetNextLabel(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(StepperItemLayoutProperty, RightLabel, frameNode);
+}
 } // namespace OHOS::Ace::NG

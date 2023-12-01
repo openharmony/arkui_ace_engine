@@ -23,7 +23,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -85,6 +85,9 @@ constexpr int32_t START_YEAR_BEFORE = 1990;
 constexpr int32_t SELECTED_YEAR = 2000;
 constexpr int32_t END_YEAR = 2090;
 constexpr Dimension HSAFE = 12.0_vp;
+constexpr float DEFAULT_HEIGHT = 0.0f;
+constexpr float MAX_HEIGHT = 10.0f;
+constexpr float MINUS_HEIGHT = -10.0f;
 } // namespace
 class OverlayManagerTestNg : public testing::Test {
 public:
@@ -99,11 +102,13 @@ protected:
 
 void OverlayManagerTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
-    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+    MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == DragBarTheme::TypeId()) {
             return AceType::MakeRefPtr<DragBarTheme>();
@@ -119,15 +124,17 @@ void OverlayManagerTestNg::SetUpTestCase()
             return AceType::MakeRefPtr<MenuTheme>();
         } else if (type == ToastTheme::TypeId()) {
             return AceType::MakeRefPtr<ToastTheme>();
+        } else if (type == SheetTheme::TypeId()) {
+            return AceType::MakeRefPtr<SheetTheme>();
         } else {
             return nullptr;
         }
     });
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 void OverlayManagerTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 RefPtr<FrameNode> OverlayManagerTestNg::CreateTargetNode()
@@ -652,6 +659,10 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
      * @tc.expected: the backgroundColor is updated successfully
      */
     sheetStyle.backgroundColor = Color::GREEN;
+    sheetStyle.backgroundBlurStyle->blurStyle = BlurStyle::BACKGROUND_THIN;
+    sheetStyle.backgroundBlurStyle->colorMode = ThemeColorMode::DARK;
+    sheetStyle.backgroundBlurStyle->adaptiveColor = AdaptiveColor::AVERAGE;
+    sheetStyle.maskColor = Color::GREEN;
     overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
         nullptr, nullptr, nullptr, targetNode);
     sheetNode = overlayManager->modalStack_.top().Upgrade();
@@ -1483,7 +1494,7 @@ HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest002, TestSize.Level1)
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
-    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+    MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
 
     /**
      * @tc.steps: step2. create modal page node.
@@ -1530,7 +1541,7 @@ HWTEST_F(OverlayManagerTestNg, ToastShowModeTest001, TestSize.Level1)
      * @tc.steps: step1. create toast node with showMode, and show it.
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    MockPipelineBase::GetCurrent()->rootNode_ = rootNode;
+    MockPipelineContext::GetCurrent()->rootNode_ = rootNode;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true, ToastShowMode::TOP_MOST);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
@@ -1614,7 +1625,7 @@ HWTEST_F(OverlayManagerTestNg, ToastTest002, TestSize.Level1)
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    MockPipelineBase::GetCurrent()->rootNode_ = rootNode;
+    MockPipelineContext::GetCurrent()->rootNode_ = rootNode;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
@@ -1924,6 +1935,249 @@ HWTEST_F(OverlayManagerTestNg, OnDialogCloseEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BindSheet004
+ * @tc.desc: Test OverlayManager::BindSheet create center sheet page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, BindSheet004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create builder func.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    auto buildTitleNodeFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. test popup page creates.
+     * @tc.expected: set sheet page height correctly.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
+        nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    // test node create
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_FALSE(topSheetNode == nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    EXPECT_FALSE(topSheetPattern == nullptr);
+    topSheetPattern->sheetThemeType_ = "popup";
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
+    EXPECT_EQ(topSheetPattern->GetSheetType(), SheetType::SHEET_CENTER);
+    topSheetPattern->pageHeight_ = 1000;
+    topSheetPattern->sheetMaxWidth_ = 1200;
+    overlayManager->sheetHeight_ = 0;
+    Dimension centerheight { 0.5, DimensionUnit::PERCENT };
+    sheetStyle.height = centerheight;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 725));
+    overlayManager->sheetHeight_ = 0;
+    sheetStyle.height->unit_ = DimensionUnit::VP;
+    sheetStyle.height->value_ = 950;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 950));
+    overlayManager->sheetHeight_ = 0;
+    sheetStyle.height->unit_ = DimensionUnit::VP;
+    sheetStyle.height->value_ = 100;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 660));
+    overlayManager->sheetHeight_ = 0;
+    sheetStyle.height->unit_ = DimensionUnit::VP;
+    sheetStyle.height->value_ = -10;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 780));
+
+    /**
+     * @tc.steps: step4. test dentents page creates.
+     * @tc.expected: set sheet page height correctly.
+     */
+    topSheetPattern->sheetThemeType_ = "auto";
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    EXPECT_EQ(topSheetPattern->GetSheetType(), SheetType::SHEET_BOTTOM);
+    topSheetPattern->pageHeight_ = 1000;
+    SheetHeight detent;
+    detent.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.detents.emplace_back(detent);
+    overlayManager->sheetHeight_ = 0;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 600));
+    sheetStyle.detents.clear();
+    detent.sheetMode = SheetMode::LARGE;
+    sheetStyle.detents.emplace_back(detent);
+    overlayManager->sheetHeight_ = 0;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 992));
+    sheetStyle.detents.clear();
+    detent.sheetMode = std::nullopt;
+    Dimension detentHeight { 0.5, DimensionUnit::PERCENT };
+    detent.height = detentHeight;
+    sheetStyle.detents.emplace_back(detent);
+    overlayManager->sheetHeight_ = 0;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 500));
+    sheetStyle.detents.clear();
+    detent.height->unit_ = DimensionUnit::VP;
+    detent.height->value_ = 600;
+    sheetStyle.detents.emplace_back(detent);
+    overlayManager->sheetHeight_ = 0;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 600));
+    sheetStyle.detents.clear();
+    detent.height->unit_ = DimensionUnit::VP;
+    detent.height->value_ = 1500;
+    sheetStyle.detents.emplace_back(detent);
+    overlayManager->sheetHeight_ = 0;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 992));
+    sheetStyle.detents.clear();
+    detent.height->unit_ = DimensionUnit::VP;
+    detent.height->value_ = -100;
+    sheetStyle.detents.emplace_back(detent);
+    overlayManager->sheetHeight_ = 0;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 992));
+}
+
+/**
+ * @tc.name: HandleDragUpdate001
+ * @tc.desc: Test SheetPresentationPattern::HandleDragUpdate().
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+
+    /**
+     * @tc.steps: step2. create stage node.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+
+    /**
+     * @tc.steps: step3. create root node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step4. create builder func.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    auto buildTitleNodeFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step5. create overlayManager.
+     */
+    std::stack<WeakPtr<FrameNode>> modalStack;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->modalStack_ = modalStack;
+    SheetStyle sheetStyle;
+    CreateSheetStyle(sheetStyle);
+    sheetStyle.sheetTitle = "11";
+    sheetStyle.sheetSubtitle = "22";
+    overlayManager->BindSheet(true, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle, nullptr,
+        nullptr, nullptr, targetNode);
+
+    /**
+     * @tc.steps: step6. get sheet node, get pattern.
+     */
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    topSheetPattern->OnDirtyLayoutWrapperSwap(topSheetNode->CreateLayoutWrapper(), DirtySwapConfig());
+
+    /**
+     * @tc.steps: step7. Init height , sheetDetentHeight and currentOffset.
+     */
+    topSheetPattern->sheetDetentHeight_.emplace_back(MINUS_HEIGHT);
+    topSheetPattern->height_ = MAX_HEIGHT;
+    topSheetPattern->OnCoordScrollStart();
+
+    /**
+     * @tc.steps: step8. Set minDelta < 0.
+     * @tc.expected: currentOffset is 0
+     */
+    GestureEvent info;
+    info.SetMainDelta(MINUS_HEIGHT);
+    topSheetPattern->HandleDragUpdate(info);
+    EXPECT_EQ(topSheetPattern->currentOffset_, DEFAULT_HEIGHT);
+
+    /**
+     * @tc.steps: step9. Set minDelta = 0.
+     * @tc.expected: currentOffset is 0
+     */
+    info.SetMainDelta(DEFAULT_HEIGHT);
+    topSheetPattern->HandleDragUpdate(info);
+    EXPECT_EQ(topSheetPattern->currentOffset_, DEFAULT_HEIGHT);
+
+    /**
+     * @tc.steps: step10. Do OnCoordScrollUpdate when scrollOffset < 0 .
+     * @tc.expected: return true
+     */
+    topSheetPattern->OnCoordScrollEnd(*topSheetPattern->sheetDetentHeight_.end());
+    auto ret = topSheetPattern->OnCoordScrollUpdate(*topSheetPattern->sheetDetentHeight_.end());
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.steps: step11. Do OnCoordScrollUpdate when scrollOffset > 0.
+     * @tc.expected: return true
+     */
+    topSheetPattern->sheetDetentHeight_.emplace_back(MAX_HEIGHT);
+    topSheetPattern->OnCoordScrollEnd(*topSheetPattern->sheetDetentHeight_.end());
+    ret = topSheetPattern->OnCoordScrollUpdate(*topSheetPattern->sheetDetentHeight_.end());
+    EXPECT_TRUE(ret);
+}
+/**
  * @tc.name: TestBindSheet
  * @tc.desc: Test SheetPresentationPattern::AvoidSafeArea().
  * @tc.type: FUNC
@@ -1933,9 +2187,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea1, TestSize.Level1)
     /**
      * @tc.steps: step1. create sheet node and initialize sheet pattern.
      */
-    auto sheetNode =
-        FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, 1,
-        AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
+    auto sheetNode = FrameNode::CreateFrameNode(
+        V2::SHEET_PAGE_TAG, 1, AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
     ASSERT_NE(sheetNode, nullptr);
     auto dragBarNode = FrameNode::CreateFrameNode(
         "SheetDragBar", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
@@ -1954,11 +2207,11 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea1, TestSize.Level1)
     auto geometryNode = sheetNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetFrameSize(SizeF(800, 2000));
-    MockPipelineBase::GetCurrent()->safeAreaManager_ = safeAreaManager;
-    MockPipelineBase::GetCurrent()->SetRootSize(800, 2000);
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
+    MockPipelineContext::GetCurrent()->SetRootSize(800, 2000);
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     textFieldManager->SetHeight(20);
-    MockPipelineBase::GetCurrent()->SetTextFieldManager(textFieldManager);
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     SafeAreaInsets::Inset upKeyboard { 0, 200 };
     sheetPattern->pageHeight_ = 2000;
     sheetPattern->sheetHeight_ = 2000;
@@ -1982,7 +2235,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea1, TestSize.Level1)
     EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()),
         2000 - sheetPattern->height_ -
             (200 + HSAFE.ConvertToPx() -
-                (MockPipelineBase::GetCurrent()->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
+                (MockPipelineContext::GetCurrent()->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
                     textFieldManager->GetHeight())));
     /**
      * @tc.cases: case3. sheet height = 1900 - 8vp, sheet goes up to LARGE and need to scroll.
@@ -2015,9 +2268,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea2, TestSize.Level1)
     /**
      * @tc.steps: step1. create sheet node and initialize sheet pattern.
      */
-    auto sheetNode =
-        FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, 1,
-        AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
+    auto sheetNode = FrameNode::CreateFrameNode(
+        V2::SHEET_PAGE_TAG, 1, AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
     ASSERT_NE(sheetNode, nullptr);
     auto dragBarNode = FrameNode::CreateFrameNode(
         "SheetDragBar", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
@@ -2045,8 +2297,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea2, TestSize.Level1)
     ASSERT_NE(sheetLayoutProperty, nullptr);
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
     geometryNode->SetFrameSize(SizeF(800, 2000));
-    MockPipelineBase::GetCurrent()->safeAreaManager_ = safeAreaManager;
-    MockPipelineBase::GetCurrent()->SetRootSize(800, 2000);
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
+    MockPipelineContext::GetCurrent()->SetRootSize(800, 2000);
     sheetPattern->pageHeight_ = 2000;
     sheetPattern->sheetHeight_ = 2000;
     sheetPattern->height_ = 500;
@@ -2069,5 +2321,64 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea2, TestSize.Level1)
     sheetPattern->OnWindowSizeChanged(800, 2000, WindowSizeChangeReason::RESIZE);
     sheetPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, DirtySwapConfig());
     EXPECT_FALSE(sheetPattern->windowRotate_);
+}
+
+/**
+ * @tc.name: DialogTest004
+ * @tc.desc: Test OverlayManager::GetDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, DialogTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and prepare dialogProperties.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    DialogProperties dialogProperties;
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowDateDialog.
+     * @tc.expected: DialogNode is created successfully
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    /**
+     * @tc.steps: step3. test OverlayManager's GetDialog function.
+     * @tc.expected: overlayManager.dialog.id equal to GetDialog(dialogId).id.
+     */
+    int32_t dialogId = dialog->GetId();
+    auto dialogNode = overlayManager->GetDialog(dialogId);
+    CHECK_NULL_VOID(dialogNode);
+    EXPECT_EQ(dialogId, dialogNode->GetId());
+}
+
+/**
+ * @tc.name: DialogTest005
+ * @tc.desc: Test OverlayManager::GetDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, DialogTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and prepare dialogProperties.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    DialogProperties dialogProperties;
+    dialogProperties.isMask = true;
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowDateDialog.
+     * @tc.expected: DialogNode is created successfully
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    /**
+     * @tc.steps: step3. test OverlayManager's GetDialog function.
+     * @tc.expected: overlayManager.dialogMap_.size to 0.
+     */
+    auto maskNode = overlayManager->GetDialog(overlayManager->maskNodeId_);
+    CHECK_NULL_VOID(maskNode);
+    overlayManager->CloseDialog(maskNode);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

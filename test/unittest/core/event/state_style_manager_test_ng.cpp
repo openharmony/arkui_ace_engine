@@ -24,7 +24,7 @@
 #include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -50,12 +50,12 @@ void StateStyleManagerTestNg::TearDownTestSuite()
 
 void StateStyleManagerTestNg::SetUp()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void StateStyleManagerTestNg::TearDown()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**

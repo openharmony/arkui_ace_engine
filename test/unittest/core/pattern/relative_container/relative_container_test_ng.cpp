@@ -17,7 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "relative_container_common_ng.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -74,12 +74,12 @@ class RelativeContainerTestNg : public testing::Test {
 public:
     static void SetUpTestCase()
     {
-        MockPipelineBase::SetUp();
+        MockPipelineContext::SetUp();
     }
 
     static void TearDownTestCase()
     {
-        MockPipelineBase::TearDown();
+        MockPipelineContext::TearDown();
     }
 };
 

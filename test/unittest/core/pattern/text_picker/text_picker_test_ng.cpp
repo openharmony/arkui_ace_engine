@@ -23,7 +23,7 @@
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_default.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/geometry/dimension.h"
@@ -195,12 +195,12 @@ void TextPickerTestNg::InitTextPickerTestNg()
 
 void TextPickerTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void TextPickerTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void TextPickerTestNg::SetUp()
@@ -217,12 +217,12 @@ void TextPickerTestNg::SetUp()
             return nullptr;
         }
     });
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
 void TextPickerTestNg::TearDown()
 {
-    MockPipelineBase::GetCurrent()->themeManager_ = nullptr;
+    MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     ViewStackProcessor::GetInstance()->ClearStack();
 }
 
@@ -252,7 +252,7 @@ public:
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions001, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -290,7 +290,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions001, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp001, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -344,7 +344,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp001, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown001, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -398,7 +398,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown001, Test
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions002, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -437,7 +437,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions002, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp002, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -482,7 +482,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp002, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown002, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -526,7 +526,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown002, Test
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions003, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -575,7 +575,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions003, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions004, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -612,7 +612,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions004, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions005, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -644,7 +644,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions005, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions006, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -679,7 +679,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions006, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions007, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -714,7 +714,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions007, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions008, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -752,7 +752,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions008, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions009, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -791,7 +791,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions009, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions010, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -830,7 +830,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions010, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions011, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 4;
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
@@ -870,7 +870,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions011, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions012, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 4;
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
@@ -912,7 +912,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions012, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions013, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 4;
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
@@ -956,7 +956,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions013, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions014, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -997,7 +997,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions014, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions015, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -1044,7 +1044,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions015, TestSi
 
 void InnerHandleScrollUp003Init()
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -1073,7 +1073,7 @@ void InnerHandleScrollUp003Init()
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp003, TestSize.Level1)
 {
     InnerHandleScrollUp003Init();
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1111,7 +1111,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp003, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp004, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -1167,7 +1167,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp004, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown003, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -1229,7 +1229,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown003, Test
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll001, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -1267,7 +1267,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll001, TestSize
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 4;
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
@@ -1305,7 +1305,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll002, TestSize
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll003, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -1346,7 +1346,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll003, TestSize
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll004, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -1387,7 +1387,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll004, TestSize
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll005, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -1431,7 +1431,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll005, TestSize
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions016, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -1481,7 +1481,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions016, TestSi
  */
 HWTEST_F(TextPickerTestNg, TextPickerPatternToJsonValue001, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -1518,7 +1518,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternToJsonValue001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerPatternToJsonValue002, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -1539,7 +1539,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternToJsonValue002, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerPatternToJsonValue003, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -1583,7 +1583,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternToJsonValue003, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerPatternProcessDepth001, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -1612,7 +1612,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternProcessDepth001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerPatternProcessDepth002, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -2057,7 +2057,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow011, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGCreateTextPicker001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, ICON);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -2077,7 +2077,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGCreateTextPicker001, TestSize.Level1
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     PickerTextStyle textStyle;
     textStyle.textColor = Color::RED;
@@ -2098,7 +2098,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle001, TestSize.L
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     PickerTextStyle textStyle;
     textStyle.fontSize = Dimension(FONT_SIZE_10);
@@ -2119,7 +2119,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle002, TestSize.L
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     PickerTextStyle textStyle;
     textStyle.fontSize = Dimension(0);
@@ -2139,7 +2139,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle003, TestSize.L
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle004, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     PickerTextStyle textStyle;
     textStyle.fontWeight = Ace::FontWeight::BOLD;
@@ -2160,7 +2160,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle004, TestSize.L
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     PickerTextStyle textStyle;
     textStyle.textColor = Color::RED;
@@ -2181,7 +2181,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle001, TestSize.Leve
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     PickerTextStyle textStyle;
     textStyle.fontSize = Dimension(FONT_SIZE_10);
@@ -2202,7 +2202,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle002, TestSize.Leve
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     PickerTextStyle textStyle;
     textStyle.fontSize = Dimension(0);
@@ -2222,7 +2222,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle003, TestSize.Leve
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle004, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     PickerTextStyle textStyle;
     textStyle.fontWeight = Ace::FontWeight::BOLD;
@@ -2243,7 +2243,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle004, TestSize.Leve
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     PickerTextStyle textStyle;
     textStyle.textColor = Color::RED;
@@ -2264,7 +2264,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle001, TestSize.Le
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     PickerTextStyle textStyle;
     textStyle.fontSize = Dimension(FONT_SIZE_10);
@@ -2285,7 +2285,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle002, TestSize.Le
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     PickerTextStyle textStyle;
     textStyle.fontSize = Dimension(0);
@@ -2305,7 +2305,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle003, TestSize.Le
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle004, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     PickerTextStyle textStyle;
     textStyle.fontWeight = Ace::FontWeight::BOLD;
@@ -2326,7 +2326,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle004, TestSize.Le
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelected001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
     TextPickerModelNG::GetInstance()->SetRange(range);
@@ -2347,7 +2347,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelected001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetRange001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
     TextPickerModelNG::GetInstance()->SetRange(range);
@@ -2366,7 +2366,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetRange001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetRange002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     std::vector<NG::RangeContent> range;
     TextPickerModelNG::GetInstance()->SetRange(range);
@@ -2385,7 +2385,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetRange002, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     TextPickerModelNG::GetInstance()->Create(theme, ICON);
@@ -2406,7 +2406,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
@@ -2427,7 +2427,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate002, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDefaultAttributes001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     theme->selectedOptionStyle_.SetTextColor(Color(0x007DFF));
     theme->selectedOptionStyle_.SetFontSize(Dimension(20, DimensionUnit::VP));
@@ -2472,7 +2472,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDefaultAttributes001, TestSize.Le
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGMultiInit001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
      * @tc.step: step1. create textpicker pattern.
      */
@@ -2495,7 +2495,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGMultiInit001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetIsCascade001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
      * @tc.step: step1. create textpicker pattern.
      */
@@ -2519,7 +2519,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetIsCascade001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
      * @tc.step: step1. create textpicker pattern.
      */
@@ -2548,7 +2548,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->MultiInit(theme);
 
     /**
@@ -2602,7 +2602,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds002, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->MultiInit(theme);
 
     /**
@@ -2647,7 +2647,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds003, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetValues001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
      * @tc.step: step1. create textpicker pattern.
      */
@@ -2676,7 +2676,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetValues001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
      * @tc.step: step1. create textpicker pattern.
      */
@@ -2712,7 +2712,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
      * @tc.step: step1. create textpicker pattern.
      */
@@ -2757,7 +2757,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns002, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
      * @tc.step: step1. create textpicker pattern.
      */
@@ -2805,7 +2805,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns003, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerLayoutPropertyToJsonValue001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
     /**
@@ -2839,7 +2839,7 @@ HWTEST_F(TextPickerTestNg, TextPickerLayoutPropertyToJsonValue001, TestSize.Leve
  */
 HWTEST_F(TextPickerTestNg, TextPickerLayoutPropertyClone001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
     /**
@@ -2868,7 +2868,7 @@ HWTEST_F(TextPickerTestNg, TextPickerLayoutPropertyClone001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerLayoutPropertyReset001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     TextPickerModelNG::GetInstance()->SetDefaultAttributes(theme);
     /**
@@ -3168,7 +3168,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAccessibilityPropertySetSpecificSupportActi
  */
 HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -3207,7 +3207,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -3234,7 +3234,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -3265,7 +3265,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest002, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -3297,7 +3297,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest003, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest004, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -3334,7 +3334,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest004, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest005, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -3367,7 +3367,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest005, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest006, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
      * @tc.cases: case. cover branch DeviceOrientation is LANDSCAPE.
      */
@@ -3412,7 +3412,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest006, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest007, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -3458,7 +3458,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest007, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerPaintTest001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     theme->gradientHeight_ = Dimension(10.0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -3494,7 +3494,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPaintTest001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerPaintTest002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -3535,7 +3535,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPaintTest002, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerPatternTest001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -3564,7 +3564,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerPatternTest002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -3597,7 +3597,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest001, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
 
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -3635,7 +3635,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest002, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
 
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -3673,7 +3673,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest003, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
 
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -3711,7 +3711,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest004, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
 
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -3749,7 +3749,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest005, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
 
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -3787,7 +3787,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest006, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
 
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -3825,7 +3825,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest007, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
 
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -3863,7 +3863,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest008, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
 
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -3901,7 +3901,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest009, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
 
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -3939,7 +3939,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest010, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
 
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -3977,7 +3977,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest011, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
 
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -4015,7 +4015,7 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest012, TestSize.Level1)
     textPickerColumnPattern_->InitMouseAndPressEvent();
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
 
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -4076,7 +4076,7 @@ HWTEST_F(TextPickerTestNg, CanLoopTest001, TestSize.Level1)
 
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
 
@@ -4113,7 +4113,7 @@ HWTEST_F(TextPickerTestNg, CanLoopTest002, TestSize.Level1)
 
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
 
@@ -4150,7 +4150,7 @@ HWTEST_F(TextPickerTestNg, CanLoopTest003, TestSize.Level1)
 
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
 
@@ -4187,7 +4187,7 @@ HWTEST_F(TextPickerTestNg, CanLoopTest004, TestSize.Level1)
 
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern_->SetOptions(range);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 5;
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
 
@@ -4218,7 +4218,7 @@ HWTEST_F(TextPickerTestNg, CanLoopTest004, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerFireChangeEventTest001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto onSelectedChange = [](const std::vector<double>& indexs) {
         for (auto index : indexs) {
@@ -4256,7 +4256,7 @@ HWTEST_F(TextPickerTestNg, TextPickerFireChangeEventTest001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerKeyEvent001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -4303,7 +4303,7 @@ HWTEST_F(TextPickerTestNg, TextPickerKeyEvent001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerKeyEvent002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -4388,7 +4388,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest003, TestSize.Level1)
     /**
      * @tc.step: step1. create textpicker framenode and pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -4418,7 +4418,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest001, TestSize.Level1)
     /**
      * @tc.step: step1. create textpicker framenode and columnpattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -4450,7 +4450,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -4515,7 +4515,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest003, TestSize.Level1)
     /**
      * @tc.step: step1. create textpicker framenode and columnpattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -4584,7 +4584,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest005, TestSize.Level1)
     /**
      * @tc.step: step1. create textpicker framenode and columnpattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -4656,7 +4656,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest004, TestSize.Level1)
     /**
      * @tc.step: step1. create textpicker framenode and columnpattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -4685,8 +4685,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest004, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, PatternGetSelectedObject001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto pipeline = MockPipelineContext::GetCurrent();
     ASSERT_NE(pipeline, nullptr);
 
     /**
@@ -4714,8 +4714,8 @@ HWTEST_F(TextPickerTestNg, PatternGetSelectedObject001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, PatternGetSelectedObject002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto pipeline = MockPipelineContext::GetCurrent();
     ASSERT_NE(pipeline, nullptr);
 
     /**
@@ -4748,7 +4748,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest001, TestSize.Level1)
     /**
      * @tc.step: step1. create textpicker framenode and textPickerLayoutProperty.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
@@ -4786,7 +4786,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest002, TestSize.Level1)
     /**
      * @tc.step: step1. create textpicker framenode.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -4827,7 +4827,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest002, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns004, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
      * @tc.step: step1. create textpicker pattern.
      */
@@ -4867,7 +4867,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest004, TestSize.Level1)
     /**
      * @tc.step: step1. create textpicker pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
 
     TextPickerModelNG::GetInstance()->SetIsCascade(true);
@@ -4918,7 +4918,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest005, TestSize.Level1)
     /**
      * @tc.step: step1. create textpicker pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
@@ -4964,7 +4964,7 @@ HWTEST_F(TextPickerTestNg, PerformActionTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create textPicker and initialize related properties.
      */
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     ASSERT_NE(pipeline, nullptr);
     auto theme = pipeline->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
@@ -5378,7 +5378,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest007, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerPatternTest008, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -5429,7 +5429,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest008, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerPatternTest009, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -5457,7 +5457,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest009, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerPatternTest010, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -5485,7 +5485,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest010, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerPatternTest011, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -5559,7 +5559,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest013, TestSize.Level1)
     /**
      * @tc.step: step1. create textpicker pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -5590,7 +5590,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest014, TestSize.Level1)
     /**
      * @tc.step: step1. create textpicker pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -5638,7 +5638,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest015, TestSize.Level1)
     /**
      * @tc.step: step1. create textpicker pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -5668,7 +5668,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest015, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, TextPickerPatternTest016, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     /**
      * @tc.step: step1. create textpicker pattern.
@@ -5764,7 +5764,7 @@ HWTEST_F(TextPickerTestNg, GetOptionsMultiStr001, TestSize.Level1)
     /**
      * @tc.step: step1. create textpicker pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
@@ -5789,7 +5789,7 @@ HWTEST_F(TextPickerTestNg, GetOptionsMultiStr002, TestSize.Level1)
     /**
      * @tc.step: step1. create textpicker pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
@@ -5817,7 +5817,7 @@ HWTEST_F(TextPickerTestNg, GetOptionsMultiStr002, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, GetOptionsCascadeStr001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
      * @tc.step: step1. create textpicker pattern.
      */
@@ -5883,7 +5883,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest008, TestSize.Level1)
     InitTextPickerTestNg();
     auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
     ASSERT_NE(textPickerColumnPattern, nullptr);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     theme->showOptionCount_ = 5;
     ScrollDirection dir = ScrollDirection::UP;
@@ -5961,7 +5961,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest011, TestSize.Level1)
     InitTextPickerTestNg();
     auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
     ASSERT_NE(textPickerColumnPattern, nullptr);
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     theme->showOptionCount_ = 4;
     TextPickerOptionProperty prop;
@@ -5988,7 +5988,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest012, TestSize.Level1)
     auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
     ASSERT_NE(textPickerColumnPattern, nullptr);
     textPickerColumnPattern->algorithmOffset_.clear();
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     uint32_t counts = theme->GetShowOptionCount();
     textPickerColumnPattern->ResetAlgorithmOffset();
     for (uint32_t i = 0; i < counts; i++) {
@@ -6004,7 +6004,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest012, TestSize.Level1)
 HWTEST_F(TextPickerTestNg, ChangeTextStyle001, TestSize.Level1)
 {
     ViewStackProcessor::GetInstance()->ClearStack();
-    auto pickerTheme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(pickerTheme, nullptr);
     TextPickerModelNG::GetInstance()->Create(pickerTheme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -6073,7 +6073,7 @@ HWTEST_F(TextPickerTestNg, ChangeTextStyle001, TestSize.Level1)
  */
 HWTEST_F(TextPickerTestNg, FlushAnimationTextProperties001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);

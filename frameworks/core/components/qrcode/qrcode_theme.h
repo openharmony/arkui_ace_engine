@@ -42,11 +42,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->qrcodeColor_ = themeConstants->GetColor(THEME_QRCODE_COLOR);
-            theme->backgroundColor_ = themeConstants->GetColor(THEME_QRCODE_BACKGROUND_COLOR);
-            theme->qrcodeType_ = QrcodeType(themeConstants->GetInt(THEME_QRCODE_TYPE));
-            theme->qrcodeWidth_ = themeConstants->GetDimension(THEME_QRCODE_SIZE);
-            theme->qrcodeHeight_ = themeConstants->GetDimension(THEME_QRCODE_SIZE);
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_RETURN(pipeline, theme);
             if (pipeline->GetMinPlatformVersion() > static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
@@ -67,6 +62,9 @@ public:
             theme->qrcodeColor_ = pattern->GetAttr<Color>("qrcode_foreground_color", Color::RED);
             theme->backgroundColor_ = pattern->GetAttr<Color>("qrcode_background_color", Color::RED);
             theme->focusedColor_ = pattern->GetAttr<Color>("qrcode_focused_color", Color::RED);
+            theme->qrcodeType_ = QrcodeType(pattern->GetAttr<int>("qrcode_type", 0));
+            theme->qrcodeWidth_ = pattern->GetAttr<Dimension>("qrcode_size", 200.0_px);
+            theme->qrcodeHeight_ = pattern->GetAttr<Dimension>("qrcode_size", 200.0_px);
         }
     };
 

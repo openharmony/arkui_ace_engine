@@ -107,9 +107,8 @@ public:
         secondHandleInfo_.rect.SetHeight(height);
     }
 
-    RectF GetCaretRect()
+    RectF GetCaretRect() const
     {
-        UpdateCaretOffset();
         return caretInfo_.rect;
     }
 

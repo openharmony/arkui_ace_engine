@@ -168,7 +168,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         textStyle->SetHalfLeading(pipelineContext->GetHalfLeading());
         builder->PushStyle(themeTextStyle);
     }
-    auto spanContent = GetSpanContent();
+    auto spanContent = GetSpanContent(content);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, -1);
     if (textPattern->GetTextDetectEnable() && !aiSpanMap.empty()) {
@@ -197,6 +197,9 @@ void SpanItem::UpdateTextStyleForAISpan(
     auto wSpanContent = StringUtils::ToWstring(spanContent);
     int32_t wSpanContentLength = static_cast<int32_t>(wSpanContent.length());
     int32_t spanStart = position - wSpanContentLength;
+    if (needRemoveNewLine) {
+        spanStart -= 1;
+    }
     int32_t preEnd = spanStart;
     while (!aiSpanMap.empty()) {
         auto aiSpan = aiSpanMap.begin()->second;
@@ -215,21 +218,7 @@ void SpanItem::UpdateTextStyleForAISpan(
             UpdateTextStyle(beforeContent, builder, textStyle);
         }
         std::optional<TextStyle> aiSpanTextStyle = textStyle;
-        if (!aiSpanTextStyle.has_value()) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            TextStyle themeTextStyle =
-                CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
-            if (NearZero(themeTextStyle.GetFontSize().Value())) {
-                return;
-            }
-            aiSpanTextStyle = themeTextStyle;
-        }
-        if (aiSpanTextStyle.has_value()) {
-            aiSpanTextStyle.value().SetTextColor(Color::BLUE);
-            aiSpanTextStyle.value().SetTextDecoration(TextDecoration::UNDERLINE);
-            aiSpanTextStyle.value().SetTextDecorationColor(Color::BLUE);
-        }
+        SetAiSpanTextStyle(aiSpanTextStyle);
         auto displayContent = StringUtils::ToWstring(
             aiSpan.content).substr(aiSpanStartInSpan - aiSpan.start, aiSpanEndInSpan - aiSpanStartInSpan);
         UpdateTextStyle(StringUtils::ToString(displayContent), builder, aiSpanTextStyle);
@@ -243,6 +232,24 @@ void SpanItem::UpdateTextStyleForAISpan(
     if (preEnd < position) {
         auto afterContent = StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, position - preEnd));
         UpdateTextStyle(afterContent, builder, textStyle);
+    }
+}
+
+void SpanItem::SetAiSpanTextStyle(std::optional<TextStyle>& aiSpanTextStyle)
+{
+    if (!aiSpanTextStyle.has_value()) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        TextStyle themeTextStyle =
+            CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
+        if (NearZero(themeTextStyle.GetFontSize().Value())) {
+            return;
+        }
+        aiSpanTextStyle = themeTextStyle;
+    } else {
+        aiSpanTextStyle.value().SetTextColor(Color::BLUE);
+        aiSpanTextStyle.value().SetTextDecoration(TextDecoration::UNDERLINE);
+        aiSpanTextStyle.value().SetTextDecorationColor(Color::BLUE);
     }
 }
 
@@ -332,13 +339,13 @@ void SpanItem::UpdateTextStyle(
 #endif // ENABLE_DRAG_FRAMEWORK
 }
 
-std::string SpanItem::GetSpanContent()
+std::string SpanItem::GetSpanContent(const std::string& rawContent)
 {
     std::string data;
     if (needRemoveNewLine) {
-        data = content.substr(0, content.length() - 1);
+        data = rawContent.substr(0, rawContent.length() - 1);
     } else {
-        data = content;
+        data = rawContent;
     }
     return data;
 }

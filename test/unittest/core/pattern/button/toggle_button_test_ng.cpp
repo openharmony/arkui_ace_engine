@@ -36,7 +36,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -71,16 +71,16 @@ protected:
 
 void ToggleButtonTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     // set buttonTheme to themeManager before using themeManager to get buttonTheme
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ButtonTheme>()));
 }
 
 void ToggleButtonTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 RefPtr<FrameNode> ToggleButtonTestNg::CreateToggleButtonFrameNode(const TestProperty& testProperty)
@@ -165,7 +165,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest002, TestSize.Level1)
 
     // set toggleTheme to themeManager before using themeManager to get toggleTheme
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerSecond);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
     EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
 
     /**
@@ -205,7 +205,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest003, TestSize.Level1)
 
     // set toggleTheme to themeManager before using themeManager to get toggleTheme
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerSecond);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
     EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
 
     /**
@@ -274,7 +274,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest005, TestSize.Level1)
 
     // set toggleTheme to themeManager before using themeManager to get toggleTheme
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerSecond);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
     EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
 
     /**
@@ -306,7 +306,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest006, TestSize.Level1)
 
     // set toggleTheme to themeManager before using themeManager to get toggleTheme
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerSecond);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
     EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
 
     /**
@@ -337,7 +337,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest007, TestSize.Level1)
 
     // set toggleTheme to themeManager before using themeManager to get toggleTheme
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerSecond);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
     EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
 
     /**

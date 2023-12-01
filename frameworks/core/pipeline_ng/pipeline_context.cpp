@@ -399,10 +399,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 #endif
     ProcessDelayTasks();
     FlushAnimation(nanoTimestamp);
-    bool hasAnimation = window_->FlushAnimation(nanoTimestamp);
-    if (hasAnimation) {
-        RequestFrame();
-    }
+    bool hasRunningAnimation = window_->FlushAnimation(nanoTimestamp);
+    LOGD("FlushAnimation hasRunningAnimation = %{public}d", hasRunningAnimation);
     FlushTouchEvents();
     FlushBuild();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
@@ -434,6 +432,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     } while (false);
 #endif
 
+    if (hasRunningAnimation || window_->HasUIAnimation()) {
+        RequestFrame();
+    }
     window_->FlushModifier();
     FlushFrameRate();
     FlushMessages();
@@ -479,14 +480,20 @@ void PipelineContext::ProcessDelayTasks()
         return;
     }
     auto currentTimeStamp = GetSysTimestamp();
-    for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end();) {
-        if (iter->timeStamp + static_cast<int64_t>(iter->time) * MILLISECONDS_TO_NANOSECONDS > currentTimeStamp) {
-            ++iter;
-        } else {
-            if (iter->task) {
+    for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end(); ++iter) {
+        if (iter->timeStamp + static_cast<int64_t>(iter->time) * MILLISECONDS_TO_NANOSECONDS <= currentTimeStamp) {
+            if (!iter->deleted && iter->task) {
                 iter->task();
             }
+            iter->deleted = true;
+        }
+    }
+
+    for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end();) {
+        if (iter->deleted) {
             delayedTasks_.erase(iter++);
+        } else {
+            ++iter;
         }
     }
 }
@@ -1595,8 +1602,11 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (eventManager_) {
             eventManager_->DumpEvent();
         }
+    } else if (params[0] == "-imagecache") {
+        if (imageCache_) {
+            imageCache_->DumpCacheInfo();
+        }
     }
-
     return true;
 }
 

@@ -20,7 +20,7 @@
 #define protected public
 #define private public
 
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/hiviewdfx/hichecker/interfaces/native/innerkits/include/hichecker.h"
 #include "base/log/ace_trace.h"
@@ -143,12 +143,12 @@ public:
 
 void LayoutWrapperTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void LayoutWrapperTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**

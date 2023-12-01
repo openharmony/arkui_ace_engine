@@ -1479,8 +1479,11 @@ void VideoPattern::EnableDrag()
         imageSrcBefore = layoutProperty->GetPosterImageInfo().value().GetSrc();
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
-    auto dragEnd = [this, videoSrcBefore](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
-        auto videoLayoutProperty = this->GetLayoutProperty<VideoLayoutProperty>();
+    auto dragEnd = [wp = WeakClaim(this), videoSrcBefore](
+                       const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+        auto videoPattern = wp.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        auto videoLayoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
         CHECK_NULL_VOID(videoLayoutProperty);
         auto unifiedData = event->GetData();
         std::string videoSrc = "";
@@ -1500,20 +1503,22 @@ void VideoPattern::EnableDrag()
             return;
         }
 
-        dragEndAutoPlay_ = true;
+        videoPattern->SetIsDragEndAutoPlay(true);
         videoLayoutProperty->UpdateVideoSource(videoSrc);
-
-        auto frameNode = this->GetHost();
+        auto frameNode = videoPattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
         frameNode->MarkModifyDone();
     };
 #else
-    auto dragEnd = [this, videoSrcBefore, imageSrcBefore](
+    auto dragEnd = [wp = WeakClaim(this), videoSrcBefore, imageSrcBefore](
                        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         if (extraParams.empty()) {
             TAG_LOGW(AceLogTag::ACE_VIDEO, "extraParams is empty");
             return;
         }
-        auto videoLayoutProperty = this->GetLayoutProperty<VideoLayoutProperty>();
+        auto videoPattern = wp.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        auto videoLayoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
         CHECK_NULL_VOID(videoLayoutProperty);
         auto json = JsonUtil::ParseJsonString(extraParams);
         std::string key = "extraInfo";
@@ -1533,21 +1538,22 @@ void VideoPattern::EnableDrag()
             imageSrc = extraInfo.substr(0, index);
         }
 
-        bool isInitialState = this->isInitialState_;
+        bool isInitialState = videoPattern->IsInitialState();
         if ((!isInitialState && videoSrc == videoSrcBefore) ||
             (isInitialState && videoSrc == videoSrcBefore && imageSrc == imageSrcBefore)) {
             return;
         }
 
-        dragEndAutoPlay_ = true;
+        videoPattern->SetIsDragEndAutoPlay(true);
         videoLayoutProperty->UpdateVideoSource(videoSrc);
         ImageSourceInfo imageSourceInfo = ImageSourceInfo(imageSrc);
         videoLayoutProperty->UpdatePosterImageInfo(imageSourceInfo);
 
         if (!isInitialState) {
-            this->SetIsStop(true);
+            videoPattern->SetIsStop(true);
         }
-        auto frameNode = this->GetHost();
+        auto frameNode = videoPattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
         frameNode->MarkModifyDone();
     };
 #endif
