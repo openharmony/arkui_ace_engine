@@ -47,7 +47,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0; // 5.0px
 } // namespace
-class ContainerModelTestNg : public testing::Test, public TestNG {
+class ContainerModelTestNg : public TestNG {
 protected:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -73,7 +73,7 @@ protected:
 
 void ContainerModelTestNg::SetUpTestSuite()
 {
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
@@ -83,7 +83,7 @@ void ContainerModelTestNg::SetUpTestSuite()
 
 void ContainerModelTestNg::TearDownTestSuite()
 {
-    MockPipelineContext::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 void ContainerModelTestNg::SetUp()
@@ -129,7 +129,7 @@ void ContainerModelTestNg::CreateContainerModal()
     auto frameNode = view.Create(content);
     ViewStackProcessor::GetInstance()->Push(frameNode);
     GetInstance();
-    RunMeasureAndLayout(frameNode_);
+    FlushLayoutTask(frameNode_);
 }
 
 void ContainerModelTestNg::Touch(TouchLocationInfo locationInfo)

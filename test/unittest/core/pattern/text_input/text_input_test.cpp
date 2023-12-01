@@ -31,7 +31,6 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_data_detector_mgr.h"
-#include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -113,19 +112,11 @@ struct TestItem {
     {}
     TestItem() = default;
 };
-struct ExpectParagaphParams {
-    float height = 50.0f;
-    float longestLine = 460.0f;
-    float maxWidth = 460.0f;
-    size_t lineCount = 1;
-    bool firstCalc = true;
-    bool secondCalc = true;
-};
 constexpr float CONTEXT_WIDTH_VALUE = 300.0f;
 constexpr float CONTEXT_HEIGHT_VALUE = 150.0f;
 } // namespace
 
-class TextInputBase : public testing::Test, public TestNG {
+class TextInputBase : public TestNG {
 protected:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -135,7 +126,6 @@ protected:
         const std::function<void(TextFieldModelNG&)>& callback = nullptr);
     void RunMeasureAndLayout();
     void GetFocus();
-    static void ExpectCallParagraphMethods(ExpectParagaphParams params);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<TextFieldPattern> pattern_;
@@ -146,9 +136,7 @@ protected:
 
 void TextInputBase::SetUpTestSuite()
 {
-    MockContainer::SetUp();
-    MockPipelineContext::SetUp();
-    MockPipelineContext::GetCurrent()->SetRootSize(DEVICE_WIDTH, DEVICE_HEIGHT);
+    TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
@@ -171,9 +159,7 @@ void TextInputBase::SetUpTestSuite()
 
 void TextInputBase::TearDownTestSuite()
 {
-    MockContainer::TearDown();
-    MockPipelineContext::TearDown();
-    MockParagraph::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 void TextInputBase::TearDown()
@@ -183,20 +169,6 @@ void TextInputBase::TearDown()
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
-}
-
-void TextInputBase::ExpectCallParagraphMethods(ExpectParagaphParams params)
-{
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, PushStyle(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, AddText(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, PopStyle()).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, Build()).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, Layout(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(params.height));
-    EXPECT_CALL(*paragraph, GetLongestLine()).WillRepeatedly(Return(params.longestLine));
-    EXPECT_CALL(*paragraph, GetMaxWidth()).WillRepeatedly(Return(params.maxWidth));
-    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(params.lineCount));
 }
 
 void TextInputBase::CreateTextField(
@@ -220,7 +192,6 @@ void TextInputBase::CreateTextField(
 
 void TextInputBase::RunMeasureAndLayout()
 {
-    ExpectCallParagraphMethods(ExpectParagaphParams());
     frameNode_->SetActive();
     frameNode_->SetRootMeasureNode(true);
     frameNode_->UpdateLayoutPropertyFlag();

@@ -15,8 +15,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("scroll_test_ng") {
   type = "new"
-  sources = [
-    "$ace_root/test/unittest/core/pattern/test_ng.cpp",
-    "scroll_test_ng.cpp",
-  ]
+  sources = [ "scroll_test_ng.cpp" ]
 }

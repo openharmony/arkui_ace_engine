@@ -18,33 +18,39 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 namespace OHOS::Ace::NG {
-void TestNG::SetWidth(const Dimension& width)
+void TestNG::SetUpTestSuite()
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), std::nullopt));
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, PushStyle(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, AddText(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, PopStyle()).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, Build()).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, Layout(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, GetTextWidth()).WillRepeatedly(Return(0.f));
+    EXPECT_CALL(*paragraph, GetAlphabeticBaseline()).WillRepeatedly(Return(0.f));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(50.f));
+    EXPECT_CALL(*paragraph, GetLongestLine()).WillRepeatedly(Return(460.f));
+    EXPECT_CALL(*paragraph, GetMaxWidth()).WillRepeatedly(Return(460.f));
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(1));
+
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::SetUp();
 }
 
-void TestNG::SetHeight(const Dimension& height)
+void TestNG::TearDownTestSuite()
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(height)));
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+    MockParagraph::TearDown();
 }
 
-void TestNG::RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode, float width, float height)
+void TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
 {
     frameNode->SetActive();
-    frameNode->SetRootMeasureNode();
-    LayoutConstraintF LayoutConstraint;
-    LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
-    LayoutConstraint.percentReference = { DEVICE_WIDTH, DEVICE_HEIGHT };
-    if (NonNegative(width) && NonNegative(height)) {
-        LayoutConstraint.selfIdealSize = { width, height };
-    }
-    LayoutConstraint.maxSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
-    frameNode->Measure(LayoutConstraint);
-    frameNode->Layout();
+    frameNode->isLayoutDirtyMarked_ = true;
+    frameNode->CreateLayoutTask();
+    frameNode->SetActive(false);
 }
 
 uint64_t TestNG::GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty)

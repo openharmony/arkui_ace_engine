@@ -54,7 +54,7 @@ std::vector<std::string> GetMorePopupData(int32_t)
 }
 } // namespace
 
-class IndexerTestNg : public testing::Test, public TestNG {
+class IndexerTestNg : public TestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -80,6 +80,7 @@ public:
 
 void IndexerTestNg::SetUpTestSuite()
 {
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
@@ -89,6 +90,7 @@ void IndexerTestNg::SetUpTestSuite()
 void IndexerTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+    MockParagraph::TearDown();
 }
 
 void IndexerTestNg::SetUp() {}
@@ -123,7 +125,7 @@ void IndexerTestNg::Create(const std::function<void(IndexerModelNG)>& callback,
         callback(model);
     }
     GetInstance();
-    RunMeasureAndLayout(frameNode_);
+    FlushLayoutTask(frameNode_);
 }
 
 float IndexerTestNg::GetFirstChildOffsetY()
