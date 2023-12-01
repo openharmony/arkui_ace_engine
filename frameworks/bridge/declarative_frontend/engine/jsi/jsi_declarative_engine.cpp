@@ -1528,6 +1528,15 @@ void JsiDeclarativeEngine::SetMockModuleList(const std::map<std::string, std::st
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     panda::JSNApi::SetMockModuleList(vm, mockJsonInfo);
 }
+
+bool JsiDeclarativeEngine::IsComponentPreview()
+{
+    auto runtime = engineInstance_->GetJsRuntime();
+    CHECK_NULL_RETURN(runtime, false);
+    shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    CHECK_NULL_RETURN(arkRuntime, false);
+    return arkRuntime->GetPreviewFlag();
+}
 #endif
 
 void JsiDeclarativeEngine::UpdateRunningPage(const RefPtr<JsAcePage>& page)

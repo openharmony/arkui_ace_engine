@@ -317,6 +317,10 @@ public:
         NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
         NG::UpdateRootComponentCallback&& updateRootComponentCallback);
 
+#if defined(PREVIEW)
+    void SetIsComponentPreview(NG::IsComponentPreviewCallback&& callback);
+#endif
+
     const RefPtr<NG::PageRouterManager>& GetPageRouterManager() const
     {
         return pageRouterManager_;

@@ -38,6 +38,9 @@ using LoadPageByBufferCallback = std::function<bool(
 using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId)>;
 using LoadNamedRouterCallback = std::function<bool(const std::string&, bool isTriggeredByJs)>;
 using UpdateRootComponentCallback = std::function<bool()>;
+#if defined(PREVIEW)
+using IsComponentPreviewCallback = std::function<bool()>;
+#endif
 
 enum class RouterMode {
     STANDARD = 0,
@@ -94,6 +97,12 @@ public:
     {
         updateRootComponent_ = callback;
     }
+#if defined(PREVIEW)
+    void SetIsComponentPreview(IsComponentPreviewCallback&& callback)
+    {
+        isComponentPreview_ = callback;
+    }
+#endif
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback);
 
@@ -199,6 +208,9 @@ private:
     std::list<WeakPtr<FrameNode>> pageRouterStack_;
     std::list<std::string> restorePageStack_;
     RouterPageInfo ngBackTarget_;
+#if defined(PREVIEW)
+    IsComponentPreviewCallback isComponentPreview_;
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(PageRouterManager);
 };
