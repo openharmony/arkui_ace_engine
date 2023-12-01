@@ -192,7 +192,11 @@ void JSAnimator::Pop() {}
 void JSAnimator::SetState(int32_t state)
 {
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
-    CHECK_NULL_VOID(animatorInfo);
+    if (!animatorInfo) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "animator component setState failed, id:%{public}s, state:%{public}d",
+            animatorId_.c_str(), state);
+        return;
+    }
     auto animator = animatorInfo->GetAnimator();
     CHECK_NULL_VOID(animator);
     auto operation = static_cast<AnimationStatus>(state);
@@ -202,12 +206,15 @@ void JSAnimator::SetState(int32_t state)
     }
     switch (operation) {
         case AnimationStatus::RUNNING:
+            TAG_LOGI(AceLogTag::ACE_ANIMATION, "animator component play, id:%{public}s", animatorId_.c_str());
             animator->Play();
             break;
         case AnimationStatus::PAUSED:
+            TAG_LOGI(AceLogTag::ACE_ANIMATION, "animator component pause, id:%{public}s", animatorId_.c_str());
             animator->Pause();
             break;
         case AnimationStatus::STOPPED:
+            TAG_LOGI(AceLogTag::ACE_ANIMATION, "animator component stop, id:%{public}s", animatorId_.c_str());
             animator->Finish();
             break;
         case AnimationStatus::INITIAL:

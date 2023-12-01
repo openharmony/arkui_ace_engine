@@ -594,6 +594,9 @@ int32_t Animator::GetId() const
 void Animator::OnFrame(int64_t duration)
 {
     CHECK_RUN_ON(UI);
+    if (iteration_ == ANIMATION_REPEAT_INFINITE) {
+        ACE_SCOPED_TRACE("onFrame %s", animatorName_.c_str());
+    }
     // notify child first
     for (auto& controller : proxyControllers_) {
         controller->OnFrame(duration);

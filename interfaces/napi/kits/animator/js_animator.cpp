@@ -631,7 +631,7 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
 {
     auto option = std::make_shared<AnimatorOption>();
     ParseAnimatorOption(env, info, option);
-    auto animator = CREATE_ANIMATOR();
+    auto animator = CREATE_ANIMATOR("ohos.animator");
     animator->AttachSchedulerOnContainer();
     AnimatorResult* animatorResult = new AnimatorResult(animator, option);
     napi_value jsAnimator = nullptr;

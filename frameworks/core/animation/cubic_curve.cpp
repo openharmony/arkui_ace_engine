@@ -15,6 +15,8 @@
 
 #include "core/animation/cubic_curve.h"
 
+#include "base/log/log_wrapper.h"
+
 namespace OHOS::Ace {
 namespace {
 
@@ -28,8 +30,12 @@ CubicCurve::CubicCurve(float x0, float y0, float x1, float y1)
 
 float CubicCurve::MoveInternal(float time)
 {
+    if (std::isnan(time)) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "CubicCurve MoveInternal: time is nan, return 1");
+        return FRACTION_PARAMETER_MAX;
+    }
     if (time < FRACTION_PARAMETER_MIN || time > FRACTION_PARAMETER_MAX) {
-        LOGE("CubicCurve MoveInternal: time is less than 0 or larger than 1, return 1");
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "CubicCurve MoveInternal: time is less than 0 or larger than 1, return 1");
         return FRACTION_PARAMETER_MAX;
     }
     // let P0 = (0,0), P3 = (1,1)
