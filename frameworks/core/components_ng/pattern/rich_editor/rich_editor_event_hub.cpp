@@ -332,8 +332,9 @@ std::string RichEditorEventHub::GetDragExtraParams(const std::string& extraInfo,
     CHECK_NULL_RETURN(host, extraInfo);
 
     auto json = JsonUtil::Create(true);
-    if (type == DragEventType::DROP && pattern->GetTimestamp() == timestamp_) {
+    if (type == DragEventType::DROP && timestamp_ != 0 && pattern->GetTimestamp() == timestamp_) {
         json->Put("isInComponent", true);
+        timestamp_ = 0;
     }
     if (!extraInfo.empty()) {
         json->Put("extraInfo", extraInfo.c_str());
