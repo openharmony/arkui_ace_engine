@@ -572,7 +572,10 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
         manager->MountPixelMapToRootNode(columnNode);
     }
     imageNode->MarkModifyDone();
-    ShowPixelMapAnimation(imageNode);
+    auto focusHub = frameNode->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
+    ShowPixelMapAnimation(imageNode, hasContextMenu);
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("DragEvent set pixelMap success.");
     }
@@ -663,7 +666,7 @@ void DragEventActuator::BindClickEvent(const RefPtr<FrameNode>& columnNode)
     columnGestureHub->AddClickEvent(clickListener);
 }
 
-void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode)
+void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, bool hasContextMenu)
 {
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
@@ -680,15 +683,17 @@ void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode
 
     AnimationUtils::Animate(
         option,
-        [imageContext, shadow]() mutable {
+        [imageContext, shadow, hasContextMenu]() mutable {
             auto color = shadow->GetColor();
             auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
             shadow->SetColor(newColor);
             imageContext->UpdateBackShadow(shadow.value());
             imageContext->UpdateTransformScale({ PIXELMAP_ANIMATION_SCALE, PIXELMAP_ANIMATION_SCALE });
-            BorderRadiusProperty borderRadius;
-            borderRadius.SetRadius(PIXELMAP_BORDER_RADIUS);
-            imageContext->UpdateBorderRadius(borderRadius);
+            if (hasContextMenu) {
+                BorderRadiusProperty borderRadius;
+                borderRadius.SetRadius(PIXELMAP_BORDER_RADIUS);
+                imageContext->UpdateBorderRadius(borderRadius);
+            }
         },
         option.GetOnFinishEvent());
 }
