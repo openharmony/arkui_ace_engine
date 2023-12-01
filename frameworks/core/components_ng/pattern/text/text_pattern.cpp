@@ -1912,6 +1912,16 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
             boundsRect.SetWidth(boundsWidth);
             boundsRect.SetHeight(boundsHeight);
             overlayMod_->SetBoundsRect(boundsRect);
+
+            auto gestureHub = host->GetOrCreateGestureEventHub();
+            CHECK_NULL_RETURN(gestureHub, paintMethod);
+            std::vector<DimensionRect> hotZoneRegions;
+            DimensionRect hotZoneRegion;
+            hotZoneRegion.SetSize(DimensionSize(Dimension(boundsWidth), Dimension(boundsHeight)));
+            hotZoneRegion.SetOffset(
+                DimensionOffset(Dimension(contentOffset_.GetX()), Dimension(contentOffset_.GetY())));
+            hotZoneRegions.emplace_back(hotZoneRegion);
+            gestureHub->SetResponseRegion(hotZoneRegions);
         }
     }
     return paintMethod;
