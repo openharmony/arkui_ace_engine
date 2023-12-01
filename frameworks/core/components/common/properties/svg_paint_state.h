@@ -105,14 +105,13 @@ public:
         return fillRule_ == ATTR_NAME_FILL_RULE_EVENODD;
     }
 
-    void Inherit(const FillState& parent, double attrOpacity = 1.0)
+    void Inherit(const FillState& parent)
     {
         if (!hasColor_) {
             color_ = parent.GetColor();
         }
         if (!hasOpacity_) {
-            opacity_ =
-                NearEqual(parent.GetOpacity().GetValue(), 1.0) ? AnimatableDouble(attrOpacity) : parent.GetOpacity();
+            opacity_ = parent.GetOpacity();
         }
         if (!hasFillRule_) {
             fillRule_ = parent.GetFillRule();
@@ -253,8 +252,8 @@ public:
         hasLineDash_ = isSelf;
     }
 
-    void SetStrokeDashOffset(
-        const Dimension& offset, bool isSelf = true, const AnimationOption& option = AnimationOption())
+    void SetStrokeDashOffset(const Dimension& offset, bool isSelf = true,
+                             const AnimationOption& option = AnimationOption())
     {
         strokeDashOffset_ = AnimatableDimension(offset, option);
         hasStrokeDashOffset_ = isSelf;
