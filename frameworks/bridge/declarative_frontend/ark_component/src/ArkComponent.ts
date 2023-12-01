@@ -538,7 +538,7 @@ class SweepGradientModifier extends Modifier<ArkSweepGradient> {
   }
 }
 
-class OverlayModifier extends Modifier<ArkOverlay> {
+class OverlayModifier extends ModifierWithKey<ArkOverlay> {
   static identity: Symbol = Symbol("overlay");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -546,8 +546,15 @@ class OverlayModifier extends Modifier<ArkOverlay> {
     } else {
       GetUINativeModule().common.setOverlay(node,
         this.value.value, this.value.align,
-        this.value.offsetX, this.value.offsetY);
+        this.value.offsetX, this.value.offsetY,
+        this.value.hasOptions, this.value.hasOffset);
     }
+  }
+  checkObjectDiff(): boolean {
+    if (isUndefined(this.value)) {
+      return !isUndefined(this.stageValue);
+    }
+    return this.value.checkObjectDiff(this.stageValue);
   }
 }
 
@@ -2526,14 +2533,14 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number } }): this {
-    if (typeof value === 'string') {
-      let arkOverlay = new ArkOverlay(value, options.align, options.offset.x, options.offset.y);
-      modifier(this._modifiers, OverlayModifier, arkOverlay);
+    var arkOverlay = new ArkOverlay();
+    if (arkOverlay.splitOverlayValue(value, options)) {
+      modifierWithKey(this._modifiersWithKeys, OverlayModifier.identity, OverlayModifier, arkOverlay);
     } else {
-      modifier(this._modifiers, OverlayModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, OverlayModifier.identity, OverlayModifier, undefined);
     }
     return this;
-  }
+}
 
   linearGradient(value: {
     angle?: number | string;

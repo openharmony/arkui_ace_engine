@@ -315,7 +315,7 @@ function ArkCopyColorStop(colorStop: any): any {
         continue;
       }
       result[index] = ArkDeepSimpleCopy(value);
-    };
+    }
     return result;
   }
   return ArkDeepSimpleCopy(colorStop);
@@ -325,7 +325,7 @@ function ArkCopyColorStops(colorStops: Array<any>) : Array<any> {
 	let result = [];
 	for (let index = 0; index < colorStops.length; index++) {
 		result[index] = ArkCopyColorStop(colorStops[index]);
-	};
+	}
 	return result;
 }
 
@@ -463,16 +463,50 @@ class ArkOverlay {
   align: number | undefined;
   offsetX: number | undefined;
   offsetY: number | undefined;
-  constructor(value: string | CustomBuilder | undefined,
-      align: number | undefined, offsetX: number | undefined, offsetY: number | undefined) {
-      this.value = value;
-      this.align = align;
-      this.offsetX = offsetX;
-      this.offsetY = offsetY;
+  hasOptions: boolean | undefined;
+  hasOffset: boolean | undefined;
+
+  constructor() {
+    this.value = undefined;
+    this.align = undefined;
+    this.offsetX = undefined;
+    this.offsetY = undefined;
+    this.hasOptions = undefined;
+    this.hasOffset = undefined;
   }
-  isEqual(another: ArkOverlay): boolean {
-      return ((this.value === another.value) && (this.align === another.align) &&
-          (this.offsetX === another.offsetX) && (this.offsetY === another.offsetY));
+
+  private splitOption(options?: { align?: Alignment; offset?: { x?: number; y?: number } }): boolean {
+    if (isUndefined(options)) {
+      return true;
+    }
+    this.hasOptions = true;
+    this.align = options.align;
+    if (isUndefined(options.offset)) {
+      return true;
+    }
+    this.hasOffset = true;
+    this.offsetX = options.offset.x;
+    this.offsetY = options.offset.y;
+    return true;
+  }
+
+  splitOverlayValue(value: string | CustomBuilder,
+    options?: { align?: Alignment; offset?: { x?: number; y?: number } }): boolean {
+    if (typeof value === 'string') {
+      this.value = value;
+      return this.splitOption(options);
+    }
+    return false;
+  }
+
+  private isEqual(another: ArkOverlay): boolean {
+    return ((this.value === another.value) && (this.align === another.align) &&
+      (this.offsetX === another.offsetX) && (this.offsetY === another.offsetY) &&
+      (this.hasOptions === another.hasOptions) && (this.hasOffset === another.hasOffset));
+  }
+
+  checkObjectDiff(another: ArkOverlay): boolean {
+    return !this.isEqual(another);
   }
 }
 
