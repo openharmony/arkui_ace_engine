@@ -1025,54 +1025,6 @@ bool ParseJsAlignRule(const EcmaVM* vm, const Local<JSValueRef> &arg, std::strin
     }
     return false;
 }
-
-std::string ParseFunctionKeyName(OHOS::Ace::FunctionKey functionkey)
-{
-    switch (functionkey) {
-        case OHOS::Ace::FunctionKey::ESC:
-            return "ESC";
-            break;
-        case OHOS::Ace::FunctionKey::F1:
-            return "F1";
-            break;
-        case OHOS::Ace::FunctionKey::F2:
-            return "F2";
-            break;
-        case OHOS::Ace::FunctionKey::F3:
-            return "F3";
-            break;
-        case OHOS::Ace::FunctionKey::F4:
-            return "F4";
-            break;
-        case OHOS::Ace::FunctionKey::F5:
-            return "F5";
-            break;
-        case OHOS::Ace::FunctionKey::F6:
-            return "F6";
-            break;
-        case OHOS::Ace::FunctionKey::F7:
-            return "F7";
-            break;
-        case OHOS::Ace::FunctionKey::F8:
-            return "F8";
-            break;
-        case OHOS::Ace::FunctionKey::F9:
-            return "F9";
-            break;
-        case OHOS::Ace::FunctionKey::F10:
-            return "F10";
-            break;
-        case OHOS::Ace::FunctionKey::F11:
-            return "F11";
-            break;
-        case OHOS::Ace::FunctionKey::F12:
-            return "F12";
-            break;
-        default:
-            return "";
-            break;
-    }
-}
 } // namespace
 
 ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
@@ -4232,7 +4184,7 @@ ArkUINativeModuleValue CommonBridge::SetKeyBoardShortCut(ArkUIRuntimeCallInfo* r
     std::string stringValue;
     if (valueArg->IsNumber()) {
         OHOS::Ace::FunctionKey functionkey = static_cast<OHOS::Ace::FunctionKey>(valueArg->Int32Value(vm));
-        stringValue = ParseFunctionKeyName(functionkey);
+        stringValue = JSViewAbstract::GetFunctionKeyName(functionkey);
     } else {
         stringValue = valueArg->ToString(vm)->ToString();
     }
