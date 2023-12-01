@@ -84,6 +84,25 @@ enum class HitTestMode {
     HTMTRANSPARENT_SELF,
 };
 
+enum class TouchTestStrategy {
+    DEFAULT = 0,
+    FORWARD_COMPETITION,
+    FORWARD
+};
+
+struct TouchTestInfo {
+    PointF windowPoint;
+    PointF currentCmpPoint;
+    PointF subCmpPoint;
+    RectF subRect;
+    std::string id;
+};
+
+struct TouchResult {
+    TouchTestStrategy strategy;
+    std::string id;
+};
+
 enum class HitTestResult {
     // The touch point is located outside the current component area;
     OUT_OF_REGION,
@@ -103,6 +122,7 @@ struct DragDropBaseInfo {
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+using OnChildTouchTestFunc = std::function<TouchResult(const std::vector<TouchTestInfo>& touchInfo)>;
 
 struct DragDropInfo {
     RefPtr<UINode> customNode;
@@ -389,6 +409,16 @@ public:
         }
     }
 
+    void SetOnTouchTestFunc(OnChildTouchTestFunc&& callback)
+    {
+        onChildTouchTestFunc_ = callback;
+    }
+
+    const OnChildTouchTestFunc& GetOnTouchTestFunc()
+    {
+        return onChildTouchTestFunc_;
+    }
+
     void SetMouseResponseRegion(const std::vector<DimensionRect>& mouseResponseRegion)
     {
         mouseResponseRegion_ = mouseResponseRegion;
@@ -566,6 +596,7 @@ private:
     OffsetF frameNodeOffset_;
     GestureEvent gestureInfoForWeb_;
     bool isReceivedDragGestureInfo_ = false;
+    OnChildTouchTestFunc onChildTouchTestFunc_;
 
     GestureJudgeFunc gestureJudgeFunc_;
     GestureJudgeFunc gestureJudgeNativeFunc_;

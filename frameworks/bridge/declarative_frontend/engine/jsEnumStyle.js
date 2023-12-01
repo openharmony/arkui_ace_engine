@@ -1232,6 +1232,13 @@ var TransitionEdge;
   TransitionEdge['END'] = 3;
 })(TransitionEdge || (TransitionEdge = {}));
 
+var TouchTestStrategy;
+(function (TouchTestStrategy) {
+  TouchTestStrategy['DEFAULT'] = 0;
+  TouchTestStrategy['FORWARD_COMPETITION'] = 1;
+  TouchTestStrategy['FORWARD'] = 2;
+})(TouchTestStrategy || (TouchTestStrategy = {}));
+
 var ModalTransition;
 (function (ModalTransition) {
   ModalTransition[ModalTransition["Default"] = 0] = "Default";
