@@ -429,7 +429,7 @@ std::map<std::string, NG::DialogEvent> JSCalendarPickerDialog::ChangeDialogEvent
                             const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("CalendarDialog.onChange");
-            NG::PipelineContext::SetCallBackNode(node);
+            PipelineContext::SetCallBackNode(node);
             auto dateObj = JSDate::New(GetMSByDate(info));
             func->ExecuteJS(1, &dateObj);
         };
