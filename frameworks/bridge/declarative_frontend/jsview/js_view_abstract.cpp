@@ -5784,7 +5784,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
             return;
         }
     }
-    if (!ParseJsDimensionVp(height, sheetHeight)) {
+    if (!ParseJsDimensionVpNG(height, sheetHeight)) {
         sheetStyle.sheetMode = NG::SheetMode::LARGE;
         sheetStyle.height.reset();
     } else {
@@ -5836,13 +5836,13 @@ void JSViewAbstract::ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetH
             sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
         }
         if (sheetHeight.Value() < 0) {
-            detent.sheetMode.reset();
+            detent.sheetMode = NG::SheetMode::LARGE;
             detent.height.reset();
             return;
         }
     }
-    if (!ParseJsDimensionVp(args, sheetHeight)) {
-        detent.sheetMode.reset();
+    if (!ParseJsDimensionVpNG(args, sheetHeight)) {
+        detent.sheetMode = NG::SheetMode::LARGE;
         detent.height.reset();
     } else {
         detent.height = sheetHeight;

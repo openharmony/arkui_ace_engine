@@ -2248,8 +2248,11 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
             maskNode->MountToParent(rootNode);
             auto eventConfirmHub = maskNode->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(eventConfirmHub);
-            sheetMaskClickEvent_ = AceType::MakeRefPtr<NG::ClickEvent>([sheetNode](const GestureEvent& /* info */) {
-                auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+            sheetMaskClickEvent_ = AceType::MakeRefPtr<NG::ClickEvent>
+                ([weak = AceType::WeakClaim(AceType::RawPtr(sheetNode))](const GestureEvent& /* info */) {
+                auto sheet = weak.Upgrade();
+                CHECK_NULL_VOID(sheet);
+                auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
                 CHECK_NULL_VOID(sheetPattern);
                 sheetPattern->SheetInteractiveDismiss(false);
             });

@@ -246,6 +246,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
             }
         } else if (std::abs(currentSheetHeight - upHeight) < std::abs(currentSheetHeight - downHeight)) {
             ChangeSheetHeight(upHeight);
+            ChangeScrollHeight(height_);
             SheetTransition(true, std::abs(dragVelocity));
         }
     } else {
@@ -258,6 +259,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
             }
         } else {
             ChangeSheetHeight(upHeight);
+            ChangeScrollHeight(height_);
             SheetTransition(true, std::abs(dragVelocity));
         }
     }
@@ -438,18 +440,20 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
             overlayManager->PlaySheetMaskTransition(maskNode, false);
         }
     }
-    option.SetOnFinishEvent([weak = AceType::WeakClaim(this), id = Container::CurrentId(), isTransitionIn]() {
+    option.SetOnFinishEvent([weak = AceType::WeakClaim(this), id = Container::CurrentId(),
+        isTransitionIn, height = height_]() {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weak, id, isTransitionIn]() {
+            [weak, id, isTransitionIn, height]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 if (isTransitionIn) {
                     pattern->SetCurrentOffset(0.0);
+                    pattern->ChangeScrollHeight(height);
                 } else {
                     auto context = PipelineContext::GetCurrentContext();
                     CHECK_NULL_VOID(context);
@@ -911,7 +915,6 @@ void SheetPresentationPattern::ChangeSheetHeight(float height)
         height_ = height;
         SetCurrentHeightToOverlay(height_);
     }
-    ChangeScrollHeight(height_);
 }
 
 void SheetPresentationPattern::StartSheetTransitionAnimation(

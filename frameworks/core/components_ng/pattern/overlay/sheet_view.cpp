@@ -119,8 +119,10 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
     buttonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     auto eventConfirmHub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(eventConfirmHub);
-    auto clickCallback = [sheetNode](const GestureEvent& /* info */) {
-        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto clickCallback = [weak = AceType::WeakClaim(AceType::RawPtr(sheetNode))](const GestureEvent& /* info */) {
+        auto sheet = weak.Upgrade();
+        CHECK_NULL_VOID(sheet);
+        auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(sheetPattern);
         sheetPattern->SheetInteractiveDismiss(false);
     };
