@@ -6758,4 +6758,41 @@ HWTEST_F(ListTestNg, Pattern016, TestSize.Level1)
         }
     }
 }
+
+/**
+ * @tc.name: ContentEndOffset001
+ * @tc.desc: Test ContentEndOffset should change behavior of IsAtBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ContentEndOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List
+     */
+    Create([](ListModelNG model) {
+        // total height = 2000
+        CreateItem(20);
+        model.SetScrollBar(Ace::DisplayMode::ON);
+        model.SetEdgeEffect(EdgeEffect::FADE, false);
+        model.SetContentEndOffset(100);
+    });
+
+    std::vector<int32_t> scrollFromVector = { SCROLL_FROM_NONE, SCROLL_FROM_UPDATE, SCROLL_FROM_ANIMATION,
+        SCROLL_FROM_JUMP, SCROLL_FROM_ANIMATION_SPRING, SCROLL_FROM_BAR, SCROLL_FROM_ANIMATION_CONTROLLER,
+        SCROLL_FROM_BAR_FLING };
+
+    // ~ -1200 to reach bottom if no contentEndOffset
+    EXPECT_TRUE(pattern_->UpdateCurrentOffset(-1195, SCROLL_FROM_UPDATE));
+    RunMeasureAndLayout(frameNode_);
+    EXPECT_FALSE(pattern_->IsAtBottom());
+
+    // contentEndOffset_ takes 100 extra offset to reach bottom
+    EXPECT_TRUE(pattern_->UpdateCurrentOffset(-50, SCROLL_FROM_UPDATE));
+    RunMeasureAndLayout(frameNode_);
+    EXPECT_FALSE(pattern_->IsAtBottom());
+
+    EXPECT_TRUE(pattern_->UpdateCurrentOffset(-100, SCROLL_FROM_UPDATE));
+    RunMeasureAndLayout(frameNode_);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+}
 } // namespace OHOS::Ace::NG
