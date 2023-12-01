@@ -297,11 +297,12 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
         // make lazy image from file
 #ifndef USE_ROSEN_DRAWING
         auto rawImage = SkImage::MakeFromEncoded(skData);
-#else
-        auto skData = rsData->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
-        auto rawImage = SkImage::MakeFromEncoded(skData);
-#endif
         if (!rawImage) {
+#else
+        auto rawImage = std::make_shared<RSImage>();
+        bool result = rawImage->MakeFromEncoded(rsData);
+        if (!result) {
+#endif
             LOGE("static image MakeFromEncoded fail! imageSource: %{private}s", imageSource.ToString().c_str());
             ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
                 "Image data may be broken, please check if image file or image data is broken.");
@@ -318,11 +319,10 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
         skData = nullptr;
 #else
         std::shared_ptr<RSImage> image;
-        auto rsRawImage = std::make_shared<RSImage>(&rawImage);
         if (smallData) {
-            image = rsRawImage;
+            image = rawImage;
         } else {
-            image = ImageProvider::ResizeDrawingImage(rsRawImage, imageSource.GetSrc(), imageSize, forceResize);
+            image = ImageProvider::ResizeDrawingImage(rawImage, imageSource.GetSrc(), imageSize, forceResize);
         }
         ImageProvider::UploadImageToGPUForRender(pipelineContext, image, stripped, callback, key);
         rsData = nullptr;
