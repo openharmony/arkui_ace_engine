@@ -53,6 +53,9 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/layout/layout_wrapper.h"
+#include "base/memory/ace_type.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -10004,8 +10007,8 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCheckMarqueeForScrollable001, TestSize
 HWTEST_F(TabsTestNg, InitScrollable001, TestSize.Level1)
 {
     /**
-        * @tc.steps: steps1. Create tabsModel
-        */
+     * @tc.steps: steps1. Create tabsModel
+     */
     MockPipelineContextGetTheme();
     EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
     EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
@@ -10028,9 +10031,9 @@ HWTEST_F(TabsTestNg, InitScrollable001, TestSize.Level1)
 
     auto pattern = AceType::DynamicCast<TabBarPattern>(tabBarPattern);
     /**
-        * @tc.steps: step2. Clear tabitemOffsets_ InitScrollable is called after data in
-        * @tc.expected: TabItem Offsets_ Value is empty
-        */
+     * @tc.steps: step2. Clear tabitemOffsets_ InitScrollable is called after data in
+     * @tc.expected: TabItem Offsets_ Value is empty
+     */
 
     pattern->tabItemOffsets_.clear();
     tabBarPattern->InitScrollable(gestureHub);
@@ -10050,8 +10053,8 @@ HWTEST_F(TabsTestNg, TabBarPatternAdjustFocusPosition0080, TestSize.Level1)
     EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     /**
-        * @tc.steps: steps1. Create tabsModel
-        */
+     * @tc.steps: steps1. Create tabsModel
+     */
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -10067,9 +10070,9 @@ HWTEST_F(TabsTestNg, TabBarPatternAdjustFocusPosition0080, TestSize.Level1)
     tabBarPattern->focusIndicator_ = -10;
     tabBarPattern->AdjustFocusPosition();
     /**
-        * @tc.steps: steps2. GetScopeFocusAlgorithm
-        * @tc.expected: steps2. Check the result of GetScopeFocusAlgorithm
-        */
+     * @tc.steps: steps2. GetScopeFocusAlgorithm
+     * @tc.expected: steps2. Check the result of GetScopeFocusAlgorithm
+     */
     tabBarPattern->AdjustFocusPosition();
     tabBarLayoutProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     tabBarPattern->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
@@ -10098,8 +10101,8 @@ HWTEST_F(TabsTestNg, DumpAdvanceInfo005, TestSize.Level1)
     EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
 
     /**
-        * @tc.steps: steps1. Create tabsModel
-        */
+     * @tc.steps: steps1. Create tabsModel
+     */
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -10109,29 +10112,29 @@ HWTEST_F(TabsTestNg, DumpAdvanceInfo005, TestSize.Level1)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
     /**
-        * @tc.steps: steps1. Set axis_ Axis: HORIZONTAL
-        * @tc.expected: Calling DumpAdvanceInfo() expects HORIZONTAL
-        */
+     * @tc.steps: steps1. Set axis_ Axis: HORIZONTAL
+     * @tc.expected: Calling DumpAdvanceInfo() expects HORIZONTAL
+     */
     tabBarPattern->DumpAdvanceInfo();
     ASSERT_EQ(tabBarPattern->axis_, Axis::HORIZONTAL);
     /**
-        * @tc.steps: steps1. Set axis_ Axis: VERTICAL
-        * @tc.expected: Calling DumpAdvanceInfo() expects VERTICAL
-        */
+     * @tc.steps: steps1. Set axis_ Axis: VERTICAL
+     * @tc.expected: Calling DumpAdvanceInfo() expects VERTICAL
+     */
     tabBarPattern->axis_ = Axis::VERTICAL;
     tabBarPattern->DumpAdvanceInfo();
     ASSERT_EQ(tabBarPattern->axis_, Axis::VERTICAL);
     /**
-        * @tc.steps: steps1. Set axis_ Axis: FREE
-        * @tc.expected: Calling DumpAdvanceInfo() expects FREE
-        */
+     * @tc.steps: steps1. Set axis_ Axis: FREE
+     * @tc.expected: Calling DumpAdvanceInfo() expects FREE
+     */
     tabBarPattern->axis_ = Axis::FREE;
     tabBarPattern->DumpAdvanceInfo();
     ASSERT_EQ(tabBarPattern->axis_, Axis::FREE);
     /**
-        * @tc.steps: steps1. Set axis_ Axis: NONE
-        * @tc.expected: Calling DumpAdvanceInfo() expects NONE
-        */
+     * @tc.steps: steps1. Set axis_ Axis: NONE
+     * @tc.expected: Calling DumpAdvanceInfo() expects NONE
+     */
     tabBarPattern->axis_ = Axis::NONE;
     tabBarPattern->DumpAdvanceInfo();
     ASSERT_EQ(tabBarPattern->axis_, Axis::NONE);
@@ -10145,8 +10148,8 @@ HWTEST_F(TabsTestNg, DumpAdvanceInfo005, TestSize.Level1)
 HWTEST_F(TabsTestNg, Layout001, TestSize.Level1)
 {
     /**
-        * @tc.steps: step1. Create TabContentNode.
-        */
+     * @tc.steps: step1. Create TabContentNode.
+     */
     MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
     TabsItemDivider divider;
@@ -10189,9 +10192,9 @@ HWTEST_F(TabsTestNg, Layout001, TestSize.Level1)
     ASSERT_NE(&layoutWrapper, nullptr);
 
     /**
-        * @tc.steps: step1. Calling the Layout interface.
-        * @tc.expected: TestTrovoid is not equal to nullptr.
-        */
+     * @tc.steps: step1. Calling the Layout interface.
+     * @tc.expected: TestTrovoid is not equal to nullptr.
+     */
     auto wrapper = static_cast<LayoutWrapper*>(&layoutWrapper);
     tabsLayoutAlgorithm->Layout(wrapper);
     ASSERT_NE(wrapper, nullptr);
@@ -10205,8 +10208,8 @@ HWTEST_F(TabsTestNg, Layout001, TestSize.Level1)
 HWTEST_F(TabsTestNg, ProvideRestoreInfo001, TestSize.Level1)
 {
     /**
-        * @tc.steps: step1. create frameNode and get pattern.
-        */
+     * @tc.steps: step1. create frameNode and get pattern.
+     */
     MockPipelineContextGetTheme();
     EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
     EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
@@ -10215,15 +10218,15 @@ HWTEST_F(TabsTestNg, ProvideRestoreInfo001, TestSize.Level1)
     TabsItemDivider divider;
     tabsModel.SetDivider(divider);
     /**
-        * @tc.steps: step1. Calling the ProvideRestoreInfo interface.
-        * @tc.expected: TestTrovoid is not equal to nullpyt.
-        */
+     * @tc.steps: step1. Calling the ProvideRestoreInfo interface.
+     * @tc.expected: TestTrovoid is not equal to nullpyt.
+     */
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    //ASSERT_NE(tabsNode, nullptr);
+    ASSERT_NE(tabsNode, nullptr);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
-    //ASSERT_NE(tabBarNode, nullptr);
+    ASSERT_NE(tabBarNode, nullptr);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    //ASSERT_NE(tabBarPattern, nullptr);
+    ASSERT_NE(tabBarPattern, nullptr);
 
     string testTrovid = tabBarPattern->ProvideRestoreInfo();
     ASSERT_TRUE(!testTrovid.empty());
@@ -10237,16 +10240,16 @@ HWTEST_F(TabsTestNg, ProvideRestoreInfo001, TestSize.Level1)
 HWTEST_F(TabsTestNg, Pop001, TestSize.Level1)
 {
     /**
-        * @tc.steps: step1. Construct TabContentModelNG object
-        */
+     * @tc.steps: step1. Construct TabContentModelNG object
+     */
     MockPipelineContextGetTheme();
     TabContentModelNG tabContentModel;
     IndicatorStyle indicator;
 
     /**
-        * @tc.steps: step1. Construct TabContentModelNG object
-        * @tc.expected: Calling the pop interface, the tabContentModel object is not empty
-        */
+     * @tc.steps: step1. Construct TabContentModelNG object
+     * @tc.expected: Calling the pop interface, the tabContentModel object is not empty
+     */
     tabContentModel.Create();
     tabContentModel.SetIndicator(indicator);
     tabContentModel.Pop();
@@ -10284,10 +10287,10 @@ HWTEST_F(TabsTestNg, SetTabBarStyle001, TestSize.Level1)
     tabContentFrameNode->GetTabBarItemId();
 
     /**
-        * @tc.steps: step1. step1.SetTabBarStyle Set TabBarStyle to TabBarStyle: SUBTABBATSTYLE
-        * @tc.steps: sCall the GetTabBarStyle interface under the TabContentModelNG
-        * @tc.expected: Equal to TabBarStyle: SUBTABBATSTYLE.
-        */
+     * @tc.steps: step1. step1.SetTabBarStyle Set TabBarStyle to TabBarStyle: SUBTABBATSTYLE
+     * @tc.steps: sCall the GetTabBarStyle interface under the TabContentModelNG
+     * @tc.expected: Equal to TabBarStyle: SUBTABBATSTYLE.
+     */
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_SWIPER_INDEX));
     EXPECT_EQ(swiperNode->GetTag(), V2::SWIPER_ETS_TAG);
     tabContentFrameNode->MountToParent(swiperNode);
@@ -10312,8 +10315,8 @@ HWTEST_F(TabsTestNg, SetTabBarStyle001, TestSize.Level1)
 HWTEST_F(TabsTestNg, SetEdgeEffect002, TestSize.Level1)
 {
     /**
-        * @tc.steps: steps1. Create TabBarPattern
-        */
+     * @tc.steps: steps1. Create TabBarPattern
+     */
     MockPipelineContextGetTheme();
     EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
     EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
@@ -10331,9 +10334,9 @@ HWTEST_F(TabsTestNg, SetEdgeEffect002, TestSize.Level1)
     ASSERT_NE(tabBarPattern, nullptr);
 
     /**
-        * @tc.steps: step1. Test function SetEdgeEffect.
-        * @tc.expected: SetEdgeEffect calling interface.
-        */
+     * @tc.steps: step1. Test function SetEdgeEffect.
+     * @tc.expected: SetEdgeEffect calling interface.
+     */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
@@ -10341,9 +10344,9 @@ HWTEST_F(TabsTestNg, SetEdgeEffect002, TestSize.Level1)
     tabBarPattern->SetEdgeEffect(gestureHub);
     EXPECT_NE(tabBarPattern, nullptr);
     /**
-        * @tc.steps: step1. Set scrollEffect_ Value is empty.
-        * @tc.expected: SetEdgeEffect calling interface
-        */
+     * @tc.steps: step1. Set scrollEffect_ Value is empty.
+     * @tc.expected: SetEdgeEffect calling interface
+     */
     tabBarPattern->scrollEffect_ = nullptr;
     tabBarPattern->SetEdgeEffect(gestureHub);
 }
@@ -10356,8 +10359,8 @@ HWTEST_F(TabsTestNg, SetEdgeEffect002, TestSize.Level1)
 HWTEST_F(TabsTestNg, Create003, TestSize.Level1)
 {
     /**
-        * @tc.steps: step1. Construct TabContentModelNG object
-        */
+     * @tc.steps: step1. Construct TabContentModelNG object
+     */
     MockPipelineContextGetTheme();
     auto controller = AceType::MakeRefPtr<SwiperController>();
     CHECK_NULL_VOID(controller);
@@ -10365,9 +10368,9 @@ HWTEST_F(TabsTestNg, Create003, TestSize.Level1)
     int32_t testIndex = 0;
 
     /**
-        * @tc.steps: step2. Test function Create.
-        * @tc.expected: TestIndex greater than or equal to 0
-        */
+     * @tc.steps: step2. Test function Create.
+     * @tc.expected: TestIndex greater than or equal to 0
+     */
     Mode1NG.Create(BarPosition::END, testIndex, nullptr, controller);
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
