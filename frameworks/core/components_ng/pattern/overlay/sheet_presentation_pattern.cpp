@@ -38,7 +38,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension HSAFE = 12.0_vp;
 constexpr float SHEET_VISIABLE_ALPHA = 1.0f;
 constexpr float SHEET_INVISIABLE_ALPHA = 0.0f;
 constexpr int32_t SHEET_ENTRY_ANIMATION_DURATION = 250;
@@ -384,16 +383,15 @@ float SheetPresentationPattern::GetSheetHeightChange()
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardInsert = manager->GetKeyboardInset();
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipelineContext->GetTextFieldManager());
-    // inputH : Distance from input component to bottom of screen
+    // inputH : Distance from input component's Caret to bottom of screen
+    // = caret's offset + caret's height + 24vp
     auto inputH = textFieldManager ? (pipelineContext->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
                                          textFieldManager->GetHeight())
                                    : .0;
-    // safeH : The default safe distance between the input component and the top of the keyboard, = 12vp
-    auto safeH = HSAFE.ConvertToPx();
     // keyboardH : keyboard height + height of the bottom navigation bar
     auto keyboardH = keyboardInsert.Length() + manager->GetSystemSafeArea().bottom_.Length();
     // The minimum height of the input component from the bottom of the screen after popping up the soft keyboard
-    auto inputMinH = keyboardH + safeH;
+    auto inputMinH = keyboardH;
     // maxH : height that the sheet can reach the stage = the LARGE sheet - Current sheet height
     auto sheetHeight = GetHost()->GetGeometryNode()->GetFrameSize().Height();
     auto largeHeight = sheetHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight_;
