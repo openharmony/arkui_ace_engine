@@ -77,12 +77,14 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                                 windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
         OffsetF wrapperOffset;
-        if (isContainerModal) {
-            auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
-                              static_cast<float>(CONTENT_PADDING.ConvertToPx());
-            auto newOffsetY = static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx()) +
-                              static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
-            wrapperOffset = OffsetF(newOffsetX, newOffsetY);
+        if (!hierarchicalParameters_) {
+            if (isContainerModal) {
+                auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
+                                  static_cast<float>(CONTENT_PADDING.ConvertToPx());
+                auto newOffsetY = static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx()) +
+                                  static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
+                wrapperOffset = OffsetF(newOffsetX, newOffsetY);
+            }
         }
         parentPattern->AddHoverRegions(topLeftPoint + wrapperOffset, bottomRightPoint + wrapperOffset);
     }
@@ -103,14 +105,15 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& pare
     CHECK_NULL_RETURN(windowManager, OffsetF());
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
-    if (isContainerModal) {
-        auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
+    if (!hierarchicalParameters_) {
+        if (isContainerModal) {
+            auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
                               static_cast<float>(CONTENT_PADDING.ConvertToPx());
-        auto newOffsetY = static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx()) +
-                            static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
-        position -= OffsetF(newOffsetX, newOffsetY);
+            auto newOffsetY = static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx()) +
+                              static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
+            position -= OffsetF(newOffsetX, newOffsetY);
+        }
     }
-
     auto parentMenu = AceType::DynamicCast<FrameNode>(parentMenuItem->GetParent());
     CHECK_NULL_RETURN(parentMenu, position);
     auto scroll = AceType::DynamicCast<FrameNode>(parentMenu->GetParent());
