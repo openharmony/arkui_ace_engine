@@ -311,14 +311,16 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
 {
     auto callback = [](std::shared_ptr<RouterAsyncContext> context, const ErrorCallback& errorCallback) {
         auto delegate = EngineHelper::GetCurrentDelegate();
-        if (!delegate) {
-            auto delegate = EngineHelper::GetDefaultDelegate();
-            if (!delegate) {
-                NapiThrow(context->env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
-                return;
-            }
+        auto defaultDelegate = EngineHelper::GetDefaultDelegate();
+        if (!delegate && !defaultDelegate) {
+            NapiThrow(context->env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            return;
         }
-        delegate->PushWithCallback(context->uriString, context->paramsString, errorCallback, context->mode);
+        if (delegate) {
+            delegate->PushWithCallback(context->uriString, context->paramsString, errorCallback, context->mode);
+        } else {
+            defaultDelegate->PushWithCallback(context->uriString, context->paramsString, errorCallback, context->mode);
+        }
     };
     return CommonRouterWithCallbackProcess(env, info, callback, "url");
 }
