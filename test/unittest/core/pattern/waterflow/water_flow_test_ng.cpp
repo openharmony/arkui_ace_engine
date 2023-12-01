@@ -938,6 +938,30 @@ HWTEST_F(WaterFlowTestNg, OnScroll001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: onScroll
+ * @tc.desc: Test onScroll event
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OnScroll002, TestSize.Level1)
+{
+    CalcDimension scrollOffset;
+    ScrollState scrollState = ScrollState::IDLE;
+    auto onScroll = [&scrollOffset, &scrollState](CalcDimension offset, ScrollState state) {
+        scrollOffset = offset;
+        scrollState = state;
+    };
+    CreateWithItem([onScroll](WaterFlowModelNG model) { model.SetOnScroll(onScroll); });
+
+    /**
+     * @tc.steps: step1. finger moves down at top
+     * @tc.expected: Trigger onScroll with SCROLL state
+     */
+    UpdateCurrentOffset(ITEM_HEIGHT);
+    EXPECT_EQ(scrollOffset.Value(), 0);
+    EXPECT_EQ(scrollState, ScrollState::IDLE);
+}
+
+/**
  * @tc.name: onScrollIndex
  * @tc.desc: Test onScrollIndex event
  * @tc.type: FUNC
@@ -1199,7 +1223,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_OnDirtyLayoutWrapperSwap001, TestSize
     pattern_->InitScrollableEvent();
     EXPECT_NE(pattern_->scrollableEvent_, nullptr);
     pattern_->OnModifyDone();
-
+    EXPECT_FALSE(pattern_->CanOverScroll(SCROLL_FROM_UPDATE));
     /**
      * @tc.steps: step2. test function.
      * @tc.expected: function OnDirtyLayoutWrapperSwap is called.
@@ -1217,6 +1241,25 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_OnDirtyLayoutWrapperSwap001, TestSize
     config.skipLayout = false;
     config.skipMeasure = true;
     EXPECT_EQ(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config), false);
+}
+
+/**
+ * @tc.name: WaterFlowPattern_EdgeEffect001
+ * @tc.desc: Test EdgeEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowPattern_EdgeEffect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Waterflow node
+     */
+    CreateWithItem([](WaterFlowModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
+
+    /**
+     * @tc.steps: step2. test function.
+     * @tc.expected: function CanOverScroll return true with spring edge effect.
+     */
+    EXPECT_TRUE(pattern_->CanOverScroll(SCROLL_FROM_UPDATE));
 }
 
 /**

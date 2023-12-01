@@ -1686,13 +1686,13 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
     auto offsetPX = Dimension(finalOffset);
     auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
     auto scrollState = GetScrollState();
-    if (scrollStop_ && !GetScrollAbort()) {
+    if (!NearZero(finalOffset)) {
         onScroll(offsetVP, scrollState);
+    }
+    if (scrollStop_ && !GetScrollAbort()) {
         if (scrollState != ScrollState::IDLE) {
             onScroll(0.0_vp, ScrollState::IDLE);
         }
-    } else if (!NearZero(finalOffset)) {
-        onScroll(offsetVP, scrollState);
     }
 }
 
