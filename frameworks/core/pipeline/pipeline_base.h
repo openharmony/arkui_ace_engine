@@ -34,12 +34,14 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/animation/schedule_task.h"
 #include "core/common/clipboard/clipboard_proxy.h"
+#include "core/common/display_info.h"
 #include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window_animation_config.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -741,6 +743,14 @@ public:
         Rect keyboardArea, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
+    void OnFoldStatusChanged(FoldStatus foldStatus);
+
+    using foldStatusChangedCallback = std::function<bool(FoldStatus)>;
+    void SetFoldStatusChangeCallback(foldStatusChangedCallback&& listener)
+    {
+        foldStatusChangedCallback_.emplace_back(std::move(listener));
+    }
+
     using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
     void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
     {
@@ -902,6 +912,7 @@ public:
     virtual void SetIsLayoutFullScreen(bool isLayoutFullScreen) {}
     virtual void SetIsNeedAvoidWindow(bool isLayoutFullScreen) {}
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) {}
+    virtual void OnFoldStatusChange(FoldStatus foldStatus) {}
 
     void SetIsAppWindow(bool isAppWindow)
     {
@@ -1040,6 +1051,7 @@ protected:
 
     std::list<configChangedCallback> configChangedCallback_;
     std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
+    std::list<foldStatusChangedCallback> foldStatusChangedCallback_;
 
     bool isRebuildFinished_ = false;
     bool isJsCard_ = false;

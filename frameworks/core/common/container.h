@@ -30,11 +30,13 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/display_info.h"
 #include "core/common/frontend.h"
 #include "core/common/page_url_checker.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/settings.h"
 #include "core/common/window.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
@@ -155,6 +157,18 @@ public:
     virtual void ProcessScreenOnEvents() {}
 
     virtual void ProcessScreenOffEvents() {}
+
+    virtual void SetOrientation(Orientation orientation) {}
+
+    virtual Orientation GetOrientation()
+    {
+        return Orientation::UNSPECIFIED;
+    }
+
+    virtual RefPtr<DisplayInfo> GetDisplayInfo()
+    {
+        return {};
+    }
 
     virtual std::string GetHapPath() const
     {

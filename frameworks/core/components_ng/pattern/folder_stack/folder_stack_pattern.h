@@ -16,11 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_FOLDER_STACK_FOLDER_STACK_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_FOLDER_STACK_FOLDER_STACK_PATTERN_H
 
+#include "core/common/display_info.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_event_hub.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_layout_property.h"
 #include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+
 namespace OHOS::Ace::NG {
 class ACE_EXPORT FolderStackPattern : public StackPattern {
     DECLARE_ACE_TYPE(FolderStackPattern, Pattern);
@@ -61,6 +64,42 @@ public:
 
     void BeforeCreateLayoutWrapper() override;
 
+    void RefreshStack(FoldStatus foldStatus);
+
+    void UpdateFoldStatusChangedCallbackId(std::optional<int32_t> id)
+    {
+        foldStatusChangedCallbackId_ = id;
+    }
+
+    bool HasFoldStatusChangedCallbackId()
+    {
+        return foldStatusChangedCallbackId_.has_value();
+    }
+
+    RefPtr<DisplayInfo> GetDisplayInfo()
+    {
+        return displayInfo_;
+    }
+
+    void DumpInfo() override;
+
+private:
+    void OnDetachFromFrameNode(FrameNode* node) override;
+    void RegisterFoldStatusListener();
+    void OnAttachToFrameNode() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    void StartOffsetEnteringAnimation();
+    RefPtr<RenderContext> GetRenderContext();
+    void OnVisibleChange(bool isVisible) override;
+    void OnModifyDone() override;
+    void InitFolderStackPatternAppearCallback();
+    void RestoreScreenState();
+    std::optional<int32_t> foldStatusChangedCallbackId_;
+    bool isScreenRotationLocked_ = false;
+    Orientation lastOrientation_ = Orientation::UNSPECIFIED;
+    bool isNeedRestoreScreenState_ = false;
+    bool isAppearCallback_ = false;
+    RefPtr<DisplayInfo> displayInfo_;
 };
 } // namespace OHOS::Ace::NG
 

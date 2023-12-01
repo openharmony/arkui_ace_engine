@@ -873,6 +873,15 @@ void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY)
     }
 }
 
+void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus)
+{
+    for (auto&& [id, callback] : foldStatusChangedCallbackMap_) {
+        if (callback) {
+            callback(foldStatus);
+        }
+    }
+}
+
 void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {

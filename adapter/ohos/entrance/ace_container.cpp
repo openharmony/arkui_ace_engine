@@ -806,7 +806,7 @@ void AceContainer::InitializeCallback()
 
     if (!isFormRender_) {
         auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
-                                        const PointerEvent& pointerEvent, const DragEventAction& action) {
+                                       const PointerEvent& pointerEvent, const DragEventAction& action) {
             ContainerScope scope(id);
             context->GetTaskExecutor()->PostTask(
                 [context, pointerEvent, action]() { context->OnDragEvent(pointerEvent, action); },
@@ -1681,8 +1681,8 @@ void AceContainer::InitWindowCallback()
         [window = uiWindow_]() -> WindowType { return static_cast<WindowType>(window->GetType()); });
     windowManager->SetWindowSetMaximizeModeCallBack(
         [window = uiWindow_](MaximizeMode mode) {
-            window->SetGlobalMaximizeMode(static_cast<Rosen::MaximizeMode>(mode));
-        });
+        window->SetGlobalMaximizeMode(static_cast<Rosen::MaximizeMode>(mode));
+    });
     windowManager->SetWindowGetMaximizeModeCallBack(
         [window = uiWindow_]() -> MaximizeMode {
             return static_cast<MaximizeMode>(window->GetGlobalMaximizeMode());
@@ -2051,6 +2051,32 @@ void AceContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
         auto name = picNameArray[i];
         sharedImageManager->AddPictureNamesToReloadMap(std::move(name));
     }
+}
+
+RefPtr<DisplayInfo> AceContainer::GetDisplayInfo()
+{
+    auto displayManager = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    CHECK_NULL_RETURN(displayManager, nullptr);
+    auto dmRotation = displayManager->GetRotation();
+    auto isFoldable = Rosen::DisplayManager::GetInstance().IsFoldable();
+    auto dmFoldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
+    std::vector<Rect> rects;
+    auto foldCreaseRegion = Rosen::DisplayManager::GetInstance().GetCurrentFoldCreaseRegion();
+    if (foldCreaseRegion) {
+        auto creaseRects = foldCreaseRegion->GetCreaseRects();
+        if (!creaseRects.empty()) {
+            for (const auto& item : creaseRects) {
+                Rect rect;
+                rect.SetRect(item.posX_, item.posY_, item.width_, item.height_);
+                rects.insert(rects.end(), rect);
+            }
+        }
+    }
+    displayInfo_->SetIsFoldable(isFoldable);
+    displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
+    displayInfo_->SetRotation(static_cast<Rotation>(static_cast<uint32_t>(dmRotation)));
+    displayInfo_->SetCurrentFoldCreaseRegion(rects);
+    return displayInfo_;
 }
 
 void AceContainer::UpdateSharedImage(

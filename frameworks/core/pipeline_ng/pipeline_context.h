@@ -29,6 +29,7 @@
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/frontend.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
@@ -54,6 +55,7 @@ public:
     using SurfaceChangedCallbackMap =
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>>;
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
+    using FoldStatusChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldStatus)>>;
     using PredictTask = std::function<void(int64_t, bool)>;
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
@@ -383,6 +385,20 @@ public:
         surfaceChangedCallbackMap_.erase(callbackId);
     }
 
+    int32_t RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback)
+    {
+        if (callback) {
+            foldStatusChangedCallbackMap_.emplace(callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnRegisterFoldStatusChangedCallback(int32_t callbackId)
+    {
+        foldStatusChangedCallbackMap_.erase(callbackId);
+    }
+
     int32_t RegisterSurfacePositionChangedCallback(std::function<void(int32_t, int32_t)>&& callback)
     {
         if (callback) {
@@ -493,6 +509,8 @@ public:
     void SetCursor(int32_t cursorValue) override;
 
     void RestoreDefault() override;
+
+    void OnFoldStatusChange(FoldStatus foldStatus) override;
 
     // for frontend animation interface.
     void OpenFrontendAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
@@ -607,6 +625,7 @@ private:
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
+    FoldStatusChangedCallbackMap foldStatusChangedCallbackMap_;
 
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
