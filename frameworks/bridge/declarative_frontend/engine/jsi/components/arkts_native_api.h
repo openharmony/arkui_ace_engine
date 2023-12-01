@@ -44,22 +44,30 @@ struct IconsStruct {
 };
 
 struct FontStruct {
-    const struct StringAndDouble* size;
+    double value;
+    int8_t unit;
     const struct StringAndInt32* weight;
     const char* family;
     int32_t style;
 };
 
 struct IconOptionsStruct {
-    const struct StringAndDouble* size;
+    double value;
+    int8_t unit;
     int32_t color;
     const char* src;
 };
 
 struct SearchButtonOptionsStruct {
     const char* value;
-    const struct StringAndDouble* fontSize;
+    double sizeValue;
+    int8_t sizeUnit;
     int32_t fontColor;
+};
+
+struct ArkUISizeType {
+    double value;
+    int8_t unit;
 };
 
 struct StringAndInt32 {
@@ -418,7 +426,7 @@ struct ArkUISearchModifierAPI {
     void (*SetSearchTextAlign)(NodeHandle node, int32_t value);
     void (*ResetSearchTextAlign)(NodeHandle node);
     void (*SetSearchCancelButton)(NodeHandle node,
-        int32_t style, const struct StringAndDouble* size, uint32_t color, const char* src);
+        int32_t style, const struct ArkUISizeType* size, uint32_t color, const char* src);
     void (*ResetSearchCancelButton)(NodeHandle node);
     void (*SetSearchEnableKeyboardOnFocus)(NodeHandle node, uint32_t value);
     void (*ResetSearchEnableKeyboardOnFocus)(NodeHandle node);
