@@ -551,6 +551,77 @@ bool ArkTSUtils::ParseJsFontFamilies(
     }
     return true;
 }
+
+bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result)
+{
+    if (!jsValue->IsObject() && !jsValue->IsString()) {
+        return false;
+    }
+    if (jsValue->IsString()) {
+        result = jsValue->ToString(vm)->ToString();
+        return true;
+    }
+    if (jsValue->IsObject()) {
+        auto obj = jsValue->ToObject(vm);
+        auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+        if (!resId->IsNumber()) {
+            return false;
+        }
+        return ParseJsMediaFromResource(vm, jsValue, result);
+    }
+    return false;
+}
+
+bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result)
+{
+    auto jsObj = jsValue->ToObject(vm);
+    auto type = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
+    auto resId = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    if (!resId->IsNull() && !type->IsNull() && type->IsNumber() && resId->IsNumber()) {
+        auto resourceObject = GetResourceObject(vm, jsValue);
+        auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
+        if (!resourceWrapper) {
+            return false;
+        }
+
+        if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::RAWFILE)) {
+            auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+            if (!args->IsArray(vm)) {
+                return false;
+            }
+            Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+            auto fileName = panda::ArrayRef::GetValueAt(vm, params, 0);
+            if (!fileName->IsString()) {
+                return false;
+            }
+            result = resourceWrapper->GetRawfile(fileName->ToString(vm)->ToString());
+            return true;
+        }
+        auto resIdNum = resId->Int32Value(vm);
+        if (resIdNum == -1) {
+            if (!IsGetResourceByName(vm, jsValue)) {
+                return false;
+            }
+            auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+            if (!args->IsArray(vm)) {
+                return false;
+            }
+            Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+            auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+            if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
+                result = resourceWrapper->GetMediaPathByName(param->ToString(vm)->ToString());
+                return true;
+            }
+            return false;
+        }
+        if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
+            result = resourceWrapper->GetMediaPath(resId->Uint32Value(vm));
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
 std::string ArkTSUtils::GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value)
 {
     std::string result = DEFAULT_STR;

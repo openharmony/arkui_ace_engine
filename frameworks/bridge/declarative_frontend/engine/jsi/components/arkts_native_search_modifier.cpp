@@ -38,38 +38,12 @@ constexpr CancelButtonStyle DEFAULT_CANCELBUTTON_STYLE = CancelButtonStyle::INPU
 constexpr Dimension THEME_SEARCH_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
 constexpr Color THEME_SEARCH_TEXT_COLOR = Color(0xe5000000);
 
-bool StringToCalcDimensionNoPercent(std::string value, CalcDimension& result, DimensionUnit defaultUnit)
-{
-    if (value.back() == '%') {
-        return false;
-    }
-    
-    result = StringUtils::StringToCalcDimension(value, true, defaultUnit);
-    if (result.Unit() == DimensionUnit::PERCENT) {
-        return false;
-    }
-    return true;
-}
-
 void SetSearchTextFont(NodeHandle node, const struct FontStruct* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Font font;
-
-    if (value->size == nullptr) {
-        font.fontSize = DEFAULT_FONT_SIZE;
-    } else if (value->size->valueStr != nullptr) {
-        CalcDimension fontSize;
-        if (StringToCalcDimensionNoPercent(value->size->valueStr, fontSize, DimensionUnit::FP)) {
-            font.fontSize = fontSize;
-        } else {
-            font.fontSize = DEFAULT_FONT_SIZE;
-        }
-    } else {
-        font.fontSize = CalcDimension(value->size->value, DimensionUnit::FP);
-    }
-
+    font.fontSize = CalcDimension(value->value, static_cast<DimensionUnit>(value->unit));
     if (value->weight != nullptr) {
         std::string weightVal;
         if (value->weight->valueStr != nullptr) {
@@ -170,27 +144,14 @@ void ResetSearchTextAlign(NodeHandle node)
 }
 
 void SetSearchCancelButton(NodeHandle node,
-    int32_t style, const struct StringAndDouble* size, uint32_t color, const char* src)
+    int32_t style, const struct ArkUISizeType* size, uint32_t color, const char* src)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetCancelButtonStyle(frameNode, static_cast<CancelButtonStyle>(style));
-    Dimension result;
-    if (size->valueStr != nullptr) {
-        result = StringUtils::StringToDimensionWithUnit(std::string(size->valueStr), DimensionUnit::VP);
-        if (result.Unit() == DimensionUnit::PERCENT) {
-            result.SetUnit(DimensionUnit::AUTO);
-        }
-        if (!LessNotEqual(result.Value(), 0.0)) {
-            SearchModelNG::SetCancelIconSize(frameNode, result);
-        }
-    } else {
-        result = CalcDimension(size->value, DimensionUnit::VP);
-        SearchModelNG::SetCancelIconSize(frameNode, result);
-    }
-    if (color != INVALID_COLOR_VALUE) {
-        SearchModelNG::SetCancelIconColor(frameNode, Color(color));
-    }
+    SearchModelNG::SetCancelIconSize(frameNode,
+        Dimension(size->value, static_cast<DimensionUnit>(size->unit)));
+    SearchModelNG::SetCancelIconColor(frameNode, Color(color));
     std::string srcStr = std::string(src);
     SearchModelNG::SetRightIconSrcPath(frameNode, srcStr);
 }
@@ -221,20 +182,7 @@ void SetSearchPlaceholderFont(NodeHandle node, const struct FontStruct* value)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Font font;
-
-    if (value->size == nullptr) {
-        font.fontSize = THEME_SEARCH_FONT_SIZE;
-    } else if (value->size->valueStr != nullptr) {
-        CalcDimension fontSize;
-        if (StringToCalcDimensionNoPercent(value->size->valueStr, fontSize, DimensionUnit::FP)) {
-            font.fontSize = fontSize;
-        } else {
-            font.fontSize = THEME_SEARCH_FONT_SIZE;
-        }
-    } else {
-        font.fontSize = CalcDimension(value->size->value, DimensionUnit::FP);
-    }
-
+    font.fontSize = CalcDimension(value->value, static_cast<DimensionUnit>(value->unit));
     if (value->weight != nullptr) {
         std::string weightVal;
         if (value->weight->valueStr != nullptr) {
@@ -263,6 +211,8 @@ void ResetSearchPlaceholderFont(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     Font font;
     font.fontSize = THEME_SEARCH_FONT_SIZE;
+    font.fontWeight = DEFAULT_FONT_WEIGHT;
+    font.fontStyle = DEFAULT_FONT_STYLE;
     SearchModelNG::SetPlaceholderFont(frameNode, font);
 }
 
@@ -270,25 +220,10 @@ void SetSearchSearchIcon(NodeHandle node, const struct IconOptionsStruct* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-
-    CalcDimension iconSize;
-    if (value->size != nullptr) {
-        if (value->size->valueStr != nullptr) {
-            StringToCalcDimensionNoPercent(value->size->valueStr, iconSize, DimensionUnit::FP);
-        } else {
-            iconSize = CalcDimension(value->size->value, DimensionUnit::VP);
-        }
-        SearchModelNG::SetSearchIconSize(frameNode, iconSize);
-    }
-
+    SearchModelNG::SetSearchSrcPath(frameNode, value->src);
+    SearchModelNG::SetSearchIconSize(frameNode, Dimension(value->value, static_cast<DimensionUnit>(value->unit)));
     if (value->color != INVALID_COLOR_VALUE) {
         SearchModelNG::SetSearchIconColor(frameNode, Color(value->color));
-    }
-
-    if (value->src != nullptr) {
-        SearchModelNG::SetSearchSrcPath(frameNode, value->src);
-    } else {
-        SearchModelNG::SetSearchSrcPath(frameNode, "");
     }
 }
 
@@ -303,26 +238,10 @@ void SetSearchSearchButton(NodeHandle node, const struct SearchButtonOptionsStru
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-
     SearchModelNG::SetSearchButton(frameNode, value->value);
-
-    CalcDimension fontSize;
-    if (value->fontSize != nullptr) {
-        if (value->fontSize->valueStr != nullptr &&
-            StringToCalcDimensionNoPercent(value->fontSize->valueStr, fontSize, DimensionUnit::FP) &&
-            GreatOrEqual(fontSize.Value(), 0.0)) {
-            SearchModelNG::SetSearchButtonFontSize(frameNode, fontSize);
-        } else {
-            fontSize = CalcDimension(value->fontSize->value, DimensionUnit::FP);
-            SearchModelNG::SetSearchButtonFontSize(frameNode, fontSize);
-        }
-    } else {
-        SearchModelNG::SetSearchButtonFontSize(frameNode, THEME_SEARCH_FONT_SIZE);
-    }
-
-    if (value->fontColor != INVALID_COLOR_VALUE) {
-        SearchModelNG::SetSearchButtonFontColor(frameNode, Color(value->fontColor));
-    }
+    SearchModelNG::SetSearchButtonFontSize(frameNode, CalcDimension(value->sizeValue,
+        static_cast<DimensionUnit>(value->sizeUnit)));
+    SearchModelNG::SetSearchButtonFontColor(frameNode, Color(value->fontColor));
 }
 
 void ResetSearchSearchButton(NodeHandle node)
