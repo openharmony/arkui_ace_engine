@@ -1251,6 +1251,9 @@ void TextFieldPattern::InitDragEvent()
         host->IsDraggable()) {
         InitDragDropEvent();
         AddDragFrameNodeToManager(host);
+        auto gestureEventHub = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureEventHub);
+        gestureEventHub->SetTextDraggable(true);
     } else {
         ClearDragDropEvent();
         RemoveDragFrameNodeFromManager(host);
