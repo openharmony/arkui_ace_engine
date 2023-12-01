@@ -1,7 +1,7 @@
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkRelativeContainerComponent extends ArkComponent implements RelativeContainerAttribute {
   monopolizeEvents(monopolize: boolean): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }
 
@@ -9,7 +9,7 @@ class ArkRelativeContainerComponent extends ArkComponent implements RelativeCont
 globalThis.RelativeContainer.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, ()=> {
+  let component = this.createOrGetNode(elmtId, () => {
     return new ArkRelativeContainerComponent(nativeNode);
   });
   modifier.applyNormalAttribute(component);

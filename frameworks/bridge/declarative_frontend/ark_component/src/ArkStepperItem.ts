@@ -1,16 +1,16 @@
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkStepperItemComponent extends ArkComponent implements StepperItemAttribute {
   prevLabel(value: string): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
   nextLabel(value: string): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
   status(value?: ItemState | undefined): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
   monopolizeEvents(monopolize: boolean): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }
 
@@ -18,7 +18,7 @@ class ArkStepperItemComponent extends ArkComponent implements StepperItemAttribu
 globalThis.StepperItem.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, ()=> {
+  let component = this.createOrGetNode(elmtId, () => {
     return new ArkStepperItemComponent(nativeNode);
   });
   modifier.applyNormalAttribute(component);

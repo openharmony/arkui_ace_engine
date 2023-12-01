@@ -1,4 +1,4 @@
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 
 class ArkHyperlinkComponent extends ArkComponent implements HyperlinkAttribute {
   color(value: Color | number | string | Resource): this {
@@ -14,7 +14,7 @@ class ArkHyperlinkComponent extends ArkComponent implements HyperlinkAttribute {
 }
 
 class HyperlinkColorModifier extends Modifier<ArkBarBackgroundColor> {
-  static identity: Symbol = Symbol("hyperlinkColor");
+  static identity: Symbol = Symbol('hyperlinkColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().hyperlink.resetColor(node);

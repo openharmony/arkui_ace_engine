@@ -1,4 +1,4 @@
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkGridContainerComponent extends ArkComponent implements ColumnAttribute {
   alignItems(value: HorizontalAlign): ColumnAttribute {
     throw new Error('Method not implemented.');
