@@ -90,6 +90,9 @@ public:
 
     void SetOnWindowFocused(const std::function<void()>& callback) override;
 
+    // Actually paint size of window
+    void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) override;
+
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
     // Set UIContent callback for custom window animation
