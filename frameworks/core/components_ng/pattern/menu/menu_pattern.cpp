@@ -170,7 +170,15 @@ void MenuPattern::OnAttachToFrameNode()
                                               const OffsetF& /* origin */) {
         auto menuNode = menuNodeWk.Upgrade();
         CHECK_NULL_VOID(menuNode);
-        menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        auto menuWarpper = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWarpper);
+        auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(warpperPattern);
+        if (!warpperPattern->IsHided()) {
+            menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
     };
     targetNode->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
 }
