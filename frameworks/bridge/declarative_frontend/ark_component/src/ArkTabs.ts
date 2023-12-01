@@ -195,9 +195,9 @@ class VerticalModifier extends Modifier<boolean> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().tabs.resetVertical(node);
+      GetUINativeModule().tabs.resetIsVertical(node);
     } else {
-      GetUINativeModule().tabs.setVertical(node, this.value);
+      GetUINativeModule().tabs.setIsVertical(node, this.value);
     }
   }
 }
