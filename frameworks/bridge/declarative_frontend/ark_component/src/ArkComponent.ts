@@ -845,7 +845,7 @@ class MotionPathModifier extends Modifier<ArkMotionPath> {
   }
 }
 
-class GroupDefaultFocusModifier extends Modifier <boolean> {
+class GroupDefaultFocusModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol("groupDefaultFocus");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -857,7 +857,7 @@ class GroupDefaultFocusModifier extends Modifier <boolean> {
   }
 }
 
-class FocusOnTouchModifier extends Modifier <boolean> {
+class FocusOnTouchModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol("focusOnTouch");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -2317,14 +2317,18 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   direction(value: Direction): this {
-    let direction: string = '';
-    switch (value) {
-      case 0: direction = 'Ltr'; break;
-      case 1: direction = 'Rtl'; break;
-      case 2:
-      default: direction = 'Auto'; break;
+    let direction: string = undefined;
+    if (value in Direction) {
+      modifier(this._modifiers, DirectionModifier, value.toString());
+    } else {
+      switch (value) {
+        case 0: direction = 'Ltr'; break;
+        case 1: direction = 'Rtl'; break;
+        case 2:
+        default: direction = 'Auto'; break;
+      }
+      modifier(this._modifiers, DirectionModifier, direction);
     }
-    modifier(this._modifiers, DirectionModifier, direction);
     return this;
   }
 
