@@ -1968,6 +1968,8 @@ ArkUINativeModuleValue CommonBridge::SetOverlay(ArkUIRuntimeCallInfo* runtimeCal
     auto alignArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto offsetXArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto offsetYArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto hasOptionsArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    auto hasOffsetArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     auto nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     std::optional<std::string> text;
@@ -1975,19 +1977,21 @@ ArkUINativeModuleValue CommonBridge::SetOverlay(ArkUIRuntimeCallInfo* runtimeCal
         text = valueArg->ToString(vm)->ToString();
     }
     int32_t align = ALIGNMENT_CENTER;
-    ParseJsInteger(vm, alignArg, align);
+    auto hasAlign = ArkTSUtils::ParseJsInteger(vm, alignArg, align);
     std::optional<CalcDimension> offsetX = CalcDimension(0);
     std::optional<CalcDimension> offsetY = CalcDimension(0);
     CalcDimension dimensionX;
-    if (ParseJsDimensionVp(vm, offsetXArg, dimensionX)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetXArg, dimensionX)) {
         offsetX = dimensionX;
     }
     CalcDimension dimensionY;
-    if (ParseJsDimensionVp(vm, offsetYArg, dimensionY)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetYArg, dimensionY)) {
         offsetY = dimensionY;
     }
+    auto hasOptions = (hasOptionsArg->IsBoolean()) ? hasOptionsArg->ToBoolean(vm)->Value(): false;
+    auto hasOffset = (hasOffsetArg->IsBoolean()) ? hasOffsetArg->ToBoolean(vm)->Value(): false;
     std::vector<double> options;
-    options.push_back(static_cast<double>(true));
+    options.push_back(static_cast<double>(hasAlign));
     options.push_back(static_cast<double>(align));
     options.push_back(static_cast<double>(offsetX.has_value()));
     options.push_back(static_cast<double>(offsetX.value().Value()));
@@ -1995,6 +1999,8 @@ ArkUINativeModuleValue CommonBridge::SetOverlay(ArkUIRuntimeCallInfo* runtimeCal
     options.push_back(static_cast<double>(offsetY.has_value()));
     options.push_back(static_cast<double>(offsetY.value().Value()));
     options.push_back(static_cast<double>(offsetY.value().Unit()));
+    options.push_back(static_cast<double>(hasOptions));
+    options.push_back(static_cast<double>(hasOffset));
     auto textPtr = (text.has_value()) ? text.value().c_str() : nullptr;
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetOverlay(nativeNode, textPtr, options.data(), options.size());
     return panda::JSValueRef::Undefined(vm);
