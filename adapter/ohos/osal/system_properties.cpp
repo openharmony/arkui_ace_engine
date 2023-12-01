@@ -87,6 +87,11 @@ bool IsSvgTraceEnabled()
     return (system::GetParameter("persist.ace.trace.svg.enabled", "0") == "1");
 }
 
+bool IsLayoutTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true");
+}
+
 bool IsHookModeEnabled()
 {
 #ifdef PREVIEW
@@ -224,6 +229,7 @@ bool IsFlutterDecouplingEnabled()
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
+bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -373,6 +379,7 @@ void SystemProperties::InitDeviceInfo(
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
+    layoutTraceEnable_ = IsLayoutTraceEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
     isHookModeEnabled_ = IsHookModeEnabled();

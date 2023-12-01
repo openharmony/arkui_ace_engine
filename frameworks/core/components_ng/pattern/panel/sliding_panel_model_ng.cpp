@@ -42,7 +42,7 @@ void SlidingPanelModelNG::Create(bool isShow)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::PANEL_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::PANEL_ETS_TAG, nodeId);
     auto panelNode = GetOrCreateSlidingPanelNode(
         V2::PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SlidingPanelPattern>(); });
 

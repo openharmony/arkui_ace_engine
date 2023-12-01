@@ -25,7 +25,7 @@ void HyperlinkModelNG::Create(const std::string& address, const std::string& con
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::HYPERLINK_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::HYPERLINK_ETS_TAG, nodeId);
     auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(
         V2::HYPERLINK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
 
