@@ -30,7 +30,7 @@ struct AISpan {
     TextDataDetectType type = TextDataDetectType::PHONE_NUMBER;
 };
 
-class ACE_EXPORT DataDetectorMgr final : public DataDetectorInterface {
+class ACE_EXPORT DataDetectorMgr : public DataDetectorInterface {
 public:
     static DataDetectorMgr& GetInstance();
 
@@ -68,10 +68,11 @@ public:
     int8_t GetCursorPosition(const std::string& text, int8_t offset) override;
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset) override;
 
-private:
-    DataDetectorMgr();
+protected:
     ~DataDetectorMgr() = default;
 
+private:
+    DataDetectorMgr();
     DataDetectorInstance engine_ = nullptr;
 
     std::string bundleName_;

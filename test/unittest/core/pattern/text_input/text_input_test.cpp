@@ -30,6 +30,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_data_detector_mgr.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
@@ -42,6 +43,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/type_definition.h"
+#include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ime/constant.h"
 #include "core/common/ime/text_editing_value.h"
 #include "core/common/ime/text_input_action.h"
@@ -63,6 +65,7 @@
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
 
+
 #undef private
 #undef protected
 
@@ -80,7 +83,12 @@ constexpr int32_t MAX_FORWARD_NUMBER = 30;
 constexpr uint32_t DEFAULT_MAX_LINES = 1;
 constexpr uint32_t DEFAULT_MAX_LENGTH = 30;
 constexpr int32_t MIN_PLATFORM_VERSION = 10;
+constexpr int32_t WORD_LIMIT_LEN = 5;
+constexpr int32_t WORD_LIMIT_RETURN = 2;
+constexpr int32_t BEYOND_LIMIT_RETURN = 4;
+constexpr int32_t DEFAULT_RETURN_VALUE = -1;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
+const std::string HELLO_TEXT = "hello";
 const std::string DEFAULT_PLACE_HOLDER = "please input text here";
 const Color DEFAULT_PLACE_HODER_COLOR = Color::RED;
 const Color DEFAULT_SELECTED_BACKFROUND_COLOR = Color::BLUE;
@@ -234,7 +242,38 @@ class TextInputCursorTest : public TextInputBase {};
 class TextFieldControllerTest : public TextInputBase {};
 class TextFieldKeyEventHandlerTest : public TextInputBase {};
 class TextFiledAttrsTest : public TextInputBase {};
-class TextFieldUXTest : public TextInputBase {};
+class TextFieldUXTest : public TextInputBase {
+protected:
+    void InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr);
+};
+
+void TextFieldUXTest::InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr)
+{
+    EXPECT_CALL(mockDataDetectorMgr, GetCursorPosition(_, _))
+            .WillRepeatedly([](const std::string &text, int8_t offset) -> int8_t {
+                if (text.empty()) {
+                    return DEFAULT_RETURN_VALUE;
+                }
+                if (text.length() <= WORD_LIMIT_LEN) {
+                    return WORD_LIMIT_RETURN;
+                } else {
+                    return BEYOND_LIMIT_RETURN;
+                }
+            });
+
+    EXPECT_CALL(mockDataDetectorMgr, GetWordSelection(_, _))
+            .WillRepeatedly([](const std::string &text, int8_t offset) -> std::vector<int8_t> {
+                if (text.empty()) {
+                    return std::vector<int8_t> { -1, -1 };
+                }
+
+                if (text.length() <= WORD_LIMIT_LEN) {
+                    return std::vector<int8_t> { 2, 3 };
+                } else {
+                    return std::vector<int8_t> { 0, 2 };
+                }
+            });
+}
 
 /**
  * @tc.name: LayoutProperty001
@@ -2487,13 +2526,74 @@ HWTEST_F(TextFieldUXTest, NeedSoftKeyboard001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize text input
-     */
+    */
     CreateTextField(DEFAULT_TEXT);
 
     /**
-     * @tc.steps: step2. Test whether text field need soft keyboard.
-     */
+    * @tc.steps: step2. Test whether text field need soft keyboard.
+    */
     ASSERT_NE(pattern_, nullptr);
     EXPECT_TRUE(pattern_->NeedSoftKeyboard());
+}
+/*
+* @tc.name: AdjustWordCursorAndSelect01
+* @tc.desc: Test .adjust word cursor and select(true)
+* @tc.type: FUNC
+*/
+HWTEST_F(TextFieldUXTest, AdjustWordCursorAndSelect01, TestSize.Level1)
+{
+    using namespace std::chrono;
+    /**
+     * @tc.steps: step1. Initialize text input "hello"
+    */
+    CreateTextField(HELLO_TEXT);
+    pattern_->selectController_->lastAiPosTimeStamp_ = high_resolution_clock::now();
+    pattern_->lastClickTimeStamp_ = pattern_->selectController_->lastAiPosTimeStamp_ + seconds(2);
+
+    MockDataDetectorMgr mockDataDetectorMgr;
+    InitAdjustObject(mockDataDetectorMgr);
+
+    std::string content = pattern_->contentController_->GetTextValue();
+    int32_t pos = 3;
+    mockDataDetectorMgr.AdjustCursorPosition(pos, content, pattern_->selectController_->lastAiPosTimeStamp_,
+                                             pattern_->lastClickTimeStamp_);
+    EXPECT_EQ(pos, 2);
+
+    int32_t start = 1;
+    int32_t end = 3;
+    mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
+    EXPECT_EQ(start, 2);
+    EXPECT_EQ(end, 3);
+    /**
+     * @tc.steps: step2. assign text as default text
+    */
+    pos = 1;
+    pattern_->contentController_->SetTextValue(DEFAULT_TEXT);
+    content = pattern_->contentController_->GetTextValue();
+    mockDataDetectorMgr.AdjustCursorPosition(pos, content, pattern_->selectController_->lastAiPosTimeStamp_,
+                                             pattern_->lastClickTimeStamp_);
+    EXPECT_EQ(pos, 4);
+
+    start = 1;
+    end = 3;
+    mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
+    EXPECT_EQ(start, 0);
+    EXPECT_EQ(end, 2);
+
+    /**
+     * @tc.steps: step3. assign text as empty
+    */
+    pos = 2;
+    pattern_->contentController_->Reset();
+    content = pattern_->contentController_->GetTextValue();
+    mockDataDetectorMgr.AdjustCursorPosition(pos, content, pattern_->selectController_->lastAiPosTimeStamp_,
+                                             pattern_->lastClickTimeStamp_);
+    EXPECT_EQ(pos, -1);
+
+    start = 1;
+    end = 3;
+    mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
+    EXPECT_EQ(start, -1);
+    EXPECT_EQ(end, -1);
 }
 } // namespace OHOS::Ace::NG

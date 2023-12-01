@@ -57,6 +57,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_data_detector_mgr.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -103,6 +104,10 @@ const CalcLength ERROR_CALC_LENGTH_CALC {-10.0, DimensionUnit::CALC};
 const Dimension CALC_TEST {10.0, DimensionUnit::CALC};
 const Dimension ERROR_CALC_TEST {-10.0, DimensionUnit::CALC};
 const Offset MOUSE_GLOBAL_LOCATION = {100, 200};
+constexpr int32_t WORD_LIMIT_LEN = 6;
+constexpr int32_t WORD_LIMIT_RETURN = 2;
+constexpr int32_t BEYOND_LIMIT_RETURN = 4;
+constexpr int32_t DEFAULT_RETURN_VALUE = -1;
 } // namespace
 
 class RichEditorTestNg : public testing::Test {
@@ -112,6 +117,7 @@ public:
     void AddSpan(const std::string& content);
     void AddImageSpan();
     void ClearSpan();
+    void InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr);
 
 protected:
     static void MockKeyboardBuilder() {}
@@ -206,6 +212,34 @@ void RichEditorTestNg::ClearSpan()
     richEditorNode_->children_.clear();
     richEditorPattern->spans_.clear();
     richEditorPattern->caretPosition_ = 0;
+}
+
+void RichEditorTestNg::InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr)
+{
+    EXPECT_CALL(mockDataDetectorMgr, GetCursorPosition(_, _))
+            .WillRepeatedly([](const std::string &text, int8_t offset) -> int8_t {
+                if (text.empty()) {
+                    return DEFAULT_RETURN_VALUE;
+                }
+                if (text.length() <= WORD_LIMIT_LEN) {
+                    return WORD_LIMIT_RETURN;
+                } else {
+                    return BEYOND_LIMIT_RETURN;
+                }
+            });
+
+    EXPECT_CALL(mockDataDetectorMgr, GetWordSelection(_, _))
+            .WillRepeatedly([](const std::string &text, int8_t offset) -> std::vector<int8_t> {
+                if (text.empty()) {
+                    return std::vector<int8_t> { -1, -1 };
+                }
+
+                if (text.length() <= WORD_LIMIT_LEN) {
+                    return std::vector<int8_t> { 2, 3 };
+                } else {
+                    return std::vector<int8_t> { 0, 2 };
+                }
+            });
 }
 
 /**
@@ -2819,16 +2853,110 @@ HWTEST_F(RichEditorTestNg, CheckScrollable, TestSize.Level1)
  */
 HWTEST_F(RichEditorTestNg, NeedSoftKeyboard001, TestSize.Level1)
 {
-    /**
-     * @tc.step: step1. Get frameNode and pattern.
-     */
+        /**
+         * @tc.step: step1. Get frameNode and pattern.
+         */
+        ASSERT_NE(richEditorNode_, nullptr);
+        auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+        ASSERT_NE(richEditorPattern, nullptr);
+
+        /**
+         * @tc.steps: step2. Test whether rich editor need soft keyboard.
+         */
+        EXPECT_TRUE(richEditorPattern->NeedSoftKeyboard());
+}
+/*
+ * @tc.name: DoubleHandleClickEvent001
+ * @tc.desc: test double click
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, DoubleHandleClickEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    GestureEvent info;
+    info.localLocation_ = Offset(0, 0);
+    richEditorPattern->isMouseSelect_ = false;
+    richEditorPattern->caretVisible_ = true;
+    richEditorPattern->HandleDoubleClickEvent(info);
+    EXPECT_TRUE(richEditorPattern->caretVisible_);
+
+    AddSpan(INIT_VALUE_3);
+    info.localLocation_ = Offset(50, 50);
+    richEditorPattern->textSelector_.baseOffset = -1;
+    richEditorPattern->textSelector_.destinationOffset = -1;
+    richEditorPattern->HandleDoubleClickEvent(info);
+    EXPECT_NE(richEditorPattern->textSelector_.baseOffset, -1);
+    EXPECT_NE(richEditorPattern->textSelector_.destinationOffset, -1);
+    EXPECT_NE(richEditorPattern->caretPosition_, -1);
+
+    info.localLocation_ = Offset(0, 0);
+    richEditorPattern->isMouseSelect_ = true;
+    richEditorPattern->textSelector_.baseOffset = -1;
+    richEditorPattern->textSelector_.destinationOffset = -1;
+    richEditorPattern->HandleDoubleClickEvent(info);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
+}
+
+/*
+ * @tc.name: DoubleHandleClickEvent001
+ * @tc.desc: test double click
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, AdjustWordCursorAndSelect01, TestSize.Level1)
+{
+    using namespace std::chrono;
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    /**
-     * @tc.steps: step2. Test whether rich editor need soft keyboard.
-     */
-    EXPECT_TRUE(richEditorPattern->NeedSoftKeyboard());
+    AddSpan(INIT_VALUE_1);
+    int32_t pos = 3;
+
+    MockDataDetectorMgr mockDataDetectorMgr;
+    InitAdjustObject(mockDataDetectorMgr);
+
+    richEditorPattern->lastAiPosTimeStamp_ = high_resolution_clock::now();
+    richEditorPattern->lastClickTimeStamp_ = richEditorPattern->lastAiPosTimeStamp_ + seconds(2);
+    int32_t spanStart = -1;
+    std::string content = richEditorPattern->GetPositionSpansText(pos, spanStart);
+    mockDataDetectorMgr.AdjustCursorPosition(pos, content, richEditorPattern->lastAiPosTimeStamp_,
+                                             richEditorPattern->lastClickTimeStamp_);
+    EXPECT_EQ(pos, 2);
+
+    int32_t start = 1;
+    int32_t end = 3;
+    mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
+    EXPECT_EQ(start, 2);
+    EXPECT_EQ(end, 3);
+
+    AddSpan(INIT_VALUE_2);
+    pos = 1;
+    content = richEditorPattern->GetPositionSpansText(pos, spanStart);
+    mockDataDetectorMgr.AdjustCursorPosition(pos, content, richEditorPattern->lastAiPosTimeStamp_,
+                                             richEditorPattern->lastClickTimeStamp_);
+    EXPECT_EQ(pos, 4);
+
+    start = 1;
+    end = 3;
+    mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
+    EXPECT_EQ(start, 0);
+    EXPECT_EQ(end, 2);
+
+    ClearSpan();
+    pos = 2;
+    content = richEditorPattern->GetPositionSpansText(pos, spanStart);
+    mockDataDetectorMgr.AdjustCursorPosition(pos, content, richEditorPattern->lastAiPosTimeStamp_,
+                                             richEditorPattern->lastClickTimeStamp_);
+    EXPECT_EQ(pos, -1);
+
+    start = 1;
+    end = 3;
+    mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
+    EXPECT_EQ(start, -1);
+    EXPECT_EQ(end, -1);
 }
 } // namespace OHOS::Ace::NG
