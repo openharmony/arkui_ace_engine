@@ -21,7 +21,7 @@ namespace OHOS::Ace {
 bool InputAIChecker::NeedAIAnalysis(const std::string& content, const NG::CaretUpdateType targetType,
     std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout)
 {
-    if (targetType != CaretUpdateType::PRESSED && targetType != CaretUpdateType::DOUBLE_CLICK) {
+    if (targetType != CaretUpdateType::DOUBLE_CLICK) {
         TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "NeedAIAnalysis type is %{public}d,return!", static_cast<int>(targetType));
         return false;
     }
