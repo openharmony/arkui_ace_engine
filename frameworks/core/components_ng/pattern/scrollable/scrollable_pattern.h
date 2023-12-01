@@ -532,7 +532,7 @@ private:
     bool NeedSplitScroll(OverScrollOffset& overOffsets, int32_t source);
     RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);
     bool CoordinateWithNavigation(bool isAtTop, bool isDraggedDown, double& offset, int32_t source);
-    void NotifyFRCSceneInfo(double velocity, SceneStatus sceneStatus);
+    void NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus);
     ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
 
     Axis axis_;

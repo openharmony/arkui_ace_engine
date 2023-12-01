@@ -6444,7 +6444,7 @@ HWTEST_F(ListTestNg, FRCCallback001, TestSize.Level1)
     auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
     frameNode_->renderContext_ = renderContext;
     EXPECT_CALL(*renderContext, CalcExpectedFrameRate(_, _)).Times(1);
-    pattern_->NotifyFRCSceneInfo(0.0f, SceneStatus::START);
+    pattern_->NotifyFRCSceneInfo("", 0.0f, SceneStatus::START);
 }
 
 /**
