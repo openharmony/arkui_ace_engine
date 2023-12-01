@@ -133,8 +133,8 @@ class ArkBorderColor {
 }
 
 class ArkPosition implements Equable {
-  x: number | string | undefined | Resource;
-  y: number | string | undefined | Resource;
+  x: Length;
+  y: Length
 
   constructor() {
     this.x = undefined;
@@ -459,21 +459,21 @@ class ArkLinearGradientBlur {
 }
 
 class ArkOverlay {
-    value: string | CustomBuilder | undefined;
-    align: number | undefined;
-    offsetX: number | undefined;
-    offsetY: number | undefined;
-    constructor(value: string | CustomBuilder | undefined,
-        align: number | undefined, offsetX: number | undefined, offsetY: number | undefined) {
-        this.value = value;
-        this.align = align;
-        this.offsetX = offsetX;
-        this.offsetY = offsetY;
-    }
-    isEqual(another: ArkOverlay): boolean {
-        return ((this.value === another.value) && (this.align === another.align) &&
-            (this.offsetX === another.offsetX) && (this.offsetY === another.offsetY));
-    }
+  value: string | CustomBuilder | undefined;
+  align: number | undefined;
+  offsetX: number | undefined;
+  offsetY: number | undefined;
+  constructor(value: string | CustomBuilder | undefined,
+      align: number | undefined, offsetX: number | undefined, offsetY: number | undefined) {
+      this.value = value;
+      this.align = align;
+      this.offsetX = offsetX;
+      this.offsetY = offsetY;
+  }
+  isEqual(another: ArkOverlay): boolean {
+      return ((this.value === another.value) && (this.align === another.align) &&
+          (this.offsetX === another.offsetX) && (this.offsetY === another.offsetY));
+  }
 }
 
 class ArkSharedTransition implements Equable {
@@ -1634,7 +1634,7 @@ class ArkDatePickerTextStyle implements Equable{
         this.font = undefined;
     }
 
-    isEqual(another: ArkPickerTextStyle): boolean {
+    isEqual(another: ArkDatePickerTextStyle): boolean {
         return (this.color === another.color && this.font === another.font);
     }
 }
