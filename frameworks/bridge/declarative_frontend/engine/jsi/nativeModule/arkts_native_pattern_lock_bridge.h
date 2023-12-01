@@ -38,6 +38,6 @@ public:
     static ArkUINativeModuleValue SetPatternLockSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetPatternLockSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
-}
+} // namespace OHOS::Ace::NG
 
-#endif  // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_PATTERN_LOCK_BRIDGE_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_PATTERN_LOCK_BRIDGE_H

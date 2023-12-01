@@ -14,29 +14,14 @@
  */
 #include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_split_bridge.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
-static bool ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
-    DimensionUnit defaultUnit, bool isSupportPercent = true)
-{
-    if (jsValue->IsNumber()) {
-        result = CalcDimension(jsValue->ToNumber(vm)->Value(), defaultUnit);
-        return true;
-    }
-    if (jsValue->IsString()) {
-        auto value = jsValue->ToString(vm)->ToString();
-        if (value.back() == '%' && !isSupportPercent) {
-            return false;
-        }
-        return StringUtils::StringToCalcDimensionNG(jsValue->ToString(vm)->ToString(), result, false, defaultUnit);
-    }
-    // resouce ignore by design
-    return false;
-}
+
 ArkUINativeModuleValue ColumnSplitBridge::SetResizeable(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
@@ -59,19 +44,19 @@ ArkUINativeModuleValue ColumnSplitBridge::ResetResizeable(ArkUIRuntimeCallInfo *
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue ColumnSplitBridge::SetDivider(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue ColumnSplitBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM *vm = runtimeCallInfo->GetVM();
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> startMarginArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> endMarginArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    void *nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
+    void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
     CalcDimension startMargin(0.0, DimensionUnit::VP);
     CalcDimension endMargin(0.0, DimensionUnit::VP);
     if (!startMarginArg.IsNull() && !endMarginArg.IsNull()) {
-        if (ParseJsDimensionNG(vm, startMarginArg, startMargin, DimensionUnit::VP, true) ||
-            ParseJsDimensionNG(vm, endMarginArg, endMargin, DimensionUnit::VP, true))
+        if (ArkTSUtils::ParseJsDimensionVp(vm, startMarginArg, startMargin) ||
+            ArkTSUtils::ParseJsDimensionVp(vm, endMarginArg, endMargin))
             GetArkUIInternalNodeAPI()->GetColumnSplitModifier().SetColumnSplitDivider(nativeNode, startMargin.Value(),
                 static_cast<int32_t>(startMargin.Unit()), endMargin.Value(), static_cast<int32_t>(endMargin.Unit()));
     } else {

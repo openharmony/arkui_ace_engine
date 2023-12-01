@@ -355,7 +355,8 @@ bool ArkTSUtils::ParseJsDimensionFromResourceNG(const EcmaVM* vm, const Local<JS
     return false;
 }
 
-bool ArkTSUtils::ParseStringArray(const EcmaVM *vm, const Local<JSValueRef> &arg, char **array, int32_t defaultLength)
+bool ArkTSUtils::ParseStringArray(const EcmaVM* vm, const Local<JSValueRef>& arg,
+    std::string* array, int32_t defaultLength)
 {
     CHECK_NULL_RETURN(vm, false);
     CHECK_NULL_RETURN(array, false);
@@ -369,10 +370,8 @@ bool ArkTSUtils::ParseStringArray(const EcmaVM *vm, const Local<JSValueRef> &arg
     }
     for (int32_t i = 0; i < length; i++) {
         auto value = handle->GetValueAt(vm, arg, i);
-        if (value->IsString()) {
-            *(array + i) = const_cast<char *>(value->ToString(vm)->ToString().c_str());
-        } else {
-            *(array + i) = nullptr;
+        if (!ParseJsMedia(vm, value, *(array + i))) {
+            *(array + i) = "";
         }
     }
     return true;

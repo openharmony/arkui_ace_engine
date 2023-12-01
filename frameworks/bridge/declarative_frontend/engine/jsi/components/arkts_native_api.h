@@ -774,7 +774,7 @@ struct ArkUIVideoModifierAPI {
 struct ArkUIPatternLockModifierAPI {
     void (*SetPatternLockActiveColor)(NodeHandle node, uint32_t value);
     void (*ResetPatternLockActiveColor)(NodeHandle node);
-    void (*SetPatternLockCircleRadius)(NodeHandle node, const struct StringAndDouble* value);
+    void (*SetPatternLockCircleRadius)(NodeHandle node, double number, int8_t unit);
     void (*ResetPatternLockCircleRadius)(NodeHandle node);
     void (*SetPatternLockSelectedColor)(NodeHandle node, uint32_t value);
     void (*ResetPatternLockSelectedColor)(NodeHandle node);
@@ -782,7 +782,7 @@ struct ArkUIPatternLockModifierAPI {
     void (*ResetPatternLockSideLength)(NodeHandle node);
     void (*SetPatternLockAutoReset)(NodeHandle node, uint32_t value);
     void (*ResetPatternLockAutoReset)(NodeHandle node);
-    void (*SetPatternLockPathStrokeWidth)(NodeHandle node, const struct StringAndDouble* pathStrokeWidthStruct);
+    void (*SetPatternLockPathStrokeWidth)(NodeHandle node, double number, int8_t unit);
     void (*ResetPatternLockPathStrokeWidth)(NodeHandle node);
     void (*SetPatternLockRegularColor)(NodeHandle node, uint32_t color);
     void (*ResetPatternLockRegularColor)(NodeHandle node);
