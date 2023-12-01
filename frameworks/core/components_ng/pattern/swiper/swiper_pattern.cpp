@@ -288,7 +288,7 @@ void SwiperPattern::OnModifyDone()
     SetAccessibilityAction();
 }
 
-void SwiperPattern::OnFirstFrame()
+void SwiperPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);

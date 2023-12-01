@@ -1318,13 +1318,15 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     dialogCount_++;
     // set close button disable
     SetContainerButtonEnable(false);
-    Recorder::EventParamsBuilder builder;
-    builder
-        .SetType("Dialog")
-        .SetEventType(Recorder::EventType::DIALOG_SHOW)
-        .SetExtra(Recorder::KEY_TITLE, dialogProps.title)
-        .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
-    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder
+            .SetType("Dialog")
+            .SetEventType(Recorder::EventType::DIALOG_SHOW)
+            .SetExtra(Recorder::KEY_TITLE, dialogProps.title)
+            .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
     return dialog;
 }
 
@@ -1361,11 +1363,11 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
         TextPickerDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
-    Recorder::EventParamsBuilder builder;
-    builder
-        .SetType("TextPickerDialog")
-        .SetEventType(Recorder::EventType::DIALOG_SHOW);
-    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder.SetType("TextPickerDialog").SetEventType(Recorder::EventType::DIALOG_SHOW);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
 }
 
 void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,

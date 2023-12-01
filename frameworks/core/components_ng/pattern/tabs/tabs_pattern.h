@@ -82,7 +82,7 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
-    void OnFirstFrame() override;
+    void OnAfterModifyDone() override;
     void OnUpdateShowDivider();
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
     void BeforeCreateLayoutWrapper() override;

@@ -48,17 +48,19 @@ public:
         if (changeEvent_) {
             changeEvent_(select);
         }
-        Recorder::EventParamsBuilder builder;
-        auto host = GetFrameNode();
-        if (host) {
-            auto id = host->GetInspectorIdValue("");
-            builder.SetId(id).SetType(host->GetHostTag());
-            if (!id.empty()) {
-                Recorder::NodeDataCache::Get().PutBool(id, select);
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            auto host = GetFrameNode();
+            if (host) {
+                auto id = host->GetInspectorIdValue("");
+                builder.SetId(id).SetType(host->GetHostTag());
+                if (!id.empty()) {
+                    Recorder::NodeDataCache::Get().PutBool(id, select);
+                }
             }
+            builder.SetChecked(select);
+            Recorder::EventRecorder::Get().OnChange(std::move(builder));
         }
-        builder.SetChecked(select);
-        Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
 
     void SetOnChangeEvent(ChangeEvent&& onChangeEvent)

@@ -450,7 +450,7 @@ public:
     }
 
 protected:
-    void OnFirstFrame() override;
+    void OnAfterModifyDone() override;
     virtual void HandleOnCopy();
     virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
     void InitMouseEvent();

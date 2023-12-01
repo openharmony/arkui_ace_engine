@@ -3897,6 +3897,9 @@ void WebDelegate::CallIsPagePathInvalid(const bool& isPageInvalid)
 
 void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::string& param) const
 {
+    if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        return;
+    }
     auto pattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();

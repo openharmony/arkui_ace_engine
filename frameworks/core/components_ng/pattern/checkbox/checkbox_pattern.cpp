@@ -135,7 +135,7 @@ void CheckBoxPattern::MarkIsSelected(bool isSelected)
     }
 }
 
-void CheckBoxPattern::OnFirstFrame()
+void CheckBoxPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);

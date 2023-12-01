@@ -99,6 +99,9 @@ public:
 private:
     void RecordEvent(Recorder::EventType eventType, int32_t index) const
     {
+        if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            return;
+        }
         Recorder::EventParamsBuilder builder;
         auto host = GetFrameNode();
         if (host) {

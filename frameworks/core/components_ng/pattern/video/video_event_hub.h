@@ -162,6 +162,9 @@ public:
 private:
     void RecorderOnEvent(Recorder::EventType eventType, const std::string& param) const
     {
+        if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            return;
+        }
         Recorder::EventParamsBuilder builder;
         auto host = GetFrameNode();
         if (host) {

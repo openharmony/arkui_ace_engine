@@ -42,18 +42,19 @@ void NavigatorEventHub::NavigatePage()
             break;
     }
 
-    Recorder::EventParamsBuilder builder;
-    auto host = GetFrameNode();
-    if (host) {
-        auto id = host->GetInspectorIdValue("");
-        builder.SetId(id).SetType(host->GetHostTag());
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        auto host = GetFrameNode();
+        if (host) {
+            auto id = host->GetInspectorIdValue("");
+            builder.SetId(id).SetType(host->GetHostTag());
+        }
+        builder.SetEventType(Recorder::EventType::NAVIGATOR)
+            .SetExtra(Recorder::KEY_NAV_PAGE, url_)
+            .SetExtra(Recorder::KEY_NAV_PAGE_PARAM, params_)
+            .SetExtra(Recorder::KEY_NAV_PAGE_TYPE, GetNavigatorType());
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
-    builder
-        .SetEventType(Recorder::EventType::NAVIGATOR)
-        .SetExtra(Recorder::KEY_NAV_PAGE, url_)
-        .SetExtra(Recorder::KEY_NAV_PAGE_PARAM, params_)
-        .SetExtra(Recorder::KEY_NAV_PAGE_TYPE, GetNavigatorType());
-    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
 void NavigatorEventHub::SetActive(bool active)

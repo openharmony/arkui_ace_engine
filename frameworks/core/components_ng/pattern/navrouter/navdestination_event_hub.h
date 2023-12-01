@@ -63,12 +63,14 @@ public:
             auto onShownEvent = onShownEvent_;
             onShownEvent();
         }
-        auto host = GetFrameNode();
-        CHECK_NULL_VOID(host);
-        auto id = host->GetInspectorIdValue("");
-        Recorder::EventParamsBuilder builder;
-        builder.SetId(id).SetText(name).SetExtra(Recorder::KEY_PAGE_PARAM, param);
-        Recorder::EventRecorder::Get().OnNavDstShow(std::move(builder));
+        if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
+            auto host = GetFrameNode();
+            CHECK_NULL_VOID(host);
+            auto id = host->GetInspectorIdValue("");
+            Recorder::EventParamsBuilder builder;
+            builder.SetId(id).SetText(name).SetExtra(Recorder::KEY_PAGE_PARAM, param);
+            Recorder::EventRecorder::Get().OnNavDstShow(std::move(builder));
+        }
     }
 
     void SetOnHidden(const std::function<void()>& onHidden)
@@ -83,12 +85,14 @@ public:
         if (onHiddenEvent_) {
             onHiddenEvent_();
         }
-        auto host = GetFrameNode();
-        CHECK_NULL_VOID(host);
-        auto id = host->GetInspectorIdValue("");
-        Recorder::EventParamsBuilder builder;
-        builder.SetId(id).SetText(name);
-        Recorder::EventRecorder::Get().OnNavDstHide(std::move(builder));
+        if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
+            auto host = GetFrameNode();
+            CHECK_NULL_VOID(host);
+            auto id = host->GetInspectorIdValue("");
+            Recorder::EventParamsBuilder builder;
+            builder.SetId(id).SetText(name);
+            Recorder::EventRecorder::Get().OnNavDstHide(std::move(builder));
+        }
     }
 
     void SetOnBackPressed(const std::function<bool()>& onBackPressed)

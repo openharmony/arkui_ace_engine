@@ -1033,7 +1033,7 @@ protected:
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
-    void OnFirstFrame() override;
+    void OnAfterModifyDone() override;
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();

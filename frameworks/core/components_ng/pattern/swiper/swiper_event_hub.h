@@ -94,17 +94,19 @@ public:
                 changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& event) { (*event)(index); });
         }
 
-        Recorder::EventParamsBuilder builder;
-        auto host = GetFrameNode();
-        if (host) {
-            auto id = host->GetInspectorIdValue("");
-            builder.SetId(id).SetType(host->GetHostTag());
-            if (!id.empty()) {
-                Recorder::NodeDataCache::Get().PutInt(id, index);
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            auto host = GetFrameNode();
+            if (host) {
+                auto id = host->GetInspectorIdValue("");
+                builder.SetId(id).SetType(host->GetHostTag());
+                if (!id.empty()) {
+                    Recorder::NodeDataCache::Get().PutInt(id, index);
+                }
             }
+            builder.SetIndex(index);
+            Recorder::EventRecorder::Get().OnChange(std::move(builder));
         }
-        builder.SetIndex(index);
-        Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
 
     void FireIndicatorChangeEvent(int32_t index) const

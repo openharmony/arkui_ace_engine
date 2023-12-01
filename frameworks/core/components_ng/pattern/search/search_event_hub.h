@@ -47,14 +47,16 @@ public:
         if (submitEvent_) {
             submitEvent_(value);
         }
-        Recorder::EventParamsBuilder builder;
-        auto host = GetFrameNode();
-        if (host) {
-            auto id = host->GetInspectorIdValue("");
-            builder.SetId(id).SetType(host->GetHostTag());
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            auto host = GetFrameNode();
+            if (host) {
+                auto id = host->GetInspectorIdValue("");
+                builder.SetId(id).SetType(host->GetHostTag());
+            }
+            builder.SetEventType(Recorder::EventType::SEARCH_SUBMIT).SetText(value);
+            Recorder::EventRecorder::Get().OnEvent(std::move(builder));
         }
-        builder.SetEventType(Recorder::EventType::SEARCH_SUBMIT).SetText(value);
-        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
 
     void UpdateChangeEvent(const std::string& value) const;

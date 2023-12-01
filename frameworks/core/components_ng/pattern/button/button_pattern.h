@@ -238,7 +238,7 @@ protected:
     }
 
     void OnModifyDone() override;
-    void OnFirstFrame() override;
+    void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
     void InitTouchEvent();
     void InitHoverEvent();

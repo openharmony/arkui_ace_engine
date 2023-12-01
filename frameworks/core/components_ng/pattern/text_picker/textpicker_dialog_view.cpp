@@ -418,7 +418,6 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-
     auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textConfirmNode = FrameNode::CreateFrameNode(
@@ -436,7 +435,6 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(
     auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
     buttonConfirmEventHub->SetStateEffect(true);
-
     UpdateButtonConfirmLayoutProperty(buttonConfirmNode, pickerTheme);
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
     buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -461,9 +459,11 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(
         auto textPickerEventHub = pickerPattern->GetEventHub<TextPickerEventHub>();
         CHECK_NULL_VOID(textPickerEventHub);
         textPickerEventHub->FireDialogAcceptEvent(str);
-        Recorder::EventParamsBuilder builder;
-        builder.SetType(dateNode->GetTag()).SetEventType(Recorder::EventType::DIALOG_ACCEPT).SetText(str);
-        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            builder.SetType(dateNode->GetTag()).SetEventType(Recorder::EventType::DIALOG_ACCEPT).SetText(str);
+            Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+        }
     };
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
     buttonConfirmNode->MarkModifyDone();
@@ -496,9 +496,11 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
     eventCancelHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
     auto recordEvent = [](GestureEvent& info) {
-        Recorder::EventParamsBuilder builder;
-        builder.SetType("TextPickerDialog").SetEventType(Recorder::EventType::DIALOG_CANCEL);
-        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            builder.SetType("TextPickerDialog").SetEventType(Recorder::EventType::DIALOG_CANCEL);
+            Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+        }
     };
     auto recordEventPtr = AceType::MakeRefPtr<ClickEvent>(std::move(recordEvent));
     eventCancelHub->AddClickEvent(recordEventPtr);

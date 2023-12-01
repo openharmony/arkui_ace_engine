@@ -160,6 +160,20 @@ EventRecorder& EventRecorder::Get()
 
 EventRecorder::EventRecorder() {}
 
+bool EventRecorder::IsPageRecordEnable() const
+{
+    return pageEnable_;
+}
+
+bool EventRecorder::IsExposureRecordEnable() const
+{
+    return exposureEnable_;
+}
+
+bool EventRecorder::IsComponentRecordEnable() const
+{
+    return componentEnable_;
+}
 
 void EventRecorder::SetContainerInfo(const std::string& windowName, int32_t id, bool foreground)
 {
@@ -178,9 +192,20 @@ void EventRecorder::SetContainerInfo(const std::string& windowName, int32_t id, 
     }
 }
 
+void EventRecorder::SetFocusContainerInfo(const std::string& windowName, int32_t id)
+{
+    if (windowName == IGNORE_WINDOW_NAME) {
+        return;
+    }
+    focusContainerId_ = id;
+}
+
 int32_t EventRecorder::GetContainerId()
 {
-    return containerId_;
+    if (containerId_ == -1) {
+        return -1;
+    }
+    return focusContainerId_;
 }
 
 const std::string& EventRecorder::GetPageUrl() const

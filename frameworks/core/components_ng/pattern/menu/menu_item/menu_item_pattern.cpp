@@ -177,7 +177,7 @@ void MenuItemPattern::OnModifyDone()
     host->GetRenderContext()->SetClipToBounds(true);
 }
 
-void MenuItemPattern::OnFirstFrame()
+void MenuItemPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -193,6 +193,9 @@ void MenuItemPattern::OnFirstFrame()
 
 void MenuItemPattern::RecordChangeEvent() const
 {
+    if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto inspectorId = host->GetInspectorId().value_or("");

@@ -172,7 +172,7 @@ public:
 protected:
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
-    void OnFirstFrame() override;
+    void OnAfterModifyDone() override;
 
 private:
     // register menu item's callback

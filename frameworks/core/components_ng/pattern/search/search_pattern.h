@@ -139,7 +139,7 @@ public:
 
 private:
     void OnModifyDone() override;
-    void OnFirstFrame() override;
+    void OnAfterModifyDone() override;
     void InitButtonAndImageClickEvent();
     void InitCancelButtonClickEvent();
     void InitSearchController();

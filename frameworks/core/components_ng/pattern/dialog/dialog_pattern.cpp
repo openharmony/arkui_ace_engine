@@ -196,12 +196,14 @@ void DialogPattern::RecordEvent(int32_t btnIndex) const
     } else {
         eventType = Recorder::EventType::DIALOG_ACTION;
     }
-    Recorder::EventParamsBuilder builder;
-    builder.SetEventType(eventType)
-        .SetText(btnText)
-        .SetExtra(Recorder::KEY_TITLE, title_)
-        .SetExtra(Recorder::KEY_SUB_TITLE, subtitle_);
-    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder.SetEventType(eventType)
+            .SetText(btnText)
+            .SetExtra(Recorder::KEY_TITLE, title_)
+            .SetExtra(Recorder::KEY_SUB_TITLE, subtitle_);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
 }
 
 // set render context properties of content frame
@@ -757,6 +759,9 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
     if (item.action) {
         hub->AddClickEvent(item.action);
         auto recordEvent = [weak = WeakClaim(this), title = item.title](GestureEvent& info) {
+            if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+                return;
+            }
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             Recorder::EventParamsBuilder builder;

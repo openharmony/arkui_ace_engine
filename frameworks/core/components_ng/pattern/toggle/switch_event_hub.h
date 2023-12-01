@@ -53,17 +53,19 @@ public:
         CHECK_NULL_VOID(context);
         context->PostAsyncEvent(task, TaskExecutor::TaskType::UI);
 
-        Recorder::EventParamsBuilder builder;
-        auto host = GetFrameNode();
-        if (host) {
-            auto id = host->GetInspectorIdValue("");
-            builder.SetId(id).SetType(host->GetHostTag());
-            if (!id.empty()) {
-                Recorder::NodeDataCache::Get().PutBool(id, isOn);
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            auto host = GetFrameNode();
+            if (host) {
+                auto id = host->GetInspectorIdValue("");
+                builder.SetId(id).SetType(host->GetHostTag());
+                if (!id.empty()) {
+                    Recorder::NodeDataCache::Get().PutBool(id, isOn);
+                }
             }
+            builder.SetChecked(isOn);
+            Recorder::EventRecorder::Get().OnChange(std::move(builder));
         }
-        builder.SetChecked(isOn);
-        Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
 
     void SetOnChangeEvent(ChangeEvent&& onChangeEvent)

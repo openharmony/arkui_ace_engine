@@ -553,7 +553,7 @@ void RefreshPattern::FireStateChange(int32_t value)
     auto refreshEventHub = GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(refreshEventHub);
     refreshEventHub->FireOnStateChange(value);
-    if (refreshStatus_ == RefreshStatus::REFRESH) {
+    if (refreshStatus_ == RefreshStatus::REFRESH && Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto inspectorId = host->GetInspectorId().value_or("");

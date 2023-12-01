@@ -31,7 +31,7 @@ ExposureProcessor::ExposureProcessor(const std::string& inspectorId)
 
 bool ExposureProcessor::IsNeedRecord() const
 {
-    return !cfg_.id.empty();
+    return EventRecorder::Get().IsExposureRecordEnable() && !cfg_.id.empty();
 }
 
 double ExposureProcessor::GetRatio() const

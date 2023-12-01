@@ -147,7 +147,7 @@ void RadioPattern::MarkIsSelected(bool isSelected)
     }
 }
 
-void RadioPattern::OnFirstFrame()
+void RadioPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);

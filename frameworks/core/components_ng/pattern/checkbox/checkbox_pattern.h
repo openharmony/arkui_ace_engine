@@ -182,7 +182,7 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
-    void OnFirstFrame() override;
+    void OnAfterModifyDone() override;
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();

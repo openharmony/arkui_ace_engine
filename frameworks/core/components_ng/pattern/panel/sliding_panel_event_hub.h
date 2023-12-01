@@ -57,6 +57,9 @@ public:
             auto changEvent = std::make_shared<SlidingPanelSizeChangeEvent>(mode, width, height);
             changeEvent_(changEvent.get());
         }
+        if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            return;
+        }
         Recorder::EventParamsBuilder builder;
         auto host = GetFrameNode();
         if (host) {

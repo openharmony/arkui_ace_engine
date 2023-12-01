@@ -345,7 +345,7 @@ void CheckBoxGroupPattern::UpdateState()
     updateFlag_ = false;
 }
 
-void CheckBoxGroupPattern::OnFirstFrame()
+void CheckBoxGroupPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);

@@ -356,6 +356,9 @@ void RatingPattern::FireChangeEvent() const
     ss << std::setprecision(2) << ratingRenderProperty->GetRatingScoreValue();
     ratingEventHub->FireChangeEvent(ss.str());
 
+    if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto inspectorId = host->GetInspectorId().value_or("");

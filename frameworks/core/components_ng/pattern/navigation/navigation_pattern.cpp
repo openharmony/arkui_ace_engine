@@ -20,6 +20,7 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
@@ -333,7 +334,7 @@ RefPtr<UINode> NavigationPattern::FireNavDestinationStateChange(bool show)
 
     if (show) {
         NotifyPageShow(topNavPath->first);
-        auto param = navigationStack_->GetRouteParam();
+        auto param = Recorder::EventRecorder::Get().IsPageRecordEnable() ? navigationStack_->GetRouteParam() : "";
         eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
         navDestinationPattern->SetIsOnShow(true);
         // The change from hiding to showing of top page means the navigation return to screen,
@@ -571,6 +572,12 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 CHECK_NULL_VOID(navigationLayoutProperty);
                 auto navigationStack = navigationStackWeak.Upgrade();
                 CHECK_NULL_VOID(navigationStack);
+                auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetContentNode());
+                CHECK_NULL_VOID(navigationContentNode);
+                auto navDestinationNode =
+                    AceType::DynamicCast<NavDestinationGroupNode>(navigationContentNode->GetLastChild());
+                CHECK_NULL_VOID(navDestinationNode);
+                auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
                 auto curTopNavPath = navigationStack->GetTopNavPath();
                 if (curTopNavPath.has_value()) {
                     // considering backButton visibility
@@ -580,7 +587,10 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     if (pattern->isChanged_) {
                         auto eventHub = curTopNavDestination->GetEventHub<NavDestinationEventHub>();
                         CHECK_NULL_VOID(eventHub);
-                        eventHub->FireOnShownEvent();
+                        auto param = Recorder::EventRecorder::Get().IsPageRecordEnable()
+                                         ? navigationStack->GetRouteParam()
+                                         : "";
+                        eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
                         NavigationPattern::FireNavigationStateChange(curTopNavDestination, true);
                         pattern->isChanged_ = false;
                     }
@@ -601,12 +611,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     navBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
                     navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
                 }
-                auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetContentNode());
-                CHECK_NULL_VOID(navigationContentNode);
-                auto navDestinationNode =
-                    AceType::DynamicCast<NavDestinationGroupNode>(navigationContentNode->GetLastChild());
-                CHECK_NULL_VOID(navDestinationNode);
-                auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
                 if (navDestinationNode->GetChildren().size() <= EMPTY_DESTINATION_CHILD_SIZE &&
                     navDestinationPattern->GetBackButtonState()) {
                     auto focusHub = navDestinationNode->GetOrCreateFocusHub();
@@ -907,7 +911,8 @@ void NavigationPattern::OnWindowShow()
     CHECK_NULL_VOID(!(navDestinationPattern->GetIsOnShow()));
     auto eventHub = curTopNavDestination->GetEventHub<NavDestinationEventHub>();
     NotifyPageShow(curTopNavPath->first);
-    eventHub->FireOnShownEvent(navDestinationPattern->GetName(), navigationStack_->GetRouteParam());
+    auto param = Recorder::EventRecorder::Get().IsPageRecordEnable() ? navigationStack_->GetRouteParam() : "";
+    eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
     navDestinationPattern->SetIsOnShow(true);
 }
 } // namespace OHOS::Ace::NG

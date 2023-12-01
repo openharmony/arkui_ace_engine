@@ -153,9 +153,11 @@ public:
     {
         FrameNode::PostTask(
             [weak = WeakClaim(this)]() {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->OnFirstFrame();
+                if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->OnAfterModifyDone();
+                }
             },
             TaskExecutor::TaskType::UI);
         if (IsNeedInitClickEventRecorder()) {
@@ -227,7 +229,7 @@ public:
         }
     }
 
-    virtual void OnFirstFrame() {}
+    virtual void OnAfterModifyDone() {}
 
     virtual void OnMountToParentDone() {}
 
@@ -469,6 +471,9 @@ public:
     GestureEventFunc GetLongPressEventRecorder()
     {
         auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+            if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+                return;
+            }
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto host = pattern->GetHost();
@@ -510,6 +515,9 @@ protected:
         }
 
         auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+            if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+                return;
+            }
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto host = pattern->GetHost();

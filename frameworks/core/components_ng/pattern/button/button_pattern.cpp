@@ -160,7 +160,7 @@ void ButtonPattern::InitTouchEvent()
     gesture->AddTouchEvent(touchListener_);
 }
 
-void ButtonPattern::OnFirstFrame()
+void ButtonPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);

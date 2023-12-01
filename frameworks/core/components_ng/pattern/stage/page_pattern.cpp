@@ -175,13 +175,15 @@ void PagePattern::OnShow()
     if (onPageShow_) {
         onPageShow_();
     }
-    std::string param;
-    auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
-    if (entryPageInfo) {
-        param = entryPageInfo->GetPageParams();
-        entryPageInfo->SetShowTime(GetCurrentTimestamp());
+    if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
+        std::string param;
+        auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
+        if (entryPageInfo) {
+            param = entryPageInfo->GetPageParams();
+            entryPageInfo->SetShowTime(GetCurrentTimestamp());
+        }
+        Recorder::EventRecorder::Get().OnPageShow(pageInfo_->GetPageUrl(), param);
     }
-    Recorder::EventRecorder::Get().OnPageShow(pageInfo_->GetPageUrl(), param);
 }
 
 void PagePattern::OnHide()
@@ -203,12 +205,14 @@ void PagePattern::OnHide()
     if (onPageHide_) {
         onPageHide_();
     }
-    auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
-    int64_t duration = 0;
-    if (entryPageInfo) {
-        duration = GetCurrentTimestamp() - entryPageInfo->GetShowTime();
+    if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
+        auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
+        int64_t duration = 0;
+        if (entryPageInfo) {
+            duration = GetCurrentTimestamp() - entryPageInfo->GetShowTime();
+        }
+        Recorder::EventRecorder::Get().OnPageHide(pageInfo_->GetPageUrl(), duration);
     }
-    Recorder::EventRecorder::Get().OnPageHide(pageInfo_->GetPageUrl(), duration);
 }
 
 void PagePattern::BuildSharedTransitionMap()

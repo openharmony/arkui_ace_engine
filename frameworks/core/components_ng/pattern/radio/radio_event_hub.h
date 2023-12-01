@@ -46,17 +46,19 @@ public:
         if (changeEvent_) {
             changeEvent_(check);
         }
-        Recorder::EventParamsBuilder builder;
-        auto host = GetFrameNode();
-        if (host) {
-            auto id = host->GetInspectorIdValue("");
-            builder.SetId(id).SetType(host->GetHostTag());
-            if (!id.empty()) {
-                Recorder::NodeDataCache::Get().PutMultiple(id, value_, check);
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            auto host = GetFrameNode();
+            if (host) {
+                auto id = host->GetInspectorIdValue("");
+                builder.SetId(id).SetType(host->GetHostTag());
+                if (!id.empty()) {
+                    Recorder::NodeDataCache::Get().PutMultiple(id, value_, check);
+                }
             }
+            builder.SetChecked(check).SetText(value_);
+            Recorder::EventRecorder::Get().OnChange(std::move(builder));
         }
-        builder.SetChecked(check).SetText(value_);
-        Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
 
     const std::string& GetValue()

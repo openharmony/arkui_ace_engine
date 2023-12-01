@@ -52,17 +52,19 @@ public:
         if (!groupRet) {
             return;
         }
-        Recorder::EventParamsBuilder builder;
-        auto host = GetFrameNode();
-        if (host) {
-            auto id = host->GetInspectorIdValue("");
-            builder.SetId(id).SetType(host->GetHostTag());
-            if (!id.empty()) {
-                Recorder::NodeDataCache::Get().PutMultiple(id, groupname_, groupRet->GetNameList());
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            auto host = GetFrameNode();
+            if (host) {
+                auto id = host->GetInspectorIdValue("");
+                builder.SetId(id).SetType(host->GetHostTag());
+                if (!id.empty()) {
+                    Recorder::NodeDataCache::Get().PutMultiple(id, groupname_, groupRet->GetNameList());
+                }
             }
+            builder.SetTextArray(groupRet->GetNameList()).SetText(groupname_);
+            Recorder::EventRecorder::Get().OnChange(std::move(builder));
         }
-        builder.SetTextArray(groupRet->GetNameList()).SetText(groupname_);
-        Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
 
     const std::string& GetGroupName()

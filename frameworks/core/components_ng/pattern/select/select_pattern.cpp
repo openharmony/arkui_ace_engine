@@ -83,7 +83,7 @@ void SelectPattern::OnModifyDone()
     }
 }
 
-void SelectPattern::OnFirstFrame()
+void SelectPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -285,19 +285,21 @@ void SelectPattern::CreateSelectedCallback()
             CHECK_NULL_VOID(newSelected);
             valueChangeEvent(newSelected->GetText());
         }
-        auto onSelect = hub->GetSelectEvent();
         // execute onSelect callback
+        auto newSelected = pattern->options_[index]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(newSelected);
+        auto value = newSelected->GetText();
+        auto onSelect = hub->GetSelectEvent();
         if (onSelect) {
-            auto newSelected = pattern->options_[index]->GetPattern<OptionPattern>();
-            CHECK_NULL_VOID(newSelected);
-            onSelect(index, newSelected->GetText());
-
+            onSelect(index, value);
+        }
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             auto inspectorId = host->GetInspectorId().value_or("");
             Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId).SetType(host->GetTag()).SetIndex(index).SetText(newSelected->GetText());
+            builder.SetId(inspectorId).SetType(host->GetTag()).SetIndex(index).SetText(value);
             Recorder::EventRecorder::Get().OnChange(std::move(builder));
             if (!inspectorId.empty()) {
-                Recorder::NodeDataCache::Get().PutMultiple(inspectorId, newSelected->GetText(), index);
+                Recorder::NodeDataCache::Get().PutMultiple(inspectorId, value, index);
             }
         }
     };

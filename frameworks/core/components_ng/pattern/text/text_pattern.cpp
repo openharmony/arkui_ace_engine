@@ -573,13 +573,15 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
         auto onClick = onClick_;
         onClick(info);
 
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto inspectorId = host->GetInspectorIdValue("");
-        auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText();
-        Recorder::EventParamsBuilder builder;
-        builder.SetId(inspectorId).SetType(host->GetTag()).SetText(text);
-        Recorder::EventRecorder::Get().OnClick(std::move(builder));
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto inspectorId = host->GetInspectorIdValue("");
+            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText();
+            Recorder::EventParamsBuilder builder;
+            builder.SetId(inspectorId).SetType(host->GetTag()).SetText(text);
+            Recorder::EventRecorder::Get().OnClick(std::move(builder));
+        }
     }
 }
 
@@ -625,9 +627,11 @@ void TextPattern::HandleSpanSingleClickEvent(
                     target.area.SetHeight(Dimension(0.0f));
                     spanClickinfo.SetTarget(target);
                     item->onClick(spanClickinfo);
-                    Recorder::EventParamsBuilder builder;
-                    builder.SetId(item->inspectId).SetText(item->content);
-                    Recorder::EventRecorder::Get().OnClick(std::move(builder));
+                    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+                        Recorder::EventParamsBuilder builder;
+                        builder.SetId(item->inspectId).SetText(item->content);
+                        Recorder::EventRecorder::Get().OnClick(std::move(builder));
+                    }
                     isClickOnSpan = true;
                     return;
                 }
@@ -1142,7 +1146,7 @@ void TextPattern::OnModifyDone()
         [weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->OnFirstFrame();
+            pattern->OnAfterModifyDone();
         },
         TaskExecutor::TaskType::UI);
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
@@ -1383,7 +1387,7 @@ void TextPattern::StartAITask()
     taskExecutor->PostDelayedTask(aiDetectDelayTask_, TaskExecutor::TaskType::UI, AI_DELAY_TIME);
 }
 
-void TextPattern::OnFirstFrame()
+void TextPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1524,7 +1528,7 @@ void TextPattern::PreCreateLayoutWrapper()
         if (!textDetectEnable_) {
             aiDetectInitialized_ = false;
         }
-        OnFirstFrame();
+        OnAfterModifyDone();
         for (const auto& item : spans_) {
             if (item->inspectId.empty()) {
                 continue;

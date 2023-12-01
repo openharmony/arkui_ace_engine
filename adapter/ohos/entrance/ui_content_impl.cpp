@@ -1487,6 +1487,10 @@ void UIContentImpl::Focus()
 {
     LOGI("UIContentImpl: window focus");
     Platform::AceContainer::OnActive(instanceId_);
+
+    CHECK_NULL_VOID(window_);
+    std::string windowName = window_->GetWindowName();
+    Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, instanceId_);
 }
 
 void UIContentImpl::UnFocus()

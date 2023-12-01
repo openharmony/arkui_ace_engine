@@ -98,6 +98,9 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             TabContentChangeEvent eventInfo(index);
             jsEvent(&eventInfo);
 
+            if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+                return;
+            }
             auto inspectorId = tabsNode->GetInspectorId().value_or("");
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -203,7 +206,7 @@ void TabsPattern::OnModifyDone()
     OnUpdateShowDivider();
 }
 
-void TabsPattern::OnFirstFrame()
+void TabsPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);

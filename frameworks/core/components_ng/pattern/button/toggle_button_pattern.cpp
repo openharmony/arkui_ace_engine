@@ -155,7 +155,7 @@ void ToggleButtonPattern::MarkIsSelected(bool isSelected)
     }
 }
 
-void ToggleButtonPattern::OnFirstFrame()
+void ToggleButtonPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);

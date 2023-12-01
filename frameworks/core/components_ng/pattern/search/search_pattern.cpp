@@ -206,7 +206,7 @@ void SearchPattern::InitTextFieldValueChangeEvent()
     }
 }
 
-void SearchPattern::OnFirstFrame()
+void SearchPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);

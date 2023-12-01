@@ -826,12 +826,14 @@ void SideBarContainerPattern::FireChangeEvent(bool isShow)
 
     sideBarContainerEventHub->FireChangeEvent(isShow);
 
-    Recorder::EventParamsBuilder builder;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto inspectorId = host->GetInspectorId().value_or("");
-    builder.SetId(inspectorId).SetType(host->GetTag()).SetChecked(isShow);
-    Recorder::EventRecorder::Get().OnChange(std::move(builder));
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto inspectorId = host->GetInspectorId().value_or("");
+        builder.SetId(inspectorId).SetType(host->GetTag()).SetChecked(isShow);
+        Recorder::EventRecorder::Get().OnChange(std::move(builder));
+    }
 }
 
 void SideBarContainerPattern::UpdateControlButtonIcon()

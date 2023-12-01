@@ -92,6 +92,12 @@ void EventController::Unregister(const std::shared_ptr<UIEventObserver>& observe
 void EventController::NotifyEvent(EventCategory category, int32_t eventType,
     const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams)
 {
+    {
+        std::unique_lock<std::mutex> lock(cacheLock_);
+        if (clientList_.empty()) {
+            return;
+        }
+    }
     BackgroundTaskExecutor::GetInstance().PostTask([category, eventType, eventParams]() {
         EventController::Get().NotifyEventSync(category, eventType, eventParams);
     });

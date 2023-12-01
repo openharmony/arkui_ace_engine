@@ -1908,7 +1908,7 @@ void TextFieldPattern::OnModifyDone()
     preInputStyle_ = inputStyle;
 }
 
-void TextFieldPattern::OnFirstFrame()
+void TextFieldPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -3602,6 +3602,9 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
 
 void TextFieldPattern::RecordSubmitEvent() const
 {
+    if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto inspectorId = host->GetInspectorId().value_or("");

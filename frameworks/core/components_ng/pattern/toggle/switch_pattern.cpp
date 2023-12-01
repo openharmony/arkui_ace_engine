@@ -198,7 +198,7 @@ void SwitchPattern::MarkIsSelected(bool isSelected)
     }
 }
 
-void SwitchPattern::OnFirstFrame()
+void SwitchPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
