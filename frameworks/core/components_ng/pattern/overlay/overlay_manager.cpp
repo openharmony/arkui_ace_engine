@@ -3111,6 +3111,7 @@ RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>&
     CHECK_NULL_RETURN(pipeline, nullptr);
     MenuParam menuParam;
     menuParam.type = MenuType::MENU;
+    menuParam.placement = Placement::BOTTOM_LEFT;
     auto menuWrapperNode =
         MenuView::Create(uiExtNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true);
     CHECK_NULL_RETURN(menuWrapperNode, nullptr);
@@ -3183,7 +3184,7 @@ SizeF OverlayManager::CaculateMenuSize(
     return SizeF(idealWidth, idealHeight);
 }
 
-bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF safeArea,
+bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect,
     const std::vector<std::string>& aiMenuOptions, const RefPtr<NG::FrameNode>& targetNode)
 {
     CHECK_NULL_RETURN(uiExtNode, false);
@@ -3191,12 +3192,11 @@ bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode,
     CHECK_NULL_RETURN(menuNode, false);
     auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(menuLayoutProperty, false);
-    menuLayoutProperty->UpdateTargetSize(safeArea.GetSize());
-    OffsetF offset(safeArea.GetX(), safeArea.Bottom());
-    menuLayoutProperty->UpdateMenuOffset(offset);
+    menuLayoutProperty->UpdateIsRectInTarget(true);
+    menuLayoutProperty->UpdateTargetSize(aiRect.GetSize());
     auto menuWrapperNode = DynamicCast<FrameNode>(menuNode->GetParent());
     CHECK_NULL_RETURN(menuWrapperNode, false);
-    ShowMenu(targetNode->GetId(), offset, menuWrapperNode);
+    ShowMenu(targetNode->GetId(), aiRect.GetOffset(), menuWrapperNode);
     return true;
 }
 
