@@ -17,6 +17,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/components/common/properties/shadow.h"
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
@@ -27,10 +28,11 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
-constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr int SIZE_OF_TEXT_CASES = 2;
+constexpr double DEFAULT_SPAN_FONT_SIZE = 16;
+constexpr DimensionUnit DEFAULT_SPAN_FONT_UNIT = DimensionUnit::FP;
 constexpr bool DEFAULT_TEXT_SHADOW_FILL = false;
+constexpr ShadowType DEFAULT_TEXT_SHADOW_TYPE = ShadowType::COLOR;
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const Color DEFAULT_DECORATION_COLOR = Color::BLACK;
@@ -43,44 +45,55 @@ constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
+constexpr int NUM_7 = 7;
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
 
-uint32_t ColorAlphaAdapt(uint32_t origin)
+uint32_t parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
-    uint32_t result = origin;
-    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
-        result = origin | COLOR_ALPHA_VALUE;
+    Color color = DEFAULT_TEXT_SHADOW_COLOR;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, jsValue, color)) {
+        color = DEFAULT_TEXT_SHADOW_COLOR;
     }
-    return result;
-}
+    return color.GetValue();
+};
 
-bool ParseJsDimensionFp(const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension &result)
+uint32_t parseShadowFill(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
-    if (value->IsNumber()) {
-        result = CalcDimension(value->ToNumber(vm)->Value(), DimensionUnit::FP);
-        return true;
+    if (jsValue->IsBoolean()) {
+        return static_cast<uint32_t>(jsValue->ToBoolean(vm)->Value());
     }
-    if (value->IsString()) {
-        result = StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::FP);
-        return true;
-    }
-    // resouce ignore by design
-    return false;
-}
+    return static_cast<uint32_t>(DEFAULT_TEXT_SHADOW_FILL);
+};
 
-bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
+uint32_t parseShadowType(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
-    if (value->IsNumber()) {
-        result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
-        return true;
+    if (jsValue->IsInt()) {
+        return jsValue->Uint32Value(vm);
     }
-    if (value->IsString()) {
-        return Color::ParseColorString(value->ToString(vm)->ToString(), result);
+    return static_cast<uint32_t>(DEFAULT_TEXT_SHADOW_TYPE);
+};
+
+double parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
+{
+    double radius = 0.0;
+    ArkTSUtils::ParseJsDouble(vm, jsValue, radius);
+    if (LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
     }
-    // resouce ignore by design
-    return false;
-}
+    return radius;
+};
+
+double parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
+{
+    CalcDimension offset;
+    if (ArkTSUtils::ParseJsResource(vm, jsValue, offset)) {
+        return offset.Value();
+    } else if (ArkTSUtils::ParseJsDimensionVp(vm, jsValue, offset)) {
+        return offset.Value();
+    }
+    return 0.0;
+};
 } // namespace
 
 ArkUINativeModuleValue TextBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -217,7 +230,7 @@ ArkUINativeModuleValue TextBridge::SetLineHeight(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     CalcDimension lineHeight(0.0, DimensionUnit::PX);
-    if (!ParseJsDimensionFp(vm, secondArg, lineHeight)) {
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, lineHeight)) {
         lineHeight.Reset();
     }
     GetArkUIInternalNodeAPI()->GetTextModifier().SetTextLineHeight(
@@ -280,7 +293,7 @@ ArkUINativeModuleValue TextBridge::SetDecoration(ArkUIRuntimeCallInfo* runtimeCa
     if (secondArg->IsInt()) {
         textDecoration = secondArg->Int32Value(vm);
     }
-    if (!ParseJsColor(vm, thirdArg, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color)) {
         color = DEFAULT_DECORATION_COLOR;
     }
     GetArkUIInternalNodeAPI()->GetTextModifier().SetTextDecoration(
@@ -358,19 +371,10 @@ ArkUINativeModuleValue TextBridge::SetMinFontSize(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    struct StringAndDouble result = { 0.0, nullptr };
-    std::string str;
-    if (secondArg->IsNumber()) {
-        result.value = secondArg->ToNumber(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetTextModifier().SetTextMinFontSize(nativeNode, &result);
-    } else if (secondArg->IsString()) {
-        str = secondArg->ToString(vm)->ToString();
-        result.valueStr = str.c_str();
-        GetArkUIInternalNodeAPI()->GetTextModifier().SetTextMinFontSize(nativeNode, &result);
-    } else {
-        GetArkUIInternalNodeAPI()->GetTextModifier().ReSetTextMinFontSize(nativeNode);
-    }
-
+    CalcDimension fontSize;
+    ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize);
+    GetArkUIInternalNodeAPI()->GetTextModifier().SetTextMinFontSize(
+        nativeNode, fontSize.Value(), static_cast<int8_t>(fontSize.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -416,19 +420,10 @@ ArkUINativeModuleValue TextBridge::SetMaxFontSize(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    struct StringAndDouble result = { 0.0, nullptr };
-    std::string str;
-    if (secondArg->IsNumber()) {
-        result.value = secondArg->ToNumber(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetTextModifier().SetTextMaxFontSize(nativeNode, &result);
-    } else if (secondArg->IsString()) {
-        str = secondArg->ToString(vm)->ToString();
-        result.valueStr = str.c_str();
-        GetArkUIInternalNodeAPI()->GetTextModifier().SetTextMaxFontSize(nativeNode, &result);
-    } else {
-        GetArkUIInternalNodeAPI()->GetTextModifier().ResetTextMaxFontSize(nativeNode);
-    }
-
+    CalcDimension fontSize;
+    ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize);
+    GetArkUIInternalNodeAPI()->GetTextModifier().SetTextMaxFontSize(
+        nativeNode, fontSize.Value(), static_cast<int8_t>(fontSize.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -506,54 +501,44 @@ ArkUINativeModuleValue TextBridge::SetTextShadow(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> radiusArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> offsetXArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> offsetYArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-    Local<JSValueRef> fillArg = runtimeCallInfo->GetCallArgRef(NUM_5);
-    Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> offsetXArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> offsetYArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    Local<JSValueRef> fillArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(NUM_7);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     uint32_t length = lengthArg->Uint32Value(vm);
     if (length == 0) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto radiusArray = std::make_unique<double[]>(length);
+    auto typeArray = std::make_unique<uint32_t[]>(length);
     auto colorArray = std::make_unique<uint32_t[]>(length);
     auto offsetXArray = std::make_unique<double[]>(length);
     auto offsetYArray = std::make_unique<double[]>(length);
     auto fillArray = std::make_unique<uint32_t[]>(length);
-    auto parseColor = [DEFAULT_TEXT_SHADOW_COLOR = DEFAULT_TEXT_SHADOW_COLOR](
-                          const EcmaVM* vm, const Local<JSValueRef>& jsValue) {
-        Color color = DEFAULT_TEXT_SHADOW_COLOR;
-        if (!ArkTSUtils::ParseJsColorAlpha(vm, jsValue, color)) {
-            color = DEFAULT_TEXT_SHADOW_COLOR;
-        }
-        return color.GetValue();
-    };
-    auto parseFill = [DEFAULT_TEXT_SHADOW_FILL = DEFAULT_TEXT_SHADOW_FILL](
-                         const EcmaVM* vm, const Local<JSValueRef>& jsValue) {
-        if (jsValue->IsBoolean()) {
-            return static_cast<uint32_t>(jsValue->ToBoolean(vm)->Value());
-        }
-        return static_cast<uint32_t>(DEFAULT_TEXT_SHADOW_FILL);
-    };
-    auto parseDouble = [](const EcmaVM* vm, const Local<JSValueRef>& jsValue) {
-        if (jsValue->IsNumber()) {
-            return jsValue->ToNumber(vm)->Value();
-        }
-        return 0.0;
-    };
-    bool radiusParseResult = ArkTSUtils::ParseArray<double>(vm, radiusArg, radiusArray.get(), length, parseDouble);
-    bool colorParseResult = ArkTSUtils::ParseArray<uint32_t>(vm, colorArg, colorArray.get(), length, parseColor);
-    bool offsetXParseResult = ArkTSUtils::ParseArray<double>(vm, offsetXArg, offsetXArray.get(), length, parseDouble);
-    bool offsetYParseResult = ArkTSUtils::ParseArray<double>(vm, offsetYArg, offsetYArray.get(), length, parseDouble);
-    bool fillParseResult = ArkTSUtils::ParseArray<uint32_t>(vm, fillArg, fillArray.get(), length, parseFill);
-    if (!radiusParseResult || !colorParseResult || !offsetXParseResult || !offsetYParseResult || !fillParseResult) {
+    bool radiusParseResult = ArkTSUtils::ParseArray<double>(
+        vm, radiusArg, radiusArray.get(), length, parseShadowRadius);
+    bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
+        vm, typeArg, typeArray.get(), length, parseShadowType);
+    bool colorParseResult = ArkTSUtils::ParseArray<uint32_t>(
+        vm, colorArg, colorArray.get(), length, parseShadowColor);
+    bool offsetXParseResult = ArkTSUtils::ParseArray<double>(
+        vm, offsetXArg, offsetXArray.get(), length, parseShadowOffset);
+    bool offsetYParseResult = ArkTSUtils::ParseArray<double>(
+        vm, offsetYArg, offsetYArray.get(), length, parseShadowOffset);
+    bool fillParseResult = ArkTSUtils::ParseArray<uint32_t>(
+        vm, fillArg, fillArray.get(), length, parseShadowFill);
+    if (!radiusParseResult || !colorParseResult || !offsetXParseResult ||
+        !offsetYParseResult || !fillParseResult || !typeParseResult) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto textShadowArray = std::make_unique<TextShadowStruct[]>(length);
     CHECK_NULL_RETURN(textShadowArray.get(), panda::JSValueRef::Undefined(vm));
     for (uint32_t i = 0; i < length; i++) {
         textShadowArray[i].radius = radiusArray[i];
+        textShadowArray[i].type = typeArray[i];
         textShadowArray[i].color = colorArray[i];
         textShadowArray[i].offsetX = offsetXArray[i];
         textShadowArray[i].offsetY = offsetYArray[i];
@@ -701,39 +686,59 @@ ArkUINativeModuleValue TextBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
-    struct StringAndDouble size = { 0.0, nullptr };
-
-    if (secondArg->IsNumber()) {
-        size.value = secondArg->ToNumber(vm)->Value();
-    } else if (secondArg->IsString()) {
-        size.valueStr = secondArg->ToString(vm)->ToString().c_str();
+    Local<JSValueRef> sizeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> weightArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> familyArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    ArkUIFontStruct fontInfo;
+    CalcDimension fontSize;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, sizeArg,  fontSize) || sizeArg->IsNull()) {
+        fontSize.SetValue(DEFAULT_SPAN_FONT_SIZE);
+        fontSize.SetUnit(DEFAULT_SPAN_FONT_UNIT);
+    }
+    if (sizeArg->IsUndefined() || fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
+        auto size = theme->GetTextStyle().GetFontSize();
+        fontInfo.fontSizeNumber = size.Value();
+        fontInfo.fontSizeUnit = static_cast<int8_t>(size.Unit());
+    } else {
+        fontInfo.fontSizeNumber = fontSize.Value();
+        fontInfo.fontSizeUnit = static_cast<int8_t>(fontSize.Unit());
     }
 
     std::string weight = DEFAULT_FONT_WEIGHT;
-    if (!thirdArg->IsNull()) {
-        if (thirdArg->IsNumber()) {
-            weight = std::to_string(thirdArg->Int32Value(vm));
-        } else if (thirdArg->IsString()) {
-            weight = thirdArg->ToString(vm)->ToString();
+    if (!weightArg->IsNull()) {
+        if (weightArg->IsNumber()) {
+            weight = std::to_string(weightArg->Int32Value(vm));
+        } else if (weightArg->IsString()) {
+            weight = weightArg->ToString(vm)->ToString();
         }
     }
-    std::string str;
-    const char* family = nullptr;
-    if (!forthArg->IsNull()) {
-        str = forthArg->ToString(vm)->ToString();
-        family = str.c_str();
-    }
+    fontInfo.fontWeight = static_cast<uint8_t>(Framework::ConvertStrToFontWeight(weight));
+    
     int32_t style = static_cast<int32_t>(DEFAULT_FONT_STYLE);
-    if (fifthArg->IsInt()) {
-        style = fifthArg->Int32Value(vm);
+    if (styleArg->IsInt()) {
+        style = styleArg->Int32Value(vm);
     }
-    GetArkUIInternalNodeAPI()->GetTextModifier().SetTextFont(nativeNode, &size, weight.c_str(), family, style);
+    fontInfo.fontStyle = static_cast<uint8_t>(style);
+
+    std::vector<std::string> fontFamilies;
+    fontInfo.fontFamilies = nullptr;
+    if (!familyArg->IsNull() && ArkTSUtils::ParseJsFontFamilies(vm, familyArg, fontFamilies)) {
+        fontInfo.familyLength = fontFamilies.size();
+        auto families = std::make_unique<const char* []>(fontInfo.familyLength);
+        for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+            families[i] = fontFamilies[i].c_str();
+        }
+        fontInfo.fontFamilies = families.get();
+        GetArkUIInternalNodeAPI()->GetTextModifier().SetTextFont(nativeNode, &fontInfo);
+    } else {
+        GetArkUIInternalNodeAPI()->GetTextModifier().SetTextFont(nativeNode, &fontInfo);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

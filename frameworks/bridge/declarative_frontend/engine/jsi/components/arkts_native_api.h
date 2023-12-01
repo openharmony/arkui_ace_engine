@@ -77,6 +77,7 @@ struct StringAndInt32 {
 
 struct TextShadowStruct {
     double radius;
+    uint32_t type;
     uint32_t color;
     double offsetX;
     double offsetY;
@@ -100,6 +101,16 @@ struct ArkUILengthType {
     const char* string;
     double number;
 };
+
+struct ArkUIFontStruct {
+    double fontSizeNumber;
+    int8_t fontSizeUnit;
+    uint8_t fontWeight;
+    uint8_t fontStyle;
+    const char** fontFamilies;
+    uint32_t familyLength;
+};
+
 typedef void* NodeHandle;
 struct ArkUICommonModifierAPI {
     void (*SetBackgroundColor)(NodeHandle node, uint32_t color);
@@ -323,11 +334,11 @@ struct ArkUITextModifierAPI {
     void (*ResetTextTextCase)(NodeHandle node);
     void (*SetTextMaxLines)(NodeHandle node, uint32_t maxLine);
     void (*ResetTextMaxLines)(NodeHandle node);
-    void (*SetTextMinFontSize)(NodeHandle node, struct StringAndDouble* minFontSize);
+    void (*SetTextMinFontSize)(NodeHandle node, const double number, const int8_t unit);
     void (*ReSetTextMinFontSize)(NodeHandle node);
     void (*SetTextDraggable)(NodeHandle node, uint32_t draggable);
     void (*ResetTextDraggable)(NodeHandle node);
-    void (*SetTextMaxFontSize)(NodeHandle node, struct StringAndDouble* maxFontSize);
+    void (*SetTextMaxFontSize)(NodeHandle node, const double number, const int8_t unit);
     void (*ResetTextMaxFontSize)(NodeHandle node);
     void (*SetTextFontFamily)(NodeHandle node, const char** fontFamilies, uint32_t length);
     void (*ResetTextFontFamily)(NodeHandle node);
@@ -343,8 +354,7 @@ struct ArkUITextModifierAPI {
     void (*ResetTextBaselineOffset)(NodeHandle node);
     void (*SetTextLetterSpacing)(NodeHandle node, const struct StringAndDouble* letterSpacingStruct);
     void (*ResetTextLetterSpacing)(NodeHandle node);
-    void (*SetTextFont)(
-        NodeHandle node, const struct StringAndDouble* size, const char* weight, const char* family, int32_t style);
+    void (*SetTextFont)(NodeHandle node, const struct ArkUIFontStruct *fontInfo);
     void (*ResetTextFont)(NodeHandle node);
 };
 
@@ -802,7 +812,7 @@ struct ArkUISpanModifierAPI {
     void (*ResetSpanTextCase)(NodeHandle node);
     void (*SetSpanFontWeight)(NodeHandle node, const char* value);
     void (*ResetSpanFontWeight)(NodeHandle node);
-    void (*SetSpanLineHeight)(NodeHandle node, struct StringAndDouble *lienHeight);
+    void (*SetSpanLineHeight)(NodeHandle node, const double number, const int8_t unit);
     void (*ReSetSpanLineHeight)(NodeHandle node);
     void (*SetSpanFontStyle)(NodeHandle node, int32_t fontStyle);
     void (*ReSetSpanFontStyle)(NodeHandle node);
@@ -816,8 +826,7 @@ struct ArkUISpanModifierAPI {
     void (*ResetSpanFontColor)(NodeHandle node);
     void (*SetSpanLetterSpacing)(NodeHandle node, const struct StringAndDouble *letterSpacingValue);
     void (*ResetSpanLetterSpacing)(NodeHandle node);
-    void (*SetSpanFont)(NodeHandle node, const struct StringAndDouble *size, const char* weight, const char *family,
-        int32_t style);
+    void (*SetSpanFont)(NodeHandle node, const struct ArkUIFontStruct *fontInfo);
     void (*ResetSpanFont)(NodeHandle node);
 };
 

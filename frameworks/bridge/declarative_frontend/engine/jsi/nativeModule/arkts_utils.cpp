@@ -549,6 +549,47 @@ bool ArkTSUtils::ParseJsFontFamilies(
         result = Framework::ConvertStrToFontFamilies(jsValue->ToString(vm)->ToString());
         return true;
     }
+    if (jsValue->IsObject()) {
+        auto obj = jsValue->ToObject(vm);
+        auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+        if (!resId->IsNumber()) {
+            return false;
+        }
+        return ParseJsFontFamiliesFromResource(vm, jsValue, result);
+    }
+    return true;
+}
+
+bool ArkTSUtils::ParseJsFontFamiliesFromResource(
+    const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result)
+{
+    auto jsObj = jsValue->ToObject(vm);
+    auto resId = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    if (!resId->IsNumber()) {
+        return false;
+    }
+
+    auto resourceObject = GetResourceObject(vm, jsValue);
+    auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
+    if (!resourceWrapper) {
+        return false;
+    }
+
+    auto resIdNum = resId->Int32Value(vm);
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(vm, jsValue)) {
+            return false;
+        }
+        auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+        if (!args->IsArray(vm)) {
+            return false;
+        }
+        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+        auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+        result.emplace_back(resourceWrapper->GetStringByName(param->ToString(vm)->ToString()));
+        return true;
+    }
+    result.emplace_back(resourceWrapper->GetString(resId->Uint32Value(vm)));
     return true;
 }
 
@@ -629,5 +670,40 @@ std::string ArkTSUtils::GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef
         result = value->ToString(vm)->ToString();
     }
     return result;
+}
+
+bool ArkTSUtils::ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+    auto jsObj = jsValue->ToObject(vm);
+    auto resourceObject = GetResourceObject(vm, jsValue);
+    auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
+    CHECK_NULL_RETURN(resourceWrapper, false);
+    
+    auto type = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
+    auto id = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    uint32_t resourceType = 0;
+    if (type->IsNull() || !type->IsNumber() || id->IsNull() || !id->IsNumber()) {
+        return false;
+    } else {
+        resourceType = type->Uint32Value(vm);
+    }
+    if (resourceType == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(id->Uint32Value(vm));
+        return StringUtils::StringToCalcDimensionNG(value, result, false);
+    }
+    if (resourceType == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(resourceWrapper->GetInt(id->Uint32Value(vm)));
+        StringUtils::StringToDimensionWithUnitNG(value, result);
+        return true;
+    }
+
+    if (resourceType == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = resourceWrapper->GetDimension(id->Uint32Value(vm));
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG
