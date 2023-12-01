@@ -362,7 +362,7 @@ void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
 void JSScroll::SetEdgeEffect(const JSCallbackInfo& args)
 {
     auto edgeEffect = JSScrollable::ParseEdgeEffect(args, EdgeEffect::NONE);
-    auto alwaysEnabled = JSScrollable::ParseAlwaysEnable(args, false);
+    auto alwaysEnabled = JSScrollable::ParseAlwaysEnable(args, true);
     ScrollModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
 }
 
