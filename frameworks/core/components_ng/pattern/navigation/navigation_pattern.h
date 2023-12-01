@@ -325,6 +325,7 @@ private:
     bool userSetNavBarRangeFlag_ = false;
     bool userSetMinContentFlag_ = false;
     bool userSetNavBarWidthFlag_ = false;
+    bool isChanged_ = false; // check navigation top page is change
     Dimension minNavBarWidthValue_ = 0.0_vp;
     Dimension maxNavBarWidthValue_ = 0.0_vp;
     Dimension minContentWidthValue_ = 0.0_vp;
