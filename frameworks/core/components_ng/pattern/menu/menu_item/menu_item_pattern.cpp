@@ -106,12 +106,13 @@ void UpdateFontFamily(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayou
 }
 
 void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimension& horizontalSize,
-    const Dimension& verticalSize, const Color& color)
+    const Dimension& verticalSize, const Color& color, const bool& useDefaultIcon)
 {
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetSrc(src);
-    imageSourceInfo.SetFillColor(color);
-
+    if (useDefaultIcon) {
+        imageSourceInfo.SetFillColor(color);
+    }
     auto props = node->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateImageSourceInfo(imageSourceInfo);
@@ -120,10 +121,11 @@ void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimens
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     props->UpdateCalcLayoutProperty(layoutConstraint);
-
-    auto iconRenderProperty = node->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(iconRenderProperty);
-    iconRenderProperty->UpdateSvgFillColor(color);
+    if (useDefaultIcon) {
+        auto iconRenderProperty = node->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(iconRenderProperty);
+        iconRenderProperty->UpdateSvgFillColor(color);
+    }
 }
 } // namespace
 
@@ -597,7 +599,7 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     UpdateIconSrc(selectIcon_, iconPath, selectTheme->GetIconSideLength(), selectTheme->GetIconSideLength(),
-        selectTheme->GetMenuIconColor());
+        selectTheme->GetMenuIconColor(), userIcon.empty());
 
     auto renderContext = selectIcon_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -633,7 +635,7 @@ void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
     CHECK_NULL_VOID(selectTheme);
     auto iconWidth = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconWidth();
     auto iconHeight = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconHeight();
-    UpdateIconSrc(iconNode, iconSrc, iconWidth, iconHeight, selectTheme->GetMenuIconColor());
+    UpdateIconSrc(iconNode, iconSrc, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
 
     iconNode->MountToParent(row, ((isStart && selectIcon_) || (!isStart && label_)) ? 1 : 0);
     iconNode->MarkModifyDone();
