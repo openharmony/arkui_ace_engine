@@ -250,7 +250,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     // Remove form scenario when formal solution is completed.
     auto pipeline = PipelineBase::GetCurrentContext();
     if (pipeline && pipeline->IsFormRender()) {
-        Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
+        Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
         if (offset.GetDistance() > MAX_THRESHOLD) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "This gesture is out of offset, try to reject it");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
