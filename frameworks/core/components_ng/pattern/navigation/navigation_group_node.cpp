@@ -502,7 +502,12 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
                 }
                 // for the case, the navBar form EXIT_PUSH to push during animation
                 if (needSetInvisible) {
-                    node->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+                    auto navBarPattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
+                    CHECK_NULL_VOID(navBarPattern);
+                    auto latestMode = navBarPattern->GetLatestNavigationMode();
+                    if (latestMode == NavigationMode::STACK) {
+                        node->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+                    }
                 }
                 if (mode == NavigationMode::SPLIT) {
                     node->GetRenderContext()->ClipWithRRect(

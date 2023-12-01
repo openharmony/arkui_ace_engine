@@ -590,6 +590,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
                 } else {
                     navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
+                    navBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
                     navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
                 }
                 auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetContentNode());
