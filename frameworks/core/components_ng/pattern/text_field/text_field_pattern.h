@@ -84,6 +84,16 @@ enum class DragStatus { DRAGGING, ON_DROP, NONE };
 
 enum class CaretStatus { SHOW, HIDE, NONE };
 
+enum class InputOperation {
+    INSERT,
+    DELETE_BACKWARD,
+    DELETE_FORWARD,
+    CURSOR_UP,
+    CURSOR_DOWN,
+    CURSOR_LEFT,
+    CURSOR_RIGHT
+};
+
 enum {
     ACTION_SELECT_ALL, // Smallest code unit.
     ACTION_UNDO,
@@ -458,17 +468,21 @@ public:
     }
 
     bool CursorMoveLeft() override;
+    bool CursorMoveLeftOperation();
     bool CursorMoveLeftWord();
     bool CursorMoveLineBegin();
     bool CursorMoveToParagraphBegin();
     bool CursorMoveHome();
     bool CursorMoveRight() override;
+    bool CursorMoveRightOperation();
     bool CursorMoveRightWord();
     bool CursorMoveLineEnd();
     bool CursorMoveToParagraphEnd();
     bool CursorMoveEnd();
     bool CursorMoveUp() override;
     bool CursorMoveDown() override;
+    bool CursorMoveUpOperation();
+    bool CursorMoveDownOperation();
     void SetCaretPosition(int32_t position);
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
     void HandleExtendAction(int32_t action) override;
@@ -1298,6 +1312,7 @@ private:
     std::queue<int32_t> deleteBackwardOperations_;
     std::queue<int32_t> deleteForwardOperations_;
     std::queue<std::string> insertValueOperations_;
+    std::queue<InputOperation> inputOperations_;
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
     bool showSelect_ = false;

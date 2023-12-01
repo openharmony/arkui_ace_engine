@@ -283,19 +283,42 @@ TextFieldPattern::~TextFieldPattern()
 
 void TextFieldPattern::BeforeCreateLayoutWrapper()
 {
-    while (!deleteBackwardOperations_.empty()) {
-        DeleteBackwardOperation(deleteBackwardOperations_.front());
-        deleteBackwardOperations_.pop();
-    }
-
-    while (!deleteForwardOperations_.empty()) {
-        DeleteForwardOperation(deleteForwardOperations_.front());
-        deleteForwardOperations_.pop();
-    }
-
-    while (!insertValueOperations_.empty()) {
-        InsertValueOperation(insertValueOperations_.front());
-        insertValueOperations_.pop();
+    while (!inputOperations_.empty()) {
+        auto operation = inputOperations_.front();
+        inputOperations_.pop();
+        switch (operation) {
+            case InputOperation::INSERT: {
+                InsertValueOperation(insertValueOperations_.front());
+                insertValueOperations_.pop();
+                break;
+            }
+            case InputOperation::DELETE_BACKWARD: {
+                DeleteBackward(deleteBackwardOperations_.front());
+                deleteBackwardOperations_.pop();
+                break;
+            }
+            case InputOperation::DELETE_FORWARD: {
+                DeleteForwardOperation(deleteForwardOperations_.front());
+                deleteForwardOperations_.pop();
+                break;
+            }
+            case InputOperation::CURSOR_UP: {
+                CursorMoveUpOperation();
+                break;
+            }
+            case InputOperation::CURSOR_DOWN: {
+                CursorMoveDownOperation();
+                break;
+            }
+            case InputOperation::CURSOR_LEFT: {
+                CursorMoveLeftOperation();
+                break;
+            }
+            case InputOperation::CURSOR_RIGHT: {
+                CursorMoveRightOperation();
+                break;
+            }
+        }
     }
 }
 
@@ -2935,6 +2958,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
         UltralimitShake();
         return;
     }
+    inputOperations_.emplace(InputOperation::INSERT);
     insertValueOperations_.emplace(insertValue);
     CloseSelectOverlay(true);
     ScrollToSafeArea();
@@ -3183,7 +3207,7 @@ bool TextFieldPattern::CharLineChanged(int32_t caretPosition)
     return !NearEqual(caretMetrics.offset.GetY(), selectController_->GetCaretRect().GetY());
 }
 
-bool TextFieldPattern::CursorMoveLeft()
+bool TextFieldPattern::CursorMoveLeftOperation()
 {
     if (focusIndex_ != FocuseIndex::TEXT) {
         return UpdateFocusBackward();
@@ -3201,6 +3225,16 @@ bool TextFieldPattern::CursorMoveLeft()
     }
     OnCursorMoveDone(TextAffinity::DOWNSTREAM);
     return originCaretPosition != selectController_->GetCaretIndex();
+}
+
+bool TextFieldPattern::CursorMoveLeft()
+{
+    if (inputOperations_.empty()) {
+        return CursorMoveLeftOperation();
+    }
+
+    inputOperations_.emplace(InputOperation::CURSOR_LEFT);
+    return false;
 }
 
 bool TextFieldPattern::CursorMoveLeftWord()
@@ -3269,7 +3303,7 @@ bool TextFieldPattern::CursorMoveHome()
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 
-bool TextFieldPattern::CursorMoveRight()
+bool TextFieldPattern::CursorMoveRightOperation()
 {
     if (focusIndex_ != FocuseIndex::TEXT) {
         return UpdateFocusForward();
@@ -3285,6 +3319,15 @@ bool TextFieldPattern::CursorMoveRight()
     }
     OnCursorMoveDone(TextAffinity::DOWNSTREAM);
     return originCaretPosition != selectController_->GetCaretIndex();
+}
+
+bool TextFieldPattern::CursorMoveRight()
+{
+    if (inputOperations_.empty()) {
+        return CursorMoveRightOperation();
+    }
+    inputOperations_.emplace(InputOperation::CURSOR_RIGHT);
+    return false;
 }
 
 bool TextFieldPattern::CursorMoveRightWord()
@@ -3354,7 +3397,7 @@ bool TextFieldPattern::CursorMoveEnd()
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 
-bool TextFieldPattern::CursorMoveUp()
+bool TextFieldPattern::CursorMoveUpOperation()
 {
     CHECK_NULL_RETURN(IsTextArea(), false);
     auto originCaretPosition = selectController_->GetCaretIndex();
@@ -3368,7 +3411,17 @@ bool TextFieldPattern::CursorMoveUp()
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 
-bool TextFieldPattern::CursorMoveDown()
+bool TextFieldPattern::CursorMoveUp()
+{
+    if (inputOperations_.empty()) {
+        return CursorMoveUpOperation();
+    }
+
+    inputOperations_.emplace(InputOperation::CURSOR_UP);
+    return false;
+}
+
+bool TextFieldPattern::CursorMoveDownOperation()
 {
     CHECK_NULL_RETURN(IsTextArea(), false);
     auto originCaretPosition = selectController_->GetCaretIndex();
@@ -3380,6 +3433,16 @@ bool TextFieldPattern::CursorMoveDown()
         static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
     OnCursorMoveDone();
     return originCaretPosition != selectController_->GetCaretIndex();
+}
+
+bool TextFieldPattern::CursorMoveDown()
+{
+    if (inputOperations_.empty()) {
+        return CursorMoveDownOperation();
+    }
+
+    inputOperations_.emplace(InputOperation::CURSOR_DOWN);
+    return false;
 }
 
 void TextFieldPattern::Delete(int32_t start, int32_t end)
@@ -3643,6 +3706,7 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     if (selectController_->GetCaretIndex() <= 0) {
         return;
     }
+    inputOperations_.emplace(InputOperation::DELETE_BACKWARD);
     deleteBackwardOperations_.emplace(length);
     if (layoutProperty->HasMaxLength()) {
         counterChange_ = false;
@@ -3694,6 +3758,7 @@ void TextFieldPattern::DeleteForward(int32_t length)
     if (selectController_->GetCaretIndex() >= static_cast<int32_t>(contentController_->GetWideText().length())) {
         return;
     }
+    inputOperations_.emplace(InputOperation::DELETE_FORWARD);
     deleteForwardOperations_.emplace(length);
     CloseSelectOverlay();
     auto tmpHost = GetHost();
