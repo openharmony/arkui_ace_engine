@@ -43,6 +43,7 @@ public:
     MOCK_METHOD2(ClearMenuNG, void(bool inWindow, bool showAnimation));
     MOCK_METHOD2(
         ShowDialogNG, RefPtr<NG::FrameNode>(const DialogProperties& dialogProps, std::function<void()>&& buildFunc));
+    MOCK_METHOD1(CloseDialogNG, void(const RefPtr<NG::FrameNode>& dialogNode));
     MOCK_METHOD0(HideSubWindowNG, void());
     MOCK_CONST_METHOD0(GetChildContainerId, int32_t());
     MOCK_METHOD0(GetShown, bool());

@@ -717,6 +717,18 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     return dialog;
 }
 
+void SubwindowOhos::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    ContainerScope scope(childContainerId_);
+    return overlay->CloseDialog(dialogNode);
+}
+
 void SubwindowOhos::HideSubWindowNG()
 {
     ContainerScope scope(childContainerId_);
