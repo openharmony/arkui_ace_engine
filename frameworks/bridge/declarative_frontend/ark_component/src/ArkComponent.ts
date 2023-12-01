@@ -2703,13 +2703,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   keyboardShortcut(value: string | FunctionKey, keys: Array<ModifierKey>, action?: () => void): this {
     let keyboardShortCut = new ArkKeyBoardShortCut();
     keyboardShortCut.value = value;
-    keyboardShortCut.keys = keys;
-    if (action) {
-      throw new Error("Method not implemented.");
-    } else {
-      modifier(this._modifiers, KeyBoardShortCutModifier, keyboardShortCut);
-      return this;
-    }
+    keyboardShortCut.keys = keys; 
+    modifier(this._modifiers, KeyBoardShortCutModifier, keyboardShortCut);
+    return this;
   }
 
   accessibilityGroup(value: boolean): this {

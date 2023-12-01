@@ -1,6 +1,6 @@
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class MenuItemSelectedModifier extends Modifier<boolean> {
-  static identity: Symbol = Symbol("selected");
+  static identity: Symbol = Symbol('selected');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
       GetUINativeModule().menuitem.resetSelected(node);
@@ -11,7 +11,7 @@ class MenuItemSelectedModifier extends Modifier<boolean> {
   }
 }
 class LabelFontColorModifier extends Modifier<number | undefined> {
-  static identity: Symbol = Symbol("labelfontColor");
+  static identity: Symbol = Symbol('labelfontColor');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
       GetUINativeModule().menuitem.resetLabelFontColor(node);
@@ -22,7 +22,7 @@ class LabelFontColorModifier extends Modifier<number | undefined> {
   }
 }
 class ContentFontColorModifier extends Modifier<number | undefined> {
-  static identity: Symbol = Symbol("contentfontColor");
+  static identity: Symbol = Symbol('contentfontColor');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
       GetUINativeModule().menuitem.resetContentFontColor(node);
@@ -34,32 +34,32 @@ class ContentFontColorModifier extends Modifier<number | undefined> {
 }
 
 class LabelFontModifier extends Modifier<ArkFont> {
-  static identity: Symbol = Symbol("labelFont");
+  static identity: Symbol = Symbol('labelFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().menu.resetLabelFont(node);
+      GetUINativeModule().menuitem.resetLabelFont(node);
     }
     else {
-      GetUINativeModule().menu.setLabelFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      GetUINativeModule().menuitem.setLabelFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
 }
 
 class ContentFontModifier extends Modifier<ArkFont> {
-  static identity: Symbol = Symbol("contentFont");
+  static identity: Symbol = Symbol('contentFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().menu.resetContentFont(node);
+      GetUINativeModule().menuitem.resetContentFont(node);
     }
     else {
-      GetUINativeModule().menu.setContentFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      GetUINativeModule().menuitem.setContentFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
 }
 
 class ArkMenuItemComponent extends ArkComponent implements MenuItemAttribute {
   selected(value: boolean): this {
-    if (typeof value === "boolean") {
+    if (typeof value === 'boolean') {
       modifier(this._modifiers, MenuItemSelectedModifier, value);
     } else {
       modifier(this._modifiers, MenuItemSelectedModifier, false);
@@ -67,10 +67,10 @@ class ArkMenuItemComponent extends ArkComponent implements MenuItemAttribute {
     return this;
   }
   selectIcon(value: any): MenuItemAttribute {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
   onChange(callback: (selected: boolean) => void): MenuItemAttribute {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
   contentFont(value: Font): MenuItemAttribute {
     let font = new ArkFont();
