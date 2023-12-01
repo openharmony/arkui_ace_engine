@@ -127,6 +127,12 @@ ohos_unittest("plugin_pattern_test_ng") {
     "//third_party/zlib:shared_libz",
   ]
 
+  if (ace_use_rosen_drawing) {
+    deps += [
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics::2d_graphics",
+    ]
+  }
+
   external_deps = [
     "c_utils:utils",
     "graphic_2d:librender_service_client",

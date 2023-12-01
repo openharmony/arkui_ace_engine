@@ -19,7 +19,7 @@
 #include <memory>
 #include <string>
 
-#include "cJSON.h"
+#include "third_party/cJSON/cJSON.h"
 #include "include/core/SkSamplingOptions.h"
 
 #include "base/utils/string_utils.h"

@@ -983,7 +983,11 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest002, TestSize.Level1)
 {
     SvgFe* svgFe = new SvgFe();
     EXPECT_NE(svgFe, nullptr);
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkImageFilter> imageFilter = nullptr;
+#else
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+#endif
     ColorInterpolationType colorInterpolationType = ColorInterpolationType::LINEAR_RGB;
     ColorInterpolationType srcColor = ColorInterpolationType::SRGB;
     svgFe->GetImageFilter(imageFilter, colorInterpolationType);
@@ -1004,7 +1008,11 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest003, TestSize.Level1)
     SvgFeColorMatrix* colorMatrix = new SvgFeColorMatrix();
     EXPECT_NE(colorMatrix, nullptr);
     colorMatrix->OnInitStyle();
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkImageFilter> imageFilter = nullptr;
+#else
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+#endif
     ColorInterpolationType srcColor = ColorInterpolationType::SRGB;
     ColorInterpolationType colorInterPolationType = ColorInterpolationType::LINEAR_RGB;
     colorMatrix->OnAsImageFilter(imageFilter, srcColor, colorInterPolationType);

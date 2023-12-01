@@ -12,16 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/render/adapter/animated_image.h"
-namespace OHOS::Ace::NG {
-#ifndef USE_ROSEN_DRAWING
-RefPtr<CanvasImage> AnimatedImage::Create(
-    const RefPtr<SkiaImageData>& data, const ResizeParam& size, const std::string& url)
-#else
-RefPtr<CanvasImage> AnimatedImage::Create(
-    const RefPtr<DrawingImageData>& data, const ResizeParam& size, const std::string& url)
-#endif
-{
-    return nullptr;
-}
-} // namespace OHOS::Ace::NG
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_RECORDING_CANVAS_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_RECORDING_CANVAS_H
+
+namespace OHOS::Ace::Testing {
+class TestingRecordingCanvas {
+public:
+    TestingRecordingCanvas() = default;
+    ~TestingRecordingCanvas() = default;
+};
+} // namespace OHOS::Ace::Testing
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_RECORDING_CANVAS_H
