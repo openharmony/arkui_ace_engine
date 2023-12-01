@@ -789,7 +789,7 @@ void RosenRenderImage::ApplyColorFilter(RSBrush& brush)
     Color color = color_.value();
     auto filter = brush.GetFilter();
     filter.SetColorFilter(RSRecordingColorFilter::CreateBlendModeColorFilter(
-        RSColor::ColorQuadSetARGB(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha()),
+        RSColor::ColorQuadSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()),
         RSBlendMode::PLUS));
     brush.SetFilter(filter);
 #endif

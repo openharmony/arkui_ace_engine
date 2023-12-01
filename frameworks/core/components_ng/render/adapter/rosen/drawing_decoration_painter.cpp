@@ -990,7 +990,7 @@ void DrawingDecorationPainter::PaintColorBlend(const RSRoundRect& rRect, RSCanva
             brush.SetAntiAlias(true);
             RSFilter filter;
             filter.SetColorFilter(RSRecordingColorFilter::CreateBlendModeColorFilter(RSColor::ColorQuadSetARGB(
-                colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue(), colorBlend.GetAlpha()),
+                colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
                 RSBlendMode::PLUS));
             brush.SetFilter(filter);
             RSSaveLayerOps slr(nullptr, &brush, RSSaveLayerOps::Flags::INIT_WITH_PREVIOUS);
