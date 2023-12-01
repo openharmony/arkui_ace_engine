@@ -28,7 +28,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
     CHECK_NULL_VOID(container);
-    if (container->IsSubContainer()) {
+    if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
     }
@@ -110,9 +110,10 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
             return;
         }
         CHECK_NULL_VOID(dialog);
-        overlayManager->CloseDialog(dialog);
-        dialogs.pop_back();
         if (dialogProperties.isShowInSubWindow) {
+            SubwindowManager::GetInstance()->CloseDialogNG(dialog);
+            dialogs.pop_back();
+
             auto parentContext = PipelineContext::GetMainPipelineContext();
             CHECK_NULL_VOID(parentContext);
             auto parentOverlay = parentContext->GetOverlayManager();
@@ -124,6 +125,9 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
                 CHECK_NULL_VOID(maskNode);
                 parentOverlay->CloseDialog(maskNode);
             }
+        } else {
+            overlayManager->CloseDialog(dialog);
+            dialogs.pop_back();
         }
     };
     executor->PostTask(task, TaskExecutor::TaskType::UI);

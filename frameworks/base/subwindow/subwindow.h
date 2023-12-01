@@ -52,6 +52,7 @@ public:
     virtual void ClearPopupNG() = 0;
     virtual RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc) = 0;
+    virtual void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) = 0;
     virtual void HideSubWindowNG() = 0;
     virtual int32_t GetChildContainerId() const = 0;
     virtual bool GetShown() = 0;
