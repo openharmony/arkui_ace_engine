@@ -2969,5 +2969,106 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
     auto result_six = context_->LinearInterpolation(history_six, current_six, nanoTimeStampSix);
     EXPECT_NE(result_six, std::make_pair(0.0f, 0.0f));
 }
+
+/**
+ * @tc.name: PipelineContextTestNg065
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg065, TestSize.Level1)
+{
+    std::vector<TouchEvent> emptyHistory;
+    std::vector<TouchEvent> emptyCurrent;
+    uint64_t nanoTimeStamp = 1234567890;
+    bool isScreen = true;
+    std::pair<float, float> result = context_->GetResampleCoord(emptyHistory, emptyCurrent, nanoTimeStamp, isScreen);
+    EXPECT_FLOAT_EQ(0.0f, result.first);
+    EXPECT_FLOAT_EQ(0.0f, result.second);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg066
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg066, TestSize.Level1)
+{
+    auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
+    auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
+    auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
+    auto timeStampFour = TimeStamp(std::chrono::nanoseconds(4000));
+    std::vector<TouchEvent> history;
+    history.push_back(TouchEvent{.x = 100.0f, .y = 200.0f, .time = timeStampAce});
+    history.push_back(TouchEvent{.x = 150.0f, .y = 250.0f, .time = timeStampTwo});
+    std::vector<TouchEvent> current;
+    current.push_back(TouchEvent{.x = 200.0f, .y = 300.0f, .time = timeStampThree});
+    current.push_back(TouchEvent{.x = 250.0f, .y = 350.0f, .time = timeStampFour});
+    
+    auto resampledCoord = context_->GetResampleCoord(history, current, 2500, true);
+    
+    ASSERT_FLOAT_EQ(0.0f, std::get<0>(resampledCoord));
+    ASSERT_FLOAT_EQ(0.0f, std::get<1>(resampledCoord));
+}
+
+/**
+ * @tc.name: PipelineContextTestNg067
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg067, TestSize.Level1)
+{
+    std::vector<TouchEvent> history;
+    std::vector<TouchEvent> current;
+    
+    auto resampledCoord = context_->GetResampleCoord(history, current, 2500, true);
+    
+    ASSERT_FLOAT_EQ(0.0f, std::get<0>(resampledCoord));
+    ASSERT_FLOAT_EQ(0.0f, std::get<1>(resampledCoord));
+}
+
+/**
+ * @tc.name: PipelineContextTestNg068
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg068, TestSize.Level1)
+{
+    auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
+    auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
+    std::vector<TouchEvent> current;
+    current.push_back(TouchEvent{.x = 100.0f, .y = 200.0f, .time = timeStampAce});
+    current.push_back(TouchEvent{.x = 150.0f, .y = 250.0f, .time = timeStampTwo});
+    uint64_t nanoTimeStamp = 1500;
+
+    TouchEvent latestPoint = context_->GetLatestPoint(current, nanoTimeStamp);
+
+    ASSERT_FLOAT_EQ(100.0f, latestPoint.x);
+    ASSERT_FLOAT_EQ(200.0f, latestPoint.y);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg069
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg069, TestSize.Level1)
+{
+    auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
+    auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
+    auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
+    auto timeStampFour = TimeStamp(std::chrono::nanoseconds(4000));
+    std::vector<TouchEvent> history;
+    history.push_back(TouchEvent{.x = 100.0f, .y = 200.0f, .time = timeStampAce});
+    history.push_back(TouchEvent{.x = 150.0f, .y = 250.0f, .time = timeStampTwo});
+    std::vector<TouchEvent> current;
+    current.push_back(TouchEvent{.x = 200.0f, .y = 300.0f, .time = timeStampThree});
+    current.push_back(TouchEvent{.x = 250.0f, .y = 350.0f, .time = timeStampFour});
+    uint64_t nanoTimeStamp = 2500;
+
+    TouchEvent resampledTouchEvent = context_->GetResampleTouchEvent(history, current, nanoTimeStamp);
+
+    ASSERT_FLOAT_EQ(175.0f, resampledTouchEvent.x);
+    ASSERT_FLOAT_EQ(275.0f, resampledTouchEvent.y);
+}
 } // namespace NG
 } // namespace OHOS::Ace
