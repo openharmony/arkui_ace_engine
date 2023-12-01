@@ -145,7 +145,11 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     // Update text position.
     if (LessOrEqual(textRect_.Height(), content->GetRect().Height())) {
-        OffsetF textRectOffSet = Alignment::GetAlignPosition(size, textRect_.GetSize(), align);
+        auto textRect = textRect_.GetSize();
+        if (LessOrEqual(textRect.Height(), 0.0)) {
+            textRect.SetHeight(content->GetRect().Height());
+        }
+        OffsetF textRectOffSet = Alignment::GetAlignPosition(size, textRect, align);
         textRect_.SetOffset(OffsetF(0.0f, textRectOffSet.GetY()) + offsetBase);
         content->SetOffset(OffsetF(0.0f, textRectOffSet.GetY()) + offsetBase);
     } else {
