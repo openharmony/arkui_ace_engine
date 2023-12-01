@@ -1638,7 +1638,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
                     rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
                 auto isNeedAvoidWindowMode = (rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
                                               rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-                                              rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN) &&
+                                              rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
                                              (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
                                               SystemProperties::GetDeviceType() == DeviceType::TABLET);
                 pipelineContext->SetIsNeedAvoidWindow(isNeedAvoidWindowMode);
