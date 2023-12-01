@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/image_provider/image_data.h"
+
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -25,5 +26,10 @@ size_t PixmapData::GetSize() const
 const void* PixmapData::GetData() const
 {
     return pixmap_ ? pixmap_->GetPixels() : nullptr;
+}
+
+std::string PixmapData::ToString() const
+{
+    return "id: " + pixmap_->GetId() + " ByteCount: " + std::to_string(pixmap_->GetByteCount());
 }
 } // namespace OHOS::Ace::NG
