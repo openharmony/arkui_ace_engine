@@ -66,6 +66,10 @@ void RefreshModelNG::Create()
 void RefreshModelNG::Pop()
 {
     auto refreshNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (refreshNode && refreshNode->IsAtomicNode()) {
+        ViewStackProcessor::GetInstance()->Pop();
+        refreshNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    }
     CHECK_NULL_VOID(refreshNode);
     auto layoutProperty = refreshNode->GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
