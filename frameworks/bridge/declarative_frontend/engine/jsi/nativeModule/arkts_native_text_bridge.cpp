@@ -331,7 +331,7 @@ ArkUINativeModuleValue TextBridge::SetMaxLines(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->ToNumber(vm)->Value() <= 0) {
+    if (secondArg->ToNumber(vm)->Value() < 0) {
         GetArkUIInternalNodeAPI()->GetTextModifier().ResetTextMaxLines(nativeNode);
     } else {
         uint32_t maxLine = secondArg->Uint32Value(vm);
@@ -642,6 +642,7 @@ ArkUINativeModuleValue TextBridge::SetBaselineOffset(ArkUIRuntimeCallInfo* runti
     std::string str;
     if (secondArg->IsNumber()) {
         offset.value = secondArg->ToNumber(vm)->Value();
+        offset.value = offset.value < 0 ? 0 : offset.value;
         GetArkUIInternalNodeAPI()->GetTextModifier().SetTextBaselineOffset(nativeNode, &offset);
     } else if (secondArg->IsString()) {
         str = secondArg->ToString(vm)->ToString();

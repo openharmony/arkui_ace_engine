@@ -9223,6 +9223,8 @@ class ArkSpanComponent extends ArkComponent {
         let arkValue = new ArkDecoration();
         if (!isNumber(value.type) && !(value.type in TextDecorationType)) {
             arkValue.type = undefined;
+        } else {
+            arkValue.type = value.type;
         }
         let arkColor = new ArkColor();
         if (arkColor.parseColorValue(value.color)) {
