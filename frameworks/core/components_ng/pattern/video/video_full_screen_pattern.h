@@ -32,7 +32,7 @@ public:
         const RefPtr<MediaPlayer>& mediaPlayer, const RefPtr<RenderContext>& context);
     void RequestFullScreen(const RefPtr<VideoNode>& videoNode);
 
-    void ExitFullScreen();
+    bool ExitFullScreen();
 
     bool OnBackPressed() override
     {
