@@ -341,6 +341,8 @@ public:
         parentId_ = parentId;
     }
 
+    float GetSmallWindowScale() const override;
+
     int32_t GetParentId() const
     {
         return parentId_;

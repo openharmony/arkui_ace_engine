@@ -740,11 +740,14 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
-    UpdateDragWindowPosition(static_cast<int32_t>(globalX), static_cast<int32_t>(globalY));
+    auto windowScale = GetSmallWindowScale();
+    auto windowX = globalX * windowScale;
+    auto windowY = globalY * windowScale;
+    UpdateDragWindowPosition(static_cast<int32_t>(windowX), static_cast<int32_t>(windowY));
 
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
+    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(windowX, DimensionUnit::PX)));
+    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(windowY, DimensionUnit::PX)));
 
     // use -1 for grid item not in eventGrid
     auto getDraggedIndex = [draggedGrid = draggedGridFrameNode_, draggedIndex, dragType](
@@ -752,7 +755,7 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
         return (dragType == DragType::GRID) ? (eventGrid == draggedGrid ? draggedIndex : -1) : draggedIndex;
     };
 
-    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType, false);
+    auto dragFrameNode = FindDragFrameNodeByPosition(windowX, windowY, dragType, false);
     if (!dragFrameNode) {
         if (preGridTargetFrameNode_) {
             FireOnItemDragEvent(preGridTargetFrameNode_, dragType, itemDragInfo, DragEventType::LEAVE,
@@ -763,7 +766,7 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     }
 
     if (dragFrameNode == preGridTargetFrameNode_) {
-        int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, globalX, globalY);
+        int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, windowX, windowY);
         FireOnItemDragEvent(
             dragFrameNode, dragType, itemDragInfo, DragEventType::MOVE, getDraggedIndex(dragFrameNode), insertIndex);
         return;
@@ -778,17 +781,31 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     preGridTargetFrameNode_ = dragFrameNode;
 }
 
+float DragDropManager::GetSmallWindowScale() const
+{
+    float scale = 1.0f;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, scale);
+    scale = container->GetSmallWindowScale();
+#endif // ENABLE_DRAG_FRAMEWORK
+    return scale;
+}
+
 void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex, DragType dragType)
 {
     dragDropState_ = DragDropMgrState::IDLE;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto windowScale = GetSmallWindowScale();
+    auto windowX = globalX * windowScale;
+    auto windowY = globalY * windowScale;
 
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
+    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(windowX, DimensionUnit::PX)));
+    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(windowY, DimensionUnit::PX)));
 
-    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType, true);
+    auto dragFrameNode = FindDragFrameNodeByPosition(windowX, windowY, dragType, true);
     if (!dragFrameNode) {
         // drag on one grid and drop on other area
         if (draggedGridFrameNode_) {
@@ -803,7 +820,7 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
             }
         }
     } else {
-        int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, globalX, globalY);
+        int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, windowX, windowY);
         // drag and drop on the same grid
         if (dragFrameNode == draggedGridFrameNode_) {
             FireOnItemDropEvent(dragFrameNode, dragType, itemDragInfo, draggedIndex, insertIndex, true);

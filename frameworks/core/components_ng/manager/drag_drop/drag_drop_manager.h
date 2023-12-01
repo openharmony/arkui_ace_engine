@@ -91,6 +91,7 @@ public:
     std::string GetExtraInfo();
     void SetExtraInfo(const std::string& extraInfo);
     void ClearExtraInfo();
+    float GetSmallWindowScale() const;
 #ifdef ENABLE_DRAG_FRAMEWORK
     void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const bool isCopy);
     void RequireSummary();
