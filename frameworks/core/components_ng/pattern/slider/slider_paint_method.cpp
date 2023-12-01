@@ -94,6 +94,8 @@ void SliderPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 
     sliderTipModifier_->BuildParagraph();
     sliderTipModifier_->UpdateBubbleSize();
-    sliderTipModifier_->UpdateOverlayRect(paintWrapper->GetGeometryNode()->GetFrameSize());
+    if (sliderTipModifier_->UpdateOverlayRect(paintWrapper->GetGeometryNode()->GetFrameSize())) {
+        paintWrapper->FlushOverlayModifier();
+    }
 }
 } // namespace OHOS::Ace::NG
