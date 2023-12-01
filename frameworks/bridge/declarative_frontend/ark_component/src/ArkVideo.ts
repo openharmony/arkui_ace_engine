@@ -84,7 +84,7 @@ class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttrib
     return this;
   }
   objectFit(value: ImageFit): VideoAttribute {
-    if (value) {
+    if (value in ImageFit) {
       modifier(this._modifiers, VideoObjectFitModifier, value);
     } else {
       modifier(this._modifiers, VideoObjectFitModifier, undefined);
