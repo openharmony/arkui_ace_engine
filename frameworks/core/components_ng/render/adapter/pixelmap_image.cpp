@@ -95,7 +95,7 @@ void PixelMapImage::DrawToRSCanvas(
     RSSamplingOptions options;
     ImagePainterUtils::AddFilter(brush, options, config);
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
-    auto recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
+    auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     std::vector<RSPoint> radius;
     for (int ii = 0; ii < 4; ii++) {
         RSPoint point(radiusXY[ii].GetX(), radiusXY[ii].GetY());
@@ -139,7 +139,7 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
 #endif
 #else
 #ifdef ENABLE_ROSEN_BACKEND
-    auto recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
+    auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     RSBrush brush;
     RSSamplingOptions options;
     RSRect dst = RSRect(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom());
