@@ -49,8 +49,8 @@ public:
     int32_t GetMainCount() const;
     void ClearCacheAfterIndex(int32_t currentIndex);
 
-    bool ReachStart(bool firstLayout) const;
-    bool ReachEnd() const;
+    bool ReachStart(float prevOffset, bool firstLayout) const;
+    bool ReachEnd(float prevOffset) const;
 
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
