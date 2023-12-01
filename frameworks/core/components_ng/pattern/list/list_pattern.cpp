@@ -559,7 +559,7 @@ bool ListPattern::IsAtTop() const
                                          contentMainSize_ / 2.0f - startItemHeight / 2.0f);
     }
 
-    return (startIndex_ == 0) && NonNegative(startMainPos_ - currentDelta_ + GetChainDelta(0));
+    return (startIndex_ == 0) && NonNegative(startMainPos_ - currentDelta_ + GetChainDelta(0) - contentStartOffset_);
 }
 
 bool ListPattern::IsAtBottom() const
@@ -571,7 +571,7 @@ bool ListPattern::IsAtBottom() const
     }
 
     return endIndex_ == maxListItemIndex_ &&
-           LessOrEqual(endMainPos_ - currentDelta_ + GetChainDelta(endIndex_), contentMainSize_);
+           LessOrEqual(endMainPos_ - currentDelta_ + GetChainDelta(endIndex_), contentMainSize_ - contentEndOffset_);
 }
 
 bool ListPattern::OutBoundaryCallback()
