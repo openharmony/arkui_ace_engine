@@ -193,7 +193,9 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CalcOffsetParam(layoutWrapper, nodeName);
     }
 
-    auto selfIdealSize = relativeContainerLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
+    auto& calcLayoutConstraint = relativeContainerLayoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_VOID(calcLayoutConstraint);
+    auto selfIdealSize = calcLayoutConstraint->selfIdealSize;
     if (selfIdealSize->Width()->GetDimension().Unit() == DimensionUnit::AUTO ||
         selfIdealSize->Height()->GetDimension().Unit() == DimensionUnit::AUTO) {
         MeasureSelf(layoutWrapper);
@@ -387,11 +389,7 @@ void RelativeContainerLayoutAlgorithm::TopologicalSort(std::list<std::string>& r
         auto childWrapper = node.second;
         auto childHostNode = childWrapper->GetHostNode();
         const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
-        if (!flexItem) {
-            renderList.emplace_back(node.first);
-            continue;
-        }
-        if (incomingDegreeMap_[childHostNode->GetInspectorIdValue()] == 0) {
+        if (!flexItem || incomingDegreeMap_[childHostNode->GetInspectorIdValue()] == 0) {
             layoutQueue.push(childHostNode->GetInspectorIdValue());
         }
     }
