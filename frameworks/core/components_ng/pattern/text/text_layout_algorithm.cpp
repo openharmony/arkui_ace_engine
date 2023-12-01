@@ -117,6 +117,8 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     if (frameNode->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or("").empty() &&
         NonPositive(static_cast<double>(paragraph_->GetLongestLine()))) {
         // text content is empty
+        ACE_SCOPED_TRACE("TextHeightFinal [%f], TextContentWidth [%f], FontSize [%lf]",
+            heightFinal, paragraph_->GetMaxWidth(), textStyle.GetFontSize().ConvertToPx());
         return SizeF {};
     }
     return SizeF(paragraph_->GetMaxWidth(), heightFinal);
