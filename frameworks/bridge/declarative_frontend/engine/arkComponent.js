@@ -2858,7 +2858,7 @@ class ArkStackComponent extends ArkComponent {
         throw new Error("Method not implemented.");
     }
     alignContent(value) {
-        if (value) {
+        if (value in Alignment) {
             modifier(this._modifiers, StackAlignContentModifier, value);
         }
         else {
