@@ -237,13 +237,16 @@ class WebGeolocationOhos : public WebGeolocation {
     DECLARE_ACE_TYPE(WebGeolocationOhos, WebGeolocation)
 
 public:
-    WebGeolocationOhos(const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>& callback)
-        : geolocationCallback_(callback) {}
+    WebGeolocationOhos(
+        const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>&
+            callback, bool incognito)
+        : geolocationCallback_(callback), incognito_(incognito) {}
 
     void Invoke(const std::string& origin, const bool& allow, const bool& retain) override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface> geolocationCallback_;
+    bool incognito_ = false;
 };
 
 class WebPermissionRequestOhos : public WebPermissionRequest {
@@ -698,15 +701,18 @@ private:
     std::string GetTitle();
     std::string GetDefaultUserAgent();
     bool SaveCookieSync();
-    bool SetCookie(const std::string& url, const std::string& value);
-    std::string GetCookie(const std::string& url) const;
-    void DeleteEntirelyCookie();
+    bool SetCookie(const std::string& url,
+                   const std::string& value,
+                   bool incognito_mode);
+    std::string GetCookie(const std::string& url, bool incognito_mode) const;
+    void DeleteEntirelyCookie(bool incognito_mode);
     void RegisterOHOSWebEventAndMethord();
     void SetWebCallBack();
     void RunSetWebIdAndHapPathCallback();
     void RunJsProxyCallback();
     void RegisterConfigObserver();
     void UnRegisterConfigObserver();
+    bool IsIncognitoMode() const;
 
     // Backward and forward
     void Backward();
@@ -825,6 +831,7 @@ private:
     std::optional<ScriptItems> scriptItems_;
     bool accessibilityState_ = false;
     std::optional<std::string> richtextData_;
+    bool incognitoMode_ = false;
 #endif
 };
 

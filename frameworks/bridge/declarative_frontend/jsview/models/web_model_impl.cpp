@@ -19,7 +19,8 @@
 #include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace::Framework {
-void WebModelImpl::Create(const std::string& src, const RefPtr<WebController>& webController, WebType /* type */)
+void WebModelImpl::Create(const std::string& src, const RefPtr<WebController>& webController, WebType /* type */,
+                          bool incognitoMode)
 {
     RefPtr<WebComponent> webComponent;
     webComponent = AceType::MakeRefPtr<WebComponent>(src);
@@ -27,11 +28,13 @@ void WebModelImpl::Create(const std::string& src, const RefPtr<WebController>& w
 
     webComponent->SetSrc(src);
     webComponent->SetWebController(webController);
+    webComponent->SetIncognitoMode(incognitoMode);
     ViewStackProcessor::GetInstance()->Push(webComponent);
 }
 
 void WebModelImpl::Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
-    std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup, WebType /* type */)
+    std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup, WebType /* type */,
+    bool incognitoMode)
 {
     RefPtr<WebComponent> webComponent;
     webComponent = AceType::MakeRefPtr<WebComponent>(src);
@@ -42,6 +45,7 @@ void WebModelImpl::Create(const std::string& src, std::function<void(int32_t)>&&
     webComponent->SetParentNWebId(parentWebId);
     webComponent->SetSetWebIdCallback(std::move(setWebIdCallback));
     webComponent->SetSetHapPathCallback(std::move(setHapPathCallback));
+    webComponent->SetIncognitoMode(incognitoMode);
     ViewStackProcessor::GetInstance()->Push(webComponent);
 }
 

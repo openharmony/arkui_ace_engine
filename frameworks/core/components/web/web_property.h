@@ -741,6 +741,20 @@ public:
         getUrlImpl_ = std::move(getUrlImpl);
     }
 
+    using IsIncognitoModeImpl = std::function<bool()>;
+    bool IsIncognitoMode() const
+    {
+        if (isIncognitoModeImpl_) {
+            return isIncognitoModeImpl_();
+        }
+        return false;
+    }
+
+    void SetIsIncognitoModeImpl(IsIncognitoModeImpl&& isIncognitoModeImpl)
+    {
+        isIncognitoModeImpl_ = std::move(isIncognitoModeImpl);
+    }
+
 private:
     WebCookie* cookieManager_ = nullptr;
     LoadUrlImpl loadUrlImpl_;
@@ -786,6 +800,7 @@ private:
     ClearMatchesImpl clearMatchesImpl_;
     SearchNextImpl searchNextImpl_;
     GetUrlImpl getUrlImpl_;
+    IsIncognitoModeImpl isIncognitoModeImpl_;
 };
 
 } // namespace OHOS::Ace

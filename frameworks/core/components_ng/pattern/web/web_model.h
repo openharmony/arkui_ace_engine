@@ -29,10 +29,10 @@ public:
     virtual ~WebModel() = default;
 
     virtual void Create(const std::string& src, const RefPtr<WebController>& webController,
-        WebType type = WebType::SURFACE) = 0;
+        WebType type = WebType::SURFACE, bool incognitoMode = false) = 0;
     virtual void Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
         std::function<void(const std::string&)>&& setHapPathCallback,
-        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE) = 0;
+        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE, bool incognitoMode = false) = 0;
     virtual void SetCustomScheme(const std::string& cmdLine) = 0;
     virtual void SetFocusable(bool focusable) {};
     virtual void SetFocusNode(bool isFocusNode) {};

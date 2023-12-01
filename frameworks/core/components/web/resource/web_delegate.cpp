@@ -654,7 +654,8 @@ void WebDelegate::ReleasePlatformResource()
 void WebGeolocationOhos::Invoke(const std::string& origin, const bool& allow, const bool& retain)
 {
     if (geolocationCallback_) {
-        geolocationCallback_->GeolocationCallbackInvoke(origin, allow, retain);
+        geolocationCallback_->GeolocationCallbackInvoke(origin, allow, retain,
+            incognito_);
     }
 }
 
@@ -1389,27 +1390,30 @@ bool WebDelegate::SaveCookieSync()
     return false;
 }
 
-bool WebDelegate::SetCookie(const std::string& url, const std::string& value)
+bool WebDelegate::SetCookie(const std::string& url,
+                            const std::string& value,
+                            bool incognitoMode)
 {
     if (cookieManager_) {
-        return cookieManager_->SetCookie(url, value);
+        return cookieManager_->SetCookie(url, value, incognitoMode);
     }
     return false;
 }
 
-std::string WebDelegate::GetCookie(const std::string& url) const
+std::string WebDelegate::GetCookie(const std::string& url,
+                                   bool incognitoMode) const
 {
     if (cookieManager_) {
         bool isValid = true;
-        return cookieManager_->ReturnCookie(url, isValid);
+        return cookieManager_->ReturnCookie(url, isValid, incognitoMode);
     }
     return "";
 }
 
-void WebDelegate::DeleteEntirelyCookie()
+void WebDelegate::DeleteEntirelyCookie(bool incognitoMode)
 {
     if (cookieManager_) {
-        cookieManager_->DeleteCookieEntirely(nullptr);
+        cookieManager_->DeleteCookieEntirely(nullptr, incognitoMode);
     }
 }
 
@@ -1598,6 +1602,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     if (!useNewPipe && !webCom) {
         return false;
     }
+    incognitoMode_ =
+        useNewPipe ? webPattern->GetIncognitoMode() : webCom->GetIncognitoMode();
     context_ = context;
     RegisterSurfacePositionChangedCallback();
     auto pipelineContext = context.Upgrade();
@@ -2154,21 +2160,21 @@ void WebDelegate::SetWebCallBack()
         webController->SetSetCookieImpl([weak = WeakClaim(this)](const std::string& url, const std::string& value) {
             auto delegate = weak.Upgrade();
             if (delegate) {
-                return delegate->SetCookie(url, value);
+                return delegate->SetCookie(url, value, delegate->incognitoMode_);
             }
             return false;
         });
         webController->SetGetCookieImpl([weak = WeakClaim(this)](const std::string& url) {
             auto delegate = weak.Upgrade();
             if (delegate) {
-                return delegate->GetCookie(url);
+                return delegate->GetCookie(url, delegate->incognitoMode_);
             }
             return std::string();
         });
         webController->SetDeleteEntirelyCookieImpl([weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (delegate) {
-                delegate->DeleteEntirelyCookie();
+                delegate->DeleteEntirelyCookie(delegate->incognitoMode_);
             }
         });
         webController->SetWebViewJavaScriptResultCallBackImpl(
@@ -2283,7 +2289,13 @@ void WebDelegate::SetWebCallBack()
             }
             return std::string();
         });
-
+        webController->SetIsIncognitoModeImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->IsIncognitoMode();
+            }
+            return false;
+        });
     } else {
         TAG_LOGW(AceLogTag::ACE_WEB, "web controller is nullptr");
     }
@@ -2309,8 +2321,11 @@ void WebDelegate::InitWebViewWithWindow()
             if (!delegate->window_) {
                 return;
             }
+
             delegate->nweb_ =
-                OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(delegate->window_.GetRefPtr(), initArgs);
+                OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
+                    delegate->window_.GetRefPtr(), initArgs,
+                    delegate->IsIncognitoMode());
             if (delegate->nweb_ == nullptr) {
                 delegate->window_ = nullptr;
                 return;
@@ -2333,10 +2348,9 @@ void WebDelegate::InitWebViewWithWindow()
             findListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutFindCallback(findListenerImpl);
 
+            std::optional<std::string> src;
             auto isNewPipe = Container::IsCurrentUseNewPipeline();
             delegate->UpdateSettting(isNewPipe);
-
-            std::optional<std::string> src;
             if (isNewPipe) {
                 auto webPattern = delegate->webPattern_.Upgrade();
                 if (webPattern) {
@@ -2614,8 +2628,13 @@ void WebDelegate::InitWebViewWithSurface()
                     std::string("--init-richtext-data=").append(delegate->richtextData_.value()));
             }
             if (isEnhanceSurface) {
-                delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb((void*)(&delegate->surfaceInfo_),
-                    initArgs, delegate->drawSize_.Width(), delegate->drawSize_.Height());
+                TAG_LOGD(AceLogTag::ACE_WEB, "Create webview with isEnhanceSurface");
+                delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
+                    (void *)(&delegate->surfaceInfo_),
+                    initArgs,
+                    delegate->drawSize_.Width(),
+                    delegate->drawSize_.Height(),
+                    delegate->incognitoMode_);
                 delegate->JavaScriptOnDocumentStart();
             } else {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2623,7 +2642,11 @@ void WebDelegate::InitWebViewWithSurface()
                 sptr<Surface> surface = surfaceWeak.promote();
                 CHECK_NULL_VOID(surface);
                 delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
-                    surface, initArgs, delegate->drawSize_.Width(), delegate->drawSize_.Height());
+                    surface,
+                    initArgs,
+                    delegate->drawSize_.Width(),
+                    delegate->drawSize_.Height(),
+                    delegate->incognitoMode_);
                 delegate->JavaScriptOnDocumentStart();
 #endif
             }
@@ -4035,7 +4058,9 @@ void WebDelegate::OnGeolocationPermissionsShowPrompt(
             // ace 2.0
             auto onGeolocationShowV2 = delegate->onGeolocationShowV2_;
             if (onGeolocationShowV2) {
-                auto geolocation = AceType::MakeRefPtr<WebGeolocationOhos>(callback);
+                auto geolocation =
+                    AceType::MakeRefPtr<WebGeolocationOhos>(callback,
+                                                            delegate->incognitoMode_);
                 onGeolocationShowV2(std::make_shared<LoadWebGeolocationShowEvent>(origin, geolocation));
             }
         },
@@ -5138,6 +5163,14 @@ void WebDelegate::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t heigh
     if (nweb_) {
         nweb_->SetDrawRect(x, y, width, height);
     }
+}
+
+bool WebDelegate::IsIncognitoMode() const
+{
+    if (nweb_) {
+        return nweb_->IsIncognitoMode();
+    }
+    return false;
 }
 #endif
 

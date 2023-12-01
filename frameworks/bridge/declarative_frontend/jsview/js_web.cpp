@@ -1923,6 +1923,10 @@ void JSWeb::Create(const JSCallbackInfo& info)
     if (type->IsNumber() && (type->ToNumber<int32_t>() >= 0) && (type->ToNumber<int32_t>() <= 1)) {
         webType = static_cast<WebType>(type->ToNumber<int32_t>());
     }
+
+    bool incognitoMode = false;
+    ParseJsBool(paramObject->GetProperty("incognitoMode"), incognitoMode);
+
     auto controller = JSRef<JSObject>::Cast(controllerObj);
     auto setWebIdFunction = controller->GetProperty("setWebId");
     if (setWebIdFunction->IsFunction()) {
@@ -1945,7 +1949,9 @@ void JSWeb::Create(const JSCallbackInfo& info)
         int32_t parentNWebId = -1;
         bool isPopup = JSWebWindowNewHandler::ExistController(controller, parentNWebId);
         WebModel::GetInstance()->Create(
-            dstSrc.value(), std::move(setIdCallback), std::move(setHapPathCallback), parentNWebId, isPopup, webType);
+            dstSrc.value(), std::move(setIdCallback),
+            std::move(setHapPathCallback), parentNWebId, isPopup, webType,
+            incognitoMode);
 
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
@@ -1964,7 +1970,8 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
     } else {
         auto* jsWebController = controller->Unwrap<JSWebController>();
-        WebModel::GetInstance()->Create(dstSrc.value(), jsWebController->GetController(), webType);
+        WebModel::GetInstance()->Create(dstSrc.value(),
+            jsWebController->GetController(), webType, incognitoMode);
     }
 
     WebModel::GetInstance()->SetFocusable(true);
