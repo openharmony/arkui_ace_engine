@@ -16,9 +16,10 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h"
 
 namespace OHOS::Ace::NG {
-constexpr int SIZE_OF_VERTICAL_ALIGN = 4;
+constexpr int SIZE_OF_VERTICAL_ALIGN = 5;
 constexpr int SIZE_OF_OBJECT_FIT = 7;
 constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
 
 ArkUINativeModuleValue ImageSpanBridge::SetVerticalAlign(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -28,7 +29,7 @@ ArkUINativeModuleValue ImageSpanBridge::SetVerticalAlign(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> verticalAlign = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = node->ToNativePointer(vm)->Value();
     int32_t value = verticalAlign->Int32Value(vm);
-    if (value >= NUM_0 && value <= SIZE_OF_VERTICAL_ALIGN) {
+    if (value >= NUM_1 && value <= SIZE_OF_VERTICAL_ALIGN) {
         GetArkUIInternalNodeAPI()->GetImageSpanModifier().SetImageSpanVerticalAlign(nativeNode, value);
     } else {
         GetArkUIInternalNodeAPI()->GetImageSpanModifier().ResetImageSpanVerticalAlign(nativeNode);
