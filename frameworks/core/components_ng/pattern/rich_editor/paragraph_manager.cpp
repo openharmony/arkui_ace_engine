@@ -123,7 +123,9 @@ OffsetF ParagraphManager::ComputeCursorOffset(int32_t index, float& selectLineHe
                           paragraph->ComputeOffsetForCaretDownstream(relativeIndex, metrics);
     }
     CHECK_NULL_RETURN(computeSuccess, OffsetF(0.0f, y));
-
+    if (NearZero(paragraph->GetTextWidth()) && paragraph->GetParagraphStyle().leadingMargin) {
+        metrics.offset.AddX(paragraph->GetParagraphStyle().leadingMargin->size.Width());
+    }
     selectLineHeight = metrics.height;
     return { static_cast<float>(metrics.offset.GetX()), static_cast<float>(metrics.offset.GetY() + y) };
 }
