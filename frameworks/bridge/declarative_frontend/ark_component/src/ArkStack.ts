@@ -5,7 +5,7 @@ class ArkStackComponent extends ArkComponent implements StackAttribute {
     throw new Error("Method not implemented.");
   }
   alignContent(value: Alignment): StackAttribute {
-    if (value) {
+    if (value in Alignment) {
       modifier(this._modifiers, StackAlignContentModifier, value);
     } else {
       modifier(this._modifiers, StackAlignContentModifier, undefined);
