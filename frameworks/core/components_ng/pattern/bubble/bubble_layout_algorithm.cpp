@@ -251,9 +251,9 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     selfSize_ = layoutWrapper->GetGeometryNode()->GetFrameSize(); // window's size
     auto childWrapper = children.front();
-    UpdateTouchRegion();
     bool showInSubWindow = bubbleProp->GetShowInSubWindowValue(false);
     BubbleAvoidanceRule(childWrapper, bubbleProp, frameNode, showInSubWindow);
+    UpdateTouchRegion();
     childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset_);
     childWrapper->Layout();
     auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
@@ -327,6 +327,8 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
     auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
+    auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
+    paddingTop_ = top;
     wrapperSize_ = SizeF(wrapperSize_.Width(), wrapperSize_.Height() - bottom);
 }
 

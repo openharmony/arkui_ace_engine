@@ -958,7 +958,9 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
     if (!childWidthVal->IsNull()) {
         CalcDimension width;
         if (JSViewAbstract::ParseJsDimensionVp(childWidthVal, width)) {
-            popupParam->SetChildWidth(width);
+            if (width.Value() > 0) {
+                popupParam->SetChildWidth(width);
+            }
         }
     }
 }
@@ -1113,7 +1115,9 @@ void ParseCustomPopupParam(
     if (!childWidthVal->IsNull()) {
         CalcDimension width;
         if (JSViewAbstract::ParseJsDimensionVp(childWidthVal, width)) {
-            popupParam->SetChildWidth(width);
+            if (width.Value() > 0) {
+                popupParam->SetChildWidth(width);
+            }
         }
     }
 }
