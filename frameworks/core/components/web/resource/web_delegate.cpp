@@ -5029,9 +5029,6 @@ void WebDelegate::OnFocus()
 
 bool WebDelegate::NeedSoftKeyboard()
 {
-    if (nweb_) {
-        return nweb_->NeedSoftKeyboard();
-    }
     return false;
 }
 
