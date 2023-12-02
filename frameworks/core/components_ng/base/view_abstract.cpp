@@ -1211,9 +1211,6 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
     if (popupInfo.isCurrentOnShow) {
         // Entering / Normal / Exiting
         bool popupShowing = popupPattern ? popupPattern->IsOnShow() : false;
-        if (popupShowing == isShow) {
-            return;
-        }
         if (!popupShowing && isShow) {
             popupInfo.markNeedUpdate = false;
         } else {
@@ -1295,7 +1292,9 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
             WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     }
     if (isShow) {
-        overlayManager->ShowPopup(targetId, popupInfo);
+        if (popupInfo.isCurrentOnShow != isShow) {
+            overlayManager->ShowPopup(targetId, popupInfo);
+        }
     } else {
         overlayManager->HidePopup(targetId, popupInfo);
     }
