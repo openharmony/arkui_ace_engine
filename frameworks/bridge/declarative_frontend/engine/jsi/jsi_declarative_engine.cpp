@@ -2118,7 +2118,9 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
         LOGI("vm is nullptr.");
         return;
     }
-    if (!arkRuntime->InitializeFromExistVM(vm)) {
+    if (arkRuntime->InitializeFromExistVM(vm)) {
+        arkRuntime->SetThreadVm(vm);
+    } else {
         LOGI("InitializeFromExistVM failed.");
         return;
     }
