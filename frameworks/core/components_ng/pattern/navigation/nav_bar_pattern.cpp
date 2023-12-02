@@ -726,6 +726,9 @@ void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
 {
     auto navBarNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(navBarNode);
+    if (isTitleMenuNodeShowing_ == navBarNode->IsTitleMenuNodeShowing()) {
+        return;
+    }
     if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
         isTitleMenuNodeShowing_ = navBarNode->IsTitleMenuNodeShowing();
     }
