@@ -22,8 +22,8 @@
 namespace OHOS::Ace::NG {
 constexpr int32_t HINGES_OFFSET_UP = 16;
 constexpr int32_t HINGES_OFFSET_DOWN = 16;
-class ACE_EXPORT FolderStackLayoutProperty : public LayoutProperty {
-    DECLARE_ACE_TYPE(FolderStackLayoutProperty, LayoutProperty);
+class ACE_EXPORT FolderStackLayoutProperty : public StackLayoutProperty {
+    DECLARE_ACE_TYPE(FolderStackLayoutProperty, StackLayoutProperty);
 
 public:
     FolderStackLayoutProperty() = default;
@@ -39,7 +39,10 @@ public:
 
     void Reset() override
     {
-        LayoutProperty::Reset();
+        StackLayoutProperty::Reset();
+        ResetEnableAnimation();
+        ResetAutoHalfFold();
+        ResetUpperItems();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override

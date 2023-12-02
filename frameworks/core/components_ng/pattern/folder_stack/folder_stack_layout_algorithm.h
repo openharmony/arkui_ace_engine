@@ -16,14 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FOLDER_STACK_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FOLDER_STACK_LAYOUT_ALGORITHM_H
 
-#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
-#include "core/components_ng/pattern/folder_stack/folder_stack_layout_property.h"
-#include "core/components_ng/pattern/folder_stack/folder_stack_group_node.h"
+#include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
-#include "base/memory/referenced.h"
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/folder_stack/folder_stack_group_node.h"
+#include "core/components_ng/pattern/folder_stack/folder_stack_layout_property.h"
+#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT FolderStackLayoutAlgorithm : public StackLayoutAlgorithm {
@@ -32,9 +32,35 @@ class ACE_EXPORT FolderStackLayoutAlgorithm : public StackLayoutAlgorithm {
 public:
     FolderStackLayoutAlgorithm();
     ~FolderStackLayoutAlgorithm() override = default;
+    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(LayoutWrapper* layoutWrapper) override;
+    const OffsetF& GetControlPartsStackRect() const
+    {
+        return controlPartsStackRect_;
+    }
 
 private:
-    
+    void LayoutHoverStack(LayoutWrapper* layoutWrapper, const RefPtr<FolderStackGroupNode>& hostNode,
+        const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty);
+    void LayoutControlPartsStack(LayoutWrapper* layoutWrapper, const RefPtr<FolderStackGroupNode>& hostNode,
+        const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty);
+    void MeasureHoverStack(LayoutWrapper* layoutWrapper, const RefPtr<FolderStackGroupNode>& hostNode,
+        const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty, const SizeF& size);
+    void MeasureControlPartsStack(LayoutWrapper* layoutWrapper, const RefPtr<FolderStackGroupNode>& hostNode,
+        const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty, const SizeF& size);
+    void RangeCalculation(const RefPtr<FolderStackGroupNode>& hostNode,
+        const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty, const SizeF& size);
+    bool IsFullWindow(SizeF& frameSize, const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty);
+    static NG::OffsetF CalculateStackAlignment(
+        const NG::SizeF& parentSize, const NG::SizeF& childSize, const Alignment& alignment);
+    void AdjustNodeTree(const RefPtr<FolderStackGroupNode>& hostNode);
+    bool IsIntoFolderStack(SizeF& frameSize, const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty,
+        LayoutWrapper* layoutWrapper);
+    ACE_DISALLOW_COPY_AND_MOVE(FolderStackLayoutAlgorithm);
+    float preHoverStackHeight_ = 0.0f;
+    float preControlPartsStackHeight_ = 0.0f;
+    OffsetF controlPartsStackRect_;
+    bool isIntoFolderStack_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FOLDER_STACK_FOLDER_STACK_LAYOUT_ALGORITHM_H

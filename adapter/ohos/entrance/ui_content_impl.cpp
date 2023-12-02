@@ -31,6 +31,7 @@
 #include "wm_common.h"
 
 #include "base/log/log_wrapper.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/property/safe_area_insets.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -282,6 +283,31 @@ public:
 #ifndef ENABLE_DRAG_FRAMEWORK
         aceView->ProcessDragEvent(x, y, action);
 #endif // ENABLE_DRAG_FRAMEWORK
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
+
+class FoldScreenListener : public OHOS::Rosen::DisplayManager::IFoldStatusListener {
+public:
+    explicit FoldScreenListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~FoldScreenListener() = default;
+    void OnFoldStatusChanged(OHOS::Rosen::FoldStatus foldStatus) override
+    {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        ContainerScope scope(instanceId_);
+        taskExecutor->PostTask(
+            [container, foldStatus] {
+                auto context = container->GetPipelineContext();
+                CHECK_NULL_VOID(context);
+                auto aceFoldStatus = static_cast<FoldStatus>(static_cast<uint32_t>(foldStatus));
+                context->OnFoldStatusChanged(aceFoldStatus);
+            },
+            TaskExecutor::TaskType::UI);
     }
 
 private:
@@ -1312,6 +1338,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
+    foldStatusListener_ = new FoldScreenListener(instanceId_);
+    OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
 
     // create ace_view
     auto aceView =
@@ -1854,6 +1882,8 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
+    foldStatusListener_ = new FoldScreenListener(instanceId_);
+    OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
 }
 
 void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)

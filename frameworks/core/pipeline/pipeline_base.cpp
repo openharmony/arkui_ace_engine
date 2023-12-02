@@ -28,6 +28,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
 #include "core/common/manager_interface.h"
@@ -677,6 +678,11 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction);
+}
+
+void PipelineBase::OnFoldStatusChanged(FoldStatus foldStatus)
+{
+    OnFoldStatusChange(foldStatus);
 }
 
 double PipelineBase::ModifyKeyboardHeight(double keyboardHeight) const
