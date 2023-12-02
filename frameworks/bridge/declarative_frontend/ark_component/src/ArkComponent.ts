@@ -306,17 +306,34 @@ class BorderStyleModifier extends Modifier<ArkBorderStyle> {
   }
 }
 
-class ShadowModifier extends Modifier<ArkShadow> {
+class ShadowModifier extends ModifierWithKey<ShadowOptions | ShadowStyle> {
   static identity: Symbol = Symbol("shadow");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetShadow(node);
     }
     else {
-      GetUINativeModule().common.setShadow(node, this.value.style,
-        this.value.radius, this.value.type, this.value.color,
-        this.value.offsetX, this.value.offsetY, this.value.fill);
+      if(isNumber(this.value)){
+        GetUINativeModule().common.setShadow(node, this.value, undefined, undefined, undefined, undefined, undefined, undefined);
+      } else {
+        GetUINativeModule().common.setShadow(node, undefined,
+          (this.value as ShadowOptions).radius,
+          (this.value as ShadowOptions).type,
+          (this.value as ShadowOptions).color,
+          (this.value as ShadowOptions).offsetX,
+          (this.value as ShadowOptions).offsetY,
+          (this.value as ShadowOptions).fill);
+      }
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !((this.stageValue as ShadowOptions).radius === (this.value as ShadowOptions).radius &&
+    (this.stageValue as ShadowOptions).type === (this.value as ShadowOptions).type &&
+    (this.stageValue as ShadowOptions).color === (this.value as ShadowOptions).color &&
+    (this.stageValue as ShadowOptions).offsetX === (this.value as ShadowOptions).offsetX &&
+    (this.stageValue as ShadowOptions).offsetY === (this.value as ShadowOptions).offsetY &&
+    (this.stageValue as ShadowOptions).fill === (this.value as ShadowOptions).fill);
   }
 }
 
@@ -2600,12 +2617,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   shadow(value: ShadowOptions | ShadowStyle): this {
-    let arkShadow = new ArkShadow();
-    if (arkShadow.parseShadowValue(value)) {
-      modifier(this._modifiers, ShadowModifier, arkShadow);
-    } else {
-      modifier(this._modifiers, ShadowModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
     return this;
   }
 

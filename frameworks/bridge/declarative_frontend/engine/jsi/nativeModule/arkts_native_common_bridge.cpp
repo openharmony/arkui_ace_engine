@@ -184,7 +184,7 @@ void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef> &value, s
         }
         Color color;
         auto colorParams = panda::ArrayRef::GetValueAt(vm, itemArray, NUM_0);
-        if (!ArkTSUtils::ParseJsColor(vm, colorParams, color)) {
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color)) {
             continue;
         }
         bool hasDimension = false;
@@ -1417,14 +1417,14 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
     }
 
     double shadows[] = { 0.0, 0.0, 0.0, 0.0, static_cast<double>(ShadowType::COLOR), 0.0, 0.0 };
-    ParseJsDouble(vm, radiusArg, shadows[NUM_0]);
+    ArkTSUtils::ParseJsDouble(vm, radiusArg, shadows[NUM_0]);
     shadows[NUM_0] = (LessNotEqual(shadows[NUM_0], 0.0)) ? 0.0 : shadows[NUM_0];
     CalcDimension offsetX;
-    if (ParseJsDimensionVp(vm, offsetXArg, offsetX)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetXArg, offsetX)) {
         shadows[NUM_2] = offsetX.Value();
     }
     CalcDimension offsetY;
-    if (ParseJsDimensionVp(vm, offsetYArg, offsetY)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetYArg, offsetY)) {
         shadows[NUM_3] = offsetY.Value();
     }
     if (typeArg->IsInt()) {

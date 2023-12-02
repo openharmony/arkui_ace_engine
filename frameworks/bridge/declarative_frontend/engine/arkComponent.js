@@ -271,14 +271,27 @@ class BorderStyleModifier extends Modifier {
     }
 }
 BorderStyleModifier.identity = Symbol("borderStyle");
-class ShadowModifier extends Modifier {
+class ShadowModifier extends ModifierWithKey {
     applyPeer(node, reset) {
         if (reset) {
             GetUINativeModule().common.resetShadow(node);
         }
         else {
-            GetUINativeModule().common.setShadow(node, this.value.style, this.value.radius, this.value.type, this.value.color, this.value.offsetX, this.value.offsetY, this.value.fill);
+            if (isNumber(this.value)) {
+                GetUINativeModule().common.setShadow(node, this.value, undefined, undefined, undefined, undefined, undefined, undefined);
+            }
+            else {
+                GetUINativeModule().common.setShadow(node, undefined, this.value.radius, this.value.type, this.value.color, this.value.offsetX, this.value.offsetY, this.value.fill);
+            }
         }
+    }
+    checkObjectDiff() {
+        return !(this.stageValue.radius === this.value.radius &&
+            this.stageValue.type === this.value.type &&
+            this.stageValue.color === this.value.color &&
+            this.stageValue.offsetX === this.value.offsetX &&
+            this.stageValue.offsetY === this.value.offsetY &&
+            this.stageValue.fill === this.value.fill);
     }
 }
 ShadowModifier.identity = Symbol("shadow");
@@ -477,14 +490,20 @@ class SweepGradientModifier extends Modifier {
     }
 }
 SweepGradientModifier.identity = Symbol("sweepGradient");
-class OverlayModifier extends Modifier {
+class OverlayModifier extends ModifierWithKey {
     applyPeer(node, reset) {
         if (reset) {
             GetUINativeModule().common.resetOverlay(node);
         }
         else {
-            GetUINativeModule().common.setOverlay(node, this.value.value, this.value.align, this.value.offsetX, this.value.offsetY);
+            GetUINativeModule().common.setOverlay(node, this.value.value, this.value.align, this.value.offsetX, this.value.offsetY, this.value.hasOptions, this.value.hasOffset);
         }
+    }
+    checkObjectDiff() {
+        if (isUndefined(this.value)) {
+            return !isUndefined(this.stageValue);
+        }
+        return this.value.checkObjectDiff(this.stageValue);
     }
 }
 OverlayModifier.identity = Symbol("overlay");
@@ -2122,20 +2141,25 @@ class ArkComponent {
         return this;
     }
     direction(value) {
-        let direction = '';
-        switch (value) {
-            case 0:
-                direction = 'Ltr';
-                break;
-            case 1:
-                direction = 'Rtl';
-                break;
-            case 2:
-            default:
-                direction = 'Auto';
-                break;
+        let direction = undefined;
+        if (value in Direction) {
+            modifier(this._modifiers, DirectionModifier, value.toString());
         }
-        modifier(this._modifiers, DirectionModifier, direction);
+        else {
+            switch (value) {
+                case 0:
+                    direction = 'Ltr';
+                    break;
+                case 1:
+                    direction = 'Rtl';
+                    break;
+                case 2:
+                default:
+                    direction = 'Auto';
+                    break;
+            }
+            modifier(this._modifiers, DirectionModifier, direction);
+        }
         return this;
     }
     align(value) {
@@ -2321,12 +2345,12 @@ class ArkComponent {
         return this;
     }
     overlay(value, options) {
-        if (typeof value === 'string') {
-            let arkOverlay = new ArkOverlay(value, options.align, options.offset.x, options.offset.y);
-            modifier(this._modifiers, OverlayModifier, arkOverlay);
+        var arkOverlay = new ArkOverlay();
+        if (arkOverlay.splitOverlayValue(value, options)) {
+            modifierWithKey(this._modifiersWithKeys, OverlayModifier.identity, OverlayModifier, arkOverlay);
         }
         else {
-            modifier(this._modifiers, OverlayModifier, undefined);
+            modifierWithKey(this._modifiersWithKeys, OverlayModifier.identity, OverlayModifier, undefined);
         }
         return this;
     }
@@ -2367,13 +2391,7 @@ class ArkComponent {
         return this;
     }
     shadow(value) {
-        let arkShadow = new ArkShadow();
-        if (arkShadow.parseShadowValue(value)) {
-            modifier(this._modifiers, ShadowModifier, arkShadow);
-        }
-        else {
-            modifier(this._modifiers, ShadowModifier, undefined);
-        }
+        modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
         return this;
     }
     mask(value) {
@@ -2467,13 +2485,8 @@ class ArkComponent {
         let keyboardShortCut = new ArkKeyBoardShortCut();
         keyboardShortCut.value = value;
         keyboardShortCut.keys = keys;
-        if (action) {
-            throw new Error("Method not implemented.");
-        }
-        else {
-            modifier(this._modifiers, KeyBoardShortCutModifier, keyboardShortCut);
-            return this;
-        }
+        modifier(this._modifiers, KeyBoardShortCutModifier, keyboardShortCut);
+        return this;
     }
     accessibilityGroup(value) {
         if (typeof value === "boolean") {
@@ -2747,16 +2760,16 @@ globalThis.Button.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkLoadingProgressComponent extends ArkComponent {
     onGestureJudgeBegin(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     color(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     enableLoading(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -2769,16 +2782,16 @@ globalThis.LoadingProgress.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkRefreshComponent extends ArkComponent {
     onGestureJudgeBegin(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onStateChange(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onRefreshing(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -2791,55 +2804,55 @@ globalThis.Refresh.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkScrollComponent extends ArkComponent {
     onGestureJudgeBegin(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     scrollable(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScroll(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScrollEdge(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScrollStart(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScrollEnd(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScrollStop(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     scrollBar(barState) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     scrollBarColor(color) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     scrollBarWidth(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     edgeEffect(edgeEffect) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScrollFrameBegin(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     nestedScroll(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     enableScrollInteraction(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     friction(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     scrollSnap(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -3093,7 +3106,7 @@ class ArkImageComponent extends ArkComponent {
         return this;
     }
     objectFit(value) {
-        if (value) {
+        if (value in ImageFit) {
             modifier(this._modifiers, ImageObjectFitModifier, value);
         }
         else {
@@ -5800,10 +5813,10 @@ globalThis.Rating.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkCheckboxComponent extends ArkComponent {
     shape(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     select(value) {
         if (!isUndefined(value)) {
@@ -5853,7 +5866,7 @@ class ArkCheckboxComponent extends ArkComponent {
         return this;
     }
     onChange(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -5877,7 +5890,7 @@ class CheckboxMarkModifier extends Modifier {
         }
     }
 }
-CheckboxMarkModifier.identity = Symbol("checkboxMark");
+CheckboxMarkModifier.identity = Symbol('checkboxMark');
 class CheckboxSelectModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -5888,7 +5901,7 @@ class CheckboxSelectModifier extends Modifier {
         }
     }
 }
-CheckboxSelectModifier.identity = Symbol("checkboxSelect");
+CheckboxSelectModifier.identity = Symbol('checkboxSelect');
 class CheckboxSelectedColorModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -5899,7 +5912,7 @@ class CheckboxSelectedColorModifier extends Modifier {
         }
     }
 }
-CheckboxSelectedColorModifier.identity = Symbol("checkboxSelectedColor");
+CheckboxSelectedColorModifier.identity = Symbol('checkboxSelectedColor');
 class CheckboxUnselectedColorModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -5910,7 +5923,7 @@ class CheckboxUnselectedColorModifier extends Modifier {
         }
     }
 }
-CheckboxUnselectedColorModifier.identity = Symbol("checkboxUnselectedColor");
+CheckboxUnselectedColorModifier.identity = Symbol('checkboxUnselectedColor');
 /// <reference path="./import.ts" />
 class DividerVerticalModifier extends Modifier {
     applyPeer(node, reset) {
@@ -6005,23 +6018,23 @@ globalThis.Divider.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkNavDestinationComponent extends ArkComponent {
     title(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     hideTitleBar(value) {
         modifier(this._modifiers, HideTitleBarModifier, value);
         return this;
     }
     onShown(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onHidden(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onBackPressed(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 class HideTitleBarModifier extends Modifier {
@@ -6034,7 +6047,7 @@ class HideTitleBarModifier extends Modifier {
         }
     }
 }
-HideTitleBarModifier.identity = Symbol("hideTitleBar");
+HideTitleBarModifier.identity = Symbol('hideTitleBar');
 //@ts-ignore
 globalThis.NavDestination.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -6304,7 +6317,7 @@ globalThis.GridCol.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 const COLOR_WITH_MAGIC = /#[0-9A-Fa-f]{6,8}/;
 const COLOR_WITH_MAGIC_MINI = /#[0-9A-Fa-f]{3,4}/;
 const COLOR_WITH_RGB = /rgb\(([0-9]{1,3})\,([0-9]{1,3})\,([0-9]{1,3})\)/i;
@@ -6328,10 +6341,10 @@ class ArkColor {
         if (isResource(value)) {
             return false;
         }
-        if (typeof value === "number") {
+        if (typeof value === 'number') {
             return this.parseColorUint(value);
         }
-        else if (typeof value === "string") {
+        else if (typeof value === 'string') {
             return this.parseColorString(value);
         }
         else if (value === undefined) {
@@ -6344,7 +6357,7 @@ class ArkColor {
         if (colorStr.length === 0) {
             return false;
         }
-        colorStr = colorStr.replace(/\s/g, "");
+        colorStr = colorStr.replace(/\s/g, '');
         return (this.matchColorWithMagic(colorStr) ||
             this.matchColorWithMagicMini(colorStr) ||
             this.matchColorWithRGB(colorStr) ||
@@ -6454,7 +6467,7 @@ class ArkColor {
         return this.color;
     }
 }
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkBorderStyle {
     constructor() {
         this.type = undefined;
@@ -6489,54 +6502,6 @@ class ArkBorderStyle {
         this.bottom = options.bottom;
         this.left = options.left;
         this.type = true;
-        return true;
-    }
-}
-class ArkShadow {
-    constructor() {
-        this.style = undefined;
-        this.radius = undefined;
-        this.type = undefined;
-        this.color = undefined;
-        this.offsetX = undefined;
-        this.offsetY = undefined;
-        this.fill = undefined;
-    }
-    isEqual(another) {
-        return (this.style === another.style &&
-            this.radius === another.radius &&
-            this.type === another.type &&
-            this.color === another.color &&
-            this.offsetX === another.offsetX &&
-            this.offsetY === another.offsetY &&
-            this.fill === another.fill);
-    }
-    parseShadowValue(value) {
-        if (typeof value === 'number') {
-            this.style = value;
-            return true;
-        }
-        else if (typeof value === 'object') {
-            return this.parseShadowOptions(value);
-        }
-        return false;
-    }
-    parseShadowOptions(options) {
-        if (isResource(options.radius) ||
-            isResource(options.color) ||
-            isResource(options.offsetX) ||
-            isResource(options.offsetY)) {
-            return false;
-        }
-        let arkColor = new ArkColor();
-        this.radius = options.radius;
-        this.type = options.type;
-        if (arkColor.parseColorValue(options.color)) {
-            this.color = arkColor.getColor();
-        }
-        this.offsetX = options.offsetX;
-        this.offsetY = options.offsetY;
-        this.fill = options.fill;
         return true;
     }
 }
@@ -6638,25 +6603,25 @@ class ArkLabelFont {
             this.style === another.style);
     }
 }
-function ArkDeepCompareArrays(arr1, arr2) {
+function deepCompareArrays(arr1, arr2) {
     return (Array.isArray(arr1) &&
         Array.isArray(arr2) &&
         arr1.length === arr2.length &&
         arr1.every((value, index) => {
             if (Array.isArray(value) && Array.isArray(arr2[index])) {
-                return ArkDeepCompareArrays(value, arr2[index]);
+                return deepCompareArrays(value, arr2[index]);
             }
             else {
                 return value === arr2[index];
             }
         }));
 }
-function ArkDeepSimpleCopy(obj) {
+function deepSimpleCopy(obj) {
     if (typeof obj === 'object') {
         if (Array.isArray(obj)) {
             let result = [];
             for (let i = 0; i < obj.length; i++) {
-                result[i] = ArkDeepSimpleCopy(obj[i]);
+                result[i] = deepSimpleCopy(obj[i]);
             }
             return result;
         }
@@ -6664,7 +6629,7 @@ function ArkDeepSimpleCopy(obj) {
             let result = {};
             for (const key in obj) {
                 if (obj.hasOwnProperty(key)) {
-                    result[key] = ArkDeepSimpleCopy(obj[key]);
+                    result[key] = deepSimpleCopy(obj[key]);
                 }
             }
             return result;
@@ -6672,7 +6637,7 @@ function ArkDeepSimpleCopy(obj) {
     }
     return obj;
 }
-function ArkCopyColorStop(colorStop) {
+function copyColorStop(colorStop) {
     if (Array.isArray(colorStop)) {
         let result = [];
         for (let index = 0; index < colorStop.length; index++) {
@@ -6684,32 +6649,23 @@ function ArkCopyColorStop(colorStop) {
                 }
                 continue;
             }
-            result[index] = ArkDeepSimpleCopy(value);
+            result[index] = deepSimpleCopy(value);
         }
-        ;
         return result;
     }
-    return ArkDeepSimpleCopy(colorStop);
-}
-function ArkCopyColorStops(colorStops) {
-    let result = [];
-    for (let index = 0; index < colorStops.length; index++) {
-        result[index] = ArkCopyColorStop(colorStops[index]);
-    }
-    ;
-    return result;
+    return deepSimpleCopy(colorStop);
 }
 class ArkLinearGradient {
     constructor(angle, direction, colors, repeating) {
         this.angle = angle;
         this.direction = direction;
-        this.colors = ArkCopyColorStops(colors);
+        this.colors = colors;
         this.repeating = repeating;
     }
     isEqual(another) {
         return (this.angle === another.angle &&
             this.direction === another.direction &&
-            ArkDeepCompareArrays(this.colors, another.colors) &&
+            deepCompareArrays(this.colors, another.colors) &&
             this.repeating === another.repeating);
     }
 }
@@ -6717,13 +6673,13 @@ class ArkRadialGradient {
     constructor(center, radius, colors, repeating) {
         this.center = center;
         this.radius = radius;
-        this.colors = ArkCopyColorStops(colors);
+        this.colors = colors;
         this.repeating = repeating;
     }
     isEqual(another) {
-        return (ArkDeepCompareArrays(this.center, another.center) &&
+        return (deepCompareArrays(this.center, another.center) &&
             this.radius === another.radius &&
-            ArkDeepCompareArrays(this.colors, another.colors) &&
+            deepCompareArrays(this.colors, another.colors) &&
             this.repeating === another.repeating);
     }
 }
@@ -6733,15 +6689,15 @@ class ArkSweepGradient {
         this.start = start;
         this.end = end;
         this.rotation = rotation;
-        this.colors = ArkCopyColorStops(colors);
+        this.colors = colors;
         this.repeating = repeating;
     }
     isEqual(another) {
-        return (ArkDeepCompareArrays(this.center, another.center) &&
+        return (deepCompareArrays(this.center, another.center) &&
             this.start === another.start &&
             this.end === another.end &&
             this.rotation === another.rotation &&
-            ArkDeepCompareArrays(this.colors, another.colors) &&
+            deepCompareArrays(this.colors, another.colors) &&
             this.repeating === another.repeating);
     }
 }
@@ -6767,20 +6723,47 @@ class ArkLinearGradientBlur {
     }
     isEqual(another) {
         return (this.blurRadius === another.blurRadius &&
-            ArkDeepCompareArrays(this.fractionStops, another.fractionStops) &&
+            deepCompareArrays(this.fractionStops, another.fractionStops) &&
             this.direction === another.direction);
     }
 }
 class ArkOverlay {
-    constructor(value, align, offsetX, offsetY) {
-        this.value = value;
-        this.align = align;
-        this.offsetX = offsetX;
-        this.offsetY = offsetY;
+    constructor() {
+        this.value = undefined;
+        this.align = undefined;
+        this.offsetX = undefined;
+        this.offsetY = undefined;
+        this.hasOptions = undefined;
+        this.hasOffset = undefined;
+    }
+    splitOption(options) {
+        if (isUndefined(options)) {
+            return true;
+        }
+        this.hasOptions = true;
+        this.align = options.align;
+        if (isUndefined(options.offset)) {
+            return true;
+        }
+        this.hasOffset = true;
+        this.offsetX = options.offset.x;
+        this.offsetY = options.offset.y;
+        return true;
+    }
+    splitOverlayValue(value, options) {
+        if (typeof value === 'string') {
+            this.value = value;
+            return this.splitOption(options);
+        }
+        return false;
     }
     isEqual(another) {
         return ((this.value === another.value) && (this.align === another.align) &&
-            (this.offsetX === another.offsetX) && (this.offsetY === another.offsetY));
+            (this.offsetX === another.offsetX) && (this.offsetY === another.offsetY) &&
+            (this.hasOptions === another.hasOptions) && (this.hasOffset === another.hasOffset));
+    }
+    checkObjectDiff(another) {
+        return !this.isEqual(another);
     }
 }
 class ArkSharedTransition {
@@ -6861,7 +6844,7 @@ class ArkBorderImage {
         let tmpSource = source;
         this.sourceAngle = tmpSource.angle;
         this.sourceDirection = tmpSource.direction;
-        this.sourceColors = ArkCopyColorStops(tmpSource.colors);
+        this.sourceColors = tmpSource.colors;
         this.sourceRepeating = tmpSource.repeating;
         return true;
     }
@@ -6949,7 +6932,7 @@ class ArkBorderImage {
     isLinearGradientEqual(another) {
         return ((this.sourceAngle === another.sourceAngle) &&
             (this.sourceDirection === another.sourceDirection) &&
-            (ArkDeepCompareArrays(this.sourceColors, another.sourceColors)) &&
+            (deepCompareArrays(this.sourceColors, another.sourceColors)) &&
             (this.sourceRepeating === another.sourceRepeating));
     }
     isSourceEqual(another) {
@@ -7588,8 +7571,8 @@ class ArkImageFrameInfoToArray {
 class ArkPickerTextStyle {
     constructor() {
         this.color = undefined;
-        this.size = "16fp";
-        this.weight = "Regular";
+        this.size = '16fp';
+        this.weight = 'Regular';
     }
     setColor(color) {
         let arkColor = new ArkColor();
@@ -7674,7 +7657,7 @@ class ArkResourceColor {
         return (this.color === another.color);
     }
 }
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkPanelComponent extends ArkComponent {
     mode(value) {
         if (typeof value === 'number') {
@@ -7894,14 +7877,14 @@ globalThis.Panel.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 const TITLE_MODE_RANGE = 2;
 const NAV_BAR_POSITION_RANGE = 1;
 const NAVIGATION_MODE_RANGE = 2;
 const DEFAULT_NAV_BAR_WIDTH = 240;
-const MIN_NAV_BAR_WIDTH_DEFAULT = "0vp";
+const MIN_NAV_BAR_WIDTH_DEFAULT = '0vp';
 const NAVIGATION_TITLE_MODE_DEFAULT = 0;
-const DEFAULT_UNIT = "vp";
+const DEFAULT_UNIT = 'vp';
 class ArkNavigationComponent extends ArkComponent {
     navBarWidth(value) {
         if (isNumber(value)) {
@@ -7979,7 +7962,7 @@ class ArkNavigationComponent extends ArkComponent {
         return this;
     }
     title(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     subTitle(value) {
         modifier(this._modifiers, SubTitleModifier, value);
@@ -8000,29 +7983,29 @@ class ArkNavigationComponent extends ArkComponent {
         return this;
     }
     menus(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     toolBar(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     toolbarConfiguration(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     hideToolBar(value) {
         modifier(this._modifiers, HideToolBarModifier, isBoolean(value) ? value : false);
         return this;
     }
     onTitleModeChange(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onNavBarStateChange(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onNavigationModeChange(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     navDestination(builder) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 class BackButtonIconModifier extends ModifierWithKey {
@@ -8038,7 +8021,7 @@ class BackButtonIconModifier extends ModifierWithKey {
         return false;
     }
 }
-BackButtonIconModifier.identity = Symbol("backButtonIcon");
+BackButtonIconModifier.identity = Symbol('backButtonIcon');
 class MinNavBarWidthModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8049,7 +8032,7 @@ class MinNavBarWidthModifier extends Modifier {
         }
     }
 }
-MinNavBarWidthModifier.identity = Symbol("minNavBarWidth");
+MinNavBarWidthModifier.identity = Symbol('minNavBarWidth');
 class MaxNavBarWidthModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8060,7 +8043,7 @@ class MaxNavBarWidthModifier extends Modifier {
         }
     }
 }
-MaxNavBarWidthModifier.identity = Symbol("maxNavBarWidth");
+MaxNavBarWidthModifier.identity = Symbol('maxNavBarWidth');
 class MinContentWidthModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8071,7 +8054,7 @@ class MinContentWidthModifier extends Modifier {
         }
     }
 }
-MinContentWidthModifier.identity = Symbol("minContentWidth");
+MinContentWidthModifier.identity = Symbol('minContentWidth');
 class NavBarWidthModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8082,7 +8065,7 @@ class NavBarWidthModifier extends Modifier {
         }
     }
 }
-NavBarWidthModifier.identity = Symbol("navBarWidth");
+NavBarWidthModifier.identity = Symbol('navBarWidth');
 class NavBarPositionModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8093,7 +8076,7 @@ class NavBarPositionModifier extends Modifier {
         }
     }
 }
-NavBarPositionModifier.identity = Symbol("navBarPosition");
+NavBarPositionModifier.identity = Symbol('navBarPosition');
 class ModeModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8104,7 +8087,7 @@ class ModeModifier extends Modifier {
         }
     }
 }
-ModeModifier.identity = Symbol("mode");
+ModeModifier.identity = Symbol('mode');
 class HideToolBarModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8115,7 +8098,7 @@ class HideToolBarModifier extends Modifier {
         }
     }
 }
-HideToolBarModifier.identity = Symbol("hideToolBar");
+HideToolBarModifier.identity = Symbol('hideToolBar');
 class TitleModeModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8126,7 +8109,7 @@ class TitleModeModifier extends Modifier {
         }
     }
 }
-TitleModeModifier.identity = Symbol("titleMode");
+TitleModeModifier.identity = Symbol('titleMode');
 class HideBackButtonModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8137,7 +8120,7 @@ class HideBackButtonModifier extends Modifier {
         }
     }
 }
-HideBackButtonModifier.identity = Symbol("hideBackButton");
+HideBackButtonModifier.identity = Symbol('hideBackButton');
 class SubTitleModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8148,7 +8131,7 @@ class SubTitleModifier extends Modifier {
         }
     }
 }
-SubTitleModifier.identity = Symbol("subTitle");
+SubTitleModifier.identity = Symbol('subTitle');
 class NavigationHideTitleBarModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8159,7 +8142,7 @@ class NavigationHideTitleBarModifier extends Modifier {
         }
     }
 }
-NavigationHideTitleBarModifier.identity = Symbol("hideTitleBar");
+NavigationHideTitleBarModifier.identity = Symbol('hideTitleBar');
 class HideNavBarModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8170,7 +8153,7 @@ class HideNavBarModifier extends Modifier {
         }
     }
 }
-HideNavBarModifier.identity = Symbol("hideNavBar");
+HideNavBarModifier.identity = Symbol('hideNavBar');
 // @ts-ignore
 globalThis.Navigation.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -8247,12 +8230,12 @@ globalThis.RichEditor.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 const NAV_ROUTE_MODE_RANGE = 2;
 const NAV_ROUTE_MODE_DEFAULT = 0;
 class ArkNavRouterComponent extends ArkComponent {
     onStateChange(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     mode(mode) {
         if (isNumber(mode) && mode >= NAV_ROUTE_MODE_DEFAULT && mode <= NAV_ROUTE_MODE_RANGE) {
@@ -8274,7 +8257,7 @@ class NavRouterModeModifier extends Modifier {
         }
     }
 }
-NavRouterModeModifier.identity = Symbol("mode");
+NavRouterModeModifier.identity = Symbol('mode');
 // @ts-ignore
 globalThis.NavRouter.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -8285,7 +8268,7 @@ globalThis.NavRouter.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 var NavigatorType;
 (function (NavigatorType) {
     NavigatorType[NavigatorType["DEFAULT"] = 0] = "DEFAULT";
@@ -8331,7 +8314,7 @@ class ParamsModifier extends Modifier {
         }
     }
 }
-ParamsModifier.identity = Symbol("params");
+ParamsModifier.identity = Symbol('params');
 class TypeModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8342,7 +8325,7 @@ class TypeModifier extends Modifier {
         }
     }
 }
-TypeModifier.identity = Symbol("type");
+TypeModifier.identity = Symbol('type');
 class ActiveModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8353,7 +8336,7 @@ class ActiveModifier extends Modifier {
         }
     }
 }
-ActiveModifier.identity = Symbol("active");
+ActiveModifier.identity = Symbol('active');
 class TargetModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8364,7 +8347,7 @@ class TargetModifier extends Modifier {
         }
     }
 }
-TargetModifier.identity = Symbol("target");
+TargetModifier.identity = Symbol('target');
 // @ts-ignore
 globalThis.Navigator.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -8375,10 +8358,10 @@ globalThis.Navigator.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkAlphabetIndexerComponent extends ArkComponent {
     onSelected(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     color(value) {
         let arkResourceColor = new ArkResourceColor();
@@ -8518,7 +8501,7 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
         return this;
     }
     itemSize(value) {
-        if (typeof value !== "number" && typeof value !== "string") {
+        if (typeof value !== 'number' && typeof value !== 'string') {
             modifier(this._modifiers, ItemSizeModifier, undefined);
         }
         else {
@@ -8542,7 +8525,7 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
     }
     alignStyle(value, offset) {
         let alignStyle = new ArkAlignStyle;
-        if (typeof value === "number") {
+        if (typeof value === 'number') {
             alignStyle.indexerAlign = value;
             alignStyle.offset = offset;
             modifier(this._modifiers, AlignStyleModifier, alignStyle);
@@ -8553,16 +8536,16 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
         return this;
     }
     onSelect(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onRequestPopupData(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onPopupSelect(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     selected(index) {
-        if (typeof index === "number") {
+        if (typeof index === 'number') {
             modifier(this._modifiers, AlphabetIndexerSelectedModifier, index);
         }
         else {
@@ -8571,8 +8554,8 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
         return this;
     }
     popupPosition(value) {
-        if (!value || (!!(value === null || value === void 0 ? void 0 : value.x) && typeof (value === null || value === void 0 ? void 0 : value.x) != "number" && typeof (value === null || value === void 0 ? void 0 : value.x) != "string") ||
-            (!!(value === null || value === void 0 ? void 0 : value.y) && typeof (value === null || value === void 0 ? void 0 : value.y) != "number" && typeof (value === null || value === void 0 ? void 0 : value.x) != "string")) {
+        if (!value || (!!(value === null || value === void 0 ? void 0 : value.x) && typeof (value === null || value === void 0 ? void 0 : value.x) != 'number' && typeof (value === null || value === void 0 ? void 0 : value.x) != 'string') ||
+            (!!(value === null || value === void 0 ? void 0 : value.y) && typeof (value === null || value === void 0 ? void 0 : value.y) != 'number' && typeof (value === null || value === void 0 ? void 0 : value.x) != 'string')) {
             modifier(this._modifiers, PopupPositionModifier, undefined);
         }
         else {
@@ -8604,7 +8587,7 @@ class PopupItemFontModifier extends Modifier {
         }
     }
 }
-PopupItemFontModifier.identity = Symbol("popupItemFont");
+PopupItemFontModifier.identity = Symbol('popupItemFont');
 class SelectedFontModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8615,7 +8598,7 @@ class SelectedFontModifier extends Modifier {
         }
     }
 }
-SelectedFontModifier.identity = Symbol("alphaBetIndexerSelectedFont");
+SelectedFontModifier.identity = Symbol('alphaBetIndexerSelectedFont');
 class PopupFontModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8626,7 +8609,7 @@ class PopupFontModifier extends Modifier {
         }
     }
 }
-PopupFontModifier.identity = Symbol("popupFont");
+PopupFontModifier.identity = Symbol('popupFont');
 class AlphabetIndexerFontModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8637,7 +8620,7 @@ class AlphabetIndexerFontModifier extends Modifier {
         }
     }
 }
-AlphabetIndexerFontModifier.identity = Symbol("alphaBetIndexerFont");
+AlphabetIndexerFontModifier.identity = Symbol('alphaBetIndexerFont');
 class PopupItemBackgroundColorModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8648,7 +8631,7 @@ class PopupItemBackgroundColorModifier extends Modifier {
         }
     }
 }
-PopupItemBackgroundColorModifier.identity = Symbol("popupItemBackgroundColor");
+PopupItemBackgroundColorModifier.identity = Symbol('popupItemBackgroundColor');
 class ColorModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8659,7 +8642,7 @@ class ColorModifier extends Modifier {
         }
     }
 }
-ColorModifier.identity = Symbol("alphabetColor");
+ColorModifier.identity = Symbol('alphabetColor');
 class PopupColorModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8670,7 +8653,7 @@ class PopupColorModifier extends Modifier {
         }
     }
 }
-PopupColorModifier.identity = Symbol("popupColor");
+PopupColorModifier.identity = Symbol('popupColor');
 class SelectedColorModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8681,7 +8664,7 @@ class SelectedColorModifier extends Modifier {
         }
     }
 }
-SelectedColorModifier.identity = Symbol("selectedColor");
+SelectedColorModifier.identity = Symbol('selectedColor');
 class PopupBackgroundModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8692,7 +8675,7 @@ class PopupBackgroundModifier extends Modifier {
         }
     }
 }
-PopupBackgroundModifier.identity = Symbol("popupBackground");
+PopupBackgroundModifier.identity = Symbol('popupBackground');
 class SelectedBackgroundColorModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8703,29 +8686,29 @@ class SelectedBackgroundColorModifier extends Modifier {
         }
     }
 }
-SelectedBackgroundColorModifier.identity = Symbol("selectedBackgroundColor");
+SelectedBackgroundColorModifier.identity = Symbol('selectedBackgroundColor');
 class PopupUnselectedColorModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
             GetUINativeModule().alphabetIndexer.resetPopupUnselectedColor(node);
         }
         else {
-            GetUINativeModule().alphabetIndexer.setSelectedPopupUnselectedColor(node, this.value.color);
+            GetUINativeModule().alphabetIndexer.setPopupUnselectedColor(node, this.value.color);
         }
     }
 }
-PopupUnselectedColorModifier.identity = Symbol("popupUnselectedColor");
+PopupUnselectedColorModifier.identity = Symbol('popupUnselectedColor');
 class PopupSelectedColorModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
             GetUINativeModule().alphabetIndexer.resetPopupSelectedColor(node);
         }
         else {
-            GetUINativeModule().alphabetIndexer.setSelectedPopupSelectedColor(node, this.value.color);
+            GetUINativeModule().alphabetIndexer.setPopupSelectedColor(node, this.value.color);
         }
     }
 }
-PopupSelectedColorModifier.identity = Symbol("popupSelectedColor");
+PopupSelectedColorModifier.identity = Symbol('popupSelectedColor');
 class AlignStyleModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8736,7 +8719,7 @@ class AlignStyleModifier extends Modifier {
         }
     }
 }
-AlignStyleModifier.identity = Symbol("alignStyle");
+AlignStyleModifier.identity = Symbol('alignStyle');
 class UsingPopupModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8747,7 +8730,7 @@ class UsingPopupModifier extends Modifier {
         }
     }
 }
-UsingPopupModifier.identity = Symbol("usingPopup");
+UsingPopupModifier.identity = Symbol('usingPopup');
 class AlphabetIndexerSelectedModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8758,7 +8741,7 @@ class AlphabetIndexerSelectedModifier extends Modifier {
         }
     }
 }
-AlphabetIndexerSelectedModifier.identity = Symbol("alphabetIndexerSelected");
+AlphabetIndexerSelectedModifier.identity = Symbol('alphabetIndexerSelected');
 class ItemSizeModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8769,7 +8752,7 @@ class ItemSizeModifier extends Modifier {
         }
     }
 }
-ItemSizeModifier.identity = Symbol("itemSize");
+ItemSizeModifier.identity = Symbol('itemSize');
 class PopupPositionModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8780,7 +8763,7 @@ class PopupPositionModifier extends Modifier {
         }
     }
 }
-PopupPositionModifier.identity = Symbol("popupPosition");
+PopupPositionModifier.identity = Symbol('popupPosition');
 /// <reference path="./import.ts" />
 class BlankColorModifier extends Modifier {
     applyPeer(node, reset) {
@@ -8815,7 +8798,7 @@ globalThis.Blank.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class TextStyleModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8826,7 +8809,7 @@ class TextStyleModifier extends Modifier {
         }
     }
 }
-TextStyleModifier.identity = Symbol("textStyle");
+TextStyleModifier.identity = Symbol('textStyle');
 class EdgeAlignModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8837,10 +8820,10 @@ class EdgeAlignModifier extends Modifier {
         }
     }
 }
-EdgeAlignModifier.identity = Symbol("edgeAlign");
+EdgeAlignModifier.identity = Symbol('edgeAlign');
 class ArkCalendarPickerComponent extends ArkComponent {
     edgeAlign(alignType, offset) {
-        if (typeof alignType === "object") {
+        if (typeof alignType === 'object') {
             modifier(this._modifiers, EdgeAlignModifier, alignType);
         }
         else {
@@ -8849,7 +8832,7 @@ class ArkCalendarPickerComponent extends ArkComponent {
         return this;
     }
     textStyle(value) {
-        if (typeof value === "object") {
+        if (typeof value === 'object') {
             let pickerTextStyle = new ArkPickerTextStyle();
             pickerTextStyle.setColor(value.color);
             pickerTextStyle.setSize(value.font.size);
@@ -8862,10 +8845,10 @@ class ArkCalendarPickerComponent extends ArkComponent {
         return this;
     }
     onChange(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -8878,25 +8861,25 @@ globalThis.CalendarPicker.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkDataPanelComponent extends ArkComponent {
     closeEffect(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     valueColors(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     trackBackgroundColor(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeWidth(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     trackShadow(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -8909,7 +8892,7 @@ globalThis.DataPanel.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkDatePickerComponent extends ArkComponent {
     lunar(value) {
         modifier(this._modifiers, DatePickerLunarModifier, isBoolean(value) ? value : false);
@@ -8937,10 +8920,10 @@ class ArkDatePickerComponent extends ArkComponent {
         return this;
     }
     onChange(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onDateChange(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 class DatePickerLunarModifier extends Modifier {
@@ -8953,7 +8936,7 @@ class DatePickerLunarModifier extends Modifier {
         }
     }
 }
-DatePickerLunarModifier.identity = Symbol("lunar");
+DatePickerLunarModifier.identity = Symbol('lunar');
 class DatePickerTextStyleModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8964,7 +8947,7 @@ class DatePickerTextStyleModifier extends Modifier {
         }
     }
 }
-DatePickerTextStyleModifier.identity = Symbol("textStyle");
+DatePickerTextStyleModifier.identity = Symbol('textStyle');
 class DatePickerSelectedTextStyleModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8975,7 +8958,7 @@ class DatePickerSelectedTextStyleModifier extends Modifier {
         }
     }
 }
-DatePickerSelectedTextStyleModifier.identity = Symbol("selectedTextStyle");
+DatePickerSelectedTextStyleModifier.identity = Symbol('selectedTextStyle');
 class DatePickerDisappearTextStyleModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -8986,7 +8969,7 @@ class DatePickerDisappearTextStyleModifier extends Modifier {
         }
     }
 }
-DatePickerDisappearTextStyleModifier.identity = Symbol("disappearTextStyle");
+DatePickerDisappearTextStyleModifier.identity = Symbol('disappearTextStyle');
 //@ts-ignore
 globalThis.DatePicker.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -8997,7 +8980,7 @@ globalThis.DatePicker.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkFormComponentComponent extends ArkComponent {
     size(value) {
         if (isObject(value)) {
@@ -9048,19 +9031,19 @@ class ArkFormComponentComponent extends ArkComponent {
         return this;
     }
     onAcquired(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onError(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onRouter(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onUninstall(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onLoad(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 class FormComponentModuleNameModifier extends Modifier {
@@ -9073,7 +9056,7 @@ class FormComponentModuleNameModifier extends Modifier {
         }
     }
 }
-FormComponentModuleNameModifier.identity = Symbol("formComponentModuleName");
+FormComponentModuleNameModifier.identity = Symbol('formComponentModuleName');
 class FormComponentDimensionModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -9084,7 +9067,7 @@ class FormComponentDimensionModifier extends Modifier {
         }
     }
 }
-FormComponentDimensionModifier.identity = Symbol("formComponentDimension");
+FormComponentDimensionModifier.identity = Symbol('formComponentDimension');
 class FormComponentAllowUpdateModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -9095,7 +9078,7 @@ class FormComponentAllowUpdateModifier extends Modifier {
         }
     }
 }
-FormComponentAllowUpdateModifier.identity = Symbol("formComponentAllowUpdate");
+FormComponentAllowUpdateModifier.identity = Symbol('formComponentAllowUpdate');
 class FormComponentSizeModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -9106,7 +9089,7 @@ class FormComponentSizeModifier extends Modifier {
         }
     }
 }
-FormComponentSizeModifier.identity = Symbol("formComponentSize");
+FormComponentSizeModifier.identity = Symbol('formComponentSize');
 class FormComponentVisibilityModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -9117,7 +9100,7 @@ class FormComponentVisibilityModifier extends Modifier {
         }
     }
 }
-FormComponentVisibilityModifier.identity = Symbol("formComponentVisibility");
+FormComponentVisibilityModifier.identity = Symbol('formComponentVisibility');
 // @ts-ignore
 globalThis.FormComponent.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -9128,34 +9111,34 @@ globalThis.FormComponent.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkGaugeComponent extends ArkComponent {
     value(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     startAngle(angle) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     endAngle(angle) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     colors(colors) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeWidth(length) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     description(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     trackShadow(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     indicator(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -9379,7 +9362,7 @@ class ImageSpanVerticalAlignModifier extends Modifier {
 ImageSpanVerticalAlignModifier.identity = Symbol('imageSpanVerticalAlign');
 class ArkImageSpanComponent extends ArkComponent {
     objectFit(value) {
-        if (value) {
+        if (value in ImageFit) {
             modifier(this._modifiers, ImageSpanObjectFitModifier, value);
         }
         else {
@@ -9388,7 +9371,7 @@ class ArkImageSpanComponent extends ArkComponent {
         return this;
     }
     verticalAlign(value) {
-        if (value) {
+        if (value in ImageSpanAlignment) {
             modifier(this._modifiers, ImageSpanVerticalAlignModifier, value);
         }
         else {
@@ -9407,34 +9390,34 @@ globalThis.ImageSpan.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkMarqueeComponent extends ArkComponent {
     fontColor(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fontSize(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     allowScale(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fontWeight(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fontFamily(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onStart(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onBounce(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onFinish(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -9447,7 +9430,7 @@ globalThis.Marquee.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class MenuFontColorModifier extends ModifierWithKey {
     applyPeer(node, reset) {
         if (reset) {
@@ -9466,7 +9449,7 @@ class MenuFontColorModifier extends ModifierWithKey {
         }
     }
 }
-MenuFontColorModifier.identity = Symbol("fontColor");
+MenuFontColorModifier.identity = Symbol('fontColor');
 class MenuFontModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -9477,7 +9460,7 @@ class MenuFontModifier extends Modifier {
         }
     }
 }
-MenuFontModifier.identity = Symbol("font");
+MenuFontModifier.identity = Symbol('font');
 class RadiusModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -9488,10 +9471,10 @@ class RadiusModifier extends Modifier {
         }
     }
 }
-RadiusModifier.identity = Symbol("radius");
+RadiusModifier.identity = Symbol('radius');
 class ArkMenuComponent extends ArkComponent {
     fontSize(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     font(value) {
         let font = new ArkFont();
@@ -9510,7 +9493,7 @@ class ArkMenuComponent extends ArkComponent {
     }
     radius(value) {
         let radius = new ArkBorderRadius();
-        if (typeof value === "number" || typeof value === "string") {
+        if (typeof value === 'number' || typeof value === 'string') {
             radius.topLeft = value;
             radius.topRight = value;
             radius.bottomLeft = value;
@@ -9526,7 +9509,7 @@ class ArkMenuComponent extends ArkComponent {
         return this;
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -9539,7 +9522,7 @@ globalThis.Menu.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class MenuItemSelectedModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -9550,7 +9533,7 @@ class MenuItemSelectedModifier extends Modifier {
         }
     }
 }
-MenuItemSelectedModifier.identity = Symbol("selected");
+MenuItemSelectedModifier.identity = Symbol('selected');
 class LabelFontColorModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -9561,7 +9544,7 @@ class LabelFontColorModifier extends Modifier {
         }
     }
 }
-LabelFontColorModifier.identity = Symbol("labelfontColor");
+LabelFontColorModifier.identity = Symbol('labelfontColor');
 class ContentFontColorModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -9572,32 +9555,32 @@ class ContentFontColorModifier extends Modifier {
         }
     }
 }
-ContentFontColorModifier.identity = Symbol("contentfontColor");
+ContentFontColorModifier.identity = Symbol('contentfontColor');
 class LabelFontModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
-            GetUINativeModule().menu.resetLabelFont(node);
+            GetUINativeModule().menuitem.resetLabelFont(node);
         }
         else {
-            GetUINativeModule().menu.setLabelFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+            GetUINativeModule().menuitem.setLabelFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
         }
     }
 }
-LabelFontModifier.identity = Symbol("labelFont");
+LabelFontModifier.identity = Symbol('labelFont');
 class ContentFontModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
-            GetUINativeModule().menu.resetContentFont(node);
+            GetUINativeModule().menuitem.resetContentFont(node);
         }
         else {
-            GetUINativeModule().menu.setContentFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+            GetUINativeModule().menuitem.setContentFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
         }
     }
 }
-ContentFontModifier.identity = Symbol("contentFont");
+ContentFontModifier.identity = Symbol('contentFont');
 class ArkMenuItemComponent extends ArkComponent {
     selected(value) {
-        if (typeof value === "boolean") {
+        if (typeof value === 'boolean') {
             modifier(this._modifiers, MenuItemSelectedModifier, value);
         }
         else {
@@ -9606,10 +9589,10 @@ class ArkMenuItemComponent extends ArkComponent {
         return this;
     }
     selectIcon(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onChange(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     contentFont(value) {
         let font = new ArkFont();
@@ -9664,10 +9647,10 @@ globalThis.MenuItem.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkMenuItemGroupComponent extends ArkComponent {
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -9854,9 +9837,7 @@ class ArkPatternLockComponent extends ArkComponent {
     onPatternComplete(callback) {
         throw new Error('Method not implemented.');
     }
-    onDotConnect(callback) {
-        throw new Error('Method not implemented.');
-    }
+    onDotConnect(callback) { throw new Error('Method not implemented.'); }
     monopolizeEvents(monopolize) {
         throw new Error('Method not implemented.');
     }
@@ -9871,16 +9852,16 @@ globalThis.PatternLock.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkPluginComponentComponent extends ArkComponent {
     onComplete(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onError(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -9893,19 +9874,19 @@ globalThis.PluginComponent.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkProgressComponent extends ArkComponent {
     value(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     color(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     style(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -9918,16 +9899,16 @@ globalThis.Progress.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkQRCodeComponent extends ArkComponent {
     color(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     contentOpacity(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -9940,10 +9921,10 @@ globalThis.QRCode.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkRemoteWindowComponent extends ArkComponent {
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -9956,7 +9937,7 @@ globalThis.RemoteWindow.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkRichTextComponent extends ArkComponent {
     onStart(callback) {
         throw new Error('Method not implemented.');
@@ -9965,7 +9946,7 @@ class ArkRichTextComponent extends ArkComponent {
         throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -9978,10 +9959,10 @@ globalThis.RichText.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkScrollBarComponent extends ArkComponent {
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -10505,7 +10486,8 @@ class ArkSpanComponent extends ArkComponent {
         let arkValue = new ArkDecoration();
         if (!isNumber(value.type) && !(value.type in TextDecorationType)) {
             arkValue.type = undefined;
-        } else {
+        }
+        else {
             arkValue.type = value.type;
         }
         let arkColor = new ArkColor();
@@ -10617,25 +10599,25 @@ globalThis.Span.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkStepperComponent extends ArkComponent {
     onFinish(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onSkip(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onChange(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onNext(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onPrevious(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -10648,19 +10630,19 @@ globalThis.Stepper.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkStepperItemComponent extends ArkComponent {
     prevLabel(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     nextLabel(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     status(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -10673,37 +10655,37 @@ globalThis.StepperItem.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkTextClockComponent extends ArkComponent {
     format(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onDateChange(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fontColor(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fontSize(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fontStyle(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fontWeight(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fontFamily(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     textShadow(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fontFeature(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -10716,31 +10698,31 @@ globalThis.TextClock.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkTextTimerComponent extends ArkComponent {
     format(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fontColor(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fontSize(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fontStyle(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fontWeight(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fontFamily(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onTimer(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -10753,277 +10735,277 @@ globalThis.TextTimer.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkWebComponent extends ArkComponent {
     javaScriptAccess(javaScriptAccess) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fileAccess(fileAccess) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onlineImageAccess(onlineImageAccess) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     domStorageAccess(domStorageAccess) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     imageAccess(imageAccess) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     mixedMode(mixedMode) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     zoomAccess(zoomAccess) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     geolocationAccess(geolocationAccess) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     javaScriptProxy(javaScriptProxy) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     password(password) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     cacheMode(cacheMode) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     darkMode(mode) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     forceDarkAccess(access) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     mediaOptions(options) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     tableData(tableData) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     wideViewModeAccess(wideViewModeAccess) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     overviewModeAccess(overviewModeAccess) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     overScrollMode(mode) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     textZoomAtio(textZoomAtio) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     textZoomRatio(textZoomRatio) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     databaseAccess(databaseAccess) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     initialScale(percent) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     userAgent(userAgent) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onPageEnd(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onPageBegin(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onProgressChange(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onTitleReceive(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onGeolocationHide(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onGeolocationShow(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onRequestSelected(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onAlert(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onBeforeUnload(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onConfirm(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onPrompt(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onConsole(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onErrorReceive(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onHttpErrorReceive(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onDownloadStart(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onRefreshAccessedHistory(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onUrlLoadIntercept(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onSslErrorReceive(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onRenderExited(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onShowFileSelector(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onFileSelectorShow(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onResourceLoad(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onFullScreenExit(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onFullScreenEnter(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScaleChange(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onHttpAuthRequest(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onInterceptRequest(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onPermissionRequest(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScreenCaptureRequest(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onContextMenuShow(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     mediaPlayGestureAccess(access) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onSearchResultReceive(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScroll(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onSslErrorEventReceive(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onClientAuthenticationRequest(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onWindowNew(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onWindowExit(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     multiWindowAccess(multiWindow) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onInterceptKeyEvent(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     webStandardFont(family) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     webSerifFont(family) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     webSansSerifFont(family) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     webFixedFont(family) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     webFantasyFont(family) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     webCursiveFont(family) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     defaultFixedFontSize(size) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     defaultFontSize(size) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     minFontSize(size) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     minLogicalFontSize(size) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     blockNetwork(block) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     horizontalScrollBarAccess(horizontalScrollBar) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     verticalScrollBarAccess(verticalScrollBar) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onTouchIconUrlReceived(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onFaviconReceived(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onPageVisible(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onDataResubmitted(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     pinchSmooth(isEnabled) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     allowWindowOpenMethod(flag) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onAudioStateChanged(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onFirstContentfulPaint(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onLoadIntercept(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onControllerAttached(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onOverScroll(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     javaScriptOnDocumentStart(scripts) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     layoutMode(mode) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     nestedScroll(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -11036,16 +11018,16 @@ globalThis.Web.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkXComponentComponent extends ArkComponent {
     onLoad(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onDestroy(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -11058,10 +11040,10 @@ globalThis.XComponent.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkBadgeComponent extends ArkComponent {
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -11202,10 +11184,10 @@ globalThis.ColumnSplit.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkEffectComponentComponent extends ArkComponent {
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -11218,13 +11200,13 @@ globalThis.EffectComponent.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkFlexComponent extends ArkComponent {
     pointLight(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -11237,10 +11219,10 @@ globalThis.Flex.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkFlowItemComponent extends ArkComponent {
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -11253,10 +11235,10 @@ globalThis.FlowItem.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkFormLinkComponent extends ArkComponent {
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -11308,106 +11290,106 @@ globalThis.GridRow.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkGridComponent extends ArkComponent {
     columnsTemplate(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     rowsTemplate(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     columnsGap(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     rowsGap(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     scrollBarWidth(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     scrollBarColor(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     scrollBar(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScrollBarUpdate(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScrollIndex(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     cachedCount(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     editMode(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     multiSelectable(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     maxCount(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     minCount(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     cellLength(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     layoutDirection(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     supportAnimation(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onItemDragStart(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onItemDragEnter(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onItemDragMove(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onItemDragLeave(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onItemDrop(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     edgeEffect(value, options) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     nestedScroll(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     enableScrollInteraction(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     friction(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScroll(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onReachStart(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onReachEnd(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScrollStart(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScrollStop(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScrollFrameBegin(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -11420,34 +11402,34 @@ globalThis.Grid.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkGridItemComponent extends ArkComponent {
     rowStart(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     rowEnd(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     columnStart(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     columnEnd(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     forceRebuild(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     selectable(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     selected(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onSelect(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -11460,7 +11442,7 @@ globalThis.GridItem.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkHyperlinkComponent extends ArkComponent {
     color(value) {
         if (!!value) {
@@ -11484,7 +11466,7 @@ class HyperlinkColorModifier extends Modifier {
         }
     }
 }
-HyperlinkColorModifier.identity = Symbol("hyperlinkColor");
+HyperlinkColorModifier.identity = Symbol('hyperlinkColor');
 // @ts-ignore
 globalThis.Hyperlink.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -11495,106 +11477,106 @@ globalThis.Hyperlink.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkListComponent extends ArkComponent {
     lanes(value, gutter) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     alignListItem(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     listDirection(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     scrollBar(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     edgeEffect(value, options) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     contentStartOffset(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     contentEndOffset(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     divider(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     editMode(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     multiSelectable(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     cachedCount(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     chainAnimation(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     chainAnimationOptions(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     sticky(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     scrollSnapAlign(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     nestedScroll(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     enableScrollInteraction(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     friction(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScroll(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScrollIndex(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onReachStart(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onReachEnd(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScrollStart(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScrollStop(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onItemDelete(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onItemMove(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onItemDragStart(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onItemDragEnter(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onItemDragMove(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onItemDragLeave(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onItemDrop(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScrollFrameBegin(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -11607,28 +11589,28 @@ globalThis.List.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkListItemComponent extends ArkComponent {
     sticky(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     editable(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     selectable(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     selected(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     swipeAction(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onSelect(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -11641,13 +11623,13 @@ globalThis.ListItem.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkListItemGroupComponent extends ArkComponent {
     divider(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -11660,10 +11642,10 @@ globalThis.ListItemGroup.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkRelativeContainerComponent extends ArkComponent {
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -12056,79 +12038,79 @@ globalThis.SideBarContainer.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkSwiperComponent extends ArkComponent {
     index(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     autoPlay(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     interval(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     indicator(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     displayArrow(value, isHoverShow) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     loop(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     duration(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     vertical(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     itemSpace(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     displayMode(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     cachedCount(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     displayCount(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     effectMode(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     disableSwipe(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     curve(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onChange(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     indicatorStyle(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     prevMargin(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     nextMargin(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onAnimationStart(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onAnimationEnd(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onGestureSwipe(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     nestedScroll(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -12141,16 +12123,16 @@ globalThis.Swiper.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkTabsComponent extends ArkComponent {
     onAnimationStart(handler) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onAnimationEnd(handler) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onGestureSwipe(handler) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     vertical(value) {
         modifier(this._modifiers, VerticalModifier, value);
@@ -12202,10 +12184,10 @@ class ArkTabsComponent extends ArkComponent {
         return this;
     }
     onChange(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onTabBarClick(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fadingEdge(value) {
         modifier(this._modifiers, FadingEdgeModifier, value);
@@ -12250,7 +12232,7 @@ class BarGridAlignModifier extends Modifier {
         }
     }
 }
-BarGridAlignModifier.identity = Symbol("barGridAlign");
+BarGridAlignModifier.identity = Symbol('barGridAlign');
 class DividerModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -12261,7 +12243,7 @@ class DividerModifier extends Modifier {
         }
     }
 }
-DividerModifier.identity = Symbol("Divider");
+DividerModifier.identity = Symbol('Divider');
 class BarWidthModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -12272,7 +12254,7 @@ class BarWidthModifier extends Modifier {
         }
     }
 }
-BarWidthModifier.identity = Symbol("barWidth");
+BarWidthModifier.identity = Symbol('barWidth');
 class BarAdaptiveHeightModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -12283,7 +12265,7 @@ class BarAdaptiveHeightModifier extends Modifier {
         }
     }
 }
-BarAdaptiveHeightModifier.identity = Symbol("barAdaptiveHeight");
+BarAdaptiveHeightModifier.identity = Symbol('barAdaptiveHeight');
 class BarHeightModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -12294,7 +12276,7 @@ class BarHeightModifier extends Modifier {
         }
     }
 }
-BarHeightModifier.identity = Symbol("barHeight");
+BarHeightModifier.identity = Symbol('barHeight');
 class BarOverlapModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -12305,7 +12287,7 @@ class BarOverlapModifier extends Modifier {
         }
     }
 }
-BarOverlapModifier.identity = Symbol("barOverlap");
+BarOverlapModifier.identity = Symbol('barOverlap');
 class VerticalModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -12316,7 +12298,7 @@ class VerticalModifier extends Modifier {
         }
     }
 }
-VerticalModifier.identity = Symbol("vertical");
+VerticalModifier.identity = Symbol('vertical');
 class AnimationDurationModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -12327,7 +12309,7 @@ class AnimationDurationModifier extends Modifier {
         }
     }
 }
-AnimationDurationModifier.identity = Symbol("animationduration");
+AnimationDurationModifier.identity = Symbol('animationduration');
 class ScrollableModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -12338,7 +12320,7 @@ class ScrollableModifier extends Modifier {
         }
     }
 }
-ScrollableModifier.identity = Symbol("scrollable");
+ScrollableModifier.identity = Symbol('scrollable');
 class TabBarModeModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -12349,7 +12331,7 @@ class TabBarModeModifier extends Modifier {
         }
     }
 }
-TabBarModeModifier.identity = Symbol("tabsbarMode");
+TabBarModeModifier.identity = Symbol('tabsbarMode');
 class BarPositionModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -12360,7 +12342,7 @@ class BarPositionModifier extends Modifier {
         }
     }
 }
-BarPositionModifier.identity = Symbol("barPosition");
+BarPositionModifier.identity = Symbol('barPosition');
 class TabsHideTitleBarModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -12371,7 +12353,7 @@ class TabsHideTitleBarModifier extends Modifier {
         }
     }
 }
-TabsHideTitleBarModifier.identity = Symbol("hideTitleBar");
+TabsHideTitleBarModifier.identity = Symbol('hideTitleBar');
 class BarBackgroundColorModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -12382,7 +12364,7 @@ class BarBackgroundColorModifier extends Modifier {
         }
     }
 }
-BarBackgroundColorModifier.identity = Symbol("barbackgroundcolor");
+BarBackgroundColorModifier.identity = Symbol('barbackgroundcolor');
 class FadingEdgeModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
@@ -12393,18 +12375,18 @@ class FadingEdgeModifier extends Modifier {
         }
     }
 }
-FadingEdgeModifier.identity = Symbol("fadingedge");
+FadingEdgeModifier.identity = Symbol('fadingedge');
 class ScrollableBarModeOptionsModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
             GetUINativeModule().tabs.resetScrollableBarModeOptions(node);
         }
         else {
-            GetUINativeModule().tabs.setScrollableBarModeOptions(node, this.value["margin"], this.value["nonScrollableLayoutStyle"]);
+            GetUINativeModule().tabs.setScrollableBarModeOptions(node, this.value['margin'], this.value['nonScrollableLayoutStyle']);
         }
     }
 }
-ScrollableBarModeOptionsModifier.identity = Symbol("tabsscrollableBarModeOptions");
+ScrollableBarModeOptionsModifier.identity = Symbol('tabsscrollableBarModeOptions');
 // @ts-ignore
 globalThis.Tabs.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -12415,13 +12397,13 @@ globalThis.Tabs.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkTabContentComponent extends ArkComponent {
     tabBar(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -12434,22 +12416,22 @@ globalThis.TabContent.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkUIExtensionComponentComponent extends ArkComponent {
     onRemoteReady(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onReceive(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onResult(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onRelease(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onError(callback) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -12462,49 +12444,49 @@ globalThis.UIExtensionComponent.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkWaterFlowComponent extends ArkComponent {
     columnsTemplate(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     itemConstraintSize(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     rowsTemplate(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     columnsGap(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     rowsGap(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     layoutDirection(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     nestedScroll(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     enableScrollInteraction(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     friction(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     cachedCount(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onReachStart(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onReachEnd(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onScrollFrameBegin(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -12607,7 +12589,7 @@ class ArkVideoComponent extends ArkComponent {
         return this;
     }
     objectFit(value) {
-        if (value) {
+        if (value in ImageFit) {
             modifier(this._modifiers, VideoObjectFitModifier, value);
         }
         else {
@@ -12754,49 +12736,49 @@ globalThis.Ellipse.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkLineComponent extends ArkComponent {
     startPoint(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     endPoint(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     stroke(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fill(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeDashOffset(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeLineCap(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeLineJoin(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeMiterLimit(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeOpacity(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fillOpacity(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeWidth(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     antiAlias(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeDashArray(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -12809,46 +12791,46 @@ globalThis.Line.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkPolylineComponent extends ArkComponent {
     points(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     stroke(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fill(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeDashOffset(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeLineCap(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeLineJoin(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeMiterLimit(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeOpacity(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fillOpacity(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeWidth(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     antiAlias(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeDashArray(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -12861,46 +12843,46 @@ globalThis.Polyline.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkPolygonComponent extends ArkComponent {
     points(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     stroke(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fill(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeDashOffset(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeLineCap(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeLineJoin(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeMiterLimit(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeOpacity(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fillOpacity(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeWidth(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     antiAlias(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeDashArray(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -12913,46 +12895,46 @@ globalThis.Polygon.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkPathComponent extends ArkComponent {
     commands(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     stroke(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fill(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeDashOffset(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeLineCap(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeLineJoin(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeMiterLimit(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeOpacity(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fillOpacity(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeWidth(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     antiAlias(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeDashArray(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -12965,52 +12947,52 @@ globalThis.Path.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkRectComponent extends ArkComponent {
     radiusWidth(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     radiusHeight(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     radius(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     stroke(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fill(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeDashOffset(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeLineCap(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeLineJoin(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeMiterLimit(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeOpacity(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fillOpacity(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeWidth(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     antiAlias(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeDashArray(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -13023,49 +13005,49 @@ globalThis.Rect.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkShapeComponent extends ArkComponent {
     viewPort(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     stroke(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fill(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeDashOffset(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeDashArray(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeLineCap(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeLineJoin(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeMiterLimit(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeOpacity(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     fillOpacity(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     strokeWidth(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     antiAlias(value) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     mesh(value, column, row) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -13078,13 +13060,13 @@ globalThis.Shape.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkCanvasComponent extends ArkComponent {
     onReady(event) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     monopolizeEvents(monopolize) {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
@@ -13097,7 +13079,7 @@ globalThis.Canvas.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkGridContainerComponent extends ArkComponent {
     alignItems(value) {
         throw new Error('Method not implemented.');
@@ -13119,7 +13101,7 @@ globalThis.GridContainer.attributeModifier = function (modifier) {
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
 };
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkWindowSceneComponent extends ArkComponent {
 }
 // @ts-ignore
