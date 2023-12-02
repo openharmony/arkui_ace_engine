@@ -117,7 +117,7 @@ private:
     void AddFormComponent(const RequestFormInfo& info);
     void UpdateFormComponent(const RequestFormInfo& info);
 
-    void HandleSnapshot();
+    void HandleSnapshot(uint32_t delayTime);
     void TakeSurfaceCaptureForUI();
     void UpdateStaticCard();
     RefPtr<FrameNode> GetOrCreateImageNode();
@@ -141,6 +141,7 @@ private:
     bool isBeenLayout_ = false;
     bool isUnTrust_ = false;
     bool isDynamic_ = true;
+    bool needSnapshotAgain_ = false;
     bool isSnapshot_ = false;
     bool isRegistedAreaCallback_ = false;
     RefPtr<PixelMap> pixelMap_ = nullptr;

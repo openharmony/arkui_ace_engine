@@ -49,8 +49,11 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
-constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT = 10000;
+constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
+constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
+constexpr double NON_TRANSPARENT_VAL = 1.0;
+constexpr double TRANSPARENT_VAL = 0;
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -168,7 +171,7 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
     host->GetRenderContext()->UpdateBackgroundColor(unTrustBackgroundColor);
 }
 
-void FormPattern::HandleSnapshot()
+void FormPattern::HandleSnapshot(uint32_t delayTime)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -180,7 +183,7 @@ void FormPattern::HandleSnapshot()
             CHECK_NULL_VOID(form);
             form->TakeSurfaceCaptureForUI();
         },
-        TaskExecutor::TaskType::UI, DELAY_TIME_FOR_FORM_SNAPSHOT);
+        TaskExecutor::TaskType::UI, delayTime);
 }
 
 void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
@@ -209,10 +212,20 @@ void FormPattern::TakeSurfaceCaptureForUI()
         formLinkInfos_.clear();
         return;
     }
-
+    TAG_LOGI(AceLogTag::ACE_FORM, "Static-form take snapshot.");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto externalContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+    auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto renderContext = host->GetRenderContext();
+    auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+    auto opacity = renderContext->GetOpacityValue(NON_TRANSPARENT_VAL);
+    if (visible == VisibleType::INVISIBLE || visible == VisibleType::GONE || opacity == TRANSPARENT_VAL) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "The form is invisible, TakeSurfaceCaptureForUI later.");
+        needSnapshotAgain_ = true;
+        return;
+    }
+    auto externalContext = DynamicCast<NG::RosenRenderContext>(renderContext);
     CHECK_NULL_VOID(externalContext);
     auto rsNode = externalContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
@@ -236,10 +249,12 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 
 void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 {
+    TAG_LOGI(AceLogTag::ACE_FORM, "call.");
     CHECK_NULL_VOID(pixelMap);
     pixelMap_ = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
     UpdateStaticCard();
     isSnapshot_ = true;
+    needSnapshotAgain_ = false;
 }
 
 void FormPattern::UpdateStaticCard()
@@ -396,12 +411,11 @@ void FormPattern::OnModifyDone()
          */
         return;
     }
-    // Convert DimensionUnit to DimensionUnit::PX,
+    // Convert DimensionUnit to DimensionUnit::PX
     auto info = layoutProperty->GetRequestFormInfo().value_or(RequestFormInfo());
     info.width = Dimension(width.ConvertToPx());
     info.height = Dimension(height.ConvertToPx());
     layoutProperty->UpdateRequestFormInfo(info);
-    TAG_LOGI(AceLogTag::ACE_FORM, "width: %{public}f   height: %{public}f", info.width.Value(), info.height.Value());
     UpdateBackgroundColorWhenUnTrustForm();
     HandleFormComponent(info);
 }
@@ -448,6 +462,7 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         TAG_LOGW(AceLogTag::ACE_FORM, "Invalid form size.");
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_FORM, "width: %{public}f   height: %{public}f", info.width.Value(), info.height.Value());
     cardInfo_ = info;
     if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)) {
         BorderRadiusProperty borderRadius;
@@ -494,6 +509,8 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
     }
 
     if (cardInfo_.width != info.width || cardInfo_.height != info.height) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "update size, width: %{public}f   height: %{public}f",
+            info.width.Value(), info.height.Value());
         cardInfo_.width = info.width;
         cardInfo_.height = info.height;
         if (formManagerBridge_) {
@@ -514,6 +531,16 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
     if (isLoaded_) {
         auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
         layoutProperty->UpdateVisibility(visible);
+        if (!isDynamic_ && !isSnapshot_ && needSnapshotAgain_) {
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            auto opacity = renderContext->GetOpacityValue(NON_TRANSPARENT_VAL);
+            TAG_LOGI(AceLogTag::ACE_FORM, "Static-form, current opacity: %{public}f, visible: %{public}d",
+                opacity, static_cast<int>(visible));
+            if (visible == VisibleType::VISIBLE && opacity == NON_TRANSPARENT_VAL) {
+                HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_3S);
+            }
+        }
     }
     UpdateConfiguration();
 }
@@ -675,7 +702,7 @@ void FormPattern::InitFormManagerDelegate()
         ContainerScope scope(instanceID);
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
-        formPattern->HandleSnapshot();
+        formPattern->HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
     });
 
     formManagerBridge_->AddFormLinkInfoUpdateCallback(
@@ -983,7 +1010,7 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
     CHECK_NULL_VOID(formManagerBridge_);
 
     if (!isVisible_) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "The form is invisible, stop to dispatch pointEvent");
+        TAG_LOGD(AceLogTag::ACE_FORM, "The form is invisible, stop to dispatch pointEvent");
         auto pointerAction = pointerEvent->GetPointerAction();
         if (pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_UP ||
             pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP ||
