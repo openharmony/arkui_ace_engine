@@ -62,6 +62,8 @@ static const std::set<std::string> stringAttrs = {
     "draggable",
     "divider_shadow_enable",
     "camera_input",
+    "menu_bg_blur_effect_enable",
+    "menu_double_border_enable"
     "section_unfocus_effect_enable",
     "section_unfocus_color",
     "sheet_type",
