@@ -42,6 +42,8 @@ public:
     static void ParseAllBorder(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result);
     static bool ParseJsFontFamilies(
         const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result);
+    static bool ParseJsFontFamiliesFromResource(
+        const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result);
     static bool ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         DimensionUnit defaultUnit);
     static bool ParseJsDimensionFp(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result);
@@ -74,6 +76,7 @@ public:
         return true;
     }
     static std::string GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value);
+    static bool ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

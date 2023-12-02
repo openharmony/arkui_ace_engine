@@ -15,6 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_span_bridge.h"
 
 #include <string>
+#include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
@@ -100,19 +101,12 @@ ArkUINativeModuleValue SpanBridge::SetLineHeight(ArkUIRuntimeCallInfo *runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-
-    std::string str;
-    struct StringAndDouble result = { 0.0, nullptr };
-    if (secondArg->IsNumber()) {
-        result.value = secondArg->ToNumber(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanLineHeight(nativeNode, &result);
-    } else if (secondArg->IsString()) {
-        str = secondArg->ToString(vm)->ToString();
-        result.valueStr = str.c_str();
-        GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanLineHeight(nativeNode, &result);
-    } else {
-        GetArkUIInternalNodeAPI()->GetSpanModifier().ReSetSpanLineHeight(nativeNode);
+    CalcDimension lineHeight(0.0, DimensionUnit::PX);
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, lineHeight)) {
+        lineHeight.Reset();
     }
+    GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanLineHeight(
+        nativeNode, lineHeight.Value(), static_cast<int8_t>(lineHeight.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -235,7 +229,8 @@ ArkUINativeModuleValue SpanBridge::SetDecoration(ArkUIRuntimeCallInfo *runtimeCa
     if (!ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color)) {
         color = DEFAULT_DECORATION_COLOR;
     }
-    GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanDecoration(nativeNode, textDecoration, color.GetValue(), style);
+    GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanDecoration(
+        nativeNode, textDecoration, color.GetValue(), style);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -263,11 +258,10 @@ ArkUINativeModuleValue SpanBridge::SetFontColor(ArkUIRuntimeCallInfo *runtimeCal
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
 
     Color textColor = theme->GetTextStyle().GetTextColor();
-    if (secondArg->IsInt() && ArkTSUtils::ParseJsColorAlpha(vm, secondArg, textColor)) {
-        GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanFontColor(nativeNode, textColor.GetValue());
-    } else {
-        GetArkUIInternalNodeAPI()->GetSpanModifier().ResetSpanFontColor(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, textColor)) {
+        textColor = theme->GetTextStyle().GetTextColor();
     }
+    GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanFontColor(nativeNode, textColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -318,38 +312,59 @@ ArkUINativeModuleValue SpanBridge::SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> sizeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> weightArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> familyArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    struct StringAndDouble size = { 0.0, nullptr };
-
-    if (secondArg->IsNumber()) {
-        size.value = secondArg->ToNumber(vm)->Value();
-    } else if (secondArg->IsString()) {
-        size.valueStr = secondArg->ToString(vm)->ToString().c_str();
+    ArkUIFontStruct fontInfo;
+    CalcDimension fontSize;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, sizeArg,  fontSize) || sizeArg->IsNull()) {
+        fontSize.SetValue(DEFAULT_SPAN_FONT_SIZE);
+        fontSize.SetUnit(DEFAULT_SPAN_FONT_UNIT);
+    }
+    if (sizeArg->IsUndefined() || fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
+        auto size = theme->GetTextStyle().GetFontSize();
+        fontInfo.fontSizeNumber = size.Value();
+        fontInfo.fontSizeUnit = static_cast<int8_t>(size.Unit());
+    } else {
+        fontInfo.fontSizeNumber = fontSize.Value();
+        fontInfo.fontSizeUnit = static_cast<int8_t>(fontSize.Unit());
     }
 
     std::string weight = DEFAULT_FONT_WEIGHT;
-    if (!thirdArg->IsNull()) {
-        if (thirdArg->IsNumber()) {
-            weight = std::to_string(thirdArg->Int32Value(vm));
-        } else if (thirdArg->IsString()) {
-            weight = thirdArg->ToString(vm)->ToString();
+    if (!weightArg->IsNull()) {
+        if (weightArg->IsNumber()) {
+            weight = std::to_string(weightArg->Int32Value(vm));
+        } else if (weightArg->IsString()) {
+            weight = weightArg->ToString(vm)->ToString();
         }
     }
-    std::string str;
-    const char *family = nullptr;
-    if (!forthArg->IsNull()) {
-        str = forthArg->ToString(vm)->ToString();
-        family = str.c_str();
-    }
+    fontInfo.fontWeight = static_cast<uint8_t>(Framework::ConvertStrToFontWeight(weight));
+    
     int32_t style = static_cast<int32_t>(DEFAULT_FONT_STYLE);
-    if (fifthArg->IsInt()) {
-        style = fifthArg->Int32Value(vm);
+    if (styleArg->IsInt()) {
+        style = styleArg->Int32Value(vm);
     }
-    GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanFont(nativeNode, &size, weight.c_str(), family, style);
+    fontInfo.fontStyle = static_cast<uint8_t>(style);
+
+    std::vector<std::string> fontFamilies;
+    fontInfo.fontFamilies = nullptr;
+    if (!familyArg->IsNull() && ArkTSUtils::ParseJsFontFamilies(vm, familyArg, fontFamilies)) {
+        fontInfo.familyLength = fontFamilies.size();
+        auto families = std::make_unique<const char* []>(fontInfo.familyLength);
+        for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+            families[i] = fontFamilies[i].c_str();
+        }
+        fontInfo.fontFamilies = families.get();
+        GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanFont(nativeNode, &fontInfo);
+    } else {
+        GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanFont(nativeNode, &fontInfo);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

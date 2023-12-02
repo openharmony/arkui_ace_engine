@@ -15,6 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_span_modifier.h"
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/dimension_size.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -65,18 +66,11 @@ void ResetSpanFontWeight(NodeHandle node)
     SpanModelNG::SetFontWeight(frameNode, DEFAULT_FONT_WEIGHT);
 }
 
-void SetSpanLineHeight(NodeHandle node, StringAndDouble *info)
+void SetSpanLineHeight(NodeHandle node, const double number, const int8_t unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-
-    CalcDimension result;
-    if (info->valueStr != nullptr) {
-        result = StringUtils::StringToCalcDimension(info->valueStr, false, DimensionUnit::FP);
-    } else {
-        result = CalcDimension(info->value, DimensionUnit::FP);
-    }
-    SpanModelNG::SetLineHeight(frameNode, result);
+    SpanModelNG::SetLineHeight(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
 void ReSetSpanLineHeight(NodeHandle node)
@@ -196,28 +190,23 @@ void SetSpanLetterSpacing(NodeHandle node)
     SpanModelNG::SetLetterSpacing(frameNode, DEFAULT_LETTER_SPACING_VALUE);
 }
 
-void SetSpanFont(NodeHandle node,
-    const struct StringAndDouble *size, const char* weight, const char *family, int32_t style)
+void SetSpanFont(NodeHandle node, const struct ArkUIFontStruct *fontInfo)
 {
-    CHECK_NULL_VOID(weight);
+    CHECK_NULL_VOID(fontInfo);
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     Font font;
-    CalcDimension fontSize;
-    if (size->valueStr != nullptr) {
-        fontSize = StringUtils::StringToCalcDimension(size->valueStr, true, DimensionUnit::FP);
-    } else {
-        fontSize = CalcDimension(size->value, DimensionUnit::FP);
+    font.fontSize = Dimension(fontInfo->fontSizeNumber, static_cast<DimensionUnit>(fontInfo->fontSizeUnit));
+    font.fontStyle = static_cast<Ace::FontStyle>(fontInfo->fontStyle);
+    font.fontWeight = static_cast<FontWeight>(fontInfo->fontWeight);
+    std::vector<std::string> families;
+    if (fontInfo->fontFamilies && fontInfo->familyLength > 0) {
+        families.resize(fontInfo->familyLength);
+        for (uint32_t i = 0; i < fontInfo->familyLength; i++) {
+            families.at(i) = std::string(*(fontInfo->fontFamilies + i));
+        }
     }
-    font.fontSize = fontSize;
-    font.fontWeight = Framework::ConvertStrToFontWeight(weight);
-    if (family == nullptr) {
-        font.fontFamilies.clear();
-        font.fontFamilies.emplace_back(DEFAULT_FONT_FAMILY);
-    } else {
-        font.fontFamilies = Framework::ConvertStrToFontFamilies(family);
-    }
-    font.fontStyle = static_cast<Ace::FontStyle>(style);
+    font.fontFamilies = families;
     SpanModelNG::SetFont(frameNode, font);
 }
 
