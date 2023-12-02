@@ -196,6 +196,8 @@ static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
     napi_value lineHeightNApi = nullptr;
     napi_value baselineOffsetNApi = nullptr;
     napi_value textCaseNApi = nullptr;
+    napi_value textIndentNApi = nullptr;
+    napi_value wordBreakNApi = nullptr;
 
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
@@ -214,6 +216,8 @@ static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
         napi_get_named_property(env, argv, "lineHeight", &lineHeightNApi);
         napi_get_named_property(env, argv, "baselineOffset", &baselineOffsetNApi);
         napi_get_named_property(env, argv, "textCase", &textCaseNApi);
+        napi_get_named_property(env, argv, "textIndent", &textIndentNApi);
+        napi_get_named_property(env, argv, "wordBreak", &wordBreakNApi);
     } else {
         return nullptr;
     }
@@ -222,11 +226,15 @@ static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
     std::optional<Dimension> constraintWidth = HandleDimensionType(constraintWidthNApi, env);
     std::optional<Dimension> lineHeight = HandleDimensionType(lineHeightNApi, env);
     std::optional<Dimension> baselineOffset = HandleDimensionType(baselineOffsetNApi, env);
+    std::optional<Dimension> textIndent = HandleDimensionType(textIndentNApi, env);
+
     int32_t fontStyle = HandleIntStyle(fontStyleNApi, env);
     int32_t textAlign = HandleIntStyle(textAlignNApi, env);
     int32_t textOverFlow = HandleIntStyle(textOverFlowNApi, env);
     int32_t maxlines = HandleIntStyle(maxLinesNApi, env);
     int32_t textCase = HandleIntStyle(textCaseNApi, env);
+    int32_t wordBreak = HandleIntStyle(wordBreakNApi, env);
+
     std::string textContent = HandleStringType(textContentNApi, env);
     std::string fontWeight = HandleStringType(fontWeightNApi, env);
     std::string fontFamily = HandleStringType(fontFamilyNApi, env);
@@ -243,6 +251,9 @@ static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
     context.lineHeight = lineHeight;
     context.baselineOffset = baselineOffset;
     context.textCase = static_cast<TextCase>(textCase);
+    context.textIndent = textIndent;
+    context.wordBreak = static_cast<WordBreak>(wordBreak);
+
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         return nullptr;
