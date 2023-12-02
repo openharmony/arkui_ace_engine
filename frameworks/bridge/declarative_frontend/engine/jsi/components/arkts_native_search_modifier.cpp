@@ -48,10 +48,11 @@ void SetSearchTextFont(NodeHandle node, const struct FontStruct* value)
         std::string weightVal;
         if (value->weight->valueStr != nullptr) {
             weightVal = value->weight->valueStr;
+            font.fontWeight = OHOS::Ace::Framework::ConvertStrToFontWeight(weightVal);
         } else {
             weightVal = std::to_string(value->weight->value);
+            font.fontWeight = OHOS::Ace::Framework::ConvertStrToFontWeight(weightVal, FontWeight::W400);
         }
-        font.fontWeight = OHOS::Ace::Framework::ConvertStrToFontWeight(weightVal);
     } else {
         font.fontWeight = DEFAULT_FONT_WEIGHT;
     }
@@ -187,10 +188,13 @@ void SetSearchPlaceholderFont(NodeHandle node, const struct FontStruct* value)
         std::string weightVal;
         if (value->weight->valueStr != nullptr) {
             weightVal = value->weight->valueStr;
+            font.fontWeight = OHOS::Ace::Framework::ConvertStrToFontWeight(weightVal);
         } else {
             weightVal = std::to_string(value->weight->value);
+            font.fontWeight = OHOS::Ace::Framework::ConvertStrToFontWeight(weightVal, FontWeight::W400);
         }
-        font.fontWeight = OHOS::Ace::Framework::ConvertStrToFontWeight(weightVal);
+    } else {
+        font.fontWeight = DEFAULT_FONT_WEIGHT;
     }
 
     if (value->family != nullptr) {
