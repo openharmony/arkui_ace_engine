@@ -5027,6 +5027,14 @@ void WebDelegate::OnFocus()
     }
 }
 
+bool WebDelegate::NeedSoftKeyboard()
+{
+    if (nweb_) {
+        return nweb_->NeedSoftKeyboard();
+    }
+    return false;
+}
+
 void WebDelegate::OnBlur()
 {
     ACE_DCHECK(nweb_ != nullptr);

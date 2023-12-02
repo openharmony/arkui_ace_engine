@@ -188,6 +188,15 @@ WebPattern::~WebPattern()
     }
 }
 
+bool WebPattern::NeedSoftKeyboard() const
+{
+    CHECK_NULL_RETURN(delegate_, false);
+    if (delegate_) {
+        return delegate_->NeedSoftKeyboard();
+    }
+    return false;
+}
+
 void WebPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
