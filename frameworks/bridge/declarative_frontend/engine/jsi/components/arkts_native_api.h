@@ -284,9 +284,9 @@ struct ArkUICommonModifierAPI {
     void (*ResetTabIndex)(NodeHandle node);
     void (*SetObscured)(NodeHandle node, const int32_t* reasons, int32_t length);
     void (*ResetObscured)(NodeHandle node);
-    void (*SetResponseRegion)(NodeHandle node, const double* values, int32_t length);
+    void (*SetResponseRegion)(NodeHandle node, const double* values, const int32_t* units, int32_t length);
     void (*ResetResponseRegion)(NodeHandle node);
-    void (*SetMouseResponseRegion)(NodeHandle node, const double* values, int32_t length);
+    void (*SetMouseResponseRegion)(NodeHandle node, const double* values, const int32_t* units, int32_t length);
     void (*ResetMouseResponseRegion)(NodeHandle node);
     void (*SetEnabled)(NodeHandle node, bool value);
     void (*ResetEnabled)(NodeHandle node);
