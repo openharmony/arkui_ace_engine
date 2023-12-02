@@ -700,6 +700,12 @@ public:
     {
         onKeyEventsInternal_[type] = std::move(onKeyEvent);
     }
+
+    bool FindContextMenuOnKeyEvent(OnKeyEventType type)
+    {
+        return (onKeyEventsInternal_.find(type) != onKeyEventsInternal_.end());
+    }
+
     bool ProcessOnKeyEventInternal(const KeyEvent& event)
     {
         bool result = false;

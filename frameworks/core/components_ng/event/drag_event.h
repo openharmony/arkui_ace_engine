@@ -126,7 +126,7 @@ public:
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0);
     void HideEventColumn();
     void BindClickEvent(const RefPtr<FrameNode>& columnNode);
-    void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode);
+    void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, bool hasContextMenu);
     void SetTextAnimation(const RefPtr<GestureEventHub>& gestureHub, const Offset& globalLocation);
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
