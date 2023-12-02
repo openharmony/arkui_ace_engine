@@ -1397,7 +1397,7 @@ void RosenDecorationPainter::PaintGrayScale(
     if (GreatNotEqual(scale, 0.0)) {
         if (canvas) {
             RSAutoCanvasRestore acr(*canvas, true);
-            canvas->ClipRoundRect(outerRRect, RSClipOp::DIFFERENCE, true);
+            canvas->ClipRoundRect(outerRRect, RSClipOp::INTERSECT, true);
             RSScalar matrix[20] = { 0 };
             matrix[0] = matrix[5] = matrix[10] = 0.2126f * scale;
             matrix[1] = matrix[6] = matrix[11] = 0.7152f * scale;
@@ -1457,7 +1457,7 @@ void RosenDecorationPainter::PaintBrightness(
     }
     if (canvas) {
         RSAutoCanvasRestore acr(*canvas, true);
-        canvas->ClipRoundRect(outerRRect, RSClipOp::DIFFERENCE, true);
+        canvas->ClipRoundRect(outerRRect, RSClipOp::INTERSECT, true);
         RSBrush brush;
         brush.SetAntiAlias(true);
         RSScalar matrix[20] = { 0 };
@@ -1511,7 +1511,7 @@ void RosenDecorationPainter::PaintContrast(
     }
     if (canvas) {
         RSAutoCanvasRestore acr(*canvas, true);
-        canvas->ClipRoundRect(outerRRect, RSClipOp::DIFFERENCE, true);
+        canvas->ClipRoundRect(outerRRect, RSClipOp::INTERSECT, true);
         RSBrush brush;
         brush.SetAntiAlias(true);
         RSScalar matrix[20] = { 0 };
@@ -1556,7 +1556,7 @@ void RosenDecorationPainter::PaintColorBlend(
     if (colorBlend.GetValue() != COLOR_MASK) {
         if (canvas) {
             RSAutoCanvasRestore acr(*canvas, true);
-            canvas->ClipRoundRect(outerRRect, RSClipOp::DIFFERENCE, true);
+            canvas->ClipRoundRect(outerRRect, RSClipOp::INTERSECT, true);
             std::shared_ptr<RSColorFilter> colorFilter =
                 RSColorFilter::CreateBlendModeColorFilter(colorBlend.GetValue(), RSBlendMode::PLUS);
             RSFilter filter;
@@ -1606,7 +1606,7 @@ void RosenDecorationPainter::PaintSaturate(
     if (!NearEqual(saturates, 1.0) && GreatOrEqual(saturates, 0.0)) {
         if (canvas) {
             RSAutoCanvasRestore acr(*canvas, true);
-            canvas->ClipRoundRect(outerRRect, RSClipOp::DIFFERENCE, true);
+            canvas->ClipRoundRect(outerRRect, RSClipOp::INTERSECT, true);
             RSBrush brush;
             brush.SetAntiAlias(true);
             RSScalar matrix[20] = { 0 };
@@ -1675,7 +1675,7 @@ void RosenDecorationPainter::PaintSepia(
     if (GreatNotEqual(sepias, 0.0)) {
         if (canvas) {
             RSAutoCanvasRestore acr(*canvas, true);
-            canvas->ClipRoundRect(outerRRect, RSClipOp::DIFFERENCE, true);
+            canvas->ClipRoundRect(outerRRect, RSClipOp::INTERSECT, true);
             RSBrush brush;
             brush.SetAntiAlias(true);
             RSScalar matrix[20] = { 0 };
@@ -1741,7 +1741,7 @@ void RosenDecorationPainter::PaintInvert(
     if (GreatNotEqual(inverts, 0.0)) {
         if (canvas) {
             RSAutoCanvasRestore acr(*canvas, true);
-            canvas->ClipRoundRect(outerRRect, RSClipOp::DIFFERENCE, true);
+            canvas->ClipRoundRect(outerRRect, RSClipOp::INTERSECT, true);
             RSBrush brush;
             brush.SetAntiAlias(true);
             RSScalar matrix[20] = { 0 };
@@ -1822,7 +1822,7 @@ void RosenDecorationPainter::PaintHueRotate(
     if (GreatNotEqual(hueRotates, 0.0)) {
         if (canvas) {
             RSAutoCanvasRestore acr(*canvas, true);
-            canvas->ClipRoundRect(outerRRect, RSClipOp::DIFFERENCE, true);
+            canvas->ClipRoundRect(outerRRect, RSClipOp::INTERSECT, true);
             RSBrush brush;
             brush.SetAntiAlias(true);
             while (GreatOrEqual(hueRotates, 360)) {
