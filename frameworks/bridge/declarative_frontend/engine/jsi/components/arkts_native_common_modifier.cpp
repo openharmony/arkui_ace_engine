@@ -527,25 +527,47 @@ void ResetBorderRadius(NodeHandle node)
 }
 
 /**
- * @param values radius values
+ * @param values radius values, -1 means no this border width
  * value[0] : BorderWidth value for left，value[1] : BorderWidth value for right
  * value[2] : BorderWidth value for top，value[3] : BorderWidth value for bottom
  * @param units adius units
  * units[0]: BorderWidth unit for left ,units[1] : BorderWidth unit for right
  * units[2]: BorderWidth unit for top, units[3] : BorderWidth unit for bottom
  */
-void SetBorderWidth(NodeHandle node, const double *values, const int *units, int32_t length)
+void SetBorderWidth(NodeHandle node, const double* values, const int* units, int32_t length)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (length != DEFAULT_LENGTH) {
         return;
     }
+    std::optional<CalcDimension> leftDimen;
+    std::optional<CalcDimension> rightDimen;
+    std::optional<CalcDimension> topDimen;
+    std::optional<CalcDimension> bottomDimen;
+
+    if (values[NUM_0] != -1 &&
+        static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]) != OHOS::Ace::DimensionUnit::INVALID) {
+        leftDimen = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    }
+    if (values[NUM_1] != -1 &&
+        static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]) != OHOS::Ace::DimensionUnit::INVALID) {
+        rightDimen = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    }
+    if (values[NUM_2] != -1 &&
+        static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]) != OHOS::Ace::DimensionUnit::INVALID) {
+        topDimen = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+    }
+    if (values[NUM_3] != -1 &&
+        static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]) != OHOS::Ace::DimensionUnit::INVALID) {
+        bottomDimen = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
+    }
+
     NG::BorderWidthProperty borderWidth;
-    borderWidth.leftDimen = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
-    borderWidth.rightDimen = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
-    borderWidth.topDimen = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
-    borderWidth.bottomDimen = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
+    borderWidth.leftDimen = leftDimen;
+    borderWidth.rightDimen = rightDimen;
+    borderWidth.topDimen = topDimen;
+    borderWidth.bottomDimen = bottomDimen;
     borderWidth.multiValued = true;
     ViewAbstract::SetBorderWidth(frameNode, borderWidth);
 }

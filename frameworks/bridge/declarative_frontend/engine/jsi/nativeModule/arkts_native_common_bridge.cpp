@@ -1053,12 +1053,24 @@ ArkUINativeModuleValue CommonBridge::ResetBackgroundColor(ArkUIRuntimeCallInfo *
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue CommonBridge::SetBorderWidth(ArkUIRuntimeCallInfo *runtimeCallInfo)
+void SetBorderWidthArray(const EcmaVM* vm, const Local<JSValueRef>& args, double values[], int units[], int index)
 {
-    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CalcDimension borderDimension;
+    if (ArkTSUtils::ParseAllBorder(vm, args, borderDimension)) {
+        values[index] = borderDimension.Value();
+        units[index] = static_cast<int>(borderDimension.Unit());
+    } else {
+        values[index] = -1;
+        units[index] = static_cast<int>(DimensionUnit::INVALID);
+    }
+}
+
+ArkUINativeModuleValue CommonBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
@@ -1068,28 +1080,14 @@ ArkUINativeModuleValue CommonBridge::SetBorderWidth(ArkUIRuntimeCallInfo *runtim
         return panda::JSValueRef::Undefined(vm);
     }
 
-    CalcDimension left;
-    CalcDimension right;
-    CalcDimension top;
-    CalcDimension bottom;
-
-    ArkTSUtils::ParseAllBorder(vm, leftArgs, left);
-    ArkTSUtils::ParseAllBorder(vm, rightArgs, right);
-    ArkTSUtils::ParseAllBorder(vm, topArgs, top);
-    ArkTSUtils::ParseAllBorder(vm, bottomArgs, bottom);
-
     uint32_t size = SIZE_OF_FOUR;
     double values[size];
     int units[size];
 
-    values[NUM_0] = left.Value();
-    units[NUM_0] = static_cast<int>(left.Unit());
-    values[NUM_1] = right.Value();
-    units[NUM_1] = static_cast<int>(right.Unit());
-    values[NUM_2] = top.Value();
-    units[NUM_2] = static_cast<int>(top.Unit());
-    values[NUM_3] = bottom.Value();
-    units[NUM_3] = static_cast<int>(bottom.Unit());
+    SetBorderWidthArray(vm, leftArgs, values, units, NUM_0);
+    SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
+    SetBorderWidthArray(vm, topArgs, values, units, NUM_2);
+    SetBorderWidthArray(vm, bottomArgs, values, units, NUM_3);
 
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetBorderWidth(nativeNode, values, units, size);
     return panda::JSValueRef::Undefined(vm);
