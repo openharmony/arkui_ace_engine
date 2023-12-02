@@ -27,7 +27,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint32_t DEFAULT_BUTTON_COLOR = 0xFF007DFF;
 constexpr VisibleType DEFAULT_VISIBILITY = static_cast<VisibleType>(0);
 constexpr float MAX_ANGLE = 360.0f;
 constexpr double PERCENT_100 = 100.0;
@@ -454,7 +453,7 @@ void ResetBackgroundColor(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetBackgroundColor(frameNode, Color(DEFAULT_BUTTON_COLOR));
+    ViewAbstract::SetBackgroundColor(frameNode, Color(Color::TRANSPARENT));
 }
 
 void SetWidth(NodeHandle node, double value, int unit, const char* calcVlaue)
@@ -1209,7 +1208,7 @@ void SetBorderImageGradient(NodeHandle node, const double* values, int32_t value
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     SetBorderImageGradientValues(gradient, values, valuesLength);
     SetGradientColors(gradient, colors, colorsLength);
-    ViewAbstract::SetBorderImageGradient(gradient);
+    ViewAbstract::SetBorderImageGradient(frameNode, gradient);
 }
 
 void SetForegroundBlurStyle(NodeHandle node, int32_t blurStyle, int32_t colorMode,
@@ -1388,10 +1387,10 @@ void ResetBorder(NodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension borderWidth;
-    ViewAbstract::SetBorderWidth(borderWidth);
-    ViewAbstract::SetBorderColor(Color::BLACK);
-    ViewAbstract::SetBorderRadius(borderWidth);
-    ViewAbstract::SetBorderStyle(BorderStyle::SOLID);
+    ViewAbstract::SetBorderWidth(frameNode, borderWidth);
+    ViewAbstract::SetBorderColor(frameNode, Color::BLACK);
+    ViewAbstract::SetBorderRadius(frameNode, borderWidth);
+    ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
 }
 
 void SetBackgroundImagePosition(NodeHandle node, const double* values, const int32_t* types, bool isAlign, int size)
@@ -1585,7 +1584,7 @@ void ResetRotate(NodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.0f, 0.0f);
-    ViewAbstract::SetRotate(
+    ViewAbstract::SetRotate(frameNode,
         NG::Vector5F(rotate.xDirection, rotate.yDirection, rotate.zDirection, 0.0, rotate.perspective));
 
     DimensionOffset center(rotate.centerX, rotate.centerY);

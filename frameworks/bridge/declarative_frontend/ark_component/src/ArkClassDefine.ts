@@ -46,69 +46,6 @@ class ArkBorderStyle implements Equable {
   }
 }
 
-class ArkShadow {
-  style: number | undefined;
-  radius: number | Resource | undefined;
-  type: ShadowType | undefined;
-  color: number | undefined;
-  offsetX: number | Resource | undefined;
-  offsetY: number | Resource | undefined;
-  fill: boolean | undefined;
-
-  constructor() {
-    this.style = undefined;
-    this.radius = undefined;
-    this.type = undefined;
-    this.color = undefined;
-    this.offsetX = undefined;
-    this.offsetY = undefined;
-    this.fill = undefined;
-  }
-
-  isEqual(another: ArkShadow): boolean {
-    return (
-      this.style === another.style &&
-      this.radius === another.radius &&
-      this.type === another.type &&
-      this.color === another.color &&
-      this.offsetX === another.offsetX &&
-      this.offsetY === another.offsetY &&
-      this.fill === another.fill
-    );
-  }
-
-  parseShadowValue(value: ShadowOptions | ShadowStyle): boolean {
-    if (typeof value === 'number') {
-      this.style = value;
-      return true;
-    } else if (typeof value === 'object') {
-      return this.parseShadowOptions(value as ShadowOptions);
-    }
-    return false;
-  }
-
-  parseShadowOptions(options: ShadowOptions): boolean {
-    if (
-      isResource(options.radius) ||
-      isResource(options.color) ||
-      isResource(options.offsetX) ||
-      isResource(options.offsetY)
-    ) {
-      return false;
-    }
-    let arkColor = new ArkColor();
-    this.radius = options.radius;
-    this.type = options.type;
-    if (arkColor.parseColorValue(options.color)) {
-      this.color = arkColor.getColor();
-    }
-    this.offsetX = options.offsetX;
-    this.offsetY = options.offsetY;
-    this.fill = options.fill;
-    return true;
-  }
-}
-
 class ArkBorderColor {
   leftColor: number | undefined | Resource;
   rightColor: number | undefined | Resource;
@@ -321,14 +258,6 @@ function copyColorStop(colorStop: any): any {
   return deepSimpleCopy(colorStop);
 }
 
-function copyColorStops(colorStops: Array<any>) : Array<any> {
-	let result = [];
-	for (let index = 0; index < colorStops.length; index++) {
-		result[index] = copyColorStop(colorStops[index]);
-	}
-	return result;
-}
-
 class ArkLinearGradient {
   angle: number | string | undefined;
   direction: number | undefined;
@@ -341,7 +270,7 @@ class ArkLinearGradient {
         repeating: boolean | undefined) {
         this.angle = angle;
         this.direction = direction;
-        this.colors = copyColorStops(colors);
+        this.colors = colors;
         this.repeating = repeating;
     }
 
@@ -367,7 +296,7 @@ class ArkRadialGradient {
         repeating: boolean | undefined) {
         this.center = center;
         this.radius = radius;
-        this.colors = copyColorStops(colors);
+        this.colors = colors;
         this.repeating = repeating;
     }
 
@@ -399,7 +328,7 @@ class ArkSweepGradient {
         this.start = start;
         this.end = end;
         this.rotation = rotation;
-        this.colors = copyColorStops(colors);
+        this.colors = colors;
         this.repeating = repeating;
     }
 
@@ -610,7 +539,7 @@ class ArkBorderImage {
         let tmpSource = source as LinearGradient;
         this.sourceAngle = tmpSource.angle;
         this.sourceDirection = tmpSource.direction;
-        this.sourceColors = copyColorStops(tmpSource.colors);
+        this.sourceColors = tmpSource.colors;
         this.sourceRepeating = tmpSource.repeating;
         return true;
     }
