@@ -504,8 +504,8 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
                 if (needSetInvisible) {
                     auto navBarPattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
                     CHECK_NULL_VOID(navBarPattern);
-                    auto latestMode = navBarPattern->GetLatestNavigationMode();
-                    if (latestMode == NavigationMode::STACK) {
+                    auto currentMode = navBarPattern->GetNavigationMode();
+                    if (currentMode == NavigationMode::STACK) {
                         node->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                     }
                 }

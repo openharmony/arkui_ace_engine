@@ -273,7 +273,6 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     if (navigationPattern->GetNavigationMode() != usrNavigationMode) {
         navigationPattern->SetNavigationModeChange(true);
-        navigationPattern->SetLatestNavigationMode(usrNavigationMode);
     }
     SetNavigationMode(usrNavigationMode);
 }
