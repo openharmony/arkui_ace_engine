@@ -2355,6 +2355,7 @@ void OverlayManager::PlaySheetTransition(
     auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
 
     if (isTransitionIn) {
+        sheetPattern->SetCurrentHeight(sheetHeight_);
         auto offset = sheetMaxHeight - sheetHeight_;
         if (isFirstTransition) {
             context->OnTransformTranslateUpdate({ 0.0f, sheetMaxHeight, 0.0f });
@@ -2363,21 +2364,13 @@ void OverlayManager::PlaySheetTransition(
             option.SetDuration(0);
             option.SetCurve(Curves::LINEAR);
         }
-        option.SetOnFinishEvent([sheetWK = WeakClaim(RawPtr(sheetNode)), sheetHeight = sheetHeight_] {
-            auto sheet = sheetWK.Upgrade();
-            CHECK_NULL_VOID(sheet);
-            auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
-            CHECK_NULL_VOID(sheetPattern);
-            sheetPattern->SetCurrentHeight(sheetHeight);
-        });
         AnimationUtils::Animate(
             option,
             [context, offset]() {
                 if (context) {
                     context->OnTransformTranslateUpdate({ 0.0f, offset, 0.0f });
                 }
-            },
-            option.GetOnFinishEvent());
+            });
     } else {
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), id = Container::CurrentId(),
@@ -2421,14 +2414,9 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
     CHECK_NULL_VOID(sheetPattern);
     sheetPattern->ResetToInvisible();
     if (isTransitionIn) {
+        sheetPattern->SetCurrentHeight(sheetHeight_);
         sheetPattern->StartOffsetEnteringAnimation();
-        sheetPattern->StartAlphaEnteringAnimation([sheetWK = WeakClaim(RawPtr(sheetNode)), sheetHeight = sheetHeight_] {
-            auto sheet = sheetWK.Upgrade();
-            CHECK_NULL_VOID(sheet);
-            auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
-            CHECK_NULL_VOID(sheetPattern);
-            sheetPattern->SetCurrentHeight(sheetHeight);
-        });
+        sheetPattern->StartAlphaEnteringAnimation(nullptr);
     } else {
         sheetPattern->StartOffsetExitingAnimation();
         sheetPattern->StartAlphaExitingAnimation(
@@ -2522,11 +2510,10 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
     auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
-    auto sheetMaxWidth = sheetPattern->GetSheetMaxWidth();
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
-    auto shortLength = sheetMaxWidth < sheetMaxHeight ? sheetMaxWidth : sheetMaxHeight;
-    auto maxHeight = shortLength * POPUP_LARGE_SIZE;
-    auto centerHeight = 0.0f;
+    auto geometryNode = sheetNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto sheetHeight = geometryNode->GetFrameSize().Height();
 
     auto sheetType = sheetPattern->GetSheetType();
     switch (sheetType) {
@@ -2542,23 +2529,7 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
             sheetHeight_ = largeHeight;
             break;
         case SheetType::SHEET_CENTER:
-            if (sheetStyle.height.has_value()) {
-                if (sheetStyle.height->Unit() == DimensionUnit::PERCENT) {
-                    centerHeight = sheetStyle.height->ConvertToPxWithSize(maxHeight);
-                } else {
-                    centerHeight = sheetStyle.height->ConvertToPx();
-                }
-            } else {
-                centerHeight = SHEET_BIG_WINDOW_HEIGHT.ConvertToPx();
-            }
-            if (centerHeight > maxHeight) {
-                centerHeight = maxHeight;
-            } else if (centerHeight < 0.0f) {
-                centerHeight = SHEET_BIG_WINDOW_HEIGHT.ConvertToPx();
-            } else if (centerHeight < SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx()) {
-                centerHeight = SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx();
-            }
-            sheetHeight_ = (centerHeight + sheetMaxHeight) / SHEET_HALF_SIZE;
+            sheetHeight_ = (sheetHeight + sheetMaxHeight) / SHEET_HALF_SIZE;
             break;
         case SheetType::SHEET_POPUP:
             sheetHeight_ = sheetMaxHeight;
