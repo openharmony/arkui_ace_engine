@@ -356,7 +356,6 @@ void RosenRenderSurface::DrawBufferForXComponent(RSCanvas& canvas, float width, 
         TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "surfaceNode is null");
         return;
     }
-#ifndef USE_ROSEN_DRAWING
     ACE_SCOPED_TRACE("XComponent DrawBuffer");
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     CHECK_NULL_VOID(rsCanvas);
