@@ -17,6 +17,7 @@ import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import measure from '@ohos.measure';
 import mediaquery from '@ohos.mediaquery';
 import resourceManager from '@ohos.resourceManager';
+import List from '@ohos.util.List';
 
 export enum ChipSize {
   NORMAL = "NORMAL",
@@ -220,7 +221,7 @@ export struct ChipComponent {
 
   private getLabelFontSize(): Dimension {
     try {
-      if (this.label?.fontSize !== void (0) && this.label.fontSize >= 0) {
+      if (this.label?.fontSize !== void (0) && this.toVp(this.label.fontSize) >= 0) {
         return this.label.fontSize
       } else {
         if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
@@ -230,7 +231,6 @@ export struct ChipComponent {
           return resourceManager.getSystemResourceManager()
             .getNumberByName((((this.theme.label.normalFontSize as Resource).params as string[])[0]).split('.')[2])
         }
-
       }
     }
     catch (error) {
@@ -249,23 +249,23 @@ export struct ChipComponent {
 
   private toVp(value: Dimension | Length | undefined): number {
     if (value === void (0)) {
-      return 0
+      return Number.NEGATIVE_INFINITY
     }
     switch (typeof (value)) {
       case 'number':
         return value as number
       case 'object':
         try {
-          return resourceManager.getSystemResourceManager()
+          return getContext().resourceManager
             .getNumber((value as Resource).id)
         } catch (error) {
-          return 0
+          return Number.NEGATIVE_INFINITY
         }
       case 'string':
         let regex: RegExp = new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i");
         let matches: RegExpMatchArray | null = value.match(regex);
         if (!matches) {
-          return 0
+          return Number.NEGATIVE_INFINITY
         }
         let length: number = Number(matches?.[1] ?? 0);
         let unit: string = matches?.[2] ?? 'vp'
@@ -289,7 +289,7 @@ export struct ChipComponent {
         }
         return length
       default:
-        return 0
+        return Number.NEGATIVE_INFINITY
     }
   }
 
@@ -598,7 +598,7 @@ export struct ChipComponent {
   }
 
   private getVisibility(): Visibility {
-    if (this.toVp(this.getChipNodeHeight()) > 0 && this.toVp(this.getChipNodeWidth()) > 0) {
+    if (this.toVp(this.getChipNodeHeight()) > 0) {
       return Visibility.Visible
     } else {
       return Visibility.None

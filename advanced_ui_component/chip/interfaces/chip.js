@@ -434,7 +434,7 @@ export class ChipComponent extends ViewPU {
     getLabelFontSize() {
         var e;
         try {
-            return void 0 !== (null === (e = this.label) || void 0 === e ? void 0 : e.fontSize) && this.label.fontSize >= 0 ? this.label.fontSize : this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL ? resourceManager.getSystemResourceManager().getNumberByName(this.theme.label.smallFontSize.params[0].split(".")[2]) : resourceManager.getSystemResourceManager().getNumberByName(this.theme.label.normalFontSize.params[0].split(".")[2])
+            return void 0 !== (null === (e = this.label) || void 0 === e ? void 0 : e.fontSize) && this.toVp(this.label.fontSize) >= 0 ? this.label.fontSize : this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL ? resourceManager.getSystemResourceManager().getNumberByName(this.theme.label.smallFontSize.params[0].split(".")[2]) : resourceManager.getSystemResourceManager().getNumberByName(this.theme.label.normalFontSize.params[0].split(".")[2])
         } catch (e) {
             return 0
         }
@@ -452,20 +452,20 @@ export class ChipComponent extends ViewPU {
 
     toVp(e) {
         var i, t;
-        if (void 0 === e) return 0;
+        if (void 0 === e) return Number.NEGATIVE_INFINITY;
         switch (typeof e) {
             case "number":
                 return e;
             case "object":
                 try {
-                    return resourceManager.getSystemResourceManager().getNumber(e.id)
+                    return getContext().resourceManager.getNumber(e.id)
                 } catch (e) {
-                    return 0
+                    return Number.NEGATIVE_INFINITY
                 }
             case "string":
                 let o = new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i");
                 let s = e.match(o);
-                if (!s) return 0;
+                if (!s) return Number.NEGATIVE_INFINITY;
                 let h = Number(null !== (i = null == s ? void 0 : s[1]) && void 0 !== i ? i : 0);
                 switch ((null !== (t = null == s ? void 0 : s[2]) && void 0 !== t ? t : "vp").toLowerCase()) {
                     case "px":
@@ -482,7 +482,7 @@ export class ChipComponent extends ViewPU {
                 }
                 return h;
             default:
-                return 0
+                return Number.NEGATIVE_INFINITY
         }
     }
 
@@ -718,7 +718,7 @@ export class ChipComponent extends ViewPU {
     }
 
     getVisibility() {
-        return this.toVp(this.getChipNodeHeight()) > 0 && this.toVp(this.getChipNodeWidth()) > 0 ? Visibility.Visible : Visibility.None
+        return this.toVp(this.getChipNodeHeight()) > 0 ? Visibility.Visible : Visibility.None
     }
 
     aboutToDisappear() {
