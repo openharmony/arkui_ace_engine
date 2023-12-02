@@ -1905,7 +1905,9 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (!itemPosition_.empty()) {
         json->Put("itemStartPos", itemPosition_.begin()->second.startPos);
     }
-    json->Put("edgeEffectAlwaysEnabled", GetAlwaysEnabled());
+    auto JsonEdgeEffectOptions = JsonUtil::Create(true);
+    JsonEdgeEffectOptions->Put("alwaysEnabled",GetAlwaysEnabled());
+    json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
