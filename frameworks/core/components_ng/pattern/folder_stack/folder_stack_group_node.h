@@ -65,11 +65,6 @@ public:
         itemId_ = itemId;
     }
 
-    std::vector<std::int32_t> GetChildId()
-    {
-        return childId_;
-    }
-
     const std::vector<RefPtr<UINode>>& GetChildNode() const
     {
         return childNode_;
@@ -79,7 +74,6 @@ private:
     RefPtr<UINode> hoverNode_;
     RefPtr<UINode> desktopNode_;
     std::vector<std::string> itemId_;
-    std::vector<std::int32_t> childId_;
     std::vector<RefPtr<UINode>> childNode_;
 };
 } // namespace OHOS::Ace::NG

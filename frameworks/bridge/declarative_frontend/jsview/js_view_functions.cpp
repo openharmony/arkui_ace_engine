@@ -897,7 +897,8 @@ std::string ViewFunctions::ExecuteOnFormRecycle()
 {
     auto ret = ExecuteFunctionWithReturn(jsOnFormRecycleFunc_, "OnFormRecycle");
     if (!ret->IsEmpty() && ret->IsString()) {
-        return ret->ToString();
+        std::string statusData = ret->ToString();
+        return statusData.empty() ? EMPTY_STATUS_DATA : statusData;
     }
     LOGE("ExecuteOnFormRecycle failed");
     return "";

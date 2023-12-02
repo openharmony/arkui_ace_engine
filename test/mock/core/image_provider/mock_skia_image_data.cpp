@@ -21,7 +21,11 @@
 
 namespace OHOS::Ace::NG {
 static int32_t frameCount { 0 };
+#ifndef USE_ROSEN_DRAWING
 SkiaImageData::SkiaImageData(const void* data, size_t length)
+#else
+DrawingImageData::DrawingImageData(const void* data, size_t length)
+#endif
 {
     frameCount = length;
 }
@@ -36,36 +40,70 @@ RefPtr<ImageData> ImageData::MakeFromDataWrapper(void* dataWrapper)
     return nullptr;
 }
 
+#ifndef USE_ROSEN_DRAWING
 size_t SkiaImageData::GetSize() const
 {
     CHECK_NULL_RETURN(skData_, 0);
     return skData_->size();
 }
+#else
+size_t DrawingImageData::GetSize() const
+{
+    CHECK_NULL_RETURN(rsData_, 0);
+    return rsData_->size();
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 const void* SkiaImageData::GetData() const
 {
     CHECK_NULL_RETURN(skData_, nullptr);
     return skData_->data();
 }
+#else
+const void* DrawingImageData::GetData() const
+{
+    CHECK_NULL_RETURN(rsData_, nullptr);
+    return rsData_->data();
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkData> SkiaImageData::GetSkData() const
 {
     CHECK_NULL_RETURN(skData_, nullptr);
     return skData_;
 }
+#else
+std::shared_ptr<RSData> DrawingImageData::GetRSData() const
+{
+    CHECK_NULL_RETURN(rsData_, nullptr);
+    return rsData_;
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFillColor)
+#else
+RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const std::optional<Color>& svgFillColor)
+#endif
 {
     return nullptr;
 }
 
+#ifndef USE_ROSEN_DRAWING
 std::pair<SizeF, int32_t> SkiaImageData::Parse() const
+#else
+std::pair<SizeF, int32_t> DrawingImageData::Parse() const
+#endif
 {
     return { SizeF(1, 1), frameCount };
 }
 
+#ifndef USE_ROSEN_DRAWING
 const void* SkiaImageData::GetDataWrapper() const
 {
     return nullptr;
 }
+#endif
 } // namespace OHOS::Ace::NG

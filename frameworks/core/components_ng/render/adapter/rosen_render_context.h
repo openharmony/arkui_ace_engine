@@ -467,6 +467,7 @@ private:
     float RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid(float absoluteLeft, float absoluteTop);
     Matrix4 GetRevertMatrix();
+    bool IsUniRenderEnabled() override;
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;

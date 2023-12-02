@@ -31,6 +31,7 @@
 #include "wm_common.h"
 
 #include "base/log/log_wrapper.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/property/safe_area_insets.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -288,6 +289,31 @@ private:
     int32_t instanceId_ = -1;
 };
 
+class FoldScreenListener : public OHOS::Rosen::DisplayManager::IFoldStatusListener {
+public:
+    explicit FoldScreenListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~FoldScreenListener() = default;
+    void OnFoldStatusChanged(OHOS::Rosen::FoldStatus foldStatus) override
+    {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        ContainerScope scope(instanceId_);
+        taskExecutor->PostTask(
+            [container, foldStatus] {
+                auto context = container->GetPipelineContext();
+                CHECK_NULL_VOID(context);
+                auto aceFoldStatus = static_cast<FoldStatus>(static_cast<uint32_t>(foldStatus));
+                context->OnFoldStatusChanged(aceFoldStatus);
+            },
+            TaskExecutor::TaskType::UI);
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
+
 class TouchOutsideListener : public OHOS::Rosen::ITouchOutsideListener {
 public:
     explicit TouchOutsideListener(int32_t instanceId) : instanceId_(instanceId) {}
@@ -304,6 +330,7 @@ public:
         taskExecutor->PostTask(
             [instanceId = instanceId_] {
                 SubwindowManager::GetInstance()->ClearMenu();
+                SubwindowManager::GetInstance()->ClearMenuNG(instanceId, false, true);
                 SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
             },
             TaskExecutor::TaskType::UI);
@@ -1311,6 +1338,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
+    foldStatusListener_ = new FoldScreenListener(instanceId_);
+    OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
 
     // create ace_view
     auto aceView =
@@ -1518,6 +1547,27 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
         TaskExecutor::TaskType::UI);
 }
 
+void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintrect)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID(stageNode);
+    auto renderContext = stageNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintRectf = renderContext->GetPaintRectWithoutTransform();
+    auto offset = stageNode->GetPaintRectOffset(false);
+    paintrect.posX_ = static_cast<int>(offset.GetX());
+    paintrect.posY_ = static_cast<int>(offset.GetY());
+    paintrect.width_ = static_cast<uint32_t>(paintRectf.Width());
+    paintrect.height_ = static_cast<uint32_t>(paintRectf.Height());
+}
+
 bool UIContentImpl::ProcessBackPressed()
 {
     LOGI("OnBackPressed called");
@@ -1638,7 +1688,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
                     rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
                 auto isNeedAvoidWindowMode = (rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
                                               rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-                                              rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN) &&
+                                              rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
                                              (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
                                               SystemProperties::GetDeviceType() == DeviceType::TABLET);
                 pipelineContext->SetIsNeedAvoidWindow(isNeedAvoidWindowMode);
@@ -1832,6 +1882,8 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
+    foldStatusListener_ = new FoldScreenListener(instanceId_);
+    OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
 }
 
 void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)

@@ -595,4 +595,9 @@ std::u16string TxtParagraph::GetParagraphText()
 {
     return text_;
 }
+
+const ParagraphStyle& TxtParagraph::GetParagraphStyle() const
+{
+    return paraStyle_;
+}
 } // namespace OHOS::Ace::NG

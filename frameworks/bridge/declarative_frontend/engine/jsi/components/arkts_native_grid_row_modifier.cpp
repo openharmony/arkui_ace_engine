@@ -34,7 +34,7 @@ void ResetAlignItems(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    FlexAlign resetValue = FlexAlign::AUTO;
+    FlexAlign resetValue = FlexAlign::FLEX_START;
     GridRowModelNG::SetAlignItems(frameNode, resetValue);
 }
 

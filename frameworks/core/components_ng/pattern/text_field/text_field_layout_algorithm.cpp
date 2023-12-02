@@ -533,7 +533,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
     const std::string& content, bool needObscureText, bool disableTextAlign)
 {
     TextStyle dragTextStyle = textStyle;
-    Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
+    Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY);
     dragTextStyle.SetTextColor(color);
     std::vector<TextStyle> textStyles { textStyle, dragTextStyle, textStyle };
 

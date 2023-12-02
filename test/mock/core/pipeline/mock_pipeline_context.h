@@ -13,24 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_BASE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_BASE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_CONTEXT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_CONTEXT_H
 
 #include "gmock/gmock.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-class MockPipelineBase : public PipelineContext {
-    DECLARE_ACE_TYPE(MockPipelineBase, PipelineContext);
+class MockPipelineContext : public PipelineContext {
+    DECLARE_ACE_TYPE(MockPipelineContext, PipelineContext);
 
 public:
-    MockPipelineBase() = default;
-    ~MockPipelineBase() override = default;
+    MockPipelineContext() = default;
+    ~MockPipelineContext() override = default;
 
     static void SetUp();
     static void TearDown();
-    static RefPtr<MockPipelineBase> GetCurrent();
+    static RefPtr<MockPipelineContext> GetCurrent();
     void SetRootSize(double rootWidth, double rootHeight);
 
     MOCK_METHOD3(
@@ -96,6 +96,7 @@ public:
         void(float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction));
     MOCK_METHOD4(OnVirtualKeyboardHeightChange, void(float keyboardHeight, double positionY, double height,
                                                     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction));
+    MOCK_METHOD1(OnFoldStatusChange, void(FoldStatus foldStatus));
     MOCK_METHOD1(SetContainerWindow, void(bool isShow));
     MOCK_METHOD1(SetTouchPipeline, void(const WeakPtr<PipelineBase>& context));
     MOCK_METHOD2(AddEtsCardTouchEventCallback, void(int32_t ponitId, EtsCardTouchEventCallback&& callback));
@@ -105,14 +106,14 @@ public:
     MOCK_METHOD1(UpdateCutoutSafeArea, void(const SafeAreaInsets& cutoutSafeArea));
     MOCK_CONST_METHOD0(GetSafeArea, SafeAreaInsets());
     MOCK_METHOD0(NotifyConfigurationChange, void());
+    MOCK_METHOD0(NeedSoftKeyboard, bool());
     MOCK_CONST_METHOD0(GetTaskExecutor, RefPtr<TaskExecutor>());
     MOCK_METHOD0(GetCurrentExtraInfo, std::string());
     MOCK_METHOD1(SetIsFocusActive, bool(bool isFocusActive));
-    MOCK_METHOD0(NeedSoftKeyboard, bool());
     MOCK_METHOD1(SetCursor, void(int32_t cursorValue));
     MOCK_METHOD0(RestoreDefault, void());
 
-    static RefPtr<MockPipelineBase> pipeline_;
+    static RefPtr<MockPipelineContext> pipeline_;
 
     void FlushUITasks() override {}
 
@@ -121,4 +122,4 @@ protected:
     RefPtr<TaskExecutor> taskExecutor_;
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_BASE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_CONTEXT_H

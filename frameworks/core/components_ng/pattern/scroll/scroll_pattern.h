@@ -78,11 +78,6 @@ public:
         return MakeRefPtr<ScrollEventHub>();
     }
 
-    virtual bool ReachMaxCount() const
-    {
-        return true;
-    }
-
     bool IsScrollable() const override
     {
         return GetAxis() != Axis::NONE;

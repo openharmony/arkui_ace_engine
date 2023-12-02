@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FOLDER_EVENT_INFO_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FOLDER_EVENT_INFO_H
 
+#include "core/common/display_info.h"
 #include "core/event/ace_events.h"
 
 namespace OHOS::Ace::NG {
@@ -23,8 +24,17 @@ class ACE_EXPORT FolderEventInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(FolderEventInfo, BaseEventInfo);
 
 public:
-    FolderEventInfo() : BaseEventInfo("FolderStackInfo") {}
+    FolderEventInfo(FoldStatus foldStatus) : BaseEventInfo("FolderStackInfo"), folderState(foldStatus) {}
+
     ~FolderEventInfo() = default;
+
+    FoldStatus GetFolderState() const
+    {
+        return folderState;
+    }
+
+private:
+    FoldStatus folderState;
 
 };
 } // namespace OHOS::Ace

@@ -1,4 +1,4 @@
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkRichTextComponent extends ArkComponent implements CommonMethod<RichTextAttribute> {
   onStart(callback: () => void): RichTextAttribute {
     throw new Error('Method not implemented.');
@@ -7,7 +7,7 @@ class ArkRichTextComponent extends ArkComponent implements CommonMethod<RichText
     throw new Error('Method not implemented.');
   }
   monopolizeEvents(monopolize: boolean): RichTextAttribute {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }
 // @ts-ignore

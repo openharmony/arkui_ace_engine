@@ -62,6 +62,7 @@ bool FormModulePreloader::CreateFormModuleList(
     if (ReadFormModuleList(bundleName, formModuleList, false)) {
         std::lock_guard<std::mutex> lock(gMapLock_);
         gFormModuleMap_.emplace(bundleName, formModuleList);
+        LOGI("push formModuleList to map, bundleName: %{public}s.", bundleName.c_str());
         return true;
     }
     return false;
@@ -270,6 +271,7 @@ RefPtr<AssetManager> FormModulePreloader::CreateAssetManager(const std::string& 
     std::vector<std::string> basePaths;
     basePaths.emplace_back("");
     basePaths.emplace_back("ets/");
+    basePaths.emplace_back("ets/widget/");
     basePaths.emplace_back("resources/base/profile/");
     if (SystemProperties::GetFlutterDecouplingEnabled()) {
         RefPtr<AssetManager> assetManager = Referenced::MakeRefPtr<AssetManagerImpl>();

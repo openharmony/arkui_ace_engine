@@ -56,7 +56,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "frameworks/base/window/drag_window.h"
 #include "frameworks/core/components_ng/pattern/root/root_pattern.h"
 #undef private
@@ -220,14 +220,14 @@ protected:
 
 void TextTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     MockContainer::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
 void TextTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
 
@@ -2048,10 +2048,10 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
     TextPaintMethod textPaintMethod(pattern, BASE_LINE_OFFSET_VALUE, contentModifier, textOverlayModifier);
     // set pipelineContext nullptr
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE);
     textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
@@ -2109,10 +2109,10 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
     RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
     TextPaintMethod textPaintMethod(pattern, BASE_LINE_OFFSET_VALUE, contentModifier, textOverlayModifier);
     // set pipelineContext nullptr
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE);
     textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     // set textDecorationAnimatable_ true
     textContentModifier.textDecorationAnimatable_ = true;
     textContentModifier.textDecoration_ = TextDecoration::UNDERLINE;
@@ -3838,7 +3838,7 @@ HWTEST_F(TextTestNg, PerformActionTest001, TestSize.Level1)
      * @tc.steps: step1. Create text, get text frameNode and pattern, set callback function.
      * @tc.expected: FrameNode and pattern is not null, related function is called.
      */
-    MockPipelineBase::GetCurrent()->rootNode_ =
+    MockPipelineContext::GetCurrent()->rootNode_ =
         FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, 0, AceType::MakeRefPtr<RootPattern>());
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);

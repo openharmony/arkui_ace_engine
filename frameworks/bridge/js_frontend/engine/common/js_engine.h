@@ -402,6 +402,11 @@ public:
     {
         LOGE("Ark does not support InitializeModuleSearcher");
     }
+
+    virtual bool IsComponentPreview()
+    {
+        return false;
+    }
 #endif
     virtual void FlushReload() {}
     virtual napi_value GetContextValue()

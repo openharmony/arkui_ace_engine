@@ -280,6 +280,16 @@ public:
 
     static void FireNavigationStateChange(const RefPtr<UINode>& node, bool show);
 
+    void SetLatestNavigationMode(const NavigationMode &mode)
+    {
+        latestNavigationMode_ = mode;
+    }
+
+    NavigationMode GetLatestNavigationMode() const
+    {
+        return latestNavigationMode_;
+    }
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);
@@ -315,6 +325,7 @@ private:
     bool userSetNavBarRangeFlag_ = false;
     bool userSetMinContentFlag_ = false;
     bool userSetNavBarWidthFlag_ = false;
+    bool isChanged_ = false; // check navigation top page is change
     Dimension minNavBarWidthValue_ = 0.0_vp;
     Dimension maxNavBarWidthValue_ = 0.0_vp;
     Dimension minContentWidthValue_ = 0.0_vp;
@@ -324,6 +335,7 @@ private:
     void NotifyPageHide(const std::string& pageName);
     void NotifyPageShow(const std::string& pageName);
     RefPtr<UINode> FireNavDestinationStateChange(bool show);
+    NavigationMode latestNavigationMode_ = NavigationMode::AUTO;
 };
 
 } // namespace OHOS::Ace::NG

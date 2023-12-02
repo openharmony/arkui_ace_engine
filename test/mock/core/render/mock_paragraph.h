@@ -41,6 +41,7 @@ public:
     MOCK_METHOD0(GetMaxWidth, float());
     MOCK_METHOD0(GetAlphabeticBaseline, float());
     MOCK_METHOD0(GetParagraphText, std::u16string());
+    MOCK_CONST_METHOD0(GetParagraphStyle, const ParagraphStyle&());
     MOCK_METHOD1(PushStyle, void(const TextStyle& style));
     MOCK_METHOD1(AddText, void(const std::u16string& text));
     MOCK_METHOD1(Layout, void(float width));
@@ -53,12 +54,21 @@ public:
     MOCK_METHOD2(ComputeOffsetForCaretUpstream, bool(int32_t extent, CaretMetricsF& result));
     MOCK_METHOD3(GetRectsForRange, void(int32_t start, int32_t end, std::vector<RectF>& selectedRects));
     MOCK_METHOD3(Paint, void(RSCanvas& canvas, float x, float y));
+#ifndef USE_ROSEN_DRAWING
     MOCK_METHOD3(Paint, void(SkCanvas* skCanvas, float x, float y));
+#endif
     MOCK_METHOD3(GetWordBoundary, bool(int32_t offset, int32_t& start, int32_t& end));
-    MOCK_METHOD3(
-        CalcCaretMetricsByPosition, bool(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity));
-    MOCK_METHOD3(CalcCaretMetricsByPosition,
-        bool(int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffsetF));
+
+    bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) override
+    {
+        return false;
+    }
+
+    bool CalcCaretMetricsByPosition(
+        int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffsetF) override
+    {
+        return false;
+    }
 
     static RefPtr<MockParagraph> GetOrCreateMockParagraph();
     static void TearDown();

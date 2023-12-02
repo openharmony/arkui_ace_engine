@@ -107,9 +107,8 @@ public:
         secondHandleInfo_.rect.SetHeight(height);
     }
 
-    RectF GetCaretRect()
+    RectF GetCaretRect() const
     {
-        UpdateCaretOffset();
         return caretInfo_.rect;
     }
 
@@ -134,6 +133,13 @@ public:
         return firstHandleInfo_.index == 0 && secondHandleInfo_.index >= 0 &&
                abs(firstHandleInfo_.index - secondHandleInfo_.index) ==
                    static_cast<int32_t>(contentController_->GetWideText().length());
+    }
+
+    bool IsHandleSamePosition()
+    {
+        bool sameX = NearEqual(firstHandleInfo_.rect.GetX(), secondHandleInfo_.rect.GetX());
+        bool sameY = NearEqual(firstHandleInfo_.rect.GetY(), secondHandleInfo_.rect.GetY());
+        return (sameX && sameY);
     }
 
     void UpdateParagraph(const RefPtr<Paragraph>& paragraph)

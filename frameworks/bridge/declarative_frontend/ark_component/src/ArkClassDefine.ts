@@ -1,4 +1,4 @@
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 
 class ArkBorderStyle implements Equable {
   type: boolean | undefined;
@@ -133,8 +133,8 @@ class ArkBorderColor {
 }
 
 class ArkPosition implements Equable {
-  x: number | string | undefined | Resource;
-  y: number | string | undefined | Resource;
+  x: Length;
+  y: Length
 
   constructor() {
     this.x = undefined;
@@ -266,14 +266,14 @@ class ArkLabelFont {
   }
 }
 
-function ArkDeepCompareArrays(arr1: Array<any>, arr2: Array<any>): boolean {
+function deepCompareArrays(arr1: Array<any>, arr2: Array<any>): boolean {
   return (
     Array.isArray(arr1) &&
     Array.isArray(arr2) &&
     arr1.length === arr2.length &&
     arr1.every((value, index) => {
       if (Array.isArray(value) && Array.isArray(arr2[index])) {
-        return ArkDeepCompareArrays(value, arr2[index]);
+        return deepCompareArrays(value, arr2[index]);
       } else {
         return value === arr2[index];
       }
@@ -281,19 +281,19 @@ function ArkDeepCompareArrays(arr1: Array<any>, arr2: Array<any>): boolean {
   );
 }
 
-function ArkDeepSimpleCopy(obj: any): any {
+function deepSimpleCopy(obj: any): any {
   if (typeof obj === 'object') {
     if (Array.isArray(obj)) {
       let result = [];
       for (let i = 0; i < obj.length; i++) {
-        result[i] = ArkDeepSimpleCopy(obj[i]);
+        result[i] = deepSimpleCopy(obj[i]);
       }
       return result;
     } else {
       let result = {};
       for (const key in obj) {
         if (obj.hasOwnProperty(key)) {
-          result[key] = ArkDeepSimpleCopy(obj[key]);
+          result[key] = deepSimpleCopy(obj[key]);
         }
       }
       return result;
@@ -302,7 +302,7 @@ function ArkDeepSimpleCopy(obj: any): any {
   return obj;
 }
 
-function ArkCopyColorStop(colorStop: any): any {
+function copyColorStop(colorStop: any): any {
   if (Array.isArray(colorStop)) {
     let result = [];
     for (let index = 0; index < colorStop.length; index++) {
@@ -314,18 +314,18 @@ function ArkCopyColorStop(colorStop: any): any {
         }
         continue;
       }
-      result[index] = ArkDeepSimpleCopy(value);
-    };
+      result[index] = deepSimpleCopy(value);
+    }
     return result;
   }
-  return ArkDeepSimpleCopy(colorStop);
+  return deepSimpleCopy(colorStop);
 }
 
-function ArkCopyColorStops(colorStops: Array<any>) : Array<any> {
+function copyColorStops(colorStops: Array<any>) : Array<any> {
 	let result = [];
 	for (let index = 0; index < colorStops.length; index++) {
-		result[index] = ArkCopyColorStop(colorStops[index]);
-	};
+		result[index] = copyColorStop(colorStops[index]);
+	}
 	return result;
 }
 
@@ -341,7 +341,7 @@ class ArkLinearGradient {
         repeating: boolean | undefined) {
         this.angle = angle;
         this.direction = direction;
-        this.colors = ArkCopyColorStops(colors);
+        this.colors = copyColorStops(colors);
         this.repeating = repeating;
     }
 
@@ -349,7 +349,7 @@ class ArkLinearGradient {
     return (
       this.angle === another.angle &&
       this.direction === another.direction &&
-      ArkDeepCompareArrays(this.colors, another.colors) &&
+      deepCompareArrays(this.colors, another.colors) &&
       this.repeating === another.repeating
     );
   }
@@ -367,15 +367,15 @@ class ArkRadialGradient {
         repeating: boolean | undefined) {
         this.center = center;
         this.radius = radius;
-        this.colors = ArkCopyColorStops(colors);
+        this.colors = copyColorStops(colors);
         this.repeating = repeating;
     }
 
   isEqual(another: ArkRadialGradient): boolean {
     return (
-      ArkDeepCompareArrays(this.center, another.center) &&
+      deepCompareArrays(this.center, another.center) &&
       this.radius === another.radius &&
-      ArkDeepCompareArrays(this.colors, another.colors) &&
+      deepCompareArrays(this.colors, another.colors) &&
       this.repeating === another.repeating
     );
   }
@@ -399,17 +399,17 @@ class ArkSweepGradient {
         this.start = start;
         this.end = end;
         this.rotation = rotation;
-        this.colors = ArkCopyColorStops(colors);
+        this.colors = copyColorStops(colors);
         this.repeating = repeating;
     }
 
   isEqual(another: ArkSweepGradient): boolean {
     return (
-      ArkDeepCompareArrays(this.center, another.center) &&
+      deepCompareArrays(this.center, another.center) &&
       this.start === another.start &&
       this.end === another.end &&
       this.rotation === another.rotation &&
-      ArkDeepCompareArrays(this.colors, another.colors) &&
+      deepCompareArrays(this.colors, another.colors) &&
       this.repeating === another.repeating
     );
   }
@@ -452,28 +452,62 @@ class ArkLinearGradientBlur {
   isEqual(another: ArkLinearGradientBlur): boolean {
     return (
       this.blurRadius === another.blurRadius &&
-      ArkDeepCompareArrays(this.fractionStops, another.fractionStops) &&
+      deepCompareArrays(this.fractionStops, another.fractionStops) &&
       this.direction === another.direction
     );
   }
 }
 
 class ArkOverlay {
-    value: string | CustomBuilder | undefined;
-    align: number | undefined;
-    offsetX: number | undefined;
-    offsetY: number | undefined;
-    constructor(value: string | CustomBuilder | undefined,
-        align: number | undefined, offsetX: number | undefined, offsetY: number | undefined) {
-        this.value = value;
-        this.align = align;
-        this.offsetX = offsetX;
-        this.offsetY = offsetY;
+  value: string | CustomBuilder | undefined;
+  align: number | undefined;
+  offsetX: number | undefined;
+  offsetY: number | undefined;
+  hasOptions: boolean | undefined;
+  hasOffset: boolean | undefined;
+
+  constructor() {
+    this.value = undefined;
+    this.align = undefined;
+    this.offsetX = undefined;
+    this.offsetY = undefined;
+    this.hasOptions = undefined;
+    this.hasOffset = undefined;
+  }
+
+  private splitOption(options?: { align?: Alignment; offset?: { x?: number; y?: number } }): boolean {
+    if (isUndefined(options)) {
+      return true;
     }
-    isEqual(another: ArkOverlay): boolean {
-        return ((this.value === another.value) && (this.align === another.align) &&
-            (this.offsetX === another.offsetX) && (this.offsetY === another.offsetY));
+    this.hasOptions = true;
+    this.align = options.align;
+    if (isUndefined(options.offset)) {
+      return true;
     }
+    this.hasOffset = true;
+    this.offsetX = options.offset.x;
+    this.offsetY = options.offset.y;
+    return true;
+  }
+
+  splitOverlayValue(value: string | CustomBuilder,
+    options?: { align?: Alignment; offset?: { x?: number; y?: number } }): boolean {
+    if (typeof value === 'string') {
+      this.value = value;
+      return this.splitOption(options);
+    }
+    return false;
+  }
+
+  private isEqual(another: ArkOverlay): boolean {
+    return ((this.value === another.value) && (this.align === another.align) &&
+      (this.offsetX === another.offsetX) && (this.offsetY === another.offsetY) &&
+      (this.hasOptions === another.hasOptions) && (this.hasOffset === another.hasOffset));
+  }
+
+  checkObjectDiff(another: ArkOverlay): boolean {
+    return !this.isEqual(another);
+  }
 }
 
 class ArkSharedTransition implements Equable {
@@ -576,7 +610,7 @@ class ArkBorderImage {
         let tmpSource = source as LinearGradient;
         this.sourceAngle = tmpSource.angle;
         this.sourceDirection = tmpSource.direction;
-        this.sourceColors = ArkCopyColorStops(tmpSource.colors);
+        this.sourceColors = copyColorStops(tmpSource.colors);
         this.sourceRepeating = tmpSource.repeating;
         return true;
     }
@@ -664,7 +698,7 @@ class ArkBorderImage {
     private isLinearGradientEqual(another: ArkBorderImage): boolean {
         return ((this.sourceAngle === another.sourceAngle) &&
             (this.sourceDirection === another.sourceDirection) &&
-            (ArkDeepCompareArrays(this.sourceColors, another.sourceColors)) &&
+            (deepCompareArrays(this.sourceColors, another.sourceColors)) &&
             (this.sourceRepeating === another.sourceRepeating));
     }
     private isSourceEqual(another: ArkBorderImage): boolean {
@@ -1237,16 +1271,48 @@ class ArkAllowDrop {
     return this.allowDropArray === another.allowDropArray;
   }
 }
-enum TabBarMode {
-  FIXED,
-  SCROLLABLE,
-  FIXED_START
-}
 
 class ArkBarMode {
-  convertStrToTabBarMode(value: string): number {
-    return value.toLowerCase() == 'fixed' ? TabBarMode.FIXED : TabBarMode.FIXED_START;
-  }
+    barMode: number;
+    options?: ArkScrollableBarModeOptions | undefined
+
+    isEqual(another: ArkBarMode): boolean {
+        return (this.barMode === another.barMode) && (this.options === another.options);
+    }
+}
+
+class ArkDivider {
+    value: DividerStyle;
+
+    isEqual(another: ArkDivider): boolean {
+        return (this.value === another.value);
+    }
+}
+
+
+class ArkBarBackgroundColor {
+    value: ResourceColor;
+
+    isEqual(another: ArkBarBackgroundColor): boolean {
+        return (this.value === another.value);
+    }
+}
+
+class ArkBarGridAlign {
+    value: BarGridColumnOptions;
+
+    isEqual(another: ArkBarGridAlign): boolean {
+        return (this.value === another.value);
+    }
+}
+
+
+class ArkScrollableBarModeOptions {
+    value: ScrollableBarModeOptions;
+
+    isEqual(another: ArkBarGridAlign): boolean {
+        return (this.value === another.value);
+    }
 }
 
 class ArkObscured {
@@ -1544,8 +1610,8 @@ class ArkPickerTextStyle implements Equable {
 
   constructor() {
     this.color = undefined;
-    this.size = "16fp"
-    this.weight = "Regular";
+    this.size = '16fp'
+    this.weight = 'Regular';
   }
 
   setColor(color: number | string | Resource){
@@ -1593,7 +1659,7 @@ class ArkEdgeAlign {
   }
 }
 
-class ArkPickerTextStyle implements Equable{
+class ArkDatePickerTextStyle implements Equable{
     color?: ResourceColor;
     font?: Font;
 
@@ -1602,7 +1668,7 @@ class ArkPickerTextStyle implements Equable{
         this.font = undefined;
     }
 
-    isEqual(another: ArkPickerTextStyle): boolean {
+    isEqual(another: ArkDatePickerTextStyle): boolean {
         return (this.color === another.color && this.font === another.font);
     }
 }

@@ -53,6 +53,13 @@ const static std::array<Alignment, 9> ALIGNMENT_ARR { Alignment::TOP_LEFT, Align
     Alignment::CENTER_LEFT, Alignment::CENTER, Alignment::CENTER_RIGHT, Alignment::BOTTOM_LEFT,
     Alignment::BOTTOM_CENTER, Alignment::BOTTOM_RIGHT };
 
+JSRef<JSVal> FolderStackEventToJSValue(const NG::FolderEventInfo& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("folderStackState", eventInfo.GetFolderState());
+    return JSRef<JSVal>::Cast(obj);
+}
+
 void JSFolderStack::Create(const JSCallbackInfo& info)
 {
     if (info[0]->IsObject()) {
@@ -104,6 +111,21 @@ void JSFolderStack::SetAutoHalfFold(const JSCallbackInfo& info)
     FolderStackModel::GetInstance()->SetAutoHalfFold(IsAutoHalfFold);
 }
 
+void JSFolderStack::JSOnFolderStateChange(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<NG::FolderEventInfo, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), FolderStackEventToJSValue);
+    auto onFolderStateChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                                   const NG::FolderEventInfo& value) {
+        ACE_SCORING_EVENT("FolderStack.onFolderStateChange");
+        func->Execute(value);
+    };
+    FolderStackModel::GetInstance()->SetOnFolderStateChange(std::move(onFolderStateChange));
+}
+
 void JSFolderStack::JSBind(BindingTarget globalObj)
 {
     JSClass<JSFolderStack>::Declare("FolderStack");
@@ -112,6 +134,7 @@ void JSFolderStack::JSBind(BindingTarget globalObj)
     JSClass<JSFolderStack>::StaticMethod("enableAnimation", &JSFolderStack::JsEnableAnimation);
     JSClass<JSFolderStack>::StaticMethod("autoHalfFold", &JSFolderStack::SetAutoHalfFold);
     JSClass<JSFolderStack>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSFolderStack>::StaticMethod("onFolderStateChange", &JSFolderStack::JSOnFolderStateChange);
     JSClass<JSFolderStack>::InheritAndBind<JSContainerBase>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

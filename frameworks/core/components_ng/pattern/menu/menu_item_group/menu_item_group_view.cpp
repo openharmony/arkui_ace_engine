@@ -44,7 +44,7 @@ void MenuItemGroupView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::MENU_ITEM_GROUP_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::MENU_ITEM_GROUP_ETS_TAG, nodeId);
     auto menuItemGroup = FrameNode::GetOrCreateFrameNode(
         V2::MENU_ITEM_GROUP_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemGroupPattern>(); });
     CHECK_NULL_VOID(menuItemGroup);

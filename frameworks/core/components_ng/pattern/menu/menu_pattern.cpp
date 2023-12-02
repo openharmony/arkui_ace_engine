@@ -49,6 +49,7 @@ namespace {
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
 constexpr Dimension MIN_SELECT_MENU_WIDTH = 64.0_vp;
 constexpr int32_t COLUMN_NUM = 2;
+constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
@@ -170,7 +171,15 @@ void MenuPattern::OnAttachToFrameNode()
                                               const OffsetF& /* origin */) {
         auto menuNode = menuNodeWk.Upgrade();
         CHECK_NULL_VOID(menuNode);
-        menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        auto menuWarpper = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWarpper);
+        auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(warpperPattern);
+        if (!warpperPattern->IsHided()) {
+            menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
     };
     targetNode->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
 }
@@ -462,6 +471,10 @@ uint32_t MenuPattern::GetInnerMenuCount() const
     uint32_t depth = 0;
     while (child && depth < MAX_SEARCH_DEPTH) {
         // found component <Menu>
+        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            child = child->GetFrameChildByIndex(0, false);
+            continue;
+        }
         if (child->GetTag() == V2::MENU_ETS_TAG) {
             auto parent = child->GetParent();
             CHECK_NULL_RETURN(parent, 0);
@@ -485,6 +498,10 @@ RefPtr<FrameNode> MenuPattern::GetFirstInnerMenu() const
     auto child = host->GetChildAtIndex(0);
     while (child && depth < MAX_SEARCH_DEPTH) {
         // found component <Menu>
+        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            child = child->GetFrameChildByIndex(0, false);
+            continue;
+        }
         if (child->GetTag() == V2::MENU_ETS_TAG) {
             return AceType::DynamicCast<FrameNode>(child);
         }
@@ -625,8 +642,11 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
 
-    auto bgColor = theme->GetBackgroundColor();
-    renderContext->UpdateBackgroundColor(bgColor);
+    auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
+    if (currentPlatformVersion < PLATFORM_VERSION_ELEVEN || renderContext->IsUniRenderEnabled()) {
+        auto bgColor = theme->GetBackgroundColor();
+        renderContext->UpdateBackgroundColor(bgColor);
+    }
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
     // make menu round rect
     BorderRadiusProperty borderRadius;

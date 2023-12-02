@@ -142,8 +142,7 @@ void WaterFlowPattern::UpdateScrollBarOffset()
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     auto viewSize = geometryNode->GetFrameSize();
-    UpdateScrollBarRegion(-layoutInfo_.currentOffset_,
-        NearZero(layoutInfo_.maxHeight_) ? layoutInfo_.GetMaxMainHeight() : layoutInfo_.maxHeight_,
+    UpdateScrollBarRegion(-layoutInfo_.currentOffset_, layoutInfo_.GetContentHeight(),
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 };
 
@@ -208,7 +207,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CHECK_NULL_RETURN(eventHub, false);
     auto onScroll = eventHub->GetOnScroll();
     if (onScroll) {
-        FireOnScroll(layoutInfo.prevOffset_ - layoutInfo.currentOffset_, onScroll);
+        FireOnScroll(prevOffset_ - layoutInfo.currentOffset_, onScroll);
     }
     bool indexChanged =
         layoutInfo_.startIndex_ != layoutInfo.startIndex_ || layoutInfo_.endIndex_ != layoutInfo.endIndex_;
@@ -218,25 +217,23 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
             onScrollIndex(layoutInfo.startIndex_, layoutInfo.endIndex_);
         }
     }
-    if (layoutInfo.itemStart_ && !layoutInfo_.itemStart_) {
-        auto onReachStart = eventHub->GetOnReachStart();
-        if (onReachStart) {
-            onReachStart();
-        }
+    auto onReachStart = eventHub->GetOnReachStart();
+    if (onReachStart && layoutInfo.ReachStart(prevOffset_, !isInitialized_)) {
+        onReachStart();
     }
-    if (layoutInfo.offsetEnd_ && !layoutInfo_.offsetEnd_) {
-        auto onReachEnd = eventHub->GetOnReachEnd();
-        if (onReachEnd) {
-            onReachEnd();
-        }
+    auto onReachEnd = eventHub->GetOnReachEnd();
+    if (onReachEnd && layoutInfo.ReachEnd(prevOffset_)) {
+        onReachEnd();
     }
     OnScrollStop(eventHub->GetOnScrollStop(), false);
 
     layoutInfo_ = std::move(layoutInfo);
     layoutInfo_.UpdateStartIndex();
+    prevOffset_ = layoutInfo_.currentOffset_;
     UpdateScrollBarOffset();
     CheckScrollable();
 
+    isInitialized_ = true;
     auto property = host->GetLayoutProperty();
     CHECK_NULL_RETURN(host, false);
     return property->GetPaddingProperty() != nullptr;
@@ -394,20 +391,20 @@ void WaterFlowPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scr
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, 0.0);
         if (pattern->GetAlwaysEnabled() &&
-            GreatNotEqual(pattern->GetMainContentSize(), pattern->layoutInfo_.maxHeight_)) {
+            GreatNotEqual(pattern->GetMainContentSize(), pattern->layoutInfo_.GetContentHeight())) {
             return 0.0;
         }
-        return pattern->GetMainContentSize() - pattern->layoutInfo_.maxHeight_;
+        return pattern->GetMainContentSize() - pattern->layoutInfo_.GetContentHeight();
     });
     scrollEffect->SetTrailingCallback([]() -> double { return 0.0; });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, 0.0);
         if (pattern->GetAlwaysEnabled() &&
-            GreatNotEqual(pattern->GetMainContentSize(), pattern->layoutInfo_.maxHeight_)) {
+            GreatNotEqual(pattern->GetMainContentSize(), pattern->layoutInfo_.GetContentHeight())) {
             return 0.0;
         }
-        return pattern->GetMainContentSize() - pattern->layoutInfo_.maxHeight_;
+        return pattern->GetMainContentSize() - pattern->layoutInfo_.GetContentHeight();
     });
     scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
 }
@@ -421,6 +418,7 @@ void WaterFlowPattern::MarkDirtyNodeSelf()
 
 void WaterFlowPattern::OnScrollEndCallback()
 {
+    SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
 }

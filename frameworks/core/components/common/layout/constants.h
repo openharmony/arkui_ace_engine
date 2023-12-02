@@ -332,6 +332,7 @@ enum class SrcType {
     DATA_ABILITY_DECODED,
     RESOURCE_ID, // default resource which src is internal resource id
     PIXMAP,
+    ASTC,
 };
 
 enum class WrapAlignment {
@@ -551,7 +552,7 @@ enum class CopyOptions {
 };
 
 enum class VisibleType {
-    VISIBLE,
+    VISIBLE = 0,
     INVISIBLE,
     GONE,
 };
@@ -696,6 +697,25 @@ enum class SwipeActionState : uint32_t {
     COLLAPSED = 0,
     EXPANDED,
     ACTIONING,
+};
+/**
+ * souce is Rosen::Orientation
+ */
+enum class Orientation : uint32_t {
+    BEGIN = 0,
+    UNSPECIFIED = BEGIN,
+    VERTICAL = 1,
+    HORIZONTAL = 2,
+    REVERSE_VERTICAL = 3,
+    REVERSE_HORIZONTAL = 4,
+    SENSOR = 5,
+    SENSOR_VERTICAL = 6,
+    SENSOR_HORIZONTAL = 7,
+    AUTO_ROTATION_RESTRICTED = 8,
+    AUTO_ROTATION_PORTRAIT_RESTRICTED = 9,
+    AUTO_ROTATION_LANDSCAPE_RESTRICTED = 10,
+    LOCKED = 11,
+    END = LOCKED,
 };
 
 } // namespace OHOS::Ace

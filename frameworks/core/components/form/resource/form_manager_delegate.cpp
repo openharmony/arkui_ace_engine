@@ -52,7 +52,7 @@ constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 constexpr char IS_DYNAMIC[] = "isDynamic";
 constexpr int32_t READD_FORM_DELAY_TIME = 50;
-constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT = 1000;
+constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
 constexpr int DELAY_TIME_OF_RECYCLE_FORM_AFTER_HANDLE_CLICK_EVENT = 10000;
 } // namespace
 
@@ -207,7 +207,7 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
 
     isDynamic_ = formInfo.isDynamic;
     if (!formInfo.isDynamic) {
-        HandleSnapshotCallback(DELAY_TIME_FOR_FORM_SNAPSHOT);
+        HandleSnapshotCallback(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
     }
 
     bool isRecoverFormToHandleClickEvent = want.GetBoolParam(

@@ -150,6 +150,9 @@ void RichEditorOverlayModifier::PaintEdgeEffect(const SizeF& frameSize, RSCanvas
 
 void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
+    if (!showSelect_->Get()) {
+        return;
+    }
     drawingContext.canvas.Save();
     if (contentRect_.has_value()) {
         auto pipeline = PipelineContext::GetCurrentContext();

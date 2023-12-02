@@ -405,9 +405,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto offsetVpValue = offsetPx.ConvertToVp();
     offset.SetValue(offsetVpValue);
     scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, offset);
-    if (firstShow_ || gridLayoutInfo_.startIndex_ != gridLayoutInfo.startIndex_) {
+    if (!isInitialized_ || gridLayoutInfo_.startIndex_ != gridLayoutInfo.startIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
-        firstShow_ = false;
     }
 
     bool indexChanged = (gridLayoutInfo.startIndex_ != gridLayoutInfo_.startIndex_) ||
@@ -434,6 +433,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckRestartSpring();
     CheckScrollable();
     MarkSelectedItems();
+    isInitialized_ = true;
     return false;
 }
 
@@ -508,9 +508,8 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
 
     auto onReachStart = gridEventHub->GetOnReachStart();
     if (onReachStart && gridLayoutInfo_.startIndex_ == 0) {
-        if (!initialIndex_) {
+        if (!isInitialized_) {
             onReachStart();
-            initialIndex_ = true;
         }
 
         if (!NearZero(finalOffset)) {
@@ -1648,7 +1647,6 @@ void GridPattern::DumpAdvanceInfo()
                         : DumpLog::GetInstance().AddDesc("isConfigScrollable:false");
     scrollable_ ? DumpLog::GetInstance().AddDesc("scrollable:true")
                 : DumpLog::GetInstance().AddDesc("scrollable:false");
-    firstShow_ ? DumpLog::GetInstance().AddDesc("firstShow:true") : DumpLog::GetInstance().AddDesc("firstShow:false");
     gridLayoutInfo_.lastCrossCount_.has_value()
         ? DumpLog::GetInstance().AddDesc("lastCrossCount:" + std::to_string(gridLayoutInfo_.lastCrossCount_.value()))
         : DumpLog::GetInstance().AddDesc("lastCrossCount:null");
@@ -1664,7 +1662,6 @@ void GridPattern::DumpAdvanceInfo()
                                    : DumpLog::GetInstance().AddDesc("offsetUpdated:false");
     DumpLog::GetInstance().AddDesc("animatorOffset:" + std::to_string(animatorOffset_));
     DumpLog::GetInstance().AddDesc("scrollStop:" + std::to_string(scrollStop_));
-    DumpLog::GetInstance().AddDesc("initialIndex:" + std::to_string(initialIndex_));
     DumpLog::GetInstance().AddDesc("prevHeight:" + std::to_string(prevHeight_));
     DumpLog::GetInstance().AddDesc("currentHeight:" + std::to_string(currentHeight_));
     DumpLog::GetInstance().AddDesc("endHeight:" + std::to_string(endHeight_));

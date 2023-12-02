@@ -33,6 +33,8 @@ public:
         : GroupNode(tag, nodeId, pattern)
     {}
     ~HoverStackNode() override = default;
+    static RefPtr<HoverStackNode> GetOrCreateHoverStackNode(
+        const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 };
 } // namespace OHOS::Ace::NG
 #endif

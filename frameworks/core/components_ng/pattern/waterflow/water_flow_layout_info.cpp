@@ -91,6 +91,11 @@ float WaterFlowLayoutInfo::GetMaxMainHeight() const
     return result;
 }
 
+float WaterFlowLayoutInfo::GetContentHeight() const
+{
+    return NearZero(maxHeight_) ? GetMaxMainHeight() : maxHeight_;
+}
+
 float WaterFlowLayoutInfo::GetMainHeight(int32_t crossIndex, int32_t itemIndex)
 {
     float result = 0.0f;
@@ -226,5 +231,20 @@ void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
             });
         crossItems.second.erase(clearFrom, crossItems.second.end());
     }
+}
+
+bool WaterFlowLayoutInfo::ReachStart(float prevOffset, bool firstLayout) const
+{
+    auto scrollUpToReachTop = (LessNotEqual(prevOffset, 0.0) || firstLayout) && GreatOrEqual(currentOffset_, 0.0);
+    auto scrollDownToReachTop = GreatNotEqual(prevOffset, 0.0) && LessOrEqual(currentOffset_, 0.0);
+    return scrollUpToReachTop || scrollDownToReachTop;
+}
+
+bool WaterFlowLayoutInfo::ReachEnd(float prevOffset) const
+{
+    float minOffset = lastMainSize_ - maxHeight_;
+    auto scrollDownToReachEnd = GreatNotEqual(prevOffset, minOffset) && LessOrEqual(currentOffset_, minOffset);
+    auto scrollUpToReachEnd = LessNotEqual(prevOffset, minOffset) && GreatOrEqual(currentOffset_, minOffset);
+    return scrollDownToReachEnd || scrollUpToReachEnd;
 }
 } // namespace OHOS::Ace::NG

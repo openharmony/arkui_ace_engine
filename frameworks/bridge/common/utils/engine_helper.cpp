@@ -83,6 +83,20 @@ ScopedDelegate EngineHelper::GetCurrentDelegate()
     return { engine ? engine->GetFrontend() : nullptr, container->GetInstanceId() };
 }
 
+ScopedDelegate EngineHelper::GetDefaultDelegate()
+{
+    auto engine = GetCurrentEngine();
+    if (engine) {
+        return { engine->GetFrontend(), Container::CurrentId() };
+    }
+    auto container = Container::GetDefault();
+    if (!container) {
+        return { nullptr, -1 };
+    }
+    engine = GetEngine(container->GetInstanceId());
+    return { engine ? engine->GetFrontend() : nullptr, container->GetInstanceId() };
+}
+
 std::pair<int32_t, int32_t> EngineHelper::StringToPair(const std::string& match)
 {
     std::vector<std::string> arr;

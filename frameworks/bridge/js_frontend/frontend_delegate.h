@@ -151,7 +151,8 @@ public:
         std::function<void(int32_t, int32_t)>&& callback) = 0;
     virtual void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback, std::function<void(bool)>&& onStatusChanged) {};
-
+    virtual void ShowActionMenu(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+        std::function<void(int32_t, int32_t)>&& callback) {};
     virtual Rect GetBoundingRectData(NodeId nodeId) = 0;
 
     virtual std::string GetInspector(NodeId nodeId) = 0;

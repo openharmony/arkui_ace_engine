@@ -19,7 +19,18 @@
 #include <string>
 
 namespace OHOS::Ace::NG {
+/**
+ * @brief Represents the safe area insets in all four directions of the screen.
+ *
+ * The SafeAreaInsets class represents the insets for the safe area of a device's screen.
+ * It provides information about the areas of the screen that are not covered by app's UI elements,
+ * such as the status bar, navigation bar, or notch.
+ */
 struct SafeAreaInsets {
+    /**
+     * @brief Represents an Inset in one direction of the screen with start/end values in pixel index. For example, a
+     * status bar of height 120px would be Inset(start = 0, end = 119) in Top direction.
+     */
     struct Inset {
         uint32_t start = 0;
         uint32_t end = 0;
@@ -33,8 +44,22 @@ struct SafeAreaInsets {
             return start < end;
         }
 
+        /**
+         * @brief Checks if the given position is overlapped by the safe area insets.
+         *
+         * @param pos The position to check.
+         * @return True if the position is overlapped by the safe area insets, false otherwise.
+         */
         bool IsOverlapped(float pos) const;
 
+        /**
+         * @brief Combines the current inset with another inset.
+         *
+         * This function combines the current inset with another inset and returns the result.
+         *
+         * @param other The other inset to combine with.
+         * @return The combined inset.
+         */
         Inset Combine(const Inset& other) const;
 
         bool operator==(const Inset& other) const
@@ -69,6 +94,14 @@ struct SafeAreaInsets {
         return !(*this == other);
     }
 
+    /**
+     * @brief Combines the current SafeAreaInsets with another SafeAreaInsets.
+     *
+     * This function takes the union of the current SafeAreaInsets with another SafeAreaInsets.
+     *
+     * @param other The SafeAreaInsets to combine with.
+     * @return The combined SafeAreaInsets.
+     */
     SafeAreaInsets Combine(const SafeAreaInsets& other) const;
 };
 

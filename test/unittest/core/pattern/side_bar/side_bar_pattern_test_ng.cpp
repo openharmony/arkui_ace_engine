@@ -33,7 +33,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/extensions/extension.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 
 using namespace testing;
@@ -81,12 +81,12 @@ public:
 
 void SideBarPatternTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void SideBarPatternTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -354,7 +354,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg011, TestSize.Level1)
     pattern->AttachToFrameNode(frameNode);
 
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
 
     pattern->CreateAndMountControlButton(frameNode);
@@ -952,7 +952,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg031, TestSize.Level1)
     pattern->AttachToFrameNode(frameNode);
 
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
 
     SideBarContainerModelInstance.SetShowSideBar(false);
@@ -997,7 +997,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg032, TestSize.Level1)
     pattern->AttachToFrameNode(frameNode);
 
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
     pattern->CreateAndMountControlButton(frameNode);
 
@@ -1318,7 +1318,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg041, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
     pattern->CreateAndMountControlButton(frameNode);
     auto children = frameNode->GetChildren();

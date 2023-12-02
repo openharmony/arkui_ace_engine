@@ -219,18 +219,11 @@ void ResetTextMaxLines(NodeHandle node)
     TextModelNG::SetMaxLines(frameNode, DEFAULT_MAX_LINE);
 }
 
-void SetTextMinFontSize(NodeHandle node, struct StringAndDouble* info)
+void SetTextMinFontSize(NodeHandle node, const double number, const int8_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension fontSize;
-
-    if (info->valueStr != nullptr) {
-        fontSize = StringUtils::StringToCalcDimension(info->valueStr, false, DimensionUnit::FP);
-    } else {
-        fontSize = CalcDimension(info->value, DimensionUnit::FP);
-    }
-    TextModelNG::SetAdaptMinFontSize(frameNode, fontSize);
+    TextModelNG::SetAdaptMinFontSize(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
 void ReSetTextMinFontSize(NodeHandle node)
@@ -254,18 +247,11 @@ void ResetTextDraggable(NodeHandle node)
     TextModelNG::SetDraggable(frameNode, DEFAULT_TEXT_DRAGGABLE);
 }
 
-void SetTextMaxFontSize(NodeHandle node, struct StringAndDouble* info)
+void SetTextMaxFontSize(NodeHandle node, const double number, const int8_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension fontSize;
-
-    if (info->valueStr != nullptr) {
-        fontSize = StringUtils::StringToCalcDimension(info->valueStr, false, DimensionUnit::FP);
-    } else {
-        fontSize = CalcDimension(info->value, DimensionUnit::FP);
-    }
-    TextModelNG::SetAdaptMaxFontSize(frameNode, fontSize);
+    TextModelNG::SetAdaptMaxFontSize(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
 void ResetTextMaxFontSize(NodeHandle node)
@@ -326,11 +312,12 @@ void SetTextTextShadow(NodeHandle node, struct TextShadowStruct* shadows, uint32
         Shadow shadow;
         TextShadowStruct* shadowStruct = shadows + i;
         shadow.SetBlurRadius(shadowStruct->radius);
+        shadow.SetShadowType(static_cast<ShadowType>(shadowStruct->type));
         shadow.SetColor(Color(shadowStruct->color));
         shadow.SetOffsetX(shadowStruct->offsetX);
         shadow.SetOffsetY(shadowStruct->offsetY);
         shadow.SetIsFilled(static_cast<bool>(shadowStruct->fill));
-        shadowList.emplace_back(shadow);
+        shadowList.at(i) = shadow;
     }
     TextModelNG::SetTextShadow(frameNode, shadowList);
 }
@@ -409,10 +396,10 @@ void SetTextLetterSpacing(NodeHandle node, const struct StringAndDouble* letterS
             return;
         } else {
             letterSpacing = StringUtils::StringToCalcDimension(
-                std::string(letterSpacingStruct->valueStr), false, DimensionUnit::PX);
+                std::string(letterSpacingStruct->valueStr), false, DimensionUnit::FP);
         }
     } else {
-        letterSpacing = CalcDimension(letterSpacingStruct->value, DimensionUnit::VP);
+        letterSpacing = CalcDimension(letterSpacingStruct->value, DimensionUnit::FP);
     }
     TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
 }
@@ -425,27 +412,23 @@ void ResetTextLetterSpacing(NodeHandle node)
     TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
 }
 
-void SetTextFont(NodeHandle node,
-    const struct StringAndDouble* size, const char* weight, const char* family, int32_t style)
+void SetTextFont(NodeHandle node, const struct ArkUIFontStruct *fontInfo)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(fontInfo);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     Font font;
-    CalcDimension fontSize;
-    if (size->valueStr != nullptr) {
-        fontSize = StringUtils::StringToCalcDimension(size->valueStr, true, DimensionUnit::FP);
-    } else {
-        fontSize = CalcDimension(size->value, DimensionUnit::FP);
+    font.fontSize = Dimension(fontInfo->fontSizeNumber, static_cast<DimensionUnit>(fontInfo->fontSizeUnit));
+    font.fontStyle = static_cast<Ace::FontStyle>(fontInfo->fontStyle);
+    font.fontWeight = static_cast<FontWeight>(fontInfo->fontWeight);
+    std::vector<std::string> families;
+    if (fontInfo->fontFamilies && fontInfo->familyLength > 0) {
+        families.resize(fontInfo->familyLength);
+        for (uint32_t i = 0; i < fontInfo->familyLength; i++) {
+            families.at(i) = std::string(*(fontInfo->fontFamilies + i));
+        }
     }
-    font.fontSize = fontSize;
-    font.fontWeight = Framework::ConvertStrToFontWeight(weight);
-    if (family == nullptr) {
-        font.fontFamilies.clear();
-        font.fontFamilies.emplace_back(DEFAULT_FAMILY);
-    } else {
-        font.fontFamilies = Framework::ConvertStrToFontFamilies(family);
-    }
-    font.fontStyle = static_cast<Ace::FontStyle>(style);
+    font.fontFamilies = families;
     TextModelNG::SetFont(frameNode, font);
 }
 

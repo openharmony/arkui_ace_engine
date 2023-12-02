@@ -24,6 +24,7 @@ class ACE_EXPORT FolderStackModelNG : public FolderStackModel {
 public:
     void Create(const std::vector<std::string>& itemId) override;
     void SetAlignment(Alignment alignment) override;
+    void SetOnFolderStateChange(std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange) override;
     void SetEnableAnimation(bool IsEnableAnimation) override;
     void SetAutoHalfFold(bool IsAutoHalfFold) override;
 

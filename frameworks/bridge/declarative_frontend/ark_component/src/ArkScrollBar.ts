@@ -1,7 +1,7 @@
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkScrollBarComponent extends ArkComponent implements ScrollBarAttribute {
   monopolizeEvents(monopolize: boolean): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }
 
@@ -9,7 +9,7 @@ class ArkScrollBarComponent extends ArkComponent implements ScrollBarAttribute {
 globalThis.ScrollBar.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, ()=> {
+  let component = this.createOrGetNode(elmtId, () => {
     return new ArkScrollBarComponent(nativeNode);
   });
   modifier.applyNormalAttribute(component);

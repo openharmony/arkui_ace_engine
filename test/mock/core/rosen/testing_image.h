@@ -33,6 +33,12 @@ public:
         const int imageHeight = 100;
         return imageHeight;
     }
+
+    virtual uint32_t GetUniqueID() const
+    {
+        const uint32_t id = 0;
+        return id;
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_IMAGE_H

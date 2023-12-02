@@ -1,4 +1,4 @@
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkPanelComponent extends ArkComponent implements PanelAttribute {
   mode(value: PanelMode): this {
     if (typeof value === 'number') {

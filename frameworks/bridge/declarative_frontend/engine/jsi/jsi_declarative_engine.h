@@ -230,6 +230,7 @@ private:
     static bool isModuleInitialized_;
     static shared_ptr<JsRuntime> globalRuntime_;
     shared_ptr<JsValue> uiContext_;
+    static std::shared_mutex globalRuntimeMutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngineInstance);
 };
@@ -395,6 +396,7 @@ public:
     void SetHspBufferTrackerCallback(std::function<bool(const std::string&, uint8_t**, size_t*)>&& callback);
     // Support to execute the ets code mocked by developer
     void SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo);
+    bool IsComponentPreview() override;
 #endif
     static void AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
         const std::string& namedRoute, panda::Local<panda::ObjectRef> params);

@@ -46,6 +46,7 @@ class AccessibilityElementInfo;
 }
 namespace Rosen {
 class Window;
+struct Rect;
 enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 enum class MaximizeMode : uint32_t;
@@ -285,6 +286,10 @@ public:
      * @param callback callback func.
      */
     virtual void SetFrameLayoutFinishCallback(std::function<void()>&& callback) {};
+
+    // Actually paint size of window
+    virtual void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) {};
+
 };
 
 } // namespace OHOS::Ace

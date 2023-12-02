@@ -21,9 +21,8 @@
 #include <optional>
 #include <string>
 
-#include "base/utils/macros.h"
-
 #include "base/geometry/dimension.h"
+#include "base/utils/macros.h"
 #include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
@@ -34,7 +33,7 @@ class ACE_EXPORT FolderStackModel {
 public:
     static FolderStackModel* GetInstance();
     virtual ~FolderStackModel() = default;
-
+    virtual void SetOnFolderStateChange(std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange) = 0;
     virtual void Create(const std::vector<std::string>& itemId) = 0;
     virtual void Create() = 0;
     virtual void SetAlignment(Alignment alignment) = 0;

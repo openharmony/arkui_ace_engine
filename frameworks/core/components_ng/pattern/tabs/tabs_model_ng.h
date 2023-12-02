@@ -60,12 +60,30 @@ public:
     void SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+    static void SetTabBarMode(FrameNode* frameNode, TabBarMode tabBarMode);
+    static void SetBarGridAlign(FrameNode* frameNode, const BarGridColumnOptions& BarGridColumnOptions);
+    static void SetDivider(FrameNode* frameNode, const TabsItemDivider& divider);
+    static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge);
+    static void SetBarBackgroundColor(FrameNode* frameNode, const Color& backgroundColor);
+    static void SetBarOverlap(FrameNode* frameNode, bool barOverlap);
+    static void SetIsVertical(FrameNode* frameNode, bool isVertical);
+    static void SetTabBarPosition(FrameNode* frameNode, BarPosition tabBarPosition);
+    static void SetScrollable(FrameNode* frameNode, bool scrollable);
+    static void SetTabBarWidth(FrameNode* frameNode, const Dimension& tabBarWidth);
+    static void SetTabBarHeight(FrameNode* frameNode, const Dimension& tabBarHeight);
+    static void SetAnimationDuration(FrameNode* frameNode, float duration);
+    static void SetBarAdaptiveHeight(FrameNode* frameNode, bool barAdaptiveHeight);
+    static void SetScrollableBarModeOptions(FrameNode* frameNode, const ScrollableBarModeOptions& option);
 
 private:
     static RefPtr<TabBarLayoutProperty> GetTabBarLayoutProperty();
     static RefPtr<TabBarPaintProperty> GetTabBarPaintProperty();
     static RefPtr<SwiperLayoutProperty> GetSwiperLayoutProperty();
     static RefPtr<SwiperPaintProperty> GetSwiperPaintProperty();
+    static RefPtr<TabBarLayoutProperty> GetTabBarLayoutProperty(FrameNode* frameNode);
+    static RefPtr<TabBarPaintProperty> GetTabBarPaintProperty(FrameNode* frameNode);
+    static RefPtr<SwiperLayoutProperty> GetSwiperLayoutProperty(FrameNode* frameNode);
+    static RefPtr<SwiperPaintProperty> GetSwiperPaintProperty(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

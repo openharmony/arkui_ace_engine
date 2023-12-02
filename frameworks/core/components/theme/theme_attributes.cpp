@@ -37,6 +37,7 @@ const char THEME_PATTERN_SEMI_MODAL[] = "semi_modal_pattern";
 const char THEME_PATTERN_BADGE[] = "badge_pattern";
 const char THEME_PATTERN_CALENDAR[] = "calendar_pattern";
 const char THEME_PATTERN_CAMERA[] = "camera_pattern";
+const char THEME_PATTERN_CARD[] = "card_pattern";
 const char THEME_PATTERN_CLOCK[] = "clock_pattern";
 const char THEME_PATTERN_COUNTER[] = "counter_pattern";
 const char THEME_PATTERN_DIVIDER[] = "divider_pattern";

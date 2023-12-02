@@ -25,6 +25,7 @@
 #include "ecmascript/napi/include/jsnapi.h"
 #include "native_engine/native_engine.h"
 
+#include "base/log/log.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 
 namespace panda::ecmascript {
@@ -98,7 +99,18 @@ public:
 
     const EcmaVM* GetEcmaVm() const
     {
-        return vm_;
+        return vm_ != nullptr ? vm_ : GetThreadVm();
+    }
+
+    const EcmaVM* GetThreadVm() const
+    {
+        LOGI("vm_ is nullptr, use threadVm_");
+        return threadVm_;
+    }
+
+    void SetThreadVm(EcmaVM* vm)
+    {
+        threadVm_ = vm;
     }
 
     void SetAssetPath(const std::string& assetPath)
@@ -223,6 +235,7 @@ private:
     std::multimap<std::string, panda::Global<panda::ObjectRef>> previewComponents_;
     panda::Global<panda::ObjectRef> RootView_;
 #endif
+    static thread_local EcmaVM* threadVm_;
 };
 
 class PandaFunctionData {

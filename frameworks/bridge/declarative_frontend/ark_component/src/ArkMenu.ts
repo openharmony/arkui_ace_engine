@@ -1,6 +1,6 @@
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class MenuFontColorModifier extends ModifierWithKey<ResourceColor> {
-  static identity: Symbol = Symbol("fontColor");
+  static identity: Symbol = Symbol('fontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetMenuFontColor(node);
@@ -19,7 +19,7 @@ class MenuFontColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class MenuFontModifier extends Modifier<ArkFont> {
-  static identity: Symbol = Symbol("font");
+  static identity: Symbol = Symbol('font');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().menu.resetFont(node);
@@ -31,7 +31,7 @@ class MenuFontModifier extends Modifier<ArkFont> {
 }
 
 class RadiusModifier extends Modifier<ArkBorderRadius> {
-  static identity: Symbol = Symbol("radius");
+  static identity: Symbol = Symbol('radius');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().menu.resetRadius(node);
@@ -44,7 +44,7 @@ class RadiusModifier extends Modifier<ArkBorderRadius> {
 
 class ArkMenuComponent extends ArkComponent implements MenuAttribute {
   fontSize(value: any): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
   font(value: Font): MenuAttribute {
     let font = new ArkFont();
@@ -63,7 +63,7 @@ class ArkMenuComponent extends ArkComponent implements MenuAttribute {
   }
   radius(value: any): MenuAttribute {
     let radius = new ArkBorderRadius();
-    if (typeof value === "number" || typeof value === "string") {
+    if (typeof value === 'number' || typeof value === 'string') {
       radius.topLeft = value;
       radius.topRight = value;
       radius.bottomLeft = value;
@@ -79,7 +79,7 @@ class ArkMenuComponent extends ArkComponent implements MenuAttribute {
     return this;
   }
   monopolizeEvents(monopolize: boolean): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }
 

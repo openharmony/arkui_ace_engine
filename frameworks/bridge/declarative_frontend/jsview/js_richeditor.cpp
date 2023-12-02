@@ -611,6 +611,36 @@ void JSRichEditor::SetOnPaste(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetOnPaste(std::move(onPaste));
 }
 
+void JSRichEditor::JsEnableDataDetector(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsBoolean()) {
+        RichEditorModel::GetInstance()->SetTextDetectEnable(false);
+        return;
+    }
+    auto enable = info[0]->ToBoolean();
+    RichEditorModel::GetInstance()->SetTextDetectEnable(enable);
+}
+
+void JSRichEditor::JsDataDetectorConfig(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
+    std::string textTypes;
+    std::function<void(const std::string&)> onResult;
+    if (!ParseDataDetectorConfig(info, textTypes, onResult)) {
+        return;
+    }
+    RichEditorModel::GetInstance()->SetTextDetectConfig(textTypes, std::move(onResult));
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -633,6 +663,8 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("copyOptions", &JSRichEditor::SetCopyOptions);
     JSClass<JSRichEditor>::StaticMethod("bindSelectionMenu", &JSRichEditor::BindSelectionMenu);
     JSClass<JSRichEditor>::StaticMethod("onPaste", &JSRichEditor::SetOnPaste);
+    JSClass<JSRichEditor>::StaticMethod("enableDataDetector", &JSRichEditor::JsEnableDataDetector);
+    JSClass<JSRichEditor>::StaticMethod("dataDetectorConfig", &JSRichEditor::JsDataDetectorConfig);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

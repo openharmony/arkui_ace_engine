@@ -147,7 +147,7 @@ void ContainerModalPattern::InitContainerEvent()
     CHECK_NULL_VOID(floatingTitleNode);
     auto floatingLayoutProperty = floatingTitleNode->GetLayoutProperty();
     CHECK_NULL_VOID(floatingLayoutProperty);
-    auto floatingContext = controlButtonsNode->GetRenderContext();
+    auto floatingContext = floatingTitleNode->GetRenderContext();
     CHECK_NULL_VOID(floatingContext);
 
     auto titlePopupDistance = TITLE_POPUP_DISTANCE * containerNode->GetContext()->GetDensity();

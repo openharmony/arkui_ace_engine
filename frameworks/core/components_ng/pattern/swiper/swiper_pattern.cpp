@@ -589,7 +589,7 @@ int32_t SwiperPattern::GetLoopIndex(int32_t originalIndex) const
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (!isDragging_) {
-        SetLazyForEachLongPredict(true);
+        SetLazyLoadFeature(true);
     }
 
     auto isNotInit = true;
@@ -1563,12 +1563,15 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
     if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
         isTouchPad_ = true;
         auto mainSize = CalculateVisibleSize();
-        if ((mainDeltaSum_ + std::abs(mainDelta)) > mainSize) {
-            mainDelta = mainDelta > 0 ? (mainSize - mainDeltaSum_) : (mainDeltaSum_ - mainSize);
-            mainDeltaSum_ = mainSize;
-        } else {
-            mainDeltaSum_ += std::abs(mainDelta);
+        if (std::abs(mainDelta) > mainSize) {
+            mainDelta = mainDelta > 0 ? mainSize : -mainSize;
         }
+
+        if ((std::abs(mainDeltaSum_ + mainDelta)) > mainSize) {
+            mainDelta = (mainDeltaSum_ + mainDelta) > 0 ? (mainSize - mainDeltaSum_) : (-mainDeltaSum_ - mainSize);
+        } 
+
+        mainDeltaSum_ += mainDelta;
     }
 
     auto dragPoint =
@@ -1704,6 +1707,10 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
         nextIndex = direction ? firstItemInfoInVisibleArea.first : firstItemInfoInVisibleArea.first + 1;
     } else {
         nextIndex = direction ? firstItemInfoInVisibleArea.first + 1 : firstItemInfoInVisibleArea.first;
+    }
+
+    if (!IsAutoLinear() && nextIndex > currentIndex_ + GetDisplayCount()) {
+        nextIndex = currentIndex_ + GetDisplayCount();
     }
 
     if (!IsLoop()) {

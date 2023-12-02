@@ -915,6 +915,16 @@ void LayoutProperty::UpdateAlignRules(const std::map<AlignDirection, AlignRule>&
     }
 }
 
+void LayoutProperty::UpdateBias(const BiasPair& biasPair)
+{
+    if (!flexItemProperty_) {
+        flexItemProperty_ = std::make_unique<FlexItemProperty>();
+    }
+    if (flexItemProperty_->UpdateBias(biasPair)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
 void LayoutProperty::UpdateDisplayIndex(int32_t displayIndex)
 {
     if (!flexItemProperty_) {

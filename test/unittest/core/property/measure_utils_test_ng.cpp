@@ -27,7 +27,7 @@
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/property/measure_property.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #undef protected
 #undef private
@@ -86,11 +86,11 @@ class MeasureUtilsTestNg : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
-        MockPipelineBase::SetUp();
+        MockPipelineContext::SetUp();
     }
     static void TeardownTestSuite()
     {
-        MockPipelineBase::TearDown();
+        MockPipelineContext::TearDown();
     }
 };
 

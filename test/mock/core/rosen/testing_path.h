@@ -58,6 +58,8 @@ public:
         TestingPathDirection dir = TestingPathDirection::CW_DIRECTION)
     {}
 
+    virtual void AddPath(const TestingPath& src) {}
+
     virtual void MoveTo(float xs, float ys) {}
     virtual void LineTo(float xs, float ys) {}
     virtual void AddCircle(
@@ -73,6 +75,11 @@ public:
     virtual void Offset(float dx, float dy) {}
     virtual void AddPoly(const std::vector<TestingPoint>& points, int count, bool close) {}
     virtual bool Op(const TestingPath& path1, TestingPath& path2, TestingPathOp op)
+    {
+        return true;
+    }
+
+    virtual bool BuildFromSVGString(const std::string& str)
     {
         return true;
     }

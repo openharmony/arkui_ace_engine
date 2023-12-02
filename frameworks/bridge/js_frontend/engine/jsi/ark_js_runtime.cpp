@@ -53,6 +53,8 @@ void FunctionDeleter(void *nativePointer, void *data)
     }
 }
 
+thread_local EcmaVM* ArkJSRuntime::threadVm_ = nullptr;
+
 bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, int32_t instanceId)
 {
     RuntimeOption option;

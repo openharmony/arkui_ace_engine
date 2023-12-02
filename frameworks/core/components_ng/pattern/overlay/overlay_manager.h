@@ -115,7 +115,7 @@ public:
     {
         return dialogMap_;
     };
-    void CloseMask ();
+    RefPtr<FrameNode> GetDialog(int32_t dialogId);
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft = false);
@@ -143,8 +143,9 @@ public:
     {
         return subWindowId_;
     }
-    RefPtr<FrameNode> GetMaskNode() {
-        return maskNode_;
+    int32_t GetMaskNodeId()
+    {
+        return maskNodeId_;
     }
     /**  pop overlays (if any) on back press
      *
@@ -278,7 +279,7 @@ public:
     RefPtr<FrameNode> BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
         const RefPtr<NG::FrameNode>& targetNode, const std::vector<std::string>& aiMenuOptions);
     SizeF CaculateMenuSize(const RefPtr<FrameNode>& menuNode, const std::vector<std::string>& aiMenuOptions);
-    bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF safeArea,
+    bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect,
         const std::vector<std::string>& aiMenuOptions, const RefPtr<NG::FrameNode>& targetNode);
 
     void MarkDirty(PropertyChangeFlag flag);
@@ -331,6 +332,9 @@ private:
 
     void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
+    void ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
+    void ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, AnimationOption& option,
+        bool showPreviewAnimation, bool startDrag);
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
@@ -368,7 +372,7 @@ private:
     float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;
     int32_t dialogCount_ = 0;
-    RefPtr<FrameNode> maskNode_;
+    int32_t maskNodeId_ = -1;
     int32_t subWindowId_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool hasPixelMap_ { false };

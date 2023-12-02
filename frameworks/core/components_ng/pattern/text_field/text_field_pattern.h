@@ -84,6 +84,16 @@ enum class DragStatus { DRAGGING, ON_DROP, NONE };
 
 enum class CaretStatus { SHOW, HIDE, NONE };
 
+enum class InputOperation {
+    INSERT,
+    DELETE_BACKWARD,
+    DELETE_FORWARD,
+    CURSOR_UP,
+    CURSOR_DOWN,
+    CURSOR_LEFT,
+    CURSOR_RIGHT
+};
+
 enum {
     ACTION_SELECT_ALL, // Smallest code unit.
     ACTION_UNDO,
@@ -173,9 +183,8 @@ public:
     {
         if (IsTextArea()) {
             return MakeRefPtr<TextAreaLayoutAlgorithm>();
-        } else {
-            return MakeRefPtr<TextInputLayoutAlgorithm>();
         }
+        return MakeRefPtr<TextInputLayoutAlgorithm>();
     }
 
     void OnModifyDone() override;
@@ -459,17 +468,21 @@ public:
     }
 
     bool CursorMoveLeft() override;
+    bool CursorMoveLeftOperation();
     bool CursorMoveLeftWord();
     bool CursorMoveLineBegin();
     bool CursorMoveToParagraphBegin();
     bool CursorMoveHome();
     bool CursorMoveRight() override;
+    bool CursorMoveRightOperation();
     bool CursorMoveRightWord();
     bool CursorMoveLineEnd();
     bool CursorMoveToParagraphEnd();
     bool CursorMoveEnd();
     bool CursorMoveUp() override;
     bool CursorMoveDown() override;
+    bool CursorMoveUpOperation();
+    bool CursorMoveDownOperation();
     void SetCaretPosition(int32_t position);
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
     void HandleExtendAction(int32_t action) override;
@@ -963,6 +976,7 @@ public:
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
     bool IsInPasswordMode() const;
+    bool IsShowCancelButtonMode() const;
 
     bool GetShowSelect() const
     {
@@ -1059,7 +1073,7 @@ private:
     void HandleLongPress(GestureEvent& info);
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void ShowSelectOverlay(const ShowSelectOverlayParams& params);
-
+    void ShowSelectOverlayAfterDrag();
     void CursorMoveOnClick(const Offset& offset);
 
     void ProcessOverlay(
@@ -1259,7 +1273,6 @@ private:
     int32_t dragTextEnd_ = 0;
     RefPtr<FrameNode> dragNode_;
     DragStatus dragStatus_ = DragStatus::NONE; // The status of the dragged initiator
-    std::vector<std::string> dragContents_;
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
     std::vector<TextEditingValueNG> redoOperationRecords_;
@@ -1299,6 +1312,7 @@ private:
     std::queue<int32_t> deleteBackwardOperations_;
     std::queue<int32_t> deleteForwardOperations_;
     std::queue<std::string> insertValueOperations_;
+    std::queue<InputOperation> inputOperations_;
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
     bool showSelect_ = false;

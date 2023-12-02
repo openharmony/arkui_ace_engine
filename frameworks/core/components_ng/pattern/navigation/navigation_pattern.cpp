@@ -209,6 +209,7 @@ void NavigationPattern::CheckTopNavPathChange(
     if (preTopNavPath == newTopNavPath && replaceValue != 1) {
         return;
     }
+    isChanged_ = true;
     if (replaceValue == 1) {
         const int32_t replaceAnimation = 2;
         navigationStack_->UpdateReplaceValue(replaceAnimation);
@@ -265,15 +266,12 @@ void NavigationPattern::CheckTopNavPathChange(
                 auto eventHub = newTopNavDestination->GetEventHub<NavDestinationEventHub>();
                 CHECK_NULL_VOID(eventHub);
                 NotifyPageShow(newTopNavPath->first);
-                eventHub->FireOnShownEvent();
                 navDestinationPattern->SetIsOnShow(true);
-                // The navigations in NavDestination should be fired the shown event
-                NavigationPattern::FireNavigationStateChange(newTopNavDestination, true);
             }
             auto focusHub = newTopNavDestination->GetOrCreateFocusHub();
             context->AddAfterLayoutTask([focusHub]() {
                 focusHub->SetParentFocusable(true);
-                focusHub->RequestFocus();
+                focusHub->RequestFocusWithDefaultFocusFirstly();
             });
         }
     } else {
@@ -284,7 +282,7 @@ void NavigationPattern::CheckTopNavPathChange(
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         auto focusHub = navBarNode->GetOrCreateFocusHub();
         focusHub->SetParentFocusable(true);
-        focusHub->RequestFocus();
+        focusHub->RequestFocusWithDefaultFocusFirstly();
     }
     // animation need to run after layout task
     if (navigationMode_ == NavigationMode::STACK) {
@@ -578,18 +576,27 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
                         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
                     pattern->UpdateContextRect(curTopNavDestination, navigationGroupNode);
+                    if (pattern->isChanged_) {
+                        auto eventHub = curTopNavDestination->GetEventHub<NavDestinationEventHub>();
+                        eventHub->FireOnShownEvent();
+                        NavigationPattern::FireNavigationStateChange(curTopNavDestination, true);
+                        pattern->isChanged_ = false;
+                    }
                 }
                 // considering navBar visibility
                 auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
                 CHECK_NULL_VOID(navBarNode);
                 auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
                 CHECK_NULL_VOID(navBarLayoutProperty);
+                bool isSetInvisible =
+                    (navigationGroupNode->GetNeedSetInvisible() && navigationStack->Size() != 0) ? true : false;
                 if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
                     (pattern->GetNavigationMode() == NavigationMode::STACK &&
-                        (navigationGroupNode->GetNeedSetInvisible() || navigationStack->Size() >= 1))) {
+                        (isSetInvisible || navigationStack->Size() >= 1))) {
                     navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
                 } else {
                     navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
+                    navBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
                     navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
                 }
                 auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetContentNode());

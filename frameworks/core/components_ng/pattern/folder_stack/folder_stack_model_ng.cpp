@@ -37,7 +37,30 @@ void FolderStackModelNG::Create()
     std::vector<std::string> itemId;
     Create(itemId);
 }
-void FolderStackModelNG::Create(const std::vector<std::string>& itemId) {}
+void FolderStackModelNG::Create(const std::vector<std::string>& itemId)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto folderStackGroupNode = FolderStackGroupNode::GetOrCreateGroupNode(
+        V2::FOLDER_STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FolderStackPattern>(); });
+    folderStackGroupNode->SetItemId(itemId);
+    if (!folderStackGroupNode->GetHoverNode()) {
+        int32_t hoverId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto hoverStackNode = HoverStackNode::GetOrCreateHoverStackNode(
+            V2::HOVER_STACK_ETS_TAG, hoverId, []() { return AceType::MakeRefPtr<HoverStackPattern>(); });
+        folderStackGroupNode->AddChild(hoverStackNode);
+        folderStackGroupNode->SetHoverNode(hoverStackNode);
+    }
+    if (!folderStackGroupNode->GetControlPartsStackNode()) {
+        int32_t controlPartsId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto controlPartsNode = ControlPartsStackNode::GetOrCreateControlPartsStackNode(V2::CONTROL_PARTS_STACK_ETS_TAG,
+            controlPartsId, []() { return AceType::MakeRefPtr<ControlPartsStackPattern>(); });
+        folderStackGroupNode->AddChild(controlPartsNode);
+        folderStackGroupNode->SetControlPartsStackNode(controlPartsNode);
+    }
+    stack->Push(folderStackGroupNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(FolderStackLayoutProperty, UpperItems, itemId);
+}
 
 void FolderStackModelNG::SetAlignment(Alignment alignment)
 {
@@ -52,5 +75,15 @@ void FolderStackModelNG::SetEnableAnimation(bool IsEnableAnimation)
 void FolderStackModelNG::SetAutoHalfFold(bool IsAutoHalfFold)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(FolderStackLayoutProperty, AutoHalfFold, IsAutoHalfFold);
+}
+
+void FolderStackModelNG::SetOnFolderStateChange(
+    std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnFolderStateChange(std::move(onChange));
 }
 } // namespace OHOS::Ace::NG

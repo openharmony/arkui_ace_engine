@@ -253,6 +253,10 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2);
     CHECK_NULL_VOID(childWrapper);
+    auto childGeometryNode = childWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(childGeometryNode);
+    // the child node needs to use its own margin
+    childGeometryNode->SetMarginFrameOffset(OffsetF());
     childWrapper->Layout();
 }
 

@@ -17,7 +17,6 @@
 #include <cinttypes>
 #include <cstring>
 
-#include "hilog_wrapper.h"
 #include "napi/native_engine/native_value.h"
 #include "securec.h"
 
@@ -908,8 +907,6 @@ napi_value AceGetCallbackErrorValue(napi_env env, int errCode)
  */
 ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(napi_env env)
 {
-    HILOG_INFO("%{public}s called.", __func__);
-
     napi_value global = 0;
     NAPI_CALL(env, napi_get_global(env, &global));
 
@@ -1006,16 +1003,12 @@ bool AceWrapThreadReturnData(napi_env env, const ACEThreadReturnData* data, napi
  */
 bool AceCreateAsyncCallback(napi_env env, napi_value param, ACEAsyncJSCallbackInfo* callback)
 {
-    HILOG_INFO("%{public}s called.", __func__);
-
     if (param == nullptr || callback == nullptr) {
-        HILOG_INFO("%{public}s called, param or callback is null.", __func__);
         return false;
     }
 
     callback->cbInfo.callback = AceCreateCallbackRefFromJS(env, param);
     if (callback->cbInfo.callback == nullptr) {
-        HILOG_INFO("%{public}s, create ref failed.", __func__);
         return false;
     }
 
@@ -1025,7 +1018,6 @@ bool AceCreateAsyncCallback(napi_env env, napi_value param, ACEAsyncJSCallbackIn
 napi_ref AceCreateCallbackRefFromJS(napi_env env, napi_value param)
 {
     if (env == nullptr || param == nullptr) {
-        HILOG_INFO("%{public}s called, env or param is null", __func__);
         return nullptr;
     }
 
@@ -1033,7 +1025,6 @@ napi_ref AceCreateCallbackRefFromJS(napi_env env, napi_value param)
     NAPI_CALL(env, napi_typeof(env, param, &valueType));
 
     if (valueType != napi_function) {
-        HILOG_INFO("%{public}s called, Param is invalid.", __func__);
         return nullptr;
     }
 
@@ -1050,9 +1041,7 @@ napi_ref AceCreateCallbackRefFromJS(napi_env env, napi_value param)
  */
 void AceCompleteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
-    HILOG_INFO("%{public}s called.", __func__);
     if (asyncCallbackInfo == nullptr) {
-        HILOG_INFO("%{public}s called, asyncCallbackInfo is null", __func__);
         return;
     }
 
@@ -1083,9 +1072,7 @@ void AceCompleteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCal
  */
 void AceCompletePromiseCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
-    HILOG_INFO("%{public}s called.", __func__);
     if (asyncCallbackInfo == nullptr) {
-        HILOG_INFO("%{public}s called, asyncCallbackInfo is null", __func__);
         return;
     }
 

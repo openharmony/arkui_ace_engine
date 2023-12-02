@@ -65,7 +65,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 #undef private
@@ -92,7 +92,7 @@ protected:
 
 void CalendarPickerTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
@@ -106,13 +106,13 @@ void CalendarPickerTestNg::SetUpTestCase()
                 return AceType::MakeRefPtr<PickerTheme>();
             }
         });
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
 void CalendarPickerTestNg::TearDownTestCase()
 {
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
-    MockPipelineBase::TearDown();
+    MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
+    MockPipelineContext::TearDown();
 }
 
 void CalendarPickerTestNg::CreateCalendarPicker()
@@ -173,7 +173,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest001, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
 
-    RefPtr<CalendarTheme> theme = MockPipelineBase::GetCurrent()->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
     ASSERT_NE(theme, nullptr);
 
     auto& borderWidthProp = layoutProperty->GetBorderWidthProperty();

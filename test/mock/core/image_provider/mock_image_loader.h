@@ -21,8 +21,13 @@
 namespace OHOS::Ace {
 class MockImageLoader : public ImageLoader {
 public:
+#ifndef USE_ROSEN_DRAWING
     MOCK_METHOD(sk_sp<SkData>, LoadImageData,
         (const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context), (override));
+#else
+    MOCK_METHOD(std::shared_ptr<RSData>, LoadImageData,
+        (const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context), (override));
+#endif
     MOCK_METHOD(RefPtr<NG::ImageData>, LoadDecodedImageData,
         (const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context), (override));
 };

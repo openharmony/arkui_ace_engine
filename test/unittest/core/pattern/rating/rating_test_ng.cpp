@@ -37,7 +37,7 @@
 #include "core/image/image_source_info.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -106,12 +106,12 @@ public:
 
 void RatingTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void RatingTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -216,7 +216,7 @@ HWTEST_F(RatingTestNg, RatingConstrainsPropertyTest006, TestSize.Level1)
     ratingTheme->ratingScore_ = DEFAULT_RATING_SCORE;
     ratingTheme->stepSize_ = DEFAULT_STEP_SIZE;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(ratingTheme));
     RatingModelNG rating;
     rating.Create();
@@ -291,7 +291,7 @@ HWTEST_F(RatingTestNg, RatingPatternGetImageSourceFromThemeTest007, TestSize.Lev
     ASSERT_NE(ratingPattern, nullptr);
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
 
     const ImageSourceInfo foregroundImage = ratingPattern->GetImageSourceInfoFromTheme(RATING_FOREGROUND_FLAG);
@@ -422,7 +422,7 @@ HWTEST_F(RatingTestNg, RatingMeasureTest009, TestSize.Level1)
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(ratingLayoutAlgorithm));
     frameNode->SetGeometryNode(geometryNode);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
 
     /**
@@ -562,7 +562,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest011, TestSize.Level1)
      * @tc.steps: step2. 3 ImageLoadContexts carry out successfully.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_))
         .Times(::testing::AtLeast(4))
         .WillOnce(Return(AceType::MakeRefPtr<RatingTheme>()))
@@ -692,7 +692,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest012, TestSize.Level1)
 HWTEST_F(RatingTestNg, RatingMeasureTest013, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
     /**
      * @tc.steps: step1. Create LayoutWrapperNode and RatingLayoutAlgorithm.
@@ -734,7 +734,7 @@ HWTEST_F(RatingTestNg, RatingOnChangeEventTest001, TestSize.Level1)
     ratingTheme->ratingScore_ = DEFAULT_RATING_SCORE;
     ratingTheme->stepSize_ = DEFAULT_STEP_SIZE;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(ratingTheme));
 
     RatingModelNG rating;
@@ -820,7 +820,7 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
      * @tc.expected: image canvas is not nullptr.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
     ratingPattern->OnImageLoadSuccess(RATING_FOREGROUND_FLAG);
     ratingPattern->OnImageLoadSuccess(RATING_SECONDARY_FLAG);

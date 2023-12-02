@@ -12,8 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "core/common/ai/data_detector_mgr.h"
+#include "test/mock/core/common/mock_data_detector_mgr.h"
 namespace OHOS::Ace {
 DataDetectorMgr& DataDetectorMgr::GetInstance()
 {
@@ -44,10 +43,16 @@ bool DataDetectorMgr::ShowUIExtensionMenu(const std::map<std::string, std::strin
 }
 void DataDetectorMgr::AdjustCursorPosition(
     int32_t& caretPos, const std::string& content, TimeStamp& lastAiPosTimeStamp, const TimeStamp& lastClickTimeStamp)
-{}
+{
+    caretPos = GetCursorPosition(content, caretPos);
+}
 
 void DataDetectorMgr::AdjustWordSelection(int32_t& caretPos, const std::string& content, int32_t& start, int32_t& end)
-{}
+{
+    auto ret = GetWordSelection(content, caretPos);
+    start = ret[0];
+    end = ret[1];
+}
 
 std::vector<int8_t> DataDetectorMgr::GetWordSelection(const std::string& text, int8_t offset)
 {

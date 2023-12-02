@@ -16,7 +16,6 @@
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
 
 #include "base/utils/utils.h"
-#include "bridge/declarative_frontend/jsview/js_list.h"
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -312,7 +311,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("enableScrollInteraction", &JSScroll::SetScrollEnabled);
     JSClass<JSScroll>::StaticMethod("friction", &JSScroll::SetFriction);
     JSClass<JSScroll>::StaticMethod("scrollSnap", &JSScroll::SetScrollSnap);
-    JSClass<JSScroll>::StaticMethod("clip", &JSList::JsClip);
+    JSClass<JSScroll>::StaticMethod("clip", &JSScrollable::JsClip);
     JSClass<JSScroll>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -363,7 +362,7 @@ void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
 void JSScroll::SetEdgeEffect(const JSCallbackInfo& args)
 {
     auto edgeEffect = JSScrollable::ParseEdgeEffect(args, EdgeEffect::NONE);
-    auto alwaysEnabled = JSScrollable::ParseAlwaysEnable(args, false);
+    auto alwaysEnabled = JSScrollable::ParseAlwaysEnable(args, true);
     ScrollModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
 }
 

@@ -20,7 +20,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/utils/time_util.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -622,8 +622,8 @@ HWTEST_F(TextClockTestNG, TextClockTest010, TestSize.Level1)
     /**
      * @tc.steps: step3. set is form render.
      */
-    MockPipelineBase::SetUp();
-    auto pipeline = MockPipelineBase::GetCurrentContext();
+    MockPipelineContext::SetUp();
+    auto pipeline = MockPipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->SetIsFormRender(true);
     EXPECT_FALSE(pattern->isForm_);
@@ -666,7 +666,7 @@ HWTEST_F(TextClockTestNG, TextClockTest010, TestSize.Level1)
     EXPECT_EQ(textClockLayoutProperty->GetFormat(), "mm:SS");
 
     pipeline = nullptr;
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -701,7 +701,7 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextClockPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->isStart_ = false;
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     pattern->InitUpdateTimeTextCallBack();
     pattern->RegistVisibleAreaChangeCallback();
 
@@ -748,7 +748,7 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
     pattern->OnFormVisibleChange(true);
     pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_2);
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**
