@@ -2643,6 +2643,10 @@ void TextFieldPattern::HandleLeftMouseMoveEvent(MouseInfo& info)
     if (!leftMouseCanMove_ || blockPress_) {
         return;
     }
+    auto focusHub = GetFocusHub();
+    if (!focusHub->IsCurrentFocus()) {
+        return;
+    }
     mouseStatus_ = MouseStatus::MOVE;
     selectController_->UpdateSecondHandleInfoByMouseOffset(info.GetLocalLocation()); // 更新时上报事件
     showSelect_ = true;
