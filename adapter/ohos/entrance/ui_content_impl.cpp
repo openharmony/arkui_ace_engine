@@ -1797,6 +1797,9 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext;
     if (isDialog) {
+        UErrorCode status = U_ZERO_ERROR;
+        icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+        AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
         container = AceType::MakeRefPtr<Platform::DialogContainer>(instanceId_, FrontendType::DECLARATIVE_JS);
     } else {
 #ifdef NG_BUILD
