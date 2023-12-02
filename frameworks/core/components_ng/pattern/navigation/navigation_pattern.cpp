@@ -271,7 +271,7 @@ void NavigationPattern::CheckTopNavPathChange(
             auto focusHub = newTopNavDestination->GetOrCreateFocusHub();
             context->AddAfterLayoutTask([focusHub]() {
                 focusHub->SetParentFocusable(true);
-                focusHub->RequestFocus();
+                focusHub->RequestFocusWithDefaultFocusFirstly();
             });
         }
     } else {
@@ -282,7 +282,7 @@ void NavigationPattern::CheckTopNavPathChange(
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         auto focusHub = navBarNode->GetOrCreateFocusHub();
         focusHub->SetParentFocusable(true);
-        focusHub->RequestFocus();
+        focusHub->RequestFocusWithDefaultFocusFirstly();
     }
     // animation need to run after layout task
     if (navigationMode_ == NavigationMode::STACK) {
