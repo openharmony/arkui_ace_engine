@@ -1,7 +1,7 @@
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkFlowItemComponent extends ArkComponent implements FlowItemAttribute {
   monopolizeEvents(monopolize: boolean): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }
 
@@ -9,7 +9,7 @@ class ArkFlowItemComponent extends ArkComponent implements FlowItemAttribute {
 globalThis.FlowItem.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, ()=> {
+  let component = this.createOrGetNode(elmtId, () => {
     return new ArkFlowItemComponent(nativeNode);
   });
   modifier.applyNormalAttribute(component);
