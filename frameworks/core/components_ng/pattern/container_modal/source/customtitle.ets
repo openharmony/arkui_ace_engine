@@ -34,16 +34,15 @@ struct Index {
 
   aboutToAppear() {
     const context = getContext(this);
-    let resourceManager = context.resourceManager;
     try {
-      this.appLabel = resourceManager.getStringSync(context.applicationInfo.labelId);
+      this.appLabel = context.resourceManager.getStringSync(context.applicationInfo.labelId);
     } catch (error) {
       let code = (error as BusinessError).code;
       let message = (error as BusinessError).message;
       console.error(`get appLabel failed, error code: ${code}, message: ${message}.`);
     }
     try {
-      this.appIcon = (resourceManager.getDrawableDescriptor(context.applicationInfo.iconId) as LayeredDrawableDescriptor);
+      this.appIcon = (context.resourceManager.getDrawableDescriptor(context.applicationInfo.iconId) as LayeredDrawableDescriptor);
     } catch (error) {
       let code = (error as BusinessError).code;
       let message = (error as BusinessError).message;
@@ -92,6 +91,5 @@ struct Index {
     .justifyContent(FlexAlign.Start)
     .alignItems(VerticalAlign.Center)
     .padding({ top: 6, bottom: 6 })
-    .backgroundColor(Color.Red)
    }
 }
