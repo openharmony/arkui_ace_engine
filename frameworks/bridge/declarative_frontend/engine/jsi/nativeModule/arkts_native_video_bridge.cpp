@@ -29,11 +29,11 @@ ArkUINativeModuleValue VideoBridge::SetAutoPlay(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
-    uint32_t autoPlay = 0;
     if (secondArg->IsBoolean()) {
-        autoPlay = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+        uint32_t autoPlay = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
         GetArkUIInternalNodeAPI()->GetVideoModifier().SetAutoPlay(nativeNode, autoPlay);
+    } else {
+        GetArkUIInternalNodeAPI()->GetVideoModifier().ResetAutoPlay(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -55,8 +55,12 @@ ArkUINativeModuleValue VideoBridge::SetControls(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    bool controlsValue = secondArg->ToBoolean(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetVideoModifier().SetVideoControls(nativeNode, static_cast<uint32_t>(controlsValue));
+    if (secondArg->IsBoolean()) {
+        uint32_t controlsValue = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+        GetArkUIInternalNodeAPI()->GetVideoModifier().SetVideoControls(nativeNode, controlsValue);
+    } else {
+        GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoControls(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -77,11 +81,12 @@ ArkUINativeModuleValue VideoBridge::SetObjectFit(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t imageFit = static_cast<int32_t>(ImageFit::COVER);
     if (secondArg->IsInt()) {
-        imageFit = secondArg->Int32Value(vm);
+        int32_t imageFit = secondArg->Int32Value(vm);
+        GetArkUIInternalNodeAPI()->GetVideoModifier().SetVideoObjectFit(nativeNode, imageFit);
+    } else {
+        GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoObjectFit(nativeNode);
     }
-    GetArkUIInternalNodeAPI()->GetVideoModifier().SetVideoObjectFit(nativeNode, imageFit);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -102,13 +107,12 @@ ArkUINativeModuleValue VideoBridge::SetLoop(ArkUIRuntimeCallInfo* runtimeCallInf
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    bool value;
     if (secondArg->IsBoolean()) {
-        value = secondArg->ToBoolean(vm)->Value();
+        uint32_t value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+        GetArkUIInternalNodeAPI()->GetVideoModifier().SetVideoLoop(nativeNode, value);
     } else {
-        return panda::JSValueRef::Undefined(vm);
+        GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoLoop(nativeNode);
     }
-    GetArkUIInternalNodeAPI()->GetVideoModifier().SetVideoLoop(nativeNode, static_cast<uint32_t>(value));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -129,13 +133,12 @@ ArkUINativeModuleValue VideoBridge::SetMuted(ArkUIRuntimeCallInfo* runtimeCallIn
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    bool value;
     if (secondArg->IsBoolean()) {
-        value = secondArg->ToBoolean(vm)->Value();
+        uint32_t value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+        GetArkUIInternalNodeAPI()->GetVideoModifier().SetVideoMuted(nativeNode, value);
     } else {
-        return panda::JSValueRef::Undefined(vm);
+        GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoMuted(nativeNode);
     }
-    GetArkUIInternalNodeAPI()->GetVideoModifier().SetVideoMuted(nativeNode, static_cast<uint32_t>(value));
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "core/components/common/properties/text_style.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::NG {
 class ArkTSUtils {
@@ -46,8 +47,9 @@ public:
     static bool ParseJsFontFamiliesFromResource(
         const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result);
     static bool ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
-        DimensionUnit defaultUnit);
-    static bool ParseJsDimensionFp(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result);
+        DimensionUnit defaultUnit, bool isSupportPercent = true);
+    static bool ParseJsDimensionFp(
+        const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result, bool isSupportPercent = true);
     static bool ParseJsDimensionVp(const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension &result);
     static bool ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         DimensionUnit defaultUnit, bool isSupportPercent = true);
@@ -80,6 +82,8 @@ public:
     static bool ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result);
     static void GetJsMediaBundleInfo(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& bundleName, std::string& moduleName);
+    static bool GetJsPasswordIcon(const EcmaVM *vm, const Local<JSValueRef> &jsOnIconSrc,
+        const Local<JSValueRef> &jsOffIconSrc, PasswordIcon& result);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

@@ -29,7 +29,6 @@
 namespace OHOS::Ace::NG {
 const uint32_t MAX_LINES = 3;
 constexpr uint32_t DEFAULT_CARET_COLOR = 0x007DFF;
-static constexpr uint32_t THEME_TEXTFIELD_PLACEHOLDER_COLOR = 0x99000000;
 constexpr uint32_t DEFAULT_CARE_POSITION = 0;
 constexpr CopyOptions DEFAULT_TEXT_INPUT_COPY_OPTION = CopyOptions::Local;
 constexpr bool DEFAULT_SHOW_PASSWORD_ICON_VALUE = true;
@@ -39,27 +38,18 @@ constexpr bool DEFAULT_SELECTION_MENU_HIDDEN = false;
 constexpr bool DEFAULT_SHOW_UNDER_LINE = false;
 constexpr bool DEFAULT_REQUEST_KEYBOARD_ON_FOCUS = true;
 constexpr DisplayMode DEFAULT_BAR_STATE = DisplayMode::AUTO;
-static constexpr Dimension THEME_TEXTFIELD_FONT_SIZE = 16.0_fp;
-constexpr uint32_t THEME_TEXTFIELD_TEXT_SELECTED_COLOR = 0x33254FF7;
-constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
+constexpr int16_t DEFAULT_APLHA = 255;
+constexpr double DEFAULT_OPACITY = 0.2;
 const std::vector<std::string> DEFAULT_FONT_FAMILY = { "HarmonyOS Sans" };
-constexpr Color DEFAULT_TEXT_COLOR = Color(0xe5000000);
-constexpr Dimension DEFAULT_CARET_STYLE = 1.5_vp;
+const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
 
-void SetTextInputCaretColor(NodeHandle node, const struct ArkUIResourceColorType *caretColor)
+void SetTextInputCaretColor(NodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-
-    Color color;
-    if (caretColor->string != nullptr) {
-        Color::ParseColorString(caretColor->string, color);
-    } else {
-        color = Color(ArkTSUtils::ColorAlphaAdapt(caretColor->number));
-    }
-    TextFieldModelNG::SetCaretColor(frameNode, color);
+    TextFieldModelNG::SetCaretColor(frameNode, Color(color));
 }
 
 void ResetTextInputCaretColor(NodeHandle node)
@@ -78,6 +68,9 @@ void SetTextInputType(NodeHandle node, int32_t value)
 
 void ResetTextInputType(NodeHandle node)
 {
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetType(frameNode, TextInputType::UNSPECIFIED);
     return;
 }
 
@@ -85,42 +78,35 @@ void SetTextInputMaxLines(NodeHandle node, int32_t value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-
     if (value <= 0) {
-        TextFieldModelNG::SetMaxLines(frameNode, MAX_LINES);
+        TextFieldModelNG::SetMaxViewLines(frameNode, MAX_LINES);
         return;
     }
 
-    TextFieldModelNG::SetMaxLines(frameNode, value);
+    TextFieldModelNG::SetMaxViewLines(frameNode, value);
 }
 
 void ResetTextInputMaxLines(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetMaxLines(frameNode, MAX_LINES);
+    TextFieldModelNG::SetMaxViewLines(frameNode, MAX_LINES);
 }
 
-void SetTextInputPlaceholderColor(NodeHandle node, const struct ArkUIResourceColorType *placeholderColor)
+void SetTextInputPlaceholderColor(NodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-
-    Color color;
-    if (placeholderColor->string != nullptr) {
-        Color::ParseColorString(placeholderColor->string, color);
-    } else {
-        color = Color(ArkTSUtils::ColorAlphaAdapt(placeholderColor->number));
-    }
-
-    TextFieldModelNG::SetPlaceholderColor(frameNode, color);
+    TextFieldModelNG::SetPlaceholderColor(frameNode, Color(color));
 }
 
 void ResetTextInputPlaceholderColor(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetPlaceholderColor(frameNode, Color(THEME_TEXTFIELD_PLACEHOLDER_COLOR));
+    auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    TextFieldModelNG::SetPlaceholderColor(frameNode, theme->GetPlaceholderColor());
 }
 
 void SetTextInputCaretPosition(NodeHandle node, int32_t caretPosition)
@@ -165,13 +151,31 @@ void ResetTextInputShowPasswordIcon(NodeHandle node)
     TextFieldModelNG::SetShowPasswordIcon(frameNode, DEFAULT_SHOW_PASSWORD_ICON_VALUE);
 }
 
-void SetTextInputPasswordIcon(NodeHandle node, const char *onIconSrc, const char *offIconSrc)
+void SetTextInputPasswordIcon(NodeHandle node, const struct ArkUIPasswordIconType* value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     PasswordIcon passwordIcon;
-    passwordIcon.showResult = onIconSrc;
-    passwordIcon.hideResult = offIconSrc;
+    if (value->showResult != nullptr && std::string(value->showResult) != "") {
+        passwordIcon.showResult = value->showResult;
+    } else {
+        if (value->showBundleName != nullptr && std::string(value->showBundleName) != "") {
+            passwordIcon.showBundleName = value->showBundleName;
+        }
+        if (value->showModuleName != nullptr && std::string(value->showModuleName) != "") {
+            passwordIcon.showModuleName = value->showModuleName;
+        }
+    }
+    if (value->hideResult != nullptr && std::string(value->hideResult) != "") {
+        passwordIcon.hideResult = value->hideResult;
+    } else {
+        if (value->hideBundleName != nullptr && std::string(value->hideBundleName) != "") {
+            passwordIcon.hideBundleName = value->hideBundleName;
+        }
+        if (value->hideModuleName != nullptr && std::string(value->hideModuleName) != "") {
+            passwordIcon.hideModuleName = value->hideModuleName;
+        }
+    }
     TextFieldModelNG::SetPasswordIcon(frameNode, passwordIcon);
 }
 
@@ -189,7 +193,11 @@ void SetTextInputTextAlign(NodeHandle node, int32_t value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetTextAlign(frameNode, static_cast<TextAlign>(value));
+    if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
+        TextFieldModelNG::SetTextAlign(frameNode, TEXT_ALIGNS[value]);
+    } else {
+        TextFieldModelNG::SetTextAlign(frameNode, DAFAULT_TEXT_ALIGN_VALUE);
+    }
 }
 
 void ResetTextInputTextAlign(NodeHandle node)
@@ -241,20 +249,35 @@ void ResetTextInputShowUnderline(NodeHandle node)
     TextFieldModelNG::SetShowUnderline(frameNode, DEFAULT_SHOW_UNDER_LINE);
 }
 
-void SetTextInputCaretStyle(NodeHandle node, const double number, const int8_t unit)
+void SetTextInputCaretStyle(NodeHandle node, const ArkUILengthType* value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<Dimension> caretStyle = Dimension(number, static_cast<DimensionUnit>(unit));
-    TextFieldModelNG::SetCaretStyle(frameNode, { caretStyle });
+    CalcDimension width;
+    if (value->string != nullptr) {
+        width.SetCalcValue(value->string);
+    } else {
+        width.SetValue(value->number);
+    }
+    width.SetUnit(static_cast<DimensionUnit>(value->unit));
+
+    CaretStyle caretStyle;
+    caretStyle.caretWidth = width;
+    TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
 }
 
 void ResetTextInputCaretStyle(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+
     CaretStyle caretStyle;
-    caretStyle.caretWidth = DEFAULT_CARET_STYLE;
+    caretStyle.caretWidth = theme->GetCursorWidth();
     TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
 }
 
@@ -314,20 +337,17 @@ void ResetTextInputFontWeight(NodeHandle node)
     TextFieldModelNG::SetFontWeight(frameNode, FontWeight::NORMAL);
 }
 
-void SetTextInputFontSize(NodeHandle node, const struct ArkUILengthType *fontSizeStruct)
+void SetTextInputFontSize(NodeHandle node, const struct ArkUILengthType *value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension fontSize;
-
-    if (fontSizeStruct->number == -1) {
-        fontSize = THEME_TEXTFIELD_FONT_SIZE;
-    } else if (fontSizeStruct->string != nullptr) {
-        fontSize = StringUtils::StringToCalcDimension(std::string(fontSizeStruct->string), false, DimensionUnit::FP);
+    if (value->string != nullptr) {
+        fontSize.SetCalcValue(value->string);
     } else {
-        fontSize = CalcDimension(fontSizeStruct->number, DimensionUnit::VP);
+        fontSize.SetValue(value->number);
     }
-
+    fontSize.SetUnit(static_cast<DimensionUnit>(value->unit));
     TextFieldModelNG::SetFontSize(frameNode, fontSize);
 }
 
@@ -335,7 +355,9 @@ void ResetTextInputFontSize(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetFontSize(frameNode, THEME_TEXTFIELD_FONT_SIZE);
+    auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    TextFieldModelNG::SetFontSize(frameNode, theme->GetFontSize());
 }
 
 void SetTextInputMaxLength(NodeHandle node, uint32_t value)
@@ -352,26 +374,28 @@ void ResetTextInputMaxLength(NodeHandle node)
     TextFieldModelNG::ResetMaxLength(frameNode);
 }
 
-void SetTextInputSelectedBackgroundColor(NodeHandle node, const struct ArkUIResourceColorType *backgroundColor)
+void SetTextInputSelectedBackgroundColor(NodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-
-    Color color;
-    if (backgroundColor->string != nullptr) {
-        Color::ParseColorString(backgroundColor->string, color);
-    } else {
-        color = Color(ArkTSUtils::ColorAlphaAdapt(backgroundColor->number));
-    }
-
-    TextFieldModelNG::SetSelectedBackgroundColor(frameNode, color);
+    TextFieldModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
 }
 
 void ResetTextInputSelectedBackgroundColor(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetSelectedBackgroundColor(frameNode, Color(THEME_TEXTFIELD_TEXT_SELECTED_COLOR));
+    Color selectedColor;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    selectedColor = theme->GetSelectedColor();
+    if (selectedColor.GetAlpha() == DEFAULT_APLHA) {
+        // Default setting of 20% opacity
+        selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
+    }
+    TextFieldModelNG::SetSelectedBackgroundColor(frameNode, selectedColor);
 }
 
 void SetTextInputShowError(NodeHandle node, const char *error, uint32_t visible)
@@ -388,32 +412,34 @@ void ResetTextInputShowError(NodeHandle node)
     TextFieldModelNG::SetShowError(frameNode, std::string(""), false);
 }
 
-void SetTextInputPlaceholderFont(NodeHandle node, const struct ArkUILengthType *size, int32_t weight,
-    const char *family, int32_t style)
+void SetTextInputPlaceholderFont(NodeHandle node, const struct ArkUIPlaceholderFontType* placeholderFont)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     Font font;
     CalcDimension fontSize;
-    if (size->string != nullptr) {
-        fontSize = StringUtils::StringToCalcDimension(size->string, true, DimensionUnit::FP);
-    } else if (size->number >= 0) {
-        fontSize = CalcDimension(size->number, DimensionUnit::FP);
-    } else {
-        fontSize = DEFAULT_FONT_SIZE;
+    if (placeholderFont->size != nullptr) {
+        if (placeholderFont->size->string != nullptr) {
+            fontSize.SetCalcValue(placeholderFont->size->string);
+        } else {
+            fontSize.SetValue(placeholderFont->size->number);
+        }
     }
-    if (fontSize.Unit() == DimensionUnit::PERCENT) {
-        fontSize = DEFAULT_FONT_SIZE;
-    }
+    fontSize.SetUnit(static_cast<DimensionUnit>(placeholderFont->size->unit));
     font.fontSize = fontSize;
-    if (weight >= 0) {
-        font.fontWeight = static_cast<FontWeight>(weight);
+    if (placeholderFont->weight != nullptr && std::string(placeholderFont->weight) != "") {
+        font.fontWeight = Framework::ConvertStrToFontWeight(placeholderFont->weight);
     }
-    if (family != nullptr) {
-        font.fontFamilies = Framework::ConvertStrToFontFamilies(family);
+    if (placeholderFont->fontFamilies != nullptr && placeholderFont->length > 0) {
+        for (uint32_t i = 0; i < placeholderFont->length; i++) {
+            const char* family = *(placeholderFont->fontFamilies + i);
+            if (family != nullptr) {
+                font.fontFamilies.emplace_back(std::string(family));
+            }
+        }
     }
-    if (style >= 0) {
-        font.fontStyle = static_cast<Ace::FontStyle>(style);
+    if (placeholderFont->style >= 0) {
+        font.fontStyle = static_cast<Ace::FontStyle>(placeholderFont->style);
     }
     TextFieldModelNG::SetPlaceholderFont(frameNode, font);
 }
@@ -423,24 +449,18 @@ void ResetTextInputPlaceholderFont(NodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     Font font;
-    font.fontSize = DEFAULT_FONT_SIZE;
+    auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    font.fontSize = theme->GetFontSize();
     font.fontWeight = DEFAULT_FONT_WEIGHT;
     font.fontStyle = DEFAULT_FONT_STYLE;
     TextFieldModelNG::SetPlaceholderFont(frameNode, font);
 }
 
-void SetTextInputFontColor(NodeHandle node, const struct ArkUIResourceColorType *fontColor)
+void SetTextInputFontColor(NodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-
-    Color color;
-    if (fontColor->string != nullptr) {
-        Color::ParseColorString(fontColor->string, color);
-    } else {
-        color = Color(ArkTSUtils::ColorAlphaAdapt(fontColor->number));
-    }
-
     TextFieldModelNG::SetTextColor(frameNode, Color(color));
 }
 
@@ -448,7 +468,9 @@ void ResetTextInputFontColor(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetTextColor(frameNode, DEFAULT_TEXT_COLOR);
+    auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    TextFieldModelNG::SetTextColor(frameNode, theme->GetTextColor());
 }
 
 void SetTextInputFontStyle(NodeHandle node, uint32_t value)
@@ -465,11 +487,21 @@ void ResetTextInputFontStyle(NodeHandle node)
     TextFieldModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);
 }
 
-void SetTextInputFontFamily(NodeHandle node, const char *value)
+void SetTextInputFontFamily(NodeHandle node, const char** fontFamilies, uint32_t length)
 {
+    CHECK_NULL_VOID(fontFamilies);
+    if (length <= 0) {
+        return;
+    }
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::vector<std::string> families = Framework::ConvertStrToFontFamilies(value);
+    std::vector<std::string> families;
+    for (uint32_t i = 0; i < length; i++) {
+        const char* family = *(fontFamilies + i);
+        if (family != nullptr) {
+            families.emplace_back(std::string(family));
+        }
+    }
     TextFieldModelNG::SetFontFamily(frameNode, families);
 }
 
