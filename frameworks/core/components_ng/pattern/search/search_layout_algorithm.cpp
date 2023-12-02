@@ -72,12 +72,13 @@ void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
         (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
     auto defaultImageHeight =
         imageConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconSize().ConvertToPx());
-    auto imageHeight = std::min((NearZero(defaultImageHeight) && !layoutProperty->HasCancelButtonUDSize())
-                                    ? static_cast<float>(searchTheme->GetIconSize().ConvertToPx())
-                                    : defaultImageHeight,
-        static_cast<float>(searchHeight));
+    auto iconStretchSize = (NearZero(defaultImageHeight) || !imageConstraint->maxSize.IsPositive()) &&
+                           !layoutProperty->HasCancelButtonUDSize();
+    auto imageHeight =
+        std::min(iconStretchSize ? static_cast<float>(searchTheme->GetIconSize().ConvertToPx()) : defaultImageHeight,
+            static_cast<float>(searchHeight));
     CalcSize imageCalcSize;
-    if (NearZero(defaultImageHeight)) {
+    if (iconStretchSize) {
         imageCalcSize.SetWidth(CalcLength(imageHeight));
     }
     imageCalcSize.SetHeight(CalcLength(imageHeight));
@@ -193,7 +194,8 @@ void SearchLayoutAlgorithm::ImageMeasure(LayoutWrapper* layoutWrapper)
         (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
     auto defaultImageHeight =
         imageConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconSize().ConvertToPx());
-    auto iconStretchSize = NearZero(defaultImageHeight) && !layoutProperty->HasSearchIconUDSize();
+    auto iconStretchSize = (NearZero(defaultImageHeight) || !imageConstraint->maxSize.IsPositive()) &&
+        !layoutProperty->HasSearchIconUDSize();
     auto imageHeight =
         std::min(iconStretchSize ? static_cast<float>(searchTheme->GetIconSize().ConvertToPx()) : defaultImageHeight,
             static_cast<float>(searchHeight));
