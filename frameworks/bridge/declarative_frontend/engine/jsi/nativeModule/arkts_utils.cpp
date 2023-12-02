@@ -472,7 +472,7 @@ bool ArkTSUtils::ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value,
     return false;
 }
 
-void ArkTSUtils::ParseAllBorder(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result)
+bool ArkTSUtils::ParseAllBorder(const EcmaVM* vm, const Local<JSValueRef>& args, CalcDimension& result)
 {
     if (ParseJsDimensionVp(vm, args, result)) {
         if (result.IsNegative()) {
@@ -482,6 +482,9 @@ void ArkTSUtils::ParseAllBorder(const EcmaVM *vm, const Local<JSValueRef> &args,
         if (result.Unit() == DimensionUnit::PERCENT) {
             result.Reset();
         }
+        return true;
+    } else {
+        return false;
     }
 }
 
