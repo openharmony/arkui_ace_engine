@@ -117,6 +117,7 @@ public:
     static void SetCaretColor(FrameNode* frameNode, const Color& value);
     static void SetShowCounter(FrameNode* frameNode, bool value);
     static void SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible);
+    static void SetCounterType(FrameNode* frameNode, int32_t value);
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);
