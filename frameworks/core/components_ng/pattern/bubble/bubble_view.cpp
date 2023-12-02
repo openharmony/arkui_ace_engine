@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/render/paint_property.h"
@@ -44,6 +45,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr double DOUBLENESS = 2.0;
+constexpr Dimension BUBBLE_MAX_HEIGHT = 480.0_vp;
 OffsetF GetDisplayWindowRectOffset()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -184,14 +187,22 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         auto buttonMiniMumHeight = popupTheme->GetBubbleMiniMumHeight().ConvertToPx();
         layoutProps->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(buttonMiniMumHeight)));
         textNode->MarkModifyDone();
-        textNode->MountToParent(columnNode);
+        auto scrollNode = FrameNode::CreateFrameNode(
+            V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+        CHECK_NULL_RETURN(scrollNode, nullptr);
+        auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+        scrollProps->UpdateAxis(Axis::VERTICAL);
+        scrollProps->UpdateAlignment(Alignment::CENTER_LEFT);
+        scrollNode->MarkModifyDone();
+        textNode->MountToParent(scrollNode);
+        scrollNode->MountToParent(columnNode);
         child = columnNode;
     }
     // TODO: GridSystemManager is not completed, need to check later.
     auto maxWidth = GetMaxWith();
     auto childLayoutProperty = child->GetLayoutProperty();
     CHECK_NULL_RETURN(childLayoutProperty, nullptr);
-    childLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));
+    childLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), NG::CalcLength(BUBBLE_MAX_HEIGHT)));
     if (param->GetChildWidth().has_value()) {
         childLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
@@ -397,17 +408,31 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
     textLayoutProps->UpdateAlignSelf(FlexAlign::FLEX_START);
     UpdateTextProperties(param, textLayoutProps);
     message->MarkModifyDone();
-    message->MountToParent(columnNode);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(buttonTheme, nullptr);
+    auto scrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    CHECK_NULL_RETURN(scrollNode, nullptr);
+    auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+    scrollProps->UpdateAxis(Axis::VERTICAL);
+    scrollProps->UpdateAlignment(Alignment::CENTER_LEFT);
+    scrollProps->UpdateCalcMaxSize(
+        CalcSize(std::nullopt, CalcLength(BUBBLE_MAX_HEIGHT - buttonTheme->GetHeight() * DOUBLENESS)));
+    scrollNode->MarkModifyDone();
+    message->MountToParent(scrollNode);
+    scrollNode->MountToParent(columnNode);
 
-    auto buttonRow = BubbleView::CreateButtons(param, popupId, targetId);
-    auto buttonRowLayoutProperty = buttonRow->GetLayoutProperty<LinearLayoutProperty>();
-    buttonRowLayoutProperty->UpdateAlignSelf(FlexAlign::FLEX_END);
-    buttonRow->MarkModifyDone();
+    auto buttonFlex = BubbleView::CreateButtons(param, popupId, targetId);
+    auto buttonFlexLayoutProperty = buttonFlex->GetLayoutProperty<FlexLayoutProperty>();
+    buttonFlexLayoutProperty->UpdateAlignSelf(FlexAlign::FLEX_END);
+    buttonFlex->MarkModifyDone();
     auto maxWidth = GetMaxWith();
     auto childLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(childLayoutProperty, nullptr);
     childLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));
-    buttonRow->MountToParent(columnNode);
+    buttonFlex->MountToParent(columnNode);
 
     columnNode->MarkModifyDone();
     return columnNode;
@@ -416,18 +441,18 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
 RefPtr<FrameNode> BubbleView::CreateButtons(const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId)
 {
     auto rowId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto rowNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, rowId, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    auto layoutProps = rowNode->GetLayoutProperty<LinearLayoutProperty>();
-    layoutProps->UpdateSpace(GetPopupTheme()->GetButtonSpacing());
+    auto flexNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, rowId, AceType::MakeRefPtr<FlexLayoutPattern>(false));
+    flexNode->GetPattern<FlexLayoutPattern>()->SetIsWrap(true);
+    auto layoutProps = flexNode->GetLayoutProperty<FlexLayoutProperty>();
     auto primaryButtonProp = param->GetPrimaryButtonProperties();
     auto primaryButton = BubbleView::CreateButton(primaryButtonProp, popupId, targetId, param);
     if (primaryButton) {
-        primaryButton->MountToParent(rowNode);
+        primaryButton->MountToParent(flexNode);
     }
     auto secondaryButtonProp = param->GetSecondaryButtonProperties();
     auto secondaryButton = BubbleView::CreateButton(secondaryButtonProp, popupId, targetId, param);
     if (secondaryButton) {
-        secondaryButton->MountToParent(rowNode);
+        secondaryButton->MountToParent(flexNode);
     }
     auto popupTheme = GetPopupTheme();
     auto littlePadding = popupTheme->GetLittlePadding();
@@ -436,8 +461,8 @@ RefPtr<FrameNode> BubbleView::CreateButtons(const RefPtr<PopupParam>& param, int
     rowPadding.bottom = CalcLength(littlePadding);
     layoutProps->UpdatePadding(rowPadding);
 
-    rowNode->MarkModifyDone();
-    return rowNode;
+    flexNode->MarkModifyDone();
+    return flexNode;
 }
 
 RefPtr<FrameNode> BubbleView::CreateButton(
