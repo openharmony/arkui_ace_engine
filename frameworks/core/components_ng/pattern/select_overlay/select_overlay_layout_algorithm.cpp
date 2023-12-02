@@ -155,6 +155,12 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
             auto top = std::min(firstHandleRect.Top(), secondHandleRect.Top());
             menuPosition.SetY(static_cast<float>(top - menuSpacing - menuHeight));
         }
+        if (!info_->firstHandle.isShow && info_->secondHandle.isShow) {
+            menuPosition.SetX(secondHandleRect.Left() - menuWidth / 2.0f);
+        }
+        if (info_->firstHandle.isShow && !info_->secondHandle.isShow) {
+            menuPosition.SetX(firstHandleRect.Left() - menuWidth / 2.0f);
+        }
     }
 
     auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
