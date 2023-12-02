@@ -684,6 +684,8 @@ void PipelineContext::FlushRenderFinish()
     }
 }
 
+void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
+
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 {
     CHECK_RUN_ON(UI);

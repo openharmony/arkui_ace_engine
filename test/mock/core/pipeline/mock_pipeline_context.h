@@ -46,6 +46,7 @@ public:
     MOCK_METHOD2(OnDragEvent, void(const PointerEvent& pointerEvent, DragEventAction action));
     MOCK_METHOD1(OnIdle, void(int64_t deadline));
     MOCK_METHOD1(SetBuildAfterCallback, void(const std::function<void()>& callback));
+    MOCK_METHOD1(DispatchDisplaySync, void(uint64_t nanoTimestamp));
     MOCK_METHOD1(FlushAnimation, void(uint64_t nanoTimestamp));
     MOCK_METHOD1(SaveExplicitAnimationOption, void(const AnimationOption& option));
     MOCK_METHOD1(CreateExplicitAnimator, void(const std::function<void()>& onFinishEvent));

@@ -398,6 +398,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     } while (false);
 #endif
     ProcessDelayTasks();
+    DispatchDisplaySync(nanoTimestamp);
     FlushAnimation(nanoTimestamp);
     bool hasRunningAnimation = window_->FlushAnimation(nanoTimestamp);
     LOGD("FlushAnimation hasRunningAnimation = %{public}d", hasRunningAnimation);
@@ -505,6 +506,24 @@ void PipelineContext::FlushFrameTrace()
     }
 }
 
+void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
+
+    GetOrCreateUIDisplaySyncManager()->SetVsyncPeriod(window_->GetVSyncPeriod());
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushAnimation();
+    }
+
+    GetOrCreateUIDisplaySyncManager()->DispatchFunc(nanoTimestamp);
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushAnimation();
+    }
+}
+
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 {
     CHECK_RUN_ON(UI);
@@ -515,14 +534,6 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushAnimation();
-    }
-
-    decltype(scheduleTasks_) temp(std::move(scheduleTasks_));
-    for (const auto& [id, weakTask] : temp) {
-        auto task = weakTask.Upgrade();
-        if (task) {
-            task->OnFrame(nanoTimestamp);
-        }
     }
 
     if (FrameReport::GetInstance().GetEnable()) {

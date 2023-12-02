@@ -54,6 +54,7 @@
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -172,6 +173,8 @@ public:
     virtual void OnIdle(int64_t deadline) = 0;
 
     virtual void SetBuildAfterCallback(const std::function<void()>& callback) = 0;
+
+    virtual void DispatchDisplaySync(uint64_t nanoTimestamp) = 0;
 
     virtual void FlushAnimation(uint64_t nanoTimestamp) = 0;
 
@@ -447,6 +450,16 @@ public:
             sharedImageManager_ = MakeRefPtr<SharedImageManager>(taskExecutor_);
         }
         return sharedImageManager_;
+    }
+
+    const RefPtr<UIDisplaySyncManager>& GetOrCreateUIDisplaySyncManager()
+    {
+        std::call_once(displaySyncFlag_, [this]() {
+            if (!uiDisplaySyncManager_) {
+                uiDisplaySyncManager_ = MakeRefPtr<UIDisplaySyncManager>();
+            }
+        });
+        return uiDisplaySyncManager_;
     }
 
     Window* GetWindow()
@@ -1123,6 +1136,9 @@ protected:
     std::atomic<bool> onFocus_ = true;
     uint64_t lastTouchTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
+
+    std::once_flag displaySyncFlag_;
+    RefPtr<UIDisplaySyncManager> uiDisplaySyncManager_;
 
 private:
     void DumpFrontend() const;
