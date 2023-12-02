@@ -3147,9 +3147,10 @@ void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHa
             selectMenuInfo_.showCopyAll = true;
             selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
         }
-        selectOverlayProxy_ = nullptr;
-        ShowSelectOverlay(
-            textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll(), RichEditorResponseType::LONG_PRESS);
+        auto handleReverse = selectOverlayProxy_->IsHandleReverse();
+        selectOverlayProxy_.Reset();
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll(),
+            RichEditorResponseType::LONG_PRESS, handleReverse);
         return;
     }
     ShowSelectOverlay(
@@ -3378,15 +3379,16 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, R
     selectInfo.menuCallback.onDisappear = menuParams->onDisappear;
 }
 
-void RichEditorPattern::ShowSelectOverlay(
-    const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll, RichEditorResponseType responseType)
+void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll,
+    RichEditorResponseType responseType, bool handleReverse)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle, isCopyAll, responseType](
-                               bool hasData) mutable {
+    auto hasDataCallback = [weak = WeakClaim(this), handleReverse, pipeline, firstHandle, secondHandle, isCopyAll,
+                               responseType](bool hasData) mutable {
         auto pattern = weak.Upgrade();
         SelectOverlayInfo selectInfo;
+        selectInfo.handleReverse = handleReverse;
         bool usingMouse = pattern->IsUsingMouse();
         if (!pattern->IsUsingMouse() && responseType == RichEditorResponseType::LONG_PRESS) {
             selectInfo.firstHandle.paintRect = firstHandle;

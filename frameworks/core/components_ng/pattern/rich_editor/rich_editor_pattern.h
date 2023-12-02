@@ -197,7 +197,7 @@ public:
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false,
-        RichEditorResponseType responseType = RichEditorResponseType::LONG_PRESS);
+        RichEditorResponseType responseType = RichEditorResponseType::LONG_PRESS, bool handlReverse = false);
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
