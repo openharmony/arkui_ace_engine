@@ -5,7 +5,7 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
         return this;
     }
     disappearTextStyle(value: PickerTextStyle): DatePickerAttribute {
-        let pickerText: ArkPickerTextStyle = new ArkPickerTextStyle();
+        let pickerText: ArkDatePickerTextStyle = new ArkDatePickerTextStyle();
         pickerText.color = value.color;
         pickerText.font = value.font;
 
@@ -14,7 +14,7 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
         return this;
     }
     textStyle(value: PickerTextStyle): DatePickerAttribute {
-        let pickerText: ArkPickerTextStyle = new ArkPickerTextStyle();
+        let pickerText: ArkDatePickerTextStyle = new ArkDatePickerTextStyle();
         pickerText.color = value.color;
         pickerText.font = value.font;
 
@@ -23,7 +23,7 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
         return this;
     }
     selectedTextStyle(value: PickerTextStyle): DatePickerAttribute {
-        let pickerText: ArkPickerTextStyle = new ArkPickerTextStyle();
+        let pickerText: ArkDatePickerTextStyle = new ArkDatePickerTextStyle();
         pickerText.color = value.color;
         pickerText.font = value.font;
 
@@ -51,7 +51,7 @@ class DatePickerLunarModifier extends Modifier<boolean> {
     }
 }
 
-class DatePickerTextStyleModifier extends Modifier<ArkPickerTextStyle> {
+class DatePickerTextStyleModifier extends Modifier<ArkDatePickerTextStyle> {
     static identity: Symbol = Symbol("textStyle");
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {
@@ -68,7 +68,7 @@ class DatePickerTextStyleModifier extends Modifier<ArkPickerTextStyle> {
     }
 }
 
-class DatePickerSelectedTextStyleModifier extends Modifier<ArkPickerTextStyle> {
+class DatePickerSelectedTextStyleModifier extends Modifier<ArkDatePickerTextStyle> {
     static identity: Symbol = Symbol("selectedTextStyle");
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {
@@ -84,7 +84,7 @@ class DatePickerSelectedTextStyleModifier extends Modifier<ArkPickerTextStyle> {
     }
 }
 
-class DatePickerDisappearTextStyleModifier extends Modifier<ArkPickerTextStyle> {
+class DatePickerDisappearTextStyleModifier extends Modifier<ArkDatePickerTextStyle> {
     static identity: Symbol = Symbol("disappearTextStyle");
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {

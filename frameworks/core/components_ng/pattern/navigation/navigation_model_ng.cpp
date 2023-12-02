@@ -572,13 +572,13 @@ void NavigationModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     // navigation node
     int32_t nodeId = stack->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVIGATION_VIEW_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVIGATION_VIEW_ETS_TAG, nodeId);
     auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     // navBar node
     if (!navigationGroupNode->GetNavBarNode()) {
         int32_t navBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVBAR_ETS_TAG, navBarNodeId);
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVBAR_ETS_TAG, navBarNodeId);
         auto navBarNode = NavBarNode::GetOrCreateNavBarNode(
             V2::NAVBAR_ETS_TAG, navBarNodeId, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
         auto navBarRenderContext = navBarNode->GetRenderContext();
@@ -590,7 +590,7 @@ void NavigationModelNG::Create()
         // titleBar node
         if (!navBarNode->GetTitleBarNode()) {
             int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-            ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TITLE_BAR_ETS_TAG, titleBarNodeId);
+            ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TITLE_BAR_ETS_TAG, titleBarNodeId);
             auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
                 V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
             navBarNode->AddChild(titleBarNode);
@@ -600,7 +600,7 @@ void NavigationModelNG::Create()
         // navBar content node
         if (!navBarNode->GetNavBarContentNode()) {
             int32_t navBarContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-            ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId);
+            ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId);
             auto navBarContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId,
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
             auto navBarContentRenderContext = navBarContentNode->GetRenderContext();
@@ -613,7 +613,7 @@ void NavigationModelNG::Create()
         // toolBar node
         if (!navBarNode->GetToolBarNode()) {
             int32_t toolBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-            ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TOOL_BAR_ETS_TAG, toolBarNodeId);
+            ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TOOL_BAR_ETS_TAG, toolBarNodeId);
             auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(
                 V2::TOOL_BAR_ETS_TAG, toolBarNodeId, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
             navBarNode->AddChild(toolBarNode);
@@ -628,7 +628,7 @@ void NavigationModelNG::Create()
     // content node
     if (!navigationGroupNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId);
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId);
         auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId,
             []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
         contentNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
@@ -641,7 +641,7 @@ void NavigationModelNG::Create()
     // divider node
     if (!navigationGroupNode->GetDividerNode()) {
         int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::DIVIDER_ETS_TAG, dividerNodeId);
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::DIVIDER_ETS_TAG, dividerNodeId);
         auto dividerNode = FrameNode::GetOrCreateFrameNode(
             V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
         navigationGroupNode->AddChild(dividerNode);
@@ -685,6 +685,8 @@ void NavigationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
     do {
         if (!navBarNode->GetTitle()) {
             navBarNode->UpdateTitleNodeOperation(ChildNodeOperation::ADD);
@@ -700,8 +702,6 @@ void NavigationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
         // if no subtitle, title's maxLine = 2. if has subtitle, title's maxLine = 1.
         if (!hasSubTitle) {
             if (navBarNode->GetSubtitle()) {
-                auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
-                CHECK_NULL_VOID(titleBarNode);
                 titleBarNode->RemoveChild(navBarNode->GetSubtitle());
                 titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 titleBarNode->SetSubtitle(nullptr);
@@ -725,9 +725,11 @@ void NavigationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
         titleProperty->UpdateContent(title);
         titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         navBarNode->UpdateTitleNodeOperation(ChildNodeOperation::NONE);
+        titleBarNode->MarkIsInitialTitle(true);
         navBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     } while (false);
+    titleBarNode->MarkIsInitialTitle(true);
     int32_t titleNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto titleNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, titleNodeId, AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
@@ -1205,6 +1207,8 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
     // if previous menu is custom, just remove it and create new menu, otherwise update old menu
     if (navBarNode->GetPrevMenuIsCustom().value_or(false)) {
         navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
@@ -1215,7 +1219,7 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
             navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
         }
     }
-
+    titleBarNode->MarkIsInitialTitle(true);
     auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
     CHECK_NULL_VOID(navBarPattern);
     navBarPattern->SetTitleBarMenuItems(menuItems);
@@ -1233,6 +1237,8 @@ void NavigationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
     // if previous menu exists, remove it if their ids are not the same
     // if previous node is not custom, their ids must not be the same
     if (navBarNode->GetMenu()) {
@@ -1242,9 +1248,11 @@ void NavigationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
         }
         navBarNode->SetMenu(customMenu);
         navBarNode->UpdatePrevMenuIsCustom(true);
+        titleBarNode->MarkIsInitialTitle(true);
         navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
         return;
     }
+    titleBarNode->MarkIsInitialTitle(true);
     navBarNode->SetMenu(customMenu);
     navBarNode->UpdatePrevMenuIsCustom(true);
     navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);

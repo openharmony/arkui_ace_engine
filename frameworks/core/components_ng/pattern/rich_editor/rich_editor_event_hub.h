@@ -225,7 +225,7 @@ public:
     }
 
 private:
-    long long timestamp_;
+    long long timestamp_ = 0;
     std::function<void(NG::TextCommonEvent&)> onPaste_;
     std::function<void()> onReady_;
     std::function<void(const BaseEventInfo*)> onSelect_;

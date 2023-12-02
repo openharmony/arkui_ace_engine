@@ -170,7 +170,15 @@ void MenuPattern::OnAttachToFrameNode()
                                               const OffsetF& /* origin */) {
         auto menuNode = menuNodeWk.Upgrade();
         CHECK_NULL_VOID(menuNode);
-        menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        auto menuWarpper = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWarpper);
+        auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(warpperPattern);
+        if (!warpperPattern->IsHided()) {
+            menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
     };
     targetNode->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
 }
@@ -462,6 +470,10 @@ uint32_t MenuPattern::GetInnerMenuCount() const
     uint32_t depth = 0;
     while (child && depth < MAX_SEARCH_DEPTH) {
         // found component <Menu>
+        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            child = child->GetFrameChildByIndex(0, false);
+            continue;
+        }
         if (child->GetTag() == V2::MENU_ETS_TAG) {
             auto parent = child->GetParent();
             CHECK_NULL_RETURN(parent, 0);
@@ -485,6 +497,10 @@ RefPtr<FrameNode> MenuPattern::GetFirstInnerMenu() const
     auto child = host->GetChildAtIndex(0);
     while (child && depth < MAX_SEARCH_DEPTH) {
         // found component <Menu>
+        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            child = child->GetFrameChildByIndex(0, false);
+            continue;
+        }
         if (child->GetTag() == V2::MENU_ETS_TAG) {
             return AceType::DynamicCast<FrameNode>(child);
         }

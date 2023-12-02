@@ -44,6 +44,15 @@ public:
         return fingers_;
     }
 
+    void ForceCleanRecognizer() override
+    {
+        touchPoints_.clear();
+        fingerList_.clear();
+        activeFingers_.clear();
+        currentFingers_ = 0;
+        refereeState_ = RefereeState::READY;
+        disposal_ = GestureDisposal::NONE;
+    }
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override
     {

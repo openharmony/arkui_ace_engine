@@ -36,6 +36,10 @@ public:
 
     virtual size_t GetSize() const = 0;
     virtual const void* GetData() const = 0;
+    virtual std::string ToString() const
+    {
+        return "";
+    }
 
     ACE_DISALLOW_COPY_AND_MOVE(ImageData);
 };
@@ -53,6 +57,8 @@ public:
     {
         return pixmap_;
     }
+
+    std::string ToString() const override;
 
 private:
     const RefPtr<PixelMap> pixmap_;

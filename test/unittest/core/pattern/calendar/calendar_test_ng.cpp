@@ -46,7 +46,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #undef private
 #undef protected
@@ -107,12 +107,12 @@ protected:
 
 void CalendarTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void CalendarTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 RefPtr<FrameNode> CalendarTestNg::CreateCalendarNode(TestProperty& testProperty)
@@ -623,7 +623,7 @@ HWTEST_F(CalendarTestNg, CalendarTest007, TestSize.Level1)
      * @tc.expected: step1. Create Calendar successfully.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     // Today style.
@@ -741,7 +741,7 @@ HWTEST_F(CalendarTestNg, CalendarTest008, TestSize.Level1)
      * @tc.expected: step1. Create Calendar successfully.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     // Today style.
@@ -1439,10 +1439,10 @@ HWTEST_F(CalendarTestNg, CalendarPaintMethodTest005, TestSize.Level1)
      * @tc.expected: step1. Create Calendar successfully.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
-    RefPtr<CalendarTheme> theme = MockPipelineBase::GetCurrent()->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
     theme->GetCalendarTheme().workDayMarkColor = Color::RED;
     theme->GetCalendarTheme().offDayMarkColor = Color::BLUE;
 

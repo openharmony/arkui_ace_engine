@@ -90,7 +90,7 @@ RefPtr<PluginSubContainer> PluginManager::MatchPluginSubContainerWithPluginId(
     std::lock_guard<std::mutex> lock(nonmatchedContainerMutex_);
     auto iter = nonmatchedContainerMap_.find(pluginKey);
     if (iter == nonmatchedContainerMap_.end()) {
-        TAG_LOGI(AceLogTag::ACE_PLUGINCOMPONENT, "no subcontainer of key: %{private}s", pluginKey.c_str());
+        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "no subcontainer of key: %{private}s", pluginKey.c_str());
         return nullptr;
     }
     auto pluginSubContainer = iter->second;
@@ -134,7 +134,7 @@ int32_t PluginManager::GetPluginParentContainerId(int64_t pluginId)
     if (result != parentContainerMap_.end()) {
         return result->second;
     } else {
-        TAG_LOGD(AceLogTag::ACE_PLUGINCOMPONENT, "Parent Container Id is empty.");
+        TAG_LOGD(AceLogTag::ACE_PLUGIN_COMPONENT, "Parent Container Id is empty.");
         return 0;
     }
 }

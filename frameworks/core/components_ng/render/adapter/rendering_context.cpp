@@ -124,7 +124,7 @@ void PixelMapImage::DrawToRSCanvas(
         static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
         1.0, 0, 0, 0 };
     recordingCanvas.AttachBrush(brush);
-    recordingCanvas.DrawExtendPixelMap(pixelMap->GetPixelMapSharedPtr(), rsImageInfo, options);
+    recordingCanvas.DrawPixelMapWithParm(pixelMap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();
 }
 #endif

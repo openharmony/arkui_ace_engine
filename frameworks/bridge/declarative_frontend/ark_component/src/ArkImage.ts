@@ -203,7 +203,7 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
     return this;
   }
   objectFit(value: ImageFit): this {
-    if (value) {
+    if (value in ImageFit) {
       modifier(this._modifiers, ImageObjectFitModifier, value);
     } else {
       modifier(this._modifiers, ImageObjectFitModifier, undefined);

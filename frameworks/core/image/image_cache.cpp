@@ -15,6 +15,9 @@
 
 #include "core/image/image_cache.h"
 
+#include <string>
+
+#include "base/log/dump_log.h"
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/image/image_object.h"
 
@@ -189,5 +192,22 @@ void ImageCache::Clear()
         cacheImgObjList_.clear();
         imgObjCache_.clear();
     }
+}
+
+void ImageCache::DumpCacheInfo()
+{
+    auto cacheSize = dataCacheList_.size();
+    DumpLog::GetInstance().Print("------------ImageCacheInfo------------");
+    DumpLog::GetInstance().Print("Cache count: " + std::to_string(cacheSize));
+    if (cacheSize == 0) {
+        return;
+    }
+    auto totalCount = 0;
+    for (const auto& item : dataCacheList_) {
+        auto imageObj = item.cacheObj;
+        totalCount += imageObj->GetSize();
+        DumpLog::GetInstance().Print("Cache Obj: " + imageObj->ToString());
+    }
+    DumpLog::GetInstance().Print("Cache total size: " + std::to_string(totalCount));
 }
 } // namespace OHOS::Ace

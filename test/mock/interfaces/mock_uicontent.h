@@ -22,6 +22,7 @@
 #include "ui_content.h"
 #include "iremote_object.h"
 #include "accessibility_element_info.h"
+
 namespace OHOS {
 namespace Ace {
 class MockUIContent : public UIContent {
@@ -98,6 +99,7 @@ public:
         FocusMoveSearch, void(int32_t elementId, int32_t direction,
         int32_t baseParent, Accessibility::AccessibilityElementInfo& output));
 #endif
+    MOCK_METHOD1(GetAppPaintSize, void(OHOS::Rosen::Rect&));
 };
 } // namespace Ace
 } // namespace OHOS

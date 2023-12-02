@@ -89,12 +89,12 @@ public:
         return controlButtonRadius_;
     }
 
-    uint32_t GetDividerShadowEnable() const
+    int32_t GetDividerShadowEnable() const
     {
         return dividerShadowEnable_;
     }
 
-    const uint32_t& GetSideBarUnfocusEffectEnable() const
+    const int32_t& GetSideBarUnfocusEffectEnable() const
     {
         return sideBarUnfocusEffectEnable_;
     }
@@ -111,8 +111,8 @@ private:
     Color controlImageColor_ = Color::BLACK;
     Color sideBarBackgroundColor_ = Color::WHITE;
     Dimension controlButtonRadius_;
-    uint32_t dividerShadowEnable_ = 0;
-    uint32_t sideBarUnfocusEffectEnable_ = 0;
+    int32_t dividerShadowEnable_ = 0;
+    int32_t sideBarUnfocusEffectEnable_ = 0;
     Color sideBarUnfocusColor_ = Color::TRANSPARENT;
 };
 } // namespace OHOS::Ace::NG

@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_divider_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_col_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_row_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_hyperlink_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_animator_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_span_modifier.h"
@@ -47,24 +48,26 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_row_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_row_split_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_search_modifier.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rich_editor_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_select_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_slider_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_span_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_stack_modifier.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_area_modifier.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_stepper_item_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_tabs_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_textpicker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_timepicker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_video_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_side_bar_container_modifier.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_toggle_modifier.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/pipeline/base/element_register.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_calendar_picker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_alphabet_indexer_modifier.h"
+
+#ifdef FORM_SUPPORTED
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_form_component_modifier.h"
+#endif
 
 using namespace OHOS::Ace::NG;
 
@@ -115,10 +118,17 @@ static struct ArkUINodeAPI impl = {
     GetSideBarContainerModifier,
     GetCalendarPickerModifier,
     GetTextInputModifier,
+    GetTabsModifier,
+    GetStepperItemModifier,
+    GetHyperlinkModifier,
     GetMenuItemModifier,
     GetMenuModifier,
     GetDatePickerModifier,
     GetAlphabetIndexerModifier,
+
+#ifdef FORM_SUPPORTED
+    GetFormComponentModifier,
+#endif
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI()

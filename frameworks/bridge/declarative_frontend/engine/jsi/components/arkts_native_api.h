@@ -44,22 +44,30 @@ struct IconsStruct {
 };
 
 struct FontStruct {
-    const struct StringAndDouble* size;
+    double value;
+    int8_t unit;
     const struct StringAndInt32* weight;
     const char* family;
     int32_t style;
 };
 
 struct IconOptionsStruct {
-    const struct StringAndDouble* size;
+    double value;
+    int8_t unit;
     int32_t color;
     const char* src;
 };
 
 struct SearchButtonOptionsStruct {
     const char* value;
-    const struct StringAndDouble* fontSize;
+    double sizeValue;
+    int8_t sizeUnit;
     int32_t fontColor;
+};
+
+struct ArkUISizeType {
+    double value;
+    int8_t unit;
 };
 
 struct StringAndInt32 {
@@ -418,7 +426,7 @@ struct ArkUISearchModifierAPI {
     void (*SetSearchTextAlign)(NodeHandle node, int32_t value);
     void (*ResetSearchTextAlign)(NodeHandle node);
     void (*SetSearchCancelButton)(NodeHandle node,
-        int32_t style, const struct StringAndDouble* size, uint32_t color, const char* src);
+        int32_t style, const struct ArkUISizeType* size, uint32_t color, const char* src);
     void (*ResetSearchCancelButton)(NodeHandle node);
     void (*SetSearchEnableKeyboardOnFocus)(NodeHandle node, uint32_t value);
     void (*ResetSearchEnableKeyboardOnFocus)(NodeHandle node);
@@ -914,6 +922,48 @@ struct ArkUITextInputModifierAPI {
     void (*ResetTextInputFontFamily)(NodeHandle node);
 };
 
+struct ArkUITabsModifierAPI {
+    void (*SetTabBarMode)(NodeHandle node, int32_t tabsBarMode);
+    void (*SetScrollableBarModeOptions)(NodeHandle node, const double value, const int unit, const int layoutStyle);
+    void (*SetBarGridAlign)(
+        NodeHandle node, const double* values, int32_t valuesLength, const int* units, int32_t unitsLength);
+    void (*SetDivider)(NodeHandle node, uint32_t color, const double* values, const int* units, int32_t length);
+    void (*SetFadingEdge)(NodeHandle node, bool fadingEdge);
+    void (*SetBarBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*SetBarOverlap)(NodeHandle node, bool overlap);
+    void (*SetIsVertical)(NodeHandle node, bool isVertical);
+    void (*SetTabBarPosition)(NodeHandle node, int32_t barVal);
+    void (*SetScrollable)(NodeHandle node, bool scrollable);
+    void (*SetTabBarWidth)(NodeHandle node, double value, int unit);
+    void (*SetTabBarHeight)(NodeHandle node, double value, int unit);
+    void (*SetBarAdaptiveHeight)(NodeHandle node, bool value);
+    void (*SetAnimationDuration)(NodeHandle node, float duration);
+    void (*ResetTabBarMode)(NodeHandle node);
+    void (*ResetScrollableBarModeOptions)(NodeHandle node);
+    void (*ResetBarGridAlign)(NodeHandle node);
+    void (*ResetDivider)(NodeHandle node);
+    void (*ResetFadingEdge)(NodeHandle node);
+    void (*ResetBarBackgroundColor)(NodeHandle node);
+    void (*ResetBarOverlap)(NodeHandle node);
+    void (*ResetIsVertical)(NodeHandle node);
+    void (*ResetTabBarPosition)(NodeHandle node);
+    void (*ResetScrollable)(NodeHandle node);
+    void (*ResetTabBarWidth)(NodeHandle node);
+    void (*ResetTabBarHeight)(NodeHandle node);
+    void (*ResetBarAdaptiveHeight)(NodeHandle node);
+    void (*ResetAnimationDuration)(NodeHandle node);
+};
+
+struct ArkUIStepperItemModifierAPI {
+    void (*SetNextLabel)(NodeHandle node, const char* rightLabel);
+    void (*ResetNextLabel)(NodeHandle node);
+};
+
+struct ArkUIHyperlinkModifierAPI {
+    void (*SetHyperlinkColor)(NodeHandle node, uint32_t color);
+    void (*ResetHyperlinkColor)(NodeHandle node);
+};
+
 struct ArkUIMenuItemModifierAPI {
     void (*SetMenuItemSelected)(NodeHandle node, bool value);
     void (*ResetMenuItemSelected)(NodeHandle node);
@@ -989,6 +1039,21 @@ struct ArkUIAlphabetIndexerModifierAPI {
     void (*ResetPopupPosition)(NodeHandle node);
 };
 
+#ifdef FORM_SUPPORTED
+struct ArkUIFormComponentModifierAPI {
+    void (*SetFormVisibility)(NodeHandle node, int32_t visible);
+    void (*AllowUpdate)(NodeHandle node, bool value);
+    void (*SetDimension)(NodeHandle node, int32_t dimension);
+    void (*SetModuleName)(NodeHandle node, const char* value);
+    void (*SetFormSize)(NodeHandle node, double widthValue, int widthUnit, double heightValue, int heightUnit);
+    void (*ResetFormVisibility)(NodeHandle node);
+    void (*DisallowUpdate)(NodeHandle node);
+    void (*ResetDimension)(NodeHandle node);
+    void (*ResetModuleName)(NodeHandle node);
+    void (*ResetFormSize)(NodeHandle node);
+};
+#endif
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -1030,10 +1095,17 @@ struct ArkUINodeAPI {
     ArkUISideBarContainerModifierAPI (*GetSideBarContainerModifier)();
     ArkUICalendarPickerModifierAPI (*GetCalendarPickerModifier)();
     ArkUITextInputModifierAPI (*GetTextInputModifier)();
+    ArkUITabsModifierAPI (*GetTabsModifier)();
+    ArkUIStepperItemModifierAPI (*GetStepperItemModifier)();
+    ArkUIHyperlinkModifierAPI (*GetHyperlinkModifier)();
     ArkUIMenuItemModifierAPI (*GetMenuItemModifier)();
     ArkUIMenuModifierAPI (*GetMenuModifier)();
     ArkUIDatePickerModifierAPI (*GetDatePickerModifier)();
     ArkUIAlphabetIndexerModifierAPI (*GetAlphabetIndexerModifier)();
+
+#ifdef FORM_SUPPORTED
+    ArkUIFormComponentModifierAPI (*GetFormComponentModifier)();
+#endif
 };
 
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);

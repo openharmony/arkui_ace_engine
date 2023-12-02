@@ -660,7 +660,7 @@ public:
                 LOGW("Count of items MUST be the same while updating");
                 count_ = lazyForEachComponent->TotalCount();
             }
-            lazyForEachComponent_->UnregisterDataChangeListener(AceType::Claim(this));
+            lazyForEachComponent_->UnregisterDataChangeListener(this);
         } else {
             count_ = lazyForEachComponent->TotalCount();
         }

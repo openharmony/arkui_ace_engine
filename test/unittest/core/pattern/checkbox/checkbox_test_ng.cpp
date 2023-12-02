@@ -31,7 +31,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -70,19 +70,19 @@ public:
 
 void CheckBoxTestNG::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
 
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
-    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+    MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
 }
 
 void CheckBoxTestNG::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -572,7 +572,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest014, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
     CheckBoxModelNG checkBoxModelNG;
@@ -861,7 +861,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest025, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty();
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
 
@@ -1380,7 +1380,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest032, TestSize.Level1)
     /**
      * @tc.steps: step2. use method FlushBuildFinishCallbacks to callback.
      */
-    MockPipelineBase::GetCurrent()->FlushBuildFinishCallbacks();
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
 }
 
 /**

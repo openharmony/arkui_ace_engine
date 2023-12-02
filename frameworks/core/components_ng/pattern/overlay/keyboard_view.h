@@ -37,7 +37,7 @@ public:
         CHECK_NULL_RETURN(builder, nullptr);
 
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::KEYBOARD_ETS_TAG, targetId);
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::KEYBOARD_ETS_TAG, targetId);
         // create wrapper node
         auto wrapperNode = FrameNode::CreateFrameNode(V2::KEYBOARD_ETS_TAG,
             nodeId, AceType::MakeRefPtr<KeyboardPattern>(targetId));

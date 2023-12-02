@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
 
@@ -64,27 +65,28 @@ void VideoFullScreenPattern::RequestFullScreen(const RefPtr<VideoNode>& videoNod
     OnFullScreenChange(true);
 }
 
-void VideoFullScreenPattern::ExitFullScreen()
+bool VideoFullScreenPattern::ExitFullScreen()
 {
     auto videoPattern = videoPattern_.Upgrade();
-    CHECK_NULL_VOID(videoPattern);
+    CHECK_NULL_RETURN(videoPattern, false);
     videoPattern->UpdateMediaParam(mediaPlayer_, renderSurface_, renderContextForMediaPlayer_);
     ResetMediaParam();
     // remove full screen node
     auto fullScreenNode = GetHost();
-    CHECK_NULL_VOID(fullScreenNode);
+    CHECK_NULL_RETURN(fullScreenNode, false);
     auto rootNode = fullScreenNode->GetParent();
-    CHECK_NULL_VOID(rootNode);
+    CHECK_NULL_RETURN(rootNode, false);
     rootNode->RemoveChild(fullScreenNode);
     rootNode->RebuildRenderContextTree();
 
     auto videoNode = AceType::DynamicCast<VideoNode>(videoPattern->GetHost());
-    CHECK_NULL_VOID(videoNode);
+    CHECK_NULL_RETURN(videoNode, false);
     // change value about time and playing status
     videoPattern->RecoverState(AceType::Claim(this));
     // change full screen button
     videoPattern->OnFullScreenChange(false);
     videoNode->MarkModifyDone();
+    return true;
 }
 
 void VideoFullScreenPattern::UpdateState()

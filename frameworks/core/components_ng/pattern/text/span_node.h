@@ -172,6 +172,7 @@ public:
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
     virtual void UpdateTextStyle(
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
+    virtual void SetAiSpanTextStyle(std::optional<TextStyle>& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
@@ -201,7 +202,7 @@ public:
     {
         onLongPress = std::move(onLongPress_);
     }
-    std::string GetSpanContent();
+    std::string GetSpanContent(const std::string& rawContent);
 
 private:
     std::optional<TextStyle> textStyle_;

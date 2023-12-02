@@ -167,6 +167,8 @@ public:
 
     void UpdateCleanNode(bool isShow);
 
+    void Refresh() override;
+
     bool IsShow() const
     {
         return isShow_;

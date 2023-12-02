@@ -332,6 +332,7 @@ enum class SrcType {
     DATA_ABILITY_DECODED,
     RESOURCE_ID, // default resource which src is internal resource id
     PIXMAP,
+    ASTC,
 };
 
 enum class WrapAlignment {
@@ -551,7 +552,7 @@ enum class CopyOptions {
 };
 
 enum class VisibleType {
-    VISIBLE,
+    VISIBLE = 0,
     INVISIBLE,
     GONE,
 };

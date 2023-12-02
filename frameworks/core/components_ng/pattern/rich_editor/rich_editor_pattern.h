@@ -153,6 +153,8 @@ public:
     void DeleteBackward(int32_t length = 0) override;
     void DeleteForward(int32_t length) override;
     void SetInputMethodStatus(bool keyboardShown) override;
+    bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
+    void HandleClickAISpanEvent(GestureEvent& info);
     void NotifyKeyboardClosedByUser() override
     {
         FocusHub::LostFocusToViewRoot();
@@ -322,6 +324,8 @@ public:
 
     void CheckHandles(SelectHandleInfo& handleInfo) override;
 
+    bool IsShowSelectMenuUsingMouse();
+
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
     {
@@ -473,7 +477,6 @@ private:
     bool imeAttached_ = false;
     bool imeShown_ = false;
 #endif
-
     bool isTextChange_ = false;
     bool caretVisible_ = false;
     bool isRichEditorInit_ = false;

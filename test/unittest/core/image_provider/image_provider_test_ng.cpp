@@ -39,7 +39,7 @@
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "test/mock/core/image_provider/mock_image_loader.h"
 #include "core/image/image_source_info.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -67,7 +67,7 @@ public:
 
 void ImageProviderTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     g_threads = std::vector<std::thread>();
 }
 
@@ -83,7 +83,7 @@ void ImageProviderTestNg::TearDown()
 
 void ImageProviderTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
     g_loader = nullptr;
 }
 
@@ -492,11 +492,19 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg006, TestSize.Level1)
     auto src = ImageSourceInfo(SRC_JPG);
     EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
 
+#ifndef USE_ROSEN_DRAWING
     auto data = AceType::MakeRefPtr<SkiaImageData>(nullptr, 0);
+#else
+    auto data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 0);
+#endif
     auto imageObject = ImageProvider::BuildImageObject(src, data);
     EXPECT_TRUE(AceType::DynamicCast<StaticImageObject>(imageObject));
 
+#ifndef USE_ROSEN_DRAWING
     data = AceType::MakeRefPtr<SkiaImageData>(nullptr, 2);
+#else
+    data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 2);
+#endif
     imageObject = ImageProvider::BuildImageObject(src, data);
     EXPECT_TRUE(AceType::DynamicCast<AnimatedImageObject>(imageObject));
 

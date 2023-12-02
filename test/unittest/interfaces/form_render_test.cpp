@@ -23,7 +23,7 @@
 #include "interfaces/inner_api/form_render/include/form_renderer.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_group.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -49,12 +49,12 @@ class FormRenderTest : public testing::Test {
 public:
     static void SetUpTestCase()
     {
-        NG::MockPipelineBase::SetUp();
+        NG::MockPipelineContext::SetUp();
     }
 
     static void TearDownTestCase()
     {
-        NG::MockPipelineBase::TearDown();
+        NG::MockPipelineContext::TearDown();
     }
 };
 

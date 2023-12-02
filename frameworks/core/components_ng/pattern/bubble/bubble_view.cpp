@@ -113,7 +113,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     const std::string& targetTag, int32_t targetId, const RefPtr<PopupParam>& param)
 {
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::POPUP_ETS_TAG, popupId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::POPUP_ETS_TAG, popupId);
     auto popupNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
     auto popupProp = AceType::DynamicCast<BubbleLayoutProperty>(popupNode->GetLayoutProperty());

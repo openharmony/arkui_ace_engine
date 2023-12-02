@@ -45,7 +45,7 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     RefPtr<FrameNode> titleBuilder, std::function<void(const std::string&)>&& callback, NG::SheetStyle& sheetStyle)
 {
     // create sheet node
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::SHEET_PAGE_TAG, targetId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SHEET_PAGE_TAG, targetId);
     auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<SheetPresentationPattern>(targetId, targetTag, std::move(callback)));
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
@@ -119,8 +119,10 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
     buttonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     auto eventConfirmHub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(eventConfirmHub);
-    auto clickCallback = [sheetNode](const GestureEvent& /* info */) {
-        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto clickCallback = [weak = AceType::WeakClaim(AceType::RawPtr(sheetNode))](const GestureEvent& /* info */) {
+        auto sheet = weak.Upgrade();
+        CHECK_NULL_VOID(sheet);
+        auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(sheetPattern);
         sheetPattern->SheetInteractiveDismiss(false);
     };

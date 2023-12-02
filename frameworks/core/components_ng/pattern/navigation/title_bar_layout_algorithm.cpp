@@ -123,37 +123,60 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
         }
         // right padding
         occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
-        return titleBarSize.Width() < occupiedWidth ? 0 : titleBarSize.Width() - occupiedWidth;
+        return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
     }
+    // navBar title bar
     auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
     CHECK_NULL_RETURN(navBarNode, 0.0f);
     float occupiedWidth = 0.0f;
     auto isCustom = navBarNode->GetPrevTitleIsCustomValue(false);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI) {
-        occupiedWidth = isCustom ? 0.0f : (maxPaddingStart_ + maxPaddingEnd_).ConvertToPx();
-        return titleBarSize.Width() < occupiedWidth ? 0 : titleBarSize.Width() - occupiedWidth;
-    }
-    // mini mode
-    if (titleBarLayoutProperty->GetHideBackButtonValue(false)) {
-        occupiedWidth += isCustom ? 0 : maxPaddingStart_.ConvertToPx();
-    } else {
-        occupiedWidth += (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE).ConvertToPx();
-        // custom right padding is the back button hot zone
-        occupiedWidth += isCustom ? BUTTON_PADDING.ConvertToPx() : (NAV_HORIZONTAL_MARGIN_L).ConvertToPx();
-    }
-    // compute right padding
-    if (NearZero(menuWidth_)) {
-        occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
-    } else {
-        occupiedWidth += menuWidth_;
-        auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
-        occupiedWidth += isCustomMenu ? 0.0f : (defaultPaddingStart_).ConvertToPx();
-        // title is custom or menu is custom, the title right margin is not needed
-        if (!isCustomMenu) {
-            occupiedWidth += isCustom ? 0.0f : (NAV_HORIZONTAL_MARGIN_L).ConvertToPx();
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+        if (titleBarLayoutProperty->GetHideBackButtonValue(false)) {
+            occupiedWidth += isCustom ? 0.0f : maxPaddingStart_.ConvertToPx();
+        } else {
+            occupiedWidth += (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE).ConvertToPx();
+            // custom right padding is the back button hot zone
+            occupiedWidth += isCustom ? BUTTON_PADDING.ConvertToPx() : NAV_HORIZONTAL_MARGIN_L.ConvertToPx();
         }
+        // compute right padding
+        if (NearZero(menuWidth_)) {
+            occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
+        } else {
+            occupiedWidth += menuWidth_;
+            auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
+            occupiedWidth += isCustomMenu ? 0.0f : defaultPaddingStart_.ConvertToPx();
+            // title is custom or menu is custom, the title right margin is not needed
+            if (!isCustomMenu) {
+                occupiedWidth += isCustom ? 0.0f : NAV_HORIZONTAL_MARGIN_L.ConvertToPx();
+            }
+        }
+        return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
     }
-    return titleBarSize.Width() < occupiedWidth ? 0 : titleBarSize.Width() - occupiedWidth;
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FULL) {
+        occupiedWidth = isCustom ? 0.0f : (maxPaddingStart_ + maxPaddingEnd_).ConvertToPx();
+        return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
+    }
+    // free mode
+    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, 0.0f);
+    auto tempTitleOffsetY = titlePattern->GetTempTitleOffsetY();
+    if (tempTitleOffsetY <= menuHeight_ && !NearZero(tempTitleOffsetY)) { // Upslides may coincide
+        occupiedWidth += isCustom ? 0.0f : maxPaddingStart_.ConvertToPx();
+        if (NearZero(menuWidth_)) {
+            occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
+        } else {
+            occupiedWidth += menuWidth_;
+            auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
+            occupiedWidth += isCustomMenu ? 0.0f : defaultPaddingStart_.ConvertToPx();
+            // title is custom or menu is custom, the title right margin is not needed
+            if (!isCustomMenu) {
+                occupiedWidth += isCustom ? 0.0f : NAV_HORIZONTAL_MARGIN_L.ConvertToPx();
+            }
+        }
+    } else {
+        occupiedWidth = isCustom ? 0.0f : (maxPaddingStart_ + maxPaddingEnd_).ConvertToPx();
+    }
+    return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
 }
 
 void TitleBarLayoutAlgorithm::MeasureSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
@@ -209,14 +232,7 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
         titleWrapper->Measure(constraint);
         return;
     }
-    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    auto tempTitleOffsetY = titlePattern->GetTempTitleOffsetY();
-    if (tempTitleOffsetY > menuHeight_ || isInitialTitle_) {
-        constraint.maxSize.SetWidth(maxWidth);
-    } else {
-        constraint.maxSize.SetWidth(maxWidth - menuWidth_);
-    }
+    constraint.maxSize.SetWidth(maxWidth);
     // NavigationCustomTitle: Custom title + height
     if (titleBarLayoutProperty->HasTitleHeight()) {
         constraint.parentIdealSize.SetWidth(maxWidth);
@@ -535,7 +551,6 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         titleWrapper->Layout();
         return;
     }
-    initialTitleOffsetY_ = menuHeight_ + offsetY;
     auto overDragOffset = titlePattern->GetOverDragOffset();
     auto titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
         titlePattern->GetTempTitleOffsetY() + overDragOffset / 6.0f);

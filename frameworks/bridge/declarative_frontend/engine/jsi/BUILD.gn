@@ -159,6 +159,7 @@ template("declarative_js_engine_ark") {
       "components/arkts_native_divider_modifier.cpp",
       "components/arkts_native_grid_col_modifier.cpp",
       "components/arkts_native_grid_row_modifier.cpp",
+      "components/arkts_native_hyperlink_modifier.cpp",
       "components/arkts_native_image_animator_modifier.cpp",
       "components/arkts_native_image_modifier.cpp",
       "components/arkts_native_image_span_modifier.cpp",
@@ -181,6 +182,8 @@ template("declarative_js_engine_ark") {
       "components/arkts_native_slider_modifier.cpp",
       "components/arkts_native_span_modifier.cpp",
       "components/arkts_native_stack_modifier.cpp",
+      "components/arkts_native_stepper_item_modifier.cpp",
+      "components/arkts_native_tabs_modifier.cpp",
       "components/arkts_native_text_area_modifier.cpp",
       "components/arkts_native_text_input_modifier.cpp",
       "components/arkts_native_text_modifier.cpp",
@@ -217,6 +220,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_divider_bridge.cpp",
       "nativeModule/arkts_native_grid_col_bridge.cpp",
       "nativeModule/arkts_native_grid_row_bridge.cpp",
+      "nativeModule/arkts_native_hyperlink_bridge.cpp",
       "nativeModule/arkts_native_image_animator_bridge.cpp",
       "nativeModule/arkts_native_image_bridge.cpp",
       "nativeModule/arkts_native_image_span_bridge.cpp",
@@ -239,6 +243,8 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_slider_bridge.cpp",
       "nativeModule/arkts_native_span_bridge.cpp",
       "nativeModule/arkts_native_stack_bridge.cpp",
+      "nativeModule/arkts_native_stepper_item_bridge.cpp",
+      "nativeModule/arkts_native_tabs_bridge.cpp",
       "nativeModule/arkts_native_text_area_bridge.cpp",
       "nativeModule/arkts_native_text_bridge.cpp",
       "nativeModule/arkts_native_text_input_bridge.cpp",
@@ -248,6 +254,17 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_video_bridge.cpp",
       "nativeModule/arkts_utils.cpp",
     ]
+
+    deps = []
+
+    if (defined(config.form_components_support) &&
+        config.form_components_support) {
+      sources += [
+        "components/arkts_native_form_component_modifier.cpp",
+        "nativeModule/arkts_native_form_component_bridge.cpp",
+      ]
+      deps += [ "${ace_root}/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform" ]
+    }
 
     include_dirs = []
     if (defined(vendor_configs.extra_view_register_sources)) {
@@ -259,7 +276,6 @@ template("declarative_js_engine_ark") {
 
     include_dirs += [ "${ace_root}/interfaces/inner_api/ace" ]
 
-    deps = []
     if (!is_arkui_x) {
       deps +=
           [ "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility" ]

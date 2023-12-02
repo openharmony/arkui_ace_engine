@@ -412,8 +412,7 @@ void TextFieldOverlayModifier::PaintShadow(const RSPath& path, const Shadow& sha
     RSPoint3 lightPos = { rsPath.GetBounds().GetLeft() / 2 + rsPath.GetBounds().GetRight(),
         rsPath.GetBounds().GetTop() / 2.0 + rsPath.GetBounds().GetBottom() / 2.0, shadow.GetLightHeight() };
 #else
-    auto tmpPath = rsPath.GetCmdList()->Playback();
-    auto bounds = tmpPath->GetBounds();
+    auto bounds = rsPath.GetBounds();
     RSPoint3 lightPos = { bounds.GetLeft() / 2.0 + bounds.GetRight() / 2.0,
         bounds.GetTop() / 2.0 + bounds.GetBottom() / 2.0, shadow.GetLightHeight() };
 #endif

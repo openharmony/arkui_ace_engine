@@ -23,9 +23,13 @@
 #include "test/mock/core/rosen/testing_color.h"
 #include "test/mock/core/rosen/testing_color_filter.h"
 #include "test/mock/core/rosen/testing_color_matrix.h"
+#include "test/mock/core/rosen/testing_color_space.h"
+#include "test/mock/core/rosen/testing_data.h"
+#include "test/mock/core/rosen/testing_draw_cmd_list.h"
 #include "test/mock/core/rosen/testing_filter.h"
 #include "test/mock/core/rosen/testing_font_collection.h"
 #include "test/mock/core/rosen/testing_image.h"
+#include "test/mock/core/rosen/testing_image_info.h"
 #include "test/mock/core/rosen/testing_image_filter.h"
 #include "test/mock/core/rosen/testing_mask_filter.h"
 #include "test/mock/core/rosen/testing_path.h"
@@ -33,6 +37,8 @@
 #include "test/mock/core/rosen/testing_pen.h"
 #include "test/mock/core/rosen/testing_point.h"
 #include "test/mock/core/rosen/testing_point3.h"
+#include "test/mock/core/rosen/testing_recording_canvas.h"
+#include "test/mock/core/rosen/testing_recording_path_effect.h"
 #include "test/mock/core/rosen/testing_sampling_options.h"
 #include "test/mock/core/rosen/testing_scalar.h"
 #include "test/mock/core/rosen/testing_shader_effect.h"
@@ -94,6 +100,13 @@ using RSFontStyle = Testing::TestingFontStyle;
 using RSTextBaseline = Testing::TestingTextBaseline;
 using RSColorFilter = Testing::TestingColorFilter;
 using RSColorMatrix = Testing::TestingColorMatrix;
+using RSColorSpace = Testing::TestingColorSpace;
+using RSData = Testing::TestingData;
+using RSRecordingCanvas = Testing::TestingRecordingCanvas;
+using RSDrawCmdList = Testing::TestingDrawCmdList;
+using RSRecordingPath = Testing::TestingPath;
+using RSImageInfo = Testing::TestingImageInfo;
+using RSRecordingPathEffect = Testing::TestingRecordingPathEffect;
 #ifdef USE_GRAPHIC_TEXT_GINE
 using RSTextRectHeightStyle = Testing::TestingTypographyProperties::TextRectHeightStyle;
 using RSTextRectWidthStyle = Testing::TestingTypographyProperties::TextRectWidthStyle;

@@ -75,6 +75,7 @@ public:
     void ClearMenuNG(int32_t instanceId = -1, bool inWindow = true, bool showAnimation = false);
     void ClearPopupInSubwindow(int32_t instanceId = -1);
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
+    void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode);
     void HideSubWindowNG();
     void HideDialogSubWindow(int32_t instanceId);
     void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId);

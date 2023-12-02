@@ -494,6 +494,9 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
     }
     if (scrollPositionCallback_) {
         scrollPositionCallback_(0, SCROLL_FROM_START);
+        if (dragFRCSceneCallback_) {
+            dragFRCSceneCallback_(0, NG::SceneStatus::START);
+        }
     }
     isDriving_ = true;
 }
@@ -505,11 +508,19 @@ void ScrollBar::HandleDragUpdate(const GestureEvent& info)
         auto offset = info.GetInputEventType() == InputEventType::AXIS ?
                       info.GetMainDelta() : CalcPatternOffset(info.GetMainDelta());
         scrollPositionCallback_(offset, SCROLL_FROM_BAR);
+        if (dragFRCSceneCallback_) {
+            dragFRCSceneCallback_(NearZero(info.GetMainDelta()) ? info.GetMainVelocity()
+                                                                : info.GetMainVelocity() / info.GetMainDelta() * offset,
+                NG::SceneStatus::RUNNING);
+        }
     }
 }
 
 void ScrollBar::HandleDragEnd(const GestureEvent& info)
 {
+    if (dragFRCSceneCallback_) {
+        dragFRCSceneCallback_(0, NG::SceneStatus::END);
+    }
     auto velocity = info.GetMainVelocity();
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
         if (scrollEndCallback_) {

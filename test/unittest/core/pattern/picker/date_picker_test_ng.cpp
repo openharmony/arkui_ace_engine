@@ -23,7 +23,7 @@
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_default.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/geometry/dimension.h"
@@ -154,12 +154,12 @@ public:
 
 void DatePickerTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void DatePickerTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void DatePickerTestNg::SetUp()
@@ -176,18 +176,18 @@ void DatePickerTestNg::SetUp()
             return nullptr;
         }
     });
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
 void DatePickerTestNg::TearDown()
 {
-    MockPipelineBase::GetCurrent()->themeManager_ = nullptr;
+    MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     ViewStackProcessor::GetInstance()->ClearStack();
 }
 
 void DatePickerTestNg::CreateDatePickerColumnNode()
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -208,7 +208,7 @@ void DatePickerTestNg::CreateDatePickerColumnNode()
  */
 HWTEST_F(DatePickerTestNg, DatePickerModelCreateDatePicker001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -265,7 +265,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelCreateDatePicker001, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     PickerTextStyle data;
@@ -287,7 +287,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle001, TestSize.Lev
  */
 HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     PickerTextStyle data;
@@ -312,7 +312,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle002, TestSize.Lev
  */
 HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     PickerTextStyle data;
@@ -333,7 +333,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle003, TestSize.Lev
  */
 HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     PickerTextStyle data;
@@ -355,7 +355,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle001, TestSize.Level1
  */
 HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     PickerTextStyle data;
@@ -380,7 +380,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle002, TestSize.Level1
  */
 HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     PickerTextStyle data;
@@ -401,7 +401,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle003, TestSize.Level1
  */
 HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     PickerTextStyle data;
@@ -423,7 +423,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle001, TestSize.Leve
  */
 HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     PickerTextStyle data;
@@ -448,7 +448,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle002, TestSize.Leve
  */
 HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     PickerTextStyle data;
@@ -794,7 +794,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow007, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestNg, DatePickerRowLayoutPropertyToJsonValue001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     PickerTextStyle data;
@@ -817,7 +817,7 @@ HWTEST_F(DatePickerTestNg, DatePickerRowLayoutPropertyToJsonValue001, TestSize.L
  */
 HWTEST_F(DatePickerTestNg, DatePickerRowLayoutPropertyReset001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     PickerTextStyle data;
@@ -838,7 +838,7 @@ HWTEST_F(DatePickerTestNg, DatePickerRowLayoutPropertyReset001, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestNg, DatePickerRowLayoutPropertyClone001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     PickerTextStyle data;
@@ -859,7 +859,7 @@ HWTEST_F(DatePickerTestNg, DatePickerRowLayoutPropertyClone001, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestNg, DatePickerPatternTest001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     DatePickerModel::GetInstance()->SetShowLunar(true);
@@ -877,7 +877,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest001, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestNg, DatePickerPatternTest002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     DatePickerModel::GetInstance()->SetStartDate(PickerDate(START_YEAR_BEFORE, 1, 1));
@@ -899,7 +899,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest002, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestNg, DatePickerPatternTest003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     DatePickerModel::GetInstance()->SetSelectedDate(PickerDate(START_YEAR_BEFORE, 1, 1));
@@ -921,7 +921,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest003, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestNg, DatePickerPatternTest004, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
 
     auto onChange = [](const BaseEventInfo* info) { EXPECT_EQ(info->GetType(), "DatePickerChangeEvent"); };
@@ -988,7 +988,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest019, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
@@ -1022,7 +1022,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg001, TestSize.Le
  */
 HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
@@ -1058,7 +1058,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg002, TestSize.Le
  */
 HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg003, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
@@ -1103,7 +1103,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg003, TestSize.Le
  */
 HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg004, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
@@ -1145,7 +1145,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg004, TestSize.Le
  */
 HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg005, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
@@ -1187,7 +1187,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg005, TestSize.Le
  */
 HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg006, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
@@ -1217,7 +1217,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg006, TestSize.Le
  */
 HWTEST_F(DatePickerTestNg, DatePickerPaintTest001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1253,7 +1253,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPaintTest001, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestNg, DatePickerPaintTest002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1291,7 +1291,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPaintTest002, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestNg, DatePickerPatternTest005, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1304,7 +1304,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest005, TestSize.Level1)
     EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
     // default focusWidth < columnWidth, focusWidth = columnWidth
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
     ASSERT_NE(pickerTheme, nullptr);
     pickerTheme->dividerSpacing_ = Dimension(50.0f);
@@ -1329,7 +1329,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest005, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestNg, DatePickerPatternTest006, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1380,7 +1380,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest006, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestNg, DatePickerPatternTest007, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1417,7 +1417,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest007, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestNg, DatePickerPatternTest008, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
@@ -1466,7 +1466,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAlgorithmTest001, TestSize.Level1)
     /**
      * @tc.step: step1. create frameNode and pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 2;
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1519,7 +1519,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAlgorithmTest001, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestNg, DatePickerAlgorithmTest002, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1733,7 +1733,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow010, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestNg, DatePickerFireChangeEventTest001, TestSize.Level1)
 {
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
 
     auto changeEvent = [](const BaseEventInfo* info) { EXPECT_EQ(info->GetType(), "DatePickerChangeEvent"); };
@@ -1757,7 +1757,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest001, TestSize.Level1)
     /**
      * @tc.step: step1. create datepicker framenode and columnpattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1788,7 +1788,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest002, TestSize.Level1)
     /**
      * @tc.step: step1. create datepicker framenode and columnpattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1818,7 +1818,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest003, TestSize.Level1)
     /**
      * @tc.step: step1. create datepicker framenode and columnpattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1893,7 +1893,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest004, TestSize.Level1)
     /**
      * @tc.step: step1. create datepicker framenode and columnpattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1951,7 +1951,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest006, TestSize.Level1)
     /**
      * @tc.steps: step1. Create datepicker framenode and columnpattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1991,7 +1991,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. Create datepicker framenode and columnpattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -2030,7 +2030,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelTest001, TestSize.Level1)
     /**
      * @tc.step: step1. create datepicker framenode.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(pickerFrameNode, nullptr);
@@ -2055,7 +2055,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest009, TestSize.Level1)
     /**
      * @tc.step: step1. create picker framenode and pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -2086,7 +2086,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest010, TestSize.Level1)
     /**
      * @tc.step: step1. create picker framenode and pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -2120,7 +2120,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest011, TestSize.Level1)
     /**
      * @tc.step: step1. create picker framenode and pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -2148,7 +2148,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest012, TestSize.Level1)
     /**
      * @tc.step: step1. create picker framenode and pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -2204,7 +2204,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest013, TestSize.Level1)
     /**
      * @tc.step: step1. create picker framenode and pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -2249,7 +2249,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest014, TestSize.Level1)
     /**
      * @tc.step: step1. create picker framenode and pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -2306,7 +2306,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest015, TestSize.Level1)
     /**
      * @tc.step: step1. create picker framenode and pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -2354,7 +2354,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest016, TestSize.Level1)
     /**
      * @tc.step: step1. create picker framenode and pattern.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -2424,7 +2424,7 @@ HWTEST_F(DatePickerTestNg, DatePickerTest017, TestSize.Level1)
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogCancelEvent["cancelId"] = cancelFunc;
 
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     ASSERT_NE(pickerTheme, nullptr);
     pickerTheme->disappearOptionStyle_.textColor_ = Color::RED;
@@ -2453,7 +2453,7 @@ HWTEST_F(DatePickerTestNg, DatePickerTest017, TestSize.Level1)
     contentRow->MountToParent(contentColumn);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PickerTheme>()));
     auto context = datePickerNode->GetContext();
     ASSERT_NE(context, nullptr);
@@ -2473,7 +2473,7 @@ HWTEST_F(DatePickerTestNg, PerformActionTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create datePicker and initialize related properties.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -2543,7 +2543,7 @@ HWTEST_F(DatePickerTestNg, DatePickerEventActionsTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create datePickerColumn.
      */
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -3255,7 +3255,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest016, TestSize.Level1)
     CreateDatePickerColumnNode();
     ASSERT_NE(columnPattern_, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
     ASSERT_NE(pickerTheme, nullptr);
     pickerTheme->showOptionCount_ = -2;

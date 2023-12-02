@@ -62,7 +62,8 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     contentSize_ = MakeRefPtr<PropertySizeF>(SizeF());
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
-
+    dragStatus_ = MakeRefPtr<PropertyBool>(false);
+    AttachProperty(dragStatus_);
     if (textStyle.has_value()) {
         SetDefaultAnimatablePropertyValue(textStyle.value());
     }
@@ -75,6 +76,11 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     AttachProperty(fontFamilyString_);
     fontReady_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(fontReady_);
+}
+
+void TextContentModifier::ChangeDragStatus()
+{
+    dragStatus_->Set(!dragStatus_->Get());
 }
 
 void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& textStyle)

@@ -21,7 +21,7 @@
 #define protected public
 #define private public
 
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/frame_node.h"
@@ -85,11 +85,11 @@ class BoxLayoutAlgorithmTestNg : public testing::Test {
 public:
     static void SetUpTestCase()
     {
-        MockPipelineBase::SetUp();
+        MockPipelineContext::SetUp();
     }
     static void TearDownTestCase()
     {
-        MockPipelineBase::TearDown();
+        MockPipelineContext::TearDown();
     }
 };
 

@@ -1704,12 +1704,19 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutW
     CHECK_NULL_VOID(targetNode);
     auto geometryNode = targetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    targetSize_ = geometryNode->GetFrameSize();
+    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(props);
+    if (props->GetIsRectInTargetValue(false)) {
+        targetSize_ = props->GetTargetSizeValue(SizeF());
+        targetOffset_ = props->GetMenuOffsetValue(OffsetF());
+    } else {
+        targetSize_ = geometryNode->GetFrameSize();
+        targetOffset_ = targetNode->GetPaintRectOffset();
+    }
     menuPattern->SetTargetSize(targetSize_);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     InitHierarchicalParameters();
-    targetOffset_ = targetNode->GetPaintRectOffset();
     if (isContextMenu || hierarchicalParameters_) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());

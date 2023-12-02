@@ -26,8 +26,11 @@ ArkUINativeModuleValue GridRowBridge::SetAlignItems(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t value = secondArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetGridRowModifier().SetAlignItems(nativeNode, value);
+    if (secondArg->IsNumber()) {
+        GetArkUIInternalNodeAPI()->GetGridRowModifier().SetAlignItems(nativeNode, secondArg->Int32Value(vm));
+    } else {
+        GetArkUIInternalNodeAPI()->GetGridRowModifier().ResetAlignItems(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -37,8 +40,7 @@ ArkUINativeModuleValue GridRowBridge::ResetAlignItems(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t value = static_cast<int32_t>(FlexAlign::AUTO);
-    GetArkUIInternalNodeAPI()->GetGridRowModifier().SetAlignItems(nativeNode, value);
+    GetArkUIInternalNodeAPI()->GetGridRowModifier().ResetAlignItems(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

@@ -1087,7 +1087,7 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
     UpdateLayoutPropertyFlag();
     SetSkipSyncGeometryNode(false);
     {
-        ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
+        ACE_LAYOUT_SCOPED_TRACE("CreateLayoutTask[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
             GetParent() ? GetParent()->GetId() : 0);
         Measure(GetLayoutConstraint());
         Layout();
@@ -1824,6 +1824,13 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
     return responseRegionList;
 }
 
+std::vector<RectF> FrameNode::GetResponseRegionListForRecognizer(int32_t sourceType)
+{
+    auto paintRect = renderContext_->GetPaintRectWithoutTransform();
+    auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
+    return responseRegionList;
+}
+
 bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const
 {
     for (const auto& rect : responseRegionList) {
@@ -2490,7 +2497,7 @@ void FrameNode::UpdatePercentSensitive()
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
-    ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", GetTag().c_str(),
+    ACE_LAYOUT_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", GetTag().c_str(),
         GetId(), GetParent() ? GetParent()->GetId() : 0);
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
@@ -2584,7 +2591,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 // Called to perform layout children.
 void FrameNode::Layout()
 {
-    ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(),
+    ACE_LAYOUT_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(),
         GetId(), GetParent() ? GetParent()->GetId() : 0);
     int64_t time = GetSysTimestamp();
     OffsetNodeToSafeArea();

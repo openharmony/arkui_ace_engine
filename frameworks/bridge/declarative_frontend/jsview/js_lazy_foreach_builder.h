@@ -102,7 +102,7 @@ public:
         JSLazyForEachActuator::RegisterListener(listener);
     }
 
-    void UnregisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) override
+    void UnregisterDataChangeListener(V2::DataChangeListener* listener) override
     {
         JSLazyForEachActuator::UnregisterListener(listener);
     }

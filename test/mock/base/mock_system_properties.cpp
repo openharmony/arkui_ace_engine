@@ -36,6 +36,7 @@ DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT }
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
 bool SystemProperties::windowAnimationEnabled_ = true;
+bool SystemProperties::layoutTraceEnable_ = false;
 double SystemProperties::resolution_ = 0.0;
 constexpr float defaultAnimationScale = 1.0f;
 bool SystemProperties::extSurfaceEnabled_ = false;
@@ -44,6 +45,8 @@ bool SystemProperties::debugEnabled_ = false;
 ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 int32_t SystemProperties::deviceWidth_ = 720;
 int32_t SystemProperties::deviceHeight_ = 1280;
+bool SystemProperties::downloadByNetworkEnabled_ = false;
+bool SystemProperties::traceEnabled_ = false;
 
 int32_t AceChecker::pageNodes_ = 0;
 int32_t AceChecker::pageDepth_ = 0;
@@ -131,4 +134,13 @@ void SystemProperties::SetDeviceOrientation(int32_t orientation)
     }
 }
 
+bool SystemProperties::Is24HourClock()
+{
+    return false;
+}
+
+bool SystemProperties::GetImageFrameworkEnabled()
+{
+    return true;
+}
 } // namespace OHOS::Ace

@@ -51,7 +51,7 @@ public:
 
     virtual void ReleaseChildGroupByComposedId(const std::string& composedId) {}
     virtual void RegisterDataChangeListener(const RefPtr<DataChangeListener>& listener) = 0;
-    virtual void UnregisterDataChangeListener(const RefPtr<DataChangeListener>& listener) = 0;
+    virtual void UnregisterDataChangeListener(DataChangeListener* listener) = 0;
 
 protected:
     virtual size_t OnGetTotalCount() = 0;

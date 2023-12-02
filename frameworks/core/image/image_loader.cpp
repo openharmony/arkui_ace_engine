@@ -142,6 +142,9 @@ RefPtr<ImageLoader> ImageLoader::CreateImageLoader(const ImageSourceInfo& imageS
         case SrcType::PIXMAP: {
             return MakeRefPtr<PixelMapImageLoader>();
         }
+        case SrcType::ASTC: {
+            return MakeRefPtr<AstcImageLoader>();
+        }
         default: {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
                 "Image source type not supported!  srcType: %{public}d, sourceInfo: %{public}s", srcType,
@@ -810,6 +813,60 @@ void SharedMemoryImageLoader::UpdateData(const std::string& uri, const std::vect
     }
 
     cv_.notify_one();
+}
+
+#ifndef USE_ROSEN_DRAWING
+sk_sp<SkData> AstcImageLoader::LoadImageData(
+    const ImageSourceInfo& /* ImageSourceInfo */, const WeakPtr<PipelineBase>& /* context */)
+#else
+std::shared_ptr<RSData> AstcImageLoader::LoadImageData(
+    const ImageSourceInfo& /* ImageSourceInfo */, const WeakPtr<PipelineBase>& /* context */)
+#endif
+{
+    return nullptr;
+}
+
+RefPtr<NG::ImageData> AstcImageLoader::LoadDecodedImageData(
+    const ImageSourceInfo& src, const WeakPtr<PipelineBase>& pipelineWK)
+{
+#if !defined(PIXEL_MAP_SUPPORTED)
+    return nullptr;
+#else
+    auto pipeline = pipelineWK.Upgrade();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto dataProvider = pipeline->GetDataProviderManager();
+    CHECK_NULL_RETURN(dataProvider, nullptr);
+
+    void* pixmapMediaUniquePtr = dataProvider->GetDataProviderThumbnailResFromUri(src.GetSrc());
+    auto pixmap = PixelMap::CreatePixelMapFromDataAbility(pixmapMediaUniquePtr);
+    CHECK_NULL_RETURN(pixmap, nullptr);
+
+    auto cache = pipeline->GetImageCache();
+    if (cache) {
+        cache->CacheImageData(src.GetKey(), MakeRefPtr<NG::PixmapData>(pixmap));
+    }
+    return MakeRefPtr<NG::PixmapData>(pixmap);
+#endif
+}
+
+std::string AstcImageLoader::GetThumbnailOrientation(const ImageSourceInfo& src)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto dataProvider = pipeline->GetDataProviderManager();
+    CHECK_NULL_RETURN(dataProvider, "");
+
+    auto path = src.GetSrc();
+    auto pos = path.find("/astc");
+    path = path.substr(0, pos);
+    int32_t fd = dataProvider->GetDataProviderFile(path, "r");
+    CHECK_NULL_RETURN(fd >= 0, "");
+
+    auto imageSrc = ImageSource::Create(fd);
+    CHECK_NULL_RETURN(imageSrc, "");
+    std::string orientation = imageSrc->GetProperty("Orientation");
+    LOGD("image %{public}s has orientation = %{public}s", path.c_str(), orientation.c_str());
+    return orientation;
 }
 
 void ImageLoader::WriteCacheToFile(const std::string& uri, const std::vector<uint8_t>& imageData)

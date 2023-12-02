@@ -34,7 +34,7 @@
 #include "test/mock/core/render/mock_render_surface.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -129,7 +129,7 @@ protected:
 
 void XComponentTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     testProperty.xcId = XCOMPONENT_ID;
     testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
     testProperty.soPath = XCOMPONENT_SO_PATH;
@@ -137,7 +137,7 @@ void XComponentTestNg::SetUpTestSuite()
 
 void XComponentTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 RefPtr<FrameNode> XComponentTestNg::CreateXComponentNode(TestProperty& testProperty)

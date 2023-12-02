@@ -88,6 +88,7 @@ public:
     void SetIndents(const std::vector<float>& indents) override;
     bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) override;
     std::u16string GetParagraphText() override;
+    const ParagraphStyle& GetParagraphStyle() const override;
 
 private:
     void CreateBuilder();

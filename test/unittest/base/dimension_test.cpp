@@ -18,7 +18,7 @@
 #include "gtest/gtest.h"
 
 #include "base/geometry/dimension.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -56,7 +56,7 @@ HWTEST_F(DimensionTest, DimensionTest001, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters.
      */
-    NG::MockPipelineBase::SetUp();
+    NG::MockPipelineContext::SetUp();
 
     /**
      * @tc.steps2: Test the function ConvertToVp of the class Dimension.
@@ -81,7 +81,7 @@ HWTEST_F(DimensionTest, DimensionTest002, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters.
      */
-    NG::MockPipelineBase::SetUp();
+    NG::MockPipelineContext::SetUp();
 
     /**
      * @tc.steps2: Test the function ConvertToPx of the class Dimension.

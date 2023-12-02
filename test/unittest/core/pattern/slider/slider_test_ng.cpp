@@ -43,7 +43,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -127,12 +127,12 @@ private:
 
 void SliderTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void SliderTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void SliderTestNg::TearDown()
@@ -336,7 +336,7 @@ HWTEST_F(SliderTestNg, SliderTestNg003, TestSize.Level1)
      *            sliderMode is OUTSET.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     sliderTheme->outsetHotBlockShadowWidth_ = Dimension(20.0f);
     sliderTheme->insetHotBlockShadowWidth_ = Dimension(30.0f);
@@ -635,7 +635,7 @@ HWTEST_F(SliderTestNg, SliderTestNg009, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     sliderTheme->outsetTrackThickness_ = SLIDER_OUTSET_TRACK_THICKNRESS;
     sliderTheme->insetTrackThickness_ = SLIDER_INSET_TRACK_THICKNRESS;
@@ -855,7 +855,7 @@ HWTEST_F(SliderTestNg, SliderLayoutAlgorithm001, TestSize.Level1)
     EXPECT_NE(sliderLayoutProperty, nullptr);
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     sliderTheme->outsetTrackThickness_ = SLIDER_OUTSET_TRACK_THICKNRESS;
     sliderTheme->insetTrackThickness_ = SLIDER_INSET_TRACK_THICKNRESS;
@@ -942,7 +942,7 @@ HWTEST_F(SliderTestNg, SliderLayoutAlgorithm002, TestSize.Level1)
     layoutWrapper.Update(hostNode, geometryNode, frameNode->GetLayoutProperty());
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     sliderTheme->bubbleToCircleCenterDistance_ = 20.0_vp;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
@@ -973,7 +973,7 @@ HWTEST_F(SliderTestNg, SliderLayoutAlgorithm003, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     sliderTheme->outsetTrackThickness_ = SLIDER_OUTSET_TRACK_THICKNRESS;
     sliderTheme->insetTrackThickness_ = SLIDER_INSET_TRACK_THICKNRESS;
@@ -1883,7 +1883,7 @@ HWTEST_F(SliderTestNg, SliderPatternTest003, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     // set theme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     sliderTheme->outsetHotBlockShadowWidth_ = Dimension(20.0f);
     sliderTheme->insetHotBlockShadowWidth_ = Dimension(30.0f);
@@ -1923,7 +1923,7 @@ HWTEST_F(SliderTestNg, SliderPatternTest004, TestSize.Level1)
      * @tc.steps: step2. call GetOutsetInnerFocusPaintRect function.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     auto appTheme = AceType::MakeRefPtr<AppTheme>();
     EXPECT_CALL(*themeManager, GetTheme(SliderTheme::TypeId())).WillRepeatedly(Return(sliderTheme));
@@ -1985,7 +1985,7 @@ HWTEST_F(SliderTestNg, SliderPatternTest005, TestSize.Level1)
     auto geometryNode = frameNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, sliderLayoutProperty);
@@ -2049,7 +2049,7 @@ HWTEST_F(SliderTestNg, SliderPatternTest006, TestSize.Level1)
      */
     // mock theme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     auto appTheme = AceType::MakeRefPtr<AppTheme>();
     EXPECT_CALL(*themeManager, GetTheme(SliderTheme::TypeId())).WillRepeatedly(Return(sliderTheme));
@@ -2150,7 +2150,7 @@ HWTEST_F(SliderTestNg, SliderPatternTest008, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     sliderPattern->AttachToFrameNode(frameNode);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     ASSERT_NE(sliderTheme, nullptr);
     auto appTheme = AceType::MakeRefPtr<AppTheme>();
@@ -2411,7 +2411,7 @@ HWTEST_F(SliderTestNg, SliderPatternTest013, TestSize.Level1)
     auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
     ASSERT_NE(sliderPattern, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
     sliderPattern->AttachToFrameNode(frameNode);
@@ -2680,7 +2680,7 @@ HWTEST_F(SliderTestNg, SliderPaintMethodTest001, TestSize.Level1)
      * @tc.steps: step3. call UpdateContentModifier function.
      */
     // set theme
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto pipeline = PipelineBase::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     pipeline->SetThemeManager(theme);
@@ -2731,7 +2731,7 @@ HWTEST_F(SliderTestNg, SliderPaintMethodTest002, TestSize.Level1)
      * @tc.steps: step3. call UpdateOverlayModifier function.
      */
     // set theme
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto pipeline = PipelineBase::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     pipeline->SetThemeManager(theme);
@@ -2758,7 +2758,7 @@ HWTEST_F(SliderTestNg, SliderPaintMethodTest002, TestSize.Level1)
 HWTEST_F(SliderTestNg, SliderPaintMethodTest003, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     sliderTheme->outsetHotBlockShadowWidth_ = Dimension(20.0f);
     sliderTheme->insetHotBlockShadowWidth_ = Dimension(30.0f);
