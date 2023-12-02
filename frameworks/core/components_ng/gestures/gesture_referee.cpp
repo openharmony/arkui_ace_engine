@@ -283,6 +283,8 @@ void GestureReferee::CleanRedundanceScope()
         }
         iter->second->Close();
     }
+}
+
 void GestureReferee::ForceCleanGestureReferee()
 {
     for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
