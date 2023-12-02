@@ -388,24 +388,6 @@ void SliderContentModifier::SetSelectSize(const PointF& start, const PointF& end
     targetSelectEnd_ = end - PointF();
 }
 
-void SliderContentModifier::UpdateBlockCenterX(float x)
-{
-    auto blockType = static_cast<SliderModelNG::BlockStyleType>(blockType_->Get());
-    blockCenterX_->Set(x);
-    if (blockType == SliderModelNG::BlockStyleType::IMAGE && updateImageCenterX_) {
-        updateImageCenterX_(x);
-    }
-}
-
-void SliderContentModifier::UpdateBlockCenterY(float y)
-{
-    auto blockType = static_cast<SliderModelNG::BlockStyleType>(blockType_->Get());
-    blockCenterY_->Set(y);
-    if (blockType == SliderModelNG::BlockStyleType::IMAGE && updateImageCenterY_) {
-        updateImageCenterY_(y);
-    }
-}
-
 void SliderContentModifier::StopCircleCenterAnimation(const PointF& center)
 {
     bool stop = false;
@@ -426,9 +408,9 @@ void SliderContentModifier::StopCircleCenterAnimation(const PointF& center)
         AnimationOption option = AnimationOption();
         AnimationUtils::Animate(option, [this]() {
             if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
-                UpdateBlockCenterX(blockCenterX_->Get());
+                blockCenterX_->Set(blockCenterX_->Get());
             } else {
-                UpdateBlockCenterY(blockCenterY_->Get());
+                blockCenterY_->Set(blockCenterY_->Get());
             }
         });
     }
@@ -450,19 +432,19 @@ void SliderContentModifier::SetCircleCenter(const PointF& center)
         option.SetCurve(motion);
         AnimationUtils::Animate(option, [this, center]() {
             if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
-                UpdateBlockCenterX(center.GetX());
+                blockCenterX_->Set(center.GetX());
             } else {
-                UpdateBlockCenterY(center.GetY());
+                blockCenterY_->Set(center.GetY());
             }
         });
         if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
-            UpdateBlockCenterY(center.GetY());
+            blockCenterY_->Set(center.GetY());
         } else {
-            UpdateBlockCenterX(center.GetX());
+            blockCenterX_->Set(center.GetX());
         }
     } else {
-        UpdateBlockCenterX(center.GetX());
-        UpdateBlockCenterY(center.GetY());
+        blockCenterX_->Set(center.GetX());
+        blockCenterY_->Set(center.GetY());
     }
     targetCenter_ = center;
 }
@@ -489,6 +471,14 @@ void SliderContentModifier::DrawBlock(DrawingContext& context)
         DrawDefaultBlock(context);
     } else if (blockType == SliderModelNG::BlockStyleType::SHAPE) {
         DrawBlockShape(context);
+    } else if (blockType == SliderModelNG::BlockStyleType::IMAGE) {
+        auto blockCenter = GetBlockCenter();
+        if (updateImageCenterX_) {
+            updateImageCenterX_(blockCenter.GetX());
+        }
+        if (updateImageCenterY_) {
+            updateImageCenterY_(blockCenter.GetY());
+        }
     }
 }
 

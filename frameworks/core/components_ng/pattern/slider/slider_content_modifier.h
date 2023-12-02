@@ -257,8 +257,6 @@ private:
     void SetBlockClip(DrawingContext& context);
     void StopSelectAnimation(const PointF& end);
     void StopCircleCenterAnimation(const PointF& center);
-    void UpdateBlockCenterX(float x);
-    void UpdateBlockCenterY(float y);
 
 private:
     std::function<void(float)> updateImageCenterX_;

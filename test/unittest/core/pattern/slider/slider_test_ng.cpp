@@ -2973,7 +2973,10 @@ HWTEST_F(SliderTestNg, SliderContentModifierTest017, TestSize.Level1)
      */
     PointF center(FRAME_WIDTH, FRAME_HEIGHT);
     sliderContentModifier.SetCircleCenter(center);
-    EXPECT_EQ(value.GetX(), FRAME_WIDTH);
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderContentModifier.DrawBlock(context);
     EXPECT_EQ(value.GetY(), FRAME_HEIGHT);
 }
 
