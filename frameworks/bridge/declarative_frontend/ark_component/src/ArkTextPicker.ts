@@ -146,4 +146,4 @@ globalThis.TextPicker.attributeModifier = function (modifier) {
   });
   modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
-}
+};
