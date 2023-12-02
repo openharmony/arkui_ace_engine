@@ -27,7 +27,7 @@
 namespace OHOS::Ace {
 namespace {
 using StartRegister = void (*)(
-    const std::string& processName, const std::string& pkgName, bool debugApp, const Callback& callbac);
+    const std::string& processName, const std::string& pkgName, bool debugApp, Callback callback);
 using StopRegister = void (*)();
 } // namespace
 
