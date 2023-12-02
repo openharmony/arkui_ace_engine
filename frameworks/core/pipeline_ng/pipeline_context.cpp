@@ -1738,6 +1738,11 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
             touchPoint.pullType = TouchType::PULL_MOVE;
         }
         OnTouchEvent(touchPoint);
+    } else {
+        auto touchPoint = event.CreateTouchPoint();
+        auto scalePoint = touchPoint.CreateScalePoint(GetViewScale());
+        auto rootOffset = GetRootRect().GetOffset();
+        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
     }
 
     CHECK_NULL_VOID(rootNode_);
