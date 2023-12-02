@@ -30,7 +30,7 @@ constexpr int32_t DEFAULT_ITERATION = 1;
 constexpr FillMode DEFAULT_FILL_MODE = FillMode::FORWARDS;
 constexpr uint32_t DEFAULT_ITERATIONS = 1;
 
-void ParseImage(CalcDimension *dimension, const ImagePropertiesStruct *image)
+void ParseImage(CalcDimension* dimension, const ImagePropertiesStruct* image)
 {
     for (int i = 0; i < 4; i++) {
         if (image->unit[i] == static_cast<int8_t>(DimensionUnit::CALC)) {
@@ -46,7 +46,7 @@ void ParseImage(CalcDimension *dimension, const ImagePropertiesStruct *image)
 
 void SetState(NodeHandle node, int32_t state)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
     int32_t value = state;
@@ -60,14 +60,14 @@ void SetState(NodeHandle node, int32_t state)
 
 void ResetState(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageAnimatorModelNG::SetState(frameNode, static_cast<int32_t>(Animator::Status::IDLE));
 }
 
 void SetDuration(NodeHandle node, int32_t duration)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (duration < 0) {
         duration = DEFAULT_DURATION;
@@ -77,7 +77,7 @@ void SetDuration(NodeHandle node, int32_t duration)
 
 void SetFixedSize(NodeHandle node, uint32_t fixedSize)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
     ImageAnimatorModelNG::SetFixedSize(frameNode, static_cast<bool>(fixedSize));
@@ -85,7 +85,7 @@ void SetFixedSize(NodeHandle node, uint32_t fixedSize)
 
 void ResetFixedSize(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
     ImageAnimatorModelNG::SetFixedSize(frameNode, true);
@@ -93,7 +93,7 @@ void ResetFixedSize(NodeHandle node)
 
 void SetFillMode(NodeHandle node, int32_t fillMode)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
     int32_t value = fillMode;
@@ -106,28 +106,28 @@ void SetFillMode(NodeHandle node, int32_t fillMode)
 
 void ResetFillMode(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageAnimatorModelNG::SetFillMode(frameNode, static_cast<int32_t>(DEFAULT_FILL_MODE));
 }
 
 void SetReverse(NodeHandle node, uint32_t value)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageAnimatorModelNG::SetIsReverse(frameNode, static_cast<bool>(value));
 }
 
 void ResetReverse(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageAnimatorModelNG::SetIsReverse(frameNode, false);
 }
 
-void SetImages(NodeHandle node, struct ImagePropertiesStruct *images, int32_t length)
+void SetImages(NodeHandle node, struct ImagePropertiesStruct* images, int32_t length)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (length == 0) {
         ImageAnimatorModelNG::SetImages(frameNode, std::vector<ImageProperties>());
@@ -139,7 +139,7 @@ void SetImages(NodeHandle node, struct ImagePropertiesStruct *images, int32_t le
     }
     std::vector<ImageProperties> imageList;
     for (int32_t i = 0; i < length; i++) {
-        ImagePropertiesStruct *image = images + i;
+        ImagePropertiesStruct* image = images + i;
         CHECK_NULL_VOID(image);
         CalcDimension dimension[4];
         ParseImage(dimension, image);
@@ -152,14 +152,14 @@ void SetImages(NodeHandle node, struct ImagePropertiesStruct *images, int32_t le
 
 void ResetImages(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageAnimatorModelNG::SetImages(frameNode, std::vector<ImageProperties>());
 }
 
 void SetImageAnimatorIteration(NodeHandle node, int32_t value)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
     int32_t iteration = value;
@@ -172,26 +172,16 @@ void SetImageAnimatorIteration(NodeHandle node, int32_t value)
 
 void ResetImageAnimatorIteration(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageAnimatorModelNG::SetIteration(frameNode, DEFAULT_ITERATION);
 }
 
 ArkUIImageAnimatorModifierAPI GetImageAnimatorModifier()
 {
-    static const ArkUIImageAnimatorModifierAPI modifier = { SetState,
-                                                            ResetState,
-                                                            SetDuration,
-                                                            SetFixedSize,
-                                                            ResetFixedSize,
-                                                            SetFillMode,
-                                                            ResetFillMode,
-                                                            SetReverse,
-                                                            ResetReverse,
-                                                            SetImages,
-                                                            ResetImages,
-                                                            SetImageAnimatorIteration,
-                                                            ResetImageAnimatorIteration };
+    static const ArkUIImageAnimatorModifierAPI modifier = { SetState, ResetState, SetDuration, SetFixedSize,
+        ResetFixedSize, SetFillMode, ResetFillMode, SetReverse, ResetReverse, SetImages, ResetImages,
+        SetImageAnimatorIteration, ResetImageAnimatorIteration };
 
     return modifier;
 }

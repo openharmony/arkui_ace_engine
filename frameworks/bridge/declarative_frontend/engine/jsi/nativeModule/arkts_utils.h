@@ -36,7 +36,8 @@ public:
         const EcmaVM* vm, const Local<JSValueRef>& jsObj, DimensionUnit dimensionUnit, CalcDimension& result);
     static bool ParseJsDimensionFromResourceNG(
         const EcmaVM* vm, const Local<JSValueRef>& jsObj, DimensionUnit dimensionUnit, CalcDimension& result);
-    static bool ParseStringArray(const EcmaVM *vm, const Local<JSValueRef> &arg, char **array, int32_t defaultLength);
+    static bool ParseStringArray(
+        const EcmaVM* vm, const Local<JSValueRef>& arg, std::string* array, int32_t defaultLength);
     static bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result);
     static bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &result);
     static void ParseAllBorder(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result);
