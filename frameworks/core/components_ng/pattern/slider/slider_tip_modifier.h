@@ -115,7 +115,7 @@ public:
 
     void BuildParagraph();
     void UpdateBubbleSize();
-    void UpdateOverlayRect(const SizeF& frameSize);
+    bool UpdateOverlayRect(const SizeF& frameSize);
 
 private:
     void PaintBezier(bool isLeft, Axis axis, RSPath& path, const OffsetF& arrowCenter, const OffsetF& arrowEdge);
