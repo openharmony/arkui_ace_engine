@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
-using AlignRulesType = std::map<AlignDirection, AlignRule>;
+using AlignRulesItem = std::map<AlignDirection, AlignRule>;
 
 class ACE_EXPORT RelativeContainerLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(RelativeContainerLayoutProperty, LayoutProperty);

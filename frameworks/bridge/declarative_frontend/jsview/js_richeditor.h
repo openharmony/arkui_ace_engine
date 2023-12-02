@@ -40,6 +40,8 @@ public:
     static void SetCopyOptions(const JSCallbackInfo& info);
     static void BindSelectionMenu(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
+    static void JsEnableDataDetector(const JSCallbackInfo& info);
+    static void JsDataDetectorConfig(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
     static JSRef<JSVal> CreateJSSelection(const RichEditorSelection& selectInfo);

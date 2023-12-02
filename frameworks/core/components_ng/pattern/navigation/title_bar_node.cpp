@@ -49,4 +49,10 @@ void TitleBarNode::FastPreviewUpdateChild(int32_t slot, const RefPtr<UINode>& ne
     UINode::FastPreviewUpdateChild(slot, newChild);
 }
 
+void TitleBarNode::MarkIsInitialTitle(bool isInitialTitle)
+{
+    auto pattern = GetPattern<TitleBarPattern>();
+    pattern->MarkIsInitialTitle(isInitialTitle);
+}
+
 } // namespace OHOS::Ace::NG

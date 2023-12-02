@@ -1090,7 +1090,10 @@ void WebDelegate::AddJavascriptInterface(const std::string& objectName, const st
                 return;
             }
             if (delegate->nweb_) {
-                delegate->nweb_->RegisterArkJSfunction(objectName, methodList);
+                // webcontroller not support object, so the object_id param assign
+                // error code
+                delegate->nweb_->RegisterArkJSfunctionExt(
+                    objectName, methodList, static_cast<int32_t>(JavaScriptObjIdErrorCode::WEBCONTROLLERERROR));
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -2637,6 +2640,11 @@ void WebDelegate::InitWebViewWithSurface()
             }
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--init-background-color=").append(std::to_string(delegate->backgroundColor_)));
+            if (delegate->richtextData_) {
+                // Created a richtext component
+                initArgs.web_engine_args_to_add.push_back(
+                    std::string("--init-richtext-data=").append(delegate->richtextData_.value()));
+            }
             if (isEnhanceSurface) {
                 TAG_LOGD(AceLogTag::ACE_WEB, "Create webview with isEnhanceSurface");
                 delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(

@@ -734,6 +734,9 @@ void SetOpacity(NodeHandle node, double opacity)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
+        opacity = 1.0f;
+    }
     ViewAbstract::SetOpacity(frameNode, opacity);
 }
 
@@ -822,9 +825,6 @@ void SetSepia(NodeHandle node, double sepia)
     CalcDimension value = CalcDimension(sepia, DimensionUnit::VP);
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
-    }
-    if (GreatNotEqual(value.Value(), 1.0)) {
-        value.SetValue(1.0);
     }
     ViewAbstract::SetSepia(frameNode, value);
 }
@@ -1070,13 +1070,15 @@ void ResetRadialGradient(NodeHandle node)
  * option[0], option[1]: align(hasValue, value)
  * option[2], option[3], option[4]: offsetX(hasValue, value, unit)
  * option[5], option[6], option[7]: offsetY(hasValue, value, unit)
+ * option[8]: hasOptions
+ * option[9]: hasOffset
  * @param optionsLength options length
  */
 void SetOverlay(NodeHandle node, const char* text, const double* options, int32_t optionsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((options == nullptr) || (optionsLength != NUM_8)) {
+    if ((options == nullptr) || (optionsLength != NUM_10)) {
         return;
     }
     auto alignHasValue = options[NUM_0];
@@ -1087,23 +1089,30 @@ void SetOverlay(NodeHandle node, const char* text, const double* options, int32_
     auto offsetYHasValue = options[NUM_5];
     auto offsetYValue = options[NUM_6];
     auto offsetYUnit = options[NUM_7];
+    auto hasOptions = options[NUM_8];
+    auto hasOffset = options[NUM_9];
     NG::OverlayOptions overlay;
     if (text != nullptr) {
         overlay.content = text;
     }
-    overlay.align = Alignment::CENTER;
-    if (static_cast<bool>(alignHasValue)) {
-        overlay.align = ParseAlignment(static_cast<int32_t>(alignValue));
+    if (static_cast<bool>(hasOptions)) {
+        if (static_cast<bool>(alignHasValue)) {
+            overlay.align = ParseAlignment(static_cast<int32_t>(alignValue));
+        } else {
+            overlay.align = Alignment::TOP_LEFT;
+        }
+        if (static_cast<bool>(hasOffset)) {
+            if (static_cast<bool>(offsetXHasValue)) {
+                overlay.x = CalcDimension(offsetXValue, static_cast<DimensionUnit>(offsetXUnit));
+            }
+            if (static_cast<bool>(offsetYHasValue)) {
+                overlay.y = CalcDimension(offsetYValue, static_cast<DimensionUnit>(offsetYUnit));
+            }
+        }
     } else {
-        overlay.align = Alignment::TOP_LEFT;
-    }
-    overlay.x = CalcDimension(0);
-    overlay.y = CalcDimension(0);
-    if (static_cast<bool>(offsetXHasValue)) {
-        overlay.x = CalcDimension(offsetXValue, static_cast<DimensionUnit>(offsetXUnit));
-    }
-    if (static_cast<bool>(offsetYHasValue)) {
-        overlay.y = CalcDimension(offsetYValue, static_cast<DimensionUnit>(offsetYUnit));
+        overlay.align = Alignment::CENTER;
+        overlay.x = CalcDimension(0);
+        overlay.y = CalcDimension(0);
     }
     ViewAbstract::SetOverlay(frameNode, overlay);
 }

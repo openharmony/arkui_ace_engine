@@ -552,6 +552,24 @@ void UIExtensionPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
     inputHub->AddOnMouseEvent(mouseEvent_);
 }
 
+void UIExtensionPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
+{
+    if (hoverEvent_) {
+        return;
+    }
+    auto callback = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleHoverEvent(isHover);
+        }
+    };
+    if (hoverEvent_) {
+        inputHub->RemoveOnHoverEvent(hoverEvent_);
+    }
+    hoverEvent_ = MakeRefPtr<InputEvent>(std::move(callback));
+    inputHub->AddOnHoverEvent(hoverEvent_);
+}
+
 void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     if (info.GetSourceDevice() != SourceType::TOUCH) {
@@ -595,6 +613,7 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
     }
     const auto pointerEvent = info.GetPointerEvent();
     CHECK_NULL_VOID(pointerEvent);
+    lastPointerEvent_ = pointerEvent;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
@@ -612,6 +631,16 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
             rectToWindow.Height() - mouseOffsetToFrameNode.GetY());
     }
     DispatchPointerEvent(pointerEvent);
+}
+
+void UIExtensionPattern::HandleHoverEvent(bool isHover)
+{
+    if (isHover) {
+        return;
+    }
+    CHECK_NULL_VOID(lastPointerEvent_);
+    lastPointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
+    DispatchPointerEvent(lastPointerEvent_);
 }
 
 void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
@@ -654,6 +683,7 @@ void UIExtensionPattern::OnModifyDone()
     auto inputHub = hub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
     InitMouseEvent(inputHub);
+    InitHoverEvent(inputHub);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);

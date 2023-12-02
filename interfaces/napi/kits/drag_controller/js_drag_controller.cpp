@@ -45,7 +45,7 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/event/ace_events.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
-
+#include "drag_preview.h"
 #endif
 namespace OHOS::Ace::Napi {
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(PIXEL_MAP_SUPPORTED)
@@ -53,7 +53,6 @@ namespace {
 constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
 constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
 
-constexpr int32_t argCount2 = 2;
 constexpr int32_t argCount3 = 3;
 
 using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
@@ -924,7 +923,26 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
     napi_close_escapable_handle_scope(env, scope);
     return result;
 }
+
+static napi_value JSGetDragPreview(napi_env env, napi_callback_info info)
+{
+    DragPreview* dragPreview = new DragPreview();
+    napi_value result = nullptr;
+    napi_get_cb_info(env, info, nullptr, nullptr, &result, nullptr);
+    dragPreview->NapiSerializer(env, result);
+    return result;
+}
 #else
+static napi_value JSGetDragPreview(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+    NapiThrow(env, "The current environment does not enable drag framework or does not support drag preview.",
+        Framework::ERROR_CODE_INTERNAL_ERROR);
+    napi_close_escapable_handle_scope(env, scope);
+    return nullptr;
+}
+
 static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
 {
     napi_escapable_handle_scope scope = nullptr;
@@ -940,6 +958,7 @@ static napi_value DragControllerExport(napi_env env, napi_value exports)
 {
     napi_property_descriptor dragControllerDesc[] = {
         DECLARE_NAPI_FUNCTION("executeDrag", JSExecuteDrag),
+        DECLARE_NAPI_FUNCTION("getDragPreview", JSGetDragPreview),
     };
     NAPI_CALL(env, napi_define_properties(
                        env, exports, sizeof(dragControllerDesc) / sizeof(dragControllerDesc[0]), dragControllerDesc));

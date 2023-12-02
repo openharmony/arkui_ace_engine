@@ -31,7 +31,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #undef private
 #undef protected
 
@@ -55,9 +55,9 @@ public:
 
 void HyperlinkTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     HyperlinkModelNG hyperlinkModelNG;
     SetThemeInCreate();
     hyperlinkModelNG.Create(HYPERLINK_ADDRESS, HYPERLINK_CONTENT);
@@ -65,12 +65,12 @@ void HyperlinkTestNg::SetUpTestSuite()
 
 void HyperlinkTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void HyperlinkTestNg::SetThemeInCreate()
 {
-    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineContext::GetCurrent()->GetThemeManager());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == TextTheme::TypeId()) {
             return AceType::MakeRefPtr<TextTheme>();
@@ -151,7 +151,7 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
  */
 HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTest001, TestSize.Level1)
 {
-    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineContext::GetCurrent()->GetThemeManager());
     ASSERT_NE(themeManager, nullptr);
     HyperlinkModelNG hyperlinkModelNG;
     SetThemeInCreate();

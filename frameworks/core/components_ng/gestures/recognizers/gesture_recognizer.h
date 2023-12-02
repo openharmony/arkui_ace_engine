@@ -265,6 +265,7 @@ public:
         }
     }
 
+    virtual void ForceCleanRecognizer() {};
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {

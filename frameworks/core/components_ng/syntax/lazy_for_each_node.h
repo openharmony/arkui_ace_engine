@@ -42,7 +42,11 @@ public:
         : UINode(V2::JS_LAZY_FOR_EACH_ETS_TAG, nodeId, false), builder_(forEachBuilder)
     {}
 
-    ~LazyForEachNode() override = default;
+    ~LazyForEachNode() {
+        CHECK_NULL_VOID(builder_);
+        builder_->UnregisterDataChangeListener(this);
+        isRegisterListener_ = false;
+    }
 
     bool IsAtomicNode() const override
     {
@@ -117,13 +121,6 @@ private:
             builder_->RegisterDataChangeListener(Claim(this));
             isRegisterListener_ = true;
         }
-    }
-
-    void OnDetachFromMainTree(bool recursive) override
-    {
-        CHECK_NULL_VOID(builder_);
-        builder_->UnregisterDataChangeListener(Claim(this));
-        isRegisterListener_ = false;
     }
 
     void OnOffscreenProcess(bool recursive) override

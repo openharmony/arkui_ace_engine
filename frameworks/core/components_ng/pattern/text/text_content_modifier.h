@@ -84,6 +84,7 @@ public:
     void SetClip(bool clip);
 
     void SetFontReady(bool value);
+    void ChangeDragStatus();
 
 protected:
     OffsetF GetPaintOffset() const
@@ -159,7 +160,7 @@ private:
     RefPtr<PropertyBool> clip_;
     RefPtr<PropertyString> fontFamilyString_;
     RefPtr<PropertyBool> fontReady_;
-
+    RefPtr<PropertyBool> dragStatus_;
     RefPtr<Paragraph> paragraph_;
     OffsetF paintOffset_;
     float textRaceSpaceWidth_ = 0;

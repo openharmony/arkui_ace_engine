@@ -34,6 +34,8 @@
 
 namespace OHOS::Ace {
 constexpr uint8_t KEYS_MAX_VALUE = 3;
+constexpr int64_t EVENT_CLEAR_DURATION = 3000;
+constexpr int64_t TRANSLATE_NS_TO_MS = 1000000;
 const std::string SHORT_CUT_VALUE_X = "X";
 const std::string SHORT_CUT_VALUE_Y = "Y";
 const std::string SHORT_CUT_VALUE_Z = "Z";
@@ -327,6 +329,12 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     }
 
     if (point.type == TouchType::DOWN) {
+        int64_t currentEventTime = static_cast<int64_t>(point.time.time_since_epoch().count());
+        int64_t lastEventTime = static_cast<int64_t>(lastEventTime_.time_since_epoch().count());
+        int64_t duration = static_cast<int64_t>((currentEventTime - lastEventTime) / TRANSLATE_NS_TO_MS);
+        if (duration >= EVENT_CLEAR_DURATION) {
+            refereeNG_->ForceCleanGestureReferee();
+        }
         // first collect gesture into gesture referee.
         if (Container::IsCurrentUseNewPipeline()) {
             refereeNG_->AddGestureToScope(point.id, iter->second);
@@ -389,6 +397,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         }
     }
 
+    lastEventTime_ = point.time;
     return true;
 }
 

@@ -25,7 +25,9 @@
 
 namespace OHOS::Ace::NG {
 
-constexpr int32_t DIRECTION_RANGE = 3;
+using AlignRulesItem = std::map<AlignDirection, AlignRule>;
+using TwoAlignedValues = std::pair<std::optional<float>, std::optional<float>>;
+using ChildIdealSize = TwoAlignedValues;
 class ACE_EXPORT RelativeContainerLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(RelativeContainerLayoutAlgorithm, LayoutAlgorithm);
 
@@ -38,6 +40,7 @@ public:
 
 private:
     void DetermineTopologicalOrder(LayoutWrapper* layoutWrapper);
+    void MeasureSelf(LayoutWrapper* layoutWrapper);
     void CollectNodesById(LayoutWrapper* layoutWrapper);
     void GetDependencyRelationship();
     bool PreTopologicalLoopDetection();
@@ -53,12 +56,22 @@ private:
     float CalcVerticalOffset(
         AlignDirection alignDirection, const AlignRule& alignRule, float containerHeight, const std::string& nodeName);
 
+    bool IsValidBias(float bias);
+    OffsetF CalcBias(const RefPtr<LayoutWrapper>& childWrapper);
+
+    std::pair<TwoAlignedValues, TwoAlignedValues> GetFirstTwoAlignValues(const RefPtr<LayoutWrapper>& childWrapper,
+        const std::unique_ptr<FlexItemProperty>& flexItemProperty, const ChildIdealSize& childIdealSize);
+
+    void UpdateVerticalTwoAlignValues(TwoAlignedValues& twoAlignedValues, AlignRule alignRule);
+    void UpdateHorizontalTwoAlignValues(TwoAlignedValues& twoAlignedValues, AlignRule alignRule);
+
     std::list<std::string> renderList_;
     std::map<std::string, RefPtr<LayoutWrapper>> idNodeMap_;
     std::map<std::string, uint32_t> incomingDegreeMap_;
     std::map<std::string, std::set<std::string>> reliedOnMap_;
     std::map<std::string, OffsetF> recordOffsetMap_;
     PaddingPropertyF padding_;
+    SizeF containerSizeWithoutPaddingBorder_;
 };
 
 } // namespace OHOS::Ace::NG

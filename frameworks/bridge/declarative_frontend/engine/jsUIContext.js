@@ -67,7 +67,7 @@ class MediaQuery {
 class UIInspector {
     /**
      * Construct new instance of ArkUIInspector.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -80,6 +80,38 @@ class UIInspector {
         let componentObserver = this.ohos_UIInspector.createComponentObserver(id);
         __JSScopeUtil__.restoreInstanceId();
         return componentObserver;
+    }
+}
+
+class DragController {
+    /**
+     * Construct new instance of DragController.
+     * initialize with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 11
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_dragController = globalThis.requireNapi('arkui.dragController');
+    }
+
+    executeDrag(custom, dragInfo, callback) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof callback !== 'undefined') {
+            this.ohos_dragController.executeDrag(custom, dragInfo, callback);
+            __JSScopeUtil__.restoreInstanceId();
+        } else {
+            let eventPromise = this.ohos_dragController.executeDrag(custom, dragInfo);
+            __JSScopeUtil__.restoreInstanceId();
+            return eventPromise;
+        }
+    }
+
+    getDragPreview() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let dragPreview = this.ohos_dragController.getDragPreview();
+        __JSScopeUtil__.restoreInstanceId();
+        return dragPreview;
     }
 }
 
@@ -110,6 +142,11 @@ class UIContext {
      */
     constructor(instanceId) {
         this.instanceId_ = instanceId;
+    }
+
+    getDragController() {
+        this.dragController_ = new DragController(this.instanceId_);
+        return this.dragController_;
     }
 
     getFont() {

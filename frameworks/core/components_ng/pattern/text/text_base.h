@@ -152,6 +152,8 @@ public:
 
 protected:
     TextSelector textSelector_;
+    bool showSelect_ = true;
+    std::vector<std::string> dragContents_;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(TextBase);
 };

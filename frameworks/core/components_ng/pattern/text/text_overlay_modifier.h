@@ -50,8 +50,10 @@ public:
         isClip_->Set(isClip);
     }
 
+    void SetShowSelect(bool value);
 protected:
     std::optional<RectF> contentRect_;
+    RefPtr<PropertyBool> showSelect_;
 
 private:
     bool IsSelectedRectsChanged(const std::vector<RectF>& selectedRects);

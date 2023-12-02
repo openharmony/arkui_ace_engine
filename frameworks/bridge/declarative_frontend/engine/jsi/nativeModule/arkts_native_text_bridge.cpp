@@ -21,9 +21,9 @@
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -166,8 +166,12 @@ ArkUINativeModuleValue TextBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t color = secondArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetTextModifier().SetFontColor(nativeNode, color);
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+        GetArkUIInternalNodeAPI()->GetTextModifier().ResetFontColor(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetTextModifier().SetFontColor(nativeNode, color.GetValue());
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue TextBridge::ResetFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -186,16 +190,12 @@ ArkUINativeModuleValue TextBridge::SetFontSize(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsNumber() || secondArg->IsString()) {
-        CalcDimension fontSize;
-        if (!ParseJsDimensionFp(vm, secondArg, fontSize)) {
-            GetArkUIInternalNodeAPI()->GetTextModifier().ResetFontSize(nativeNode);
-        } else {
-            GetArkUIInternalNodeAPI()->GetTextModifier().SetFontSize(
-                nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()));
-        }
-    } else {
+    CalcDimension fontSize;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize)) {
         GetArkUIInternalNodeAPI()->GetTextModifier().ResetFontSize(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetTextModifier().SetFontSize(
+            nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -331,7 +331,7 @@ ArkUINativeModuleValue TextBridge::SetMaxLines(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->ToNumber(vm)->Value() <= 0) {
+    if (secondArg->ToNumber(vm)->Value() < 0) {
         GetArkUIInternalNodeAPI()->GetTextModifier().ResetTextMaxLines(nativeNode);
     } else {
         uint32_t maxLine = secondArg->Uint32Value(vm);
@@ -642,6 +642,7 @@ ArkUINativeModuleValue TextBridge::SetBaselineOffset(ArkUIRuntimeCallInfo* runti
     std::string str;
     if (secondArg->IsNumber()) {
         offset.value = secondArg->ToNumber(vm)->Value();
+        offset.value = offset.value < 0 ? 0 : offset.value;
         GetArkUIInternalNodeAPI()->GetTextModifier().SetTextBaselineOffset(nativeNode, &offset);
     } else if (secondArg->IsString()) {
         str = secondArg->ToString(vm)->ToString();

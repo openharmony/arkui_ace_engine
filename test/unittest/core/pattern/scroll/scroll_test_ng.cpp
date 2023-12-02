@@ -28,7 +28,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
@@ -79,7 +79,7 @@ public:
     void Create(const std::function<void(ScrollModelNG)>& callback = nullptr);
     void CreateWithContent(const std::function<void(ScrollModelNG)>& callback = nullptr);
     void CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
-    const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
+        const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
 
     static void CreateContent(int32_t childNumber = TOTAL_LINE_NUMBER);
     RefPtr<FrameNode> GetContentChild(int32_t index);
@@ -107,18 +107,18 @@ public:
 void ScrollTestNg::SetUpTestSuite()
 {
     MockContainer::SetUp();
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto scrollBarTheme = AceType::MakeRefPtr<ScrollBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(scrollBarTheme));
-    MockPipelineBase::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
 void ScrollTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
 
@@ -169,8 +169,7 @@ void ScrollTestNg::CreateWithContent(const std::function<void(ScrollModelNG)>& c
 void ScrollTestNg::CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
     const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide)
 {
-    CreateWithContent(
-        [scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide](ScrollModelNG model) {
+    CreateWithContent([scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide](ScrollModelNG model) {
         model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
     });
 }
@@ -308,7 +307,8 @@ AssertionResult ScrollTestNg::IsEqualCurrentPosition(float expectOffset)
     if (NearEqual(currentOffset, expectOffset)) {
         return AssertionSuccess();
     }
-    return AssertionFailure() << "currentOffset: " << currentOffset << " != " << "expectOffset: " << expectOffset;
+    return AssertionFailure() << "currentOffset: " << currentOffset << " != "
+                              << "expectOffset: " << expectOffset;
 }
 
 /**
@@ -353,7 +353,7 @@ HWTEST_F(ScrollTestNg, AttrScrollBar001, TestSize.Level1)
     /**
      * @tc.steps: step2. Text set value: OFF
      */
-    CreateWithContent([](ScrollModelNG model) {  model.SetDisplayMode(static_cast<int>(DisplayMode::OFF)); });
+    CreateWithContent([](ScrollModelNG model) { model.SetDisplayMode(static_cast<int>(DisplayMode::OFF)); });
     EXPECT_EQ(paintProperty_->GetBarStateString(), "BarState.Off");
 
     /**
@@ -374,7 +374,7 @@ HWTEST_F(ScrollTestNg, AttrScrollBarColorWidth001, TestSize.Level1)
      * @tc.steps: step1. Text default value: [color:foregroundColor_, width: 4]
      */
     CreateWithContent();
-    auto themeManager = MockPipelineBase::GetCurrent()->GetThemeManager();
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
     auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
     EXPECT_EQ(paintProperty_->GetBarColor(), scrollBarTheme->GetForegroundColor());
     EXPECT_EQ(paintProperty_->GetBarWidth(), scrollBarTheme->GetNormalWidth());
@@ -1606,9 +1606,7 @@ HWTEST_F(ScrollTestNg, ScrollBar002, TestSize.Level1)
      */
     // pattern_->GetScrollBar()->touchRegion_ == Rect (710.00, 0.00) - [10.00 x 946.67]
     const float barWidth = 10.f;
-    CreateWithContent([barWidth](ScrollModelNG model) {
-        model.SetScrollBarWidth(Dimension(barWidth));
-    });
+    CreateWithContent([barWidth](ScrollModelNG model) { model.SetScrollBarWidth(Dimension(barWidth)); });
     auto scrollBar = pattern_->GetScrollBar();
     const Offset downInBar = Offset(DEVICE_WIDTH - 1.f, 0.f);
     const Offset moveInBar = Offset(DEVICE_WIDTH - 1.f, 10.f);
@@ -1701,9 +1699,7 @@ HWTEST_F(ScrollTestNg, ScrollBar002, TestSize.Level1)
      * @tc.steps: step7. Mouse in bar and move out of bar (out->in->in->out)
      * @tc.expected: touchAnimator_ is take effect
      */
-    CreateWithContent([barWidth](ScrollModelNG model) {
-        model.SetScrollBarWidth(Dimension(barWidth));
-    });
+    CreateWithContent([barWidth](ScrollModelNG model) { model.SetScrollBarWidth(Dimension(barWidth)); });
     scrollBar = pattern_->GetScrollBar();
     const Offset moveOutBar = Offset(DEVICE_WIDTH - barWidth - 1.f, 0.f);
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
@@ -1773,28 +1769,16 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
      */
     const float barWidth = 10.f;
     const float ratio = static_cast<float>(VIEW_LINE_NUMBER) / TOTAL_LINE_NUMBER;
-    CreateWithContent([barWidth](ScrollModelNG model) {
-        model.SetScrollBarWidth(Dimension(barWidth));
-    });
+    CreateWithContent([barWidth](ScrollModelNG model) { model.SetScrollBarWidth(Dimension(barWidth)); });
     auto scrollBar = pattern_->GetScrollBar();
 
     Rect rect = scrollBar->touchRegion_;
-    Rect expectRect = Rect(
-        DEVICE_WIDTH - barWidth,
-        0.f,
-        barWidth,
-        DEVICE_HEIGHT * ratio
-    );
+    Rect expectRect = Rect(DEVICE_WIDTH - barWidth, 0.f, barWidth, DEVICE_HEIGHT * ratio);
     EXPECT_TRUE(IsEqual(rect, expectRect));
 
     UpdateCurrentOffset(-ITEM_HEIGHT);
     rect = scrollBar->touchRegion_;
-    expectRect = Rect(
-        DEVICE_WIDTH - barWidth,
-        ITEM_HEIGHT * ratio,
-        barWidth,
-        DEVICE_HEIGHT * ratio
-    );
+    expectRect = Rect(DEVICE_WIDTH - barWidth, ITEM_HEIGHT * ratio, barWidth, DEVICE_HEIGHT * ratio);
     EXPECT_TRUE(IsEqual(rect, expectRect));
 
     /**
@@ -1808,22 +1792,12 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
     scrollBar = pattern_->GetScrollBar();
 
     rect = scrollBar->touchRegion_;
-    expectRect = Rect(
-        0.f,
-        DEVICE_HEIGHT - barWidth,
-        DEVICE_WIDTH * ratio,
-        barWidth
-    );
+    expectRect = Rect(0.f, DEVICE_HEIGHT - barWidth, DEVICE_WIDTH * ratio, barWidth);
     EXPECT_TRUE(IsEqual(rect, expectRect));
 
     UpdateCurrentOffset(-ITEM_WIDTH);
     rect = scrollBar->touchRegion_;
-    expectRect = Rect(
-        ITEM_WIDTH * ratio,
-        DEVICE_HEIGHT - barWidth,
-        DEVICE_WIDTH * ratio,
-        barWidth
-    );
+    expectRect = Rect(ITEM_WIDTH * ratio, DEVICE_HEIGHT - barWidth, DEVICE_WIDTH * ratio, barWidth);
     EXPECT_TRUE(IsEqual(rect, expectRect));
 }
 
@@ -1835,9 +1809,7 @@ HWTEST_F(ScrollTestNg, ScrollBar003, TestSize.Level1)
 HWTEST_F(ScrollTestNg, ScrollBar004, TestSize.Level1)
 {
     const float barWidth = 10.f;
-    CreateWithContent([barWidth](ScrollModelNG model) {
-        model.SetScrollBarWidth(Dimension(barWidth));
-    });
+    CreateWithContent([barWidth](ScrollModelNG model) { model.SetScrollBarWidth(Dimension(barWidth)); });
     auto scrollBar = pattern_->GetScrollBar();
     scrollBar->SetShapeMode(ShapeMode::ROUND);
     EXPECT_FALSE(scrollBar->InBarTouchRegion(Point(0, 0)));
@@ -2592,7 +2564,7 @@ HWTEST_F(ScrollTestNg, Snap001, TestSize.Level1)
     };
 
     // snapOffsets_: {0, -10, -20, -30, -160}
-    std::pair<bool, bool> enableSnapToSide = {false, false};
+    std::pair<bool, bool> enableSnapToSide = { false, false };
     CreateSnapScroll(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(0.f).has_value());
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-20.f).has_value());
@@ -2605,7 +2577,7 @@ HWTEST_F(ScrollTestNg, Snap001, TestSize.Level1)
     pattern_->currentOffset_ = -20.f;
     EXPECT_FALSE(pattern_->NeedScrollSnapToSide(0.f));
 
-    enableSnapToSide = {true, false};
+    enableSnapToSide = { true, false };
     CreateSnapScroll(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-40.f).has_value());
     pattern_->currentOffset_ = 20.f;
@@ -2645,14 +2617,14 @@ HWTEST_F(ScrollTestNg, Snap002, TestSize.Level1)
     };
 
     // snapOffsets_: {0, -10, -20, -30, -160}
-    std::pair<bool, bool> enableSnapToSide = {false, false};
+    std::pair<bool, bool> enableSnapToSide = { false, false };
     CreateSnapScroll(ScrollSnapAlign::CENTER, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(0.f).has_value());
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-20.f).has_value());
     pattern_->currentOffset_ = -20.f;
     EXPECT_TRUE(pattern_->CalePredictSnapOffset(0.f).has_value());
 
-    enableSnapToSide = {true, false};
+    enableSnapToSide = { true, false };
     CreateSnapScroll(ScrollSnapAlign::CENTER, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-40.f).has_value());
     pattern_->currentOffset_ = 20.f;
@@ -2684,14 +2656,14 @@ HWTEST_F(ScrollTestNg, Snap003, TestSize.Level1)
     };
 
     // snapOffsets_: {0, -10, -20, -30, -160}
-    std::pair<bool, bool> enableSnapToSide = {false, false};
+    std::pair<bool, bool> enableSnapToSide = { false, false };
     CreateSnapScroll(ScrollSnapAlign::END, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(0.f).has_value());
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-20.f).has_value());
     pattern_->currentOffset_ = -20.f;
     EXPECT_TRUE(pattern_->CalePredictSnapOffset(0.f).has_value());
 
-    enableSnapToSide = {true, false};
+    enableSnapToSide = { true, false };
     CreateSnapScroll(ScrollSnapAlign::END, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-40.f).has_value());
     pattern_->currentOffset_ = 20.f;
@@ -2779,8 +2751,8 @@ HWTEST_F(ScrollTestNg, ScrollGetItemRect001, TestSize.Level1)
      * @tc.steps: step3. Get valid ScrollItem Rect.
      * @tc.expected: Return actual Rect when input valid index.
      */
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0),
-        Rect(0, 0, TOTAL_LINE_NUMBER * ITEM_WIDTH, FILL_LENGTH.Value() * DEVICE_HEIGHT)));
+    EXPECT_TRUE(IsEqual(
+        pattern_->GetItemRect(0), Rect(0, 0, TOTAL_LINE_NUMBER * ITEM_WIDTH, FILL_LENGTH.Value() * DEVICE_HEIGHT)));
 }
 
 /**

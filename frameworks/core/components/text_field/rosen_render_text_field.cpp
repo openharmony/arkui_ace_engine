@@ -618,7 +618,11 @@ void RosenRenderTextField::PaintFocus(const Offset& offset, const Size& widthHei
 #endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderTextField::PaintScrollBar(const Offset& offset, RenderContext& context, SkCanvas* canvas)
+#else
+void RosenRenderTextField::PaintScrollBar(const Offset& offset, RenderContext& context, RSCanvas* canvas)
+#endif
 {
     if (scrollBar_ && scrollBar_->NeedPaint()) {
         scrollBar_->UpdateScrollBarRegion(offset, GetLayoutSize(), GetLastOffset(), GetLongestLine());

@@ -29,7 +29,7 @@
 #include "test/mock/core/render/mock_paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_interface.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 // Add the following two macro definitions to test the private and protected method.
 #define private public
@@ -57,7 +57,7 @@ public:
 RefPtr<OffscreenCanvasPaintMethod> OffscreenCanvasPaintMethodTestNg::CreateOffscreenCanvasPaintMethod(
     int32_t width, int32_t height)
 {
-    RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineBase>();
+    RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineContext>();
     return AceType::MakeRefPtr<OffscreenCanvasPaintMethod>(pipelineContext, width, height);
 }
 

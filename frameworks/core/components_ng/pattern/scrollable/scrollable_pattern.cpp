@@ -34,6 +34,7 @@ namespace {
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
+const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 } // namespace
 
 RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
@@ -281,7 +282,7 @@ bool ScrollablePattern::CoordinateWithNavigation(bool isAtTop, bool isDraggedDow
     if (isReactInParentMovement_ && navBarPattern_) {
         auto needMove = ProcessNavBarReactOnUpdate(offset);
         auto minTitle = navBarPattern_->GetCurrentNavBarStatus();
-        if (navBarPattern_ && navBarPattern_->IsTitleModeFree()) {
+        if (navBarPattern_ && navBarPattern_->IsTitleModeFree() && !navBarPattern_->IsTitleBarHide()) {
             if (minTitle && LessNotEqual(offset, 0.0)) {
                 reactiveIn = needMove;
             } else {
@@ -402,7 +403,7 @@ void ScrollablePattern::AddScrollEvent()
     auto dragFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        return pattern->NotifyFRCSceneInfo(velocity, sceneStatus);
+        return pattern->NotifyFRCSceneInfo(SCROLLABLE_DRAG_SCENE, velocity, sceneStatus);
     };
     scrollable->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
 
@@ -542,6 +543,13 @@ void ScrollablePattern::RegisterScrollBarEventTask()
             scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
         }
     );
+
+    auto dragFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        return pattern->NotifyFRCSceneInfo(SCROLL_BAR_DRAG_SCENE, velocity, sceneStatus);
+    };
+    scrollBar_->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
 }
 
 void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
@@ -1544,7 +1552,7 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
 {
     auto parent = parent_.Upgrade();
     if (!parent || !nestedScroll_.NeedParent(velocity < 0)) {
-        if (GetEdgeEffect() == EdgeEffect::SPRING) {
+        if (GetEdgeEffect() == EdgeEffect::SPRING && AnimateStoped()) {
             // trigger onScrollEnd later, when spring animation finishes
             ProcessSpringEffect(velocity);
             return true;
@@ -1649,11 +1657,11 @@ void ScrollablePattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     }
 }
 
-void ScrollablePattern::NotifyFRCSceneInfo(double velocity, SceneStatus sceneStatus)
+void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->AddFRCSceneInfo(SCROLLABLE_DRAG_SCENE, velocity, sceneStatus);
+    host->AddFRCSceneInfo(scene, velocity, sceneStatus);
 }
 
 void ScrollablePattern::FireOnScrollStart()
@@ -1686,13 +1694,13 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
     auto offsetPX = Dimension(finalOffset);
     auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
     auto scrollState = GetScrollState();
-    if (scrollStop_ && !GetScrollAbort()) {
+    if (!NearZero(finalOffset)) {
         onScroll(offsetVP, scrollState);
+    }
+    if (scrollStop_ && !GetScrollAbort()) {
         if (scrollState != ScrollState::IDLE) {
             onScroll(0.0_vp, ScrollState::IDLE);
         }
-    } else if (!NearZero(finalOffset)) {
-        onScroll(offsetVP, scrollState);
     }
 }
 

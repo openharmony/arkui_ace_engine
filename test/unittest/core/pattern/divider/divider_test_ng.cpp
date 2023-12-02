@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -62,7 +62,7 @@ protected:
 
 void DividerTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     testProperty.vertical = VERTICAL_TRUE;
     testProperty.dividerColor = DIVIDER_COLOR;
     testProperty.strokeWidth = STROKE_WIDTH;
@@ -71,7 +71,7 @@ void DividerTestNg::SetUpTestCase()
 
 void DividerTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 RefPtr<FrameNode> DividerTestNg::CreateDividerNode(TestProperty& testProperty)
@@ -224,7 +224,7 @@ HWTEST_F(DividerTestNg, DivideAlgorithmTest001, TestSize.Level1)
     layoutConstraintF.maxSize = MAX_SIZE;
     RefPtr<DividerLayoutAlgorithm> dividerLayoutAlgorithm = AceType::MakeRefPtr<DividerLayoutAlgorithm>();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DividerTheme>()));
 
     RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
@@ -254,7 +254,7 @@ HWTEST_F(DividerTestNg, DivideAlgorithmTest002, TestSize.Level1)
     layoutConstraintF.maxSize = MAX_SIZE;
     RefPtr<DividerLayoutAlgorithm> dividerLayoutAlgorithm = AceType::MakeRefPtr<DividerLayoutAlgorithm>();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DividerTheme>()));
 
     RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
@@ -281,7 +281,7 @@ HWTEST_F(DividerTestNg, DivideAlgorithmTest003, TestSize.Level1)
     layoutConstraintF.maxSize = MAX_SIZE;
     RefPtr<DividerLayoutAlgorithm> dividerLayoutAlgorithm = AceType::MakeRefPtr<DividerLayoutAlgorithm>();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DividerTheme>()));
 
     RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
@@ -308,7 +308,7 @@ HWTEST_F(DividerTestNg, DivideAlgorithmTest004, TestSize.Level1)
     layoutConstraintF.maxSize = MAX_SIZE;
     RefPtr<DividerLayoutAlgorithm> dividerLayoutAlgorithm = AceType::MakeRefPtr<DividerLayoutAlgorithm>();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DividerTheme>()));
 
     RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);

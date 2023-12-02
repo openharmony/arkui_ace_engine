@@ -49,7 +49,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -83,11 +83,11 @@ class GesturesTestNg : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
-        MockPipelineBase::SetUp();
+        MockPipelineContext::SetUp();
     }
     static void TearDownTestSuite()
     {
-        MockPipelineBase::TearDown();
+        MockPipelineContext::TearDown();
     }
 };
 

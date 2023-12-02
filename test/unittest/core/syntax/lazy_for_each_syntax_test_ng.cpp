@@ -25,7 +25,7 @@
 #define protected public
 #include "mock_lazy_for_each_actuator.h"
 #include "mock_lazy_for_each_builder.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
@@ -119,12 +119,12 @@ public:
 
 void LazyForEachSyntaxTestNg::SetUp()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void LazyForEachSyntaxTestNg::TearDown()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 RefPtr<FrameNode> LazyForEachSyntaxTestNg::CreateNode(const std::string& tag)

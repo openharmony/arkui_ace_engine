@@ -208,7 +208,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CHECK_NULL_RETURN(eventHub, false);
     auto onScroll = eventHub->GetOnScroll();
     if (onScroll) {
-        FireOnScroll(layoutInfo.prevOffset_ - layoutInfo.currentOffset_, onScroll);
+        FireOnScroll(prevOffset_ - layoutInfo.currentOffset_, onScroll);
     }
     bool indexChanged =
         layoutInfo_.startIndex_ != layoutInfo.startIndex_ || layoutInfo_.endIndex_ != layoutInfo.endIndex_;
@@ -219,17 +219,18 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         }
     }
     auto onReachStart = eventHub->GetOnReachStart();
-    if (onReachStart && layoutInfo.ReachStart(!isInitialized_)) {
+    if (onReachStart && layoutInfo.ReachStart(prevOffset_, !isInitialized_)) {
         onReachStart();
     }
     auto onReachEnd = eventHub->GetOnReachEnd();
-    if (onReachEnd && layoutInfo.ReachEnd()) {
+    if (onReachEnd && layoutInfo.ReachEnd(prevOffset_)) {
         onReachEnd();
     }
     OnScrollStop(eventHub->GetOnScrollStop(), false);
 
     layoutInfo_ = std::move(layoutInfo);
     layoutInfo_.UpdateStartIndex();
+    prevOffset_ = layoutInfo_.currentOffset_;
     UpdateScrollBarOffset();
     CheckScrollable();
 
@@ -418,6 +419,7 @@ void WaterFlowPattern::MarkDirtyNodeSelf()
 
 void WaterFlowPattern::OnScrollEndCallback()
 {
+    SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
 }

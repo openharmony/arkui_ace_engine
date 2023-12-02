@@ -42,7 +42,7 @@
 #include "core/components_ng/render/render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -158,13 +158,13 @@ protected:
 
 void ProgressTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     creatProperty.maxValue = std::make_optional(MAX_VALUE_OF_PROGRESS);
     creatProperty.value = std::make_optional(VALUE_OF_PROGRESS);
     themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     progressTheme->trackThickness_ = TEST_PROGRESS_THICKNESS;
     progressTheme->scaleLength_ = TEST_PROGRESS_STROKE_WIDTH;
@@ -178,7 +178,7 @@ void ProgressTestNg::SetUpTestSuite()
 
 void ProgressTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
     progressTheme = nullptr;
     themeManager = nullptr;
 }

@@ -119,12 +119,25 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
                 // if activeRecognizer_ change to another recognizer, call the handleEvent function of the new
                 // recognizer.
                 while (activeRecognizer_ && saveRecognizer != activeRecognizer_ &&
+                       activeRecognizer_->CheckTouchId(point.id) &&
                        count < static_cast<int32_t>(recognizers_.size()) - 1) {
                     saveRecognizer = activeRecognizer_;
                     activeRecognizer_->HandleEvent(point);
                     AddGestureProcedure(point, saveRecognizer);
                     count++;
                 }
+                // if activeRecognizer_ has changed or be empty, do not dispatch to other recognizers
+                if (count > 0) {
+                    break;
+                }
+                auto blockRecognizer = UnBlockGesture();
+                // ensure do not dispatch same recognizer twice
+                if (!blockRecognizer || blockRecognizer == saveRecognizer ||
+                    !blockRecognizer->CheckTouchId(point.id)) {
+                    break;
+                }
+                blockRecognizer->HandleEvent(point);
+                AddGestureProcedure(point, blockRecognizer);
             } else {
                 for (const auto& recognizer : recognizers_) {
                     if (recognizer && recognizer->CheckTouchId(point.id)) {

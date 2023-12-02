@@ -916,6 +916,9 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
         loadJs_(target.path, target.errorCallback);
     }
 
+#if defined(PREVIEW)
+    if (!isComponentPreview_()) {
+#endif
     auto result = loadNamedRouter_(target.url, target.isNamedRouterMode);
     if (!result) {
         if (!target.isNamedRouterMode) {
@@ -937,6 +940,9 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     if (target.errorCallback != nullptr) {
         target.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
     }
+#if defined(PREVIEW)
+    }
+#endif
 
     if (!OnPageReady(pageNode, needHideLast, needTransition)) {
         pageRouterStack_.pop_back();

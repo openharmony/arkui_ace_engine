@@ -23,7 +23,7 @@
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_canvas.h"
 
@@ -155,11 +155,11 @@ protected:
 
 void BubbleTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 void BubbleTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 PaddingProperty CreatePadding(float left, float top, float right, float bottom)
@@ -583,7 +583,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest007, TestSize.Level1)
     EXPECT_NE(targetNode, nullptr);
     // set popupTheme and  buttonTheme to themeManager before using themeManager
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
     EXPECT_NE(popupNode, nullptr);
@@ -1063,7 +1063,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest013, TestSize.Level1)
      */
     auto targetNode = CreateTargetNode();
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
     ASSERT_NE(popupNode, nullptr);
@@ -1110,7 +1110,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level1)
      */
     auto targetNode = CreateTargetNode();
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
     ASSERT_NE(popupNode, nullptr);
@@ -1189,7 +1189,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest015, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     ASSERT_NE(targetNode, nullptr);
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
     ASSERT_NE(popupNode, nullptr);
@@ -1259,7 +1259,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest001, TestSize.Level1)
     auto targetId = targetNode->GetId();
     // set popupTheme and  buttonTheme to themeManager before using themeManager
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, popupParam);
     EXPECT_NE(popupNode, nullptr);
@@ -1385,7 +1385,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest003, TestSize.Level1)
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
     // set popupTheme and  buttonTheme to themeManager before using themeManager
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto frameNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
@@ -1527,7 +1527,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest005, TestSize.Level1)
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
     // set popupTheme and  buttonTheme to themeManager before using themeManager
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto frameNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
@@ -1633,7 +1633,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest007, TestSize.Level1)
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
     // set popupTheme and  buttonTheme to themeManager before using themeManager
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto frameNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));

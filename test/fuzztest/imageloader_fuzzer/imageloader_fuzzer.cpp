@@ -24,8 +24,13 @@
 namespace OHOS::Ace {
 constexpr uint32_t u16m = 65535;
 
+#ifndef USE_ROSEN_DRAWING
 RefPtr<ImageObject> CreateAnimatedImageObject(
     ImageSourceInfo source, const Size& imageSize, int32_t frameCount, const sk_sp<SkData>& data)
+#else
+RefPtr<ImageObject> CreateAnimatedImageObject(
+    ImageSourceInfo source, const Size& imageSize, int32_t frameCount, const std::shared_ptr<RSData>& data)
+#endif
 {
     return Referenced::MakeRefPtr<StaticImageObject>(source, imageSize, frameCount, data);
 }

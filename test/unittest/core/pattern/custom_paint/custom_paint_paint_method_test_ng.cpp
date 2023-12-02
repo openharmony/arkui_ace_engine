@@ -31,7 +31,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/core/pipeline/mock_interface.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 // Add the following two macro definitions to test the private and protected method.
 #define private public
@@ -60,7 +60,7 @@ public:
 
 RefPtr<CanvasPaintMethod> CustomPaintPaintMethodTestNg::CreateCanvasPaintMethod()
 {
-    RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineBase>();
+    RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineContext>();
     RefPtr<RenderingContext2DModifier> contentModifier = AceType::MakeRefPtr<RenderingContext2DModifier>();
     return AceType::MakeRefPtr<CanvasPaintMethod>(pipelineContext, contentModifier);
 }

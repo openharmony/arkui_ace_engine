@@ -36,7 +36,7 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
         ContainerScope scope(client->GetInstanceId());
         client->InsertValue(StringUtils::Str16ToStr8(text));
     };
-    PostSyncTaskToUI(task);
+    PostTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
@@ -53,7 +53,7 @@ void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
         ContainerScope scope(client->GetInstanceId());
         client->DeleteBackward(length);
     };
-    PostSyncTaskToUI(task);
+    PostTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::DeleteForward(int32_t length)

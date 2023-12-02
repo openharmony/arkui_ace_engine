@@ -17,7 +17,7 @@
 #define private public
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #undef private
 #undef protected
@@ -75,14 +75,14 @@ public:
 
 void GridPropertyTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
-    MockPipelineBase::GetCurrent()->rootNode_ =
+    MockPipelineContext::SetUp();
+    MockPipelineContext::GetCurrent()->rootNode_ =
         FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, 0, AceType::MakeRefPtr<RootPattern>());
 }
 
 void GridPropertyTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**

@@ -323,7 +323,7 @@ class PopupUnselectedColorModifier extends Modifier<ArkResourceColor> {
         if (reset) {
             GetUINativeModule().alphabetIndexer.resetPopupUnselectedColor(node);
         } else {
-            GetUINativeModule().alphabetIndexer.setSelectedPopupUnselectedColor(node, this.value.color);
+            GetUINativeModule().alphabetIndexer.setPopupUnselectedColor(node, this.value.color);
         }
     }
 }
@@ -334,7 +334,7 @@ class PopupSelectedColorModifier extends Modifier<ArkResourceColor> {
         if (reset) {
             GetUINativeModule().alphabetIndexer.resetPopupSelectedColor(node);
         } else {
-            GetUINativeModule().alphabetIndexer.setSelectedPopupSelectedColor(node, this.value.color);
+            GetUINativeModule().alphabetIndexer.setPopupSelectedColor(node, this.value.color);
         }
     }
 }

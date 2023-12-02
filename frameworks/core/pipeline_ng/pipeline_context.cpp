@@ -399,10 +399,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 #endif
     ProcessDelayTasks();
     FlushAnimation(nanoTimestamp);
-    bool hasAnimation = window_->FlushAnimation(nanoTimestamp);
-    if (hasAnimation) {
-        RequestFrame();
-    }
+    bool hasRunningAnimation = window_->FlushAnimation(nanoTimestamp);
+    LOGD("FlushAnimation hasRunningAnimation = %{public}d", hasRunningAnimation);
     FlushTouchEvents();
     FlushBuild();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
@@ -434,6 +432,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     } while (false);
 #endif
 
+    if (hasRunningAnimation || window_->HasUIAnimation()) {
+        RequestFrame();
+    }
     window_->FlushModifier();
     FlushFrameRate();
     FlushMessages();
@@ -1601,8 +1602,11 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (eventManager_) {
             eventManager_->DumpEvent();
         }
+    } else if (params[0] == "-imagecache") {
+        if (imageCache_) {
+            imageCache_->DumpCacheInfo();
+        }
     }
-
     return true;
 }
 

@@ -138,6 +138,8 @@ private:
 
     WaterFlowLayoutInfo layoutInfo_;
 
+    float prevOffset_ = 0.0f;
+
     // clip padding of WaterFlow
     RefPtr<WaterFlowContentModifier> contentModifier_;
 };

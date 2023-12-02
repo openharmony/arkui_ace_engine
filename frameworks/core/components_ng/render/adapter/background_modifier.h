@@ -62,7 +62,7 @@ public:
     {
         CHECK_NULL_VOID(pixelMap_);
         std::shared_ptr<Media::PixelMap> mediaPixelMap = pixelMap_->GetPixelMapSharedPtr();
-        auto recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(*context.canvas);
+        auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(*context.canvas);
         RSSamplingOptions samplingOptions;
         RSBrush brush;
 
@@ -86,7 +86,7 @@ public:
             desRSRect.SetBottom(context.height);
         }
         recordingCanvas.AttachBrush(brush);
-        recordingCanvas.DrawPixelMapRect(mediaPixelMap, srcSKRect, desSKRect, samplingOptions);
+        recordingCanvas.DrawPixelMapRect(mediaPixelMap, srcRSRect, desRSRect, samplingOptions);
         recordingCanvas.DetachBrush();
     }
 #endif

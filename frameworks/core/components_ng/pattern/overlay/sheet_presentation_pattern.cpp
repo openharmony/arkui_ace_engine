@@ -38,7 +38,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension HSAFE = 12.0_vp;
 constexpr float SHEET_VISIABLE_ALPHA = 1.0f;
 constexpr float SHEET_INVISIABLE_ALPHA = 0.0f;
 constexpr int32_t SHEET_ENTRY_ANIMATION_DURATION = 250;
@@ -78,6 +77,9 @@ void SheetPresentationPattern::InitPageHeight()
     auto manager = context->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);
     statusBarHeight_ = manager->GetSystemSafeArea().top_.Length();
+    auto sheetTheme = context->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    sheetThemeType_ = sheetTheme->GetSheetType();
 }
 
 bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
@@ -243,6 +245,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
             }
         } else if (std::abs(currentSheetHeight - upHeight) < std::abs(currentSheetHeight - downHeight)) {
             ChangeSheetHeight(upHeight);
+            ChangeScrollHeight(height_);
             SheetTransition(true, std::abs(dragVelocity));
         }
     } else {
@@ -255,6 +258,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
             }
         } else {
             ChangeSheetHeight(upHeight);
+            ChangeScrollHeight(height_);
             SheetTransition(true, std::abs(dragVelocity));
         }
     }
@@ -384,16 +388,15 @@ float SheetPresentationPattern::GetSheetHeightChange()
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardInsert = manager->GetKeyboardInset();
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipelineContext->GetTextFieldManager());
-    // inputH : Distance from input component to bottom of screen
+    // inputH : Distance from input component's Caret to bottom of screen
+    // = caret's offset + caret's height + 24vp
     auto inputH = textFieldManager ? (pipelineContext->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
                                          textFieldManager->GetHeight())
                                    : .0;
-    // safeH : The default safe distance between the input component and the top of the keyboard, = 12vp
-    auto safeH = HSAFE.ConvertToPx();
     // keyboardH : keyboard height + height of the bottom navigation bar
     auto keyboardH = keyboardInsert.Length() + manager->GetSystemSafeArea().bottom_.Length();
     // The minimum height of the input component from the bottom of the screen after popping up the soft keyboard
-    auto inputMinH = keyboardH + safeH;
+    auto inputMinH = keyboardH;
     // maxH : height that the sheet can reach the stage = the LARGE sheet - Current sheet height
     auto sheetHeight = GetHost()->GetGeometryNode()->GetFrameSize().Height();
     auto largeHeight = sheetHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight_;
@@ -435,18 +438,20 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
             overlayManager->PlaySheetMaskTransition(maskNode, false);
         }
     }
-    option.SetOnFinishEvent([weak = AceType::WeakClaim(this), id = Container::CurrentId(), isTransitionIn]() {
+    option.SetOnFinishEvent([weak = AceType::WeakClaim(this), id = Container::CurrentId(),
+        isTransitionIn, height = height_]() {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weak, id, isTransitionIn]() {
+            [weak, id, isTransitionIn, height]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 if (isTransitionIn) {
                     pattern->SetCurrentOffset(0.0);
+                    pattern->ChangeScrollHeight(height);
                 } else {
                     auto context = PipelineContext::GetCurrentContext();
                     CHECK_NULL_VOID(context);
@@ -696,11 +701,6 @@ void SheetPresentationPattern::InitSheetDetents()
 SheetType SheetPresentationPattern::GetSheetType()
 {
     SheetType sheetType = SheetType::SHEET_BOTTOM;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, sheetType);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
-    CHECK_NULL_RETURN(sheetTheme, sheetType);
-    auto type = sheetTheme->GetSheetType();
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     auto rootWidth = PipelineContext::GetCurrentRootWidth();
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -709,7 +709,7 @@ SheetType SheetPresentationPattern::GetSheetType()
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (type == "auto") {
+    if (sheetThemeType_ == "auto") {
         if (IsFold()) {
             sheetType = SheetType::SHEET_CENTER;
         } else {
@@ -719,7 +719,7 @@ SheetType SheetPresentationPattern::GetSheetType()
                 sheetType = SheetType::SHEET_BOTTOM;
             }
         }
-    } else if (type == "popup") {
+    } else if (sheetThemeType_ == "popup") {
         if (windowRect.Width() >= SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
             if (sheetStyle.sheetType.has_value()) {
                 sheetType = sheetStyle.sheetType.value();
@@ -913,7 +913,6 @@ void SheetPresentationPattern::ChangeSheetHeight(float height)
         height_ = height;
         SetCurrentHeightToOverlay(height_);
     }
-    ChangeScrollHeight(height_);
 }
 
 void SheetPresentationPattern::StartSheetTransitionAnimation(

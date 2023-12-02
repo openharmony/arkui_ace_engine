@@ -228,18 +228,18 @@ void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
     }
 }
 
-bool WaterFlowLayoutInfo::ReachStart(bool firstLayout) const
+bool WaterFlowLayoutInfo::ReachStart(float prevOffset, bool firstLayout) const
 {
-    auto scrollUpToReachTop = (LessNotEqual(prevOffset_, 0.0) || firstLayout) && GreatOrEqual(currentOffset_, 0.0);
-    auto scrollDownToReachTop = GreatNotEqual(prevOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
+    auto scrollUpToReachTop = (LessNotEqual(prevOffset, 0.0) || firstLayout) && GreatOrEqual(currentOffset_, 0.0);
+    auto scrollDownToReachTop = GreatNotEqual(prevOffset, 0.0) && LessOrEqual(currentOffset_, 0.0);
     return scrollUpToReachTop || scrollDownToReachTop;
 }
 
-bool WaterFlowLayoutInfo::ReachEnd() const
+bool WaterFlowLayoutInfo::ReachEnd(float prevOffset) const
 {
     float minOffset = lastMainSize_ - maxHeight_;
-    auto scrollDownToReachEnd = GreatNotEqual(prevOffset_, minOffset) && LessOrEqual(currentOffset_, minOffset);
-    auto scrollUpToReachEnd = LessNotEqual(prevOffset_, minOffset) && GreatOrEqual(currentOffset_, minOffset);
+    auto scrollDownToReachEnd = GreatNotEqual(prevOffset, minOffset) && LessOrEqual(currentOffset_, minOffset);
+    auto scrollUpToReachEnd = LessNotEqual(prevOffset, minOffset) && GreatOrEqual(currentOffset_, minOffset);
     return scrollDownToReachEnd || scrollUpToReachEnd;
 }
 } // namespace OHOS::Ace::NG

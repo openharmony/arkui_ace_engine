@@ -403,6 +403,9 @@ public:
         RELEASED,
     };
 
+    // for webcontoller, the enum is same as web_webview and core side
+    enum class JavaScriptObjIdErrorCode : int32_t { WEBCONTROLLERERROR = -2, WEBVIEWCONTROLLERERROR = -1, END = 0 };
+
     WebDelegate() = delete;
     ~WebDelegate() override;
     WebDelegate(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type)
@@ -524,6 +527,10 @@ public:
     }
     void NotifyMemoryLevel(int32_t level);
     void SetAudioMuted(bool muted);
+    void SetRichtextIdentifier(std::optional<std::string>& richtextData)
+    {
+        richtextData_ = richtextData;
+    }
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -814,6 +821,7 @@ private:
     float lowerFrameRateVisibleRatio_ = 0.1;
     std::optional<ScriptItems> scriptItems_;
     bool accessibilityState_ = false;
+    std::optional<std::string> richtextData_;
 #endif
 };
 

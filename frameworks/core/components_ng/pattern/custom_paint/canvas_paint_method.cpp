@@ -655,7 +655,7 @@ void CanvasPaintMethod::GetImageData(
         }
         RSBitmap bitmap;
         RSImageInfo info = RSImageInfo(rect.GetWidth(), rect.GetHeight(),
-            RSColorType::COLORTYPE_BRGBA_8888, RSAlphaType::ALPHATYPE_PREMUL);
+            RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_PREMUL);
         bitmap.InstallPixels(info, pixelMap->GetWritablePixels(), pixelMap->GetRowBytes());
         RSCanvas canvas;
         canvas.Bind(bitmap);
@@ -1296,10 +1296,10 @@ std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContex
     if (!DrawBitmap(renderContext, currentBitmap)) {
         return UNSUPPORTED;
     }
-    bool success = currentBitmap.GetPixelMap().ScalePixels(
-        tempCache.GetPixelMap(), RSSamplingOptions(RSCubicResampler { 1 / 3.0f, 1 / 3.0f }));
+    bool success = currentBitmap.GetPixmap().ScalePixels(
+        tempCache.GetPixmap(), RSSamplingOptions(RSCubicResampler { 1 / 3.0f, 1 / 3.0f }));
     CHECK_NULL_RETURN(success, UNSUPPORTED);
-    RSPixmap rsSrc = tempCache.GetPixelMap();
+    RSPixmap rsSrc = tempCache.GetPixmap();
     SkPixmap src { imageInfo, rsSrc.GetAddr(), rsSrc.GetRowBytes() };
 #endif
     SkDynamicMemoryWStream dst;

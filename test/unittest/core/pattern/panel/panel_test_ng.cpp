@@ -35,7 +35,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
 #include "core/components_ng/pattern/panel/drag_bar_pattern.h"
 
@@ -136,11 +136,11 @@ protected:
 
 void PanelTestNg::SetUp()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 void PanelTestNg::TearDown()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 RefPtr<FrameNode> PanelTestNg::CreateSlidingPanel(const TestProperty& testProperty)
@@ -178,7 +178,7 @@ RefPtr<FrameNode> PanelTestNg::CreateSlidingPanel(const TestProperty& testProper
 RefPtr<FrameNode> PanelTestNg::CreateSlidingPanelwithCloseIcon()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto closeIconTheme = AceType::MakeRefPtr<CloseIconTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(closeIconTheme));
     SlidingPanelModelNG slidingPanelModelNG;
@@ -2058,7 +2058,7 @@ HWTEST_F(PanelTestNg, PanelTestNg0034, TestSize.Level1)
      * @tc.steps: step1. create mock theme manager
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto closeIconTheme = AceType::MakeRefPtr<CloseIconTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(closeIconTheme));
     /**
@@ -2107,7 +2107,7 @@ HWTEST_F(PanelTestNg, PanelTestNg0035, TestSize.Level1)
      * @tc.steps: step1. create mock theme manager
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto closeIconTheme = AceType::MakeRefPtr<CloseIconTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(closeIconTheme));
     /**
@@ -3223,7 +3223,7 @@ HWTEST_F(PanelTestNg, PanelTestNg0063, TestSize.Level1)
      * @tc.steps: step1. create mock theme manager
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto closeIconTheme = AceType::MakeRefPtr<CloseIconTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(closeIconTheme));
     SlidingPanelModelNG slidingPanelModelNG;
@@ -3343,7 +3343,7 @@ HWTEST_F(PanelTestNg, PanelTestNg0066, TestSize.Level1)
      * @tc.steps: step1. create mock theme manager
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto closeIconTheme = AceType::MakeRefPtr<CloseIconTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(closeIconTheme));
     SlidingPanelModelNG slidingPanelModelNG;

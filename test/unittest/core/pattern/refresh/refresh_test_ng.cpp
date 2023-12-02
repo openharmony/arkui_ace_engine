@@ -31,7 +31,7 @@
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
@@ -75,7 +75,7 @@ public:
 
 void RefreshTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RefreshTheme>()));
@@ -83,14 +83,14 @@ void RefreshTestNg::SetUpTestCase()
 
 void RefreshTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void RefreshTestNg::SetUp() {}
 
 void RefreshTestNg::TearDown()
 {
-    MockPipelineBase::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_TEN);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_TEN);
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
@@ -607,7 +607,7 @@ HWTEST_F(RefreshTestNg, UpdateRefreshDraw001, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, VersionElevenDrag001, TestSize.Level1)
 {
-    MockPipelineBase::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
     auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
@@ -681,7 +681,7 @@ HWTEST_F(RefreshTestNg, VersionElevenDrag001, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, VersionElevenDrag002, TestSize.Level1)
 {
-    MockPipelineBase::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     Create([](RefreshModelNG model) { model.SetCustomBuilder(CreateCustomNode()); });
     const float radio = DEFAULT_FRICTION_RATIO * PERCENT;
     const float lessThanOffset = DEFAULT_INDICATOR_OFFSET / radio;
@@ -748,7 +748,7 @@ HWTEST_F(RefreshTestNg, VersionElevenDrag002, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, VersionElevenDrag003, TestSize.Level1)
 {
-    MockPipelineBase::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     Create();
     pattern_->HandleDragStart();
 
@@ -783,7 +783,7 @@ HWTEST_F(RefreshTestNg, VersionElevenDrag003, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, VersionElevenAttrRefreshing001, TestSize.Level1)
 {
-    MockPipelineBase::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     Create([](RefreshModelNG model) { model.SetCustomBuilder(CreateCustomNode()); });
 
     /**
@@ -810,7 +810,7 @@ HWTEST_F(RefreshTestNg, VersionElevenAttrRefreshing001, TestSize.Level1)
  */
 HWTEST_F(RefreshTestNg, VersionElevenAttrRefreshing002, TestSize.Level1)
 {
-    MockPipelineBase::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     Create();
 
     /**

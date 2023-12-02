@@ -29,7 +29,7 @@
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "mock/mock_bundle_mgr_interface.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
@@ -82,14 +82,14 @@ protected:
 
 void PluginPatternTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     pluginInfo.pluginName = "plugin1";
     pluginInfo.bundleName = "com.example.plugin";
 }
 
 void PluginPatternTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 RefPtr<FrameNode> PluginPatternTestNg::CreatePluginParagraph()

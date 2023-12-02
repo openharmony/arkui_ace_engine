@@ -23,7 +23,7 @@
 #include <iostream>
 
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/select/select_theme.h"
@@ -103,15 +103,15 @@ protected:
 
 void SelectPropertyTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
 void SelectPropertyTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void SelectPropertyTestNg::SetUp() {}
@@ -968,7 +968,7 @@ HWTEST_F(SelectPropertyTestNg, SelectModel004, TestSize.Level1)
  */
 HWTEST_F(SelectPropertyTestNg, SelectPattern001, TestSize.Level1)
 {
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };

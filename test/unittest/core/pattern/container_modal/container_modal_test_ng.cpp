@@ -16,6 +16,11 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
+
 #include "base/log/log_wrapper.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/test/mock/mock_resource_adapter.h"
@@ -31,11 +36,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/unittest/core/pattern/test_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -72,9 +73,9 @@ protected:
 
 void ContainerModelTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(nullptr));
     EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
@@ -82,7 +83,7 @@ void ContainerModelTestNg::SetUpTestSuite()
 
 void ContainerModelTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void ContainerModelTestNg::SetUp()
@@ -117,7 +118,7 @@ void ContainerModelTestNg::SetMockWindow(WindowMode windowMode)
     const auto windowManager = AceType::MakeRefPtr<WindowManager>();
     auto windowModeCallback = [windowMode]() { return windowMode; };
     windowManager->SetWindowGetModeCallBack(std::move(windowModeCallback));
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->windowManager_ = windowManager;
 }
 
@@ -282,7 +283,7 @@ HWTEST_F(ContainerModelTestNg, Test002, TestSize.Level1)
     windowManager->SetWindowMaximizeCallBack(std::move(windowMaximizeCallBack));
     windowManager->SetWindowMinimizeCallBack(std::move(windowMinimizeCallBack));
     windowManager->SetWindowCloseCallBack(std::move(windowCloseCallBack));
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->windowManager_ = windowManager;
     CreateContainerModal();
     pattern_->ShowTitle(true, true);
@@ -485,7 +486,7 @@ HWTEST_F(ContainerModelTestNg, Test005, TestSize.Level1)
     /**
      * @tc.steps: step3. Alter maxId.
      */
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->windowManager_->SetCurrentWindowMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
     pattern_->OnWindowFocused();
     EXPECT_TRUE(pattern_->isFocus_);

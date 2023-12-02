@@ -387,6 +387,16 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     return subwindow->ShowDialogNG(dialogProps, std::move(buildFunc));
 }
 
+void SubwindowManager::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        return;
+    }
+    return subwindow->CloseDialogNG(dialogNode);
+}
+
 void SubwindowManager::HideDialogSubWindow(int32_t instanceId)
 {
     auto subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);

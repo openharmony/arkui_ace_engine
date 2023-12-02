@@ -43,7 +43,7 @@
 #include "test/unittest/core/pattern/test_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 
@@ -118,11 +118,11 @@ void GridTestNg::UpdateLayoutInfo()
 void GridTestNg::SetUpTestSuite()
 {
     MockContainer::SetUp();
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     // set buttonTheme to themeManager before using themeManager to get buttonTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     auto gridItemTheme = AceType::MakeRefPtr<GridItemTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
@@ -131,7 +131,7 @@ void GridTestNg::SetUpTestSuite()
 
 void GridTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
 
@@ -4444,7 +4444,7 @@ HWTEST_F(GridTestNg, GridPaintMethodTest001, TestSize.Level1)
 HWTEST_F(GridTestNg, ScrollLayout001, TestSize.Level1)
 {
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
-    MockPipelineBase::GetCurrent()->SetTextFieldManager(textFieldManager);
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     auto textFieldPattern = AceType::MakeRefPtr<Pattern>();
     textFieldManager->SetOnFocusTextField(textFieldPattern);
     const Offset clickPosition = Offset(100.f, DEVICE_HEIGHT + ITEM_HEIGHT);
@@ -4482,7 +4482,7 @@ HWTEST_F(GridTestNg, ScrollLayout001, TestSize.Level1)
 HWTEST_F(GridTestNg, ScrollLayout002, TestSize.Level1)
 {
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
-    MockPipelineBase::GetCurrent()->SetTextFieldManager(textFieldManager);
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     auto textFieldPattern = AceType::MakeRefPtr<Pattern>();
     textFieldManager->SetOnFocusTextField(textFieldPattern);
     const Offset clickPosition = Offset(100.f, 100.f);

@@ -68,7 +68,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
     SecurityComponentElementStyle& style,
     const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(tag, nodeId, patternCreator);
     CHECK_NULL_RETURN(frameNode, nullptr);
 

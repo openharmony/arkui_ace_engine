@@ -30,7 +30,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -164,11 +164,11 @@ protected:
 void ListTestNg::SetUpTestSuite()
 {
     MockContainer::SetUp();
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
 
@@ -190,7 +190,7 @@ void ListTestNg::SetUpTestSuite()
 
 void ListTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
 
@@ -1088,7 +1088,7 @@ HWTEST_F(ListTestNg, AttrScrollBar001, TestSize.Level1)
      * @tc.steps: step1. Set scrollBar, set api version >= 10
      * @tc.expected: the default value is auto
      */
-    MockPipelineBase::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_TEN);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_TEN);
     CreateWithItem();
     EXPECT_EQ(pattern_->GetScrollBar()->GetDisplayMode(), DisplayMode::AUTO);
 }
@@ -3103,7 +3103,7 @@ HWTEST_F(ListTestNg, Event001, TestSize.Level1)
     EXPECT_TRUE(isTrigger);
 
     // SetMinPlatformVersion
-    MockPipelineBase::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_TEN - 1);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_TEN - 1);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
@@ -3124,7 +3124,7 @@ HWTEST_F(ListTestNg, Event001, TestSize.Level1)
     EXPECT_TRUE(isTrigger);
 
     // set back
-    MockPipelineBase::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_TEN);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_TEN);
 }
 
 /**
@@ -6340,7 +6340,7 @@ HWTEST_F(ListTestNg, ListLayout_SafeArea001, TestSize.Level1)
         CreateItem(TOTAL_LINE_NUMBER * 2);
     });
 
-    EXPECT_CALL(*MockPipelineBase::pipeline_, GetSafeArea)
+    EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
         .Times(1)
         .WillOnce(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
     layoutProperty_->UpdateSafeAreaExpandOpts(
@@ -6365,7 +6365,7 @@ HWTEST_F(ListTestNg, ListLayout_SafeArea002, TestSize.Level1)
         CreateItem(TOTAL_LINE_NUMBER * 2);
     });
 
-    EXPECT_CALL(*MockPipelineBase::pipeline_, GetSafeArea).Times(0);
+    EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea).Times(0);
     layoutProperty_->UpdateSafeAreaExpandOpts(
         { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP });
     RunMeasureAndLayout(frameNode_);
@@ -6444,7 +6444,7 @@ HWTEST_F(ListTestNg, FRCCallback001, TestSize.Level1)
     auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
     frameNode_->renderContext_ = renderContext;
     EXPECT_CALL(*renderContext, CalcExpectedFrameRate(_, _)).Times(1);
-    pattern_->NotifyFRCSceneInfo(0.0f, SceneStatus::START);
+    pattern_->NotifyFRCSceneInfo("", 0.0f, SceneStatus::START);
 }
 
 /**
@@ -6757,5 +6757,42 @@ HWTEST_F(ListTestNg, Pattern016, TestSize.Level1)
             EXPECT_TRUE(IsEqual(scrollBar->GetActiveRect(), activeRectBot));
         }
     }
+}
+
+/**
+ * @tc.name: ContentEndOffset001
+ * @tc.desc: Test ContentEndOffset should change behavior of IsAtBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ContentEndOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List
+     */
+    Create([](ListModelNG model) {
+        // total height = 2000
+        CreateItem(20);
+        model.SetScrollBar(Ace::DisplayMode::ON);
+        model.SetEdgeEffect(EdgeEffect::FADE, false);
+        model.SetContentEndOffset(100);
+    });
+
+    std::vector<int32_t> scrollFromVector = { SCROLL_FROM_NONE, SCROLL_FROM_UPDATE, SCROLL_FROM_ANIMATION,
+        SCROLL_FROM_JUMP, SCROLL_FROM_ANIMATION_SPRING, SCROLL_FROM_BAR, SCROLL_FROM_ANIMATION_CONTROLLER,
+        SCROLL_FROM_BAR_FLING };
+
+    // ~ -1200 to reach bottom if no contentEndOffset
+    EXPECT_TRUE(pattern_->UpdateCurrentOffset(-1195, SCROLL_FROM_UPDATE));
+    RunMeasureAndLayout(frameNode_);
+    EXPECT_FALSE(pattern_->IsAtBottom());
+
+    // contentEndOffset_ takes 100 extra offset to reach bottom
+    EXPECT_TRUE(pattern_->UpdateCurrentOffset(-50, SCROLL_FROM_UPDATE));
+    RunMeasureAndLayout(frameNode_);
+    EXPECT_FALSE(pattern_->IsAtBottom());
+
+    EXPECT_TRUE(pattern_->UpdateCurrentOffset(-100, SCROLL_FROM_UPDATE));
+    RunMeasureAndLayout(frameNode_);
+    EXPECT_TRUE(pattern_->IsAtBottom());
 }
 } // namespace OHOS::Ace::NG

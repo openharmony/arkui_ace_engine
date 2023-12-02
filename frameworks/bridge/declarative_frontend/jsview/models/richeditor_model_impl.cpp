@@ -46,4 +46,9 @@ void RichEditorModelImpl::BindSelectionMenu(RichEditorType& editorType, RichEdit
 {}
 
 void RichEditorModelImpl::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) {}
+
+void RichEditorModelImpl::SetTextDetectEnable(bool value) {}
+
+void RichEditorModelImpl::SetTextDetectConfig(const std::string& value,
+    std::function<void(const std::string&)>&& onResult) {}
 } // namespace OHOS::Ace::Framework

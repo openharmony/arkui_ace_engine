@@ -34,7 +34,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -70,12 +70,12 @@ protected:
 
 void ToggleTestNg::SetUpTestCase()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void ToggleTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 PaddingPropertyF ToggleTestNg::CreatePadding(Dimension length)
@@ -375,7 +375,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest008, TestSize.Level1)
 
     // set switchTheme to themeManager before using themeManager to get switchTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SwitchTheme>()));
     switchPattern->OnModifyDone();
 
@@ -582,7 +582,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0011, TestSize.Level1)
      * @tc.steps: step1. test checkbox
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
 
@@ -602,7 +602,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0011, TestSize.Level1)
      * @tc.steps: step2. test button
      */
     themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto toggleButtonTheme = AceType::MakeRefPtr<ToggleTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(toggleButtonTheme));
 
@@ -619,7 +619,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0011, TestSize.Level1)
      * @tc.steps: step3. test switch
      */
     themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
 
@@ -660,7 +660,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0012, TestSize.Level1)
 
     // set switchTheme to themeManager before using themeManager to get switchTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
 
@@ -777,7 +777,7 @@ HWTEST_F(ToggleTestNg, ToggleLayoutTest001, TestSize.Level1)
      */
     // set switchTheme to themeManager before using themeManager to get switchTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 
     // update switchTheme values
     auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
@@ -849,7 +849,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest001, TestSize.Level1)
     EXPECT_NE(paintWrapper, nullptr);
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
     switchTheme->width_ = TOGGLE_WIDTH;
     switchTheme->height_ = TOGGLE_HEIGH;
@@ -932,7 +932,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest004, TestSize.Level1)
     ASSERT_NE(paintWrapper, nullptr);
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
     switchTheme->width_ = TOGGLE_WIDTH;
     switchTheme->height_ = TOGGLE_HEIGH;
@@ -961,7 +961,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest003, TestSize.Level1)
     auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(IS_ON, SELECTED_COLOR, 0.0f);
     SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(switchModifier);
 
-    auto switchTheme = MockPipelineBase::GetCurrent()->GetTheme<SwitchTheme>();
+    auto switchTheme = MockPipelineContext::GetCurrent()->GetTheme<SwitchTheme>();
     ASSERT_NE(switchTheme, nullptr);
     switchTheme->height_ = TOGGLE_HEIGH;
     switchTheme->hotZoneVerticalPadding_ = ZERO;
