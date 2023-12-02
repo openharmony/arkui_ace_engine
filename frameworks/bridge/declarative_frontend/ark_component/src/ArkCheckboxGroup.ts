@@ -10,7 +10,8 @@ class CheckboxGroupSelectAllModifier extends Modifier<boolean> {
         }
     }
 }
-class CheckboxGroupSelectedColorModifier extends Modifier<number | undefined> {
+
+class CheckboxGroupSelectedColorModifier extends ModifierWithKey<ResourceColor> {
     static identity: Symbol = Symbol('checkboxgroupSelectedColor');
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {
@@ -20,8 +21,18 @@ class CheckboxGroupSelectedColorModifier extends Modifier<number | undefined> {
             GetUINativeModule().checkboxgroup.setSelectedColor(node, this.value);
         }
     }
+
+    checkObjectDiff() {
+        if (isResource(this.stageValue) && isResource(this.value)) {
+            return !isResourceEqual(this.stageValue, this.value);
+        }
+        else {
+            return true;
+        }
+    }    
 }
-class CheckboxGroupUnselectedColorModifier extends Modifier<number | undefined> {
+
+class CheckboxGroupUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
     static identity: Symbol = Symbol('checkboxgroupUnselectedColor');
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {
@@ -29,6 +40,15 @@ class CheckboxGroupUnselectedColorModifier extends Modifier<number | undefined> 
         }
         else {
             GetUINativeModule().checkboxgroup.setUnSelectedColor(node, this.value);
+        }
+    }
+
+    checkObjectDiff() {
+        if (isResource(this.stageValue) && isResource(this.value)) {
+            return !isResourceEqual(this.stageValue, this.value);
+        }
+        else {
+            return true;
         }
     }
 }
@@ -54,21 +74,11 @@ class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAtt
         return this;
     }
     selectedColor(value: ResourceColor): this {
-        let arkColor = new ArkColor();
-        if (arkColor.parseColorValue(value)) {
-            modifier(this._modifiers, CheckboxGroupSelectedColorModifier, arkColor.color);
-        } else {
-            modifier(this._modifiers, CheckboxGroupSelectedColorModifier, undefined);
-        }
+        modifierWithKey(this._modifiersWithKeys, CheckboxGroupSelectedColorModifier.identity, CheckboxGroupSelectedColorModifier, value);
         return this;
     }
     unselectedColor(value: ResourceColor): this {
-        let arkColor = new ArkColor();
-        if (arkColor.parseColorValue(value)) {
-            modifier(this._modifiers, CheckboxGroupUnselectedColorModifier, arkColor.color);
-        } else {
-            modifier(this._modifiers, CheckboxGroupUnselectedColorModifier, undefined);
-        }
+        modifierWithKey(this._modifiersWithKeys, CheckboxGroupUnselectedColorModifier.identity, CheckboxGroupUnselectedColorModifier, value);
         return this;
     }
     mark(value: MarkStyle): this {

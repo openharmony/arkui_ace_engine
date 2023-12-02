@@ -12,8 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkboxgroup_bridge.h"
+
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -23,19 +25,6 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr double NUM_4 = 2.0;
-bool ParseJsDimensionVp(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
-{
-    if (value->IsNumber()) {
-        result = CalcDimension(value->ToNumber(vm)->Value(), DimensionUnit::VP);
-        return true;
-    }
-    if (value->IsString()) {
-        result = StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::VP);
-        return true;
-    }
-    // resouce ignore by design
-    return false;
-}
 }   // namespace
 ArkUINativeModuleValue CheckboxGroupBridge::SetGroupSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -44,9 +33,13 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetGroupSelectedColor(ArkUIRuntimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t selectedColor = secondArg->Uint32Value(vm);
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+        GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetGroupSelectedColor(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetGroupSelectedColor(nativeNode, color.GetValue());
+    }
 
-    GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetGroupSelectedColor(nativeNode, selectedColor);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue CheckboxGroupBridge::ResetGroupSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -66,9 +59,12 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetGroupUnSelectedColor(ArkUIRuntime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t unSelectedColor = secondArg->Uint32Value(vm);
-
-    GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetGroupUnSelectedColor(nativeNode, unSelectedColor);
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+        GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetGroupUnSelectedColor(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetGroupUnSelectedColor(nativeNode, color.GetValue());
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue CheckboxGroupBridge::ResetGroupUnSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -112,7 +108,7 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupWidth(ArkUIRuntimeCa
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension width;
     if (!jsValue->IsUndefined()) {
-        ParseJsDimensionVp(vm, jsValue, width);
+        ArkTSUtils::ParseJsDimensionVp(vm, jsValue, width);
         if (width.IsNegative()) {
             GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetCheckboxGroupWidth(nativeNode);
             return panda::JSValueRef::Undefined(vm);
@@ -141,7 +137,7 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupHeight(ArkUIRuntimeC
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension height;
     if (!jsValue->IsUndefined()) {
-        ParseJsDimensionVp(vm, jsValue, height);
+        ArkTSUtils::ParseJsDimensionVp(vm, jsValue, height);
         if (height.IsNegative()) {
             GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetCheckboxGroupHeight(nativeNode);
             return panda::JSValueRef::Undefined(vm);
@@ -181,8 +177,8 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetGroupMark(ArkUIRuntimeCallInfo* r
     CalcDimension width;
 
     if (!sizeArg->IsUndefined() && !widthArg->IsUndefined()) {
-        ParseJsDimensionVp(vm, sizeArg, size);
-        if (!ParseJsDimensionVp(vm, widthArg, width)) {
+        ArkTSUtils::ParseJsDimensionVp(vm, sizeArg, size);
+        if (!ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width)) {
             width.SetValue(NUM_4);
         }
     }
