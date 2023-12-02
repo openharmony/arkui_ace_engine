@@ -36,7 +36,7 @@ constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 constexpr DisplayMode DEFAULT_BAR_STATE_VALUE = DisplayMode::AUTO;
 constexpr bool DEFAULT_KEY_BOARD_VALUE = true;
 constexpr char DEFAULT_FONT_FAMILY[] = "HarmonyOS Sans";
-constexpr const char DEFAULT_CATET_COLOR[] = "#007DFF";
+constexpr uint32_t DEFAULT_CATET_COLOR = 0xFF007DFF;
 
 void SetTextAreaStyle(NodeHandle node, int32_t style)
 {
@@ -94,24 +94,16 @@ void ResetTextAreaCopyOption(NodeHandle node)
     TextFieldModelNG::SetCopyOption(frameNode, DEFAULT_COPY_OPTIONS_VALUE);
 }
 
-void SetTextAreaPlaceholderColor(NodeHandle node, const struct ArkUIResourceColorType *colorType)
+void SetTextAreaPlaceholderColor(NodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    Color color;
-    if (colorType->string != nullptr) {
-        if (!Color::ParseColorString(std::string(colorType->string), color)) {
-            return;
-        }
-    } else {
-        color = Color(colorType->number);
-    }
-    TextFieldModelNG::SetPlaceholderColor(frameNode, color);
+    TextFieldModelNG::SetPlaceholderColor(frameNode, Color(color));
 }
 
 void ResetTextAreaPlaceholderColor(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
@@ -134,35 +126,44 @@ void ResetTextAreaTextAlign(NodeHandle node)
     TextFieldModelNG::SetTextAlign(frameNode, TextAlign::START);
 }
 
-void SetTextAreaPlaceholderFont(NodeHandle node, const struct StringAndDouble *size,
-    const struct ArkUIFontWeight *weight, const char *family, int32_t style)
+void SetTextAreaPlaceholderFont(NodeHandle node, const struct ArkUIResourceLength *size, const char *weight,
+    const char *family, int32_t style)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     Font font;
-
-    if (size->valueStr != nullptr) {
-        font.fontSize = StringUtils::StringToCalcDimension(size->valueStr, true, DimensionUnit::FP);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(size->Uint);
+    if (size->Uint >= 0) {
+        if (unitEnum == DimensionUnit::CALC) {
+            font.fontSize = CalcDimension(size->string, DimensionUnit::CALC);
+        } else {
+            font.fontSize = CalcDimension(size->value, unitEnum);
+        }
     } else {
-        font.fontSize = CalcDimension(size->value, DimensionUnit::FP);
+        font.fontSize = DEFAULT_FONT_SIZE;
     }
 
-    if (weight->valueStr != nullptr) {
-        font.fontWeight = StringUtils::StringToFontWeight(std::string(weight->valueStr), FontWeight::NORMAL);
-    } else if (weight->value >= 0) {
-        font.fontWeight = static_cast<FontWeight>(weight->value);
+    if (weight != nullptr) {
+        font.fontWeight = Framework::ConvertStrToFontWeight(weight);
+    } else {
+        font.fontWeight = DEFAULT_FONT_WEIGHT;
     }
 
     if (family != nullptr) {
         font.fontFamilies = Framework::ConvertStrToFontFamilies(std::string(family));
+    } else {
+        std::vector<std::string> fontFamilies;
+        fontFamilies.emplace_back(std::string(DEFAULT_FONT_FAMILY));
+        font.fontFamilies = fontFamilies;
     }
 
     if (style >= 0) {
         font.fontStyle = static_cast<Ace::FontStyle>(style);
+    } else {
+        font.fontStyle = DEFAULT_FONT_STYLE;
     }
     TextFieldModelNG::SetPlaceholderFont(frameNode, font);
 }
-
 
 void ResetTextAreaPlaceholderFont(NodeHandle node)
 {
@@ -172,6 +173,9 @@ void ResetTextAreaPlaceholderFont(NodeHandle node)
     font.fontSize = DEFAULT_FONT_SIZE;
     font.fontWeight = DEFAULT_FONT_WEIGHT;
     font.fontStyle = DEFAULT_FONT_STYLE;
+    std::vector<std::string> fontFamilies;
+    fontFamilies.emplace_back(std::string(DEFAULT_FONT_FAMILY));
+    font.fontFamilies = fontFamilies;
     TextFieldModelNG::SetPlaceholderFont(frameNode, font);
 }
 
@@ -236,26 +240,18 @@ void ResetTextAreaShowCounter(NodeHandle node)
     TextFieldModelNG::SetShowCounter(frameNode, false);
 }
 
-void SetTextAreaCaretColor(NodeHandle node, const struct ArkUIResourceColorType *colorType)
+void SetTextAreaCaretColor(NodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    Color color;
-    if (colorType->string != nullptr) {
-        if (!Color::ParseColorString(std::string(colorType->string), color)) {
-            return;
-        }
-    } else {
-        color = Color(colorType->number);
-    }
-    TextFieldModelNG::SetCaretColor(frameNode, color);
+    TextFieldModelNG::SetCaretColor(frameNode, Color(color));
 }
 
 void ResetTextAreaCaretColor(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetCaretColor(frameNode, Color::FromString(std::string(DEFAULT_CATET_COLOR)));
+    TextFieldModelNG::SetCaretColor(frameNode, Color(DEFAULT_CATET_COLOR));
 }
 
 void SetTextAreaMaxLength(NodeHandle node, int32_t value)
@@ -272,24 +268,16 @@ void ResetTextAreaMaxLength(NodeHandle node)
     TextFieldModelNG::ResetMaxLength(frameNode);
 }
 
-void SetTextAreaFontColor(NodeHandle node, const struct ArkUIResourceColorType *colorType)
+void SetTextAreaFontColor(NodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    Color color;
-    if (colorType->string != nullptr) {
-        if (!Color::ParseColorString(std::string(colorType->string), color)) {
-            return;
-        }
-    } else {
-        color = Color(colorType->number);
-    }
-    TextFieldModelNG::SetTextColor(frameNode, color);
+    TextFieldModelNG::SetTextColor(frameNode, Color(color));
 }
 
 void ResetTextAreaFontColor(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t textColor = 0;
     auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
@@ -311,12 +299,13 @@ void ResetTextAreaFontStyle(NodeHandle node)
     TextFieldModelNG::SetFontStyle(frameNode, OHOS::Ace::FontStyle::NORMAL);
 }
 
-void SetTextAreaFontWeight(NodeHandle node, uint32_t fontWeight)
+void SetTextAreaFontWeight(NodeHandle node, const char *fontWeight)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(fontWeight));
+    TextFieldModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeight));
 }
+
 void ResetTextAreaFontWeight(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -324,29 +313,32 @@ void ResetTextAreaFontWeight(NodeHandle node)
     TextFieldModelNG::SetFontWeight(frameNode, OHOS::Ace::FontWeight::NORMAL);
 }
 
-void SetTextAreaFontSize(NodeHandle node, const struct StringAndDouble *size)
+void SetTextAreaFontSize(NodeHandle node, const struct ArkUIResourceLength *size)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result;
-    if (size->valueStr != nullptr) {
-        result = StringUtils::StringToCalcDimension(size->valueStr, false, DimensionUnit::FP);
-    } else if (size->value >= 0) {
-        result = CalcDimension(size->value, DimensionUnit::FP);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(size->Uint);
+    if (unitEnum == DimensionUnit::CALC) {
+        TextFieldModelNG::SetFontSize(frameNode, CalcDimension(size->string, DimensionUnit::CALC));
     } else {
-        result = DEFAULT_FONT_SIZE;
+        TextFieldModelNG::SetFontSize(frameNode, CalcDimension(size->value, unitEnum));
     }
-    if (result.Unit() == DimensionUnit::PERCENT) {
-        result = DEFAULT_FONT_SIZE;
-    }
-    TextFieldModelNG::SetFontSize(frameNode, result);
 }
 
 void ResetTextAreaFontSize(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetFontSize(frameNode, DEFAULT_FONT_SIZE);
+    auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    TextFieldModelNG::SetFontSize(frameNode, Dimension(theme->GetFontSize()));
+}
+
+void SetCounterType(NodeHandle node, int32_t value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCounterType(frameNode, value);
 }
 
 ArkUITextAreaModifierAPI GetTextAreaModifier()
@@ -384,7 +376,8 @@ ArkUITextAreaModifierAPI GetTextAreaModifier()
                                                        SetTextAreaFontWeight,
                                                        ResetTextAreaFontWeight,
                                                        SetTextAreaFontSize,
-                                                       ResetTextAreaFontSize };
+                                                       ResetTextAreaFontSize,
+                                                       SetCounterType };
 
     return modifier;
 }

@@ -804,7 +804,7 @@ void TextFieldModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
 
 void TextFieldModelNG::SetCaretColor(FrameNode* frameNode, const Color& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldPaintProperty, CursorColor, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, value, frameNode);
 }
 
 void TextFieldModelNG::SetSelectionMenuHidden(FrameNode* frameNode, bool selectionMenuHidden)
@@ -828,5 +828,13 @@ void TextFieldModelNG::SetShowError(FrameNode* frameNode, const std::string& err
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ErrorText, errorText, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowErrorText, visible, frameNode);
+}
+
+void TextFieldModelNG::SetCounterType(FrameNode* frameNode, int32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SetCounter, value, frameNode);
 }
 } // namespace OHOS::Ace::NG
