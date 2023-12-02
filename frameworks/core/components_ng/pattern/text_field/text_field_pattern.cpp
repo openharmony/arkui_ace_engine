@@ -293,7 +293,7 @@ void TextFieldPattern::BeforeCreateLayoutWrapper()
                 break;
             }
             case InputOperation::DELETE_BACKWARD: {
-                DeleteBackward(deleteBackwardOperations_.front());
+                DeleteBackwardOperation(deleteBackwardOperations_.front());
                 deleteBackwardOperations_.pop();
                 break;
             }
