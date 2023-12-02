@@ -2636,13 +2636,6 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         };
         menuParam.onDisappear = std::move(onDisappear);
     }
-    auto effectOptionVal = menuOptions->GetProperty("effectOption");
-    if (effectOptionVal->IsObject()) {
-        auto effectOptionJson = JSRef<JSObject>::Cast(effectOptionVal);
-        EffectOption option;
-        JSViewAbstract::ParseEffectOption(effectOptionJson, option);
-        menuParam.backgroundEffectOption = option;
-    }
     ParseMenuArrowParam(menuOptions, menuParam);
 }
 

@@ -45,6 +45,8 @@ public:
 private:
     static void UpdateMenuPaintProperty(
         const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam, const MenuType& isContextMenu);
+    static void UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode);
+    static void UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode);
 };
 } // namespace OHOS::Ace::NG
 

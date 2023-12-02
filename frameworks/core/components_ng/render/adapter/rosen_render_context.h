@@ -73,7 +73,19 @@ public:
 
     void SetBorderRadius(const BorderRadiusProperty& value) override;
 
+    void SetBorderStyle(const BorderStyleProperty& value) override;
+
+    void SetBorderColor(const BorderColorProperty& value) override;
+
+    void SetBorderWidth(const BorderWidthProperty& value) override;
+
     void SetOuterBorderRadius(const BorderRadiusProperty& value) override;
+
+    void SetOuterBorderStyle(const BorderStyleProperty& value) override;
+
+    void SetOuterBorderColor(const BorderColorProperty& value) override;
+
+    void SetOuterBorderWidth(const BorderWidthProperty& value) override;
 
     void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) override;
 

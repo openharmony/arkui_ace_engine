@@ -64,6 +64,20 @@ public:
                 return;
             }
             theme->previewMenuMaskColor_ = pattern->GetAttr<Color>("preview_menu_mask_color", Color(0x33182431));
+            theme->bgBlurEffectEnable_ =
+                StringUtils::StringToInt(pattern->GetAttr<std::string>("menu_bg_blur_effect_enable", "0"));
+            theme->bgEffectSaturation_ = pattern->GetAttr<double>("menu_blur_effect_saturation", 1.0);
+            theme->bgEffectBrightness_ = pattern->GetAttr<double>("menu_blur_effect_brightness", 1.0);
+            theme->bgEffectRadius_ = pattern->GetAttr<Dimension>("menu_blur_effect_radius", 0.0_vp);
+            theme->bgEffectColor_ = pattern->GetAttr<Color>("menu_blur_effect_color", Color::TRANSPARENT);
+            theme->doubleBorderEnable_ =
+                StringUtils::StringToInt(pattern->GetAttr<std::string>("menu_double_border_enable", "0"));
+            theme->outerBorderWidth_ = pattern->GetAttr<Dimension>("menu_outer_border_width", 0.0_vp);
+            theme->outerBorderRadius_ = pattern->GetAttr<Dimension>("menu_outer_border_radius", 0.0_vp);
+            theme->outerBorderColor_ = pattern->GetAttr<Color>("menu_outer_border_color", Color::TRANSPARENT);
+            theme->innerBorderWidth_ = pattern->GetAttr<Dimension>("menu_inner_border_width", 0.0_vp);
+            theme->innerBorderRadius_ = pattern->GetAttr<Dimension>("menu_inner_border_radius", 0.0_vp);
+            theme->innerBorderColor_ = pattern->GetAttr<Color>("menu_inner_border_color", Color::TRANSPARENT);
             theme->filterAnimationDuration_ = 250;
             theme->previewAnimationDuration_ = 300;
             theme->previewBeforeAnimationScale_ = 0.95f;
@@ -164,6 +178,66 @@ public:
         return previewMenuMaskColor_;
     }
 
+    int32_t GetBgBlurEffectEnable() const
+    {
+        return bgBlurEffectEnable_;
+    }
+
+    double GetBgEffectSaturation() const
+    {
+        return bgEffectSaturation_;
+    }
+
+    double GetBgEffectBrightness() const
+    {
+        return bgEffectBrightness_;
+    }
+
+    Dimension GetBgEffectRadius() const
+    {
+        return bgEffectRadius_;
+    }
+
+    Color GetBgEffectColor() const
+    {
+        return bgEffectColor_;
+    }
+
+    int32_t GetDoubleBorderEnable() const
+    {
+        return doubleBorderEnable_;
+    }
+
+    Dimension GetOuterBorderWidth() const
+    {
+        return outerBorderWidth_;
+    }
+
+    Dimension GetOuterBorderRadius() const
+    {
+        return outerBorderRadius_;
+    }
+
+    Color GetOuterBorderColor() const
+    {
+        return outerBorderColor_;
+    }
+
+    Dimension GetInnerBorderWidth() const
+    {
+        return innerBorderWidth_;
+    }
+
+    Dimension GetInnerBorderRadius() const
+    {
+        return innerBorderRadius_;
+    }
+
+    Color GetInnerBorderColor() const
+    {
+        return innerBorderColor_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -184,6 +258,18 @@ private:
     Dimension filterRadius_;
     Dimension previewBorderRadius_;
     Color previewMenuMaskColor_;
+    int32_t bgBlurEffectEnable_ = 0;
+    double bgEffectSaturation_ = 1.0f;
+    double bgEffectBrightness_ = 1.0f;
+    Dimension bgEffectRadius_;
+    Color bgEffectColor_ = Color::TRANSPARENT;
+    int32_t doubleBorderEnable_ = 0;
+    Dimension outerBorderWidth_;
+    Dimension outerBorderRadius_;
+    Color outerBorderColor_ = Color::TRANSPARENT;
+    Dimension innerBorderWidth_;
+    Dimension innerBorderRadius_;
+    Color innerBorderColor_ = Color::TRANSPARENT;
 };
 
 } // namespace OHOS::Ace::NG

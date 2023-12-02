@@ -102,7 +102,19 @@ public:
 
     virtual void SetBorderRadius(const BorderRadiusProperty& value) {}
 
-    virtual void SetOuterBorderRadius(const BorderRadiusProperty& value) {}
+    virtual void SetBorderStyle(const BorderStyleProperty& value) {};
+
+    virtual void SetBorderColor(const BorderColorProperty& value) {};
+
+    virtual void SetBorderWidth(const BorderWidthProperty& value) {};
+
+    virtual void SetOuterBorderRadius(const BorderRadiusProperty& value) {};
+
+    virtual void SetOuterBorderStyle(const BorderStyleProperty& value) {};
+
+    virtual void SetOuterBorderColor(const BorderColorProperty& value) {};
+
+    virtual void SetOuterBorderWidth(const BorderWidthProperty& value) {};
 
     // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
     // will be unaffected by parent's transition.
