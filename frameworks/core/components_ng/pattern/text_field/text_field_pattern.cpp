@@ -2083,6 +2083,11 @@ void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool is
     ShowSelectOverlayParams showOverlayParams = {
         .animation = animation, .isShowMenu = isShowMenu, .isUpdateMenu = isUpdateMenu
     };
+    if (IsSelected() && selectController_->IsHandleSamePosition()) {
+        isSingleHandle_ = true;
+        selectController_->UpdateCaretIndex(selectController_->GetFirstHandleIndex());
+        selectController_->UpdateCaretOffset();
+    }
     if (isSingleHandle_) {
         StartTwinkling();
         showOverlayParams.firstHandle = std::nullopt;

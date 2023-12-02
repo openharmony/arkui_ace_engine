@@ -135,6 +135,13 @@ public:
                    static_cast<int32_t>(contentController_->GetWideText().length());
     }
 
+    bool IsHandleSamePosition()
+    {
+        bool sameX = NearEqual(firstHandleInfo_.rect.GetX(), secondHandleInfo_.rect.GetX());
+        bool sameY = NearEqual(firstHandleInfo_.rect.GetY(), secondHandleInfo_.rect.GetY());
+        return (sameX && sameY);
+    }
+
     void UpdateParagraph(const RefPtr<Paragraph>& paragraph)
     {
         paragraph_ = paragraph;
