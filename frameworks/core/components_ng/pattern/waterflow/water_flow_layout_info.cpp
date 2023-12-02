@@ -91,6 +91,11 @@ float WaterFlowLayoutInfo::GetMaxMainHeight() const
     return result;
 }
 
+float WaterFlowLayoutInfo::GetContentHeight() const
+{
+    return NearZero(maxHeight_) ? GetMaxMainHeight() : maxHeight_;
+}
+
 float WaterFlowLayoutInfo::GetMainHeight(int32_t crossIndex, int32_t itemIndex)
 {
     float result = 0.0f;

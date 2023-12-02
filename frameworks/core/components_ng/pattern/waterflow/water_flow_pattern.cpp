@@ -142,8 +142,7 @@ void WaterFlowPattern::UpdateScrollBarOffset()
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     auto viewSize = geometryNode->GetFrameSize();
-    UpdateScrollBarRegion(-layoutInfo_.currentOffset_,
-        NearZero(layoutInfo_.maxHeight_) ? layoutInfo_.GetMaxMainHeight() : layoutInfo_.maxHeight_,
+    UpdateScrollBarRegion(-layoutInfo_.currentOffset_, layoutInfo_.GetContentHeight(),
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 };
 
@@ -392,20 +391,20 @@ void WaterFlowPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scr
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, 0.0);
         if (pattern->GetAlwaysEnabled() &&
-            GreatNotEqual(pattern->GetMainContentSize(), pattern->layoutInfo_.maxHeight_)) {
+            GreatNotEqual(pattern->GetMainContentSize(), pattern->layoutInfo_.GetContentHeight())) {
             return 0.0;
         }
-        return pattern->GetMainContentSize() - pattern->layoutInfo_.maxHeight_;
+        return pattern->GetMainContentSize() - pattern->layoutInfo_.GetContentHeight();
     });
     scrollEffect->SetTrailingCallback([]() -> double { return 0.0; });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, 0.0);
         if (pattern->GetAlwaysEnabled() &&
-            GreatNotEqual(pattern->GetMainContentSize(), pattern->layoutInfo_.maxHeight_)) {
+            GreatNotEqual(pattern->GetMainContentSize(), pattern->layoutInfo_.GetContentHeight())) {
             return 0.0;
         }
-        return pattern->GetMainContentSize() - pattern->layoutInfo_.maxHeight_;
+        return pattern->GetMainContentSize() - pattern->layoutInfo_.GetContentHeight();
     });
     scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
 }
