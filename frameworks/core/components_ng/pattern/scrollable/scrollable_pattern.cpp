@@ -1650,10 +1650,10 @@ float ScrollablePattern::GetMainContentSize() const
 void ScrollablePattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 {
     if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
-        ScrollToIndex(0, smooth, ScrollAlign::START);
+        ScrollToIndex(0, false, ScrollAlign::START);
     } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
         // use LAST_ITEM for children count changed after scrollEdge(Edge.Bottom) and before layout
-        ScrollToIndex(LAST_ITEM, smooth, ScrollAlign::END);
+        ScrollToIndex(LAST_ITEM, false, ScrollAlign::END);
     }
 }
 
