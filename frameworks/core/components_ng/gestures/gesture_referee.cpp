@@ -188,6 +188,8 @@ bool GestureScope::CheckRecognizerState()
         }
     }
     return false;
+}
+
 void GestureScope::ForceCleanGestureScope()
 {
     for (const auto& weak : recognizers_) {
