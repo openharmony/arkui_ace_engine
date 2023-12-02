@@ -1503,6 +1503,8 @@ void RichEditorPattern::OnVisibleChange(bool isVisible)
 
 bool RichEditorPattern::CloseKeyboard(bool forceClose)
 {
+    CloseSelectOverlay();
+    ResetSelection();
     if (forceClose) {
         if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
             return CloseCustomKeyboard();
