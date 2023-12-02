@@ -24,6 +24,7 @@ constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 const std::string FORMAT_FONT = "%s|%s|%s";
 const int SIZE_OF_FOUR = 4;
+const int SIZE_OF_ONE = 1;
 
 ArkUINativeModuleValue MenuBridge::SetMenuFontColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
@@ -98,10 +99,24 @@ ArkUINativeModuleValue MenuBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
     Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
-    if (!topLeftArgs->IsString() && !topLeftArgs->IsNumber() && !topRightArgs->IsString() &&
-        !topRightArgs->IsNumber() && !bottomLeftArgs->IsString() && !bottomLeftArgs->IsNumber() &&
-        !bottomRightArgs->IsString() && !bottomRightArgs->IsNumber()) {
+    if (topLeftArgs->IsUndefined() && topRightArgs->IsUndefined() && bottomLeftArgs->IsUndefined() &&
+        bottomRightArgs->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetMenuModifier().ResetRadius(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CalcDimension radius;
+    if (topLeftArgs->IsNumber() || topLeftArgs->IsString() || ArkTSUtils::ParseJsDimensionVp(vm, topLeftArgs, radius)) {
+        if (LessNotEqual(radius.Value(), 0.0)) {
+            GetArkUIInternalNodeAPI()->GetMenuModifier().ResetRadius(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        uint32_t size = SIZE_OF_ONE;
+        double values[size];
+        int units[size];
+        values[NUM_0] = radius.Value();
+        units[NUM_0] = static_cast<int>(radius.Unit());
+        GetArkUIInternalNodeAPI()->GetMenuModifier().SetRadius(nativeNode, values, units, SIZE_OF_ONE);
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -109,11 +124,10 @@ ArkUINativeModuleValue MenuBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
     CalcDimension topRight;
     CalcDimension bottomLeft;
     CalcDimension bottomRight;
-
-    ArkTSUtils::ParseAllRadius(vm, topLeftArgs, topLeft);
-    ArkTSUtils::ParseAllRadius(vm, topRightArgs, topRight);
-    ArkTSUtils::ParseAllRadius(vm, bottomLeftArgs, bottomLeft);
-    ArkTSUtils::ParseAllRadius(vm, bottomRightArgs, bottomRight);
+    ArkTSUtils::ParseJsDimensionVp(vm, topLeftArgs, topLeft);
+    ArkTSUtils::ParseJsDimensionVp(vm, topRightArgs, topRight);
+    ArkTSUtils::ParseJsDimensionVp(vm, bottomLeftArgs, bottomLeft);
+    ArkTSUtils::ParseJsDimensionVp(vm, bottomRightArgs, bottomRight);
 
     uint32_t size = SIZE_OF_FOUR;
     double values[size];
@@ -129,7 +143,6 @@ ArkUINativeModuleValue MenuBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
     units[NUM_3] = static_cast<int>(bottomRight.Unit());
 
     GetArkUIInternalNodeAPI()->GetMenuModifier().SetRadius(nativeNode, values, units, SIZE_OF_FOUR);
-
     return panda::JSValueRef::Undefined(vm);
 }
 
