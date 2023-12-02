@@ -55,7 +55,7 @@ void AnimatorModelNG::Create(const std::string& animatorId)
     auto animatorInfo = page->GetJsAnimator(animatorId);
     if (!animatorInfo) {
         animatorInfo = AceType::MakeRefPtr<AnimatorInfo>();
-        auto animator = CREATE_ANIMATOR();
+        auto animator = CREATE_ANIMATOR(animatorId.c_str());
         animatorInfo->SetAnimator(animator);
         page->AddJsAnimator(animatorId, animatorInfo);
     }

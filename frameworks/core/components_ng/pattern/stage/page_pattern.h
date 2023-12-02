@@ -55,6 +55,11 @@ public:
         return pageInfo_;
     }
 
+    std::string GetPageUrl() const
+    {
+        return pageInfo_ ? pageInfo_->GetPageUrl() : "";
+    }
+
     void OnShow();
 
     void OnHide();
