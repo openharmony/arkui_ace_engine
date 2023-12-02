@@ -17,6 +17,7 @@
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -27,51 +28,15 @@ constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
-constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
-constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr uint32_t DEFAULT_SIDE_BAR_DIVIDER_COLOR = 0x08000000;
 const CalcDimension DEFAULT_MAX_SIDE_BAR_WIDTH(280.0, DimensionUnit::VP);
 const CalcDimension DEFAULT_SIDE_BAR_MIN_CONTENT_WIDTH(360.0, DimensionUnit::VP);
-static bool ParseJsDimensionNG(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
-    DimensionUnit defaultUnit, bool isSupportPercent = true)
-{
-    if (jsValue->IsNumber()) {
-        result = CalcDimension(jsValue->ToNumber(vm)->Value(), defaultUnit);
-        return true;
-    }
-    if (jsValue->IsString()) {
-        auto value = jsValue->ToString(vm)->ToString();
-        if (value.back() == '%' && !isSupportPercent) {
-            return false;
-        }
-        return StringUtils::StringToCalcDimensionNG(jsValue->ToString(vm)->ToString(), result, false, defaultUnit);
-    }
-    // resouce ignore by design
-    return false;
-}
-
-static uint32_t ColorAlphaAdapt(uint32_t origin)
-{
-    uint32_t result = origin;
-    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
-        result = origin | COLOR_ALPHA_VALUE;
-    }
-    return result;
-}
-
-static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
-{
-    if (value->IsNumber()) {
-        result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
-        return true;
-    }
-    if (value->IsString()) {
-        return Color::ParseColorString(value->ToString(vm)->ToString(), result);
-    }
-    // resouce ignore by design
-    return false;
-}
-
+const Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
+const Dimension DEFAULT_CONTROL_BUTTON_WIDTH_V10 = 24.0_vp;
+const Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
+const Dimension DEFAULT_CONTROL_BUTTON_HEIGHT_V10 = 24.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_LEFT = 16.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_TOP = 48.0_vp;
 ArkUINativeModuleValue SideBarContainerBridge::SetSideBarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -79,15 +44,11 @@ ArkUINativeModuleValue SideBarContainerBridge::SetSideBarWidth(ArkUIRuntimeCallI
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> sideBarWidthArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    struct StringAndDouble sideBarWidth {
-        0.0, nullptr
-    };
-    if (sideBarWidthArg->IsNumber()) {
-        sideBarWidth.value = sideBarWidthArg->ToNumber(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetSideBarWidth(nativeNode, &sideBarWidth);
-    } else if (sideBarWidthArg->IsString()) {
-        sideBarWidth.valueStr = sideBarWidthArg->ToString(vm)->ToString().c_str();
-        GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetSideBarWidth(nativeNode, &sideBarWidth);
+    CalcDimension sideBarWidth;
+    if (ArkTSUtils::ParseJsDimensionNG(vm, sideBarWidthArg, sideBarWidth, DimensionUnit::VP, true) &&
+        sideBarWidth.Value() >= 0) {
+        GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetSideBarWidth(
+            nativeNode, sideBarWidth.Value(), static_cast<int32_t>(sideBarWidth.Unit()));
     } else {
         GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().ResetSideBarWidth(nativeNode);
     }
@@ -111,15 +72,11 @@ ArkUINativeModuleValue SideBarContainerBridge::SetMinSideBarWidth(ArkUIRuntimeCa
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> minSideBarWidthArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    struct StringAndDouble minSideBarWidth {
-        0.0, nullptr
-    };
-    if (minSideBarWidthArg->IsNumber()) {
-        minSideBarWidth.value = minSideBarWidthArg->ToNumber(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetMinSideBarWidth(nativeNode, &minSideBarWidth);
-    } else if (minSideBarWidthArg->IsString()) {
-        minSideBarWidth.valueStr = minSideBarWidthArg->ToString(vm)->ToString().c_str();
-        GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetMinSideBarWidth(nativeNode, &minSideBarWidth);
+    CalcDimension minSideBarWidth;
+    if (ArkTSUtils::ParseJsDimensionNG(vm, minSideBarWidthArg, minSideBarWidth, DimensionUnit::VP, true) &&
+        minSideBarWidth.Value() >= 0) {
+        GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetMinSideBarWidth(
+            nativeNode, minSideBarWidth.Value(), static_cast<int32_t>(minSideBarWidth.Unit()));
     } else {
         GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().ResetMinSideBarWidth(nativeNode);
     }
@@ -149,28 +106,49 @@ ArkUINativeModuleValue SideBarContainerBridge::SetControlButton(ArkUIRuntimeCall
     Local<JSValueRef> iconsHiddenArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     Local<JSValueRef> iconsSwitchingArg = runtimeCallInfo->GetCallArgRef(NUM_7);
     double values[NUM_4];
+    void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
+    if (leftArg->IsNumber() && leftArg->ToNumber(vm)->Value() >= 0) {
+        values[NUM_0] = leftArg->ToNumber(vm)->Value();
+    } else {
+        values[NUM_0] = DEFAULT_CONTROL_BUTTON_LEFT.Value();
+    }
+    if (topArg->IsNumber() && topArg->ToNumber(vm)->Value() >= 0) {
+        values[NUM_1] = topArg->ToNumber(vm)->Value();
+    } else {
+        values[NUM_1] = DEFAULT_CONTROL_BUTTON_TOP.Value();
+    }
+    if (widthArg->IsNumber() && widthArg->ToNumber(vm)->Value() >= 0) {
+        values[NUM_2] = widthArg->ToNumber(vm)->Value();
+    } else {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            values[NUM_2] = DEFAULT_CONTROL_BUTTON_WIDTH_V10.Value();
+        } else {
+            values[NUM_2] = DEFAULT_CONTROL_BUTTON_WIDTH.Value();
+        }
+    }
+    if (heightArg->IsNumber() && heightArg->ToNumber(vm)->Value() >= 0) {
+        values[NUM_3] = heightArg->ToNumber(vm)->Value();
+    } else {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            values[NUM_3] = DEFAULT_CONTROL_BUTTON_HEIGHT_V10.Value();
+        } else {
+            values[NUM_3] = DEFAULT_CONTROL_BUTTON_HEIGHT.Value();
+        }
+    }
+    std::string iconsShown;
+    std::string iconsHidden;
+    std::string iconsSwitching;
     struct IconsStruct iconsStruct {
         nullptr, nullptr, nullptr
     };
-    void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    values[NUM_0] = leftArg->ToNumber(vm)->Value();
-    values[NUM_1] = topArg->ToNumber(vm)->Value();
-    values[NUM_2] = widthArg->ToNumber(vm)->Value();
-    values[NUM_3] = heightArg->ToNumber(vm)->Value();
-    if (!iconsShownArg->IsString()) {
-        iconsStruct.ShowIconInfo = nullptr;
-    } else {
-        iconsStruct.ShowIconInfo = iconsShownArg->ToString(vm)->ToString().c_str();
+    if (ArkTSUtils::ParseJsMedia(vm, iconsShownArg, iconsShown)) {
+        iconsStruct.ShowIconInfo = iconsShown.c_str();
     }
-    if (!iconsHiddenArg->IsString()) {
-        iconsStruct.HiddenIconInfo = nullptr;
-    } else {
-        iconsStruct.HiddenIconInfo = iconsHiddenArg->ToString(vm)->ToString().c_str();
+    if (ArkTSUtils::ParseJsMedia(vm, iconsHiddenArg, iconsHidden)) {
+        iconsStruct.HiddenIconInfo = iconsHidden.c_str();
     }
-    if (!iconsSwitchingArg->IsString()) {
-        iconsStruct.SwitchingIconInfo = nullptr;
-    } else {
-        iconsStruct.SwitchingIconInfo = iconsSwitchingArg->ToString(vm)->ToString().c_str();
+    if (ArkTSUtils::ParseJsMedia(vm, iconsSwitchingArg, iconsSwitching)) {
+        iconsStruct.SwitchingIconInfo = iconsSwitching.c_str();
     }
     GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetControlButton(nativeNode, values, &iconsStruct);
     return panda::JSValueRef::Undefined(vm);
@@ -197,6 +175,8 @@ ArkUINativeModuleValue SideBarContainerBridge::SetShowControlButton(ArkUIRuntime
     if (showControlButtonArg->IsBoolean()) {
         isShow = showControlButtonArg->ToBoolean(vm)->Value();
         GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetShowControlButton(nativeNode, isShow);
+    } else {
+        GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().ResetShowControlButton(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -245,7 +225,7 @@ ArkUINativeModuleValue SideBarContainerBridge::SetMaxSideBarWidth(ArkUIRuntimeCa
     Local<JSValueRef> maxSideBarWidthArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
     CalcDimension maxSideBarWidth(DEFAULT_MAX_SIDE_BAR_WIDTH);
-    if (ParseJsDimensionNG(vm, maxSideBarWidthArg, maxSideBarWidth, DimensionUnit::VP, true) &&
+    if (ArkTSUtils::ParseJsDimensionNG(vm, maxSideBarWidthArg, maxSideBarWidth, DimensionUnit::VP, true) &&
         maxSideBarWidth.Value() >= 0) {
         GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetSideBarContainerMaxSideBarWidth(
             nativeNode, maxSideBarWidth.Value(), static_cast<int32_t>(maxSideBarWidth.Unit()));
@@ -273,7 +253,7 @@ ArkUINativeModuleValue SideBarContainerBridge::SetMinContentWidth(ArkUIRuntimeCa
     Local<JSValueRef> minContentWidthArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
     CalcDimension minContentWidth(DEFAULT_SIDE_BAR_MIN_CONTENT_WIDTH);
-    if (ParseJsDimensionNG(vm, minContentWidthArg, minContentWidth, DimensionUnit::VP, true) &&
+    if (ArkTSUtils::ParseJsDimensionNG(vm, minContentWidthArg, minContentWidth, DimensionUnit::VP, true) &&
         minContentWidth.Value() >= 0) {
         GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetSideBarContainerMinContentWidth(
             nativeNode, minContentWidth.Value(), static_cast<int32_t>(minContentWidth.Unit()));
@@ -358,42 +338,39 @@ ArkUINativeModuleValue SideBarContainerBridge::SetDivider(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> startMarginArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> endMarginArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    struct StringAndDouble strokeWidth {
-        0.0, nullptr
-    };
-    struct StringAndDouble startMargin {
-        0.0, nullptr
-    };
-    struct StringAndDouble endMargin {
-        0.0, nullptr
-    };
-    if (strokeWidthArg->IsNumber()) {
-        strokeWidth.value = strokeWidthArg->ToNumber(vm)->Value();
-    } else if (strokeWidthArg->IsString()) {
-        strokeWidth.valueStr = strokeWidthArg->ToString(vm)->ToString().c_str();
+    CalcDimension strokeWidth;
+    CalcDimension startMargin;
+    CalcDimension endMargin;
+    double values[NUM_3] = { 1.0, 0.0, 0.0 };
+    int32_t units[NUM_3] = { static_cast<int32_t>(DimensionUnit::VP) };
+    if (ArkTSUtils::ParseJsDimensionNG(vm, strokeWidthArg, strokeWidth, DimensionUnit::VP, false)) {
+        values[NUM_0] = strokeWidth.Value();
+        units[NUM_0] = static_cast<int32_t>(strokeWidth.Unit());
     } else {
-        return panda::JSValueRef::Undefined(vm);
+        strokeWidth.SetValue(1.0);
+        strokeWidth.SetUnit(DimensionUnit::VP);
     }
+    if (ArkTSUtils::ParseJsDimensionNG(vm, startMarginArg, startMargin, DimensionUnit::VP, false)) {
+        values[NUM_1] = startMargin.Value();
+        units[NUM_1] = static_cast<int32_t>(startMargin.Unit());
+    } else {
+        startMargin.SetValue(0.0);
+        startMargin.SetUnit(DimensionUnit::VP);
+    }
+    if (ArkTSUtils::ParseJsDimensionNG(vm, endMarginArg, endMargin, DimensionUnit::VP, false)) {
+        values[NUM_2] = endMargin.Value();
+        units[NUM_2] = static_cast<int32_t>(endMargin.Unit());
+    } else {
+        endMargin.SetValue(0.0);
+        endMargin.SetUnit(DimensionUnit::VP);
+    }
+
     Color color(DEFAULT_SIDE_BAR_DIVIDER_COLOR);
-    if (!ParseJsColor(vm, colorArg, color)) {
+    if (!ArkTSUtils::ParseJsColor(vm, colorArg, color)) {
         color.SetValue(DEFAULT_SIDE_BAR_DIVIDER_COLOR);
     }
-    if (startMarginArg->IsNumber()) {
-        startMargin.value = startMarginArg->ToNumber(vm)->Value();
-    } else if (startMarginArg->IsString()) {
-        startMargin.valueStr = startMarginArg->ToString(vm)->ToString().c_str();
-    } else {
-        startMargin.value = 0.0;
-    }
-    if (endMarginArg->IsNumber()) {
-        endMargin.value = endMarginArg->ToNumber(vm)->Value();
-    } else if (endMarginArg->IsString()) {
-        endMargin.valueStr = endMarginArg->ToString(vm)->ToString().c_str();
-    } else {
-        endMargin.value = 0.0;
-    }
     GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetSideBarContainerDivider(
-        nativeNode, &strokeWidth, color.GetValue(), &startMargin, &endMargin);
+        nativeNode, values, units, NUM_3, color.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -488,6 +488,9 @@ void ArkTSUtils::ParseAllBorder(const EcmaVM *vm, const Local<JSValueRef> &args,
 bool ArkTSUtils::ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
     DimensionUnit defaultUnit, bool isSupportPercent)
 {
+    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
+        return false;
+    }
     if (jsValue->IsNumber()) {
         result = CalcDimension(jsValue->ToNumber(vm)->Value(), defaultUnit);
         return true;
@@ -662,6 +665,7 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
     }
     return false;
 }
+
 std::string ArkTSUtils::GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value)
 {
     std::string result = DEFAULT_STR;
@@ -704,5 +708,22 @@ bool ArkTSUtils::ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsVa
         return true;
     }
     return false;
+}
+
+void ArkTSUtils::GetJsMediaBundleInfo(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& bundleName, std::string& moduleName)
+{
+    if (!jsValue->IsObject() || jsValue->IsString()) {
+        return;
+    }
+    auto jsObj = jsValue->ToObject(vm);
+    if (!jsObj->IsUndefined()) {
+        auto bundle = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
+        auto module = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
+        if (bundle->IsString() && module->IsString()) {
+            bundleName = bundle->ToString(vm)->ToString();
+            moduleName = module->ToString(vm)->ToString();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

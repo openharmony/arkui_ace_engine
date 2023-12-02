@@ -242,12 +242,13 @@ ArkUINativeModuleValue ImageBridge::SetFillColor(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
-    if (secondArg->IsNumber()) {
-        uint32_t value = secondArg->Uint32Value(vm);
-        GetArkUIInternalNodeAPI()->GetImageModifier().SetFillColor(nativeNode, value);
+    Color color;
+    if (!ArkTSUtils::ParseJsColor(vm, colorArg, color)) {
+        GetArkUIInternalNodeAPI()->GetImageModifier().ResetFillColor(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetFillColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -269,10 +270,20 @@ ArkUINativeModuleValue ImageBridge::SetAlt(ArkUIRuntimeCallInfo* runtimeCallInfo
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
-    if (secondArg->IsString()) {
-        GetArkUIInternalNodeAPI()->GetImageModifier().SetAlt(nativeNode, secondArg->ToString(vm)->ToString().c_str());
+    std::string src;
+    if (!ArkTSUtils::ParseJsMedia(vm, secondArg, src)) {
+        GetArkUIInternalNodeAPI()->GetImageModifier().ResetAlt(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
+    if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
+        GetArkUIInternalNodeAPI()->GetImageModifier().ResetAlt(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::string bundleName;
+    std::string moduleName;
+    ArkTSUtils::GetJsMediaBundleInfo(vm, secondArg, bundleName, moduleName);
+    GetArkUIInternalNodeAPI()->GetImageModifier().SetAlt(
+        nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 

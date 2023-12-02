@@ -182,15 +182,15 @@ void ResetFillColor(NodeHandle node)
     return;
 }
 
-void SetAlt(NodeHandle node, const char *value)
+void SetAlt(NodeHandle node, const char *src, const char *bundleName, const char *moduleName)
 {
-    if (ImageSourceInfo::ResolveURIType(value) == SrcType::NETWORK) {
+    if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
         return;
     }
 
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetAlt(frameNode, value);
+    ImageModelNG::SetAlt(frameNode, ImageSourceInfo { src, bundleName, moduleName });
 }
 
 void ResetAlt(NodeHandle node)
