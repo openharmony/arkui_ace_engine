@@ -16,6 +16,7 @@
 
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/properties/color.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -264,8 +265,12 @@ ArkUINativeModuleValue TabsBridge::SetBarBackgroundColor(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t color = secondArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetTabsModifier().SetBarBackgroundColor(nativeNode, color);
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+        GetArkUIInternalNodeAPI()->GetTabsModifier().ResetBarBackgroundColor(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetTabsModifier().SetBarBackgroundColor(nativeNode, color.GetValue());
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -376,7 +381,7 @@ ArkUINativeModuleValue TabsBridge::SetTabBarWidth(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension width;
 
-    if (jsValue->IsUndefined() || !ParseJsDimensionVp(vm, jsValue, width)) {
+    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionFromResource(vm, jsValue, DimensionUnit::VP, width)) {
         GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarWidth(nativeNode);
     } else {
         if (LessNotEqual(width.Value(), 0.0)) {
@@ -407,7 +412,7 @@ ArkUINativeModuleValue TabsBridge::SetTabBarHeight(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension height;
 
-    if (jsValue->IsUndefined() || !ParseJsDimensionVp(vm, jsValue, height)) {
+    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionFromResource(vm, jsValue, DimensionUnit::VP, height)) {
         GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarHeight(nativeNode);
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
