@@ -190,6 +190,9 @@ WebPattern::~WebPattern()
 
 bool WebPattern::NeedSoftKeyboard() const
 {
+    if (delegate_) {
+        return delegate_->NeedSoftKeyboard();
+    }
     return false;
 }
 
