@@ -3992,6 +3992,31 @@ void RosenRenderContext::OnTransitionInFinish()
     RemoveDefaultTransition();
 }
 
+void RosenRenderContext::GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent)
+{
+    while (breakPointParent && !breakPointChild->IsDisappearing()) {
+        // recursively looking up the node tree, until we reach the breaking point (IsDisappearing() == true).
+        // Because when trigger transition, only the breakPoint will be marked as disappearing and
+        // moved to disappearingChildren.
+        breakPointChild = breakPointParent;
+        breakPointParent = breakPointParent->GetParent();
+    }
+    RefPtr<UINode> betterChild = breakPointChild;
+    RefPtr<UINode> betterParent = breakPointParent;
+    // when current breakPointParent is UINode, looking up the node tree to see whether there is a better breakPoint.
+    while (betterParent && !InstanceOf<FrameNode>(betterParent)) {
+        if (betterChild->IsDisappearing()) {
+            if (!betterChild->RemoveImmediately()) {
+                break;
+            }
+            breakPointChild = betterChild;
+            breakPointParent = betterParent;
+        }
+        betterChild = betterParent;
+        betterParent = betterParent->GetParent();
+    }
+}
+
 void RosenRenderContext::OnTransitionOutFinish()
 {
     // update transition out count
@@ -4017,13 +4042,7 @@ void RosenRenderContext::OnTransitionOutFinish()
     }
     RefPtr<UINode> breakPointChild = host;
     RefPtr<UINode> breakPointParent = breakPointChild->GetParent();
-    while (breakPointParent && !breakPointChild->IsDisappearing()) {
-        // recursively looking up the node tree, until we reach the breaking point (IsDisappearing() == true).
-        // Because when trigger transition, only the breakPoint will be marked as disappearing and
-        // moved to disappearingChildren.
-        breakPointChild = breakPointParent;
-        breakPointParent = breakPointParent->GetParent();
-    }
+    GetBestBreakPoint(breakPointChild, breakPointParent);
     // if can not find the breakPoint, means the node is not disappearing (reappear?), return.
     if (!breakPointParent) {
         return;
