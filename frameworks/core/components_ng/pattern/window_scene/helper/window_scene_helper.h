@@ -41,9 +41,9 @@ public:
 
     static bool IsFocusWindowSceneCloseKeyboard(RefPtr<FrameNode> focusedFrameNode);
 
-    static void IsWindowSceneCloseKeyboard(bool isFocusTypeNode, RefPtr<FrameNode> frameNode);
+    static void IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode);
 
-    static void IsCloseKeyboard(bool isFocusTypeNode, RefPtr<FrameNode> frameNode);
+    static void IsCloseKeyboard(RefPtr<FrameNode> frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_HELPER_H

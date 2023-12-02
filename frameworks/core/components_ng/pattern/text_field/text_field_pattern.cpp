@@ -1021,6 +1021,14 @@ void TextFieldPattern::HandleOnCameraInput()
         MiscServices::TextConfig textConfig = optionalTextConfig.value();
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnCameraInput set calling window id is : %{public}u",
             textConfig.windowId);
+#ifdef WINDOW_SCENE_SUPPORTED
+        auto systemWindowId = GetSCBSystemWindowId();
+        if (systemWindowId) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+                "windowId From %{public}u to %{public}u.", textConfig.windowId, systemWindowId);
+            textConfig.windowId = systemWindowId;
+        }
+#endif
         inputMethod->Attach(textChangeListener_, false, textConfig);
         inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
         inputMethod->ShowTextInput();
@@ -2715,11 +2723,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     CHECK_NULL_RETURN(tmpHost, false);
     auto context = tmpHost->GetContext();
     CHECK_NULL_RETURN(context, false);
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (imeShown_) {
-        return true;
-    }
-#endif
+
     if (needShowSoftKeyboard) {
         if (customKeyboardBuilder_) {
             return RequestCustomKeyboard();

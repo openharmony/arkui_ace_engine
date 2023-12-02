@@ -1123,9 +1123,9 @@ void FocusHub::OnFocusNode()
 #if defined (ENABLE_STANDARD_INPUT)
     // If focus pattern does not need softkeyboard, close it.
 #ifdef WINDOW_SCENE_SUPPORTED
-    WindowSceneHelper::IsWindowSceneCloseKeyboard(focusType_ == FocusType::NODE, frameNode);
+    WindowSceneHelper::IsWindowSceneCloseKeyboard(frameNode);
 #else
-    WindowSceneHelper::IsCloseKeyboard(focusType_ == FocusType::NODE, frameNode);
+    WindowSceneHelper::IsCloseKeyboard(frameNode);
 #endif
 #endif
 
