@@ -14,6 +14,7 @@
  */
 
 #include "core/components/theme/theme_manager_impl.h"
+#include "shadow_theme.h"
 
 #include "core/components/badge/badge_theme.h"
 #include "core/components/button/button_theme.h"
@@ -53,10 +54,13 @@
 #include "core/components/text/text_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components/theme/advanced_pattern_theme.h"
 #include "core/components/theme/app_theme.h"
+#include "core/components/theme/blur_style_theme.h"
 #include "core/components/theme/card_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components/theme/resource_adapter.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components/tool_bar/tool_bar_theme.h"
@@ -68,7 +72,6 @@
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
-#include "core/components/theme/advanced_pattern_theme.h"
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
@@ -140,6 +143,8 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::MenuTheme::TypeId(), &ThemeBuildFunc<NG::MenuTheme::Builder> },
     { NG::GaugeTheme::TypeId(), &ThemeBuildFunc<NG::GaugeTheme::Builder> },
     { NG::SheetTheme::TypeId(), &ThemeBuildFunc<NG::SheetTheme::Builder> },
+    { BlurStyleTheme::TypeId(), &ThemeBuildFunc<BlurStyleTheme::Builder> },
+    { ShadowTheme::TypeId(), &ThemeBuildFunc<ShadowTheme::Builder> }
 };
 } // namespace
 

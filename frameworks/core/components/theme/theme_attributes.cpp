@@ -78,6 +78,8 @@ const char THEME_PATTERN_PATTERN_LOCK[] = "pattern_lock_pattern";
 const char THEME_PATTERN_GAUGE[] = "gauge_pattern";
 const char THEME_PATTERN_SHEET[] = "sheet_pattern";
 
+const char THEME_BLUR_STYLE_COMMON[] = "blur_style_common";
+const char THEME_PATTERN_SHADOW[] = "shadow_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
