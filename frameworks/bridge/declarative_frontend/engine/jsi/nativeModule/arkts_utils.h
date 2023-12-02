@@ -77,6 +77,8 @@ public:
     }
     static std::string GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value);
     static bool ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result);
+    static void GetJsMediaBundleInfo(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& bundleName, std::string& moduleName);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

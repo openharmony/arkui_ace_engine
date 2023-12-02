@@ -752,7 +752,7 @@ struct ArkUIImageModifierAPI {
     void (*ResetMatchTextDirection)(NodeHandle node);
     void (*SetFillColor)(NodeHandle node, uint32_t value);
     void (*ResetFillColor)(NodeHandle node);
-    void (*SetAlt)(NodeHandle node, const char *value);
+    void (*SetAlt)(NodeHandle node, const char *src, const char *bundleName, const char *moduleName);
     void (*ResetAlt)(NodeHandle node);
     void (*SetImageInterpolation)(NodeHandle node, int32_t value);
     void (*ResetImageInterpolation)(NodeHandle node);
@@ -847,9 +847,9 @@ struct ArkUIImageAnimatorModifierAPI {
 };
 
 struct ArkUISideBarContainerModifierAPI {
-    void (*SetSideBarWidth)(NodeHandle node, const struct StringAndDouble* sideBarWidth);
+    void (*SetSideBarWidth)(NodeHandle node, double value, int32_t unit);
     void (*ResetSideBarWidth)(NodeHandle node);
-    void (*SetMinSideBarWidth)(NodeHandle node, const struct StringAndDouble* minSideBarWidth);
+    void (*SetMinSideBarWidth)(NodeHandle node, double value, int32_t unit);
     void (*ResetMinSideBarWidth)(NodeHandle node);
     void (*SetControlButton)(NodeHandle node, double* values, const struct IconsStruct* sideBarWidth);
     void (*ResetControlButton)(NodeHandle node);
@@ -865,8 +865,7 @@ struct ArkUISideBarContainerModifierAPI {
     void (*ResetSideBarPosition)(NodeHandle node);
     void (*SetShowSideBar)(NodeHandle node, bool isShow);
     void (*ResetShowSideBar)(NodeHandle node);
-    void (*SetSideBarContainerDivider)(NodeHandle node, const struct StringAndDouble* strokeWidthStruct, uint32_t color,
-        const struct StringAndDouble* startMarginStruct, const struct StringAndDouble* endMarginStruct);
+    void (*SetSideBarContainerDivider)(NodeHandle node, double* values, int32_t* units, int32_t length, uint32_t color);
     void (*ResetSideBarContainerDivider)(NodeHandle node);
 };
 

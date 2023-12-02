@@ -22,6 +22,10 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
+constexpr int NUM_2 = 2;
+constexpr int NUM_3 = 3;
 const Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
 const Dimension DEFAULT_SIDE_BAR_WIDTH_V10 = 240.0_vp;
 const Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
@@ -42,17 +46,12 @@ constexpr SideBarPosition DEFAULT_SIDE_BAR_POSITION = SideBarPosition::START;
 constexpr uint32_t DEFAULT_SIDE_BAR_DIVIDER_COLOR = 0x08000000;
 const Dimension DEFAULT_START_MARGIN(0.0, DimensionUnit::VP);
 const Dimension DEFAULT_END_MARGIN(0.0, DimensionUnit::VP);
-void SetSideBarWidth(NodeHandle node, const struct StringAndDouble* sideBarWidth)
+void SetSideBarWidth(NodeHandle node, double value, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result;
-    if (sideBarWidth->valueStr != nullptr) {
-        result = StringUtils::StringToCalcDimension(sideBarWidth->valueStr, true, DimensionUnit::VP);
-    } else {
-        result = CalcDimension(sideBarWidth->value, DimensionUnit::VP);
-    }
-    SideBarContainerModelNG::SetSideBarWidth(frameNode, result);
+    Dimension sideBarWidthDimension(value, static_cast<DimensionUnit>(unit));
+    SideBarContainerModelNG::SetSideBarWidth(frameNode, sideBarWidthDimension);
 }
 
 void ResetSideBarWidth(NodeHandle node)
@@ -66,17 +65,12 @@ void ResetSideBarWidth(NodeHandle node)
     SideBarContainerModelNG::SetSideBarWidth(frameNode, DEFAULT_SIDE_BAR_WIDTH);
 }
 
-void SetMinSideBarWidth(NodeHandle node, const struct StringAndDouble* minSideBarWidth)
+void SetMinSideBarWidth(NodeHandle node, double value, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result;
-    if (minSideBarWidth->valueStr != nullptr) {
-        result = StringUtils::StringToCalcDimension(minSideBarWidth->valueStr, true, DimensionUnit::VP);
-    } else {
-        result = CalcDimension(minSideBarWidth->value, DimensionUnit::VP);
-    }
-    SideBarContainerModelNG::SetMinSideBarWidth(frameNode, result);
+    Dimension minSideBarWidthDimension(value, static_cast<DimensionUnit>(unit));
+    SideBarContainerModelNG::SetMinSideBarWidth(frameNode, minSideBarWidthDimension);
 }
 
 void ResetMinSideBarWidth(NodeHandle node)
@@ -218,32 +212,18 @@ void ResetShowSideBar(NodeHandle node)
     SideBarContainerModelNG::SetShowSideBar(frameNode, DEFAULT_SHOW_SIDE_BAR);
 }
 
-void SetSideBarContainerDivider(NodeHandle node, const struct StringAndDouble* strokeWidthStruct, uint32_t color,
-    const struct StringAndDouble* startMarginStruct, const struct StringAndDouble* endMarginStruct)
+void SetSideBarContainerDivider(NodeHandle node, double* values, int32_t* units, int32_t length, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension strokeWidth(DEFAULT_DIVIDER_STROKE_WIDTH);
-    CalcDimension startMargin(DEFAULT_START_MARGIN);
-    CalcDimension endMargin(DEFAULT_END_MARGIN);
-    if (strokeWidthStruct->valueStr != nullptr) {
-        strokeWidth = StringUtils::StringToCalcDimension(std::string(strokeWidthStruct->valueStr),
-        false, DimensionUnit::VP);
-    } else {
-        strokeWidth = CalcDimension(strokeWidthStruct->value, DimensionUnit::VP);
+    CHECK_NULL_VOID(values);
+    CHECK_NULL_VOID(units);
+    if (length != NUM_3) {
+        return;
     }
-    if (startMarginStruct->valueStr != nullptr) {
-        startMargin = StringUtils::StringToCalcDimension(std::string(strokeWidthStruct->valueStr),
-        false, DimensionUnit::VP);
-    } else {
-        startMargin = CalcDimension(startMarginStruct->value, DimensionUnit::VP);
-    }
-    if (endMarginStruct->valueStr != nullptr) {
-        endMargin = StringUtils::StringToCalcDimension(std::string(strokeWidthStruct->valueStr),
-        false, DimensionUnit::VP);
-    } else {
-        endMargin = CalcDimension(endMarginStruct->value, DimensionUnit::VP);
-    }
+    Dimension strokeWidth(values[NUM_0], static_cast<DimensionUnit>(units[NUM_0]));
+    Dimension startMargin(values[NUM_1], static_cast<DimensionUnit>(units[NUM_1]));
+    Dimension endMargin(values[NUM_2], static_cast<DimensionUnit>(units[NUM_2]));
     SideBarContainerModelNG::SetDividerStrokeWidth(frameNode, strokeWidth);
     SideBarContainerModelNG::SetDividerColor(frameNode, Color(color));
     SideBarContainerModelNG::SetDividerStartMargin(frameNode, startMargin);

@@ -22,7 +22,7 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-constexpr uint32_t DEFAULT_DIVIDER_COLOR = 0xFF007DFF;
+constexpr uint32_t DEFAULT_DIVIDER_COLOR = 0x33182431;
 constexpr bool DEFAULT_DIVIDER_VERTICAL = false;
 const Dimension DEFAULT_DIVIDER_STROKE_WIDTH(1, DimensionUnit::PX);
 const LineCap DEFAULT_DIVIDER_LINE_CAP = LineCap::BUTT;

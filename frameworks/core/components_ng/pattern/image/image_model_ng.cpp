@@ -278,9 +278,9 @@ void ImageModelNG::SetImageFill(FrameNode *frameNode, const Color &color)
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
 }
 
-void ImageModelNG::SetAlt(FrameNode *frameNode, const std::string &src)
+void ImageModelNG::SetAlt(FrameNode *frameNode, const ImageSourceInfo &src)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, ImageSourceInfo(src), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, src, frameNode);
 }
 
 void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation)
