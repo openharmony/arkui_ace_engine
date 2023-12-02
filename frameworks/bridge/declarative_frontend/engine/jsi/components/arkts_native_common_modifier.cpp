@@ -1626,8 +1626,8 @@ void ResetOffset(NodeHandle node)
     Dimension yVal(0.0, DimensionUnit::VP);
     ViewAbstract::SetOffset(frameNode, { xVal, yVal });
 }
-void SetPadding(NodeHandle node, const struct StringAndDouble *top, const struct StringAndDouble *right,
-    const struct StringAndDouble *bottom, const struct StringAndDouble *left)
+void SetPadding(NodeHandle node, const struct ArkUISizeType *top, const struct ArkUISizeType *right,
+    const struct ArkUISizeType *bottom, const struct ArkUISizeType *left)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1636,28 +1636,10 @@ void SetPadding(NodeHandle node, const struct StringAndDouble *top, const struct
     std::optional<OHOS::Ace::CalcDimension> bottomDimen;
     std::optional<OHOS::Ace::CalcDimension> leftDimen;
 
-    if (top->valueStr != nullptr) {
-        topDimen = StringUtils::StringToCalcDimension(std::string(top->valueStr), false, DimensionUnit::VP);
-    } else {
-        topDimen = CalcDimension(top->value, DimensionUnit::VP);
-    }
-    if (right->valueStr != nullptr) {
-        rightDimen = StringUtils::StringToCalcDimension(std::string(right->valueStr), false, DimensionUnit::VP);
-    } else {
-        rightDimen = CalcDimension(right->value, DimensionUnit::VP);
-    }
-
-    if (bottom->valueStr != nullptr) {
-        bottomDimen = StringUtils::StringToCalcDimension(std::string(bottom->valueStr), false, DimensionUnit::VP);
-    } else {
-        bottomDimen = CalcDimension(bottom->value, DimensionUnit::VP);
-    }
-
-    if (left->valueStr != nullptr) {
-        leftDimen = StringUtils::StringToCalcDimension(std::string(left->valueStr), false, DimensionUnit::VP);
-    } else {
-        leftDimen = CalcDimension(left->value, DimensionUnit::VP);
-    }
+    topDimen = CalcDimension(top->value, static_cast<DimensionUnit>(top->unit));
+    rightDimen = CalcDimension(right->value, static_cast<DimensionUnit>(right->unit));
+    bottomDimen = CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit));
+    leftDimen = CalcDimension(left->value, static_cast<DimensionUnit>(left->unit));
     NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(topDimen, bottomDimen, leftDimen, rightDimen);
     ViewAbstract::SetPadding(frameNode, paddings);
 }
@@ -1941,8 +1923,8 @@ void ResetDisplayPriority(NodeHandle node)
     ViewAbstract::SetDisplayIndex(frameNode, DEFAULT_DISPLAY_PRIORITY);
 }
 
-void SetMargin(NodeHandle node, const struct StringAndDouble *top, const struct StringAndDouble *right,
-    const struct StringAndDouble *bottom, const struct StringAndDouble *left)
+void SetMargin(NodeHandle node, const struct ArkUISizeType *top, const struct ArkUISizeType *right,
+    const struct ArkUISizeType *bottom, const struct ArkUISizeType *left)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1950,30 +1932,10 @@ void SetMargin(NodeHandle node, const struct StringAndDouble *top, const struct 
     std::optional<OHOS::Ace::CalcDimension> rightDimen;
     std::optional<OHOS::Ace::CalcDimension> bottomDimen;
     std::optional<OHOS::Ace::CalcDimension> leftDimen;
-
-    if (top->valueStr != nullptr) {
-        topDimen = StringUtils::StringToCalcDimension(std::string(top->valueStr), false, DimensionUnit::VP);
-    } else {
-        topDimen = CalcDimension(top->value, DimensionUnit::VP);
-    }
-
-    if (right->valueStr != nullptr) {
-        rightDimen = StringUtils::StringToCalcDimension(std::string(right->valueStr), false, DimensionUnit::VP);
-    } else {
-        rightDimen = CalcDimension(right->value, DimensionUnit::VP);
-    }
-
-    if (bottom->valueStr != nullptr) {
-        bottomDimen = StringUtils::StringToCalcDimension(std::string(bottom->valueStr), false, DimensionUnit::VP);
-    } else {
-        bottomDimen = CalcDimension(bottom->value, DimensionUnit::VP);
-    }
-
-    if (left->valueStr != nullptr) {
-        leftDimen = StringUtils::StringToCalcDimension(std::string(left->valueStr), false, DimensionUnit::VP);
-    } else {
-        leftDimen = CalcDimension(left->value, DimensionUnit::VP);
-    }
+    topDimen = CalcDimension(top->value, static_cast<DimensionUnit>(top->unit));
+    rightDimen = CalcDimension(right->value, static_cast<DimensionUnit>(right->unit));
+    bottomDimen = CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit));
+    leftDimen = CalcDimension(left->value, static_cast<DimensionUnit>(left->unit));
     NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(topDimen, bottomDimen, leftDimen, rightDimen);
     ViewAbstract::SetMargin(frameNode, paddings);
 }
@@ -2098,17 +2060,12 @@ void ResetLayoutWeight(NodeHandle node)
     ViewAbstract::SetLayoutWeight(frameNode, DEFAULT_COMMON_LAYOUTWEIGHT);
 }
 
-void SetMinWidth(NodeHandle node, const struct StringAndDouble *minWidth)
+void SetMinWidth(NodeHandle node, const struct ArkUISizeType *minWidth)
 {
     CHECK_NULL_VOID(minWidth);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result;
-    if (minWidth->valueStr != nullptr) {
-        result = StringUtils::StringToCalcDimension(std::string(minWidth->valueStr), true, DimensionUnit::VP);
-    } else {
-        result = CalcDimension(minWidth->value, DimensionUnit::VP);
-    }
+    CalcDimension result(minWidth->value, static_cast<DimensionUnit>(minWidth->unit));
     ViewAbstract::SetMinWidth(frameNode, CalcLength(result));
 }
 
@@ -2119,17 +2076,12 @@ void ResetMinWidth(NodeHandle node)
     ViewAbstract::ResetMinSize(frameNode, true);
 }
 
-void SetMaxWidth(NodeHandle node, const struct StringAndDouble* maxWidth)
+void SetMaxWidth(NodeHandle node, const struct ArkUISizeType* maxWidth)
 {
     CHECK_NULL_VOID(maxWidth);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result;
-    if (maxWidth->valueStr != nullptr) {
-        result = StringUtils::StringToCalcDimension(std::string(maxWidth->valueStr), true, DimensionUnit::VP);
-    } else {
-        result = CalcDimension(maxWidth->value, DimensionUnit::VP);
-    }
+    CalcDimension result(maxWidth->value, static_cast<DimensionUnit>(maxWidth->unit));
     ViewAbstract::SetMaxWidth(frameNode, CalcLength(result));
 }
 
@@ -2140,17 +2092,12 @@ void ResetMaxWidth(NodeHandle node)
     ViewAbstract::ResetMaxSize(frameNode, true);
 }
 
-void SetMinHeight(NodeHandle node, const struct StringAndDouble* minHeight)
+void SetMinHeight(NodeHandle node, const struct ArkUISizeType* minHeight)
 {
     CHECK_NULL_VOID(minHeight);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result;
-    if (minHeight->valueStr != nullptr) {
-        result = StringUtils::StringToCalcDimension(std::string(minHeight->valueStr), true, DimensionUnit::VP);
-    } else {
-        result = CalcDimension(minHeight->value, DimensionUnit::VP);
-    }
+    CalcDimension result(minHeight->value, static_cast<DimensionUnit>(minHeight->unit));
     ViewAbstract::SetMinHeight(frameNode, CalcLength(result));
 }
 
@@ -2161,17 +2108,12 @@ void ResetMinHeight(NodeHandle node)
     ViewAbstract::ResetMinSize(frameNode, false);
 }
 
-void SetMaxHeight(NodeHandle node, const struct StringAndDouble* maxHeight)
+void SetMaxHeight(NodeHandle node, const struct ArkUISizeType* maxHeight)
 {
     CHECK_NULL_VOID(maxHeight);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result;
-    if (maxHeight->valueStr != nullptr) {
-        result = StringUtils::StringToCalcDimension(std::string(maxHeight->valueStr), true, DimensionUnit::VP);
-    } else {
-        result = CalcDimension(maxHeight->value, DimensionUnit::VP);
-    }
+    CalcDimension result(maxHeight->value, static_cast<DimensionUnit>(maxHeight->unit));
     ViewAbstract::SetMaxHeight(frameNode, CalcLength(result));
 }
 

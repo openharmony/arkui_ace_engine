@@ -239,11 +239,11 @@ struct ArkUICommonModifierAPI {
     void (*ResetDisplayPriority)(NodeHandle node);
     void (*SetOffset)(NodeHandle node, const double *number, const int8_t *unit);
     void (*ResetOffset)(NodeHandle node);
-    void (*SetPadding)(NodeHandle node, const struct StringAndDouble *top, const struct StringAndDouble *right,
-        const struct StringAndDouble *bottom, const struct StringAndDouble *left);
+    void (*SetPadding)(NodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
+        const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
     void (*ResetPadding)(NodeHandle node);
-    void (*SetMargin)(NodeHandle node, const struct StringAndDouble *top, const struct StringAndDouble *right,
-        const struct StringAndDouble *bottom, const struct StringAndDouble *left);
+    void (*SetMargin)(NodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
+        const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
     void (*ResetMargin)(NodeHandle node);
     void (*SetMarkAnchor)(NodeHandle node, double xValue, int32_t xUnit, double yValue, int32_t yUnit);
     void (*ResetMarkAnchor)(NodeHandle node);
@@ -259,13 +259,13 @@ struct ArkUICommonModifierAPI {
     void (*ResetDirection)(NodeHandle node);
     void (*SetLayoutWeight)(NodeHandle node, int32_t layoutWeight);
     void (*ResetLayoutWeight)(NodeHandle node);
-    void (*SetMinWidth)(NodeHandle node, const struct StringAndDouble* minWidth);
+    void (*SetMinWidth)(NodeHandle node, const struct ArkUISizeType* minWidth);
     void (*ResetMinWidth)(NodeHandle node);
-    void (*SetMaxWidth)(NodeHandle node, const struct StringAndDouble* maxWidth);
+    void (*SetMaxWidth)(NodeHandle node, const struct ArkUISizeType* maxWidth);
     void (*ResetMaxWidth)(NodeHandle node);
-    void (*SetMinHeight)(NodeHandle node, const struct StringAndDouble* minHeight);
+    void (*SetMinHeight)(NodeHandle node, const struct ArkUISizeType* minHeight);
     void (*ResetMinHeight)(NodeHandle node);
-    void (*SetMaxHeight)(NodeHandle node, const struct StringAndDouble* maxHeight);
+    void (*SetMaxHeight)(NodeHandle node, const struct ArkUISizeType* maxHeight);
     void (*ResetMaxHeight)(NodeHandle node);
     void (*SetSize)(NodeHandle node, const double* number, const int8_t* unit, const char** calc);
     void (*ResetSize)(NodeHandle node);
