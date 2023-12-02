@@ -1832,7 +1832,7 @@ class stateMgmtConsole {
         // aceConsole.debug(...args);
     }
     static applicationError(...args) {
-        aceConsole.warn(`FIX THIS APPLICATION ERROR \n`, ...args);
+        aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
     }
 }
 class stateMgmtTrace {
@@ -4451,6 +4451,7 @@ class ViewPU extends NativeViewPartialUpdate {
         this.isDeleting_ = false;
         this.watchedProps = new Map();
         this.recycleManager = undefined;
+        this.isCompFreezeAllowed = false;
         this.extraInfo_ = undefined;
         // Set of dependent elmtIds that need partial update
         // during next re-render
@@ -4458,8 +4459,6 @@ class ViewPU extends NativeViewPartialUpdate {
         // registry of update functions
         // the key is the elementId of the Component/Element that's the result of this function
         this.updateFuncByElmtId = new Map();
-        // set of all @Local/StorageLink/Prop variables owned by this ViwPU
-        this.ownStorageLinksProps_ = new Set();
         // my LocalStorage instance, shared with ancestor Views.
         // create a default instance on demand if none is initialized
         this.localStoragebackStore_ = undefined;
@@ -4515,10 +4514,14 @@ class ViewPU extends NativeViewPartialUpdate {
         // it will unregister removed elementids from all the viewpu, equals purgeDeletedElmtIdsRecursively
         this.purgeDeletedElmtIds();
         
+        // in case ViewPU is currently frozen
+        ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
         this.providedVars_.clear();
-        this.ownStorageLinksProps_.clear();
+        if (this.ownObservedPropertiesStore__) {
+            this.ownObservedPropertiesStore__.clear();
+        }
         if (this.parent_) {
             this.parent_.removeChild(this);
         }
@@ -4590,7 +4593,7 @@ class ViewPU extends NativeViewPartialUpdate {
    */
     setActiveInternal(active) {
         
-        if (this.isActive_ == active) {
+        if (!this.isCompFreezeAllowed) {
             
             
             return;
@@ -4611,6 +4614,8 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         
         this.performDelayedUpdate();
+        // Remove the active component from the Map for Dfx
+        ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
         for (const child of this.childrenWeakrefMap_.values()) {
             const childViewPU = child.deref();
             if (childViewPU) {
@@ -4623,9 +4628,11 @@ class ViewPU extends NativeViewPartialUpdate {
             return;
         }
         
-        for (const storageProp of this.ownStorageLinksProps_) {
-            storageProp.enableDelayedNotification();
+        for (const stateLinkProp of this.ownObservedPropertiesStore__) {
+            stateLinkProp.enableDelayedNotification();
         }
+        // Add the inactive Components to Map for Dfx listing
+        ViewPU.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
         for (const child of this.childrenWeakrefMap_.values()) {
             const childViewPU = child.deref();
             if (childViewPU) {
@@ -4638,6 +4645,19 @@ class ViewPU extends NativeViewPartialUpdate {
             stateMgmtConsole.warn(`${this.debugInfo()}: setChild: changing parent to '${parent === null || parent === void 0 ? void 0 : parent.debugInfo()} (unsafe operation)`);
         }
         this.parent_ = parent;
+    }
+    /**
+     * Indicate if this @Component is allowed to freeze by calling with freezeState=true
+     * Called with value of the @Component decorator 'freezeWhenInactive' parameter
+     * or depending how UI compiler works also with 'undefined'
+     * @param freezeState only value 'true' will be used, otherwise inherits from parent
+     *      if not parent, set to false.
+     */
+    initAllowComponentFreeze(freezeState) {
+        // set to true if freeze parameter set for this @Component to true
+        // otherwise inherit from parent @Component (if it exists).
+        this.isCompFreezeAllowed = freezeState || (this.parent_ && this.parent_.isCompFreezeAllowed);
+        
     }
     /**
      * add given child and set 'this' as its parent
@@ -4686,6 +4706,7 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     initialRenderView() {
         
+        this.obtainOwnObservedProperties();
         this.isRenderInProgress = true;
         this.initialRender();
         this.isRenderInProgress = false;
@@ -4819,17 +4840,17 @@ class ViewPU extends NativeViewPartialUpdate {
         
     }
     performDelayedUpdate() {
-        if (!this.ownStorageLinksProps_.size) {
+        if (!this.ownObservedPropertiesStore__.size) {
             return;
         }
         
         stateMgmtTrace.scopedTrace(() => {
             
             this.syncInstanceId();
-            for (const storageProp of this.ownStorageLinksProps_) {
-                const changedElmtIds = storageProp.moveElmtIdsForDelayedUpdate();
+            for (const stateLinkPropVar of this.ownObservedPropertiesStore__) {
+                const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
                 if (changedElmtIds) {
-                    const varName = storageProp.info();
+                    const varName = stateLinkPropVar.info();
                     if (changedElmtIds.size && !this.isFirstRender()) {
                         for (const elmtId of changedElmtIds) {
                             this.dirtDescendantElementIds_.add(elmtId);
@@ -4842,7 +4863,7 @@ class ViewPU extends NativeViewPartialUpdate {
                         cb.call(this, varName);
                     }
                 }
-            } // for all ownStorageLinksProps_
+            } // for all ownStateLinkProps_
             this.restoreInstanceId();
             if (this.dirtDescendantElementIds_.size) {
                 this.markNeedUpdate();
@@ -5219,28 +5240,24 @@ class ViewPU extends NativeViewPartialUpdate {
         const appStorageLink = AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : new SynchedPropertyTwoWayPU(source, this, viewVariableName));
-        this.ownStorageLinksProps_.add(appStorageLink);
         return appStorageLink;
     }
     createStorageProp(storagePropName, defaultValue, viewVariableName) {
         const appStorageProp = AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : new SynchedPropertyOneWayPU(source, this, viewVariableName));
-        this.ownStorageLinksProps_.add(appStorageProp);
         return appStorageProp;
     }
     createLocalStorageLink(storagePropName, defaultValue, viewVariableName) {
         const localStorageLink = this.localStorage_.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : new SynchedPropertyTwoWayPU(source, this, viewVariableName));
-        this.ownStorageLinksProps_.add(localStorageLink);
         return localStorageLink;
     }
     createLocalStorageProp(storagePropName, defaultValue, viewVariableName) {
         const localStorageProp = this.localStorage_.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
-        this.ownStorageLinksProps_.add(localStorageProp);
         return localStorageProp;
     }
     createOrGetNode(elmtId, builder) {
@@ -5298,6 +5315,10 @@ class ViewPU extends NativeViewPartialUpdate {
                 case "-dirtyElementIds":
                     view.printDFXHeader("ViewPU Dirty Registered Element IDs", command);
                     DumpLog.print(0, view.debugInfoDirtDescendantElementIds(command.isRecursive));
+                    break;
+                case "-inactiveComponents":
+                    view.printDFXHeader("List of Inactive Components", command);
+                    DumpLog.print(0, view.debugInfoInactiveComponents());
                     break;
                 case "-profiler":
                     view.printDFXHeader("Profiler Info", command);
@@ -5378,6 +5399,9 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     debugInfoViewHierarchyInternal(depth = 0, recursive = false) {
         let retVaL = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]`;
+        if (this.isCompFreezeAllowed) {
+            retVaL += ` {freezewhenInactive : ${this.isCompFreezeAllowed}}`;
+        }
         if (depth < 1 || recursive) {
             this.childrenWeakrefMap_.forEach((value, key, map) => {
                 var _a;
@@ -5428,11 +5452,17 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         return retVaL;
     }
+    debugInfoInactiveComponents() {
+        return Array.from(ViewPU.inactiveComponents_)
+            .map((component) => `- ${component}`).join('\n');
+    }
 }
 // Array.sort() converts array items to string to compare them!
 ViewPU.compareNumber = (a, b) => {
     return (a < b) ? -1 : (a > b) ? 1 : 0;
 };
+// List of inactive components used for Dfx
+ViewPU.inactiveComponents_ = new Set();
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

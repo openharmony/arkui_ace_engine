@@ -155,13 +155,15 @@ For the purpose of logging the following commands are accepted as input:
 - `-dumpAll`
     * Prints all information about the view. This combines the output of all other commands for the specified view. Default print is for root view if no view is specified.
 - `-viewHierarchy`
-    * Prints the view hierarchy of a particular view, namely the custom component children. Accepts `-viewId` argument and `-r` flag. Depending on the flags provided it can be either recursive, from a specific view downwards, or just the immediate children of the view. Default print is for root view non-recursive if no flags are provided.
+    * Prints the view hierarchy of a particular view, namely the custom component children. Accepts `-viewId` argument and `-r` flag. Depending on the flags provided it can be either recursive, from a specific view downwards, or just the immediate children of the view. Default print is for root view non-recursive if no flags are provided. It also indicates the freeze state of the component if it is configured to be frozen while inactive.
 - `-stateVariables`
     * Prints the variables dependencies of the view, and their respective owners and sync peers. Accepts `-viewId` argument. Default print is for root view if no view is specified.
 - `-registeredElementIds`
     * Prints a list of components, namely JS classes such as `Column`, `TapGesture` etc. and their ID-s owned by the view. Accepts `-viewId` argument. Default print is for root view if not specified otherwise.
 - `-dirtyElementIds`
     * Prints a list of dependent elmtIds that need partial update in next re-render. Accepts `-viewId` argument. Default print is for root view if not specified otherwise.
+- `-inactiveComponents`
+    * Prints the list of the components that are presently in an inactive or frozen state. These components are not actively processing updates and will stay inactive while in the background.
 
 The application must be running and visible in order to receive commands. The `hidumper` service delivers the commands through the `WindowManagerService`. and the window ID is used to target a specific application.
 
@@ -173,6 +175,7 @@ hdc shell "hidumper -s WindowManagerService -a '-a'"
 Check WinId of your app. Lets say its 11. Put it to -w arg.
 hdc shell "hidumper -s WindowManagerService -a '-w 11 -jsdump -dumpAll'"
 hdc shell "hidumper -s WindowManagerService -a '-w 11 -jsdump -viewHierarchy'"
+hdc shell "hidumper -s WindowManagerService -a '-w 11 -jsdump -viewHierarchy -inactiveComponents'"
 ```
 
 ### Important for Profiler and JSDump
