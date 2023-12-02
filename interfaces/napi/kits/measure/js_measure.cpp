@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <map>
 #include <optional>
 #include <string>
 
@@ -174,15 +175,8 @@ static napi_value JSMeasureText(napi_env env, napi_callback_info info)
     return result;
 }
 
-static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
+static void CreateMeasureTextSizeParamMap(std::map<std::string, napi_value>& contextParamMap)
 {
-    size_t argc = 1;
-    napi_value result = nullptr;
-    napi_value argv = nullptr;
-    napi_value thisvar = nullptr;
-    void* data = nullptr;
-    napi_get_cb_info(env, info, &argc, &argv, &thisvar, &data);
-
     napi_value textContentNApi = nullptr;
     napi_value constraintWidthNApi = nullptr;
     napi_value fontSizeNApi = nullptr;
@@ -196,40 +190,65 @@ static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
     napi_value lineHeightNApi = nullptr;
     napi_value baselineOffsetNApi = nullptr;
     napi_value textCaseNApi = nullptr;
+    napi_value textIndentNApi = nullptr;
+    napi_value wordBreakNApi = nullptr;
+    contextParamMap["textContentNApi"] = textContentNApi;
+    contextParamMap["constraintWidthNApi"] = constraintWidthNApi;
+    contextParamMap["fontSizeNApi"] = fontSizeNApi;
+    contextParamMap["fontStyleNApi"] = fontStyleNApi;
+    contextParamMap["fontWeightNApi"] = fontWeightNApi;
+    contextParamMap["fontFamilyNApi"] = fontFamilyNApi;
+    contextParamMap["letterSpacingNApi"] = letterSpacingNApi;
+    contextParamMap["textAlignNApi"] = textAlignNApi;
+    contextParamMap["textOverFlowNApi"] = textOverFlowNApi;
+    contextParamMap["maxLinesNApi"] = maxLinesNApi;
+    contextParamMap["lineHeightNApi"] = lineHeightNApi;
+    contextParamMap["baselineOffsetNApi"] = baselineOffsetNApi;
+    contextParamMap["textCaseNApi"] = textCaseNApi;
+    contextParamMap["textIndentNApi"] = textIndentNApi;
+    contextParamMap["wordBreakNApi"] = wordBreakNApi;
+}
 
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, argv, &valueType);
-    MeasureContext context;
-    if (valueType == napi_object) {
-        napi_get_named_property(env, argv, "textContent", &textContentNApi);
-        napi_get_named_property(env, argv, "constraintWidth", &constraintWidthNApi);
-        napi_get_named_property(env, argv, "fontSize", &fontSizeNApi);
-        napi_get_named_property(env, argv, "fontStyle", &fontStyleNApi);
-        napi_get_named_property(env, argv, "fontWeight", &fontWeightNApi);
-        napi_get_named_property(env, argv, "fontFamily", &fontFamilyNApi);
-        napi_get_named_property(env, argv, "letterSpacing", &letterSpacingNApi);
-        napi_get_named_property(env, argv, "textAlign", &textAlignNApi);
-        napi_get_named_property(env, argv, "overflow", &textOverFlowNApi);
-        napi_get_named_property(env, argv, "maxLines", &maxLinesNApi);
-        napi_get_named_property(env, argv, "lineHeight", &lineHeightNApi);
-        napi_get_named_property(env, argv, "baselineOffset", &baselineOffsetNApi);
-        napi_get_named_property(env, argv, "textCase", &textCaseNApi);
-    } else {
-        return nullptr;
-    }
-    std::optional<Dimension> fontSizeNum = HandleDimensionType(fontSizeNApi, env);
-    std::optional<Dimension> letterSpace = HandleDimensionType(letterSpacingNApi, env);
-    std::optional<Dimension> constraintWidth = HandleDimensionType(constraintWidthNApi, env);
-    std::optional<Dimension> lineHeight = HandleDimensionType(lineHeightNApi, env);
-    std::optional<Dimension> baselineOffset = HandleDimensionType(baselineOffsetNApi, env);
-    int32_t fontStyle = HandleIntStyle(fontStyleNApi, env);
-    int32_t textAlign = HandleIntStyle(textAlignNApi, env);
-    int32_t textOverFlow = HandleIntStyle(textOverFlowNApi, env);
-    int32_t maxlines = HandleIntStyle(maxLinesNApi, env);
-    int32_t textCase = HandleIntStyle(textCaseNApi, env);
-    std::string textContent = HandleStringType(textContentNApi, env);
-    std::string fontWeight = HandleStringType(fontWeightNApi, env);
-    std::string fontFamily = HandleStringType(fontFamilyNApi, env);
+static void SetMeasureTextNapiProperty(
+    std::map<std::string, napi_value>& contextParamMap, napi_value& argv, napi_env& env)
+{
+    napi_get_named_property(env, argv, "textContent", &contextParamMap["textContentNApi"]);
+    napi_get_named_property(env, argv, "constraintWidth", &contextParamMap["constraintWidthNApi"]);
+    napi_get_named_property(env, argv, "fontSize", &contextParamMap["fontSizeNApi"]);
+    napi_get_named_property(env, argv, "fontStyle", &contextParamMap["fontStyleNApi"]);
+    napi_get_named_property(env, argv, "fontWeight", &contextParamMap["fontWeightNApi"]);
+    napi_get_named_property(env, argv, "fontFamily", &contextParamMap["fontFamilyNApi"]);
+    napi_get_named_property(env, argv, "letterSpacing", &contextParamMap["letterSpacingNApi"]);
+    napi_get_named_property(env, argv, "textAlign", &contextParamMap["textAlignNApi"]);
+    napi_get_named_property(env, argv, "overflow", &contextParamMap["textOverFlowNApi"]);
+    napi_get_named_property(env, argv, "maxLines", &contextParamMap["maxLinesNApi"]);
+    napi_get_named_property(env, argv, "lineHeight", &contextParamMap["lineHeightNApi"]);
+    napi_get_named_property(env, argv, "baselineOffset", &contextParamMap["baselineOffsetNApi"]);
+    napi_get_named_property(env, argv, "textCase", &contextParamMap["textCaseNApi"]);
+    napi_get_named_property(env, argv, "textIndent", &contextParamMap["textIndentNApi"]);
+    napi_get_named_property(env, argv, "wordBreak", &contextParamMap["wordBreakNApi"]);
+}
+
+static void SetContextProperty(
+    std::map<std::string>, napi_value>& contextParamMap, MeasureContext& context, napi_env& env)
+{
+    std::optional<Dimension> fontSizeNum = HandleDimensionType(contextParamMap["fontSizeNApi"], env);
+    std::optional<Dimension> letterSpace = HandleDimensionType(contextParamMap["letterSpacingNApi"], env);
+    std::optional<Dimension> constraintWidth = HandleDimensionType(contextParamMap["constraintWidthNApi"], env);
+    std::optional<Dimension> lineHeight = HandleDimensionType(contextParamMap["lineHeightNApi"], env);
+    std::optional<Dimension> baselineOffset = HandleDimensionType(contextParamMap["baselineOffsetNApi"], env);
+    std::optional<Dimension> textIndent = HandleDimensionType(contextParamMap["textIndentNApi"], env);
+
+    int32_t fontStyle = HandleIntStyle(contextParamMap["fontStyleNApi"], env);
+    int32_t textAlign = HandleIntStyle(contextParamMap["textAlignNApi"], env);
+    int32_t textOverFlow = HandleIntStyle(contextParamMap["textOverFlowNApi"], env);
+    int32_t maxlines = HandleIntStyle(contextParamMap["maxLinesNApi"], env);
+    int32_t textCase = HandleIntStyle(contextParamMap["textCaseNApi"], env);
+    int32_t wordBreak = HandleIntStyle(contextParamMap["wordBreakNApi"], env);
+
+    std::string textContent = HandleStringType(contextParamMap["textContentNApi"], env);
+    std::string fontWeight = HandleStringType(contextParamMap["fontWeightNApi"], env);
+    std::string fontFamily = HandleStringType(contextParamMap["fontFamilyNApi"], env);
     context.textContent = textContent;
     context.constraintWidth = constraintWidth;
     context.fontSize = fontSizeNum;
@@ -243,6 +262,30 @@ static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
     context.lineHeight = lineHeight;
     context.baselineOffset = baselineOffset;
     context.textCase = static_cast<TextCase>(textCase);
+    context.textIndent = textIndent;
+    context.wordBreak = static_cast<WordBreak>(wordBreak);
+}
+
+static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value result = nullptr;
+    napi_value argv = nullptr;
+    napi_value thisvar = nullptr;
+    void* data = nullptr;
+    napi_get_cb_info(env, info, &argc, &argv, &thisvar, &data);
+
+    std::map<std:;string, napi_value> contextParamMap;
+    CreateMeasureTextSizeParamMap(contextParamMap)
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv, &valueType);
+    MeasureContext context;
+    if (valueType == napi_object) {
+        SetMeasureTextNapiProperty(contextParamMap, argv, env);
+    } else {
+        return nullptr;
+    }
+    SetContextProperty(contextParamMap, context, env);
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         return nullptr;

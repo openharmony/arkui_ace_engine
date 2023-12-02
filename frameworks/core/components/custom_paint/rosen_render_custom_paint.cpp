@@ -671,6 +671,22 @@ double RosenRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
 #endif
 }
 
+bool RosenRenderCustomPaint::IsApplyIndent(const MeasureContext& context, double& indent)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    if (context.textIndent.value().Unit() != DimensionUnit::PERCENT) {
+        indent = context.textIndent.value().ConvertToPx();
+        return true;
+    } else {
+        if (context.constraintWidth.has_value()) {
+            indent = context.constraintWidth.value().ConvertToPx() * context.textIndent.value().Value();
+            return true;
+        }
+    }
+    return false;
+}
+
 Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
 {
     using namespace Constants;
@@ -700,7 +716,11 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
         style.maxLines = context.maxlines;
 #endif
     }
-
+#ifndef USE_GRAPHIC_TEXT_GINE
+    style.word_break_type = static_cast<minikin::WordBreakType>(context.wordBreak);
+#else
+    style.wordBreakType = static_cast<Rosen::WordBreakType>(context.wordBreak);
+#endif
 #ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
@@ -785,6 +805,17 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
 #endif
     if (!paragraph) {
         return Size(0.0, 0.0);
+    }
+    if (context.textIndent.has_value()) {
+        double indent = 0.0;
+        // first line indent
+        if (IsApplyIndent(context, indent)) {
+            std::vector<float> indents;
+            // only indent first line
+            indents.emplace_back(static_cast<float>(indent));
+            indents.emplace_back(0.0);
+            paragraph->SetIndents(indents);
+        }
     }
     if (context.constraintWidth.has_value()) {
         paragraph->Layout(context.constraintWidth.value().ConvertToPx());
