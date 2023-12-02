@@ -33,7 +33,7 @@ private:
     std::vector<KeyCode> getPressedKeys() const;
     void addPressedKey(const int32_t keyCode);
     void removeReleasedKey(const int32_t keyCode);
-
+    void clearPressedKey();
 private:
     std::unordered_map<int32_t, bool> keyMap_;
     std::vector<int32_t> keys_;

@@ -24,6 +24,15 @@ namespace {
 
 constexpr int32_t LONG_PRESS_DURATION = 1;
 
+// List Menu key on keyboard.
+constexpr int64_t KEY_COMPOSE = 2466;
+
+enum class CtrlKeysBit {
+    CTRL = 1,
+    SHIFT = 2,
+    ALT = 4,
+    META = 8,
+};
 }
 
 const char* KeyCodeToString(int32_t keyCode)
@@ -452,6 +461,7 @@ KeyIntention keyItemsTransKeyIntention(const std::vector<KeyCode> &items)
         {((int64_t)KeyCode::KEY_ALT_RIGHT << 16) + (int64_t)KeyCode::KEY_DPAD_RIGHT, KeyIntention::INTENTION_FORWARD},
         {((int64_t)KeyCode::KEY_SHIFT_LEFT << 16) + (int64_t)KeyCode::KEY_F10, KeyIntention::INTENTION_MENU},
         {((int64_t)KeyCode::KEY_SHIFT_RIGHT << 16) + (int64_t)KeyCode::KEY_F10, KeyIntention::INTENTION_MENU},
+        {KEY_COMPOSE, KeyIntention::INTENTION_MENU},
         {(int64_t)KeyCode::KEY_PAGE_UP, KeyIntention::INTENTION_PAGE_UP},
         {(int64_t)KeyCode::KEY_PAGE_DOWN, KeyIntention::INTENTION_PAGE_DOWN},
         {((int64_t)KeyCode::KEY_CTRL_LEFT << 16) + (int64_t)KeyCode::KEY_PLUS, KeyIntention::INTENTION_ZOOM_OUT},
@@ -492,16 +502,21 @@ std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(int32_t keyCode, int32_t 
 
     if ((keyCode != static_cast<int32_t>(KeyCode::KEY_UNKNOWN)) &&
         (keyAction == static_cast<int32_t>(KeyAction::DOWN))) {
+        clearPressedKey();
+        if (metaKey & static_cast<int32_t>(CtrlKeysBit::CTRL)) {
+            addPressedKey(static_cast<int32_t>(KeyCode::KEY_CTRL_LEFT));
+        }
+        if (metaKey & static_cast<int32_t>(CtrlKeysBit::SHIFT)) {
+            addPressedKey(static_cast<int32_t>(KeyCode::KEY_SHIFT_LEFT));
+        }
+        if (metaKey & static_cast<int32_t>(CtrlKeysBit::ALT)) {
+            addPressedKey(static_cast<int32_t>(KeyCode::KEY_ALT_LEFT));
+        }
         addPressedKey(keyCode);
     }
     event.pressedCodes = getPressedKeys();
     event.key = KeyCodeToString(keyCode);
-    event.metaKey = metaKey;
     event.keyIntention = keyItemsTransKeyIntention(event.pressedCodes);
-    if ((keyCode != static_cast<int32_t>(KeyCode::KEY_UNKNOWN)) &&
-        (keyAction == static_cast<int32_t>(KeyAction::UP))) {
-        removeReleasedKey(keyCode);
-    }
     keyEvents.emplace_back(event);
     auto result = keyMap_.try_emplace(keyCode, false);
     auto iter = result.first;
@@ -554,5 +569,10 @@ void KeyEventRecognizer::removeReleasedKey(const int32_t keyCode)
             return;
         }
     }
+}
+
+void KeyEventRecognizer::clearPressedKey()
+{
+    keys_.clear();
 }
 } // namespace OHOS::Ace
