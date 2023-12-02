@@ -26,8 +26,7 @@ class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttr
     if (value === null || value === undefined) {
       modifier(this._modifiers, ColumnAlignItemsModifier, undefined);
     } else if (!(value in HorizontalAlign)) {
-      value = HorizontalAlign.Center;
-      modifier(this._modifiers, ColumnAlignItemsModifier, value);
+      modifier(this._modifiers, ColumnAlignItemsModifier, undefined);
     } else {
       modifier(this._modifiers, ColumnAlignItemsModifier, value);
     }
@@ -37,8 +36,7 @@ class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttr
     if (value === null || value === undefined) {
       modifier(this._modifiers, ColumnJustifyContentModifier, undefined);
     } else if (!(value in FlexAlign)) {
-      value = FlexAlign.Start;
-      modifier(this._modifiers, ColumnJustifyContentModifier, value);
+      modifier(this._modifiers, ColumnJustifyContentModifier, undefined);
     } else {
       modifier(this._modifiers, ColumnJustifyContentModifier, value);
     }

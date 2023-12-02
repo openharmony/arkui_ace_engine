@@ -52,35 +52,35 @@ class VideoMutedModifier extends Modifier<boolean> {
 }
 class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
   muted(value: boolean): VideoAttribute {
-    let muted = false;
     if (isBoolean(value)) {
-      muted = value;
+      modifier(this._modifiers, VideoMutedModifier, value);
+    } else {
+      modifier(this._modifiers, VideoMutedModifier, undefined);
     }
-    modifier(this._modifiers, VideoMutedModifier, muted);
     return this;
   }
   autoPlay(value: boolean): VideoAttribute {
-    let autoPlay = false;
     if (isBoolean(value)) {
-      autoPlay = value;
+      modifier(this._modifiers, VideoAutoPlayModifier, value);
+    } else {
+      modifier(this._modifiers, VideoAutoPlayModifier, undefined);
     }
-    modifier(this._modifiers, VideoAutoPlayModifier, autoPlay);
     return this;
   }
   controls(value: boolean): VideoAttribute {
-    let controls = true;
     if (isBoolean(value)) {
-      controls = value;
+      modifier(this._modifiers, VideoControlsModifier, value);
+    } else {
+      modifier(this._modifiers, VideoControlsModifier, undefined);
     }
-    modifier(this._modifiers, VideoControlsModifier, controls);
     return this;
   }
   loop(value: boolean): VideoAttribute {
-    let loop = false;
     if (isBoolean(value)) {
-      loop = value;
+      modifier(this._modifiers, VideoLoopModifier, value);
+    } else {
+      modifier(this._modifiers, VideoLoopModifier, undefined);
     }
-    modifier(this._modifiers, VideoLoopModifier, loop);
     return this;
   }
   objectFit(value: ImageFit): VideoAttribute {

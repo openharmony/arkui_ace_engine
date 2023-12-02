@@ -14,7 +14,7 @@ class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAt
     throw new Error("Method not implemented.");
   }
   alignItems(value: ItemAlign): GridRowAttribute {
-    if (value) {
+    if (value in ItemAlign) {
       modifier(this._modifiers, GridRowAlignItemsModifier, value);
     } else {
       modifier(this._modifiers, GridRowAlignItemsModifier, undefined);

@@ -26,8 +26,7 @@ class ArkRowComponent extends ArkComponent implements RowAttribute {
     if (value === null || value === undefined) {
       modifier(this._modifiers, RowAlignItemsModifier, undefined);
     } else if (!(value in VerticalAlign)) {
-      value = VerticalAlign.Center;
-      modifier(this._modifiers, RowAlignItemsModifier, value);
+      modifier(this._modifiers, RowAlignItemsModifier, undefined);
     } else {
       modifier(this._modifiers, RowAlignItemsModifier, value);
     }
@@ -37,8 +36,7 @@ class ArkRowComponent extends ArkComponent implements RowAttribute {
     if (value === null || value === undefined) {
       modifier(this._modifiers, RowJustifyContentlModifier, undefined);
     } else if (!(value in FlexAlign)) {
-      value = FlexAlign.Start;
-      modifier(this._modifiers, RowJustifyContentlModifier, value);
+      modifier(this._modifiers, RowJustifyContentlModifier, undefined);
     } else {
       modifier(this._modifiers, RowJustifyContentlModifier, value);
     }

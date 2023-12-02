@@ -32,18 +32,23 @@ class TextAreaMaxLinesModifier extends Modifier<number | undefined> {
   }
 }
 
-class TextAreaFontSizeModifier extends Modifier<string | number> {
+class TextAreaFontSizeModifier extends ModifierWithKey<string | number> {
   static identity: Symbol = Symbol('textAreaFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      GetUINativeModule().textArea.resetFontSize(node);
+    } else if (!isString(this.value) && !isNumber(this.value) && !isResource(this.value)) {
       GetUINativeModule().textArea.resetFontSize(node);
     } else {
       GetUINativeModule().textArea.setFontSize(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class TextAreaPlaceholderColorModifier extends Modifier<number> {
+class TextAreaPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('textAreaPlaceholderColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -52,15 +57,29 @@ class TextAreaPlaceholderColorModifier extends Modifier<number> {
       GetUINativeModule().textArea.setPlaceholderColor(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
 }
 
-class TextAreaFontColorModifier extends Modifier<number> {
+class TextAreaFontColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('textAreaFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().textArea.resetFontColor(node);
     } else {
       GetUINativeModule().textArea.setFontColor(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
@@ -98,7 +117,7 @@ class TextAreaEnableKeyboardOnFocusModifier extends Modifier<boolean> {
   }
 }
 
-class TextAreaFontFamilyModifier extends Modifier<string> {
+class TextAreaFontFamilyModifier extends ModifierWithKey<ResourceColor | string> {
   static identity: Symbol = Symbol('textAreaFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -107,15 +126,26 @@ class TextAreaFontFamilyModifier extends Modifier<string> {
       GetUINativeModule().textArea.setFontFamily(node, this.value!);
     }
   }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class TextAreaCaretColorModifier extends Modifier<number> {
+class TextAreaCaretColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('textAreaCaretColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().textArea.resetCaretColor(node);
     } else {
       GetUINativeModule().textArea.setCaretColor(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
@@ -153,13 +183,31 @@ class TextAreaSelectionMenuHiddenModifier extends Modifier<boolean> {
   }
 }
 
-class TextAreaPlaceholderFontModifier extends Modifier<ArkFont> {
+class TextAreaPlaceholderFontModifier extends ModifierWithKey<Font> {
   static identity: Symbol = Symbol('textAreaPlaceholderFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().textArea.resetPlaceholderFont(node);
     } else {
-      GetUINativeModule().textArea.setPlaceholderFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      if (!(isNumber(this.value.size)) && !(isString(this.value.size)) &&
+        !(isResource(this.value.size))) {
+        this.value.size = undefined;
+      }
+      if (!(isString(this.value.family)) && !(isResource(this.value.family))) {
+        this.value.family = undefined;
+      }
+      GetUINativeModule().textArea.setPlaceholderFont(node, this.value.size,
+        this.value.weight, this.value.family, this.value.style);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (!(this.stageValue.weight === this.value.weight &&
+      this.stageValue.style === this.value.style)) {
+      return true;
+    } else {
+      return !isBaseOrResourceEqual(this.stageValue.size, this.value.size) ||
+        !isBaseOrResourceEqual(this.stageValue.family, this.value.family);
     }
   }
 }
@@ -175,13 +223,13 @@ class TextAreaTextAlignModifier extends Modifier<number> {
   }
 }
 
-class TextAreaShowCounterModifier extends Modifier<boolean> {
+class TextAreaShowCounterModifier extends Modifier<ArkTextAreaShowCounter> {
   static identity: Symbol = Symbol('textAreaShowCounter');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().textArea.resetShowCounter(node);
     } else {
-      GetUINativeModule().textArea.setShowCounter(node, this.value!);
+      GetUINativeModule().textArea.setShowCounter(node, this.value.value!, this.value?.options?.thresholdPercentage);
     }
   }
 }
@@ -191,67 +239,46 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     throw new Error('Method not implemented.');
   }
   placeholderColor(value: ResourceColor): TextAreaAttribute {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, TextAreaPlaceholderColorModifier, arkColor.color);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaPlaceholderColorModifier.identity, TextAreaPlaceholderColorModifier, value);
     return this;
   }
   placeholderFont(value: Font): TextAreaAttribute {
-    let arkValue: ArkFont = new ArkFont();
-    if (isLengthType(value.size)) {
-      arkValue.size = <string | number>value.size;
+    if (!isLengthType(value.weight)) {
+      value.weight = undefined;
     }
-    if (isLengthType(value.weight)) {
-      arkValue.weight = value.weight;
+    if (!(value.style in FontStyle)) {
+      value.style = undefined;
     }
-    if (isString(value.family)) {
-      arkValue.family = <string>value.family;
-    }
-    if (value.style in FontStyle) {
-      arkValue.style = value.style;
-    }
-    modifier(this._modifiers, TextAreaPlaceholderFontModifier, arkValue);
+    modifierWithKey(this._modifiersWithKeys, TextAreaPlaceholderFontModifier.identity, TextAreaPlaceholderFontModifier, value);
     return this;
   }
-
 
   textAlign(value: TextAlign): TextAreaAttribute {
     if (value) {
       modifier(this._modifiers, TextAreaTextAlignModifier, value);
     } else {
-      modifier(this._modifiers, TextAreaTextAlignModifier, TextAlign.Start);
+      modifier(this._modifiers, TextAreaTextAlignModifier, undefined);
     }
     return this;
   }
   caretColor(value: ResourceColor): TextAreaAttribute {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, TextAreaCaretColorModifier, arkColor.color);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaCaretColorModifier.identity, TextAreaCaretColorModifier, value);
     return this;
   }
   fontColor(value: ResourceColor): TextAreaAttribute {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, TextAreaFontColorModifier, arkColor.color);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaFontColorModifier.identity, TextAreaFontColorModifier, value);
     return this;
   }
   fontSize(value: Length): TextAreaAttribute {
-    if (isLengthType(value)) {
-      modifier(this._modifiers, TextAreaFontSizeModifier, <string | number>value);
-    } else {
-      modifier(this._modifiers, TextAreaFontSizeModifier, 16);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaFontSizeModifier.identity, TextAreaFontSizeModifier, value);
     return this;
   }
   fontStyle(value: FontStyle): TextAreaAttribute {
-    let arkValue = FontStyle.Normal;
-    if (value) {
-      arkValue = value;
+    if (value in FontStyle) {
+      modifier(this._modifiers, TextAreaFontStyleModifier, value);
+    } else {
+      modifier(this._modifiers, TextAreaFontStyleModifier, undefined);
     }
-    modifier(this._modifiers, TextAreaFontStyleModifier, arkValue);
     return this;
   }
   fontWeight(value: number | FontWeight | string): TextAreaAttribute {
@@ -263,11 +290,7 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     return this;
   }
   fontFamily(value: ResourceStr): TextAreaAttribute {
-    let arkValue = 'HarmonyOS Sans';
-    if (isString(value)) {
-      arkValue = <string>value;
-    }
-    modifier(this._modifiers, TextAreaFontFamilyModifier, arkValue);
+    modifierWithKey(this._modifiersWithKeys, TextAreaFontFamilyModifier.identity, TextAreaFontFamilyModifier, value);
     return this;
   }
   inputFilter(value: ResourceStr, error?: (value: string) => void): TextAreaAttribute {
@@ -295,44 +318,36 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     throw new Error('Method not implemented.');
   }
   copyOption(value: CopyOptions): TextAreaAttribute {
-    if (value === undefined) {
-      value = CopyOptions.LocalDevice;
-      modifier(this._modifiers, TextAreaCopyOptionModifier, value);
-    }
-    let copyOptions = CopyOptions.None;
     if (isNumber(value)) {
-      copyOptions = value;
+      modifier(this._modifiers, TextAreaCopyOptionModifier, value);
+    } else {
+      modifier(this._modifiers, TextAreaCopyOptionModifier, undefined);
     }
-    modifier(this._modifiers, TextAreaCopyOptionModifier, copyOptions);
     return this;
   }
 
   enableKeyboardOnFocus(value: boolean): TextAreaAttribute {
-    if (value === undefined) {
-      return this;
+    if (value) {
+      modifier(this._modifiers, TextAreaEnableKeyboardOnFocusModifier, value);
+    } else {
+      modifier(this._modifiers, TextAreaEnableKeyboardOnFocusModifier, undefined);
     }
-    if (isUndefined(value) || !isBoolean(value)) {
-      modifier(this._modifiers, TextAreaEnableKeyboardOnFocusModifier, true);
-      return this;
-    }
-    modifier(this._modifiers, TextAreaEnableKeyboardOnFocusModifier, Boolean(value));
     return this;
   }
 
   maxLength(value: number): TextAreaAttribute {
-    if (!value || isNaN(value)) {
+    if (isNumber(value)) {
+      modifier(this._modifiers, TextAreaMaxLengthModifier, value);
+    } else {
       modifier(this._modifiers, TextAreaMaxLengthModifier, undefined);
-      return this;
     }
-    modifier(this._modifiers, TextAreaMaxLengthModifier, value);
     return this;
   }
-  showCounter(value: boolean): TextAreaAttribute {
-    let showCounter = false;
-    if (isBoolean(value)) {
-      showCounter = value;
-    }
-    modifier(this._modifiers, TextAreaShowCounterModifier, showCounter);
+  showCounter(value: boolean, options?: InputCounterOptions): TextAreaAttribute {
+    let arkValue: ArkTextAreaShowCounter = new ArkTextAreaShowCounter();
+    arkValue.value = value;
+    arkValue.options = options;
+    modifier(this._modifiers, TextAreaShowCounterModifier, arkValue);
     return this;
   }
   style(value: TextContentStyle): TextAreaAttribute {
@@ -344,31 +359,27 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     return this;
   }
   barState(value: BarState): TextAreaAttribute {
-    if (value === null || value === undefined || !isNumber(value)) {
-      modifier(this._modifiers, TextAreaBarStateModifier, BarState.Auto);
-      return this;
+    if (isNumber(value)) {
+      modifier(this._modifiers, TextAreaBarStateModifier, value);
+    } else {
+      modifier(this._modifiers, TextAreaBarStateModifier, undefined);
     }
-    modifier(this._modifiers, TextAreaBarStateModifier, value);
     return this;
   }
   selectionMenuHidden(value: boolean): TextAreaAttribute {
-    let selectionMenuHidden = false;
-    if (isBoolean(value)) {
-      selectionMenuHidden = value;
+    if (value) {
+      modifier(this._modifiers, TextAreaSelectionMenuHiddenModifier, value);
+    } else {
+      modifier(this._modifiers, TextAreaSelectionMenuHiddenModifier, undefined);
     }
-    modifier(this._modifiers, TextAreaSelectionMenuHiddenModifier, selectionMenuHidden);
     return this;
   }
   maxLines(value: number): TextAreaAttribute {
     if (!isNumber(value)) {
       modifier(this._modifiers, TextAreaMaxLinesModifier, undefined);
-      return this;
+    } else {
+      modifier(this._modifiers, TextAreaMaxLinesModifier, value);
     }
-    if (Number(value) <= 0) {
-      modifier(this._modifiers, TextAreaMaxLinesModifier, undefined);
-      return this;
-    }
-    modifier(this._modifiers, TextAreaMaxLinesModifier, Number(value));
     return this;
   }
   customKeyboard(value: CustomBuilder): TextAreaAttribute {

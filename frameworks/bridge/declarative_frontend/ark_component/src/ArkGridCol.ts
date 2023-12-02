@@ -35,52 +35,46 @@ class GridColOrderModifier extends Modifier<ArkGridColColumnOption> {
 
 class ArkGridColComponent extends ArkComponent implements GridColAttribute {
   span(value: number | GridColColumnOption): GridColAttribute {
-    modifier(this._modifiers, GridColSpanModifier, this.parserGridColColumnOption(value, 1));
+    modifier(this._modifiers, GridColSpanModifier, this.parserGridColColumnOption(value));
     return this;
   }
   gridColOffset(value: number | GridColColumnOption): GridColAttribute {
-    modifier(this._modifiers, GridColOffsetModifier, this.parserGridColColumnOption(value, 0));
+    modifier(this._modifiers, GridColOffsetModifier, this.parserGridColColumnOption(value));
     return this;
   }
   order(value: number | GridColColumnOption): GridColAttribute {
-    modifier(this._modifiers, GridColOrderModifier, this.parserGridColColumnOption(value, 0));
+    modifier(this._modifiers, GridColOrderModifier, this.parserGridColColumnOption(value));
     return this;
   }
-  private parserGridColColumnOption(jsValue: any, defaultVal: number) {
-    let gridColColumnOption: ArkGridColColumnOption = new ArkGridColColumnOption();
-    if (jsValue === null || jsValue === undefined) {
-      gridColColumnOption.xs = defaultVal;
-      gridColColumnOption.sm = defaultVal;
-      gridColColumnOption.md = defaultVal;
-      gridColColumnOption.lg = defaultVal;
-      gridColColumnOption.xl = defaultVal;
-      gridColColumnOption.xxl = defaultVal;
-    } else if (isNumber(jsValue) && jsValue >= 0) {
+  private parserGridColColumnOption(jsValue: any) {
+    let gridColColumnOption = new ArkGridColColumnOption();
+    if (isNumber(jsValue) && jsValue >= 0) {
       gridColColumnOption.xs = jsValue;
       gridColColumnOption.sm = jsValue;
       gridColColumnOption.md = jsValue;
       gridColColumnOption.lg = jsValue;
       gridColColumnOption.xl = jsValue;
       gridColColumnOption.xxl = jsValue;
-    } else if (isObject(jsValue)) {
-      let hasValue = false;
-      let attributeNames = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl']
-      for (let attributeName of attributeNames) {
-        let attributeValue = jsValue[attributeName];
-        if (attributeValue === null || attributeValue === undefined) {
-          jsValue[attributeName] = defaultVal;
-        } else if (isNumber(attributeValue) && <number>attributeValue >= 0) {
-          continue;
-        } else {
-          jsValue[attributeName] = defaultVal;
-        }
+    }
+    else if (isObject(jsValue)) {
+      if (isNumber(jsValue.xs) && jsValue.xs >= 0) {
+        gridColColumnOption.xs = jsValue.xs;
       }
-      gridColColumnOption.xs = jsValue.xs;
-      gridColColumnOption.sm = jsValue.sm;
-      gridColColumnOption.md = jsValue.md;
-      gridColColumnOption.lg = jsValue.lg;
-      gridColColumnOption.xl = jsValue.xl;
-      gridColColumnOption.xxl = jsValue.xxl;
+      if (isNumber(jsValue.sm) && jsValue.sm >= 0) {
+        gridColColumnOption.sm = jsValue.sm;
+      }
+      if (isNumber(jsValue.md) && jsValue.md >= 0) {
+        gridColColumnOption.md = jsValue.md;
+      }
+      if (isNumber(jsValue.lg) && jsValue.lg >= 0) {
+        gridColColumnOption.lg = jsValue.lg;
+      }
+      if (isNumber(jsValue.xl) && jsValue.xl >= 0) {
+        gridColColumnOption.xl = jsValue.xl;
+      }
+      if (isNumber(jsValue.xxl) && jsValue.xxl >= 0) {
+        gridColColumnOption.xxl = jsValue.xxl;
+      }
     }
     return gridColColumnOption;
   }

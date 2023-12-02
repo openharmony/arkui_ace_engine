@@ -18,6 +18,14 @@ function isResourceEqual(stageValue: Resource, value: Resource): boolean {
     (stageValue.params === value.params) &&
     (stageValue.type === value.type);
 }
+function isBaseOrResourceEqual(stageValue: any, value: any): boolean {
+  if (isResource(stageValue) && isResource(value)) {
+    return isResourceEqual(stageValue, value);
+  } else if (!isResource(stageValue) && !isResource(value)) {
+    return (stageValue === value);
+  }
+  return false;
+}
 
 const SAFE_AREA_TYPE_NONE = 0;
 const SAFE_AREA_TYPE_SYSTEM = 1;
@@ -875,25 +883,35 @@ class FocusOnTouchModifier extends Modifier<boolean> {
     }
   }
 }
-class OffsetModifier extends Modifier<ArkPosition> {
+class OffsetModifier extends ModifierWithKey<ArkPosition>  {
   static identity: Symbol = Symbol('offset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetOffset(node);
     } else {
-      GetUINativeModule().common.setOffset(node, this.value.x, this.value.y);
+      GetUINativeModule().common.setOffset(node, this.value?.x, this.value?.y);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.x, this.value.x) ||
+      !isBaseOrResourceEqual(this.stageValue.y, this.value.y)
   }
 }
 
-class MarkAnchorModifier extends Modifier<ArkPosition> {
+class MarkAnchorModifier extends ModifierWithKey<ArkPosition>  {
   static identity: Symbol = Symbol('markAnchor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetMarkAnchor(node);
     } else {
-      GetUINativeModule().common.setMarkAnchor(node, this.value.x, this.value.y);
+      GetUINativeModule().common.setMarkAnchor(node, this.value?.x, this.value?.y);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.x, this.value.x) ||
+      !isBaseOrResourceEqual(this.stageValue.y, this.value.y)
   }
 }
 class DefaultFocusModifier extends Modifier<boolean>{
@@ -932,7 +950,7 @@ class TouchableModifier extends Modifier<boolean>{
   }
 }
 
-class MarginModifier extends Modifier<ArkPadding> {
+class MarginModifier extends ModifierWithKey<ArkPadding> {
   static identity: Symbol = Symbol('margin');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -941,11 +959,17 @@ class MarginModifier extends Modifier<ArkPadding> {
       GetUINativeModule().common.setMargin(node, this.value.top,
         this.value.right, this.value.bottom, this.value.left);
     }
+  }
 
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left)
   }
 }
 
-class PaddingModifier extends Modifier<ArkPadding> {
+class PaddingModifier extends ModifierWithKey<ArkPadding> {
   static identity: Symbol = Symbol('padding');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -954,6 +978,13 @@ class PaddingModifier extends Modifier<ArkPadding> {
       GetUINativeModule().common.setPadding(node, this.value.top,
         this.value.right, this.value.bottom, this.value.left);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left)
   }
 }
 
@@ -1083,7 +1114,7 @@ class AlignSelfModifier extends Modifier<number> {
   }
 }
 
-class SizeModifier extends Modifier<ArkSize> {
+class SizeModifier extends ModifierWithKey<ArkSize> {
   static identity: Symbol = Symbol('size');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1091,6 +1122,11 @@ class SizeModifier extends Modifier<ArkSize> {
     } else {
       GetUINativeModule().common.setSize(node, this.value.width, this.value.height);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height)
   }
 }
 
@@ -1221,7 +1257,7 @@ class AspectRatioModifier extends Modifier<number> {
   }
 }
 
-class ConstraintSizeModifier extends Modifier<ArkConstraintSizeOptions> {
+class ConstraintSizeModifier extends ModifierWithKey<ArkConstraintSizeOptions> {
   static identity: Symbol = Symbol('constraintSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1230,6 +1266,13 @@ class ConstraintSizeModifier extends Modifier<ArkConstraintSizeOptions> {
       GetUINativeModule().common.setConstraintSize(node, this.value.minWidth,
         this.value.maxWidth, this.value.minHeight, this.value.maxHeight);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.minWidth, this.value.minWidth) ||
+      !isBaseOrResourceEqual(this.stageValue.maxWidth, this.value.maxWidth) ||
+      !isBaseOrResourceEqual(this.stageValue.minHeight, this.value.minHeight) ||
+      !isBaseOrResourceEqual(this.stageValue.maxHeight, this.value.maxHeight)
   }
 }
 
@@ -1475,14 +1518,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
     let opts = new ArkSafeAreaExpandOpts();
-    opts.type = SAFE_AREA_TYPE_ALL;
-    opts.edges = SAFE_AREA_EDGE_ALL;
-
     if (types && types.length > 0) {
       let safeAreaType: string | number = '';
       for (let param of types) {
         if (!isNumber(param) || param >= SAFE_AREA_TYPE_LIMIT) {
-          safeAreaType = SAFE_AREA_TYPE_ALL;
+          safeAreaType = undefined;
           break;
         }
         if (safeAreaType) {
@@ -1497,7 +1537,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       let safeAreaEdge: string | number = '';
       for (let param of edges) {
         if (!isNumber(param) || param >= SAFE_AREA_EDGE_LIMIT) {
-          safeAreaEdge = SAFE_AREA_EDGE_ALL;
+          safeAreaEdge = undefined;
           break;
         }
         if (safeAreaEdge) {
@@ -1508,8 +1548,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       }
       opts.edges = safeAreaEdge;
     }
-    if (opts.type === SAFE_AREA_TYPE_ALL && opts.edges === SAFE_AREA_EDGE_ALL) {
-      // modifier(this._modifiers, ExpandSafeAreaModifier, undefined);
+    if (opts.type === undefined && opts.edges === undefined) {
+      modifier(this._modifiers, ExpandSafeAreaModifier, undefined);
     } else {
       modifier(this._modifiers, ExpandSafeAreaModifier, opts);
     }
@@ -1537,44 +1577,30 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   size(value: SizeOptions): this {
-    let arkValue: ArkSize = new ArkSize();
-    if (!value || (!isLengthType(value.width) && !isLengthType(value.height))) {
-      modifier(this._modifiers, SizeModifier, undefined);
+    if (!value) {
+      modifierWithKey(this._modifiersWithKeys, SizeModifier.identity, SizeModifier, undefined);
+    } else {
+      let arkValue: ArkSize = new ArkSize();
+      arkValue.width = value.width;
+      arkValue.height = value.height;
+      modifierWithKey(this._modifiersWithKeys, SizeModifier.identity, SizeModifier, arkValue);
     }
-
-    if (value.width && isLengthType(value.width)) {
-      arkValue.width = <string | number>value.width;
-    }
-    if (value.height && isLengthType(value.height)) {
-      arkValue.height = <string | number>value.height;
-    }
-    modifier(this._modifiers, SizeModifier, arkValue);
-
     return this;
   }
 
   constraintSize(value: ConstraintSizeOptions): this {
-    let arkValue: ArkConstraintSizeOptions = new ArkConstraintSizeOptions();
-
-    if (!value ||
-      (!isLengthType(value.minWidth) && !isLengthType(value.maxWidth) &&
-        !isLengthType(value.minHeight) && !isLengthType(value.maxHeight))) {
-      modifier(this._modifiers, ConstraintSizeModifier, undefined);
-      return this;
+    if (!value) {
+      modifierWithKey(this._modifiersWithKeys, ConstraintSizeModifier.identity,
+        ConstraintSizeModifier, undefined);
+    } else {
+      let arkValue: ArkConstraintSizeOptions = new ArkConstraintSizeOptions();
+      arkValue.minWidth = value.minWidth;
+      arkValue.maxWidth = value.maxWidth;
+      arkValue.minHeight = value.minHeight;
+      arkValue.maxHeight = value.maxHeight;
+      modifierWithKey(this._modifiersWithKeys, ConstraintSizeModifier.identity,
+        ConstraintSizeModifier, arkValue);
     }
-    if (value.minWidth && isLengthType(value.minWidth)) {
-      arkValue.minWidth = <string | number>value?.minWidth;
-    }
-    if (value.maxWidth && isLengthType(value.maxWidth)) {
-      arkValue.maxWidth = <string | number>value?.maxWidth;
-    }
-    if (value.minHeight && isLengthType(value.minHeight)) {
-      arkValue.minHeight = <string | number>value?.minHeight;
-    }
-    if (value.maxHeight && isLengthType(value.maxHeight)) {
-      arkValue.maxHeight = <string | number>value?.maxHeight;
-    }
-    modifier(this._modifiers, ConstraintSizeModifier, arkValue);
     return this;
   }
 
@@ -1603,7 +1629,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     else if (isString(value) && !isNaN(Number(value))) {
       modifier(this._modifiers, LayoutWeightModifier, parseInt(value.toString()));
     } else {
-      modifier(this._modifiers, LayoutWeightModifier, 0);
+      modifier(this._modifiers, LayoutWeightModifier, undefined);
     }
     return this;
   }
@@ -1611,28 +1637,20 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   padding(value: Padding | Length): this {
     let arkValue = new ArkPadding();
     if (value !== null && value !== undefined) {
-      if (isLengthType(value)) {
-        arkValue.top = <string | number>value;
-        arkValue.right = <string | number>value;
-        arkValue.bottom = <string | number>value;
-        arkValue.left = <string | number>value;
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = <Length>value;
+        arkValue.right = <Length>value;
+        arkValue.bottom = <Length>value;
+        arkValue.left = <Length>value;
       } else {
-        if ((<Padding>value).top && isLengthType((<Padding>value).top)) {
-          arkValue.top = <string | number>(<Padding>value).top;
-        }
-        if ((<Padding>value).right && isLengthType((<Padding>value).right)) {
-          arkValue.right = <string | number>(<Padding>value).right;
-        }
-        if ((<Padding>value).bottom && isLengthType((<Padding>value).bottom)) {
-          arkValue.bottom = <string | number>(<Padding>value).bottom;
-        }
-        if ((<Padding>value).left && isLengthType((<Padding>value).left)) {
-          arkValue.left = <string | number>(<Padding>value).left;
-        }
+        arkValue.top = (<Margin>value).top;
+        arkValue.right = (<Margin>value).right;
+        arkValue.bottom = (<Margin>value).bottom;
+        arkValue.left = (<Margin>value).left;
       }
-      modifier(this._modifiers, PaddingModifier, arkValue);
+      modifierWithKey(this._modifiersWithKeys, PaddingModifier.identity, PaddingModifier, arkValue);
     } else {
-      modifier(this._modifiers, PaddingModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, PaddingModifier.identity, PaddingModifier, undefined);
     }
     return this;
   }
@@ -1640,28 +1658,20 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   margin(value: Margin | Length): this {
     let arkValue = new ArkPadding();
     if (value !== null && value !== undefined) {
-      if (!isNaN(Number(value)) && isLengthType(value)) {
-        arkValue.top = <string | number>value;
-        arkValue.right = <string | number>value;
-        arkValue.bottom = <string | number>value;
-        arkValue.left = <string | number>value;
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = <Length>value;
+        arkValue.right = <Length>value;
+        arkValue.bottom = <Length>value;
+        arkValue.left = <Length>value;
       } else {
-        if ((<Padding>value).top && isLengthType((<Padding>value).top)) {
-          arkValue.top = <string | number>(<Padding>value).top;
-        }
-        if ((<Padding>value).right && isLengthType((<Padding>value).right)) {
-          arkValue.right = <string | number>(<Padding>value).right;
-        }
-        if ((<Padding>value).bottom && isLengthType((<Padding>value).bottom)) {
-          arkValue.bottom = <string | number>(<Padding>value).bottom;
-        }
-        if ((<Padding>value).left && isLengthType((<Padding>value).left)) {
-          arkValue.left = <string | number>(<Padding>value).left;
-        }
+        arkValue.top = (<Margin>value).top;
+        arkValue.right = (<Margin>value).right;
+        arkValue.bottom = (<Margin>value).bottom;
+        arkValue.left = (<Margin>value).left;
       }
-      modifier(this._modifiers, MarginModifier, arkValue);
+      modifierWithKey(this._modifiersWithKeys, MarginModifier.identity, MarginModifier, arkValue);
     } else {
-      modifier(this._modifiers, MarginModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, MarginModifier.identity, MarginModifier, undefined);
     }
     return this;
   }
@@ -2176,19 +2186,19 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
   gridSpan(value: number): this {
-    if (value === null || value === undefined) {
-      modifier(this._modifiers, GridSpanModifier, undefined);
-    } else {
+    if (isNumber(value)) {
       modifier(this._modifiers, GridSpanModifier, value);
+    } else {
+      modifier(this._modifiers, GridSpanModifier, undefined);
     }
     return this;
   }
 
   gridOffset(value: number): this {
-    if (value === null || value === undefined) {
-      modifier(this._modifiers, GridOffsetModifier, undefined);
-    } else {
+    if (isNumber(value)) {
       modifier(this._modifiers, GridOffsetModifier, value);
+    } else {
+      modifier(this._modifiers, GridOffsetModifier, undefined);
     }
     return this;
   }
@@ -2246,28 +2256,28 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   visibility(value: Visibility): this {
-    if (isNaN(value)) {
-      modifier(this._modifiers, VisibilityModifier, undefined);
-    } else {
+    if (value in Visibility) {
       modifier(this._modifiers, VisibilityModifier, value);
+    } else {
+      modifier(this._modifiers, VisibilityModifier, undefined);
     }
     return this;
   }
 
   flexGrow(value: number): this {
-    if (isNaN(value) || value < 0.0) {
-      modifier(this._modifiers, FlexGrowModifier, undefined);
-    } else {
+    if (isNumber(value)) {
       modifier(this._modifiers, FlexGrowModifier, value);
+    } else {
+      modifier(this._modifiers, FlexGrowModifier, undefined);
     }
     return this;
   }
 
   flexShrink(value: number): this {
-    if (isNaN(value) || value < 0.0) {
-      modifier(this._modifiers, FlexShrinkModifier, undefined);
-    } else {
+    if (isNumber(value)) {
       modifier(this._modifiers, FlexShrinkModifier, value);
+    } else {
+      modifier(this._modifiers, FlexShrinkModifier, undefined);
     }
     return this;
   }
@@ -2282,19 +2292,19 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   alignSelf(value: ItemAlign): this {
-    if (value) {
+    if (value in ItemAlign) {
       modifier(this._modifiers, AlignSelfModifier, value);
     } else {
-      modifier(this._modifiers, AlignSelfModifier, ItemAlign.Auto);
+      modifier(this._modifiers, AlignSelfModifier, undefined);
     }
     return this;
   }
 
   displayPriority(value: number): this {
-    if (isNaN(value)) {
-      modifier(this._modifiers, DisplayPriorityModifier, undefined);
-    } else {
+    if (isNumber(value)) {
       modifier(this._modifiers, DisplayPriorityModifier, value);
+    } else {
+      modifier(this._modifiers, DisplayPriorityModifier, undefined);
     }
     return this;
   }
@@ -2354,34 +2364,26 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   markAnchor(value: Position): this {
-    let arkValue = new ArkPosition();
-    if (!value || (!isLengthType(value.x) && !isLengthType(value.y))) {
-      modifier(this._modifiers, MarkAnchorModifier, undefined);
-      return this;
-    }
-    if (value.x && isLengthType(value.x)) {
+    if (!value) {
+      modifierWithKey(this._modifiersWithKeys, MarkAnchorModifier.identity, MarkAnchorModifier, undefined);
+    } else {
+      let arkValue = new ArkPosition();
       arkValue.x = value?.x;
-    }
-    if (value.y && isLengthType(value.y)) {
       arkValue.y = value?.y;
+      modifierWithKey(this._modifiersWithKeys, MarkAnchorModifier.identity, MarkAnchorModifier, arkValue);
     }
-    modifier(this._modifiers, MarkAnchorModifier, arkValue);
     return this;
   }
 
   offset(value: Position): this {
-    let arkValue = new ArkPosition();
-    if (!value || (!isLengthType(value.x) && !isLengthType(value.y))) {
-      modifier(this._modifiers, OffsetModifier, undefined);
-      return this;
-    }
-    if (value.x && isLengthType(value.x)) {
+    if (!value) {
+      modifierWithKey(this._modifiersWithKeys, OffsetModifier.identity, OffsetModifier, undefined);
+    } else {
+      let arkValue = new ArkPosition();
       arkValue.x = value?.x;
-    }
-    if (value.y && isLengthType(value.y)) {
       arkValue.y = value?.y;
+      modifierWithKey(this._modifiersWithKeys, OffsetModifier.identity, OffsetModifier, value);
     }
-    modifier(this._modifiers, OffsetModifier, arkValue);
     return this;
   }
 
@@ -2474,11 +2476,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   aspectRatio(value: number): this {
-
-    if (isNaN(value) || lessThenFunction(value, 0.0)) {
-      modifier(this._modifiers, AspectRatioModifier, undefined);
-    } else {
+    if (isNumber(value)) {
       modifier(this._modifiers, AspectRatioModifier, value);
+    } else {
+      modifier(this._modifiers, AspectRatioModifier, undefined);
     }
     return this;
   }
@@ -2544,7 +2545,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       modifierWithKey(this._modifiersWithKeys, OverlayModifier.identity, OverlayModifier, undefined);
     }
     return this;
-}
+  }
 
   linearGradient(value: {
     angle?: number | string;
@@ -2714,7 +2715,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   keyboardShortcut(value: string | FunctionKey, keys: Array<ModifierKey>, action?: () => void): this {
     let keyboardShortCut = new ArkKeyBoardShortCut();
     keyboardShortCut.value = value;
-    keyboardShortCut.keys = keys; 
+    keyboardShortCut.keys = keys;
     modifier(this._modifiers, KeyBoardShortCutModifier, keyboardShortCut);
     return this;
   }
@@ -2737,7 +2738,6 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
     return this;
   }
-
 
   accessibilityDescription(value: string): this {
     if (typeof value !== "string") {

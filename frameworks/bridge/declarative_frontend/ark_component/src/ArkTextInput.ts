@@ -49,18 +49,38 @@ class TextInputTextAlignModifier extends Modifier<TextAlign> {
     }
   }
 }
-class TextInputPlaceholderFontModifier extends Modifier<ArkFont> {
+
+class TextInputPlaceholderFontModifier extends ModifierWithKey<Font> {
   static identity: Symbol = Symbol('textInputPlaceholderFont');
+
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().textInput.resetPlaceholderFont(node);
     } else {
+      if (!(isNumber(this.value.size)) && !(isString(this.value.size)) &&
+        !(isResource(this.value.size))) {
+        this.value.size = undefined;
+      }
+      if (!(isString(this.value.family)) && !(isResource(this.value.family))) {
+        this.value.family = undefined;
+      }
       GetUINativeModule().textInput.setPlaceholderFont(node, this.value.size,
         this.value.weight, this.value.family, this.value.style);
     }
   }
+
+  checkObjectDiff(): boolean {
+    if (!(this.stageValue.weight === this.value.weight &&
+      this.stageValue.style === this.value.style)) {
+      return true;
+    } else {
+      return !isBaseOrResourceEqual(this.stageValue.size, this.value.size) ||
+        !isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    }
+  }
 }
-class TextInputPlaceholderColorModifier extends Modifier<number> {
+
+class TextInputPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('textInputPlaceholderColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -69,19 +89,27 @@ class TextInputPlaceholderColorModifier extends Modifier<number> {
       GetUINativeModule().textInput.setPlaceholderColor(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class TextInputPasswordIconModifier extends Modifier<ArkPasswordIcon> {
+
+class TextInputPasswordIconModifier extends ModifierWithKey<PasswordIcon> {
   static identity: Symbol = Symbol('textInputPasswordIcon');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().textInput.resetPasswordIcon(node);
     } else {
-      GetUINativeModule().textInput.setPasswordIcon(node,
-        this.value.onIconSrc, this.value.offIconSrc);
+      GetUINativeModule().textInput.setPasswordIcon(node, this.value.onIconSrc, this.value.offIconSrc);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.onIconSrc, this.value.onIconSrc) ||
+      !isBaseOrResourceEqual(this.stageValue.offIconSrc, this.value.offIconSrc);
+  }
 }
-class TextInputSelectedBackgroundColorModifier extends Modifier<number> {
+
+class TextInputSelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('textInputSelectedBackgroundColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -90,7 +118,11 @@ class TextInputSelectedBackgroundColorModifier extends Modifier<number> {
       GetUINativeModule().textInput.setSelectedBackgroundColor(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
+
 class TextInputSelectionMenuHiddenModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('textInputSelectionMenuHidden');
   applyPeer(node: KNode, reset: boolean): void {
@@ -165,13 +197,24 @@ class TextInputEnableKeyboardOnFocusModifier extends Modifier<boolean> {
   }
 }
 
-class TextInputCaretStyleModifier extends Modifier<string | number> {
+class TextInputCaretStyleModifier extends ModifierWithKey<CaretStyle> {
   static identity: Symbol = Symbol('textInputCaretStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().textInput.resetCaretStyle(node);
+    } else if (!isObject(this.value) && !isString(this.value.width) &&
+      !isNumber(this.value.width) && !isResource(this.value.width)) {
+      GetUINativeModule().textInput.resetCaretStyle(node);
     } else {
-      GetUINativeModule().textInput.setCaretStyle(node, this.value);
+      GetUINativeModule().textInput.setCaretStyle(node, this.value!.width);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isObject(this.stageValue) && isObject(this.value)) {
+      return !isBaseOrResourceEqual(this.stageValue.width, this.value.width)
+    } else {
+      return true;
     }
   }
 }
@@ -198,38 +241,51 @@ class TextInputBarStateModifier extends Modifier<number> {
   }
 }
 
-class TextInputCaretColorModifier extends Modifier<number | string | undefined> {
+class TextInputCaretColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('textinputCaretColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().textInput.resetCaretColor(node);
     } else {
-      GetUINativeModule().textInput.setCaretColor(node, this.value);
+      GetUINativeModule().textInput.setCaretColor(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-
-class TextInputFontColorModifier extends Modifier<number | string> {
+class TextInputFontColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('textInputFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().textInput.resetFontColor(node);
     } else {
-      GetUINativeModule().textInput.setFontColor(node, this.value);
+      GetUINativeModule().textInput.setFontColor(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class TextInputFontSizeModifier extends Modifier<number | string> {
+
+
+class TextInputFontSizeModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('textInputFontSize');
+
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      GetUINativeModule().textInput.resetFontSize(node);
+    } else if (!isString(this.value) && !isNumber(this.value) && !isResource(this.value)) {
       GetUINativeModule().textInput.resetFontSize(node);
     } else {
       GetUINativeModule().textInput.setFontSize(node, this.value!);
     }
   }
-}
 
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 class TextInputFontStyleModifier extends Modifier<number> {
   static identity: Symbol = Symbol('textInputFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
@@ -252,7 +308,7 @@ class TextInputFontWeightModifier extends Modifier<number | string> {
   }
 }
 
-class TextInputFontFamilyModifier extends Modifier<string> {
+class TextInputFontFamilyModifier extends ModifierWithKey<ResourceStr> {
   static identity: Symbol = Symbol('textInputFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -261,8 +317,11 @@ class TextInputFontFamilyModifier extends Modifier<string> {
       GetUINativeModule().textInput.setFontFamily(node, this.value!);
     }
   }
-}
 
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute>{
   cancelButton(value: { style?: CancelButtonStyle, icon?: IconOptions }): TextInputAttribute {
     throw new Error('Method not implemented.');
@@ -284,41 +343,33 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
 
   type(value: InputType): TextInputAttribute {
-    if (value) {
+    if (value in InputType) {
       modifier(this._modifiers, TextInputTypeModifier, value);
     } else {
       modifier(this._modifiers, TextInputTypeModifier, undefined);
     }
     return this;
   }
+
   placeholderColor(value: ResourceColor): TextInputAttribute {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, TextInputPlaceholderColorModifier, arkColor.color);
-    } else {
-      modifier(this._modifiers, TextInputPlaceholderColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextInputPlaceholderColorModifier.identity,
+      TextInputPlaceholderColorModifier, value);
     return this;
   }
+
   placeholderFont(value?: Font): TextInputAttribute {
-    let arkValue: ArkFont = new ArkFont();
-    if (isLengthType(value.size)) {
-      arkValue.size = <string | number>value.size;
+    if (!isLengthType(value.weight)) {
+      value.weight = undefined;
     }
-    if (isLengthType(value.weight)) {
-      arkValue.weight = value.weight;
+    if (!(value.style in FontStyle)) {
+      value.style = undefined;
     }
-    if (isString(value.family)) {
-      arkValue.family = <string>value.family;
-    }
-    if (value.style in FontStyle) {
-      arkValue.style = value.style;
-    }
-    modifier(this._modifiers, TextInputPlaceholderFontModifier, arkValue);
+    modifierWithKey(this._modifiersWithKeys, TextInputPlaceholderFontModifier.identity,
+      TextInputPlaceholderFontModifier, value);
     return this;
   }
   enterKeyType(value: EnterKeyType): TextInputAttribute {
-    if (value) {
+    if (value in EnterKeyType) {
       modifier(this._modifiers, TextInputEnterKeyTypeModifier, value);
     } else {
       modifier(this._modifiers, TextInputEnterKeyTypeModifier, EnterKeyType.Done);
@@ -326,11 +377,8 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     return this;
   }
   caretColor(value: ResourceColor): TextInputAttribute {
-    if (isNumber(value) || isString(value)) {
-      modifier(this._modifiers, TextInputCaretColorModifier, <string | number>value);
-    } else {
-      modifier(this._modifiers, TextInputCaretColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextInputCaretColorModifier.identity,
+      TextInputCaretColorModifier, value);
     return this;
   }
   onEditChanged(callback: (isEditing: boolean) => void): TextInputAttribute {
@@ -359,27 +407,21 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     }
     return this;
   }
+
   fontColor(value: ResourceColor): TextInputAttribute {
-    let arkColor: ArkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, TextInputFontColorModifier, arkColor.color);
-    } else {
-      modifier(this._modifiers, TextInputFontColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextInputFontColorModifier.identity,
+      TextInputFontColorModifier, value);
     return this;
   }
+
   fontSize(value: Length): TextInputAttribute {
-    if (isLengthType(value)) {
-      let arkValue: number | string = <number | string>value;
-      modifier(this._modifiers, TextInputFontSizeModifier, arkValue);
-    } else {
-      modifier(this._modifiers, TextInputFontSizeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextInputFontSizeModifier.identity,
+      TextInputFontSizeModifier, value);
     return this;
   }
   fontStyle(value: FontStyle): TextInputAttribute {
     if (!(value in FontStyle)) {
-      value = FontStyle.Normal;
+      value = undefined;
     }
     modifier(this._modifiers, TextInputFontStyleModifier, value);
     return this;
@@ -392,12 +434,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     }
     return this;
   }
+
   fontFamily(value: ResourceStr): TextInputAttribute {
-    if (!(isString(value))) {
-      value = 'HarmonyOS Sans'
-    }
-    let arkValue: number | string = <number | string>value;
-    modifier(this._modifiers, TextInputFontFamilyModifier, arkValue);
+    modifierWithKey(this._modifiersWithKeys, TextInputFontFamilyModifier.identity,
+      TextInputFontFamilyModifier, value);
     return this;
   }
   inputFilter(value: ResourceStr, error?: (value: string) => void): TextInputAttribute {
@@ -413,10 +453,11 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     throw new Error('Method not implemented.');
   }
   copyOption(value: CopyOptions): TextInputAttribute {
-    if (!(value in CopyOptions)) {
-      value = CopyOptions.LocalDevice;
+    if (isNumber(value)) {
+      modifier(this._modifiers, TextInputCopyOptionModifier, value);
+    } else {
+      modifier(this._modifiers, TextInputCopyOptionModifier, undefined);
     }
-    modifier(this._modifiers, TextInputCopyOptionModifier, value);
     return this;
   }
 
@@ -444,26 +485,20 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     }
     return this;
   }
-
   caretStyle(value: CaretStyle) {
-    if (isUndefined(value)) {
-      modifier(this._modifiers, TextInputCaretStyleModifier, undefined);
-    } else if (isObject(value)) {
-      if ((value.width !== undefined) && ((isNumber(value.width)) || (isString(value.width)))) {
-        modifier(this._modifiers, TextInputCaretStyleModifier, <string | number>value.width);
-      } else {
-        modifier(this._modifiers, TextInputCaretStyleModifier, undefined);
-      }
+    if (value) {
+      modifierWithKey(this._modifiersWithKeys, TextInputCaretStyleModifier.identity,
+        TextInputCaretStyleModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TextInputCaretStyleModifier.identity,
+        TextInputCaretStyleModifier, undefined);
     }
     return this;
   }
+
   selectedBackgroundColor(value: ResourceColor): TextInputAttribute {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, TextInputSelectedBackgroundColorModifier, arkColor.color);
-    } else {
-      modifier(this._modifiers, TextInputSelectedBackgroundColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextInputSelectedBackgroundColorModifier.identity,
+      TextInputSelectedBackgroundColorModifier, value);
     return this;
   }
   caretPosition(value: number): TextInputAttribute {
@@ -474,17 +509,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     modifier(this._modifiers, TextInputEnableKeyboardOnFocusModifier, value);
     return this;
   }
+
   passwordIcon(value: PasswordIcon): TextInputAttribute {
-    let passwordIcon: ArkPasswordIcon = new ArkPasswordIcon();
-    if (!value ||
-      (!isString(value.onIconSrc) && !isString(value.onIconSrc))) {
-      passwordIcon.offIconSrc = <string>value.offIconSrc;
-      passwordIcon.onIconSrc = <string>value.onIconSrc;
-      modifier(this._modifiers, TextInputPasswordIconModifier, passwordIcon);
-      return this;
-    } else {
-      modifier(this._modifiers, TextInputPasswordIconModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextInputPasswordIconModifier.identity,
+      TextInputPasswordIconModifier, value);
     return this;
   }
   showError(value: string | undefined): TextInputAttribute {
@@ -516,14 +544,13 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     return this;
   }
   barState(value: BarState): TextInputAttribute {
-    if (value) {
+    if (value in BarState) {
       modifier(this._modifiers, TextInputBarStateModifier, value);
     } else {
       modifier(this._modifiers, TextInputBarStateModifier, undefined);
     }
     return this;
   }
-
 
   maxLines(value: number): TextInputAttribute {
     if (typeof value === "number") {
@@ -546,5 +573,4 @@ globalThis.TextInput.attributeModifier = function (modifier) {
   });
   modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
-
 }
