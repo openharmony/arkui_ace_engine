@@ -3729,14 +3729,23 @@ ArkUINativeModuleValue CommonBridge::SetResponseRegion(ArkUIRuntimeCallInfo* run
     Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(secondArg);
     int32_t length = transArray->Length(vm);
     double regionArray[length];
-
+    int32_t regionUnits[length];
     for (int32_t i = 0; i < length; i++) {
         Local<JSValueRef> value = transArray->GetValueAt(vm, secondArg, i);
+        std::string region = value->ToString(vm)->ToString();
+        if (region == "PLACEHOLDER") {
+            if (i / NUM_4 < NUM_2) {
+                region = "0vp";
+            } else {
+                region = "100%";
+            }
+        }
         CalcDimension result =
-            StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::VP);
+            StringUtils::StringToCalcDimension(region, false, DimensionUnit::VP);
         regionArray[i] = result.Value();
+        regionUnits[i] = static_cast<int32_t>(result.Unit());
     }
-    GetArkUIInternalNodeAPI()->GetCommonModifier().SetResponseRegion(nativeNode, regionArray, length);
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetResponseRegion(nativeNode, regionArray, regionUnits, length);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -3936,14 +3945,23 @@ ArkUINativeModuleValue CommonBridge::SetMouseResponseRegion(ArkUIRuntimeCallInfo
     Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(secondArg);
     int32_t length = transArray->Length(vm);
     double regionArray[length];
-
+    int32_t regionUnits[length];
     for (int32_t i = 0; i < length; i++) {
         Local<JSValueRef> value = transArray->GetValueAt(vm, secondArg, i);
+        std::string region = value->ToString(vm)->ToString();
+        if (region == "PLACEHOLDER") {
+            if (i / NUM_4 < NUM_2) {
+                region = "0vp";
+            } else {
+                region = "100%";
+            }
+        }
         CalcDimension result =
-            StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::VP);
+            StringUtils::StringToCalcDimension(region, false, DimensionUnit::VP);
         regionArray[i] = result.Value();
+        regionUnits[i] = static_cast<int32_t>(result.Unit());
     }
-    GetArkUIInternalNodeAPI()->GetCommonModifier().SetMouseResponseRegion(nativeNode, regionArray, length);
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetMouseResponseRegion(nativeNode, regionArray, regionUnits, length);
     return panda::JSValueRef::Undefined(vm);
 }
 

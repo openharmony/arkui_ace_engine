@@ -1246,7 +1246,7 @@ class ArkObscured {
   reasons: number[];
 
   constructor() {
-    this.reasons = undefined;
+    this.reasons = [];
   }
 
   parseReasonsArray(reasonObject: object) {
@@ -1268,7 +1268,7 @@ class ArkResponseRegion {
   responseRegion: string[];
 
   constructor() {
-    this.responseRegion = undefined;
+    this.responseRegion = [];
   }
 
   isObject(region: object) {
@@ -1289,14 +1289,14 @@ class ArkResponseRegion {
 
   parseArray(regionObject: object) {
     if (this.isObject(regionObject)) {
-      let x = regionObject['x'].toString();
-      let y = regionObject['y'].toString();
-      let width = regionObject['width'].toString();
-      let height = regionObject['height'].toString();
-      this.responseRegion.push(x);
-      this.responseRegion.push(y);
-      this.responseRegion.push(width);
-      this.responseRegion.push(height);
+      let x = regionObject['x'] ?? 'PLACEHOLDER';
+      let y = regionObject['y'] ?? 'PLACEHOLDER';
+      let width = regionObject['width'] ?? 'PLACEHOLDER';
+      let height = regionObject['height'] ?? 'PLACEHOLDER';
+      this.responseRegion.push(x.toString());
+      this.responseRegion.push(y.toString());
+      this.responseRegion.push(width.toString());
+      this.responseRegion.push(height.toString());
       return true;
     }
     return false;

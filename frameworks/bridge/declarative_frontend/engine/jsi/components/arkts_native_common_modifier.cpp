@@ -2502,16 +2502,20 @@ void ResetObscured(NodeHandle node)
     ViewAbstract::SetObscured(frameNode, reasons);
 }
 
-void SetResponseRegion(NodeHandle node, const double* values, int32_t length)
+void SetResponseRegion(NodeHandle node, const double* values, const int32_t* units, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<DimensionRect> region;
-    for (int32_t i = 0; i < length/NUM_4; i++) {
-        CalcDimension xDimen = CalcDimension(values[i * NUM_4 + NUM_0], DimensionUnit::VP);
-        CalcDimension yDimen = CalcDimension(values[i * NUM_4 + NUM_1], DimensionUnit::VP);
-        CalcDimension widthDimen = CalcDimension(values[i * NUM_4 + NUM_2], DimensionUnit::PERCENT);
-        CalcDimension heightDimen = CalcDimension(values[i * NUM_4 + NUM_3], DimensionUnit::PERCENT);
+    for (int32_t i = 0; i < length / NUM_4; i++) {
+        CalcDimension xDimen =
+            CalcDimension(values[i * NUM_4 + NUM_0], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_0]));
+        CalcDimension yDimen =
+            CalcDimension(values[i * NUM_4 + NUM_1], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_1]));
+        CalcDimension widthDimen =
+            CalcDimension(values[i * NUM_4 + NUM_2], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_2]));
+        CalcDimension heightDimen =
+            CalcDimension(values[i * NUM_4 + NUM_3], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_3]));
         DimensionOffset offsetDimen(xDimen, yDimen);
         DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
         region.emplace_back(dimenRect);
@@ -2534,16 +2538,20 @@ void ResetResponseRegion(NodeHandle node)
     ViewAbstract::SetResponseRegion(frameNode, region);
 }
 
-void SetMouseResponseRegion(NodeHandle node, const double* values, int32_t length)
+void SetMouseResponseRegion(NodeHandle node, const double* values, const int32_t* units, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<DimensionRect> region;
-    for (int32_t i = 0; i < length/NUM_4; i++) {
-        CalcDimension xDimen = CalcDimension(values[i * NUM_4 + NUM_0], DimensionUnit::VP);
-        CalcDimension yDimen = CalcDimension(values[i * NUM_4 + NUM_1], DimensionUnit::VP);
-        CalcDimension widthDimen = CalcDimension(values[i * NUM_4 + NUM_2], DimensionUnit::PERCENT);
-        CalcDimension heightDimen = CalcDimension(values[i * NUM_4 + NUM_3], DimensionUnit::PERCENT);
+    for (int32_t i = 0; i < length / NUM_4; i++) {
+        CalcDimension xDimen =
+            CalcDimension(values[i * NUM_4 + NUM_0], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_0]));
+        CalcDimension yDimen =
+            CalcDimension(values[i * NUM_4 + NUM_1], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_1]));
+        CalcDimension widthDimen =
+            CalcDimension(values[i * NUM_4 + NUM_2], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_2]));
+        CalcDimension heightDimen =
+            CalcDimension(values[i * NUM_4 + NUM_3], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_3]));
         DimensionOffset offsetDimen(xDimen, yDimen);
         DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
         region.emplace_back(dimenRect);
