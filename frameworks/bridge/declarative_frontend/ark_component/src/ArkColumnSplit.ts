@@ -1,5 +1,5 @@
 /// <reference path="./import.ts" />
-class ColumnSplitDividerModifier extends Modifier<ArkColumnSplitDividerStyle> {
+class ColumnSplitDividerModifier extends ModifierWithKey<ArkColumnSplitDividerStyle> {
   static identity: Symbol = Symbol('columnSplitDivider');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -7,6 +7,10 @@ class ColumnSplitDividerModifier extends Modifier<ArkColumnSplitDividerStyle> {
     } else {
       GetUINativeModule().columnSplit.setDivider(node, this.value.startMargin, this.value.endMargin);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.startMargin, this.value.startMargin) ||
+      !isBaseOrResourceEqual(this.stageValue.endMargin, this.value.endMargin)
   }
 }
 class ColumnSplitResizeableModifier extends Modifier<boolean> {
@@ -22,27 +26,24 @@ class ColumnSplitResizeableModifier extends Modifier<boolean> {
 }
 class ArkColumnSplitComponent extends ArkComponent implements CommonMethod<ColumnSplitAttribute> {
   resizeable(value: boolean): ColumnSplitAttribute {
-    let arkResizeable: boolean = false;
     if (isBoolean(value)) {
-      arkResizeable = value;
+      modifier(this._modifiers, ColumnSplitResizeableModifier, value);
+    } else {
+      modifier(this._modifiers, ColumnSplitResizeableModifier, undefined);
     }
-    modifier(this._modifiers, ColumnSplitResizeableModifier, arkResizeable);
     return this;
   }
   divider(value: ColumnSplitDividerStyle | null): ColumnSplitAttribute {
     let arkValue = new ArkColumnSplitDividerStyle();
     if (!value || (!isLengthType(value.startMargin) && !isLengthType(value.endMargin))) {
-      modifier(this._modifiers, ColumnSplitDividerModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, ColumnSplitDividerModifier.identity, ColumnSplitDividerModifier, undefined);
+      return this;
+    } else {
+      arkValue.startMargin = value?.startMargin;
+      arkValue.endMargin = value?.endMargin;
+      modifierWithKey(this._modifiersWithKeys, ColumnSplitDividerModifier.identity, ColumnSplitDividerModifier, arkValue);
       return this;
     }
-    if (value.startMargin && isLengthType(value.startMargin)) {
-      arkValue.startMargin = value.startMargin.toString();
-    }
-    if (value.endMargin && isLengthType(value.endMargin)) {
-      arkValue.endMargin = value.endMargin.toString();
-    }
-    modifier(this._modifiers, ColumnSplitDividerModifier, arkValue);
-    return this;
   }
   monopolizeEvents(monopolize: boolean): this {
     throw new Error("Method not implemented.");

@@ -13,11 +13,11 @@ class RowSplitResizeableModifier extends Modifier<boolean> {
 
 class ArkRowSplitComponent extends ArkComponent implements RowSplitAttribute {
   resizeable(value: boolean): RowSplitAttribute {
-    let arkResizeable: boolean = false;
     if (isBoolean(value)) {
-      arkResizeable = value;
+      modifier(this._modifiers, PatternLockAutoResetModifier, value);
+    } else {
+      modifier(this._modifiers, PatternLockAutoResetModifier, undefined);
     }
-    modifier(this._modifiers, RowSplitResizeableModifier, arkResizeable);
     return this;
   }
   monopolizeEvents(monopolize: boolean): this {

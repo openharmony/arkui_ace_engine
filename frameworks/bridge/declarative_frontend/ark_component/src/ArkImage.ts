@@ -10,7 +10,7 @@ class ImageColorFilterModifier extends Modifier<string> {
   }
 }
 
-class ImageFillColorModifier extends Modifier<number> {
+class ImageFillColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('imageFillColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -19,16 +19,30 @@ class ImageFillColorModifier extends Modifier<number> {
       GetUINativeModule().image.setFillColor(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
 }
 
-class ImageAltModifier extends Modifier<string> {
+class ImageAltModifier extends ModifierWithKey<ResourceColor | string> {
   static identity: Symbol = Symbol('imageAlt');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().image.resetAlt(node);
     } else {
-      GetUINativeModule().image.setAlt(node, this.value!);
+      if (isString(this.value) || isResource(this.value)) {
+        GetUINativeModule().image.setAlt(node, this.value!);
+      } else {
+        GetUINativeModule().image.resetAlt(node);
+      }
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -157,49 +171,41 @@ class ImageObjectFitModifier extends Modifier<number> {
 }
 
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
-  onGestureJudgeBegin(callback):this {
-      throw new Error("Method not implemented.");
+  onGestureJudgeBegin(callback): this {
+    throw new Error("Method not implemented.");
   }
   draggable(value: boolean): this {
-    let arkValue = false;
     if (isBoolean(value)) {
-      arkValue = value;
+      modifier(this._modifiers, ImageDraggableModifier, value);
+    } else {
+      modifier(this._modifiers, ImageDraggableModifier, undefined);
     }
-    modifier(this._modifiers, ImageDraggableModifier, arkValue);
     return this;
   }
-  alt(value: string | Resource): this {
-    let arkValue = null;
-    if (isString(value)) {
-      arkValue = value;
-    }
-    modifier(this._modifiers, ImageAltModifier, arkValue);
+  alt(value: ResourceStr): this {
+    modifierWithKey(this._modifiersWithKeys, ImageAltModifier.identity, ImageAltModifier, value);
     return this;
   }
   matchTextDirection(value: boolean): this {
-    let matchTextDirection = false;
     if (isBoolean(value)) {
-      matchTextDirection = value;
+      modifier(this._modifiers, ImageMatchTextDirectionModifier, value);
+    } else {
+      modifier(this._modifiers, ImageMatchTextDirectionModifier, undefined);
     }
-    modifier(this._modifiers, ImageMatchTextDirectionModifier, matchTextDirection);
     return this;
   }
-
   fitOriginalSize(value: boolean): this {
-    let arkValue = false;
     if (isBoolean(value)) {
-      arkValue = value;
+      modifier(this._modifiers, ImageFitOriginalSizeModifier, value);
+    } else {
+      modifier(this._modifiers, ImageFitOriginalSizeModifier, undefined);
     }
-    modifier(this._modifiers, ImageFitOriginalSizeModifier, arkValue);
+
     return this;
   }
   fillColor(value: ResourceColor): this {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, ImageFillColorModifier, arkColor.color);
-    } else {
-      modifier(this._modifiers, ImageFillColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ImageFillColorModifier.identity,
+      ImageFillColorModifier, value);
     return this;
   }
   objectFit(value: ImageFit): this {
@@ -219,11 +225,11 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
     return this;
   }
   autoResize(value: boolean): this {
-    let arkValue = true;
     if (isBoolean(value)) {
-      arkValue = value;
+      modifier(this._modifiers, ImageAutoResizeModifier, value);
+    } else {
+      modifier(this._modifiers, ImageAutoResizeModifier, undefined);
     }
-    modifier(this._modifiers, ImageAutoResizeModifier, arkValue);
     return this;
   }
   renderMode(value: ImageRenderMode): this {
@@ -243,8 +249,8 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
     return this;
   }
   sourceSize(value: { width: number; height: number }): this {
-    let w = "0.0";
-    let h = "0.0";
+    let w = undefined;
+    let h = undefined;
     if (isNumber(value.width)) {
       w = value.width.toString();
     }
@@ -255,11 +261,11 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
     return this;
   }
   syncLoad(value: boolean): this {
-    let syncLoad = false;
     if (isBoolean(value)) {
-      syncLoad = value;
+      modifier(this._modifiers, ImageSyncLoadModifier, value);
+    } else {
+      modifier(this._modifiers, ImageSyncLoadModifier, undefined);
     }
-    modifier(this._modifiers, ImageSyncLoadModifier, syncLoad);
     return this;
   }
 

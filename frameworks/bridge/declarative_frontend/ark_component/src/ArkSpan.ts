@@ -1,32 +1,50 @@
 /// <reference path="./import.ts" />
-class SpanFontSizeModifier extends Modifier<string | number> {
+class SpanFontSizeModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('spanFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      GetUINativeModule().span.resetFontSize(node);
+    } else if (!isString(this.value) && !isNumber(this.value) && !isResource(this.value)) {
       GetUINativeModule().span.resetFontSize(node);
     } else {
       GetUINativeModule().span.setFontSize(node, this.value!);
     }
   }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class SpanFontFamilyModifier extends Modifier<string> {
+class SpanFontFamilyModifier extends ModifierWithKey<string | Resource> {
   static identity: Symbol = Symbol('spanFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().span.resetFontFamily(node);
+    } else if (!isString(this.value) && !isResource(this.value)) {
+      GetUINativeModule().span.resetFontFamily(node);
     } else {
-      GetUINativeModule().span.setFontFamily(node, this.value);
+      GetUINativeModule().span.setFontFamily(node, this.value!);
     }
   }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class SpanLineHeightModifier extends Modifier<string | number> {
+class SpanLineHeightModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('spanLineHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().span.resetLineHeight(node);
+    } else if (!isNumber(this.value) && !isString(this.value) && !isResource(this.value)) {
+      GetUINativeModule().span.resetLineHeight(node);
     } else {
       GetUINativeModule().span.setLineHeight(node, this.value!);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class SpanFontStyleModifier extends Modifier<FontStyle> {
@@ -49,14 +67,20 @@ class SpanTextCaseModifier extends Modifier<TextCase> {
     }
   }
 }
-class SpanFontColorModifier extends Modifier<string | number> {
+class SpanFontColorModifier extends ModifierWithKey<ResourceColor> {
   static identity = Symbol('spanFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().span.resetFontColor(node);
+    } else if (!isString(this.value) && !isNumber(this.value) && !isResource(this.value)) {
+      GetUINativeModule().span.resetFontColor(node);
     } else {
       GetUINativeModule().span.setFontColor(node, this.value!);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class SpanLetterSpacingModifier extends Modifier<string> {
@@ -69,23 +93,63 @@ class SpanLetterSpacingModifier extends Modifier<string> {
     }
   }
 }
-class SpanFontModifier extends Modifier<ArkFont> {
+class SpanFontModifier extends ModifierWithKey<Font> {
   static identity = Symbol('spanFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().span.resetFont(node);
     } else {
+      if (!(isNumber(this.value.size)) && !(isString(this.value.size)) && !(isResource(this.value.size))) {
+        this.value.size = undefined;
+      }
+      if (!(isString(this.value.family)) && !(isResource(this.value.family))) {
+        this.value.family = undefined;
+      }
       GetUINativeModule().span.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
+
+  checkObjectDiff(): boolean {
+    if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style) {
+      return true;
+    }
+    if (((isResource(this.stageValue.size) && isResource(this.value.size) &&
+      isResourceEqual(this.stageValue.size, this.value.size)) ||
+      (!isResource(this.stageValue.size) && !isResource(this.value.size) &&
+        this.stageValue.size === this.value.size)) &&
+      ((isResource(this.stageValue.family) && isResource(this.value.family) &&
+        isResourceEqual(this.stageValue.family, this.value.family)) ||
+        (!isResource(this.stageValue.family) && !isResource(this.value.family) &&
+          this.stageValue.family === this.value.family))) {
+      return false;
+    } else {
+      return true;
+    }
+  }
 }
-class SpanDecorationModifier extends Modifier<ArkDecoration> {
+class SpanDecorationModifier extends ModifierWithKey<ArkDecoration> {
   static identity = Symbol('spanDecoration');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().span.resetDecoration(node);
     } else {
+      if (!(isNumber(this.value.color)) && !(isString(this.value.color)) && !(isResource(this.value.color))) {
+        this.value.color = undefined;
+      }
       GetUINativeModule().span.setDecoration(node, this.value.type, this.value.color);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (this.stageValue.type !== this.value.type) {
+      return true;
+    }
+    if (isResource(this.stageValue.color) && isResource(this.value.color)) {
+      return !isResourceEqual(this.stageValue.color, this.value.color);
+    } else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
+      return !(this.stageValue.color === this.value.color);
+    } else {
+      return true;
     }
   }
 }
@@ -103,83 +167,55 @@ class SpanFontWeightModifier extends Modifier<string> {
 class ArkSpanComponent extends ArkComponent implements CommonMethod<SpanAttribute> {
   decoration(value: { type: TextDecorationType, color?: ResourceColor }): SpanAttribute {
     let arkValue: ArkDecoration = new ArkDecoration();
-    if (!isNumber(value.type) && !(value.type in TextDecorationType)) {
-      arkValue.type = undefined;
-    } else {
+    if (isNumber(value.type) || (value.type in TextDecorationType)) {
       arkValue.type = value.type;
     }
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value.color)) {
-      arkValue.color = arkColor.color;
-    } else {
-      arkValue.color = undefined;
+    if (value.color) {
+      arkValue.color = value.color;
     }
-    modifier(this._modifiers, SpanDecorationModifier, arkValue);
+    modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, arkValue);
     return this;
   }
   font(value: Font): SpanAttribute {
-    let arkValue: ArkFont = new ArkFont();
-    if (isLengthType(value.size)) {
-      arkValue.size = <string | number>value.size;
+    if (!isLengthType(value.weight)) {
+      value.weight = undefined;
     }
-    if (isLengthType(value.weight)) {
-      arkValue.weight = value.weight;
+    if (!(value.style in FontStyle)) {
+      value.style = undefined;
     }
-    if (isString(value.family)) {
-      arkValue.family = <string>value.family;
-    }
-    if (value.style in FontStyle) {
-      arkValue.style = value.style;
-    }
-    modifier(this._modifiers, SpanFontModifier, arkValue);
+    modifierWithKey(this._modifiersWithKeys, SpanFontModifier.identity, SpanFontModifier, value);
     return this;
   }
   lineHeight(value: Length): SpanAttribute {
-    if (isString(value) || isNumber(value)) {
-      modifier(this._modifiers, SpanLineHeightModifier, <string | number>value);
-    } else {
-      modifier(this._modifiers, SpanLineHeightModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SpanLineHeightModifier.identity, SpanLineHeightModifier, value);
     return this;
   }
-  fontSize(value: number | string | Resource): SpanAttribute {
-    if (isLengthType(value)) {
-      modifier(this._modifiers, SpanFontSizeModifier, <string | number>value);
-    } else {
-      modifier(this._modifiers, SpanFontSizeModifier, undefined);
-    }
+  fontSize(value: Length): SpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, SpanFontSizeModifier.identity, SpanFontSizeModifier, value);
     return this;
   }
   fontColor(value: ResourceColor): SpanAttribute {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, SpanFontColorModifier, arkColor.color);
-    } else {
-      modifier(this._modifiers, SpanFontColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SpanFontColorModifier.identity, SpanFontColorModifier, value);
     return this;
   }
   fontStyle(value: FontStyle): SpanAttribute {
-    if (!(value in FontStyle)) {
-      value = FontStyle.Normal;
+    if (value in FontStyle) {
+      modifier(this._modifiers, SpanFontStyleModifier, value);
+    } else {
+      modifier(this._modifiers, SpanFontStyleModifier, undefined);
     }
-    modifier(this._modifiers, SpanFontStyleModifier, value);
     return this;
   }
   fontWeight(value: number | FontWeight | string): SpanAttribute {
-    if (!isLengthType(value)) {
-      modifier(this._modifiers, SpanFontWeightModifier, undefined);
-    } else {
+    if (isLengthType(value)) {
       modifier(this._modifiers, SpanFontWeightModifier, value);
+    } else {
+      modifier(this._modifiers, SpanFontWeightModifier, undefined);
     }
     return this;
   }
   fontFamily(value: string | Resource): SpanAttribute {
-    if (isString(value)) {
-      modifier(this._modifiers, SpanFontFamilyModifier, <string>value);
-    } else {
-      modifier(this._modifiers, SpanFontFamilyModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SpanFontFamilyModifier.identity, SpanFontFamilyModifier, value);
     return this;
   }
   letterSpacing(value: number | string): SpanAttribute {

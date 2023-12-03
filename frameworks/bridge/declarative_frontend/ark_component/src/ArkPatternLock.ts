@@ -1,5 +1,5 @@
 /// <reference path="./import.ts" />
-class PatternLockActiveColorModifier extends Modifier<number> {
+class PatternLockActiveColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('patternLockActiveColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -8,9 +8,16 @@ class PatternLockActiveColorModifier extends Modifier<number> {
       GetUINativeModule().patternLock.setActiveColor(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
 }
 
-class PatternLockSelectedColorModifier extends Modifier<number> {
+class PatternLockSelectedColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('patternLockSelectedColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -19,9 +26,16 @@ class PatternLockSelectedColorModifier extends Modifier<number> {
       GetUINativeModule().patternLock.setSelectedColor(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
 }
 
-class PatternLockPathColorModifier extends Modifier<number> {
+class PatternLockPathColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('patternLockPathColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -30,9 +44,16 @@ class PatternLockPathColorModifier extends Modifier<number> {
       GetUINativeModule().patternLock.setPathColor(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
 }
 
-class PatternLockRegularColorModifier extends Modifier<number> {
+class PatternLockRegularColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('patternLockRegularColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -41,15 +62,29 @@ class PatternLockRegularColorModifier extends Modifier<number> {
       GetUINativeModule().patternLock.setRegularColor(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
 }
 
-class PatternLockSideLengthModifier extends Modifier<number | string> {
+class PatternLockSideLengthModifier extends ModifierWithKey<Resource> {
   static identity: Symbol = Symbol('patternLockSideLength');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().patternLock.resetSideLength(node);
     } else {
       GetUINativeModule().patternLock.setSideLength(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
@@ -65,13 +100,20 @@ class PatternLockPathStrokeModifier extends Modifier<number | string> {
   }
 }
 
-class PatternLockCircleRadiusModifier extends Modifier<number> {
+class PatternLockCircleRadiusModifier extends ModifierWithKey<Resource> {
   static identity: Symbol = Symbol('patternLockCircleRadius');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().patternLock.resetCircleRadius(node);
     } else {
       GetUINativeModule().patternLock.setCircleRadius(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
@@ -89,91 +131,59 @@ class PatternLockAutoResetModifier extends Modifier<boolean> {
 
 class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribute {
   sideLength(value: Length): PatternLockAttribute {
-    let arkValue = 288;
-    if (isLengthType(value)) {
-      let _value: number | string = <number | string>value;
-      modifier(this._modifiers, PatternLockSideLengthModifier, _value);
-    } else {
-      modifier(this._modifiers, PatternLockSideLengthModifier, arkValue);
-    }
+    modifierWithKey(this._modifiersWithKeys, PatternLockSideLengthModifier.identity,
+      PatternLockSideLengthModifier, value);
     return this;
   }
   circleRadius(value: Length): PatternLockAttribute {
-    let arkValue = 6;
-    if (isLengthType(value)) {
-      let _value: number | string = <number | string>value;
-      modifier(this._modifiers, PatternLockSideLengthModifier, _value);
-    } else {
-      modifier(this._modifiers, PatternLockCircleRadiusModifier, arkValue);
-    }
+    modifierWithKey(this._modifiersWithKeys, PatternLockCircleRadiusModifier.identity,
+      PatternLockCircleRadiusModifier, value);
     return this;
   }
   regularColor(value: ResourceColor): PatternLockAttribute {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, PatternLockRegularColorModifier, arkColor.color);
-    } else {
-      modifier(this._modifiers, PatternLockRegularColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PatternLockRegularColorModifier.identity,
+      PatternLockRegularColorModifier, value);
     return this;
   }
   selectedColor(value: ResourceColor): PatternLockAttribute {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, PatternLockSelectedColorModifier, arkColor.color);
-    } else {
-      modifier(this._modifiers, PatternLockSelectedColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PatternLockSelectedColorModifier.identity,
+      PatternLockSelectedColorModifier, value);
     return this;
   }
   activeColor(value: ResourceColor): PatternLockAttribute {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, PatternLockActiveColorModifier, arkColor.color);
-    } else {
-      modifier(this._modifiers, PatternLockActiveColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PatternLockActiveColorModifier.identity,
+      PatternLockActiveColorModifier, value);
     return this;
   }
   pathColor(value: ResourceColor): PatternLockAttribute {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, PatternLockPathColorModifier, arkColor.color);
-    } else {
-      modifier(this._modifiers, PatternLockPathColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PatternLockPathColorModifier.identity,
+      PatternLockPathColorModifier, value);
     return this;
   }
   pathStrokeWidth(value: number | string): PatternLockAttribute {
-    let arkValue = 12;
     if (isLengthType(value)) {
-      let _value: number | string = <number | string>value;
-      modifier(this._modifiers, PatternLockPathStrokeModifier, _value);
+      modifier(this._modifiers, PatternLockPathStrokeModifier, <number | string>value);
     } else {
-      modifier(this._modifiers, PatternLockPathStrokeModifier, arkValue);
+      modifier(this._modifiers, PatternLockPathStrokeModifier, undefined);
     }
-
     return this;
   }
-
   autoReset(value: boolean): PatternLockAttribute {
-    let arkValue = false;
     if (isBoolean(value)) {
-      arkValue = value;
+      modifier(this._modifiers, PatternLockAutoResetModifier, value);
+    } else {
+      modifier(this._modifiers, PatternLockAutoResetModifier, undefined);
     }
-    modifier(this._modifiers, PatternLockAutoResetModifier, arkValue);
     return this;
   }
   onPatternComplete(callback: (input: Array<number>) => void): PatternLockAttribute {
     throw new Error('Method not implemented.');
   }
-  onDotConnect(
-    callback: import('../../../../../../../../../openharmony/out/sdk/ohos-sdk/windows/ets/api/@ohos.base').Callback<number>
-  ): PatternLockAttribute {
+  onDotConnect(callback: any): PatternLockAttribute {
     throw new Error('Method not implemented.');
   }
   monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.");
   }
 }
 // @ts-ignore
@@ -185,4 +195,4 @@ globalThis.PatternLock.attributeModifier = function (modifier) {
   });
   modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
-};
+}

@@ -21,7 +21,7 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   }
 
   copyOptions(value: CopyOptions): RichEditorAttribute {
-    if (value) {
+    if (value in CopyOptions) {
       modifier(this._modifiers, RichEditorCopyOptionsModifier, value);
     } else {
       modifier(this._modifiers, RichEditorCopyOptionsModifier, undefined);

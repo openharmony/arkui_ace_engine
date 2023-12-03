@@ -1,21 +1,73 @@
 /// <reference path="./import.ts" />
-
-class ImageAnimatorImagesModifier extends Modifier<ArkImageFrameInfoToArray> {
+class ImageAnimatorImagesModifier extends ModifierWithKey<Array<ImageFrameInfo>> {
   static identity: Symbol = Symbol('imageAnimatorImages');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().imageAnimator.resetImages(node);
     } else {
-      GetUINativeModule().imageAnimator.setImages(
-        node,
-        this.value.arrSrc,
-        this.value.arrWidth,
-        this.value.arrHeight,
-        this.value.arrTop,
-        this.value.arrLeft,
-        this.value.arrDuration,
-        this.value.arrSrc.length
-      );
+      let arkImageFrame: ArkImageFrameInfoToArray = this.convertImageFrames(this.value);
+      GetUINativeModule().imageAnimator.setImages(node, arkImageFrame.arrSrc,
+        arkImageFrame.arrWidth, arkImageFrame.arrHeight, arkImageFrame.arrTop, arkImageFrame.arrLeft,
+        arkImageFrame.arrDuration, arkImageFrame.arrSrc.length);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    let checkDiff = true;
+    if (this.value && this.value.length > 0 &&
+      this.stageValue && this.stageValue.length > 0 &&
+      this.value.length === this.stageValue.length) {
+      let checkItemEqual: Boolean = false;
+
+      for (let i: number = 0; i < this.value.length; i++) {
+        this.isEqual(this.stageValue[i], this.value[i])
+        if (!checkItemEqual) {
+          checkDiff = !checkItemEqual;
+          break;
+        }
+      }
+    }
+    return checkDiff;
+  }
+
+  isEqual(one: ImageFrameInfo, another: ImageFrameInfo): boolean {
+    if (!(one.width === another.width &&
+      one.height === another.height &&
+      one.top === another.top &&
+      one.left === another.left &&
+      one.duration === another.duration)) {
+      return true;
+    }
+    else {
+      return !isBaseOrResourceEqual(one.src, another.src);
+    }
+  }
+
+  convertImageFrames(value: Array<ImageFrameInfo>): ArkImageFrameInfoToArray {
+    if (value && value.length > 0) {
+      let isFlag: Boolean = true;
+      for (let item of value) {
+        if (item.src === undefined || item.src === null) {
+          isFlag = false;
+          break;
+        }
+      }
+      if (isFlag) {
+        let array: ArkImageFrameInfoToArray = new ArkImageFrameInfoToArray();
+        for (let item of value) {
+          array.arrSrc.push(<string>item.src);
+          array.arrWidth.push((item.width === undefined || item.width === null) ? 0 : item.width);
+          array.arrHeight.push((item.height === undefined || item.height === null) ? 0 : item.height);
+          array.arrTop.push((item.top === undefined || item.top === null) ? 0 : item.top);
+          array.arrLeft.push((item.left === undefined || item.left === null) ? 0 : item.left);
+          array.arrDuration.push((item.duration === undefined || item.duration === null) ? 0 : item.duration);
+        }
+        return array;
+      } else {
+        return undefined;
+      }
+    } else {
+      return undefined;
     }
   }
 }
@@ -100,29 +152,11 @@ class ImageAnimatorIterationsModeModifier extends Modifier<number> {
 class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<ImageAnimatorAttribute> {
   images(value: Array<ImageFrameInfo>): ImageAnimatorAttribute {
     if (value && value.length > 0) {
-      let isFlag: Boolean = true;
-      for (let item of value) {
-        if (item.src === undefined || item.src === null) {
-          isFlag = false;
-          break;
-        }
-      }
-      if (isFlag) {
-        let array: ArkImageFrameInfoToArray = new ArkImageFrameInfoToArray();
-        for (let item of value) {
-          array.arrSrc.push(<string>item.src);
-          array.arrWidth.push(item.width === undefined || item.width === null ? 0 : item.width);
-          array.arrHeight.push(item.height === undefined || item.height === null ? 0 : item.height);
-          array.arrTop.push(item.top === undefined || item.top === null ? 0 : item.top);
-          array.arrLeft.push(item.left === undefined || item.left === null ? 0 : item.left);
-          array.arrDuration.push(item.duration === undefined || item.duration === null ? 0 : item.duration);
-        }
-        modifier(this._modifiers, ImageAnimatorImagesModifier, array);
-      } else {
-        modifier(this._modifiers, ImageAnimatorImagesModifier, undefined);
-      }
+      modifierWithKey(this._modifiersWithKeys, ImageAnimatorImagesModifier.identity,
+        ImageAnimatorImagesModifier, value);
     } else {
-      modifier(this._modifiers, ImageAnimatorImagesModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, ImageAnimatorImagesModifier.identity,
+        ImageAnimatorImagesModifier, undefined);
     }
     return this;
   }
@@ -130,7 +164,7 @@ class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<Ima
     if (value) {
       modifier(this._modifiers, ImageAnimatorStateModifier, value);
     } else {
-      modifier(this._modifiers, ImageAnimatorStateModifier, AnimationStatus.Initial);
+      modifier(this._modifiers, ImageAnimatorStateModifier, undefined);
     }
     return this;
   }
@@ -150,10 +184,10 @@ class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<Ima
     throw new Error('Method not implemented.');
   }
   fillMode(value: FillMode): ImageAnimatorAttribute {
-    if (value) {
+    if (value in FillMode) {
       modifier(this._modifiers, ImageAnimatorFillModeModifier, value);
     } else {
-      modifier(this._modifiers, ImageAnimatorFillModeModifier, FillMode.Forwards);
+      modifier(this._modifiers, ImageAnimatorFillModeModifier, undefined);
     }
     return this;
   }
