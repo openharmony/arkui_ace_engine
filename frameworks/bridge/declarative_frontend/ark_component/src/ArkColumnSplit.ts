@@ -35,7 +35,7 @@ class ArkColumnSplitComponent extends ArkComponent implements CommonMethod<Colum
   }
   divider(value: ColumnSplitDividerStyle | null): ColumnSplitAttribute {
     let arkValue = new ArkColumnSplitDividerStyle();
-    if (!value || (!isLengthType(value.startMargin) && !isLengthType(value.endMargin))) {
+    if (!value) {
       modifierWithKey(this._modifiersWithKeys, ColumnSplitDividerModifier.identity, ColumnSplitDividerModifier, undefined);
       return this;
     } else {
