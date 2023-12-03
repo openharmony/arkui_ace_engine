@@ -1109,6 +1109,8 @@ void ScrollablePattern::SelectWithScroll()
     }
 
     animator_->PlayMotion(selectMotion_);
+
+    FireOnScrollStart();
 }
 
 void ScrollablePattern::OnMouseRelease()
@@ -1348,13 +1350,18 @@ EdgeEffect ScrollablePattern::GetEdgeEffect() const
 
 ScrollState ScrollablePattern::GetScrollState() const
 {
+    return ScrollablePattern::GetScrollState(scrollSource_);
+}
+
+ScrollState ScrollablePattern::GetScrollState(int32_t scrollSource)
+{
     // with event
-    if (scrollSource_ == SCROLL_FROM_UPDATE || scrollSource_ == SCROLL_FROM_AXIS || scrollSource_ == SCROLL_FROM_BAR) {
+    if (scrollSource == SCROLL_FROM_UPDATE || scrollSource == SCROLL_FROM_AXIS || scrollSource == SCROLL_FROM_BAR) {
         return ScrollState::SCROLL;
     }
     // without event
-    if (scrollSource_ == SCROLL_FROM_ANIMATION || scrollSource_ == SCROLL_FROM_ANIMATION_SPRING ||
-        scrollSource_ == SCROLL_FROM_ANIMATION_CONTROLLER || scrollSource_ == SCROLL_FROM_BAR_FLING) {
+    if (scrollSource == SCROLL_FROM_ANIMATION || scrollSource == SCROLL_FROM_ANIMATION_SPRING ||
+        scrollSource == SCROLL_FROM_ANIMATION_CONTROLLER || scrollSource == SCROLL_FROM_BAR_FLING) {
         return ScrollState::FLING;
     }
     // SCROLL_FROM_NONE, SCROLL_FROM_JUMP, SCROLL_FROM_CHILD, SCROLL_FROM_FOCUS_JUMP, SCROLL_FROM_ROTATE,

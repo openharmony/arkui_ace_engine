@@ -469,34 +469,8 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     CHECK_NULL_VOID(gridEventHub);
 
     auto onScroll = gridEventHub->GetOnScroll();
-    auto scrollSource = GetScrollSource();
-    if (scrollStop_ && !GetScrollAbort()) {
-        auto offsetPX = Dimension(finalOffset);
-        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-        if (onScroll) {
-            if (scrollSource == SCROLL_FROM_UPDATE || scrollSource == SCROLL_FROM_AXIS ||
-                scrollSource == SCROLL_FROM_BAR) {
-                onScroll(offsetVP, ScrollState::SCROLL);
-                onScroll(0.0_vp, ScrollState::IDLE);
-            } else if (scrollSource == SCROLL_FROM_ANIMATION || scrollSource == SCROLL_FROM_ANIMATION_SPRING ||
-                       scrollSource == SCROLL_FROM_ANIMATION_CONTROLLER || scrollSource == SCROLL_FROM_BAR_FLING) {
-                onScroll(offsetVP, ScrollState::FLING);
-                onScroll(0.0_vp, ScrollState::IDLE);
-            } else {
-                onScroll(offsetVP, ScrollState::IDLE);
-            }
-        }
-    } else if (onScroll && !NearZero(finalOffset)) {
-        auto offsetPX = Dimension(finalOffset);
-        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-        if (scrollSource == SCROLL_FROM_UPDATE || scrollSource == SCROLL_FROM_AXIS || scrollSource == SCROLL_FROM_BAR) {
-            onScroll(offsetVP, ScrollState::SCROLL);
-        } else if (scrollSource == SCROLL_FROM_ANIMATION || scrollSource == SCROLL_FROM_ANIMATION_SPRING ||
-                   scrollSource == SCROLL_FROM_ANIMATION_CONTROLLER || scrollSource == SCROLL_FROM_BAR_FLING) {
-            onScroll(offsetVP, ScrollState::FLING);
-        } else {
-            onScroll(offsetVP, ScrollState::IDLE);
-        }
+    if (onScroll) {
+        FireOnScroll(finalOffset, onScroll);
     }
 
     if (indexChanged) {
