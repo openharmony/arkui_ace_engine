@@ -184,8 +184,11 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
     // logic when the formal scenario is complete.
     if (pipeline && pipeline->IsFormRender()) {
+        Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
         if (event.time.time_since_epoch().count() - touchDownTime_.time_since_epoch().count() >
-            DEFAULT_LONGPRESS_DURATION) {
+            DEFAULT_LONGPRESS_DURATION || offset.GetDistance() > MAX_THRESHOLD) {
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "reject click when up, offset is %{public}f",
+                static_cast<float>(offset.GetDistance()));
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return;
         }
