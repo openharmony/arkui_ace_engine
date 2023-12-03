@@ -39,7 +39,6 @@ namespace {
     constexpr Dimension MIN_OPTION_WIDTH = 56.0_vp;
     constexpr Dimension OPTION_MARGIN = 8.0_vp;
     constexpr int32_t COLUMN_NUM = 2;
-    constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
 } // namespace
 
 void OptionPattern::OnAttachToFrameNode()
@@ -374,8 +373,7 @@ Color OptionPattern::GetBgColor()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, Color());
-    auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
-    if (currentPlatformVersion >= PLATFORM_VERSION_ELEVEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         return Color::TRANSPARENT;
     }
     auto theme = pipeline->GetTheme<SelectTheme>();
