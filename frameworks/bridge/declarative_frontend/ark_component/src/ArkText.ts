@@ -254,7 +254,7 @@ class TextTextShadowModifier extends ModifierWithKey<ShadowOptions | Array<Shado
         GetUINativeModule().text.resetTextShadow(node);
       } else {
         GetUINativeModule().text
-          .setTextShadow(node, shadow.radius, shadow.color, shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
+          .setTextShadow(node, shadow.radius, shadow.type, shadow.color, shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
       }
     }
   }
@@ -451,14 +451,18 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     return this;
   }
   decoration(value: { type: TextDecorationType; color?: ResourceColor }): TextAttribute {
-    let arkValue: ArkDecoration = new ArkDecoration();
-    if (isNumber(value.type) || (value.type in TextDecorationType)) {
-      arkValue.type = value.type;
-    }
-    if (value.color) {
-      arkValue.color = value.color;
-    }
-    modifierWithKey(this._modifiersWithKeys, TextDecorationModifier.identity, TextDecorationModifier, arkValue);
+    if (value === null || value === undefined) {
+      modifier(this._modifiersWithKeys, TextDecorationModifier.identity, TextDecorationModifier,undefined);
+    } else { 
+      let arkValue: ArkDecoration = new ArkDecoration();
+      if (isNumber(value.type) || (value.type in TextDecorationType)) {
+        arkValue.type = value.type;
+      }
+      if (value.color) {
+        arkValue.color = value.color;
+      }
+      modifierWithKey(this._modifiersWithKeys, TextDecorationModifier.identity, TextDecorationModifier, arkValue);
+    }    
     return this;
   }
   letterSpacing(value: number | string): TextAttribute {
@@ -502,7 +506,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     return this;
   }
   textShadow(value: ShadowOptions | Array<ShadowOptions>): TextAttribute {
-    modifierWithKey(this._modifiersWithKeys, TextTextShadowModifier.identity, TextTextShadowModifier, value);
+    if (value === null || value === undefined) {
+      modifierWithKey(this._modifiersWithKeys, TextTextShadowModifier.identity, TextTextShadowModifier, undefined);
+    } else { 
+      modifierWithKey(this._modifiersWithKeys, TextTextShadowModifier.identity, TextTextShadowModifier, value);
+    }
     return this;
   }
   heightAdaptivePolicy(value: TextHeightAdaptivePolicy): TextAttribute {

@@ -166,24 +166,32 @@ class SpanFontWeightModifier extends Modifier<string> {
 
 class ArkSpanComponent extends ArkComponent implements CommonMethod<SpanAttribute> {
   decoration(value: { type: TextDecorationType, color?: ResourceColor }): SpanAttribute {
-    let arkValue: ArkDecoration = new ArkDecoration();
-    if (isNumber(value.type) || (value.type in TextDecorationType)) {
-      arkValue.type = value.type;
+    if (value === null || value === undefined) {
+      modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, undefined);
+    } else {
+      let arkValue: ArkDecoration = new ArkDecoration();
+      if (isNumber(value.type) || (value.type in TextDecorationType)) {
+        arkValue.type = value.type;
+      }
+      if (value.color) {
+        arkValue.color = value.color;
+      }
+      modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, arkValue);
     }
-    if (value.color) {
-      arkValue.color = value.color;
-    }
-    modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, arkValue);
     return this;
   }
   font(value: Font): SpanAttribute {
-    if (!isLengthType(value.weight)) {
-      value.weight = undefined;
+    if (value === null || value === undefined) {
+      modifierWithKey(this._modifiersWithKeys, SpanFontModifier.identity, SpanFontModifier, undefined);
+    } else {
+      if (!isLengthType(value.weight)) {
+        value.weight = undefined;
+      }
+      if (!(value.style in FontStyle)) {
+        value.style = undefined;
+      }
+      modifierWithKey(this._modifiersWithKeys, SpanFontModifier.identity, SpanFontModifier, value);
     }
-    if (!(value.style in FontStyle)) {
-      value.style = undefined;
-    }
-    modifierWithKey(this._modifiersWithKeys, SpanFontModifier.identity, SpanFontModifier, value);
     return this;
   }
   lineHeight(value: Length): SpanAttribute {

@@ -3480,7 +3480,7 @@ class TextTextShadowModifier extends ModifierWithKey {
             }
             else {
                 GetUINativeModule().text
-                    .setTextShadow(node, shadow.radius, shadow.color, shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
+                    .setTextShadow(node, shadow.radius, shadow.type, shadow.color, shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
             }
         }
     }
@@ -3689,14 +3689,18 @@ class ArkTextComponent extends ArkComponent {
         return this;
     }
     decoration(value) {
-        let arkValue = new ArkDecoration();
-        if (isNumber(value.type) || (value.type in TextDecorationType)) {
-            arkValue.type = value.type;
+        if (value === null || value === undefined) {
+            modifier(this._modifiersWithKeys, TextDecorationModifier.identity, TextDecorationModifier, undefined);
+        } else {
+            let arkValue = new ArkDecoration();
+            if (isNumber(value.type) || (value.type in TextDecorationType)) {
+                arkValue.type = value.type;
+            }
+            if (value.color) {
+                arkValue.color = value.color;
+            }
+            modifierWithKey(this._modifiersWithKeys, TextDecorationModifier.identity, TextDecorationModifier, arkValue);
         }
-        if (value.color) {
-            arkValue.color = value.color;
-        }
-        modifierWithKey(this._modifiersWithKeys, TextDecorationModifier.identity, TextDecorationModifier, arkValue);
         return this;
     }
     letterSpacing(value) {
@@ -3745,7 +3749,11 @@ class ArkTextComponent extends ArkComponent {
         return this;
     }
     textShadow(value) {
-        modifierWithKey(this._modifiersWithKeys, TextTextShadowModifier.identity, TextTextShadowModifier, value);
+        if (value === null || value === undefined) {
+          modifierWithKey(this._modifiersWithKeys, TextTextShadowModifier.identity, TextTextShadowModifier, undefined);
+        } else {
+          modifierWithKey(this._modifiersWithKeys, TextTextShadowModifier.identity, TextTextShadowModifier, value);
+        }
         return this;
     }
     heightAdaptivePolicy(value) {
@@ -5991,7 +5999,7 @@ DividerLineCapModifier.identity = Symbol('dividerLineCap');
 class DividerColorModifier extends ModifierWithKey {
     applyPeer(node, reset) {
         if (reset) {
-            GetUINativeModule().divider.resetrColor(node);
+            GetUINativeModule().divider.resetColor(node);
         }
         else {
             GetUINativeModule().divider.setColor(node, this.value);
@@ -10737,24 +10745,32 @@ class SpanFontWeightModifier extends Modifier {
 SpanFontWeightModifier.identity = Symbol('spanfontweight');
 class ArkSpanComponent extends ArkComponent {
     decoration(value) {
-        let arkValue = new ArkDecoration();
-        if (isNumber(value.type) || (value.type in TextDecorationType)) {
-            arkValue.type = value.type;
+        if (value === null || value === undefined) {
+            modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, undefined);
+        } else {
+            let arkValue = new ArkDecoration();
+            if (isNumber(value.type) || (value.type in TextDecorationType)) {
+                arkValue.type = value.type;
+            }
+            if (value.color) {
+                arkValue.color = value.color;
+            }
+            modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, arkValue);
         }
-        if (value.color) {
-            arkValue.color = value.color;
-        }
-        modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, arkValue);
         return this;
     }
     font(value) {
-        if (!isLengthType(value.weight)) {
-            value.weight = undefined;
+        if (value === null || value === undefined) {
+            modifierWithKey(this._modifiersWithKeys, SpanFontModifier.identity, SpanFontModifier, undefined);
+        } else {
+            if (!isLengthType(value.weight)) {
+                value.weight = undefined;
+            }
+            if (!(value.style in FontStyle)) {
+                value.style = undefined;
+            }
+            modifierWithKey(this._modifiersWithKeys, SpanFontModifier.identity, SpanFontModifier, value);
         }
-        if (!(value.style in FontStyle)) {
-            value.style = undefined;
-        }
-        modifierWithKey(this._modifiersWithKeys, SpanFontModifier.identity, SpanFontModifier, value);
         return this;
     }
     lineHeight(value) {
