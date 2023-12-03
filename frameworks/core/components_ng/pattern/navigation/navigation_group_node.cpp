@@ -129,6 +129,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             // process shallow builder
             navDestination->ProcessShallowBuilder();
             navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+            navDestination->GetEventHub<EventHub>()->SetEnabledInternal(true);
             // for the navDestination at the top, FireChangeEvent
             eventHub->FireChangeEvent(true);
             hasChanged = CheckNeedMeasure(navDestination->GetLayoutProperty()->GetPropertyChangeFlag());
