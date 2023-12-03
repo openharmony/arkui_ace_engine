@@ -17,7 +17,6 @@ import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import measure from '@ohos.measure';
 import mediaquery from '@ohos.mediaquery';
 import resourceManager from '@ohos.resourceManager';
-import List from '@ohos.util.List';
 
 export enum ChipSize {
   NORMAL = "NORMAL",
