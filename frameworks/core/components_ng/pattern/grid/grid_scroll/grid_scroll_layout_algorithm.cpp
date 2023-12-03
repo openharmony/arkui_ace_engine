@@ -330,6 +330,9 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
             gridLayoutInfo_.prevOffset_ = 0.0;
         }
         if (!haveNewLineAtStart) {
+            if (canOverScroll_) {
+                gridLayoutInfo_.UpdateEndIndex(offset, mainSize, mainGap_);
+            }
             layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
             return;
         }

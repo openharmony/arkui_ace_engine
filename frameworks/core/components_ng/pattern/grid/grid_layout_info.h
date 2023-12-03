@@ -53,6 +53,8 @@ struct GridLayoutInfo {
     }
 
     void UpdateEndLine(float mainSize, float mainGap);
+    // for overScroll at top
+    void UpdateEndIndex(float overScrollOffset, float mainSize, float mainGap);
 
     void SwapItems(int32_t itemIndex, int32_t insertIndex);
     int32_t GetOriginalIndex() const;
