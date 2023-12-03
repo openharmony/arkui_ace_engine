@@ -145,7 +145,8 @@ Rosen::Gravity GetRosenGravity(RenderFit renderFit)
     return idx != -1 ? gravityMap[idx].value : Rosen::Gravity::DEFAULT;
 }
 
-std::shared_ptr<Rosen::RSFilter> CreateRSMaterialFilter(const BlurStyleOption& blurStyleOption, const RefPtr<PipelineBase>& pipeline)
+std::shared_ptr<Rosen::RSFilter> CreateRSMaterialFilter(
+    const BlurStyleOption& blurStyleOption, const RefPtr<PipelineBase>& pipeline)
 {
     auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
     if (!blurStyleTheme) {
