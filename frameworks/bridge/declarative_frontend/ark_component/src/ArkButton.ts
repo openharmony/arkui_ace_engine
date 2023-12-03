@@ -1,4 +1,23 @@
 /// <reference path="./import.ts" />
+/// <reference path="./ArkComponent.ts" />
+const FontWeightMap = {
+  0: 'lighter',
+  1: 'normal',
+  2: 'regular',
+  3: 'medium',
+  4: 'bold',
+  5: 'bolder',
+  100: '100',
+  200: '200',
+  300: '300',
+  400: '400',
+  500: '500',
+  600: '600',
+  700: '700',
+  800: '800',
+  900: '900',
+}
+
 class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error("Method not implemented.");
@@ -38,7 +57,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   fontWeight(value: string | number | FontWeight): this {
-    if (typeof value === "string") {
+    if (typeof value === "string" || typeof value === "number") {
       modifier(this._modifiers, ButtonFontWeightModifier, value);
     } else {
       modifier(this._modifiers, ButtonFontWeightModifier, undefined);
@@ -136,9 +155,16 @@ class ButtonLabelStyleModifier extends Modifier<ArkLabelStyle> {
         if (typeof this.value.font === "object")
         {
           fontSize = this.value.font.size;
-          fontWeight = this.value.font.weight;
+          fontWeight = 'normal';
           fontStyle = this.value.font.style;
           fontFamily = this.value.font.family;
+          if (typeof this.value.font.weight === "string") {
+            fontWeight = this.value.font.weight;
+          } else {
+            if (this.value.font.weight in FontWeightMap) {
+              fontWeight = FontWeightMap[this.value.font.weight];
+            }
+          }
         }
         GetUINativeModule().button.setLabelStyle(node, textOverflow, maxLines, minFontSize, maxFontSize,
           heightAdaptivePolicy, fontSize, fontWeight, fontStyle, fontFamily);
@@ -179,14 +205,22 @@ class ButtonFontSizeModifier extends Modifier<number> {
     }
   }
 }
-class ButtonFontWeightModifier extends Modifier<string> {
+class ButtonFontWeightModifier extends Modifier<string | number | FontWeight> {
   static identity: Symbol = Symbol("buttonFontWeight");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().button.resetFontWeight(node);
     }
     else {
-      GetUINativeModule().button.setFontWeight(node, this.value);
+      let fontWeightStr = 'normal';
+      if (typeof this.value === "string") {
+        fontWeightStr = this.value;
+      } else {
+        if (this.value in FontWeightMap) {
+          fontWeightStr = FontWeightMap[this.value];
+        }
+      }
+      GetUINativeModule().button.setFontWeight(node, fontWeightStr);
     }
   }
 }
