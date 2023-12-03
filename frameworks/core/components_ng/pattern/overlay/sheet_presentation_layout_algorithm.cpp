@@ -70,8 +70,8 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->Measure(childConstraint);
         }
-        if ((sheetStyle_.sheetType == SheetType::SHEET_CENTER || sheetStyle_.sheetType == SheetType::SHEET_POPUP) &&
-            (sheetStyle_.sheetMode == AUTO)) {
+        if ((sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP)
+            && (sheetStyle_.sheetMode.value_or(SheetMode::LARGE) == SheetMode::AUTO)) {
             auto&& children = layoutWrapper->GetAllChildrenWithBuild();
             auto secondIter = std::next(children.begin(), 1);
             auto secondChild = *secondIter;
@@ -85,12 +85,20 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             CHECK_NULL_VOID(operatorGeometryNode);
             auto builderGeometryNode = builder->GetGeometryNode();
             CHECK_NULL_VOID(builderGeometryNode);
-            centerChildHeight_ =
+            sheetHeight_ =
                 operatorGeometryNode->GetFrameSize().Height() + builderGeometryNode->GetFrameSize().Height();
-            SizeF idealSize(sheetWidth_, centerChildHeight_);
+            auto maxHeight = std::min(sheetMaxHeight_, sheetMaxWidth_) * POPUP_LARGE_SIZE;
+            if (sheetHeight_ > maxHeight) {
+                sheetHeight_ = maxHeight;
+            } else if (sheetHeight_ < 0.0f) {
+                sheetHeight_ = SHEET_BIG_WINDOW_HEIGHT.ConvertToPx();
+            } else if (sheetHeight_ < SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx()) {
+                sheetHeight_ = SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx();
+            }
+            SizeF idealSize(sheetWidth_, sheetHeight_);
             layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
             childConstraint.maxSize.SetWidth(sheetWidth_);
-            childConstraint.maxSize.SetHeight(centerChildHeight_);
+            childConstraint.maxSize.SetHeight(sheetHeight_);
         }
     }
 }

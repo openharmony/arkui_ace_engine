@@ -258,7 +258,9 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
             }
         } else {
             ChangeSheetHeight(upHeight);
-            ChangeScrollHeight(height_);
+            if (upHeight != downHeight) {
+                ChangeScrollHeight(height_);
+            }
             SheetTransition(true, std::abs(dragVelocity));
         }
     }
@@ -451,7 +453,6 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
                 CHECK_NULL_VOID(pattern);
                 if (isTransitionIn) {
                     pattern->SetCurrentOffset(0.0);
-                    pattern->ChangeScrollHeight(height);
                 } else {
                     auto context = PipelineContext::GetCurrentContext();
                     CHECK_NULL_VOID(context);
@@ -925,10 +926,13 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
     if (isTransitionIn) {
         AnimationUtils::Animate(
             option,
-            [context, offset]() {
+            [context, offset, height = height_, weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
                 if (context) {
                     context->OnTransformTranslateUpdate({ 0.0f, offset, 0.0f });
                 }
+                pattern->ChangeScrollHeight(height);
             },
             option.GetOnFinishEvent());
     } else {

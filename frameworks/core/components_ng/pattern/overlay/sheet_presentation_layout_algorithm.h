@@ -71,7 +71,6 @@ private:
     float sheetWidth_ = 0.0f;
     float sheetMaxHeight_ = 0.0f;
     float sheetMaxWidth_ = 0.0f;
-    float centerChildHeight_ = 0.0f;
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
     SheetStyle sheetStyle_;
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationLayoutAlgorithm);
