@@ -390,21 +390,21 @@ void WaterFlowPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scr
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, 0.0);
-        if (pattern->GetAlwaysEnabled() &&
-            GreatNotEqual(pattern->GetMainContentSize(), pattern->layoutInfo_.GetContentHeight())) {
+        auto leadOffset = pattern->GetMainContentSize() - pattern->layoutInfo_.GetContentHeight();
+        if (pattern->GetAlwaysEnabled() && Positive(leadOffset)) {
             return 0.0;
         }
-        return pattern->GetMainContentSize() - pattern->layoutInfo_.GetContentHeight();
+        return Negative(leadOffset) ? leadOffset : 0.0;
     });
     scrollEffect->SetTrailingCallback([]() -> double { return 0.0; });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, 0.0);
-        if (pattern->GetAlwaysEnabled() &&
-            GreatNotEqual(pattern->GetMainContentSize(), pattern->layoutInfo_.GetContentHeight())) {
+        auto leadOffset = pattern->GetMainContentSize() - pattern->layoutInfo_.GetContentHeight();
+        if (pattern->GetAlwaysEnabled() && Positive(leadOffset)) {
             return 0.0;
         }
-        return pattern->GetMainContentSize() - pattern->layoutInfo_.GetContentHeight();
+        return Negative(leadOffset) ? leadOffset : 0.0;
     });
     scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
 }
