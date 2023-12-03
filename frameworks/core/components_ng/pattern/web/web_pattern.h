@@ -113,6 +113,8 @@ public:
         return true;
     }
 
+    bool NeedSoftKeyboard() const override;
+    
     void UpdateScrollOffset(SizeF frameSize) override;
 
     RefPtr<EventHub> CreateEventHub() override
