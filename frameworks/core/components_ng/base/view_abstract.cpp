@@ -2510,6 +2510,7 @@ void ViewAbstract::SetTabIndex(FrameNode* frameNode, int32_t index)
 void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector< ObscuredReasons>& reasons)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Obscured, reasons, frameNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

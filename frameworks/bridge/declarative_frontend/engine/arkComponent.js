@@ -7368,7 +7368,7 @@ class ArkScrollableBarModeOptions {
 }
 class ArkObscured {
     constructor() {
-        this.reasons = undefined;
+        this.reasons = [];
     }
     parseReasonsArray(reasonObject) {
         if (Array.isArray(reasonObject)) {
@@ -7385,7 +7385,7 @@ class ArkObscured {
 }
 class ArkResponseRegion {
     constructor() {
-        this.responseRegion = undefined;
+        this.responseRegion = [];
     }
     isObject(region) {
         return region !== null && !Array.isArray(region) && typeof region === 'object';
@@ -7404,15 +7404,16 @@ class ArkResponseRegion {
         return false;
     }
     parseArray(regionObject) {
+        var _a, _b, _c, _d;
         if (this.isObject(regionObject)) {
-            let x = regionObject['x'].toString();
-            let y = regionObject['y'].toString();
-            let width = regionObject['width'].toString();
-            let height = regionObject['height'].toString();
-            this.responseRegion.push(x);
-            this.responseRegion.push(y);
-            this.responseRegion.push(width);
-            this.responseRegion.push(height);
+            let x = (_a = regionObject['x']) !== null && _a !== void 0 ? _a : 'PLACEHOLDER';
+            let y = (_b = regionObject['y']) !== null && _b !== void 0 ? _b : 'PLACEHOLDER';
+            let width = (_c = regionObject['width']) !== null && _c !== void 0 ? _c : 'PLACEHOLDER';
+            let height = (_d = regionObject['height']) !== null && _d !== void 0 ? _d : 'PLACEHOLDER';
+            this.responseRegion.push(x.toString());
+            this.responseRegion.push(y.toString());
+            this.responseRegion.push(width.toString());
+            this.responseRegion.push(height.toString());
             return true;
         }
         return false;
