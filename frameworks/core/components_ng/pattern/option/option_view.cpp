@@ -106,16 +106,11 @@ RefPtr<FrameNode> OptionView::CreateIcon(const std::string& icon, const RefPtr<F
     CHECK_NULL_RETURN(theme, nullptr);
     if (!icon.empty()) {
         ImageSourceInfo info(icon);
-        info.SetFillColor(theme->GetMenuIconColor());
         props->UpdateImageSourceInfo(info);
     }
     props->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(theme->GetIconSideLength()), CalcLength(theme->GetIconSideLength())));
     props->UpdateAlignment(Alignment::CENTER_LEFT);
-
-    auto renderProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_RETURN(renderProperty, nullptr);
-    renderProperty->UpdateSvgFillColor(theme->GetMenuIconColor());
 
     MarginProperty margin;
     margin.right = CalcLength(theme->GetIconContentPadding());
