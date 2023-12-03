@@ -836,4 +836,21 @@ void PipelineBase::Destroy()
     etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
 }
+
+std::string PipelineBase::OnFormRecycle()
+{
+    if (onFormRecycle_) {
+        return onFormRecycle_();
+    }
+    LOGE("onFormRecycle_ is null.");
+    return "";
+}
+
+void PipelineBase::OnFormRecover(const std::string& statusData)
+{
+    if (onFormRecover_) {
+        return onFormRecover_(statusData);
+    }
+    LOGE("onFormRecover_ is null.");
+}
 } // namespace OHOS::Ace

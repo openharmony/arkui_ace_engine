@@ -120,11 +120,11 @@ private:
     void HandleSnapshot(uint32_t delayTime);
     void TakeSurfaceCaptureForUI();
     void UpdateStaticCard();
-    RefPtr<FrameNode> GetOrCreateImageNode();
+    RefPtr<FrameNode> CreateImageNode();
     void UpdateImageNode();
     void RemoveFrsNode();
     void ReleaseRenderer();
-    void HideImageNode();
+    void DeleteImageNode();
     void HandleStaticFormEvent(const PointF& touchPoint);
     void RegistVisibleAreaChangeCallback();
     void OnVisibleAreaChange(bool visible);

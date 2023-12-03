@@ -52,6 +52,8 @@ constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 constexpr char IS_DYNAMIC[] = "isDynamic";
 constexpr int32_t READD_FORM_DELAY_TIME = 50;
+constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
+constexpr int DELAY_TIME_OF_RECYCLE_FORM_AFTER_HANDLE_CLICK_EVENT = 10000;
 } // namespace
 
 FormManagerDelegate::~FormManagerDelegate()
@@ -205,8 +207,35 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
 
     isDynamic_ = formInfo.isDynamic;
     if (!formInfo.isDynamic) {
-        HandleSnapshotCallback();
+        HandleSnapshotCallback(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
     }
+
+    bool isRecoverFormToHandleClickEvent = want.GetBoolParam(
+        OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false);
+    if (isDynamic_ && isRecoverFormToHandleClickEvent) {
+        HandleCachedClickEvents();
+    }
+}
+
+void FormManagerDelegate::HandleCachedClickEvents()
+{
+    {
+        std::lock_guard<std::mutex> lock(recycleMutex_);
+        LOGI("process click event after recover form, pointerEventCache_.size: %{public}s",
+            std::to_string(pointerEventCache_.size()).c_str());
+        recycleStatus_ = RecycleStatus::RECOVERED;
+        for (const auto& pointerEvent : pointerEventCache_) {
+            formRendererDispatcher_->DispatchPointerEvent(pointerEvent);
+        }
+        pointerEventCache_.clear();
+    }
+
+    // recycle form after handle click event
+    std::vector<int64_t> formIds = {runningCardId_};
+    AAFwk::Want want;
+    want.SetParam(OHOS::AppExecFwk::Constants::FORM_DELAY_TIME_OF_RECYCLE,
+        DELAY_TIME_OF_RECYCLE_FORM_AFTER_HANDLE_CLICK_EVENT);
+    OHOS::AppExecFwk::FormMgr::GetInstance().RecycleForms(formIds, want);
 }
 
 std::string FormManagerDelegate::ConvertRequestInfo(const RequestFormInfo& info) const
@@ -561,10 +590,30 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
 
 void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    if (!isDynamic_ || formRendererDispatcher_ == nullptr) {
+    if (!isDynamic_) {
         return;
     }
 
+    // if formRendererDispatcher_ is null, check if form is recycled.
+    if (formRendererDispatcher_ == nullptr) {
+        std::lock_guard<std::mutex> lock(recycleMutex_);
+        if (recycleStatus_ == RecycleStatus::RECYCLED) {
+            LOGI("form is recycled, recover it first");
+            recycleStatus_ = RecycleStatus::RECOVERING;
+            pointerEventCache_.emplace_back(pointerEvent);
+
+            std::vector<int64_t> formIds = {runningCardId_};
+            AAFwk::Want want;
+            want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, true);
+            OHOS::AppExecFwk::FormMgr::GetInstance().RecoverForms(formIds, want);
+        } else if (recycleStatus_ == RecycleStatus::RECOVERING) {
+            LOGI("form is recovering, cache pointer event");
+            pointerEventCache_.emplace_back(pointerEvent);
+        } else {
+            LOGE("formRendererDispatcher_ is null");
+        }
+        return;
+    }
     formRendererDispatcher_->DispatchPointerEvent(pointerEvent);
 }
 
@@ -655,11 +704,11 @@ void FormManagerDelegate::HandleUnTrustFormCallback()
     }
 }
 
-void FormManagerDelegate::HandleSnapshotCallback()
+void FormManagerDelegate::HandleSnapshotCallback(const uint32_t& delayTime)
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "HandleSnapshotCallback.");
     if (snapshotCallback_) {
-        snapshotCallback_();
+        snapshotCallback_(delayTime);
     }
 }
 
@@ -798,6 +847,16 @@ bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::
         iter++;
     }
     return false;
+}
+
+void FormManagerDelegate::ProcessRecycleForm()
+{
+    LOGI("ProcessRecycleForm, formId is %{public}s", std::to_string(runningCardId_).c_str());
+    {
+        std::lock_guard<std::mutex> lock(recycleMutex_);
+        recycleStatus_ = RecycleStatus::RECYCLED;
+    }
+    HandleSnapshotCallback(0);
 }
 #endif
 } // namespace OHOS::Ace

@@ -242,6 +242,21 @@ public:
         return false;
     }
 
+    /**
+     * @description: Recycle form.
+     * @return return Json string of status data of ArkTS form.
+     */
+    virtual std::string RecycleForm()
+    {
+        return "";
+    }
+
+    /**
+     * @description: Recover form.
+     * @param statusData Indicates json string of status data of ArkTS form.
+     */
+    virtual void RecoverForm(const std::string &statusData) {}
+
 #ifndef PREVIEW
     virtual void SearchElementInfoByAccessibilityId(
         int32_t elementId, int32_t mode,

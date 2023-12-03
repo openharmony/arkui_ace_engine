@@ -49,7 +49,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
-constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
@@ -210,7 +209,6 @@ void FormPattern::TakeSurfaceCaptureForUI()
 {
     if (isDynamic_) {
         formLinkInfos_.clear();
-        return;
     }
     TAG_LOGI(AceLogTag::ACE_FORM, "Static-form take snapshot.");
     auto host = GetHost();
@@ -267,46 +265,34 @@ void FormPattern::UpdateStaticCard()
     ReleaseRenderer();
 }
 
-void FormPattern::HideImageNode()
+void FormPattern::DeleteImageNode()
 {
     ContainerScope scope(scopeId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto child = host->GetLastChild();
     CHECK_NULL_VOID(child);
-    auto imageNode = DynamicCast<FrameNode>(child);
-    CHECK_NULL_VOID(imageNode);
-    auto externalContext = DynamicCast<NG::RosenRenderContext>(imageNode->GetRenderContext());
-    CHECK_NULL_VOID(externalContext);
-    externalContext->SetVisible(false);
-    imageNode->MarkModifyDone();
-    imageNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+
+    std::list<RefPtr<UINode>> children = host->GetChildren();
+    if (children.size() > 0 && child->GetTag() == V2::IMAGE_ETS_TAG) {
+        host->RemoveChildAtIndex(children.size() - 1);
+    }
 }
 
-RefPtr<FrameNode> FormPattern::GetOrCreateImageNode()
+RefPtr<FrameNode> FormPattern::CreateImageNode()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto child = host->GetLastChild();
-    if (!child) {
-        auto formNode = DynamicCast<FormNode>(host);
-        CHECK_NULL_RETURN(formNode, nullptr);
-        auto imageId = formNode->GetImageId();
-        auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageId, AceType::MakeRefPtr<ImagePattern>());
-        CHECK_NULL_RETURN(imageNode, nullptr);
-        host->AddChild(imageNode);
-        auto eventHub = imageNode->GetOrCreateGestureEventHub();
-        if (eventHub != nullptr) {
-            eventHub->RemoveDragEvent();
-        }
-        return imageNode;
+    auto formNode = DynamicCast<FormNode>(host);
+    CHECK_NULL_RETURN(formNode, nullptr);
+    auto imageId = formNode->GetImageId();
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageId, AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_RETURN(imageNode, nullptr);
+    host->AddChild(imageNode);
+    auto eventHub = imageNode->GetOrCreateGestureEventHub();
+    if (eventHub != nullptr) {
+        eventHub->RemoveDragEvent();
     }
-
-    if (child->GetTag() != V2::IMAGE_ETS_TAG) {
-        return nullptr;
-    }
-
-    auto imageNode = DynamicCast<FrameNode>(child);
     return imageNode;
 }
 
@@ -316,7 +302,7 @@ void FormPattern::UpdateImageNode()
     CHECK_NULL_VOID(pixelMap_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto imageNode = GetOrCreateImageNode();
+    auto imageNode = CreateImageNode();
     CHECK_NULL_VOID(imageNode);
     auto pixelLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(pixelLayoutProperty);
@@ -698,11 +684,11 @@ void FormPattern::InitFormManagerDelegate()
         });
     });
 
-    formManagerBridge_->AddSnapshotCallback([weak = WeakClaim(this), instanceID]() {
+    formManagerBridge_->AddSnapshotCallback([weak = WeakClaim(this), instanceID](const uint32_t& delayTime) {
         ContainerScope scope(instanceID);
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
-        formPattern->HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
+        formPattern->HandleSnapshot(delayTime);
     });
 
     formManagerBridge_->AddFormLinkInfoUpdateCallback(
@@ -749,7 +735,7 @@ void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSur
     isLoaded_ = true;
     isUnTrust_ = false;
     isDynamic_ = isDynamic;
-    HideImageNode();
+    DeleteImageNode();
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
     CHECK_NULL_VOID(parent);

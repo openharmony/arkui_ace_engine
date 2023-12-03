@@ -73,6 +73,25 @@ public:
         return false;
     }
 
+    std::string FireOnFormRecycle()
+    {
+        if (jsViewFunction_) {
+            ACE_SCORING_EVENT("OnFormRecycle");
+            return jsViewFunction_->ExecuteOnFormRecycle();
+        }
+        LOGE("jsViewFunction_ is null");
+        return "";
+    }
+
+    void FireOnFormRecover(const std::string &statusData)
+    {
+        if (jsViewFunction_) {
+            ACE_SCORING_EVENT("OnFormRecover");
+            return jsViewFunction_->ExecuteOnFormRecover(statusData);
+        }
+        LOGE("jsViewFunction_ is null");
+    }
+
     void RenderJSExecution();
 
     virtual void MarkNeedUpdate() = 0;
