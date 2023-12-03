@@ -11381,7 +11381,7 @@ class ArkColumnSplitComponent extends ArkComponent {
     }
     divider(value) {
         let arkValue = new ArkColumnSplitDividerStyle();
-        if (!value || (!isLengthType(value.startMargin) && !isLengthType(value.endMargin))) {
+        if (!value) {
             modifierWithKey(this._modifiersWithKeys, ColumnSplitDividerModifier.identity, ColumnSplitDividerModifier, undefined);
             return this;
         }
