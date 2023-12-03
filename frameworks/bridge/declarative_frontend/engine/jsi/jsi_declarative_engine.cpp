@@ -2159,6 +2159,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
         (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
     if (!jsEnumStyleResult) {
         LOGI("preload js enums failed.");
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
         return;
     }
@@ -2169,6 +2170,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
         (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start);
     if (!arkComponentResult) {
         LOGI("preload ark component failed.");
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
         return;
     }
@@ -2181,7 +2183,10 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
     isModulePreloaded_ = arkRuntime->EvaluateJsCode(codeStart, codeLength);
 
-    globalRuntime_ = nullptr;
+    {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+    }
     cardRuntime_ = runtime;
     LOGI("PreloadAceModuleCard end.");
 }
