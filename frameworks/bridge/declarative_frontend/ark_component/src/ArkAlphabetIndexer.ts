@@ -4,83 +4,35 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     throw new Error('Method not implemented.');
   }
   color(value: ResourceColor): this {
-    let arkResourceColor = new ArkResourceColor()
-    arkResourceColor.color = value;
-    if (value) {
-      modifier(this._modifiers, ColorModifier, arkResourceColor);
-    } else {
-      modifier(this._modifiers, ColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ColorModifier.identity, ColorModifier, value);
     return this;
   }
   selectedColor(value: ResourceColor): this {
-    let arkResourceColor = new ArkResourceColor()
-    arkResourceColor.color = value;
-    if (value) {
-      modifier(this._modifiers, SelectedColorModifier, arkResourceColor);
-    } else {
-      modifier(this._modifiers, SelectedColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SelectedColorModifier.identity, SelectedColorModifier, value);
     return this;
   }
   popupColor(value: ResourceColor): this {
-    let arkResourceColor = new ArkResourceColor()
-    arkResourceColor.color = value;
-    if (value) {
-      modifier(this._modifiers, PopupColorModifier, arkResourceColor);
-    } else {
-      modifier(this._modifiers, PopupColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PopupColorModifier.identity, PopupColorModifier, value);
     return this;
   }
   selectedBackgroundColor(value: ResourceColor): this {
-    let arkResourceColor = new ArkResourceColor()
-    arkResourceColor.color = value;
-    if (value) {
-      modifier(this._modifiers, SelectedBackgroundColorModifier, arkResourceColor);
-    } else {
-      modifier(this._modifiers, SelectedBackgroundColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SelectedBackgroundColorModifier.identity, SelectedBackgroundColorModifier, value);
     return this;
   }
   popupBackground(value: ResourceColor): this {
-    let arkResourceColor = new ArkResourceColor()
-    arkResourceColor.color = value;
-    if (value) {
-      modifier(this._modifiers, PopupBackgroundModifier, arkResourceColor);
-    } else {
-      modifier(this._modifiers, PopupBackgroundModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PopupBackgroundModifier.identity, PopupBackgroundModifier, value);
     return this;
   }
   popupSelectedColor(value: ResourceColor): this {
-    let arkResourceColor = new ArkResourceColor()
-    arkResourceColor.color = value;
-    if (value) {
-      modifier(this._modifiers, PopupSelectedColorModifier, arkResourceColor);
-    } else {
-      modifier(this._modifiers, PopupSelectedColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PopupSelectedColorModifier.identity, PopupSelectedColorModifier, value);
     return this;
   }
   popupUnselectedColor(value: ResourceColor): this {
-    let arkResourceColor = new ArkResourceColor()
-    arkResourceColor.color = value;
-    if (value) {
-      modifier(this._modifiers, PopupUnselectedColorModifier, arkResourceColor);
-    } else {
-      modifier(this._modifiers, PopupUnselectedColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PopupUnselectedColorModifier.identity, PopupUnselectedColorModifier, value);
     return this;
   }
   popupItemBackgroundColor(value: ResourceColor): this {
-    let arkResourceColor = new ArkResourceColor()
-    arkResourceColor.color = value;
-    if (value) {
-      modifier(this._modifiers, PopupItemBackgroundColorModifier, arkResourceColor);
-    } else {
-      modifier(this._modifiers, PopupItemBackgroundColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PopupItemBackgroundColorModifier.identity, PopupItemBackgroundColorModifier, value);
     return this;
   }
   usingPopup(value: boolean): this {
@@ -251,90 +203,154 @@ class AlphabetIndexerFontModifier extends Modifier<ArkFont> {
   }
 }
 
-class PopupItemBackgroundColorModifier extends Modifier<ArkResourceColor> {
-  static identity = Symbol('popupItemBackgroundColor');
+class PopupItemBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  static identity: Symbol = Symbol("popupItemBackgroundColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetPopupItemBackgroundColor(node);
     } else {
-      GetUINativeModule().alphabetIndexer.setPopupItemBackgroundColor(node, this.value.color);
+      GetUINativeModule().alphabetIndexer.setPopupItemBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
 
-class ColorModifier extends Modifier<ArkResourceColor> {
-  static identity = Symbol('alphabetColor');
+class ColorModifier extends ModifierWithKey<ResourceColor> {
+  static identity: Symbol = Symbol("alphabetColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetColor(node);
     } else {
-      GetUINativeModule().alphabetIndexer.setColor(node, this.value.color);
+      GetUINativeModule().alphabetIndexer.setColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
 
-class PopupColorModifier extends Modifier<ArkResourceColor> {
-  static identity = Symbol('popupColor');
+class PopupColorModifier extends ModifierWithKey<ResourceColor> {
+  static identity: Symbol = Symbol("popupColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetPopupColor(node);
     } else {
-      GetUINativeModule().alphabetIndexer.setPopupColor(node, this.value.color);
+      GetUINativeModule().alphabetIndexer.setPopupColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
 
-class SelectedColorModifier extends Modifier<ArkResourceColor> {
-  static identity = Symbol('selectedColor');
+class SelectedColorModifier extends ModifierWithKey<ResourceColor> {
+  static identity: Symbol = Symbol("selectedColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetSelectedColor(node);
     } else {
-      GetUINativeModule().alphabetIndexer.setSelectedColor(node, this.value.color);
+      GetUINativeModule().alphabetIndexer.setSelectedColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
 
-class PopupBackgroundModifier extends Modifier<ArkResourceColor> {
-  static identity = Symbol('popupBackground');
+class PopupBackgroundModifier extends ModifierWithKey<ResourceColor> {
+  static identity: Symbol = Symbol("popupBackground");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetPopupBackground(node);
     } else {
-      GetUINativeModule().alphabetIndexer.setPopupBackground(node, this.value.color);
+      GetUINativeModule().alphabetIndexer.setPopupBackground(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
 
-class SelectedBackgroundColorModifier extends Modifier<ArkResourceColor> {
-  static identity = Symbol('selectedBackgroundColor');
+class SelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  static identity: Symbol = Symbol("selectedBackgroundColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetSelectedBackgroundColor(node);
     } else {
-      GetUINativeModule().alphabetIndexer.setSelectedBackgroundColor(node, this.value.color);
+      GetUINativeModule().alphabetIndexer.setSelectedBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
 
-class PopupUnselectedColorModifier extends Modifier<ArkResourceColor> {
-  static identity = Symbol('popupUnselectedColor');
+class PopupUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
+  static identity: Symbol = Symbol("popupUnselectedColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetPopupUnselectedColor(node);
     } else {
-      GetUINativeModule().alphabetIndexer.setPopupUnselectedColor(node, this.value.color);
+      GetUINativeModule().alphabetIndexer.setPopupUnselectedColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
 
-class PopupSelectedColorModifier extends Modifier<ArkResourceColor> {
-  static identity = Symbol('popupSelectedColor');
+class PopupSelectedColorModifier extends ModifierWithKey<ResourceColor> {
+  static identity: Symbol = Symbol("popupSelectedColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetPopupSelectedColor(node);
     } else {
-      GetUINativeModule().alphabetIndexer.setPopupSelectedColor(node, this.value.color);
+      GetUINativeModule().alphabetIndexer.setPopupSelectedColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
