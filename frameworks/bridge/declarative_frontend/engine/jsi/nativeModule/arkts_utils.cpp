@@ -518,7 +518,7 @@ bool ArkTSUtils::ParseJsDimensionVpNG(const EcmaVM *vm, const Local<JSValueRef> 
 }
 
 bool ArkTSUtils::ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
-    DimensionUnit defaultUnit)
+    DimensionUnit defaultUnit, bool isSupportPercent)
 {
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
         return false;
@@ -529,6 +529,10 @@ bool ArkTSUtils::ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsV
         return true;
     }
     if (jsValue->IsString()) {
+        auto stringValue = jsValue->ToString(vm)->ToString();
+        if (stringValue.back() == '%' && !isSupportPercent) {
+            return false;
+        }
         result = StringUtils::StringToCalcDimension(jsValue->ToString(vm)->ToString(), false, defaultUnit);
         return true;
     }
@@ -538,9 +542,10 @@ bool ArkTSUtils::ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsV
     return false;
 }
 
-bool ArkTSUtils::ParseJsDimensionFp(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result)
+bool ArkTSUtils::ParseJsDimensionFp(
+    const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result, bool isSupportPercent)
 {
-    return ArkTSUtils::ParseJsDimension(vm, jsValue, result, DimensionUnit::FP);
+    return ArkTSUtils::ParseJsDimension(vm, jsValue, result, DimensionUnit::FP, isSupportPercent);
 }
 
 bool ArkTSUtils::ParseJsFontFamilies(
@@ -728,5 +733,56 @@ void ArkTSUtils::GetJsMediaBundleInfo(
             moduleName = module->ToString(vm)->ToString();
         }
     }
+}
+
+bool ArkTSUtils::GetJsPasswordIcon(const EcmaVM *vm, const Local<JSValueRef> &jsOnIconSrc,
+    const Local<JSValueRef> &jsOffIconSrc, PasswordIcon& result)
+{
+    result.showResult = "";
+    result.hideResult = "";
+    result.showBundleName = "";
+    result.hideBundleName = "";
+    result.showModuleName = "";
+    result.hideModuleName = "";
+
+    if (!jsOnIconSrc->IsString() && !jsOnIconSrc->IsObject()
+        && !jsOffIconSrc->IsString() && !jsOffIconSrc->IsObject()) {
+        return false;
+    }
+
+    if (jsOnIconSrc->IsString()) {
+        result.showResult = jsOnIconSrc->ToString(vm)->ToString();
+    }
+
+    if (jsOnIconSrc->IsObject()) {
+        auto obj = jsOnIconSrc->ToObject(vm);
+        std::string bundleName;
+        std::string moduleName;
+        auto bundle = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
+        auto module = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
+        if (bundle->IsString() && module->IsString()) {
+            result.showBundleName = bundle->ToString(vm)->ToString();
+            result.showModuleName = module->ToString(vm)->ToString();
+        }
+        ParseJsMedia(vm, jsOnIconSrc, result.showResult);
+    }
+
+    if (jsOffIconSrc->IsString()) {
+        result.hideResult = jsOffIconSrc->ToString(vm)->ToString();
+    }
+
+    if (jsOffIconSrc->IsObject()) {
+        auto obj = jsOffIconSrc->ToObject(vm);
+        std::string bundleName;
+        std::string moduleName;
+        auto bundle = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
+        auto module = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
+        if (bundle->IsString() && module->IsString()) {
+            result.hideBundleName = bundle->ToString(vm)->ToString();
+            result.hideModuleName = module->ToString(vm)->ToString();
+        }
+        ParseJsMedia(vm, jsOffIconSrc, result.hideResult);
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
