@@ -848,7 +848,7 @@ void ScrollPattern::OnRestoreInfo(const std::string& restoreInfo)
 void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     auto JsonEdgeEffectOptions = JsonUtil::Create(true);
-    JsonEdgeEffectOptions->Put("alwaysEnabled",GetAlwaysEnabled());
+    JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
     json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
 }
 
