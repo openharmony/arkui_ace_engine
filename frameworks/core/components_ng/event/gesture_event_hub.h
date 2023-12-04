@@ -467,6 +467,12 @@ public:
         return longPressEventActuator_->GetLongPressRecognizer();
     }
 
+    void SetIsAllowMouse(bool isAllowMouse) const
+    {
+        CHECK_NULL_VOID(panEventActuator_);
+        panEventActuator_->SetIsAllowMouse(isAllowMouse);
+    }
+
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
