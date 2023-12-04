@@ -62,6 +62,16 @@ public:
         originalConstraint_->UpdateMaxSizeWithCheck(value);
     }
 
+    void UpdateItemCalcMinSize(const CalcSize& value)
+    {
+        LayoutProperty::UpdateCalcMinSize(value);
+    }
+
+    void UpdateItemCalcMaxSize(const CalcSize& value)
+    {
+        LayoutProperty::UpdateCalcMaxSize(value);
+    }
+
     std::optional<CalcSize> GetMinSize() const
     {
         if (originalConstraint_) {

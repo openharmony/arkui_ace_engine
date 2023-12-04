@@ -273,9 +273,12 @@ LayoutConstraintF WaterFlowLayoutAlgorithm::CreateChildConstraint(int32_t crossI
         }
     }
 
-    childLayoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(itemConstraint.maxSize.Width(), DimensionUnit::PX),
+    childLayoutProperty->ResetCalcMinSize();
+    childLayoutProperty->ResetCalcMaxSize();
+
+    childLayoutProperty->UpdateItemCalcMaxSize(CalcSize(CalcLength(itemConstraint.maxSize.Width(), DimensionUnit::PX),
         CalcLength(itemConstraint.maxSize.Height(), DimensionUnit::PX)));
-    childLayoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(itemConstraint.minSize.Width(), DimensionUnit::PX),
+    childLayoutProperty->UpdateItemCalcMinSize(CalcSize(CalcLength(itemConstraint.minSize.Width(), DimensionUnit::PX),
         CalcLength(itemConstraint.minSize.Height(), DimensionUnit::PX)));
 
     return itemConstraint;
