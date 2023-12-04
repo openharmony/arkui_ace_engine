@@ -715,11 +715,11 @@ class ArkMenuAlignType implements Equable {
 
 class ArkSliderTips implements Equable {
   showTip: boolean;
-  tipText: string | undefined;
+  tipText: string | ResourceStr;
 
-  constructor() {
-    this.showTip = false;
-    this.tipText = undefined;
+  constructor(value: boolean, content?: string | ResourceStr) {
+    this.showTip = value;
+    this.tipText = content;
   }
 
   isEqual(another: ArkSliderTips): boolean {
