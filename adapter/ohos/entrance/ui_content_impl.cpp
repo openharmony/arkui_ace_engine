@@ -531,7 +531,7 @@ void UIContentImpl::CommonInitializeForm(
             AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
             AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
             AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
-            AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
+            AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
             CapabilityRegistry::Register();
             ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
             ImageFileCache::GetInstance().SetCacheFileInfo();
@@ -997,7 +997,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         AceApplicationInfo::GetInstance().SetAppVersionName(context->GetApplicationInfo()->versionName);
         AceApplicationInfo::GetInstance().SetAppVersionCode(context->GetApplicationInfo()->versionCode);
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
-        AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
+        AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
         CapabilityRegistry::Register();
         ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
         ImageFileCache::GetInstance().SetCacheFileInfo();
