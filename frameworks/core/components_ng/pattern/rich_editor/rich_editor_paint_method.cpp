@@ -38,7 +38,7 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     overlayMod->SetPrintOffset(richEditorPattern->GetTextRect().GetOffset());
     overlayMod->SetTextHeight(richEditorPattern->GetTextRect().Height());
     overlayMod->SetScrollOffset(richEditorPattern->GetScrollOffset());
-    if (!richEditorPattern->HasFocus()) {
+    if (!richEditorPattern->HasFocus() && !richEditorPattern->GetTextDetectEnable()) {
         overlayMod->UpdateScrollBar(paintWrapper);
         overlayMod->SetCaretVisible(false);
         return;
