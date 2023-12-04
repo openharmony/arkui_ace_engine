@@ -26,6 +26,10 @@
 #else
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #endif
+#ifdef ENABLE_ROSEN_BACKEND
+#include "transaction/rs_transaction_proxy.h"
+#endif
+
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
@@ -283,6 +287,12 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     if (handlingSurfaceRenderContext_) {
         handlingSurfaceRenderContext_->SetBounds(
             localposition_.GetX(), localposition_.GetY(), drawSize_.Width(), drawSize_.Height());
+#ifdef ENABLE_ROSEN_BACKEND
+        auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+        if (transactionProxy != nullptr) {
+            transactionProxy->FlushImplicitTransaction();
+        }
+#endif
     }
     // XComponentType::SURFACE has set surface default size in RSSurfaceNode->SetBounds()
     if (type_ == XComponentType::TEXTURE) {
