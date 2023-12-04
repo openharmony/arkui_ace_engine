@@ -116,7 +116,6 @@ void JSSlidingPanel::JSBind(BindingTarget globalObj)
 void JSSlidingPanel::SetBackgroundMask(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color color;
@@ -130,7 +129,6 @@ void JSSlidingPanel::SetBackgroundMask(const JSCallbackInfo& info)
 void JSSlidingPanel::ParsePanelRadius(const JSRef<JSVal>& args, BorderRadius& borderRadius)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
         return;
     }
 
@@ -162,7 +160,6 @@ void JSSlidingPanel::ParsePanelRadius(const JSRef<JSVal>& args, BorderRadius& bo
         }
         return;
     }
-    LOGE("args format error. %{public}s", args->ToString().c_str());
 }
 
 void JSSlidingPanel::JsPanelBorderRadius(const JSCallbackInfo& info)
@@ -177,7 +174,6 @@ void JSSlidingPanel::JsPanelBorderRadius(const JSCallbackInfo& info)
 void JSSlidingPanel::JsBackgroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color backgroundColor;
@@ -191,7 +187,6 @@ void JSSlidingPanel::JsBackgroundColor(const JSCallbackInfo& info)
 void JSSlidingPanel::JsPanelBorderColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color borderColor;
@@ -205,7 +200,6 @@ void JSSlidingPanel::JsPanelBorderColor(const JSCallbackInfo& info)
 void JSSlidingPanel::JsPanelBorderWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension borderWidth;
@@ -227,11 +221,9 @@ void JSSlidingPanel::JsPanelBorderStyle(int32_t style)
 void JSSlidingPanel::JsPanelBorder(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     if (!info[0]->IsObject()) {
-        LOGE("arg is not a object.");
         return;
     }
 
@@ -285,7 +277,6 @@ void JSSlidingPanel::SetOnSizeChange(const JSCallbackInfo& args)
 void JSSlidingPanel::SetOnHeightChange(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     if (!args[0]->IsFunction()) {
@@ -311,7 +302,6 @@ void JSSlidingPanel::SetOnHeightChange(const JSCallbackInfo& args)
 void JSSlidingPanel::SetHasDragBar(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto hasDragBar = DEFAULT_HASDRAGBAR;
@@ -324,7 +314,6 @@ void JSSlidingPanel::SetHasDragBar(const JSCallbackInfo& info)
 void JSSlidingPanel::SetShowCloseIcon(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto showCloseIcon = DEFAULT_SHOWCLOSEICON;
@@ -368,7 +357,6 @@ void ParseModeObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEvent
 void JSSlidingPanel::SetPanelMode(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || info.Length() > 2) {
-        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
 
@@ -390,7 +378,6 @@ void JSSlidingPanel::SetPanelMode(const JSCallbackInfo& info)
 void JSSlidingPanel::SetPanelType(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto type = static_cast<int32_t>(DEFAULT_PANELTYPE);
@@ -406,7 +393,6 @@ void JSSlidingPanel::SetPanelType(const JSCallbackInfo& info)
 void JSSlidingPanel::SetCustomHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension customHeight;
@@ -422,7 +408,6 @@ void JSSlidingPanel::SetCustomHeight(const JSCallbackInfo& info)
 void JSSlidingPanel::SetMiniHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension miniHeight;
@@ -436,7 +421,6 @@ void JSSlidingPanel::SetMiniHeight(const JSCallbackInfo& info)
 void JSSlidingPanel::SetHalfHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension halfHeight;
@@ -449,7 +433,6 @@ void JSSlidingPanel::SetHalfHeight(const JSCallbackInfo& info)
 void JSSlidingPanel::SetFullHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension fullHeight;

@@ -17,13 +17,13 @@
 
 #include <atomic>
 
-#include "hilog_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
 #include "ui_service_mgr_errors.h"
 
+#include "ui_service_hilog.h"
 namespace OHOS {
 namespace Ace {
 namespace {
@@ -59,14 +59,10 @@ int32_t UIMgrService::Dump(int32_t fd, const std::vector<std::u16string>& args)
 
 void UIMgrService::OnStart()
 {
-    HILOG_INFO("Ace ui manager service OnStart");
     if (state_ == UIServiceRunningState::STATE_RUNNING) {
-        HILOG_INFO("Ace ui Manager Service has already started.");
         return;
     }
-    HILOG_INFO("Ace ui Manager Service started.");
     if (!Init()) {
-        HILOG_ERROR("Ace ui service failed to init service.");
         return;
     }
     state_ = UIServiceRunningState::STATE_RUNNING;
@@ -76,11 +72,9 @@ void UIMgrService::OnStart()
      * so it can't affect the TDD test program */
     bool ret = Publish(DelayedSingleton<UIMgrService>::GetInstance().get());
     if (!ret) {
-        HILOG_ERROR("UIMgrService::Init Publish failed!");
         return;
     }
-
-    HILOG_INFO("UIMgrService  start success.");
+    HILOG_INFO("Ace UImanager service OnStart");
 }
 
 bool UIMgrService::Init()
@@ -94,18 +88,17 @@ bool UIMgrService::Init()
     if (handler_ == nullptr) {
         return false;
     }
-
-    HILOG_INFO("Ace ui service init success");
+    HILOG_INFO("Ace UIservice init success");
     return true;
 }
 
 void UIMgrService::OnStop()
 {
-    HILOG_INFO("stop service");
     eventLoop_->Stop();
     eventLoop_.reset();
     handler_.reset();
     state_ = UIServiceRunningState::STATE_NOT_START;
+    HILOG_INFO("Ace UImanager service stop");
 }
 
 UIServiceRunningState UIMgrService::QueryServiceState() const
@@ -115,46 +108,38 @@ UIServiceRunningState UIMgrService::QueryServiceState() const
 
 int32_t UIMgrService::RegisterCallBack(const AAFwk::Want& want, const sptr<IUIService>& uiService)
 {
-    HILOG_INFO("UIMgrService::RegisterCallBack called start");
     if (uiService == nullptr) {
-        HILOG_ERROR("UIMgrService::RegisterCallBack failed!. uiService is nullptr");
         return UI_SERVICE_IS_NULL;
     }
     if (handler_ == nullptr) {
-        HILOG_ERROR("UIMgrService::RegisterCallBack failed!. handler is nullptr");
         return UI_SERVICE_HANDLER_IS_NULL;
     }
     std::function<void()> registerFunc = std::bind(&UIMgrService::HandleRegister, shared_from_this(), want, uiService);
     bool ret = handler_->PostTask(registerFunc);
     if (!ret) {
-        HILOG_ERROR("DataObsMgrService::RegisterCallBack PostTask error");
         return UI_SERVICE_POST_TASK_FAILED;
     }
-    HILOG_INFO("UIMgrService::RegisterCallBack called end");
+    HILOG_INFO("UIServices register CallBack success");
     return NO_ERROR;
 }
 
 int32_t UIMgrService::UnregisterCallBack(const AAFwk::Want& want)
 {
-    HILOG_INFO("UIMgrService::UnregisterCallBack called start");
     if (handler_ == nullptr) {
-        HILOG_ERROR("UIMgrService::UnregisterCallBack failed!. handler is nullptr");
         return UI_SERVICE_HANDLER_IS_NULL;
     }
     std::function<void()> unregisterFunc = std::bind(&UIMgrService::HandleUnregister, shared_from_this(), want);
     bool ret = handler_->PostTask(unregisterFunc);
     if (!ret) {
-        HILOG_ERROR("DataObsMgrService::UnregisterCallBack PostTask error");
         return UI_SERVICE_POST_TASK_FAILED;
     }
-    HILOG_INFO("UIMgrService::UnregisterCallBack called end");
+    HILOG_INFO("UIServices unregister CallBack success");
     return NO_ERROR;
 }
 
 int32_t UIMgrService::Push(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
     const std::string& data, const std::string& extraData)
 {
-    HILOG_INFO("UIMgrService::Push called start");
     std::map<std::string, sptr<IUIService>> callbackMap;
     {
         std::lock_guard<std::recursive_mutex> lock(uiMutex_);
@@ -167,13 +152,11 @@ int32_t UIMgrService::Push(const AAFwk::Want& want, const std::string& name, con
         }
         uiService->OnPushCallBack(want, name, jsonPath, data, extraData);
     }
-    HILOG_INFO("UIMgrService::Push called end");
     return NO_ERROR;
 }
 
 int32_t UIMgrService::Request(const AAFwk::Want& want, const std::string& name, const std::string& data)
 {
-    HILOG_INFO("UIMgrService::Request called start");
     std::map<std::string, sptr<IUIService>> callbackMap;
     {
         std::lock_guard<std::recursive_mutex> lock(uiMutex_);
@@ -186,14 +169,12 @@ int32_t UIMgrService::Request(const AAFwk::Want& want, const std::string& name, 
         }
         uiService->OnRequestCallBack(want, name, data);
     }
-    HILOG_INFO("UIMgrService::Request called end");
     return NO_ERROR;
 }
 
 int32_t UIMgrService::ReturnRequest(
     const AAFwk::Want& want, const std::string& source, const std::string& data, const std::string& extraData)
 {
-    HILOG_INFO("UIMgrService::ReturnRequest called start");
     std::map<std::string, sptr<IUIService>> callbackMap;
     {
         std::lock_guard<std::recursive_mutex> lock(uiMutex_);
@@ -206,59 +187,48 @@ int32_t UIMgrService::ReturnRequest(
         }
         uiService->OnReturnRequest(want, source, data, extraData);
     }
-    HILOG_INFO("UIMgrService::ReturnRequest called end");
     return NO_ERROR;
 }
 
 int32_t UIMgrService::HandleRegister(const AAFwk::Want& want, const sptr<IUIService>& uiService)
 {
-    HILOG_INFO("UIMgrService::HandleRegister called start");
     std::lock_guard<std::recursive_mutex> lock(uiMutex_);
     std::string keyStr = GetCallBackKeyStr(want);
-    HILOG_INFO("UIMgrService::HandleRegister keyStr = %{public}s", keyStr.c_str());
     bool exist = CheckCallBackFromMap(keyStr);
     if (exist) {
         callbackMap_.erase(keyStr);
     }
     callbackMap_.emplace(keyStr, uiService);
-    HILOG_INFO("UIMgrService::HandleRegister called end callbackMap_.size() %{public}zu", callbackMap_.size());
     return NO_ERROR;
 }
 
 int32_t UIMgrService::HandleUnregister(const AAFwk::Want& want)
 {
-    HILOG_INFO("UIMgrService::HandleUnregister called start");
     std::lock_guard<std::recursive_mutex> lock(uiMutex_);
     std::string keyStr = GetCallBackKeyStr(want);
     bool exist = CheckCallBackFromMap(keyStr);
     if (!exist) {
-        HILOG_ERROR("UIMgrService::HandleUnregister there is no keyStr in map.");
         return NO_CALLBACK_FOR_KEY;
     }
     callbackMap_.erase(keyStr);
-    HILOG_INFO("UIMgrService::HandleUnregister called end");
     return NO_ERROR;
 }
 
 std::string UIMgrService::GetCallBackKeyStr(const AAFwk::Want& want)
 {
-    HILOG_INFO("UIMgrService::GetCallBackKeyStr called start");
     AppExecFwk::ElementName element = want.GetElement();
     std::string bundleName = element.GetBundleName();
     std::string keyStr = bundleName;
-    HILOG_INFO("UIMgrService::GetCallBackKeyStr called end");
     return keyStr;
 }
 
 bool UIMgrService::CheckCallBackFromMap(const std::string& key)
 {
-    HILOG_INFO("UIMgrService::CheckCallBackFromMap called start");
     std::lock_guard<std::recursive_mutex> lock(uiMutex_);
     auto it = callbackMap_.find(key);
     if (it == callbackMap_.end()) {
         return false;
     }
-    HILOG_INFO("UIMgrService::CheckCallBackFromMap called end");
     return true;
 }
 } // namespace Ace

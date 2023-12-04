@@ -77,7 +77,6 @@ void JSPageTransition::JSBind(BindingTarget globalObj)
 
 void JSPageTransition::Slide(const JSCallbackInfo& info)
 {
-    LOGD("JSPageTransition::Slide");
     if (info.Length() > 0 && info[0]->IsNumber()) {
         auto effect = info[0]->ToNumber<int32_t>();
 
@@ -89,7 +88,6 @@ void JSPageTransition::Slide(const JSCallbackInfo& info)
 
 void JSPageTransition::Translate(const JSCallbackInfo& info)
 {
-    LOGD("JSPageTransitionTranslate");
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
         NG::TranslateOptions option;
@@ -109,7 +107,6 @@ void JSPageTransition::Translate(const JSCallbackInfo& info)
 
 void JSPageTransition::Scale(const JSCallbackInfo& info)
 {
-    LOGD("JSPageTransition::Scale");
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
         // default: x, y, z (1.0, 1.0, 1.0)
@@ -140,9 +137,7 @@ void JSPageTransition::Scale(const JSCallbackInfo& info)
 
 void JSPageTransition::Opacity(const JSCallbackInfo& info)
 {
-    LOGD("JSPageTransition::Opacity");
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     double opacity = 0.0;
@@ -157,9 +152,7 @@ void JSPageTransition::Opacity(const JSCallbackInfo& info)
 
 void JSPageTransition::JsHandlerOnEnter(const JSCallbackInfo& info)
 {
-    LOGD("JSPageTransition::JsHandlerOnEnter");
     if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("JsHandlerOnEnter info.Length < 0 or info[0] is not function");
         return;
     }
 
@@ -178,9 +171,7 @@ void JSPageTransition::JsHandlerOnEnter(const JSCallbackInfo& info)
 
 void JSPageTransition::JsHandlerOnExit(const JSCallbackInfo& info)
 {
-    LOGD("JSPageTransition::JsHandlerOnExit");
     if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("JsHandlerOnExit info.Length < 0 or info[0] is not function");
         return;
     }
 
@@ -199,13 +190,11 @@ void JSPageTransition::JsHandlerOnExit(const JSCallbackInfo& info)
 
 void JSPageTransition::Create(const JSCallbackInfo& info)
 {
-    LOGD("JSPageTransition::JSTransition::Create");
     PageTransitionModel::GetInstance()->Create();
 }
 
 void JSPageTransition::Pop()
 {
-    LOGD("JSPageTransition::Pop");
     PageTransitionModel::GetInstance()->Pop();
 }
 
@@ -229,10 +218,7 @@ PageTransitionOption JSPageTransition::ParseTransitionOption(const JSRef<JSVal>&
     if (routeTypeTmp >= static_cast<int32_t>(RouteType::NONE) &&
         routeTypeTmp <= static_cast<int32_t>(RouteType::POP)) {
         option.routeType = static_cast<RouteType>(routeTypeTmp);
-    } else {
-        LOGW("CreateTransition RouteType out of range");
     }
-
     JSRef<JSVal> curveArgs = jsObj->GetProperty("curve");
     RefPtr<Curve> curve;
     if (curveArgs->IsString()) {
@@ -251,7 +237,6 @@ PageTransitionOption JSPageTransition::ParseTransitionOption(const JSRef<JSVal>&
 
 void JSPageTransitionEnter::Create(const JSCallbackInfo& info)
 {
-    LOGD("JSPageTransitionEnter::Create");
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto option = ParseTransitionOption(info[0]);
         PageTransitionModel::GetInstance()->CreateTransition(PageTransitionType::ENTER, option);
@@ -260,7 +245,6 @@ void JSPageTransitionEnter::Create(const JSCallbackInfo& info)
 
 void JSPageTransitionExit::Create(const JSCallbackInfo& info)
 {
-    LOGD("JSPageTransitionExit::Create");
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto option = ParseTransitionOption(info[0]);
         PageTransitionModel::GetInstance()->CreateTransition(PageTransitionType::EXIT, option);

@@ -17,6 +17,7 @@
 
 #include "errors.h"
 #include "string_ex.h"
+#include "ui_service_hilog.h"
 #include "ui_service_mgr_errors.h"
 #include "ui_service_proxy.h"
 #include "ui_service_stub.h"
@@ -25,7 +26,6 @@ namespace OHOS::Ace {
 bool UIServiceMgrProxy::WriteInterfaceToken(MessageParcel& data)
 {
     if (!data.WriteInterfaceToken(UIServiceMgrProxy::GetDescriptor())) {
-        HILOG_ERROR("write interface token failed");
         return false;
     }
     return true;
@@ -40,20 +40,17 @@ int32_t UIServiceMgrProxy::RegisterCallBack(const AAFwk::Want& want, const sptr<
         return UI_SERVICE_PROXY_INNER_ERR;
     }
     if (!data.WriteParcelable(&want)) {
-        HILOG_ERROR("register callback fail, want error");
         return ERR_INVALID_VALUE;
     }
     if (uiService == nullptr) {
-        HILOG_ERROR("register callback fail, uiService is nullptr");
         return ERR_INVALID_VALUE;
     }
     if (!data.WriteRemoteObject(uiService->AsObject())) {
-        HILOG_ERROR("register callback fail, uiService error");
         return ERR_INVALID_VALUE;
     }
     int32_t error = Remote()->SendRequest(IUIServiceMgr::REGISTER_CALLBACK, data, reply, option);
     if (error != NO_ERROR) {
-        HILOG_ERROR("register callback fail, error: %d", error);
+        HILOG_WARN("register callback fail, error: %d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -71,7 +68,7 @@ int32_t UIServiceMgrProxy::UnregisterCallBack(const AAFwk::Want& want)
     data.WriteParcelable(&want);
     int32_t error = Remote()->SendRequest(IUIServiceMgr::UNREGISTER_CALLBACK, data, reply, option);
     if (error != NO_ERROR) {
-        HILOG_ERROR("unregister callback fail, error: %d", error);
+        HILOG_WARN("unregister callback fail, error: %d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -88,24 +85,19 @@ int32_t UIServiceMgrProxy::Push(const AAFwk::Want& want, const std::string& name
     }
     dataParcel.WriteParcelable(&want);
     if (!dataParcel.WriteString(name)) {
-        HILOG_ERROR("fail to WriteString name");
         return INVALID_DATA;
     }
     if (!dataParcel.WriteString(jsonPath)) {
-        HILOG_ERROR("fail to WriteString jsonPath");
         return INVALID_DATA;
     }
     if (!dataParcel.WriteString(data)) {
-        HILOG_ERROR("fail to WriteString data");
         return INVALID_DATA;
     }
     if (!dataParcel.WriteString(extraData)) {
-        HILOG_ERROR("fail to WriteString extraData");
         return INVALID_DATA;
     }
     int32_t error = Remote()->SendRequest(IUIServiceMgr::PUSH, dataParcel, reply, option);
     if (error != NO_ERROR) {
-        HILOG_ERROR("Push fail, error: %d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -123,25 +115,22 @@ int32_t UIServiceMgrProxy::Request(const AAFwk::Want& want, const std::string& n
     dataParcel.WriteParcelable(&want);
 
     if (!dataParcel.WriteString(name)) {
-        HILOG_ERROR("fail to WriteString name");
         return INVALID_DATA;
     }
 
     if (!dataParcel.WriteString(data)) {
-        HILOG_ERROR("fail to WriteString data");
         return INVALID_DATA;
     }
 
     int32_t error = Remote()->SendRequest(IUIServiceMgr::REQUEST, dataParcel, reply, option);
     if (error != NO_ERROR) {
-        HILOG_ERROR("Request fail, error: %d", error);
         return error;
     }
     return reply.ReadInt32();
 }
 
-int32_t UIServiceMgrProxy::ReturnRequest(const AAFwk::Want& want, const std::string& source, const std::string& data,
-    const std::string& extraData)
+int32_t UIServiceMgrProxy::ReturnRequest(
+    const AAFwk::Want& want, const std::string& source, const std::string& data, const std::string& extraData)
 {
     MessageParcel dataParcel;
     MessageParcel reply;
@@ -153,23 +142,19 @@ int32_t UIServiceMgrProxy::ReturnRequest(const AAFwk::Want& want, const std::str
     dataParcel.WriteParcelable(&want);
 
     if (!dataParcel.WriteString(source)) {
-        HILOG_ERROR("fail to WriteString source");
         return INVALID_DATA;
     }
 
     if (!dataParcel.WriteString(data)) {
-        HILOG_ERROR("fail to WriteString data");
         return INVALID_DATA;
     }
     if (!dataParcel.WriteString(extraData)) {
-        HILOG_ERROR("fail to WriteString extraData");
         return INVALID_DATA;
     }
     int32_t error = Remote()->SendRequest(IUIServiceMgr::RETURN_REQUEST, dataParcel, reply, option);
     if (error != NO_ERROR) {
-        HILOG_ERROR("Request fail, error: %d", error);
         return error;
     }
     return reply.ReadInt32();
 }
-}
+} // namespace OHOS::Ace

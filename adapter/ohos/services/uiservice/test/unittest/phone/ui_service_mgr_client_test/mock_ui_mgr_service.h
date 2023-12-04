@@ -71,22 +71,17 @@ public:
     void OnStart()
     {
         if (state_ == UIServiceRunningState::STATE_RUNNING) {
-            HILOG_INFO("UIService Manager  has already started.");
             return;
         }
-        HILOG_INFO("UIService Manager  started.");
         if (!Init()) {
-            HILOG_ERROR("failed to init service.");
             return;
         }
         state_ = UIServiceRunningState::STATE_RUNNING;
         eventLoop_->Run();
-
-        HILOG_INFO("UIService Manager  start success.");
     }
+
     void OnStop()
     {
-        HILOG_INFO("stop service");
         eventLoop_.reset();
         handler_.reset();
         state_ = UIServiceRunningState::STATE_NOT_START;
@@ -113,7 +108,6 @@ private:
             return false;
         }
 
-        HILOG_INFO("init success");
         return true;
     }
 

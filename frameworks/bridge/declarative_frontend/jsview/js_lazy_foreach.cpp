@@ -159,7 +159,7 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
 {
     JSRef<JSVal> params[MAX_PARAM_SIZE];
     if (!ParseAndVerifyParams(info, params)) {
-        TAG_LOGW(AceLogTag::ACE_LAZYFOREACH, "Invalid arguments for LazyForEach");
+        TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Invalid arguments for LazyForEach");
         return;
     }
     std::string viewId = ViewStackModel::GetInstance()->ProcessViewId(params[PARAM_VIEW_ID]->ToString());
