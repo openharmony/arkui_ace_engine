@@ -226,7 +226,11 @@ static void SetMeasureTextNapiProperty(
     napi_get_named_property(env, argv, "baselineOffset", &contextParamMap["baselineOffsetNApi"]);
     napi_get_named_property(env, argv, "textCase", &contextParamMap["textCaseNApi"]);
     napi_get_named_property(env, argv, "textIndent", &contextParamMap["textIndentNApi"]);
-    napi_get_named_property(env, argv, "wordBreak", &contextParamMap["wordBreakNApi"]);
+    bool hasElement = false;
+    napi_has_named_property(env, argv, "wordBreak", &hasElement);
+    if (hasElement) {
+        napi_get_named_property(env, argv, "wordBreak", &contextParamMap["wordBreakNApi"]);
+    }
 }
 
 static void SetContextProperty(
@@ -244,7 +248,11 @@ static void SetContextProperty(
     int32_t textOverFlow = HandleIntStyle(contextParamMap["textOverFlowNApi"], env);
     int32_t maxlines = HandleIntStyle(contextParamMap["maxLinesNApi"], env);
     int32_t textCase = HandleIntStyle(contextParamMap["textCaseNApi"], env);
-    int32_t wordBreak = HandleIntStyle(contextParamMap["wordBreakNApi"], env);
+    
+    if (contextParamMap["wordBreakNApi"] != nullptr) {
+        int32_t wordBreak = HandleIntStyle(contextParamMap["wordBreakNApi"], env);
+        context.wordBreak = static_cast<WordBreak>(wordBreak);
+    }
 
     std::string textContent = HandleStringType(contextParamMap["textContentNApi"], env);
     std::string fontWeight = HandleStringType(contextParamMap["fontWeightNApi"], env);
@@ -264,7 +272,7 @@ static void SetContextProperty(
     context.baselineOffset = baselineOffset;
     context.textCase = static_cast<TextCase>(textCase);
     context.textIndent = textIndent;
-    context.wordBreak = static_cast<WordBreak>(wordBreak);
+    
 }
 
 static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
@@ -276,7 +284,7 @@ static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, &argv, &thisvar, &data);
 
-    std::map<std:string, napi_value> contextParamMap;
+    std::map<std::string, napi_value> contextParamMap;
     CreateMeasureTextSizeParamMap(contextParamMap);
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
