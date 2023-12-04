@@ -273,7 +273,7 @@ void SetSearchCopyOption(NodeHandle node, uint32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto copyOptions = CopyOptions::None;
+    auto copyOptions = CopyOptions::Local;
     copyOptions = static_cast<CopyOptions>(value);
     SearchModelNG::SetCopyOption(frameNode, copyOptions);
 }
@@ -282,7 +282,7 @@ void ResetSearchCopyOption(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto copyOptions = CopyOptions::None;
+    auto copyOptions = CopyOptions::Local;
     SearchModelNG::SetCopyOption(frameNode, copyOptions);
 }
 
