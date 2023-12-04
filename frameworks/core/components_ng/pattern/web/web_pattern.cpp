@@ -17,6 +17,11 @@
 
 #include <securec.h>
 
+#include "display_manager.h"
+#include "file_uri.h"
+#include "image_source.h"
+#include "parameters.h"
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/image/file_uri_helper.h"
 #include "base/mousestyle/mouse_style.h"
@@ -32,15 +37,12 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "file_uri.h"
 #include "frameworks/base/utils/system_properties.h"
-#include "parameters.h"
-#include "image_source.h"
-#include "display_manager.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
@@ -2584,7 +2586,14 @@ bool WebPattern::HandleScrollVelocity(float velocity)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::HandleScrollVelocity velocity = %{public}f", velocity);
     auto parent = parent_.Upgrade();
-    if (parent && parent->HandleScrollVelocity(velocity)) {
+    CHECK_NULL_RETURN(parent, false);
+    if (InstanceOf<SwiperPattern>(parent)) {
+        // When scrolling to the previous SwiperItem, that item needs to be visible. Update the offset slightly to make
+        // it visible before calling HandleScrollVelocity.
+        float tweak = (velocity > 0.0) ? 1.0 : -1.0;
+        parent->HandleScroll(tweak, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    }
+    if (parent->HandleScrollVelocity(velocity)) {
         TAG_LOGD(AceLogTag::ACE_WEB, "Parent component successfully called HandleScrollVelocity");
         return true;
     }
