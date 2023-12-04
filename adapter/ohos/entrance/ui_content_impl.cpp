@@ -70,6 +70,7 @@
 #include "core/common/asset_manager_impl.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/modal_ui_extension.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/resource_manager.h"
@@ -81,6 +82,9 @@
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/inspector.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef NG_BUILD
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
@@ -2348,5 +2352,170 @@ void UIContentImpl::RecoverForm(const std::string& statusData)
     auto pipeline = container->GetPipelineContext();
     CHECK_NULL_VOID(pipeline);
     return pipeline->OnFormRecover(statusData);
+}
+
+void UIContentImpl::RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t nodeId)
+{
+    ContainerScope scope(instanceId_);
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    if (isShowInSubWindow) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        CHECK_NULL_VOID(subwindow);
+        overlayManager = subwindow->GetOverlayManager();
+    }
+ 
+    CHECK_NULL_VOID(overlayManager);
+    if (overlayManager->HasPopupInfo(nodeId)) {
+        LOGD("Target node id=%{public}d has old popup info, erase it", nodeId);
+        overlayManager->ErasePopupInfo(nodeId);
+    }
+}
+ 
+RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(
+    bool isShow, const CustomPopupUIExtensionConfig& config)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(isShow);
+    popupParam->SetUseCustomComponent(true);
+    popupParam->SetShowInSubWindow(config.isShowInSubWindow);
+ 
+    if (config.isAutoCancel.has_value()) {
+        popupParam->SetHasAction(config.isAutoCancel.value());
+    }
+ 
+    if (config.isEnableArrow.has_value()) {
+        popupParam->SetEnableArrow(config.isEnableArrow.value());
+    }
+ 
+    if (config.targetOffset.has_value()) {
+        PopupOffset targetOffset = config.targetOffset.value();
+        DimensionUnit unit = static_cast<DimensionUnit>(targetOffset.unit);
+        if (unit != DimensionUnit::PERCENT) { // not support percent settings
+            CalcDimension dx(targetOffset.deltaX, unit);
+            CalcDimension dy(targetOffset.deltaY, unit);
+            popupParam->SetTargetOffset(Offset(dx.ConvertToPx(), dy.ConvertToPx()));
+        }
+    }
+ 
+    if (config.targetSpace.has_value()) {
+        PopupLength targetSpace = config.targetSpace.value();
+        DimensionUnit unit = static_cast<DimensionUnit>(targetSpace.unit);
+        popupParam->SetTargetSpace(CalcDimension(targetSpace.length, unit));
+    }
+ 
+    if (config.arrowOffset.has_value()) {
+        PopupLength arrowOffset = config.arrowOffset.value();
+        DimensionUnit unit = static_cast<DimensionUnit>(arrowOffset.unit);
+        popupParam->SetArrowOffset(CalcDimension(arrowOffset.length, unit));
+    }
+ 
+    if (config.placement.has_value()) {
+        popupParam->SetPlacement(static_cast<Placement>(config.placement.value()));
+    }
+ 
+    if (config.backgroundColor.has_value()) {
+        popupParam->SetBackgroundColor(Color(config.backgroundColor.value()));
+    }
+ 
+    if (config.maskColor.has_value()) {
+        popupParam->SetMaskColor(Color(config.maskColor.value()));
+    }
+    return popupParam;
+}
+ 
+void UIContentImpl::OnPopupStateChange(const std::string& event,
+    const CustomPopupUIExtensionConfig& config, int32_t nodeId)
+{
+    if (config.onStateChange) {
+        config.onStateChange(event);
+    }
+ 
+    auto visible = JsonUtil::ParseJsonString(event);
+    CHECK_NULL_VOID(visible);
+    bool isVisible = visible->GetBool("isVisible");
+    if (isVisible) {
+        return;
+    }
+ 
+    LOGD("Created custom popup is invisible");
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        [config, nodeId, this]() {
+            RemoveOldPopInfoIfExsited(config.isShowInSubWindow, nodeId);
+            customPopupConfigMap_.erase(nodeId);
+        },
+        TaskExecutor::TaskType::UI, 100); // delay 100ms
+}
+ 
+int32_t UIContentImpl::CreateCustomPopupUIExtension(const AAFwk::Want& want,
+    const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config)
+{
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, 0);
+    int32_t nodeId = 0;
+    taskExecutor->PostSyncTask(
+        [want, &nodeId, callbacks = callbacks, config = config, this]() {
+            auto targetNode = NG::Inspector::GetFrameNodeByKey(config.popupPosition);
+            CHECK_NULL_VOID(targetNode);
+            if (customPopupConfigMap_.find(targetNode->GetId()) != customPopupConfigMap_.end()) {
+                LOGW("Nodeid=%{public}d has unclosed popup, cannot create new", targetNode->GetId());
+                return;
+            }
+ 
+            auto popupParam = CreateCustomPopupParam(true, config);
+            auto uiExtNode = ModalUIExtension::Create(want, callbacks);
+            if (config.targetSize.has_value()) {
+                auto layoutProperty = uiExtNode->GetLayoutProperty();
+                CHECK_NULL_VOID(layoutProperty);
+                PopupSize targetSize = config.targetSize.value();
+                DimensionUnit unit = static_cast<DimensionUnit>(targetSize.unit);
+                auto width = NG::CalcLength(targetSize.width, unit);
+                auto height = NG::CalcLength(targetSize.height, unit);
+                layoutProperty->UpdateUserDefinedIdealSize(NG::CalcSize(width, height));
+            }
+            uiExtNode->MarkModifyDone();
+            nodeId = targetNode->GetId();
+            popupParam->SetOnStateChange([config, nodeId, this](const std::string& event) {
+                this->OnPopupStateChange(event, config, nodeId);
+            });
+ 
+            NG::ViewAbstract::BindPopup(popupParam, targetNode, AceType::DynamicCast<NG::UINode>(uiExtNode));
+            customPopupConfigMap_[nodeId] = config;
+        },
+        TaskExecutor::TaskType::UI);
+    LOGI("Create custom popup with UIExtension end, nodeId=%{public}d", nodeId);
+    return nodeId;
+}
+ 
+void UIContentImpl::CloseCustomPopupUIExtension(int32_t nodeId)
+{
+    LOGI("Close custom popup start, nodeId=%{public}d", nodeId);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto popupConfig = customPopupConfigMap_.find(nodeId);
+    if (popupConfig == customPopupConfigMap_.end()) {
+        LOGW("Node doesn't hava popup or closed already");
+        return;
+    }
+    auto config = popupConfig->second;
+    taskExecutor->PostTask(
+        [container, nodeId, config, this]() {
+            auto targetNode = AceType::DynamicCast<NG::FrameNode>(
+                ElementRegister::GetInstance()->GetUINodeById(nodeId));
+            CHECK_NULL_VOID(targetNode);
+            auto popupParam = CreateCustomPopupParam(false, config);
+            NG::ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
+            RemoveOldPopInfoIfExsited(config.isShowInSubWindow, nodeId);
+            customPopupConfigMap_.erase(nodeId);
+        },
+        TaskExecutor::TaskType::UI);
 }
 } // namespace OHOS::Ace
