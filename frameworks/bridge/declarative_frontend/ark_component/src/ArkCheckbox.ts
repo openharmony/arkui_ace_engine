@@ -80,26 +80,8 @@ class CheckboxMarkModifier extends Modifier<ArkMarkStyle> {
       GetUINativeModule().checkbox.setMark(node, this.value?.strokeColor, this.value?.size, this.value?.strokeWidth);
     }
   }
-  static identity: Symbol = Symbol('checkboxMark');
-  applyPeer(node: KNode, reset: boolean) {
-    if (reset) {
-      GetUINativeModule().checkbox.resetMark(node);
-    }
-    else {
-      GetUINativeModule().checkbox.setMark(node, this.value?.strokeColor, this.value?.size, this.value?.strokeWidth);
-    }
-  }
 }
 class CheckboxSelectModifier extends Modifier<boolean> {
-  static identity: Symbol = Symbol('checkboxSelect');
-  applyPeer(node: KNode, reset: boolean) {
-    if (reset) {
-      GetUINativeModule().checkbox.resetSelect(node);
-    }
-    else {
-      GetUINativeModule().checkbox.setSelect(node, this.value);
-    }
-  }
   static identity: Symbol = Symbol('checkboxSelect');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -121,27 +103,9 @@ class CheckboxSelectedColorModifier extends Modifier<number> {
       GetUINativeModule().checkbox.setSelectedColor(node, this.value);
     }
   }
-  static identity: Symbol = Symbol('checkboxSelectedColor');
-  applyPeer(node: KNode, reset: boolean) {
-    if (reset) {
-      GetUINativeModule().checkbox.resetSelectedColor(node);
-    }
-    else {
-      GetUINativeModule().checkbox.setSelectedColor(node, this.value);
-    }
-  }
 }
 
 class CheckboxUnselectedColorModifier extends Modifier<number> {
-  static identity: Symbol = Symbol('checkboxUnselectedColor');
-  applyPeer(node: KNode, reset: boolean) {
-    if (reset) {
-      GetUINativeModule().checkbox.resetUnSelectedColor(node);
-    }
-    else {
-      GetUINativeModule().checkbox.setUnSelectedColor(node, this.value);
-    }
-  }
   static identity: Symbol = Symbol('checkboxUnselectedColor');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
