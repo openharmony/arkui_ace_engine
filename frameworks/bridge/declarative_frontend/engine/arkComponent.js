@@ -1022,10 +1022,10 @@ DisplayPriorityModifier.identity = Symbol('displayPriority');
 class IDModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
-            GetUINativeModule().common.resetID(node);
+            GetUINativeModule().common.resetId(node);
         }
         else {
-            GetUINativeModule().common.setID(node, this.value);
+            GetUINativeModule().common.setId(node, this.value);
         }
     }
 }
@@ -2399,19 +2399,19 @@ class ArkComponent {
     }
     key(value) {
         if (typeof value === "string") {
-            modifier(this._modifiers, IDModifier, value);
+            modifier(this._modifiers, KeyModifier, value);
         }
         else {
-            modifier(this._modifiers, IDModifier, undefined);
+            modifier(this._modifiers, KeyModifier, undefined);
         }
         return this;
     }
     id(value) {
         if (typeof value === "string") {
-            modifier(this._modifiers, KeyModifier, value);
+            modifier(this._modifiers, IDModifier, value);
         }
         else {
-            modifier(this._modifiers, KeyModifier, undefined);
+            modifier(this._modifiers, IDModifier, undefined);
         }
         return this;
     }
