@@ -1164,7 +1164,7 @@ class ArkAllowDrop {
 
 class ArkBarMode {
     barMode: number;
-    options?: ArkScrollableBarModeOptions | undefined
+    options?: ScrollableBarModeOptions | undefined
 
     isEqual(another: ArkBarMode): boolean {
         return (this.barMode === another.barMode) && (this.options === another.options);
@@ -1172,10 +1172,10 @@ class ArkBarMode {
 }
 
 class ArkDivider {
-    value: DividerStyle;
+    divider: DividerStyle;
 
     isEqual(another: ArkDivider): boolean {
-        return (this.value === another.value);
+      return (this.divider === another.divider);
     }
 }
 
@@ -1189,10 +1189,10 @@ class ArkBarBackgroundColor {
 }
 
 class ArkBarGridAlign {
-    value: BarGridColumnOptions;
+    barGridAlign: BarGridColumnOptions;
 
     isEqual(another: ArkBarGridAlign): boolean {
-        return (this.value === another.value);
+      return (this.barGridAlign === another.barGridAlign);
     }
 }
 
@@ -1200,7 +1200,7 @@ class ArkBarGridAlign {
 class ArkScrollableBarModeOptions {
     value: ScrollableBarModeOptions;
 
-    isEqual(another: ArkBarGridAlign): boolean {
+    isEqual(another: ArkScrollableBarModeOptions ): boolean {
         return (this.value === another.value);
     }
 }
