@@ -16,6 +16,8 @@ import(
 
 build_component_ng("manager_ng") {
   sources = [
+    "display_sync/ui_display_sync.cpp",
+    "display_sync/ui_display_sync_manager.cpp",
     "drag_drop/drag_drop_manager.cpp",
     "drag_drop/drag_drop_proxy.cpp",
     "frame_rate/frame_rate_manager.cpp",

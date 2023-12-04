@@ -1,0 +1,63 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_UI_DISPLAY_SYNC_MANAGER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_UI_DISPLAY_SYNC_MANAGER_H
+
+#include <unordered_map>
+#include <mutex>
+
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
+#include "base/log/log.h"
+#include "base/utils/base_id.h"
+#include "base/log/ace_trace.h"
+#include "ui_display_sync.h"
+
+namespace OHOS::Ace {
+using IdType = uint64_t;
+using IdToDisplaySyncMap = std::unordered_map<IdType, WeakPtr<UIDisplaySync>>;
+
+class ACE_FORCE_EXPORT UIDisplaySyncManager : public AceType {
+    DECLARE_ACE_TYPE(UIDisplaySyncManager, AceType)
+public:
+    bool AddDisplaySync(const RefPtr<UIDisplaySync>& displaySync);
+    bool RemoveDisplaySync(const RefPtr<UIDisplaySync>& displaySync);
+    bool HasDisplaySync(const RefPtr<UIDisplaySync>& displaySync);
+
+    void DispatchFunc(uint64_t nanoTimestamp);
+
+    bool SetVsyncRate(int32_t vsyncRate);
+    int32_t GetVsyncRate() const;
+    bool SetVsyncPeriod(int64_t vsyncPeriod);
+    int64_t GetVsyncPeriod() const;
+    IdToDisplaySyncMap GetUIDisplaySyncMap() const;
+
+    UIDisplaySyncManager();
+    ~UIDisplaySyncManager() noexcept override;
+
+private:
+    static const std::vector<int32_t> REFRESH_RATE_LIST;
+    static constexpr int32_t ERROR_DELTA = 3;
+    static constexpr float SECOND_IN_NANO = 1000000000.0f;
+    
+    int32_t sourceVsyncRate_ = 0;
+    int64_t vsyncPeriod_ = 0;
+
+    IdToDisplaySyncMap uiDisplaySyncMap_;
+};
+} // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_UI_DISPLAY_SYNC_MANAGER_H

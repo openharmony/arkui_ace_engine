@@ -180,6 +180,8 @@ void PipelineContext::FlushPipelineWithoutAnimation() {}
 
 void PipelineContext::FlushFocus() {}
 
+void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
+
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
 void PipelineContext::OnVirtualKeyboardHeightChange(
