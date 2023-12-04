@@ -23,6 +23,8 @@
 #include "session_manager/include/extension_session_manager.h"
 #include "ui/rs_surface_node.h"
 
+#include "accessibility_event_info.h"
+
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
@@ -98,9 +100,16 @@ public:
     void OnAccessibilityEvent(
         const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList) override
     {
-        auto pattern = uiExtensionPattern_.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnAccessibilityEvent(info, uiExtensionIdLevelList);
+        ContainerScope scope(instanceId_);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([weak = uiExtensionPattern_, info, uiExtensionIdLevelList]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnAccessibilityEvent(info, uiExtensionIdLevelList);
+        }, TaskExecutor::TaskType::UI);
     }
 
 private:
