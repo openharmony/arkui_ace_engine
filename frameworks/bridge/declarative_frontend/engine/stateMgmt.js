@@ -4313,7 +4313,7 @@ class UINodeRegisterProxy {
         if ((!UINodeRegisterProxy.instance_.obtainDeletedElmtIds) || typeof UINodeRegisterProxy.instance_.obtainDeletedElmtIds != "function") {
             stateMgmtConsole.error(`UINodeRegisterProxy obtainDeletedElmtIds is not a function: ${UINodeRegisterProxy.instance_.obtainDeletedElmtIds}.` );
         } else {
-            UINodeRegisterProxy.instance_.obtainDeletedElmtIds();UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
+            UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
         }
     }
     static unregisterElmtIdsFromViewPUs() {
