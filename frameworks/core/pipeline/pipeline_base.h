@@ -1137,6 +1137,12 @@ protected:
     std::atomic<bool> onFocus_ = true;
     uint64_t lastTouchTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
+    struct FunctionHash {
+        std::size_t operator()(const std::shared_ptr<std::function<void()>>& functionPtr) const
+        {
+            return std::hash<std::function<void()>*>()(functionPtr.get());
+        }
+    };
     std::function<std::string()> onFormRecycle_;
     std::function<void(std::string)> onFormRecover_;
 
@@ -1157,6 +1163,7 @@ private:
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
+    std::unordered_set<std::shared_ptr<std::function<void()>>, FunctionHash> finishFunctions_;
     bool isFormAnimationFinishCallback_ = false;
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
