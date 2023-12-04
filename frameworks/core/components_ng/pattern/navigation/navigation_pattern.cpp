@@ -578,6 +578,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     pattern->UpdateContextRect(curTopNavDestination, navigationGroupNode);
                     if (pattern->isChanged_) {
                         auto eventHub = curTopNavDestination->GetEventHub<NavDestinationEventHub>();
+                        CHECK_NULL_VOID(eventHub);
                         eventHub->FireOnShownEvent();
                         NavigationPattern::FireNavigationStateChange(curTopNavDestination, true);
                         pattern->isChanged_ = false;
