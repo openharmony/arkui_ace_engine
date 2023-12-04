@@ -235,12 +235,12 @@ void WindowScene::OnActivation()
         }
 
         if (self->session_ && self->session_->GetShowRecent() && self->startingNode_) {
+            auto surfaceNode = self->session_->GetSurfaceNode();
+            CHECK_NULL_VOID(surfaceNode);
             auto host = self->GetHost();
             CHECK_NULL_VOID(host);
             host->AddChild(self->contentNode_, 0);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            auto surfaceNode = self->session_->GetSurfaceNode();
-            CHECK_NULL_VOID(surfaceNode);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
         }
     };
