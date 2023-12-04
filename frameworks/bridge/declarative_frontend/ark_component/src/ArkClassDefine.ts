@@ -736,7 +736,7 @@ class ArkTextStyle implements Equable {
     this.font = new ArkFont();
   }
 
-  parseTextStyle(value: PickerTextStyle, defaultColor: string, defaultSize: string, defaultWeight: string) {
+  parseTextStyle(value: PickerTextStyle) {
     if (isObject(value)) {
       let color = new ArkColor();
       let inputFont = value.font;
@@ -758,10 +758,6 @@ class ArkTextStyle implements Equable {
         this.font.family = inputFont.family;
         this.font.style = inputFont.style;
       }
-    } else {
-      this.color = defaultColor;
-      this.font.size = defaultSize;
-      this.font.parseFontWeight(defaultWeight);
     }
   }
 

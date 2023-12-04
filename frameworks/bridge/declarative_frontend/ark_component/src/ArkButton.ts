@@ -20,10 +20,10 @@ const FontWeightMap = {
 
 class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
   type (value: ButtonType): this {
-    if (typeof value === "number") {
+    if (isNumber(value)) {
       modifier(this._modifiers, ButtonTypeModifier, value);
     }
     else {
@@ -32,7 +32,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   stateEffect(value: boolean): this {
-    if (typeof value === "boolean") {
+    if (isBoolean(value)) {
       modifier(this._modifiers, ButtonStateEffectModifier, value);
     } else {
       modifier(this._modifiers, ButtonStateEffectModifier, undefined);
@@ -49,7 +49,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   fontSize(value: Length): this {
-    if (typeof value === "number" || typeof value === "string") {
+    if (typeof value === 'number' || typeof value === 'string') {
       modifier(this._modifiers, ButtonFontSizeModifier, value);
     } else {
       modifier(this._modifiers, ButtonFontSizeModifier, undefined);
@@ -65,7 +65,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   fontStyle(value: FontStyle): this {
-    if (typeof value === "number" && value >= 0 && value < 2) {
+    if (typeof value === 'number' && value >= 0 && value < 2) {
       modifier(this._modifiers, ButtonFontStyleModifier, value);
     } else {
       modifier(this._modifiers, ButtonFontStyleModifier, undefined);
@@ -73,22 +73,22 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   fontFamily(value: string | Resource): this {
-    if (typeof value === "string") {
-      modifier(this._modifiers, ButtonFontFamilyModifier, value);
+    if (isString(value)) {
+      modifier(this._modifiers, ButtonFontFamilyModifier, value as string);
     } else {
       modifier(this._modifiers, ButtonFontFamilyModifier, undefined);
     }
     return this;
   }
   labelStyle(value: LabelStyle): this {
-    if (typeof value === "object") {
+    if (isObject(value)) {
       let data = new ArkLabelStyle();
       data.heightAdaptivePolicy = value.heightAdaptivePolicy;
       data.maxFontSize = value.maxFontSize;
       data.maxLines = value.maxLines;
       data.minFontSize = value.minFontSize;
       data.overflow = value.overflow;
-      if (typeof value.font === "object") {
+      if (isObject(value.font)) {
         data.font.family = value.font.family;
         data.font.size = value.font.size;
         data.font.style = value.font.style;
@@ -102,7 +102,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   }
 }
 class ButtonStateEffectModifier extends Modifier<boolean> {
-  static identity: Symbol = Symbol("buttonStateEffect");
+  static identity: Symbol = Symbol('buttonStateEffect');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().button.resetStateEffect(node);
@@ -113,7 +113,7 @@ class ButtonStateEffectModifier extends Modifier<boolean> {
   }
 }
 class ButtonFontStyleModifier extends Modifier<number> {
-  static identity: Symbol = Symbol("buttonFontStyle");
+  static identity: Symbol = Symbol('buttonFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().button.resetFontStyle(node);
@@ -124,7 +124,7 @@ class ButtonFontStyleModifier extends Modifier<number> {
   }
 }
 class ButtonFontFamilyModifier extends Modifier<string> {
-  static identity: Symbol = Symbol("buttonFontFamily");
+  static identity: Symbol = Symbol('buttonFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
       if (reset) {
         GetUINativeModule().button.resetFontFamily(node);
@@ -135,13 +135,13 @@ class ButtonFontFamilyModifier extends Modifier<string> {
   }
 }
 class ButtonLabelStyleModifier extends Modifier<ArkLabelStyle> {
-  static identity: Symbol = Symbol("buttonLabelStyle");
+  static identity: Symbol = Symbol('buttonLabelStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
         GetUINativeModule().button.resetLabelStyle(node);
     }
     else {
-      if (typeof this.value === "object")
+      if (isObject(this.value))
       {
         let textOverflow = this.value.overflow; // number -> Ace::TextOverflow
         let maxLines = this.value.maxLines; // number -> uint32_t
@@ -152,7 +152,7 @@ class ButtonLabelStyleModifier extends Modifier<ArkLabelStyle> {
         let fontWeight = undefined; // string -> Ace::FontWeight
         let fontStyle = undefined; // number -> Ace::FontStyle
         let fontFamily = undefined; // string ->std::vector<std::string>
-        if (typeof this.value.font === "object")
+        if (isObject(this.value.font))
         {
           fontSize = this.value.font.size;
           fontWeight = 'normal';
@@ -173,7 +173,7 @@ class ButtonLabelStyleModifier extends Modifier<ArkLabelStyle> {
   }
 }
 class ButtonTypeModifier extends Modifier<number> {
-  static identity: Symbol = Symbol("buttonType");
+  static identity: Symbol = Symbol('buttonType');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().button.resetType(node);
@@ -184,7 +184,7 @@ class ButtonTypeModifier extends Modifier<number> {
   }
 }
 class ButtonFontColorModifier extends Modifier<number | undefined> {
-  static identity: Symbol = Symbol("buttonFontColor");
+  static identity: Symbol = Symbol('buttonFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().button.resetFontColor(node);
@@ -195,7 +195,7 @@ class ButtonFontColorModifier extends Modifier<number | undefined> {
   }
 }
 class ButtonFontSizeModifier extends Modifier<number> {
-  static identity: Symbol = Symbol("buttonFontSize");
+  static identity: Symbol = Symbol('buttonFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().button.resetFontSize(node);
@@ -206,7 +206,7 @@ class ButtonFontSizeModifier extends Modifier<number> {
   }
 }
 class ButtonFontWeightModifier extends Modifier<string | number | FontWeight> {
-  static identity: Symbol = Symbol("buttonFontWeight");
+  static identity: Symbol = Symbol('buttonFontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().button.resetFontWeight(node);

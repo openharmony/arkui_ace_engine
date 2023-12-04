@@ -388,7 +388,7 @@ bool ArkTSUtils::ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value
         result = value->Int32Value(vm);
         return true;
     }
-    // resouce ignore by design
+    // resource ignore by design
     return false;
 }
 
@@ -681,6 +681,20 @@ std::string ArkTSUtils::GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef
         result = value->ToString(vm)->ToString();
     }
     return result;
+}
+
+bool ArkTSUtils::ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values, std::vector<uint32_t>& result)
+{
+    Local<panda::ArrayRef> valueArray = static_cast<Local<panda::ArrayRef>>(values);
+    for (size_t i = 0; i < valueArray->Length(vm); i++) {
+        Local<JSValueRef> value = valueArray->GetValueAt(vm, values, i);
+        if (value->IsNumber()) {
+            result.emplace_back(value->Uint32Value(vm));
+        } else {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool ArkTSUtils::ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result)
