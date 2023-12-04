@@ -513,6 +513,7 @@ bool ScrollPattern::ScrollPage(bool reverse, bool smooth, const std::function<vo
 void ScrollPattern::JumpToPosition(float position, int32_t source)
 {
     // If an animation is playing, stop it.
+    auto lastAnimateRunning = AnimateRunning();
     StopAnimate();
     float cachePosition = currentOffset_;
     DoJump(position, source);
@@ -520,6 +521,9 @@ void ScrollPattern::JumpToPosition(float position, int32_t source)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    }
+    if (lastAnimateRunning) {
+        SetScrollAbort(false);
     }
 }
 
