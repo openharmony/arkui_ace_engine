@@ -386,7 +386,7 @@ public:
     {
         static const int32_t precision = 2;
         std::stringstream ss;
-        ss << "[" << std::fixed << std::setprecision(precision) << x_ << ", " << y_ << "][";
+        ss << "[" << std::fixed << std::setprecision(precision) << x_ << ", " << y_ << "],[";
         if (NearEqual(width_, Infinity<T>())) {
             ss << "INFINITE";
         } else {
