@@ -3132,6 +3132,11 @@ void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHa
     StopAutoScroll();
     if (selectOverlayProxy_) {
         SelectHandleInfo handleInfo;
+        if (!selectOverlayProxy_->IsSingleHandle() && textSelector_.firstHandle == textSelector_.secondHandle) {
+            CloseSelectOverlay();
+            StartTwinkling();
+            return;
+        }
         if (isFirstHandle) {
             handleInfo.paintRect = textSelector_.firstHandle;
             selectOverlayProxy_->UpdateFirstSelectHandleInfo(handleInfo);
