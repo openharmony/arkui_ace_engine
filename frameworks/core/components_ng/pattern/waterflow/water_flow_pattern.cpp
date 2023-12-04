@@ -62,9 +62,6 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
             auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             delta *= friction;
         }
-        if (IsOutOfBoundary()) {
-            HandleScrollBarOutBoundary(overScroll);
-        }
     } else {
         if (layoutInfo_.itemStart_ && delta > 0) {
             return false;
@@ -142,6 +139,14 @@ void WaterFlowPattern::UpdateScrollBarOffset()
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     auto viewSize = geometryNode->GetFrameSize();
+    auto overScroll = 0.0f;
+    if (Positive(layoutInfo_.currentOffset_)) {
+        overScroll = layoutInfo_.currentOffset_;
+    } else {
+        overScroll = GetMainContentSize() - (layoutInfo_.GetContentHeight() + layoutInfo_.currentOffset_);
+        overScroll = Positive(overScroll) ? overScroll : 0.0f;
+    }
+    HandleScrollBarOutBoundary(overScroll);
     UpdateScrollBarRegion(-layoutInfo_.currentOffset_, layoutInfo_.GetContentHeight(),
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 };
