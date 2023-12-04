@@ -305,6 +305,7 @@ build_component_ng("pattern_ng") {
     "relative_container/relative_container_view.cpp",
     "rendering_context/rendering_context_model_ng.cpp",
     "rich_editor_drag/rich_editor_drag_overlay_modifier.cpp",
+    "rich_editor_drag/rich_editor_drag_paint_method.cpp",
     "rich_editor_drag/rich_editor_drag_pattern.cpp",
     "root/root_layout_algorithm.cpp",
     "scroll/effect/scroll_fade_controller.cpp",

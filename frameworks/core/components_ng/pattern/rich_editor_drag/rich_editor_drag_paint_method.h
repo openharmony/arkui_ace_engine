@@ -18,24 +18,22 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_overlay_modifier.h"
-#include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/pattern/text_drag/text_drag_paint_method.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_content_modifier.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT RichEditorDragPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(RichEditorDragPaintMethod, NodePaintMethod)
+class ACE_EXPORT RichEditorDragPaintMethod : public TextDragPaintMethod {
+    DECLARE_ACE_TYPE(RichEditorDragPaintMethod, TextDragPaintMethod)
 public:
     RichEditorDragPaintMethod(const WeakPtr<Pattern>& pattern,
-        const RefPtr<RichEditorDragOverlayModifier>& richEditorDragOverlayModifier);
+        const RefPtr<TextDragOverlayModifier>& overlayMod, const RefPtr<RichEditorDragContentModifier>& contentMod);
 
     ~RichEditorDragPaintMethod() override = default;
 
-    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override;
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    WeakPtr<Pattern> pattern_;
-    RefPtr<RichEditorDragOverlayModifier> overlayModifier_;
-
+    RefPtr<RichEditorDragContentModifier> contentModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorDragPaintMethod);
 };
 } // namespace OHOS::Ace::NG

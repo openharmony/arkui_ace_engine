@@ -19,8 +19,6 @@
 #include <stack>
 #include <string>
 
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
@@ -30,6 +28,8 @@
 #include "base/utils/utils.h"
 #include "base/window/drag_window.h"
 #include "core/common/ai/data_detector_mgr.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/ui_node.h"
@@ -37,6 +37,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
@@ -62,8 +63,9 @@ constexpr float BOX_EPSILON = 0.5f;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
-    {TextDataDetectType::PHONE_NUMBER, "phoneNum"}, {TextDataDetectType::URL, "url"},
-    {TextDataDetectType::EMAIL, "email"}, {TextDataDetectType::ADDRESS, "location"} };
+    { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
+    { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" }
+};
 }; // namespace
 
 void TextPattern::OnAttachToFrameNode()
@@ -586,7 +588,7 @@ void TextPattern::HandleSpanSingleClickEvent(
             }
             auto spanStart = item->position - static_cast<int32_t>(StringUtils::ToWstring(item->content).length());
             while (textDetectEnable_ && aiSpanIterator != aiSpanMap_.end() &&
-                aiSpanIterator->second.start <= item->position) {
+                   aiSpanIterator->second.start <= item->position) {
                 if (aiSpanIterator->second.end <= spanStart) {
                     ++aiSpanIterator;
                     continue;
@@ -640,8 +642,8 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
     const ShowSelectOverlayFunc& showSelectOverlayFunc)
 
 {
-    onClickMenu_ = [aiSpan, weak = WeakClaim(this), calculateHandleFunc, showSelectOverlayFunc]
-        (const std::string& action) {
+    onClickMenu_ = [aiSpan, weak = WeakClaim(this), calculateHandleFunc, showSelectOverlayFunc](
+                       const std::string& action) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->copyOption_ == CopyOptions::None) {
@@ -658,8 +660,8 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
                 calculateHandleFunc();
             }
             if (showSelectOverlayFunc == nullptr) {
-                pattern->ShowSelectOverlay(pattern->textSelector_.firstHandle,
-                    pattern->textSelector_.secondHandle, true);
+                pattern->ShowSelectOverlay(
+                    pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle, true);
             } else {
                 showSelectOverlayFunc(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle);
             }
@@ -771,8 +773,8 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
         return;
     }
     if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == OHOS::Ace::MouseAction::RELEASE) {
-        rightClickOffset_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
-            static_cast<float>(info.GetGlobalLocation().GetY()));
+        rightClickOffset_ = OffsetF(
+            static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
         CalculateHandleOffsetAndShowOverlay(true);
         if (SelectOverlayIsOn()) {
             CloseSelectOverlay(true);
@@ -988,14 +990,14 @@ DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const
     auto beforeStr = GetSelectedText(0, start);
     auto selectedStr = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     auto afterStr = GetSelectedText(end, GetWideText().length());
-    pattern->dragContents_ = {beforeStr, selectedStr, afterStr};
+    pattern->dragContents_ = { beforeStr, selectedStr, afterStr };
 
     itemInfo.extraInfo = selectedStr;
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                        : PROPERTY_UPDATE_MEASURE);
+                                                                                 : PROPERTY_UPDATE_MEASURE);
 
     CloseSelectOverlay();
     ResetSelection();
@@ -1036,8 +1038,7 @@ void TextPattern::InitDragEvent()
     if (!eventHub->HasOnDragStart()) {
         eventHub->SetOnDragStart(std::move(onDragStart));
     }
-    auto onDragMove = [weakPtr = WeakClaim(this)](
-                           const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)  {
+    auto onDragMove = [weakPtr = WeakClaim(this)](const RefPtr<Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnDragMove(event);
@@ -1072,7 +1073,20 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
         auto pattern = wk.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->BetweenSelectedPosition(point)) {
-            pattern->dragNode_ = TextDragPattern::CreateDragNode(pattern->GetHost());
+            auto host = pattern->GetHost();
+            auto children = host->GetChildren();
+            std::list<RefPtr<FrameNode>> imageChildren;
+            for (const auto& child : children) {
+                auto node = DynamicCast<FrameNode>(child);
+                if (!node) {
+                    continue;
+                }
+                auto image = node->GetPattern<ImagePattern>();
+                if (image) {
+                    imageChildren.emplace_back(node);
+                }
+            }
+            pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren);
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
     };
@@ -1235,8 +1249,8 @@ void TextPattern::InitTextDetect(int32_t startPos, std::string detectText)
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto uiTaskExecutor = SingleTaskExecutor::Make(
-            host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([result, weak, instanceID, startPos] {
             ContainerScope scope(instanceID);
             auto pattern = weak.Upgrade();
@@ -1278,15 +1292,14 @@ void TextPattern::ParseAIResult(const TextDataDetectResult& result, int32_t star
         }
     }
 
-    if (startPos + AI_TEXT_MAX_LENGTH >=
-        static_cast<int32_t>(StringUtils::ToWstring(textForAI_).length())) {
+    if (startPos + AI_TEXT_MAX_LENGTH >= static_cast<int32_t>(StringUtils::ToWstring(textForAI_).length())) {
         aiDetectInitialized_ = true;
         aiDetectTypesChanged_ = false;
     }
 }
 
-void TextPattern::ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue,
-    TextDataDetectType type, int32_t startPos, bool isMenuOption)
+void TextPattern::ParseAIJson(
+    const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos, bool isMenuOption)
 {
     if (!jsonValue || !jsonValue->IsArray()) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "Error AI Result.");
@@ -1313,13 +1326,13 @@ void TextPattern::ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue,
         auto wTextForAI = StringUtils::ToWstring(textForAI_);
         auto wOriText = StringUtils::ToWstring(oriText);
         int32_t end = startPos + charOffset + static_cast<int32_t>(wOriText.length());
-        if (charOffset < 0 || startPos + charOffset >= static_cast<int32_t>(wTextForAI.length())
-            || end >= startPos + AI_TEXT_MAX_LENGTH || oriText.empty()) {
+        if (charOffset < 0 || startPos + charOffset >= static_cast<int32_t>(wTextForAI.length()) ||
+            end >= startPos + AI_TEXT_MAX_LENGTH || oriText.empty()) {
             LOGW("The result of AI is error");
             continue;
         }
-        if (oriText != StringUtils::ToString(
-            wTextForAI.substr(startPos + charOffset, static_cast<int32_t>(wOriText.length())))) {
+        if (oriText !=
+            StringUtils::ToString(wTextForAI.substr(startPos + charOffset, static_cast<int32_t>(wOriText.length())))) {
             LOGW("The charOffset is error");
             continue;
         }
@@ -1351,8 +1364,7 @@ void TextPattern::StartAITask()
         auto wTextForAI = StringUtils::ToWstring(pattern->textForAI_);
         auto wTextForAILength = static_cast<int32_t>(wTextForAI.length());
         while (startPos < wTextForAILength) {
-            std::string detectText = StringUtils::ToString(
-                wTextForAI.substr(startPos, AI_TEXT_MAX_LENGTH));
+            std::string detectText = StringUtils::ToString(wTextForAI.substr(startPos, AI_TEXT_MAX_LENGTH));
             pattern->InitTextDetect(startPos, detectText);
             startPos += AI_TEXT_MAX_LENGTH - AI_TEXT_GAP;
         }
