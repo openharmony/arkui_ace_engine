@@ -212,6 +212,7 @@ public:
         }
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
+        currentFingers_ = 0;
         OnResetStatus();
     }
 

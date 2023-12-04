@@ -90,6 +90,7 @@ public:
         queryStateFunc_ = queryStateFunc;
     }
     bool QueryAllDone(size_t touchId);
+    bool CheckRecognizerState();
 
     void ForceCleanGestureScope();
 private:
@@ -129,6 +130,7 @@ public:
     bool QueryAllDone();
     bool CheckSourceTypeChange(SourceType type, bool isAxis = false);
     void CleanAll(bool isBlocked = false);
+    void CleanRedundanceScope();
     void ForceCleanGestureReferee();
 private:
     void HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer);

@@ -392,6 +392,9 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         refereeNG_->CleanGestureScope(point.id);
         referee_->CleanGestureScope(point.id);
         touchTestResults_.erase(point.id);
+        if (touchTestResults_.empty()) {
+            refereeNG_->CleanRedundanceScope();
+        }
     }
 
     lastEventTime_ = point.time;
