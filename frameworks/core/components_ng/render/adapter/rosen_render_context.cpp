@@ -3345,11 +3345,16 @@ void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radius
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnClipShapeUpdate(const RefPtr<BasicShape>& /*basicShape*/)
+void RosenRenderContext::OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape)
 {
-    RectF rect = GetPaintRectWithoutTransform();
-    if (!RectIsNull()) {
-        PaintClip(SizeF(rect.Width(), rect.Height()));
+    if (basicShape) {
+        if (!RectIsNull()) {
+            RectF rect = GetPaintRectWithoutTransform();
+            PaintClipShape(GetOrCreateClip(), rect.GetSize());
+        }
+    } else if (clipBoundModifier_) {
+        rsNode_->RemoveModifier(clipBoundModifier_);
+        clipBoundModifier_ = nullptr;
     }
     RequestNextFrame();
 }

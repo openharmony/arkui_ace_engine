@@ -614,6 +614,7 @@ protected:
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
 
 private:
+    friend class ViewAbstract;
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
 
