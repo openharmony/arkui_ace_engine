@@ -267,13 +267,17 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
         }
         return menuOffset;
     }
-    // avoid soft keyboard
+    // avoid soft keyboard and root bottom
     if (!upHandle.isShow && downHandle.isShow) {
         CHECK_NULL_RETURN(pipeline, menuOffset);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         CHECK_NULL_RETURN(safeAreaManager, menuOffset);
         auto keyboardInsert = safeAreaManager->GetKeyboardInset();
-        if (GreatOrEqual(menuRect.Bottom(), keyboardInsert.start)) {
+        auto shouldAvoidKeyboard =
+            GreatNotEqual(keyboardInsert.Length(), 0.0f) && GreatNotEqual(menuRect.Bottom(), keyboardInsert.start);
+        auto rootRect = layoutWrapper->GetGeometryNode()->GetFrameRect();
+        auto shouldAvoidBottom = GreatNotEqual(menuRect.Bottom(), rootRect.Height());
+        if (shouldAvoidKeyboard || shouldAvoidBottom) {
             auto menuSpace = NearEqual(upPaint.Top(), downPaint.Top()) ? spaceBetweenHandle : spaceBetweenText;
             menuOffset.SetY(downPaint.GetY() - menuSpace - menuRect.Height());
         }
