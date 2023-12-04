@@ -336,6 +336,7 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
             paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
         }
         paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
+        CHECK_NULL_RETURN(paragraph_, -1);
         paragraph_->PushStyle(textStyle);
         CHECK_NULL_RETURN(pattern, -1);
         if (spanItemChildren_.empty()) {
