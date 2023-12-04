@@ -5640,9 +5640,11 @@ class BlockStyleModifier extends ModifierWithKey {
             GetUINativeModule().slider.setBlockStyle(node, this.value);
         }
     }
-    checkObjectDiff() {
-        return false;
-    }
+  checkObjectDiff() {
+    return !(this.stageValue.type === this.value.type &&
+      this.stageValue.image === this.value.image &&
+      this.stageValue.shape === this.value.shape);
+  }
 }
 BlockStyleModifier.identity = Symbol("sliderBlockStyle");
 class ShowTipsModifier extends Modifier {

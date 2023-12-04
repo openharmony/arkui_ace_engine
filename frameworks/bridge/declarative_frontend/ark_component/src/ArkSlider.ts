@@ -131,7 +131,7 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     return this;
   }
 }
-class BlockStyleModifier extends ModifierWithKey<boolean | object> {
+class BlockStyleModifier extends ModifierWithKey<SliderBlockStyle> {
   static identity: Symbol = Symbol('sliderBlockStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -143,7 +143,10 @@ class BlockStyleModifier extends ModifierWithKey<boolean | object> {
   }
 
   checkObjectDiff(): boolean {
-    return false;
+    return !((this.stageValue as SliderBlockStyle).type === (this.value as SliderBlockStyle).type &&
+    (this.stageValue as SliderBlockStyle).image === (this.value as SliderBlockStyle).image &&
+    (this.stageValue as SliderBlockStyle).shape === (this.value as SliderBlockStyle).shape)       
+
   }
 }
 
