@@ -177,6 +177,7 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childFrameOffset = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     layoutInfo_.UpdateStartIndex();
+    auto firstIndex = layoutInfo_.endIndex_;
     for (const auto& mainPositions : layoutInfo_.waterFlowItems_) {
         for (const auto& item : mainPositions.second) {
             if (item.first < layoutInfo_.startIndex_ || item.first > layoutInfo_.endIndex_) {
@@ -204,13 +205,23 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (item.first == layoutInfo_.startIndex_) {
                 layoutInfo_.storedOffset_ = mainOffset;
             }
+
+            if (NonNegative(mainOffset + item.second.second)) {
+                firstIndex = std::min(firstIndex, item.first);
+            }
         }
     }
+    layoutInfo_.firstIndex_ = firstIndex;
+    LayoutFooter(layoutWrapper, childFrameOffset, layoutProperty->IsReverse());
+}
+
+void WaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse)
+{
     if (layoutInfo_.itemEnd_ && layoutInfo_.footerIndex_ >= 0) {
         auto footer = layoutWrapper->GetOrCreateChildByIndex(layoutInfo_.footerIndex_);
         auto footerOffset = childFrameOffset;
         auto mainOffset = layoutInfo_.GetMaxMainHeight() + layoutInfo_.currentOffset_;
-        if (layoutProperty->IsReverse()) {
+        if (reverse) {
             mainOffset = mainSize_ - footerMainSize_ - mainOffset;
         }
         footerOffset += (axis_ == Axis::VERTICAL) ? OffsetF(0, mainOffset) : OffsetF(mainOffset, 0);
