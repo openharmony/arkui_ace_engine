@@ -1396,10 +1396,10 @@ void SetBorder(NodeHandle node, double* values, int32_t* units, uint32_t* colorA
     ViewAbstract::SetBorderRadius(frameNode, borderRadius);
 
     NG::BorderStyleProperty borderStyles;
-    borderStyles.styleLeft = ConvertBorderStyle(colorAndStyle[NUM_4]);
+    borderStyles.styleTop = ConvertBorderStyle(colorAndStyle[NUM_4]);
     borderStyles.styleRight = ConvertBorderStyle(colorAndStyle[NUM_5]);
-    borderStyles.styleTop = ConvertBorderStyle(colorAndStyle[NUM_6]);
-    borderStyles.styleBottom = ConvertBorderStyle(colorAndStyle[NUM_7]);
+    borderStyles.styleBottom = ConvertBorderStyle(colorAndStyle[NUM_6]);
+    borderStyles.styleLeft = ConvertBorderStyle(colorAndStyle[NUM_7]);
     borderStyles.multiValued = true;
     ViewAbstract::SetBorderStyle(frameNode, borderStyles);
 }
