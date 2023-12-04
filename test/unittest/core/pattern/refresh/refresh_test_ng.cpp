@@ -53,10 +53,10 @@ constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
 constexpr float DEFAULT_SPEED = 10.0f;
 constexpr float DEFAULT_OFFSET = 20.0f;
 } // namespace
-class RefreshTestNg : public testing::Test, public TestNG {
+class RefreshTestNg : public TestNG {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
     void GetInstance();
@@ -73,17 +73,17 @@ public:
     RefPtr<RefreshAccessibilityProperty> accessibilityProperty_;
 };
 
-void RefreshTestNg::SetUpTestCase()
+void RefreshTestNg::SetUpTestSuite()
 {
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RefreshTheme>()));
 }
 
-void RefreshTestNg::TearDownTestCase()
+void RefreshTestNg::TearDownTestSuite()
 {
-    MockPipelineContext::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 void RefreshTestNg::SetUp() {}
@@ -120,7 +120,7 @@ void RefreshTestNg::Create(const std::function<void(RefreshModelNG)>& callback)
     }
     model.Pop();
     GetInstance();
-    RunMeasureAndLayout(frameNode_);
+    FlushLayoutTask(frameNode_);
 }
 
 RefPtr<FrameNode> RefreshTestNg::CreateCustomNode()

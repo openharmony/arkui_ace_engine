@@ -56,6 +56,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float SWIPER_WIDTH = 480.f;
+constexpr float SWIPER_HEIGHT = 800.f;
 constexpr int32_t ITEM_NUMBER = 4;
 constexpr int32_t DEFAULT_INTERVAL = 3000;
 constexpr int32_t DEFAULT_DURATION = 400;
@@ -64,7 +66,7 @@ constexpr float DRAG_SPEED = 500.0f;
 constexpr float DRAG_OFFSET_X = 50.0f;
 } // namespace
 
-class SwiperTestNg : public testing::Test, public TestNG {
+class SwiperTestNg : public TestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -95,7 +97,7 @@ public:
 
 void SwiperTestNg::SetUpTestSuite()
 {
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->SetThemeManager(themeManager);
@@ -105,7 +107,7 @@ void SwiperTestNg::SetUpTestSuite()
 
 void SwiperTestNg::TearDownTestSuite()
 {
-    MockPipelineContext::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 void SwiperTestNg::SetUp() {}
@@ -135,12 +137,14 @@ void SwiperTestNg::CreateWithItem(const std::function<void(SwiperModelNG)>& call
 {
     SwiperModelNG model;
     model.Create();
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
     if (callback) {
         callback(model);
     }
     CreateItem();
     GetInstance();
-    RunMeasureAndLayout(frameNode_);
+    FlushLayoutTask(frameNode_);
 }
 
 void SwiperTestNg::CreateItem(int32_t itemNumber)
@@ -622,7 +626,7 @@ HWTEST_F(SwiperTestNg, AttrMargin001, TestSize.Level1)
      * @tc.steps: step2. Set illegal value
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(DEVICE_WIDTH + 1));
+        model.SetNextMargin(Dimension(SWIPER_WIDTH + 1));
         model.SetPreviousMargin(Dimension(5));
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0);
@@ -633,7 +637,7 @@ HWTEST_F(SwiperTestNg, AttrMargin001, TestSize.Level1)
      */
     CreateWithItem([](SwiperModelNG model) {
         model.SetNextMargin(Dimension(10));
-        model.SetPreviousMargin(Dimension(DEVICE_WIDTH + 1));
+        model.SetPreviousMargin(Dimension(SWIPER_WIDTH + 1));
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0);
@@ -1066,6 +1070,8 @@ HWTEST_F(SwiperTestNg, SwiperModelNg001, TestSize.Level1)
 {
     SwiperModelNG model;
     model.Create();
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
@@ -1147,6 +1153,8 @@ HWTEST_F(SwiperTestNg, SwiperModelNg002, TestSize.Level1)
 {
     SwiperModelNG model;
     model.Create();
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
@@ -1215,6 +1223,8 @@ HWTEST_F(SwiperTestNg, SwiperModelNg003, TestSize.Level1)
 {
     SwiperModelNG model;
     model.Create();
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
@@ -8148,6 +8158,8 @@ HWTEST_F(SwiperTestNg, SwiperModelNGSetDisplayCount001, TestSize.Level1)
 {
     SwiperModelNG mode;
     auto controller = mode.Create();
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
     ASSERT_NE(controller, nullptr);
     int32_t displayCount = 0;
 

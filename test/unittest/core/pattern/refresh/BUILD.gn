@@ -15,8 +15,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("refresh_test_ng") {
   type = "new"
-  sources = [
-    "$ace_root/test/unittest/core/pattern/test_ng.cpp",
-    "refresh_test_ng.cpp",
-  ]
+  sources = [ "refresh_test_ng.cpp" ]
 }
