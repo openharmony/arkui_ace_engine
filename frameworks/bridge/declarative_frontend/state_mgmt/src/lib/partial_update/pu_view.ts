@@ -383,6 +383,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
           result += `\n  ${observedProp.debugInfoSubscribers()}`
           result += `\n  ${observedProp.debugInfoSyncPeers()}`;
           result += `\n  ${observedProp.debugInfoDependentElmtIds()}`
+          result += `\n  ${observedProp.debugInfoDependentComponents()}`
         }
       });
     return result;
