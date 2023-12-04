@@ -1643,10 +1643,132 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest043, TestSize.Level1)
     FRAME_NODE2->eventHub_->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
-        return GestureJudgeResult::REJECT;};
+        return GestureJudgeResult::REJECT;
+    };
     auto gestureEventHub = FRAME_NODE2->eventHub_->GetOrCreateGestureEventHub();
     gestureEventHub->SetOnGestureJudgeBegin(gestureJudgeFunc);
     auto test = FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
     EXPECT_EQ(test, HitTestResult::STOP_BUBBLING);
+}
+
+/**
+ * @tc.name: FrameNodeTouchTest044
+ * @tc.desc: Test method TransferExecuteAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest044, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct parameters.
+     */
+    FRAME_NODE2->isActive_ = true;
+    FRAME_NODE2->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+    auto eventHub = FRAME_NODE2->GetOrCreateGestureEventHub();
+    eventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    std::map<std::string, std::string> actionArguments;
+
+    /**
+     * @tc.steps: step2. call TransferExecuteAction.
+     * @tc.expected: expect result is false.
+     */
+    bool result = FRAME_NODE2->TransferExecuteAction(1, actionArguments, 1, 1);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: FrameNodeTouchTest045
+ * @tc.desc: Test method GetUiExtensionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest045, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct parameters.
+     */
+    FRAME_NODE2->isActive_ = true;
+    FRAME_NODE2->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+
+    /**
+     * @tc.steps: step2. call GetUiExtensionId.
+     * @tc.expected: expect result is -1.
+     */
+    int32_t result = FRAME_NODE2->GetUiExtensionId();
+    EXPECT_EQ(result, -1);
+}
+
+/**
+ * @tc.name: FrameNodeTouchTest046
+ * @tc.desc: Test method WrapExtensionAbilityId
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest046, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct parameters.
+     */
+    FRAME_NODE2->isActive_ = true;
+    FRAME_NODE2->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+
+    int32_t extensionOffset = 1;
+    int32_t abilityId = 1;
+
+    /**
+     * @tc.steps: step2. call WrapExtensionAbilityId.
+     * @tc.expected: expect result is -1.
+     */
+    int32_t result = FRAME_NODE2->WrapExtensionAbilityId(extensionOffset, abilityId);
+    EXPECT_EQ(result, -1);
+}
+
+/**
+ * @tc.name: FrameNodeTouchTest047
+ * @tc.desc: Test method GeometryNodeToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest047, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct parameters.
+     */
+    std::unique_ptr<JsonValue> value = JsonUtil::Create(true);
+
+    /**
+     * @tc.steps: step2. construct parameters.
+     * @tc.expected: expect cover branch layoutProperty_ is nullptr.
+     */
+    FRAME_NODE2->GeometryNodeToJsonValue(value);
+    EXPECT_EQ(FRAME_NODE2->layoutProperty_, nullptr);
+
+    /**
+     * @tc.steps: step3. set layoutProperty_ and call GeometryNodeToJsonValue.
+     * @tc.expected: expect cover branch layoutProperty_ is not nullptr.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    FRAME_NODE2->layoutProperty_ = layoutProperty;
+    FRAME_NODE2->GeometryNodeToJsonValue(value);
+    EXPECT_NE(FRAME_NODE2->layoutProperty_, nullptr);
+
+    /**
+     * @tc.steps: step4. set calcLayoutConstraint_ and call GeometryNodeToJsonValue.
+     * @tc.expected: expect cover branch calcLayoutConstraint_ is not nullptr.
+     */
+    FRAME_NODE2->layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+
+    FRAME_NODE2->GeometryNodeToJsonValue(value);
+    EXPECT_NE(FRAME_NODE2->layoutProperty_->calcLayoutConstraint_, nullptr);
+
+    /**
+     * @tc.steps: step5. set selfIdealSize and call GeometryNodeToJsonValue.
+     * @tc.expected: expect cover branch selfIdealSize has value.
+     */
+    std::optional<CalcLength> len = CalcLength("auto");
+    FRAME_NODE2->layoutProperty_->calcLayoutConstraint_->selfIdealSize = CalcSize(len, len);
+    FRAME_NODE2->GeometryNodeToJsonValue(value);
+    EXPECT_NE(FRAME_NODE2->renderContext_, nullptr);
+
+    FRAME_NODE2->layoutProperty_ = nullptr;
 }
 } // namespace OHOS::Ace::NG
