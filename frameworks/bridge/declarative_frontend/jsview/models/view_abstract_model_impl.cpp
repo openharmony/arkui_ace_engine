@@ -595,8 +595,6 @@ void ViewAbstractModelImpl::SetAlignRules(const std::map<AlignDirection, AlignRu
     flexItem->SetAlignRules(alignRules);
 }
 
-void ViewAbstractModelImpl::SetBias(const BiasPair& biasPair) {}
-
 void ViewAbstractModelImpl::SetUseAlign(
     AlignDeclarationPtr declaration, AlignDeclaration::Edge edge, const std::optional<Dimension>& offset)
 {
