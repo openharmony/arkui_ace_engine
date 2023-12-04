@@ -118,9 +118,9 @@ public:
     static void ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint);
 
     // apply keyboard avoidance on content rootNodes
-    void AvoidKeyboard();
+    void AvoidKeyboard(bool isFocusOnPage = true);
     // expand the SafeArea of expansive nodes, which are previously recorded during Layout traversal
-    void ExpandSafeArea();
+    void ExpandSafeArea(bool isFocusOnPage = true);
 
     // save geometry states before SafeArea expansion / keyboard avoidance
     void SaveGeoState();
