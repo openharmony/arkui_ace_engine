@@ -23,7 +23,7 @@ class DividerColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('dividerColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().divider.resetrColor(node);
+      GetUINativeModule().divider.resetColor(node);
     } else {
       GetUINativeModule().divider.setColor(node, this.value!);
     }
