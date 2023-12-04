@@ -551,9 +551,12 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool did
         break;
     }
     if (placement_ == Placement::NONE) {
+        bVertical_ = false;
+        bHorizontal_ = false;
         position = GetAdjustPosition(currentPlacementStates, step, childSize, topPosition, bottomPosition, ArrowOffset);
         if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
-            position = defaultPosition;
+            showArrow_ = false;
+            position = AdjustPosition(defaultPosition, childSize.Width(), childSize.Height(), targetSecurity_);
         }
     }
     positionOffset_ = positionOffset;
@@ -571,6 +574,24 @@ OffsetF BubbleLayoutAlgorithm::GetAdjustPosition(std::vector<Placement>& current
         placement_ = currentPlacementStates[i];
         if (placement_ == Placement::NONE) {
             break;
+        }
+        if (bCaretMode_) { // Caret mode
+            if ((placement_ != Placement::BOTTOM) && (placement_ != Placement::TOP)) {
+                i++;
+                continue;
+            }
+        }
+        if (bVertical_) {
+            if (setHorizontal_.find(placement_) != setHorizontal_.end()) {
+                i++;
+                continue;
+            }
+        }
+        if (bHorizontal_) {
+            if (setVertical_.find(placement_) != setVertical_.end()) {
+                i++;
+                continue;
+            }
         }
         childPosition = GetPositionWithPlacement(childSize, topPosition, bottomPosition, arrowPosition);
         UpdateChildPosition(childPosition);
@@ -624,6 +645,13 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
             xMin = paddingStart_;
             xMax = wrapperSize_.Width() - width - paddingEnd_;
             yMin = std::max(targetOffset_.GetY() + targetSize_.Height() + space, paddingTop_);
+            yMax = wrapperSize_.Height() - height - paddingBottom_;
+            break;
+        }
+        case Placement::NONE: {
+            xMin = paddingStart_;
+            xMax = wrapperSize_.Width() - width - paddingEnd_;
+            yMin = paddingTop_;
             yMax = wrapperSize_.Height() - height - paddingBottom_;
             break;
         }
@@ -1207,6 +1235,7 @@ void BubbleLayoutAlgorithm::UpdateClipOffset(const RefPtr<FrameNode>& frameNode)
     targetOffset_ = targetOffset_ - childOffset_;
     childOffset_ = OffsetF(0.0f, 0.0f);
     clipFrameNode_ = childNode;
+    clipPath_.clear();
     if (enableArrow_ && showArrow_) {
         clipPath_ = ClipBubbleWithArrow();
     }
