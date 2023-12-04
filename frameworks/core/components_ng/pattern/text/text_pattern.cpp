@@ -730,7 +730,6 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
     } else {
         calculateHandleFunc();
     }
-    CalculateHandleOffsetAndShowOverlay();
     textSelector_.Update(baseOffset, destinationOffset);
     RectF aiRect;
     if (textSelector_.firstHandle.Top() != textSelector_.secondHandle.Top()) {
@@ -1345,8 +1344,10 @@ void TextPattern::InitTextDetect(int32_t startPos, std::string detectText)
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
         auto uiTaskExecutor =
-            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([result, weak, instanceID, startPos] {
             ContainerScope scope(instanceID);
             auto pattern = weak.Upgrade();
