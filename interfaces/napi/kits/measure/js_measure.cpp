@@ -276,7 +276,7 @@ static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, &argv, &thisvar, &data);
 
-    std::map<std:string, napi_value> contextParamMap;
+    std::map<std::string, napi_value> contextParamMap;
     CreateMeasureTextSizeParamMap(contextParamMap);
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
