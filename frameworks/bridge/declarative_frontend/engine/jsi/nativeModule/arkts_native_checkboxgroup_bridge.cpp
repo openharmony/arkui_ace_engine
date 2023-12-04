@@ -12,19 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkboxgroup_bridge.h"
 
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkboxgroup_bridge.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint32_t COLOR_ALPHA_VALUE = 0xffffff;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
-constexpr double NUM_4 = 2.0;
+constexpr float DEFAULT_SIZE_VALUE = -1.0f;
 }   // namespace
 ArkUINativeModuleValue CheckboxGroupBridge::SetGroupSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -167,24 +166,31 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetGroupMark(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> sizeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t strokeColorValue = COLOR_ALPHA_VALUE;
 
-    if (!colorArg->IsUndefined()) {
-        strokeColorValue = colorArg->Uint32Value(vm);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
+    auto theme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(theme, panda::NativePointerRef::New(vm, nullptr));
+
+    Color strokeColor;
+    if (!ArkTSUtils::ParseJsColor(vm, colorArg, strokeColor)) {
+        strokeColor = theme->GetPointColor();
     }
-    
-    CalcDimension size;
-    CalcDimension width;
 
-    if (!sizeArg->IsUndefined() && !widthArg->IsUndefined()) {
-        ArkTSUtils::ParseJsDimensionVp(vm, sizeArg, size);
-        if (!ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width)) {
-            width.SetValue(NUM_4);
-        }
+    CalcDimension size;
+    if (!(ArkTSUtils::ParseJsDimensionVp(vm, sizeArg, size)) || (size.Unit() == DimensionUnit::PERCENT) ||
+        (size.ConvertToVp() < 0)) {
+        size = Dimension(DEFAULT_SIZE_VALUE);
+    }
+
+    CalcDimension strokeWidth;
+    if (!(ArkTSUtils::ParseJsDimensionVp(vm, widthArg, strokeWidth)) ||
+        (strokeWidth.Unit() == DimensionUnit::PERCENT) || (strokeWidth.ConvertToVp() < 0)) {
+        strokeWidth = theme->GetCheckStroke();
     }
 
     GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetGroupMark(nativeNode,
-        strokeColorValue, width.Value(), size.Value());
+        strokeColor.GetValue(), strokeWidth.Value(), size.Value());
 
     return panda::JSValueRef::Undefined(vm);
 }

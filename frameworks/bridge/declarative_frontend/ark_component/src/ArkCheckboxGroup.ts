@@ -52,17 +52,23 @@ class CheckboxGroupUnselectedColorModifier extends ModifierWithKey<ResourceColor
         }
     }
 }
-class CheckboxGroupMarkModifier extends Modifier<ArkMarkStyle> {
-    static identity: Symbol = Symbol('checkboxgroupMark');
-    applyPeer(node: KNode, reset: boolean) {
-        if (reset) {
-            GetUINativeModule().checkboxgroup.resetMark(node);
-        }
-        else {
-            GetUINativeModule().checkboxgroup.setMark(node, this.value?.strokeColor, this.value?.size,
-                this.value?.strokeWidth);
-        }
+class CheckboxGroupMarkModifier extends ModifierWithKey<MarkStyle> {
+  static identity: Symbol = Symbol('checkboxgroupMark');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().checkboxgroup.resetMark(node);
     }
+    else {
+      GetUINativeModule().checkboxgroup.setMark(node, this.value?.strokeColor, this.value?.size, this.value?.strokeWidth);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    let colorEQ = isBaseOrResourceEqual(this.stageValue.strokeColor, this.value.strokeColor);
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let widthEQ = isBaseOrResourceEqual(this.stageValue.strokeWidth, this.value.strokeWidth);
+    return !colorEQ || !sizeEQ || !widthEQ;    
+  }
 }
 class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAttribute {
     selectAll(value: boolean): this {
@@ -82,12 +88,8 @@ class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAtt
         return this;
     }
     mark(value: MarkStyle): this {
-        let arkMarkStyle = new ArkMarkStyle();
-        if (arkMarkStyle.parseMarkStyle(value)) {
-            modifier(this._modifiers, CheckboxGroupMarkModifier, arkMarkStyle);
-        } else {
-            modifier(this._modifiers, CheckboxGroupMarkModifier, undefined);
-        }
+        modifierWithKey(
+          this._modifiersWithKeys, CheckboxGroupMarkModifier.identity, CheckboxGroupMarkModifier, value);
         return this;
     }
     onChange(callback: (event: CheckboxGroupResult) => void): CheckboxGroupAttribute {
