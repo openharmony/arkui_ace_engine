@@ -358,11 +358,11 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     paragraphWidth_ = paragraphWidth;
     textRect_ = textRect;
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
-    FireOnTextChangeEvent();
+    bool isEditorValueChanged = FireOnTextChangeEvent();
     UpdateSelectController();
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     AdjustTextInReasonableArea();
-    UpdateCaretRect();
+    UpdateCaretRect(isEditorValueChanged);
     UpdateCaretInfoToController();
     auto hostLayoutProperty =
         dirty->GetHostNode() ? dirty->GetHostNode()->GetLayoutProperty<TextFieldLayoutProperty>() : nullptr;
@@ -439,7 +439,7 @@ void TextFieldPattern::UpdateCaretInfoToController() const // todo确定更新�
 }
 
 // return: true if text rect offset will NOT be further changed by caret position
-void TextFieldPattern::UpdateCaretRect()
+void TextFieldPattern::UpdateCaretRect(bool isEditorValueChanged)
 {
     auto focusHub = GetFocusHub();
     if (IsSelected()) {
@@ -452,7 +452,8 @@ void TextFieldPattern::UpdateCaretRect()
         return;
     }
 
-    selectController_->MoveCaretToContentRect(selectController_->GetCaretIndex(), TextAffinity::DOWNSTREAM);
+    selectController_->MoveCaretToContentRect(
+        selectController_->GetCaretIndex(), TextAffinity::DOWNSTREAM, isEditorValueChanged);
 }
 
 void TextFieldPattern::AdjustTextInReasonableArea()
@@ -1926,26 +1927,26 @@ void TextFieldPattern::CalculateDefaultCursor()
     selectController_->UpdateCaretHeight(PreferredLineHeight());
 }
 
-void TextFieldPattern::FireOnTextChangeEvent()
+bool TextFieldPattern::FireOnTextChangeEvent()
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_RETURN(eventHub, false);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_RETURN(layoutProperty, false);
 
     auto textCache = layoutProperty->GetValueValue("");
     if (textCache == contentController_->GetTextValue()) {
-        return;
+        return false;
     }
     layoutProperty->UpdateValue(contentController_->GetTextValue());
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     eventHub->FireOnChange(contentController_->GetTextValue());
     auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
+    CHECK_NULL_RETURN(taskExecutor, false);
     taskExecutor->PostTask(
         [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();
@@ -1953,6 +1954,7 @@ void TextFieldPattern::FireOnTextChangeEvent()
             pattern->ScrollToSafeArea();
         },
         TaskExecutor::TaskType::UI);
+    return true;
 }
 
 void TextFieldPattern::FilterInitializeText()

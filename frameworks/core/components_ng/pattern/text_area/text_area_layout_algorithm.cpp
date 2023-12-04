@@ -129,6 +129,14 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize() -
                 SizeF(pattern->GetHorizontalPaddingAndBorderSum(), pattern->GetVerticalPaddingAndBorderSum());
+    
+    // Remove counterNode height.
+    auto counterNode = pattern->GetCounterNode().Upgrade();
+    if (counterNode && !pattern->IsNormalInlineState()) {
+        auto counterHeight = counterNode->GetGeometryNode()->GetFrameSize().Height();
+        size.SetHeight(size.Height() - counterHeight);
+    }
+
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());

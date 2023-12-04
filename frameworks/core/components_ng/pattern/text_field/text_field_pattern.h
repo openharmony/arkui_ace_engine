@@ -1092,7 +1092,8 @@ private:
 
     void FireEventHubOnChange(const std::string& text);
     void FireOnChangeIfNeeded();
-    void FireOnTextChangeEvent();
+    // The return value represents whether the editor content has change.
+    bool FireOnTextChangeEvent();
 
     void FilterInitializeText();
 
@@ -1101,7 +1102,7 @@ private:
     void FireOnSelectionChange(int32_t start, int32_t end);
     void UpdateCaretPositionByLastTouchOffset();
     bool UpdateCaretPosition();
-    void UpdateCaretRect();
+    void UpdateCaretRect(bool isEditorValueChanged);
     void AdjustTextInReasonableArea();
     bool CharLineChanged(int32_t caretPosition);
 
