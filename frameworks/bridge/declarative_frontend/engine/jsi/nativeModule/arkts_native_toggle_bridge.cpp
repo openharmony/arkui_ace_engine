@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue ToggleBridge::SetSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -25,8 +26,12 @@ ArkUINativeModuleValue ToggleBridge::SetSelectedColor(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t color = secondArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetToggleModifier().SetToggleSelectedColor(nativeNode, color);
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+        GetArkUIInternalNodeAPI()->GetToggleModifier().ResetToggleSelectedColor(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetToggleModifier().SetToggleSelectedColor(nativeNode, color.GetValue());
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -47,8 +52,12 @@ ArkUINativeModuleValue ToggleBridge::SetSwitchPointColor(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t color = secondArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetToggleModifier().SetToggleSwitchPointColor(nativeNode, color);
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+        GetArkUIInternalNodeAPI()->GetToggleModifier().ResetToggleSwitchPointColor(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetToggleModifier().SetToggleSwitchPointColor(nativeNode, color.GetValue());
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
