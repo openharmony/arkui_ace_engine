@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -279,6 +280,15 @@ void NavigationPattern::CheckTopNavPathChange(
         auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
         CHECK_NULL_VOID(navBarNode);
         navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        auto stageManager = context->GetStageManager();
+        if (stageManager != nullptr) {
+            RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
+            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+            if (pagePattern != nullptr) {
+                auto pageInfo = pagePattern->GetPageInfo();
+                NotifyPageShow(pageInfo->GetPageUrl());
+            }
+        }
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         auto focusHub = navBarNode->GetOrCreateFocusHub();
         focusHub->SetParentFocusable(true);
@@ -374,23 +384,17 @@ void NavigationPattern::FireNavigationStateChange(const RefPtr<UINode>& node, bo
 void NavigationPattern::NotifyPageHide(const std::string& pageName)
 {
     auto container = Container::Current();
-    if (container) {
-        auto pageUrlChecker = container->GetPageUrlChecker();
-        if (pageUrlChecker != nullptr) {
-            pageUrlChecker->NotifyPageHide(pageName);
-        }
-    }
+    CHECK_NULL_VOID(container);
+    auto pageUrlChecker = container->GetPageUrlChecker();
+    pageUrlChecker->NotifyPageHide(pageName);
 }
 
 void NavigationPattern::NotifyPageShow(const std::string& pageName)
 {
     auto container = Container::Current();
-    if (container) {
-        auto pageUrlChecker = container->GetPageUrlChecker();
-        if (pageUrlChecker != nullptr) {
-            pageUrlChecker->NotifyPageShow(pageName);
-        }
-    }
+    CHECK_NULL_VOID(container);
+    auto pageUrlChecker = container->GetPageUrlChecker();
+    pageUrlChecker->NotifyPageShow(pageName);
 }
 
 void NavigationPattern::DoStackModeTransitionAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,

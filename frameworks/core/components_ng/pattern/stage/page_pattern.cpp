@@ -167,9 +167,7 @@ void PagePattern::OnShow()
     JankFrameReport::StartRecord(pageInfo_->GetPageUrl());
     PerfMonitor::GetPerfMonitor()->SetPageUrl(pageInfo_->GetPageUrl());
     auto pageUrlChecker = container->GetPageUrlChecker();
-    if (pageUrlChecker != nullptr) {
-        pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
-    }
+    pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
     if (onPageShow_) {
         onPageShow_();
     }
@@ -186,9 +184,7 @@ void PagePattern::OnHide()
     auto container = Container::Current();
     if (container) {
         auto pageUrlChecker = container->GetPageUrlChecker();
-        if (pageUrlChecker != nullptr) {
-            pageUrlChecker->NotifyPageHide(pageInfo_->GetPageUrl());
-        }
+        pageUrlChecker->NotifyPageHide(pageInfo_->GetPageUrl());
     }
     
     if (onPageHide_) {
