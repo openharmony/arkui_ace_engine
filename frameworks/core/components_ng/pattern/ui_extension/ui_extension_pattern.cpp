@@ -229,7 +229,7 @@ void UIExtensionPattern::OnConnect()
     bool isFocused = IsCurrentFocus();
     RegisterVisibleAreaChange();
     TransferFocusState(isFocused);
-    if (isFocused) {
+    if (isFocused || isModal_) {
         auto context = AceType::DynamicCast<PipelineContext>(pipeline);
         auto uiExtensionManager = context->GetUIExtensionManager();
         uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this));
