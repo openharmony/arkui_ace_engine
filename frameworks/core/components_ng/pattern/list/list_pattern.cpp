@@ -307,37 +307,20 @@ void ListPattern::ProcessEvent(
     paintStateFlag_ = !NearZero(finalOffset) && !isJump;
     isFramePaintStateValid_ = true;
     auto onScroll = listEventHub->GetOnScroll();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) && scrollStop_ && !GetScrollAbort()) {
-        auto source = GetScrollSource();
-        auto offsetPX = Dimension(finalOffset);
-        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-        if (onScroll) {
-            if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR) {
-                onScroll(offsetVP, ScrollState::SCROLL);
-                onScroll(0.0_vp, ScrollState::IDLE);
-            } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
-                       source == SCROLL_FROM_ANIMATION_CONTROLLER || source == SCROLL_FROM_BAR_FLING) {
-                onScroll(offsetVP, ScrollState::FLING);
-                onScroll(0.0_vp, ScrollState::IDLE);
-            } else {
-                onScroll(offsetVP, ScrollState::IDLE);
-            }
-        }
-    } else if (onScroll && !NearZero(finalOffset)) {
-        auto source = GetScrollSource();
-        auto offsetPX = Dimension(finalOffset);
-        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN) &&
-            (source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR || source == SCROLL_FROM_ANIMATION_CONTROLLER)) {
-            source = SCROLL_FROM_NONE;
-        }
-        if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR) {
-            onScroll(offsetVP, ScrollState::SCROLL);
-        } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
-                   source == SCROLL_FROM_ANIMATION_CONTROLLER || source == SCROLL_FROM_BAR_FLING) {
-            onScroll(offsetVP, ScrollState::FLING);
+    if (onScroll) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            FireOnScroll(finalOffset, onScroll);
         } else {
-            onScroll(offsetVP, ScrollState::IDLE);
+            if (!NearZero(finalOffset)) {
+                auto offsetPX = Dimension(finalOffset);
+                auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
+                auto source = GetScrollSource();
+                if (source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR ||
+                    source == SCROLL_FROM_ANIMATION_CONTROLLER) {
+                    source = SCROLL_FROM_NONE;
+                }
+                onScroll(offsetVP, GetScrollState(source));
+            }
         }
     }
 

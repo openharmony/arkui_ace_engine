@@ -121,15 +121,15 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(host, false);
     auto eventHub = host->GetEventHub<ScrollEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
-    if (IsCrashTop()) {
-        auto onReachStart = eventHub->GetOnReachStart();
-        if (onReachStart) {
+    auto onReachStart = eventHub->GetOnReachStart();
+    if (onReachStart) {
+        if (ReachStart()) {
             onReachStart();
         }
     }
-    if (IsCrashBottom()) {
-        auto onReachEnd = eventHub->GetOnReachEnd();
-        if (onReachEnd) {
+    auto onReachEnd = eventHub->GetOnReachEnd();
+    if (onReachEnd) {
+        if (ReachEnd()) {
             onReachEnd();
         }
     }
@@ -139,6 +139,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
     ScrollSnapTrigger();
     CheckScrollable();
+    prevOffset_ = currentOffset_;
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto offsetRelativeToWindow = host->GetOffsetRelativeToWindow();
@@ -388,7 +389,7 @@ void ScrollPattern::HandleScrollPosition(float scroll, int32_t scrollState)
 
 bool ScrollPattern::IsCrashTop() const
 {
-    bool scrollUpToReachTop = (LessNotEqual(lastOffset_, 0.0) || !isInitialized_) && GreatOrEqual(currentOffset_, 0.0);
+    bool scrollUpToReachTop = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
     bool scrollDownToReachTop = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
     return scrollUpToReachTop || scrollDownToReachTop;
 }
@@ -398,6 +399,21 @@ bool ScrollPattern::IsCrashBottom() const
     float minExtent = -scrollableDistance_;
     bool scrollDownToReachEnd = GreatNotEqual(lastOffset_, minExtent) && LessOrEqual(currentOffset_, minExtent);
     bool scrollUpToReachEnd = LessNotEqual(lastOffset_, minExtent) && GreatOrEqual(currentOffset_, minExtent);
+    return (scrollUpToReachEnd || scrollDownToReachEnd);
+}
+
+bool ScrollPattern::ReachStart() const
+{
+    bool scrollUpToReachTop = (LessNotEqual(prevOffset_, 0.0) || !isInitialized_) && GreatOrEqual(currentOffset_, 0.0);
+    bool scrollDownToReachTop = GreatNotEqual(prevOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
+    return scrollUpToReachTop || scrollDownToReachTop;
+}
+
+bool ScrollPattern::ReachEnd() const
+{
+    float minExtent = -scrollableDistance_;
+    bool scrollDownToReachEnd = GreatNotEqual(prevOffset_, minExtent) && LessOrEqual(currentOffset_, minExtent);
+    bool scrollUpToReachEnd = LessNotEqual(prevOffset_, minExtent) && GreatOrEqual(currentOffset_, minExtent);
     return (scrollUpToReachEnd || scrollDownToReachEnd);
 }
 

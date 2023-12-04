@@ -330,6 +330,8 @@ public:
 
     ScrollState GetScrollState() const;
 
+    static ScrollState GetScrollState(int32_t scrollSource);
+
     static float CalculateFriction(float gamma)
     {
         constexpr float RATIO = 1.848f;

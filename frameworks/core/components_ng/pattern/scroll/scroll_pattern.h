@@ -277,6 +277,8 @@ private:
 
     bool IsCrashTop() const;
     bool IsCrashBottom() const;
+    bool ReachStart() const;
+    bool ReachEnd() const;
     bool IsScrollOutOnEdge(float delta) const;
     void HandleCrashTop() const;
     void HandleCrashBottom() const;
@@ -298,6 +300,8 @@ private:
 
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
+    // keep lastOffset_ for compatibility, use prevOffset_ for onReachStart/onReachEnd
+    float prevOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
     float viewPortLength_ = 0.0f;
     SizeF viewPort_;
