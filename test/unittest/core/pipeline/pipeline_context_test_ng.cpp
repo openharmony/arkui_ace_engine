@@ -3070,5 +3070,68 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg069, TestSize.Level1)
     ASSERT_FLOAT_EQ(175.0f, resampledTouchEvent.x);
     ASSERT_FLOAT_EQ(275.0f, resampledTouchEvent.y);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg070
+ * @tc.desc: Test GetLatestPoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg070, TestSize.Level1)
+{
+    std::vector<TouchEvent> events;
+
+    TouchEvent event;
+    event.time = TimeStamp(std::chrono::nanoseconds(1000));
+    events.push_back(event);
+
+    TouchEvent result = context_->GetLatestPoint(events, 1000);
+    ASSERT_EQ(static_cast<uint64_t>(result.time.time_since_epoch().count()), 1000);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg071
+ * @tc.desc: Test GetLatestPoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg071, TestSize.Level1)
+{
+    std::vector<TouchEvent> events;
+
+    TouchEvent eventAce;
+    eventAce.time = TimeStamp(std::chrono::nanoseconds(2000));
+    events.push_back(eventAce);
+
+    TouchEvent eventTwo;
+    eventTwo.time = TimeStamp(std::chrono::nanoseconds(3000));
+    events.push_back(eventTwo);
+
+    uint64_t nanoTimeStamp = 1500;
+
+    TouchEvent result = context_->GetLatestPoint(events, nanoTimeStamp);
+    ASSERT_GT(static_cast<uint64_t>(result.time.time_since_epoch().count()), nanoTimeStamp);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg072
+ * @tc.desc: Test GetLatestPoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg072, TestSize.Level1)
+{
+    std::vector<TouchEvent> events;
+
+    TouchEvent eventAce;
+    eventAce.time = TimeStamp(std::chrono::nanoseconds(500));
+    events.push_back(eventAce);
+
+    TouchEvent eventTwo;
+    eventTwo.time = TimeStamp(std::chrono::nanoseconds(1000));
+    events.push_back(eventTwo);
+
+    uint64_t nanoTimeStamp = 1500;
+
+    TouchEvent result = context_->GetLatestPoint(events, nanoTimeStamp);
+    ASSERT_LT(static_cast<uint64_t>(result.time.time_since_epoch().count()), nanoTimeStamp);
+}
 } // namespace NG
 } // namespace OHOS::Ace
