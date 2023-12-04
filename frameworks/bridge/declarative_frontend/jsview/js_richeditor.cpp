@@ -203,7 +203,7 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
     lmObj->SetPropertyObject("size", size);
 #ifdef PIXEL_MAP_SUPPORTED
     if (info.leadingMarginPixmap) {
-        lmObj->SetPropertyObject("placeholder", ConvertPixmap(info.leadingMarginPixmap));
+        lmObj->SetPropertyObject("pixelMap", ConvertPixmap(info.leadingMarginPixmap));
     }
 #endif
     obj->SetPropertyObject("leadingMargin", lmObj);
