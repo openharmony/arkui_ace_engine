@@ -5434,10 +5434,10 @@ void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
             selectController_->UpdateCaretOffset();
             UpdateSelectOverlayDoubleHandle();
         } else {
-            UpdateSelectOverlaySecondHandle();
             auto carectOffset = selectController_->GetCaretRect().GetOffset() +
                                 (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
             selectController_->UpdateCaretOffset(carectOffset);
+            UpdateSelectOverlaySecondHandle();
         }
     } else {
         auto caretOffset = selectController_->GetCaretRect().GetOffset() +
