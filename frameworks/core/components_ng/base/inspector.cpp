@@ -115,9 +115,14 @@ void GetSpanInspector(
 {
     // span rect follows parent text size
     auto spanParentNode = parent->GetParent();
+    while (spanParentNode != nullptr) {
+        if (AceType::InstanceOf<NG::FrameNode>(spanParentNode)) {
+            break;
+        }
+        spanParentNode = spanParentNode->GetParent();
+    }
     CHECK_NULL_VOID(spanParentNode);
     auto node = AceType::DynamicCast<FrameNode>(spanParentNode);
-    CHECK_NULL_VOID(node);
     auto jsonNode = JsonUtil::Create(true);
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
@@ -222,9 +227,14 @@ void GetSpanInspector(
 {
     // span rect follows parent text size
     auto spanParentNode = parent->GetParent();
+    while (spanParentNode != nullptr) {
+        if (AceType::InstanceOf<NG::FrameNode>(spanParentNode)) {
+            break;
+        }
+        spanParentNode = spanParentNode->GetParent();
+    }
     CHECK_NULL_VOID(spanParentNode);
     auto node = AceType::DynamicCast<FrameNode>(spanParentNode);
-    CHECK_NULL_VOID(node);
     auto jsonNode = JsonUtil::Create(true);
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
