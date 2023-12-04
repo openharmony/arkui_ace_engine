@@ -586,12 +586,13 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     pattern->UpdateContextRect(curTopNavDestination, navigationGroupNode);
                     if (pattern->isChanged_ && curTopNavDestination) {
                         auto eventHub = curTopNavDestination->GetEventHub<NavDestinationEventHub>();
-                        CHECK_NULL_VOID(eventHub);
-                        auto param = Recorder::EventRecorder::Get().IsPageRecordEnable()
-                                         ? navigationStack->GetRouteParam()
-                                         : "";
-                        eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
-                        NavigationPattern::FireNavigationStateChange(curTopNavDestination, true);
+                        if (eventHub) {
+                            auto param = Recorder::EventRecorder::Get().IsPageRecordEnable()
+                                            ? navigationStack->GetRouteParam()
+                                            : "";
+                            eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
+                            NavigationPattern::FireNavigationStateChange(curTopNavDestination, true);
+                        }
                         pattern->isChanged_ = false;
                     }
                 }
@@ -603,8 +604,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 bool isSetInvisible =
                     (navigationGroupNode->GetNeedSetInvisible() && navigationStack->Size() != 0) ? true : false;
                 if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
-                    (pattern->GetNavigationMode() == NavigationMode::STACK &&
-                        (isSetInvisible || navigationStack->Size() >= 1))) {
+                    (pattern->GetNavigationMode() == NavigationMode::STACK && isSetInvisible)) {
                     navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
                 } else {
                     navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
