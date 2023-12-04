@@ -181,6 +181,11 @@ void ButtonModelNG::BackgroundColor(const Color& color, const bool& colorFlag)
     ViewAbstract::SetBackgroundColor(color);
 }
 
+void ButtonModelNG::BackgroundColor(FrameNode* frameNode, const Color& color, const bool& colorFlag)
+{
+    ViewAbstract::SetBackgroundColor(frameNode, color);
+}
+
 void ButtonModelNG::SetSize(const std::optional<Dimension>& width, const std::optional<Dimension>& height)
 {
     if (width.has_value()) {

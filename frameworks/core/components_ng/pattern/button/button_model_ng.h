@@ -48,7 +48,8 @@ public:
     static void SetType(FrameNode* frameNode, const int value);
     static void SetStateEffect(FrameNode* frameNode, const bool stateEffect);
     static void SetLableStyle(FrameNode* frameNode, const ButtonParameters& buttonParameters);
-
+    static void BackgroundColor(FrameNode* frameNode, const Color& color, const bool& colorFlag);
+    
 private:
     static void CreateWithLabel(const std::string& label);
     static void Create(const std::string& tagName);

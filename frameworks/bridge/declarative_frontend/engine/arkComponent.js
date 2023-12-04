@@ -2558,6 +2558,10 @@ class ArkButtonComponent extends ArkComponent {
     onGestureJudgeBegin(callback) {
         throw new Error("Method not implemented.");
     }
+    backgroundColor(value) {
+        modifierWithKey(this._modifiersWithKeys, ButtonBackgroundColorModifier.identity, ButtonBackgroundColorModifier, value);
+        return this;
+    }
     type(value) {
         if (typeof value === "number") {
             modifier(this._modifiers, ButtonTypeModifier, value);
@@ -2644,6 +2648,25 @@ class ArkButtonComponent extends ArkComponent {
         return this;
     }
 }
+class ButtonBackgroundColorModifier extends ModifierWithKey {
+    applyPeer(node, reset) {
+        if (reset) {
+            GetUINativeModule().button.resetBackgroundColor(node);
+        }
+        else {
+            GetUINativeModule().button.setBackgroundColor(node, this.value);
+        }
+    }
+    checkObjectDiff() {
+        if (isResource(this.stageValue) && isResource(this.value)) {
+            return !isResourceEqual(this.stageValue, this.value);
+        }
+        else {
+            return true;
+        }
+    }
+}
+ButtonBackgroundColorModifier.identity = Symbol("buttonBackgroundColor");
 class ButtonStateEffectModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {

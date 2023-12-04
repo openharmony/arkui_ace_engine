@@ -22,6 +22,10 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error("Method not implemented.");
   }
+  backgroundColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, ButtonBackgroundColorModifier.identity, ButtonBackgroundColorModifier, value);
+    return this;
+  }
   type (value: ButtonType): this {
     if (typeof value === "number") {
       modifier(this._modifiers, ButtonTypeModifier, value);
@@ -99,6 +103,24 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
       modifier(this._modifiers, ButtonLabelStyleModifier, undefined);
     }
     return this;
+  }
+}
+class ButtonBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  static identity: Symbol = Symbol("buttonBackgroundColor");
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().button.resetBackgroundColor(node);
+    } else {
+      GetUINativeModule().button.setBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 class ButtonStateEffectModifier extends Modifier<boolean> {
