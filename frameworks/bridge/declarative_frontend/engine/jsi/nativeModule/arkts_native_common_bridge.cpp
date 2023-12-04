@@ -3570,6 +3570,10 @@ ArkUINativeModuleValue CommonBridge::SetAllowDrop(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if (secondArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetAllowDrop(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
     Local<panda::ArrayRef> allowDropArray = static_cast<Local<panda::ArrayRef>>(secondArg);
     std::vector<std::string> keepStr;
     std::vector<const char*> strList;
