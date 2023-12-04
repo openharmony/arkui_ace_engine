@@ -1585,7 +1585,8 @@ void ViewAbstract::SetClipEdge(bool isClip)
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetClipShape().has_value()) {
-            target->UpdateClipShape(nullptr);
+            target->ResetClipShape();
+            target->OnClipShapeUpdate(nullptr);
         }
         target->UpdateClipEdge(isClip);
     }
@@ -1597,7 +1598,8 @@ void ViewAbstract::SetClipEdge(FrameNode *frameNode, bool isClip)
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetClipShape().has_value()) {
-            target->UpdateClipShape(nullptr);
+            target->ResetClipShape();
+            target->OnClipShapeUpdate(nullptr);
         }
         target->UpdateClipEdge(isClip);
     }
@@ -1613,7 +1615,8 @@ void ViewAbstract::SetMask(const RefPtr<BasicShape> &basicShape)
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->HasProgressMask()) {
-            target->UpdateProgressMask(nullptr);
+            target->ResetProgressMask();
+            target->OnProgressMaskUpdate(nullptr);
         }
         target->UpdateClipMask(basicShape);
     }
@@ -1629,7 +1632,8 @@ void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty> &progress)
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->HasClipMask()) {
-            target->UpdateClipMask(nullptr);
+            target->ResetClipMask();
+            target->OnClipMaskUpdate(nullptr);
         }
         target->UpdateProgressMask(progress);
     }
@@ -1830,7 +1834,8 @@ void ViewAbstract::SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basic
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->HasProgressMask()) {
-            target->UpdateProgressMask(nullptr);
+            target->ResetProgressMask();
+            target->OnProgressMaskUpdate(nullptr);
         }
         target->UpdateClipMask(basicShape);
     }
@@ -1842,7 +1847,8 @@ void ViewAbstract::SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMa
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->HasClipMask()) {
-            target->UpdateClipMask(nullptr);
+            target->ResetClipMask();
+            target->OnClipMaskUpdate(nullptr);
         }
         target->UpdateProgressMask(progress);
     }
