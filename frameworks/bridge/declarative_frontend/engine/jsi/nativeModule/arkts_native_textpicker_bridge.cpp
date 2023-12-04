@@ -55,7 +55,10 @@ ArkUINativeModuleValue TextpickerBridge::SetCanLoop(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    bool canLoop = secondArg->ToBoolean(vm)->Value();
+    bool canLoop = true;
+    if (secondArg->IsBoolean()) {
+        canLoop = secondArg->ToBoolean(vm)->Value();
+    }
     GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerCanLoop(nativeNode, canLoop);
     return panda::JSValueRef::Undefined(vm);
 }

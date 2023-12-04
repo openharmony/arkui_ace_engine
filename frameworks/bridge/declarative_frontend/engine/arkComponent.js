@@ -659,7 +659,7 @@ class MaskModifier extends ModifierWithKey {
         }
     }
     checkObjectDiff() {
-        return false;
+        return true;
     }
 }
 MaskModifier.identity = Symbol("mask");
