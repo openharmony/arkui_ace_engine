@@ -55,11 +55,7 @@ function uiNodeCleanUpIdleTask(): void {
 class UINodeRegisterProxy {
     public static obtainDeletedElmtIds(): void {
         stateMgmtConsole.debug(`UINodeRegisterProxy. static obtainDeletedElmtIds:`);
-        if ((!UINodeRegisterProxy.instance_.obtainDeletedElmtIds) || typeof UINodeRegisterProxy.instance_.obtainDeletedElmtIds != "function") {
-            stateMgmtConsole.error(`UINodeRegisterProxy obtainDeletedElmtIds is not a function: ${UINodeRegisterProxy.instance_.obtainDeletedElmtIds}.` );
-        } else {
-            UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
-        }
+        UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
     }
 
     public static unregisterElmtIdsFromViewPUs(): void {
@@ -92,10 +88,10 @@ class UINodeRegisterProxy {
                 if (owningView) {
                     owningView.purgeDeleteElmtId(rmElmtInfo.elmtId);
                 } else {
-                    stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} has not been removed because of failure of updating the weakptr of viewpu. Internal error!.`);
+                    stateMgmtConsole.warn(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} has not been removed because of failure of updating the weakptr of viewpu. Internal error!.`);
                 }
             } else {
-                stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} cannot find its owning viewpu, maybe this viewpu has already been abouttobedeleted. Internal error!`)
+                stateMgmtConsole.warn(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} cannot find its owning viewpu, maybe this viewpu has already been abouttobedeleted. Internal error!`)
             }
         })
 
