@@ -584,7 +584,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
                         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
                     pattern->UpdateContextRect(curTopNavDestination, navigationGroupNode);
-                    if (pattern->isChanged_) {
+                    if (pattern->isChanged_ && curTopNavDestination) {
                         auto eventHub = curTopNavDestination->GetEventHub<NavDestinationEventHub>();
                         CHECK_NULL_VOID(eventHub);
                         auto param = Recorder::EventRecorder::Get().IsPageRecordEnable()
