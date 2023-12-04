@@ -31,13 +31,9 @@ const Dimension DEFAULT_SIDE_BAR_WIDTH_V10 = 240.0_vp;
 const Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 const Dimension DEFAULT_MIN_SIDE_BAR_WIDTH_V10 = 240.0_vp;
 const Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
-const Dimension DEFAULT_CONTROL_BUTTON_WIDTH_V10 = 24.0_vp;
 const Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
-const Dimension DEFAULT_CONTROL_BUTTON_HEIGHT_V10 = 24.0_vp;
-constexpr Dimension DEFAULT_CONTROL_BUTTON_LEFT = 16.0_vp;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_TOP = 48.0_vp;
 const Dimension DEFAULT_SIDE_BAR_CONTAINER_MAX_SIDE_BAR_WIDTH(280.0, DimensionUnit::VP);
-const Dimension DEFAULT_SIDE_BAR_CONTAINER_MIN_CONTENT_WIDTH(360.0, DimensionUnit::VP);
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
 const bool DEFAULT_SHOW_SIDE_BAR = true;
 const bool DEFAULT_SHOW_CONTROL_BUTTON = true;
@@ -98,10 +94,10 @@ void SetControlButton(NodeHandle node, double* values, const struct IconsStruct*
     SideBarContainerModelNG::SetControlButtonHeight(frameNode, heigth);
     CHECK_NULL_VOID(iconsStruct);
     if (iconsStruct->HiddenIconInfo) {
-        SideBarContainerModelNG::SetControlButtonShowIconInfo(frameNode, iconsStruct->ShowIconInfo, false, nullptr);
+        SideBarContainerModelNG::SetControlButtonShowIconInfo(frameNode, iconsStruct->HiddenIconInfo, false, nullptr);
     }
     if (iconsStruct->ShowIconInfo) {
-        SideBarContainerModelNG::SetControlButtonHiddenIconInfo(frameNode, iconsStruct->HiddenIconInfo, false, nullptr);
+        SideBarContainerModelNG::SetControlButtonHiddenIconInfo(frameNode, iconsStruct->ShowIconInfo, false, nullptr);
     }
     if (iconsStruct->SwitchingIconInfo) {
         SideBarContainerModelNG::SetControlButtonSwitchingIconInfo(
@@ -114,16 +110,14 @@ void ResetControlButton(NodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        SideBarContainerModelNG::SetControlButtonWidth(frameNode, DEFAULT_CONTROL_BUTTON_WIDTH_V10);
-        SideBarContainerModelNG::SetControlButtonHeight(frameNode, DEFAULT_CONTROL_BUTTON_HEIGHT_V10);
-        SideBarContainerModelNG::SetControlButtonLeft(frameNode, DEFAULT_CONTROL_BUTTON_LEFT);
+        SideBarContainerModelNG::SetControlButtonWidth(frameNode, DEFAULT_CONTROL_BUTTON_WIDTH);
+        SideBarContainerModelNG::SetControlButtonHeight(frameNode, DEFAULT_CONTROL_BUTTON_HEIGHT);
+        SideBarContainerModelNG::ResetControlButtonLeft(frameNode);
         SideBarContainerModelNG::SetControlButtonTop(frameNode, DEFAULT_CONTROL_BUTTON_TOP);
         return;
     }
     SideBarContainerModelNG::SetControlButtonWidth(frameNode, DEFAULT_CONTROL_BUTTON_WIDTH);
     SideBarContainerModelNG::SetControlButtonHeight(frameNode, DEFAULT_CONTROL_BUTTON_HEIGHT);
-    SideBarContainerModelNG::SetControlButtonLeft(frameNode, DEFAULT_CONTROL_BUTTON_LEFT);
-    SideBarContainerModelNG::SetControlButtonTop(frameNode, DEFAULT_CONTROL_BUTTON_TOP);
 }
 
 void SetShowControlButton(NodeHandle node, bool isShow)
@@ -181,7 +175,7 @@ void ResetSideBarContainerMinContentWidth(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SideBarContainerModelNG::SetMinContentWidth(frameNode, DEFAULT_SIDE_BAR_CONTAINER_MIN_CONTENT_WIDTH);
+    SideBarContainerModelNG::SetMinContentWidth(frameNode, -1.0_vp);
 }
 
 void SetSideBarPosition(NodeHandle node, int32_t sideBarPosition)

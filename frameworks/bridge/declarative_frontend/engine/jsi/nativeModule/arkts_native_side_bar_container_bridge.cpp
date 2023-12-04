@@ -286,8 +286,7 @@ ArkUINativeModuleValue SideBarContainerBridge::SetSideBarPosition(ArkUIRuntimeCa
     }
     if (sideBarPosition < static_cast<int32_t>(SideBarPosition::START) ||
         sideBarPosition > static_cast<int32_t>(SideBarPosition::END)) {
-        GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetSideBarPosition(
-            nativeNode, static_cast<int32_t>(SideBarPosition::START));
+        GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().ResetSideBarPosition(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetSideBarPosition(nativeNode, sideBarPosition);
     }
@@ -314,6 +313,8 @@ ArkUINativeModuleValue SideBarContainerBridge::SetShowSideBar(ArkUIRuntimeCallIn
     if (showSideBarArg->IsBoolean()) {
         bool isShow = showSideBarArg->ToBoolean(vm)->Value();
         GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetShowSideBar(nativeNode, isShow);
+    } else {
+        GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().ResetShowSideBar(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -343,21 +344,24 @@ ArkUINativeModuleValue SideBarContainerBridge::SetDivider(ArkUIRuntimeCallInfo* 
     CalcDimension endMargin;
     double values[NUM_3] = { 1.0, 0.0, 0.0 };
     int32_t units[NUM_3] = { static_cast<int32_t>(DimensionUnit::VP) };
-    if (ArkTSUtils::ParseJsDimensionNG(vm, strokeWidthArg, strokeWidth, DimensionUnit::VP, false)) {
+    if (ArkTSUtils::ParseJsDimensionNG(vm, strokeWidthArg, strokeWidth, DimensionUnit::VP, false) &&
+        strokeWidth.Value() >= 0) {
         values[NUM_0] = strokeWidth.Value();
         units[NUM_0] = static_cast<int32_t>(strokeWidth.Unit());
     } else {
         strokeWidth.SetValue(1.0);
         strokeWidth.SetUnit(DimensionUnit::VP);
     }
-    if (ArkTSUtils::ParseJsDimensionNG(vm, startMarginArg, startMargin, DimensionUnit::VP, false)) {
+    if (ArkTSUtils::ParseJsDimensionNG(vm, startMarginArg, startMargin, DimensionUnit::VP, false) &&
+        startMargin.Value() >= 0) {
         values[NUM_1] = startMargin.Value();
         units[NUM_1] = static_cast<int32_t>(startMargin.Unit());
     } else {
         startMargin.SetValue(0.0);
         startMargin.SetUnit(DimensionUnit::VP);
     }
-    if (ArkTSUtils::ParseJsDimensionNG(vm, endMarginArg, endMargin, DimensionUnit::VP, false)) {
+    if (ArkTSUtils::ParseJsDimensionNG(vm, endMarginArg, endMargin, DimensionUnit::VP, false) &&
+        endMargin.Value() >= 0) {
         values[NUM_2] = endMargin.Value();
         units[NUM_2] = static_cast<int32_t>(endMargin.Unit());
     } else {
@@ -366,7 +370,7 @@ ArkUINativeModuleValue SideBarContainerBridge::SetDivider(ArkUIRuntimeCallInfo* 
     }
 
     Color color(DEFAULT_SIDE_BAR_DIVIDER_COLOR);
-    if (!ArkTSUtils::ParseJsColor(vm, colorArg, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
         color.SetValue(DEFAULT_SIDE_BAR_DIVIDER_COLOR);
     }
     GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetSideBarContainerDivider(

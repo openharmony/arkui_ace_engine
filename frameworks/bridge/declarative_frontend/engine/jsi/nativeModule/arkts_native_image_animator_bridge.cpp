@@ -34,6 +34,7 @@ constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
 constexpr int32_t IMAGESIZE = 4;
+constexpr FillMode DEFAULT_FILL_MODE = FillMode::FORWARDS;
 ArkUINativeModuleValue ImageAnimatorBridge::SetState(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -41,8 +42,13 @@ ArkUINativeModuleValue ImageAnimatorBridge::SetState(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    int32_t state = static_cast<int32_t>(Animator::Status::IDLE);
     if (secondArg->IsNumber()) {
-        int32_t state = secondArg->Int32Value(vm);
+        state = secondArg->Int32Value(vm);
+        if (state < static_cast<int32_t>(Animator::Status::IDLE) ||
+            state > static_cast<int32_t>(Animator::Status::STOPPED)) {
+            state = static_cast<int32_t>(Animator::Status::IDLE);
+        }
         GetArkUIInternalNodeAPI()->GetImageAnimatorModifier().SetState(nativeNode, state);
     } else {
         GetArkUIInternalNodeAPI()->GetImageAnimatorModifier().ResetState(nativeNode);
@@ -119,6 +125,9 @@ ArkUINativeModuleValue ImageAnimatorBridge::SetFillMode(ArkUIRuntimeCallInfo* ru
 
     if (secondArg->IsNumber()) {
         int32_t fillMode = secondArg->Int32Value(vm);
+        if (fillMode < static_cast<int32_t>(FillMode::NONE) || fillMode > static_cast<int32_t>(FillMode::BOTH)) {
+            fillMode = static_cast<int32_t>(DEFAULT_FILL_MODE);
+        }
         GetArkUIInternalNodeAPI()->GetImageAnimatorModifier().SetFillMode(nativeNode, fillMode);
     } else {
         GetArkUIInternalNodeAPI()->GetImageAnimatorModifier().ResetFillMode(nativeNode);
@@ -177,10 +186,12 @@ ArkUINativeModuleValue ImageAnimatorBridge::SetImages(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> seventhArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     Local<JSValueRef> eighthArg = runtimeCallInfo->GetCallArgRef(NUM_7);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t arrayLength = eighthArg->Int32Value(vm);
-    if (arrayLength <= 0) {
+
+    if (!eighthArg->IsNumber() || eighthArg->Int32Value(vm) <= 0) {
         return panda::JSValueRef::Undefined(vm);
     }
+    int32_t arrayLength = eighthArg->Int32Value(vm);
+
     if (secondArg->IsNull() || !secondArg->IsArray(vm) || thirdArg->IsNull() || !thirdArg->IsArray(vm) ||
         fourthArg->IsNull() || !fourthArg->IsArray(vm) || fifthArg->IsNull() || !fifthArg->IsArray(vm) ||
         sixthArg->IsNull() || !sixthArg->IsArray(vm) || seventhArg->IsNull() || !seventhArg->IsArray(vm)) {
@@ -243,7 +254,7 @@ ArkUINativeModuleValue ImageAnimatorBridge::SetIteration(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t value;
+    int32_t value ;
     if (secondArg->IsNumber()) {
         value = secondArg->Int32Value(vm);
     } else {

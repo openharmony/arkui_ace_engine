@@ -29,7 +29,8 @@ ArkUINativeModuleValue DividerBridge::SetStrokeWidth(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> strokeWidthArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
     CalcDimension strokeWidth;
-    if (ArkTSUtils::ParseJsDimensionNG(vm, strokeWidthArg, strokeWidth, DimensionUnit::VP, false)) {
+    if (ArkTSUtils::ParseJsDimensionVpNG(vm, strokeWidthArg, strokeWidth, false) &&
+        strokeWidth.Value() >= 0) {
         GetArkUIInternalNodeAPI()->GetDividerModifier().SetDividerStrokeWidth(
             nativeNode, strokeWidth.Value(), static_cast<int32_t>(strokeWidth.Unit()));
     } else {
@@ -55,8 +56,12 @@ ArkUINativeModuleValue DividerBridge::SetLineCap(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> lineCapArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    int32_t lineCap = lineCapArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetDividerModifier().SetDividerLineCap(nativeNode, lineCap);
+    if (lineCapArg->IsNumber()) {
+        int32_t lineCap = lineCapArg->Int32Value(vm);
+        GetArkUIInternalNodeAPI()->GetDividerModifier().SetDividerLineCap(nativeNode, lineCap);
+    } else {
+        GetArkUIInternalNodeAPI()->GetDividerModifier().ResetDividerLineCap(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -78,7 +83,7 @@ ArkUINativeModuleValue DividerBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
     Color color;
-    if (ArkTSUtils::ParseJsColor(vm, colorArg, color)) {
+    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
         GetArkUIInternalNodeAPI()->GetDividerModifier().SetDividerColor(nativeNode, color.GetValue());
     } else {
         GetArkUIInternalNodeAPI()->GetDividerModifier().ResetDividerColor(nativeNode);
@@ -103,8 +108,12 @@ ArkUINativeModuleValue DividerBridge::SetVertical(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> verticalArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    bool value = verticalArg->ToBoolean(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetDividerModifier().SetDividerVertical(nativeNode, value);
+    if (verticalArg->IsBoolean()) {
+        bool value = verticalArg->ToBoolean(vm)->Value();
+        GetArkUIInternalNodeAPI()->GetDividerModifier().SetDividerVertical(nativeNode, value);
+    } else {
+        GetArkUIInternalNodeAPI()->GetDividerModifier().ResetDividerVertical(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

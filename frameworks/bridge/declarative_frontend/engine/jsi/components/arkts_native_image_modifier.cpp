@@ -30,40 +30,43 @@ constexpr bool DEFAULT_SYNC_LOAD_VALUE = false;
 constexpr ImageFit DEFAULT_OBJECT_FIT_VALUE = ImageFit::COVER;
 constexpr bool DEFAULT_FIT_ORIGINAL_SIZE = false;
 constexpr ImageInterpolation DEFAULT_IMAGE_INTERPOLATION = ImageInterpolation::NONE;
-const std::vector<float> DEFAULT_COLOR_FILTER = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
 constexpr bool DEFAULT_DRAGGABLE = false;
 
 void SetCopyOption(NodeHandle node, int32_t copyOption)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetCopyOption(frameNode, static_cast<CopyOptions>(copyOption));
+    auto copyOptions = static_cast<CopyOptions>(copyOption);
+    if (copyOptions < CopyOptions::None || copyOptions > CopyOptions::Distributed) {
+        copyOptions = DEFAULT_IMAGE_COPYOPTION;
+    }
+    ImageModelNG::SetCopyOption(frameNode, copyOptions);
 }
 
 void ResetCopyOption(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetCopyOption(frameNode, DEFAULT_IMAGE_COPYOPTION);
 }
 
 void SetAutoResize(NodeHandle node, bool autoResize)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetAutoResize(frameNode, autoResize);
 }
 
 void ResetAutoResize(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetAutoResize(frameNode, DEFAULT_IMAGE_AUTORESIZE);
 }
 
 void SetObjectRepeat(NodeHandle node, int32_t imageRepeat)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto repeat = static_cast<ImageRepeat>(imageRepeat);
     if (repeat < ImageRepeat::NO_REPEAT || repeat > ImageRepeat::REPEAT) {
@@ -74,14 +77,14 @@ void SetObjectRepeat(NodeHandle node, int32_t imageRepeat)
 
 void ResetObjectRepeat(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetImageRepeat(frameNode, ImageRepeat::NO_REPEAT);
 }
 
 void SetRenderMode(NodeHandle node, int32_t imageRenderMode)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto renderMode = static_cast<ImageRenderMode>(imageRenderMode);
     if (renderMode < ImageRenderMode::ORIGINAL || renderMode > ImageRenderMode::TEMPLATE) {
@@ -92,57 +95,60 @@ void SetRenderMode(NodeHandle node, int32_t imageRenderMode)
 
 void ResetRenderMode(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetImageRenderMode(frameNode, ImageRenderMode::ORIGINAL);
 }
 
 void SetSyncLoad(NodeHandle node, bool syncLoadValue)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetSyncMode(frameNode, syncLoadValue);
 }
 
 void ResetSyncLoad(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetSyncMode(frameNode, DEFAULT_SYNC_LOAD_VALUE);
 }
 
 void SetObjectFit(NodeHandle node, int32_t objectFitNumber)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageFit objectFitValue = static_cast<ImageFit>(objectFitNumber);
+    if (objectFitValue < ImageFit::FILL || objectFitValue > ImageFit::SCALE_DOWN) {
+        objectFitValue = ImageFit::COVER;
+    }
     ImageModelNG::SetImageFit(frameNode, objectFitValue);
 }
 
 void ResetObjectFit(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetImageFit(frameNode, DEFAULT_OBJECT_FIT_VALUE);
 }
 
 void SetFitOriginalSize(NodeHandle node, bool fitOriginalSizeValue)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetFitOriginSize(frameNode, fitOriginalSizeValue);
 }
 
 void ResetFitOriginalSize(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetFitOriginSize(frameNode, DEFAULT_FIT_ORIGINAL_SIZE);
 }
 
 void SetSourceSize(NodeHandle node, double width, double height)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension widthObj(width, DimensionUnit::VP);
     CalcDimension heightObj(height, DimensionUnit::VP);
@@ -151,28 +157,28 @@ void SetSourceSize(NodeHandle node, double width, double height)
 
 void ResetSourceSize(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetImageSourceSize(frameNode, std::pair<CalcDimension, CalcDimension>());
 }
 
 void SetMatchTextDirection(NodeHandle node, uint32_t value)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetMatchTextDirection(frameNode, static_cast<bool>(value));
 }
 
 void ResetMatchTextDirection(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetMatchTextDirection(frameNode, false);
 }
 
 void SetFillColor(NodeHandle node, uint32_t value)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetImageFill(frameNode, Color(value));
 }
@@ -182,13 +188,13 @@ void ResetFillColor(NodeHandle node)
     return;
 }
 
-void SetAlt(NodeHandle node, const char *src, const char *bundleName, const char *moduleName)
+void SetAlt(NodeHandle node, const char* src, const char* bundleName, const char* moduleName)
 {
     if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
         return;
     }
 
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetAlt(frameNode, ImageSourceInfo { src, bundleName, moduleName });
 }
@@ -200,7 +206,7 @@ void ResetAlt(NodeHandle node)
 
 void SetImageInterpolation(NodeHandle node, int32_t value)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto interpolation = static_cast<Ace::ImageInterpolation>(value);
     if (interpolation < Ace::ImageInterpolation::NONE || interpolation > Ace::ImageInterpolation::HIGH) {
@@ -211,46 +217,46 @@ void SetImageInterpolation(NodeHandle node, int32_t value)
 
 void ResetImageInterpolation(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetImageInterpolation(frameNode, DEFAULT_IMAGE_INTERPOLATION);
 }
 
-void SetColorFilter(NodeHandle node, float *array, int length)
+void SetColorFilter(NodeHandle node, float* array, int length)
 {
     CHECK_NULL_VOID(array);
     if (length != COLOR_FILTER_MATRIX_SIZE) {
         return;
     }
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetColorFilterMatrix(frameNode, std::vector<float>(array, array + length));
 }
 
 void ResetColorFilter(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
+    return;
 }
 
 void SetImageSyncLoad(NodeHandle node, bool syncLoadValue)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetSyncMode(frameNode, syncLoadValue);
 }
 
 void ResetImageSyncLoad(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetSyncMode(frameNode, DEFAULT_SYNC_LOAD_VALUE);
 }
 
 void SetImageObjectFit(NodeHandle node, int32_t objectFitNumber)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageFit objectFitValue = static_cast<ImageFit>(objectFitNumber);
     ImageModelNG::SetImageFit(frameNode, objectFitValue);
@@ -258,75 +264,48 @@ void SetImageObjectFit(NodeHandle node, int32_t objectFitNumber)
 
 void ResetImageObjectFit(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetImageFit(frameNode, DEFAULT_OBJECT_FIT_VALUE);
 }
 
 void SetImageFitOriginalSize(NodeHandle node, bool fitOriginalSizeValue)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetFitOriginSize(frameNode, fitOriginalSizeValue);
 }
 
 void ResetImageFitOriginalSize(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetFitOriginSize(frameNode, DEFAULT_FIT_ORIGINAL_SIZE);
 }
 
 void SetImageDraggable(NodeHandle node, bool value)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetDraggable(frameNode, value);
 }
 
 void ResetImageDraggable(NodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetDraggable(frameNode, DEFAULT_DRAGGABLE);
 }
 
 ArkUIImageModifierAPI GetImageModifier()
 {
-    static const ArkUIImageModifierAPI modifier = { SetCopyOption,
-                                                    ResetCopyOption,
-                                                    SetAutoResize,
-                                                    ResetAutoResize,
-                                                    SetObjectRepeat,
-                                                    ResetObjectRepeat,
-                                                    SetRenderMode,
-                                                    ResetRenderMode,
-                                                    SetSyncLoad,
-                                                    ResetSyncLoad,
-                                                    SetObjectFit,
-                                                    ResetObjectFit,
-                                                    SetFitOriginalSize,
-                                                    ResetFitOriginalSize,
-                                                    SetSourceSize,
-                                                    ResetSourceSize,
-                                                    SetMatchTextDirection,
-                                                    ResetMatchTextDirection,
-                                                    SetFillColor,
-                                                    ResetFillColor,
-                                                    SetAlt,
-                                                    ResetAlt,
-                                                    SetImageInterpolation,
-                                                    ResetImageInterpolation,
-                                                    SetColorFilter,
-                                                    ResetColorFilter,
-                                                    SetImageSyncLoad,
-                                                    ResetImageSyncLoad,
-                                                    SetImageObjectFit,
-                                                    ResetImageObjectFit,
-                                                    SetImageFitOriginalSize,
-                                                    ResetImageFitOriginalSize,
-                                                    SetImageDraggable,
-                                                    ResetImageDraggable };
+    static const ArkUIImageModifierAPI modifier = { SetCopyOption, ResetCopyOption, SetAutoResize, ResetAutoResize,
+        SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad, ResetSyncLoad, SetObjectFit,
+        ResetObjectFit, SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize, ResetSourceSize, SetMatchTextDirection,
+        ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt, SetImageInterpolation,
+        ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad, ResetImageSyncLoad,
+        SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize, SetImageDraggable,
+        ResetImageDraggable };
 
     return modifier;
 }

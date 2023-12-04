@@ -354,4 +354,9 @@ void SideBarContainerModelNG::SetDividerEndMargin(FrameNode* frameNode, const Di
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerEndMargin, endMargin, frameNode);
 }
+void SideBarContainerModelNG::ResetControlButtonLeft(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(SideBarContainerLayoutProperty, ControlButtonLeft,
+        PROPERTY_UPDATE_LAYOUT, frameNode);
+}
 } // namespace OHOS::Ace::NG

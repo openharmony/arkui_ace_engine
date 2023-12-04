@@ -31,6 +31,16 @@ ArkUINativeModuleValue ColumnBridge::SetJustifyContent(ArkUIRuntimeCallInfo* run
     int32_t flexAlign = static_cast<int32_t>(FlexAlign::FLEX_START);
     if (secondArg->IsInt()) {
         flexAlign = secondArg->Int32Value(vm);
+        if ((flexAlign == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
+            (flexAlign == static_cast<int32_t>(FlexAlign::FLEX_END)) ||
+            (flexAlign == static_cast<int32_t>(FlexAlign::CENTER)) ||
+            (flexAlign == static_cast<int32_t>(FlexAlign::SPACE_BETWEEN)) ||
+            (flexAlign == static_cast<int32_t>(FlexAlign::SPACE_AROUND)) ||
+            (flexAlign == static_cast<int32_t>(FlexAlign::SPACE_EVENLY))) {
+            GetArkUIInternalNodeAPI()->GetColumnModifier().SetColumnJustifyContent(nativeNode, flexAlign);
+        } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            GetArkUIInternalNodeAPI()->GetColumnModifier().ResetColumnJustifyContent(nativeNode);
+        }
     }
     GetArkUIInternalNodeAPI()->GetColumnModifier().SetColumnJustifyContent(nativeNode, flexAlign);
     return panda::JSValueRef::Undefined(vm);
@@ -56,10 +66,17 @@ ArkUINativeModuleValue ColumnBridge::SetAlignItems(ArkUIRuntimeCallInfo* runtime
     int32_t value;
     if (secondArg->IsNumber()) {
         value = secondArg->Int32Value(vm);
+        if ((value == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
+            (value == static_cast<int32_t>(FlexAlign::FLEX_END)) ||
+            (value == static_cast<int32_t>(FlexAlign::CENTER)) ||
+            (value == static_cast<int32_t>(FlexAlign::STRETCH))) {
+            GetArkUIInternalNodeAPI()->GetColumnModifier().SetColumnAlignItems(nativeNode, value);
+        } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            GetArkUIInternalNodeAPI()->GetColumnModifier().ResetColumnAlignItems(nativeNode);
+        }
     } else {
-        return panda::JSValueRef::Undefined(vm);
+        GetArkUIInternalNodeAPI()->GetColumnModifier().ResetColumnAlignItems(nativeNode);
     }
-    GetArkUIInternalNodeAPI()->GetColumnModifier().SetColumnAlignItems(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
 }
 

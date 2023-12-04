@@ -201,6 +201,8 @@ ArkUINativeModuleValue SearchBridge::SetSearchTextAlign(ArkUIRuntimeCallInfo* ru
     if (secondArg->IsNumber()) {
         int32_t value = secondArg->Int32Value(vm);
         GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchTextAlign(nativeNode, value);
+    } else {
+        GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchTextAlign(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -213,6 +215,17 @@ ArkUINativeModuleValue SearchBridge::ResetSearchTextAlign(ArkUIRuntimeCallInfo* 
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchTextAlign(nativeNode);
     return panda::JSValueRef::Undefined(vm);
+}
+
+static CancelButtonStyle ConvertStrToCancelButtonStyle(const std::string& value)
+{
+    if (value == "CONSTANT") {
+        return CancelButtonStyle::CONSTANT;
+    } else if (value == "INVISIBLE") {
+        return CancelButtonStyle::INVISIBLE;
+    } else {
+        return CancelButtonStyle::INPUT;
+    }
 }
 
 ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -234,8 +247,9 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
     auto theme = themeManager->GetTheme<SearchTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     int32_t style = static_cast<int32_t>(theme->GetCancelButtonStyle());
-    if (secondArg->IsNumber()) {
-        style = secondArg->ToNumber(vm)->Value();
+    if (secondArg->IsString()) {
+        CancelButtonStyle cancelButtonStyle = ConvertStrToCancelButtonStyle(secondArg->ToString(vm)->ToString());
+        style = static_cast<int32_t>(cancelButtonStyle);
     }
     struct ArkUISizeType size = {0.0, 0};
     CalcDimension iconSize;
