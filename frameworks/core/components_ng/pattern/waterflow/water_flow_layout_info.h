@@ -72,6 +72,10 @@ public:
     int32_t endIndex_ = 0;
     int32_t footerIndex_ = -1;
     int32_t childrenCount_ = 0;
+
+    // first index for onScrollIndex
+    int32_t firstIndex_ = 0;
+
     // Map structure: [crossIndex, [index, (mainOffset, itemMainSize)]],
     std::map<int32_t, std::map<int32_t, std::pair<float, float>>> waterFlowItems_;
 
