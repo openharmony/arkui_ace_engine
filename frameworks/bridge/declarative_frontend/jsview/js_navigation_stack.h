@@ -70,6 +70,7 @@ public:
     RefPtr<NG::UINode> CreateNodeByIndex(int32_t index) override;
     RefPtr<NG::UINode> CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo) override;
     void SetJSExecutionContext(const JSExecutionContext& context);
+    std::string GetRouteParam() const override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;
@@ -80,6 +81,9 @@ private:
     std::string GetNameByIndex(int32_t index);
     JSRef<JSVal> GetParamByIndex(int32_t index) const;
     bool CheckNavDestinationNodeInUINode(RefPtr<NG::UINode> node);
+    int32_t GetSize() const;
+    static std::string ConvertParamToString(const JSRef<JSVal>& param);
+    static void ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj);
 };
 } // namespace OHOS::Ace::Framework
 

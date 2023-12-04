@@ -30,6 +30,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/common/recorder/exposure_processor.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
@@ -100,7 +101,7 @@ public:
     {
         return checkboxFlag_;
     }
-    void OnInspectorIdUpdate(const std::string& /*unused*/) override;
+    void OnInspectorIdUpdate(const std::string& id) override;
 
     struct ZIndexComparator {
         bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
@@ -688,6 +689,8 @@ private:
 
     int32_t GetNodeExpectedRate();
 
+    void RecordExposureIfNeed(const std::string& inspectorId);
+
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
@@ -753,6 +756,8 @@ private:
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
     DragPreviewOption previewOption_ { DragPreviewMode::AUTO };
+
+    RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

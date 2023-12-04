@@ -136,6 +136,13 @@ bool PipelineContext::NeedSoftKeyboard()
     return isNeed;
 }
 
+RefPtr<PipelineContext> PipelineContext::GetContextByContainerId(int32_t containerId)
+{
+    auto preContainer = Container::GetContainer(containerId);
+    CHECK_NULL_RETURN(preContainer, nullptr);
+    return DynamicCast<PipelineContext>(preContainer->GetPipelineContext());
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     auto context = GetCurrentContext();

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
@@ -132,6 +133,19 @@ void CheckBoxPattern::MarkIsSelected(bool isSelected)
         eventHub->ResetCurrentUIState(UI_STATE_SELECTED);
         host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     }
+}
+
+void CheckBoxPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (inspectorId.empty()) {
+        return;
+    }
+    auto eventHub = host->GetEventHub<CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, eventHub->GetName(), lastSelect_);
 }
 
 void CheckBoxPattern::InitClickEvent()

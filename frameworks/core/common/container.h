@@ -246,6 +246,7 @@ public:
 
     static int32_t CurrentId();
     static RefPtr<Container> Current();
+    static RefPtr<Container> GetContainer(int32_t containerId);
     static RefPtr<Container> GetActive();
     static RefPtr<Container> GetDefault();
     static RefPtr<Container> GetFoucsed();

@@ -331,6 +331,10 @@ void GestureEventHub::UpdateGestureHierarchy()
         auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(recognizer);
         if (longPressRecognizer) {
             longPressRecognizer->SetOnAccessibility(GetOnAccessibilityEventFunc());
+            auto pattern = host->GetPattern();
+            if (pattern && longPressRecognizer->HasAction()) {
+                longPressRecognizer->SetOnLongPressRecorder(pattern->GetLongPressEventRecorder());
+            }
         }
 
         if (!recognizer) {

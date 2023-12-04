@@ -30,6 +30,7 @@
 #include "core/animation/curves.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/container_scope.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -285,6 +286,16 @@ void SwiperPattern::OnModifyDone()
     }
 
     SetAccessibilityAction();
+}
+
+void SwiperPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (!inspectorId.empty()) {
+        Recorder::NodeDataCache::Get().PutInt(inspectorId, CurrentIndex());
+    }
 }
 
 void SwiperPattern::BeforeCreateLayoutWrapper()

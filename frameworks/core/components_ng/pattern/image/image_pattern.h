@@ -130,6 +130,11 @@ private:
 
     void OnModifyDone() override;
 
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
+
     void OnLanguageConfigurationUpdate() override;
 
     void OnImageDataReady();

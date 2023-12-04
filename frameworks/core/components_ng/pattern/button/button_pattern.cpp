@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -157,6 +158,17 @@ void ButtonPattern::InitTouchEvent()
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(touchListener_);
+}
+
+void ButtonPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (!inspectorId.empty()) {
+        auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText();
+        Recorder::NodeDataCache::Get().PutString(inspectorId, text);
+    }
 }
 
 void ButtonPattern::InitHoverEvent()

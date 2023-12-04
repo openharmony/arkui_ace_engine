@@ -31,6 +31,8 @@
 #include "base/window/drag_window.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/font_manager.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -570,6 +572,16 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     if (onClick_) {
         auto onClick = onClick_;
         onClick(info);
+
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto inspectorId = host->GetInspectorIdValue("");
+            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText();
+            Recorder::EventParamsBuilder builder;
+            builder.SetId(inspectorId).SetType(host->GetTag()).SetText(text);
+            Recorder::EventRecorder::Get().OnClick(std::move(builder));
+        }
     }
 }
 
@@ -615,6 +627,11 @@ void TextPattern::HandleSpanSingleClickEvent(
                     target.area.SetHeight(Dimension(0.0f));
                     spanClickinfo.SetTarget(target);
                     item->onClick(spanClickinfo);
+                    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+                        Recorder::EventParamsBuilder builder;
+                        builder.SetId(item->inspectId).SetText(item->content);
+                        Recorder::EventRecorder::Get().OnClick(std::move(builder));
+                    }
                     isClickOnSpan = true;
                     return;
                 }
@@ -1125,6 +1142,13 @@ bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
 
 void TextPattern::OnModifyDone()
 {
+    FrameNode::PostTask(
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnAfterModifyDone();
+        },
+        TaskExecutor::TaskType::UI);
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto host = GetHost();
@@ -1363,6 +1387,17 @@ void TextPattern::StartAITask()
     taskExecutor->PostDelayedTask(aiDetectDelayTask_, TaskExecutor::TaskType::UI, AI_DELAY_TIME);
 }
 
+void TextPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (!inspectorId.empty()) {
+        auto prop = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        Recorder::NodeDataCache::Get().PutString(inspectorId, prop->GetText());
+    }
+}
+
 void TextPattern::ActSetSelection(int32_t start, int32_t end)
 {
     int32_t min = 0;
@@ -1492,6 +1527,13 @@ void TextPattern::PreCreateLayoutWrapper()
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
         if (!textDetectEnable_) {
             aiDetectInitialized_ = false;
+        }
+        OnAfterModifyDone();
+        for (const auto& item : spans_) {
+            if (item->inspectId.empty()) {
+                continue;
+            }
+            Recorder::NodeDataCache::Get().PutString(item->inspectId, item->content);
         }
     }
     if (isSpanHasClick) {

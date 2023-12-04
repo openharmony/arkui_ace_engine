@@ -324,6 +324,9 @@ void LongPressRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
+        if (longPressRecorder_ && *longPressRecorder_) {
+            (*longPressRecorder_)(info);
+        }
     }
 }
 

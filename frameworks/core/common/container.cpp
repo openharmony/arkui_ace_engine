@@ -34,6 +34,11 @@ RefPtr<Container> Container::Current()
     return AceEngine::Get().GetContainer(ContainerScope::CurrentId());
 }
 
+RefPtr<Container> Container::GetContainer(int32_t containerId)
+{
+    return AceEngine::Get().GetContainer(containerId);
+}
+
 RefPtr<Container> Container::GetActive()
 {
     RefPtr<Container> activeContainer;

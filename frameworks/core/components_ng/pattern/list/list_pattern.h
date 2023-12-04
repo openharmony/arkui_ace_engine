@@ -227,6 +227,11 @@ public:
     }
 
 private:
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
+
     void OnScrollEndCallback() override;
 
     void OnModifyDone() override;

@@ -17,13 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_WEB_PATTERN_WEB_DELEGATE_CROSS_H
 
 #include "web_object_event.h"
-#include "core/components_ng/pattern/web/web_delegate_interface.h"
-#include "core/components_ng/pattern/web/cross_platform/web_resource.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/common/container.h"
-#include "base/log/log.h"
 
+#include "base/log/log.h"
+#include "core/common/container.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
+#include "core/components_ng/pattern/web/cross_platform/web_resource.h"
+#include "core/components_ng/pattern/web/web_delegate_interface.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 class WebResourceRequsetImpl : public AceType {
@@ -421,6 +422,7 @@ private:
     void OnDownloadStart(void* object);
     bool OnShowFileChooser(void* object);
     void OnGeolocationPermissionsShowPrompt(void* object);
+    void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
 
     WeakPtr<NG::WebPattern> webPattern_;
     WeakPtr<PipelineBase> context_;

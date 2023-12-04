@@ -18,6 +18,9 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
@@ -49,6 +52,20 @@ public:
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostAsyncEvent(task, TaskExecutor::TaskType::UI);
+
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            auto host = GetFrameNode();
+            if (host) {
+                auto id = host->GetInspectorIdValue("");
+                builder.SetId(id).SetType(host->GetHostTag());
+                if (!id.empty()) {
+                    Recorder::NodeDataCache::Get().PutBool(id, isOn);
+                }
+            }
+            builder.SetChecked(isOn);
+            Recorder::EventRecorder::Get().OnChange(std::move(builder));
+        }
     }
 
     void SetOnChangeEvent(ChangeEvent&& onChangeEvent)

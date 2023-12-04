@@ -17,8 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SEARCH_SEARCH_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/common/recorder/event_recorder.h"
 
 namespace OHOS::Ace::NG {
 using ChangeAndSubmitEvent = std::function<void(const std::string)>;
@@ -44,6 +46,16 @@ public:
     {
         if (submitEvent_) {
             submitEvent_(value);
+        }
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            auto host = GetFrameNode();
+            if (host) {
+                auto id = host->GetInspectorIdValue("");
+                builder.SetId(id).SetType(host->GetHostTag());
+            }
+            builder.SetEventType(Recorder::EventType::SEARCH_SUBMIT).SetText(value);
+            Recorder::EventRecorder::Get().OnEvent(std::move(builder));
         }
     }
 

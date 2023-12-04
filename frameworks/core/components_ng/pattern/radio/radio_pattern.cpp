@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
@@ -144,6 +145,19 @@ void RadioPattern::MarkIsSelected(bool isSelected)
         eventHub->ResetCurrentUIState(UI_STATE_SELECTED);
         host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     }
+}
+
+void RadioPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (inspectorId.empty()) {
+        return;
+    }
+    auto eventHub = host->GetEventHub<RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, eventHub->GetValue(), preCheck_);
 }
 
 void RadioPattern::InitClickEvent()

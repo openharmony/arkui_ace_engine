@@ -505,6 +505,7 @@ public:
 
 private:
     void OnModifyDone() override;
+    void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
     void InitSurfaceChangedCallback();

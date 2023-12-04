@@ -19,6 +19,8 @@
 #include <functional>
 
 #include "base/memory/ace_type.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
@@ -44,6 +46,7 @@ public:
             auto onStart = onStart_;
             onStart(param);
         }
+        RecorderOnEvent(Recorder::EventType::VIDEO_START, param);
     }
 
     void SetOnPause(VideoEventCallback&& onPause)
@@ -57,6 +60,7 @@ public:
             auto onPause = onPause_;
             onPause(param);
         }
+        RecorderOnEvent(Recorder::EventType::VIDEO_PAUSE, param);
     }
 
     void SetOnFinish(VideoEventCallback&& onFinish)
@@ -70,6 +74,7 @@ public:
             auto onFinish = onFinish_;
             onFinish(param);
         }
+        RecorderOnEvent(Recorder::EventType::VIDEO_FINISH, param);
     }
 
     void SetOnError(VideoEventCallback&& onError)
@@ -83,6 +88,7 @@ public:
             auto onError = onError_;
             onError(param);
         }
+        RecorderOnEvent(Recorder::EventType::VIDEO_ERROR, param);
     }
 
     void SetOnPrepared(VideoEventCallback&& onPrepared)
@@ -96,6 +102,7 @@ public:
             auto onPrepared = onPrepared_;
             onPrepared(param);
         }
+        RecorderOnEvent(Recorder::EventType::VIDEO_PREPARED, param);
     }
 
     void SetOnSeeking(VideoEventCallback&& onSeeking)
@@ -122,6 +129,7 @@ public:
             auto onSeeked = onSeeked_;
             onSeeked(param);
         }
+        RecorderOnEvent(Recorder::EventType::VIDEO_SEEKED, param);
     }
 
     void SetOnUpdate(VideoEventCallback&& onUpdate)
@@ -148,9 +156,25 @@ public:
             auto onFullScreenChange = onFullScreenChange_;
             onFullScreenChange(param);
         }
+        RecorderOnEvent(Recorder::EventType::VIDEO_SCREEN_CHANGE, param);
     }
 
 private:
+    void RecorderOnEvent(Recorder::EventType eventType, const std::string& param) const
+    {
+        if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            return;
+        }
+        Recorder::EventParamsBuilder builder;
+        auto host = GetFrameNode();
+        if (host) {
+            auto id = host->GetInspectorIdValue("");
+            builder.SetId(id).SetType(host->GetHostTag());
+        }
+        builder.SetEventType(eventType).SetText(param);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
+
     VideoEventCallback onStart_;
     VideoEventCallback onPause_;
     VideoEventCallback onFinish_;

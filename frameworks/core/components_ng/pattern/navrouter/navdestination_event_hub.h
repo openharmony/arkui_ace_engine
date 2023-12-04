@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -54,13 +55,21 @@ public:
         onShownEvent_ = onShown;
     }
 
-    void FireOnShownEvent() const
+    void FireOnShownEvent(const std::string& name, const std::string& param) const
     {
         UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
                                                                      NavDestinationState::ON_SHOWN);
         if (onShownEvent_) {
             auto onShownEvent = onShownEvent_;
             onShownEvent();
+        }
+        if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
+            auto host = GetFrameNode();
+            CHECK_NULL_VOID(host);
+            auto id = host->GetInspectorIdValue("");
+            Recorder::EventParamsBuilder builder;
+            builder.SetId(id).SetText(name).SetExtra(Recorder::KEY_PAGE_PARAM, param);
+            Recorder::EventRecorder::Get().OnNavDstShow(std::move(builder));
         }
     }
 
@@ -69,12 +78,20 @@ public:
         onHiddenEvent_ = onHidden;
     }
 
-    void FireOnHiddenEvent() const
+    void FireOnHiddenEvent(const std::string& name) const
     {
         UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
                                                                      NavDestinationState::ON_HIDDEN);
         if (onHiddenEvent_) {
             onHiddenEvent_();
+        }
+        if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
+            auto host = GetFrameNode();
+            CHECK_NULL_VOID(host);
+            auto id = host->GetInspectorIdValue("");
+            Recorder::EventParamsBuilder builder;
+            builder.SetId(id).SetText(name);
+            Recorder::EventRecorder::Get().OnNavDstHide(std::move(builder));
         }
     }
 

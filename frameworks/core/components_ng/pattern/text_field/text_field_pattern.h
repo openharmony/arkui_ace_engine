@@ -1033,6 +1033,7 @@ protected:
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
+    void OnAfterModifyDone() override;
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
@@ -1179,6 +1180,7 @@ private:
     bool CheckAutoFill();
     bool ProcessAutoFill();
     void ScrollToSafeArea() const override;
+    void RecordSubmitEvent() const;
 
     RectF frameRect_;
     RectF contentRect_;
