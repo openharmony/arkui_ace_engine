@@ -28,9 +28,9 @@
 
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_data_detector_mgr.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_data_detector_mgr.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -63,7 +63,6 @@
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
-
 
 #undef private
 #undef protected
@@ -124,7 +123,6 @@ protected:
 
     void CreateTextField(const std::string& text = "", const std::string& placeHolder = "",
         const std::function<void(TextFieldModelNG&)>& callback = nullptr);
-    void RunMeasureAndLayout();
     void GetFocus();
 
     RefPtr<FrameNode> frameNode_;
@@ -187,18 +185,7 @@ void TextInputBase::CreateTextField(
     eventHub_ = frameNode_->GetEventHub<TextFieldEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
-    RunMeasureAndLayout();
-}
-
-void TextInputBase::RunMeasureAndLayout()
-{
-    frameNode_->SetActive();
-    frameNode_->SetRootMeasureNode(true);
-    frameNode_->UpdateLayoutPropertyFlag();
-    frameNode_->SetSkipSyncGeometryNode(false);
-    frameNode_->Measure(frameNode_->GetLayoutConstraint());
-    frameNode_->Layout();
-    frameNode_->SetRootMeasureNode(false);
+    FlushLayoutTask(frameNode_);
 }
 
 void TextInputBase::GetFocus()
@@ -206,7 +193,7 @@ void TextInputBase::GetFocus()
     auto focushHub = pattern_->GetFocusHub();
     focushHub->currentFocus_ = true;
     pattern_->HandleFocusEvent();
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 }
 
 class TextInputCursorTest : public TextInputBase {};
@@ -215,35 +202,33 @@ class TextFieldKeyEventHandlerTest : public TextInputBase {};
 class TextFiledAttrsTest : public TextInputBase {};
 class TextFieldUXTest : public TextInputBase {
 protected:
-    void InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr);
+    static void InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr);
 };
 
 void TextFieldUXTest::InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr)
 {
     EXPECT_CALL(mockDataDetectorMgr, GetCursorPosition(_, _))
-            .WillRepeatedly([](const std::string &text, int8_t offset) -> int8_t {
-                if (text.empty()) {
-                    return DEFAULT_RETURN_VALUE;
-                }
-                if (text.length() <= WORD_LIMIT_LEN) {
-                    return WORD_LIMIT_RETURN;
-                } else {
-                    return BEYOND_LIMIT_RETURN;
-                }
-            });
+        .WillRepeatedly([](const std::string& text, int8_t /* offset */) -> int8_t {
+            if (text.empty()) {
+                return DEFAULT_RETURN_VALUE;
+            }
+            if (text.length() <= WORD_LIMIT_LEN) {
+                return WORD_LIMIT_RETURN;
+            }
+            return BEYOND_LIMIT_RETURN;
+        });
 
     EXPECT_CALL(mockDataDetectorMgr, GetWordSelection(_, _))
-            .WillRepeatedly([](const std::string &text, int8_t offset) -> std::vector<int8_t> {
-                if (text.empty()) {
-                    return std::vector<int8_t> { -1, -1 };
-                }
+        .WillRepeatedly([](const std::string& text, int8_t /* offset */) -> std::vector<int8_t> {
+            if (text.empty()) {
+                return std::vector<int8_t> { -1, -1 };
+            }
 
-                if (text.length() <= WORD_LIMIT_LEN) {
-                    return std::vector<int8_t> { 2, 3 };
-                } else {
-                    return std::vector<int8_t> { 0, 2 };
-                }
-            });
+            if (text.length() <= WORD_LIMIT_LEN) {
+                return std::vector<int8_t> { 2, 3 };
+            }
+            return std::vector<int8_t> { 0, 2 };
+        });
 }
 
 /**
@@ -324,7 +309,7 @@ HWTEST_F(TextInputCursorTest, CaretPosition001, TestSize.Level1)
      * @tc.steps: Changed new text and remeasure and layout
      */
     pattern_->InsertValue("new");
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Current caret position is end of text
@@ -441,7 +426,7 @@ HWTEST_F(TextInputCursorTest, CaretPosition006, TestSize.Level1)
     auto controller = pattern_->GetTextSelectController();
     controller->UpdateCaretIndex(2);
     pattern_->InsertValue("new");
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if the text and cursor position are correct
@@ -479,7 +464,7 @@ HWTEST_F(TextInputCursorTest, CaretPosition007, TestSize.Level1)
      */
     auto controller = pattern_->GetTextFieldController();
     controller->StopEditing();
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if the cursor stop twinking
@@ -506,7 +491,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition001, TestSize.Le
     selection.baseOffset = value.text.length();
     value.selection = selection;
     pattern_->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if the new text and cursor position are correct
@@ -529,7 +514,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition002, TestSize.Le
 
     GetFocus();
     pattern_->DeleteBackward(5);
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if the new text and cursor position are correct
@@ -543,7 +528,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition002, TestSize.Le
     auto textFiledController = pattern_->GetTextFieldController();
     textFiledController->CaretPosition(5);
     pattern_->DeleteBackward(5);
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if the new text and cursor position are correct
@@ -555,7 +540,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition002, TestSize.Le
      * @tc.steps: Trigger a backspace key press that exceeds the length of the text
      */
     pattern_->DeleteBackward(MAX_BACKWARD_NUMBER);
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if the new text and cursor position are correct
@@ -578,7 +563,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition003, TestSize.Le
 
     GetFocus();
     pattern_->DeleteForward(5);
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if the new text and cursor position are correct
@@ -592,7 +577,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition003, TestSize.Le
     auto textFiledController = pattern_->GetTextFieldController();
     textFiledController->CaretPosition(5);
     pattern_->DeleteForward(MAX_FORWARD_NUMBER);
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if the new text and cursor position are correct
@@ -613,7 +598,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition004, TestSize.Le
      */
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
     pattern_->InsertValue("abc");
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if the new text and cursor position are correct
@@ -627,7 +612,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition004, TestSize.Le
     auto textFiledController = pattern_->GetTextFieldController();
     textFiledController->CaretPosition(0);
     pattern_->InsertValue("abcde");
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if the new text and cursor position are correct
@@ -649,14 +634,15 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition005, TestSize.Le
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
     int32_t start = 5;
     int32_t end = 10;
-    pattern_->HandleSetSelection(start, end);
-    RunMeasureAndLayout();
+    pattern_->HandleSetSelection(start, end, false);
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if the new handle positions are correct
      */
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end)
+        << "Second index is " + std::to_string(pattern_->selectController_->GetSecondHandleInfo().index);
 }
 
 /**
@@ -677,29 +663,31 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition006, TestSize.Le
         ACTION_PASTE,
     };
     pattern_->HandleExtendAction(action[0]);
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if the new handle positions are correct
      */
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26)
+        << "Second index is " + std::to_string(pattern_->selectController_->GetSecondHandleInfo().index);
 
     /**
      * @tc.steps: Move the handles and then cut text snippet.
      */
     int32_t start = 5;
     int32_t end = 10;
-    pattern_->HandleSetSelection(start, end);
+    pattern_->HandleSetSelection(start, end, false);
     pattern_->HandleExtendAction(action[1]);
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if the new handle positions are correct
      * Cut data hasn't simulated
      */
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 5);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 5)
+        << "Second index is " + std::to_string(pattern_->selectController_->GetSecondHandleInfo().index);
     EXPECT_EQ(pattern_->GetTextSelectController()->GetCaretIndex(), 5);
 }
 
@@ -724,16 +712,17 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition007, TestSize.Le
     };
     auto callback = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) { model.SetOnCut(callback); });
-    pattern_->HandleSetSelection(start, end);
+    pattern_->HandleSetSelection(start, end, false);
     pattern_->HandleExtendAction(action[1]);
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if the new handle positions are correct
      *               Verify the cut data
      */
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, start)
+        << "Second index is " + std::to_string(pattern_->selectController_->GetSecondHandleInfo().index);
     EXPECT_EQ(pattern_->GetTextSelectController()->GetCaretIndex(), start);
     EXPECT_EQ(pattern_->contentController_->GetTextValue().compare("abcdeklmnopqrstuvwxyz"), 0);
 }
@@ -768,10 +757,10 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition008, TestSize.Le
      * @tc.steps: Move the handles and then cut text snippet.
      *            Verify the copy and paste data.
      */
-    pattern_->HandleSetSelection(start, end);
+    pattern_->HandleSetSelection(start, end, false);
     pattern_->HandleExtendAction(action[2]);
     pattern_->HandleExtendAction(action[3]);
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijfghijklmnopqrstuvwxyz"), 0)
         << "Text is " + pattern_->GetTextValue();
 }
@@ -795,9 +784,9 @@ HWTEST_F(TextInputCursorTest, OnHandleMove001, TestSize.Level1)
      * @tc.steps: Move the handles and selection left.
      *            Verify the selection data.
      */
-    pattern_->HandleSetSelection(start, end);
+    pattern_->HandleSetSelection(start, end, false);
     pattern_->HandleSelect(select[0], 0);
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
     EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end - 1);
 
@@ -805,9 +794,9 @@ HWTEST_F(TextInputCursorTest, OnHandleMove001, TestSize.Level1)
      * @tc.steps: Move the handles and selection right.
      *            Verify the selection data.
      */
-    pattern_->HandleSetSelection(start, end);
+    pattern_->HandleSetSelection(start, end, false);
     pattern_->HandleSelect(select[1], 0);
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
     EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end + 1);
 }
@@ -832,9 +821,9 @@ HWTEST_F(TextInputCursorTest, OnHandleMove002, TestSize.Level1)
      *            Verify the selection data.
      */
     EXPECT_FALSE(pattern_->IsTextArea());
-    pattern_->HandleSetSelection(start, end);
+    pattern_->HandleSetSelection(start, end, false);
     pattern_->HandleSelect(select[2], 0);
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
     EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end);
 
@@ -843,9 +832,9 @@ HWTEST_F(TextInputCursorTest, OnHandleMove002, TestSize.Level1)
      *            Verify the selection data.
      */
     EXPECT_FALSE(pattern_->IsTextArea());
-    pattern_->HandleSetSelection(start, end);
+    pattern_->HandleSetSelection(start, end, false);
     pattern_->HandleSelect(select[3], 0);
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
     EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end);
 }
@@ -869,7 +858,7 @@ HWTEST_F(TextInputCursorTest, OnHandleMove003, TestSize.Level1)
     auto textFiledController = pattern_->GetTextFieldController();
     textFiledController->CaretPosition(5);
     pattern_->HandleSelectionLeftWord();
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
     EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 0);
 
@@ -878,7 +867,7 @@ HWTEST_F(TextInputCursorTest, OnHandleMove003, TestSize.Level1)
      *            Verify the selection data.
      */
     pattern_->HandleSelectionRightWord();
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
     EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 21);
 }
@@ -896,7 +885,7 @@ HWTEST_F(TextInputCursorTest, CursonMoveLeftTest001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
     GetFocus();
     auto ret = pattern_->CursorMoveLeft();
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: In a situation where no text is selected, the movement is successfull
@@ -908,8 +897,8 @@ HWTEST_F(TextInputCursorTest, CursonMoveLeftTest001, TestSize.Level1)
     /**
      * @tc.steps: In a situation where text is selected, the movement is successful
      */
-    pattern_->HandleSetSelection(3, 5);
-    RunMeasureAndLayout();
+    pattern_->HandleSetSelection(3, 5, false);
+    FlushLayoutTask(frameNode_);
     ret = pattern_->CursorMoveLeft();
 
     /**
@@ -947,8 +936,8 @@ HWTEST_F(TextInputCursorTest, CursonMoveLeftWordTest001, TestSize.Level1)
     /**
      * @tc.steps: In a situation where text is selected, the movement is successful
      */
-    pattern_->HandleSetSelection(3, 5);
-    RunMeasureAndLayout();
+    pattern_->HandleSetSelection(3, 5, false);
+    FlushLayoutTask(frameNode_);
     ret = pattern_->CursorMoveLeftWord();
 
     /**
@@ -979,7 +968,7 @@ HWTEST_F(TextInputCursorTest, CursorMoveLineBeginTest001, TestSize.Level1)
      * @tc.steps: step2. Insert text and move line begin
      */
     pattern_->InsertValue("hello world");
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
     ret = pattern_->CursorMoveLineBegin();
 
     /**
@@ -993,8 +982,8 @@ HWTEST_F(TextInputCursorTest, CursorMoveLineBeginTest001, TestSize.Level1)
     /**
      * @tc.steps: In a situation where text is all selected, the movement is successful
      */
-    pattern_->HandleSetSelection(0, 11);
-    RunMeasureAndLayout();
+    pattern_->HandleSetSelection(0, 11, false);
+    FlushLayoutTask(frameNode_);
     ret = pattern_->CursorMoveLineBegin();
 
     /**
@@ -1025,7 +1014,7 @@ HWTEST_F(TextInputCursorTest, CursorMoveToParagraphBeginTest001, TestSize.Level1
      * @tc.steps: step2. Insert text
      */
     pattern_->InsertValue("hello world");
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
     ret = pattern_->CursorMoveToParagraphBegin();
 
     /**
@@ -1056,7 +1045,7 @@ HWTEST_F(TextInputCursorTest, CursorMoveHomeTest001, TestSize.Level1)
      * @tc.steps: step2. Insert text
      */
     pattern_->InsertValue("hello world");
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
     ret = pattern_->CursorMoveHome();
 
     /**
@@ -1107,8 +1096,8 @@ HWTEST_F(TextInputCursorTest, CursorMoveRightTest001, TestSize.Level1)
     /**
      * @tc.steps: step3. Select the text within coordinates 3 to 5 and move cursor right
      */
-    pattern_->HandleSetSelection(3, 5);
-    RunMeasureAndLayout();
+    pattern_->HandleSetSelection(3, 5, false);
+    FlushLayoutTask(frameNode_);
     ret = pattern_->CursorMoveRight();
 
     /**
@@ -1147,7 +1136,7 @@ HWTEST_F(TextInputCursorTest, CursorMoveRightWordTest001, TestSize.Level1)
      */
     ret = pattern_->CursorMoveLeft();
     ret = pattern_->CursorMoveLeft();
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected:  the current text length - 2
@@ -1172,8 +1161,8 @@ HWTEST_F(TextInputCursorTest, CursorMoveRightWordTest001, TestSize.Level1)
      * @tc.steps: step4. Move to the beginning of the line and select all text.
      */
     ret = pattern_->CursorMoveLineBegin();
-    pattern_->HandleSetSelection(0, DEFAULT_TEXT.length());
-    RunMeasureAndLayout();
+    pattern_->HandleSetSelection(0, DEFAULT_TEXT.length(), false);
+    FlushLayoutTask(frameNode_);
     ret = pattern_->CursorMoveRightWord();
 
     /**
@@ -1210,8 +1199,8 @@ HWTEST_F(TextInputCursorTest, CursorMoveLineEndTest001, TestSize.Level1)
     /**
      * @tc.steps: step2. Move to the beginning of the line and select all text
      */
-    pattern_->HandleSetSelection(0, DEFAULT_TEXT.length());
-    RunMeasureAndLayout();
+    pattern_->HandleSetSelection(0, DEFAULT_TEXT.length(), false);
+    FlushLayoutTask(frameNode_);
     ret = pattern_->CursorMoveLineEnd();
 
     /**
@@ -1313,8 +1302,8 @@ HWTEST_F(TextInputCursorTest, GetLeftTextOfCursor001, TestSize.Level1)
     /**
      * @tc.steps: step2. Select the text from position 3 to 5
      */
-    pattern_->HandleSetSelection(3, 5);
-    RunMeasureAndLayout();
+    pattern_->HandleSetSelection(3, 5, false);
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if it equals "vwxyz"
@@ -1343,8 +1332,8 @@ HWTEST_F(TextInputCursorTest, GetRightTextOfCursor001, TestSize.Level1)
     /**
      * @tc.steps: step2. Select the text from position 3 to 5
      */
-    pattern_->HandleSetSelection(3, 5);
-    RunMeasureAndLayout();
+    pattern_->HandleSetSelection(3, 5, false);
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.expected: Check if it equals "vwxyz"
@@ -1651,7 +1640,7 @@ HWTEST_F(TextFieldKeyEventHandlerTest, KeyEventHandler004, TestSize.Level1)
         event.pressedCodes.push_back(code.first);
         event.code = code.first;
         auto ret = pattern_->OnKeyEvent(event);
-        RunMeasureAndLayout();
+        FlushLayoutTask(frameNode_);
         std::wstring appendElement(1, code.second);
         result.append(StringUtils::ToString(appendElement));
         EXPECT_EQ(pattern_->GetTextValue(), result);
@@ -1705,7 +1694,7 @@ HWTEST_F(TextFieldKeyEventHandlerTest, KeyEventHandler005, TestSize.Level1)
             event.pressedCodes.push_back(code.first);
             event.code = code.first;
             auto ret = pattern_->OnKeyEvent(event);
-            RunMeasureAndLayout();
+            FlushLayoutTask(frameNode_);
             std::wstring appendElement(1, code.second);
             result.append(StringUtils::ToString(appendElement));
             EXPECT_EQ(pattern_->GetTextValue(), result);
@@ -1776,7 +1765,7 @@ HWTEST_F(TextFieldKeyEventHandlerTest, KeyEventHandler006, TestSize.Level1)
             event.pressedCodes.push_back(code.first);
             event.code = code.first;
             auto ret = pattern_->OnKeyEvent(event);
-            RunMeasureAndLayout();
+            FlushLayoutTask(frameNode_);
             std::wstring appendElement(1, code.second);
             result.append(StringUtils::ToString(appendElement));
             EXPECT_EQ(pattern_->GetTextValue(), result);
@@ -1830,7 +1819,7 @@ HWTEST_F(TextFieldKeyEventHandlerTest, KeyEventHandler007, TestSize.Level1)
             event.pressedCodes.push_back(code.first);
             event.code = code.first;
             auto ret = pattern_->OnKeyEvent(event);
-            RunMeasureAndLayout();
+            FlushLayoutTask(frameNode_);
             std::wstring appendElement(1, code.second);
             result.append(StringUtils::ToString(appendElement));
             EXPECT_EQ(pattern_->GetTextValue(), result);
@@ -1870,7 +1859,7 @@ HWTEST_F(TextFieldKeyEventHandlerTest, KeyEventHandler008, TestSize.Level1)
         event.pressedCodes.push_back(KeyCode::KEY_F10);
         event.code = KeyCode::KEY_F10;
         auto ret = pattern_->OnKeyEvent(event);
-        RunMeasureAndLayout();
+        FlushLayoutTask(frameNode_);
         EXPECT_TRUE(ret);
     }
 }
@@ -1886,9 +1875,7 @@ HWTEST_F(TextFieldUXTest, UpdateCaretByTouchMove001, TestSize.Level1)
      * @tc.steps: step1. Initialize textInput and focusHub
      */
     CreateTextField();
-    auto focusHub = frameNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->currentFocus_ = true;
+    GetFocus();
 
     /**
      * @tc.steps: step2. create location info, touch type DOWN
@@ -1964,42 +1951,24 @@ HWTEST_F(TextFieldUXTest, CleanNode001, TestSize.Level1)
      * @tc.steps: step2. Get clear node response area
      */
     auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
-    ASSERT_NE(cleanNodeResponseArea, nullptr);
-
-    /**
-     * @tc.steps: step3. Get clean node from clear node response area
-     */
     auto stackNode = cleanNodeResponseArea->cleanNode_;
-    ASSERT_NE(stackNode, nullptr);
-
-    /**
-     * @tc.steps: step4. Get image node from clean node
-     */
-    auto imageUiNode = stackNode->GetFirstChild();
-    ASSERT_NE(imageUiNode, nullptr);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageUiNode);
-    ASSERT_NE(imageFrameNode, nullptr);
-
-    /**
-     * @tc.steps: step5. Get image node layout property
-     */
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    ASSERT_NE(imageLayoutProperty, nullptr);
 
     /**
-     * @tc.steps: step6. create text inco size
+     * @tc.steps: step5. create text inco size
      */
     auto iconSize = Dimension(ICON_SIZE, DimensionUnit::PX);
 
     /**
-     * @tc.steps: step7. test Update clear node true
+     * @tc.steps: step6. test Update clear node true
      */
     cleanNodeResponseArea->UpdateCleanNode(true);
     EXPECT_EQ(imageLayoutProperty->calcLayoutConstraint_->selfIdealSize,
         CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
 
     /**
-     * @tc.steps: step8. test Update clear node false
+     * @tc.steps: step7. test Update clear node false
      */
     cleanNodeResponseArea->UpdateCleanNode(false);
     EXPECT_EQ(imageLayoutProperty->calcLayoutConstraint_->selfIdealSize, CalcSize(CalcLength(0.0), CalcLength(0.0)));
@@ -2106,7 +2075,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward002, TestSize.Level1)
      * @tc.steps: step3. show cancel image.
      */
     pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.steps: step4. Test update focus forward when focus index = CANCEL.
@@ -2139,7 +2108,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward003, TestSize.Level1)
      * @tc.steps: step3. show cancel image.
      */
     pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.steps: step4. Test update focus forward, focus index = CANCEL.
@@ -2220,7 +2189,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward002, TestSize.Level1)
      * @tc.steps: step3. show cancel image.
      */
     pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.steps: step4. Test update focus backward when focus index = CANCEL.
@@ -2280,7 +2249,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward004, TestSize.Level1)
      * @tc.steps: step3. show cancel image.
      */
     pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
-    RunMeasureAndLayout();
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.steps: step4. Test update focus backward when focus index = UNIT.
@@ -2497,26 +2466,26 @@ HWTEST_F(TextFieldUXTest, NeedSoftKeyboard001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize text input
-    */
+     */
     CreateTextField(DEFAULT_TEXT);
 
     /**
-    * @tc.steps: step2. Test whether text field need soft keyboard.
-    */
+     * @tc.steps: step2. Test whether text field need soft keyboard.
+     */
     ASSERT_NE(pattern_, nullptr);
     EXPECT_TRUE(pattern_->NeedSoftKeyboard());
 }
 /*
-* @tc.name: AdjustWordCursorAndSelect01
-* @tc.desc: Test .adjust word cursor and select(true)
-* @tc.type: FUNC
-*/
+ * @tc.name: AdjustWordCursorAndSelect01
+ * @tc.desc: Test .adjust word cursor and select(true)
+ * @tc.type: FUNC
+ */
 HWTEST_F(TextFieldUXTest, AdjustWordCursorAndSelect01, TestSize.Level1)
 {
     using namespace std::chrono;
     /**
      * @tc.steps: step1. Initialize text input "hello"
-    */
+     */
     CreateTextField(HELLO_TEXT);
     pattern_->selectController_->lastAiPosTimeStamp_ = high_resolution_clock::now();
     pattern_->lastClickTimeStamp_ = pattern_->selectController_->lastAiPosTimeStamp_ + seconds(2);
@@ -2526,8 +2495,8 @@ HWTEST_F(TextFieldUXTest, AdjustWordCursorAndSelect01, TestSize.Level1)
 
     std::string content = pattern_->contentController_->GetTextValue();
     int32_t pos = 3;
-    mockDataDetectorMgr.AdjustCursorPosition(pos, content, pattern_->selectController_->lastAiPosTimeStamp_,
-                                             pattern_->lastClickTimeStamp_);
+    mockDataDetectorMgr.AdjustCursorPosition(
+        pos, content, pattern_->selectController_->lastAiPosTimeStamp_, pattern_->lastClickTimeStamp_);
     EXPECT_EQ(pos, 2);
 
     int32_t start = 1;
@@ -2537,12 +2506,12 @@ HWTEST_F(TextFieldUXTest, AdjustWordCursorAndSelect01, TestSize.Level1)
     EXPECT_EQ(end, 3);
     /**
      * @tc.steps: step2. assign text as default text
-    */
+     */
     pos = 1;
     pattern_->contentController_->SetTextValue(DEFAULT_TEXT);
     content = pattern_->contentController_->GetTextValue();
-    mockDataDetectorMgr.AdjustCursorPosition(pos, content, pattern_->selectController_->lastAiPosTimeStamp_,
-                                             pattern_->lastClickTimeStamp_);
+    mockDataDetectorMgr.AdjustCursorPosition(
+        pos, content, pattern_->selectController_->lastAiPosTimeStamp_, pattern_->lastClickTimeStamp_);
     EXPECT_EQ(pos, 4);
 
     start = 1;
@@ -2553,12 +2522,12 @@ HWTEST_F(TextFieldUXTest, AdjustWordCursorAndSelect01, TestSize.Level1)
 
     /**
      * @tc.steps: step3. assign text as empty
-    */
+     */
     pos = 2;
     pattern_->contentController_->Reset();
     content = pattern_->contentController_->GetTextValue();
-    mockDataDetectorMgr.AdjustCursorPosition(pos, content, pattern_->selectController_->lastAiPosTimeStamp_,
-                                             pattern_->lastClickTimeStamp_);
+    mockDataDetectorMgr.AdjustCursorPosition(
+        pos, content, pattern_->selectController_->lastAiPosTimeStamp_, pattern_->lastClickTimeStamp_);
     EXPECT_EQ(pos, -1);
 
     start = 1;

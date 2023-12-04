@@ -35,7 +35,7 @@ namespace OHOS::Ace::NG {
 class LayoutConstraintTestNg : public testing::Test {
 public:
     static void SetUpTestSuite() {};
-    static void TeardownTestSuite() {};
+    static void TearDownTestSuite() {};
 };
 
 /**

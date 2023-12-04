@@ -1070,7 +1070,6 @@ void FrameNode::SetActive(bool active)
     }
     // inform the js side the active status
     SetJSViewActive(active);
-
 }
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)

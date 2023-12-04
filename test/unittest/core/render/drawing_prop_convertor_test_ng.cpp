@@ -68,7 +68,7 @@ public:
     {
         NG::MockPipelineContext::SetUp();
     }
-    static void TeardownTestSuite()
+    static void TearDownTestSuite()
     {
         NG::MockPipelineContext::TearDown();
     }
