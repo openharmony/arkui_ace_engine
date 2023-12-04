@@ -1571,8 +1571,9 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
         }
     }
 
-    auto dragPoint =
-        PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
+    PointF dragPoint(static_cast<float>(info.GetGlobalLocation().GetX()),
+        static_cast<float>(info.GetGlobalLocation().GetY()));
+    NGGestureRecognizer::Transform(dragPoint, GetHost(), true);
     if (IsOutOfHotRegion(dragPoint)) {
         isTouchPad_ = false;
         return;
@@ -2612,10 +2613,10 @@ bool SwiperPattern::IsOutOfHotRegion(const PointF& dragPoint) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, true);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_RETURN(context, true);
 
-    auto hotRegion = geometryNode->GetFrameRect();
+    auto hotRegion = context->GetPaintRectWithoutTransform();
     return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
 }
 
