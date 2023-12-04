@@ -249,6 +249,7 @@ static void SetContextProperty(
     std::string textContent = HandleStringType(contextParamMap["textContentNApi"], env);
     std::string fontWeight = HandleStringType(contextParamMap["fontWeightNApi"], env);
     std::string fontFamily = HandleStringType(contextParamMap["fontFamilyNApi"], env);
+    
     context.textContent = textContent;
     context.constraintWidth = constraintWidth;
     context.fontSize = fontSizeNum;
