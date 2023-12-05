@@ -2590,7 +2590,7 @@ bool WebPattern::HandleScrollVelocity(float velocity)
     if (InstanceOf<SwiperPattern>(parent)) {
         // When scrolling to the previous SwiperItem, that item needs to be visible. Update the offset slightly to make
         // it visible before calling HandleScrollVelocity.
-        float tweak = (velocity > 0.0) ? 1.0 : -1.0;
+        float tweak = (velocity > 0.0f) ? 1.0f : -1.0f;
         parent->HandleScroll(tweak, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     }
     if (parent->HandleScrollVelocity(velocity)) {
