@@ -59,7 +59,7 @@ void ResetTextpickerCanLoop(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextPickerModelNG::SetCanLoop(frameNode, false);
+    TextPickerModelNG::SetCanLoop(frameNode, true);
 }
 
 void SetTextpickerSelected(NodeHandle node, uint32_t selectedValue)
