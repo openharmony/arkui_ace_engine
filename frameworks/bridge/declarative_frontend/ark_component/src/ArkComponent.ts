@@ -88,7 +88,7 @@ class ModifierWithKey<T extends number | string | boolean | object> {
   }
 
   applyStage(node: KNode): boolean {
-    if (this.stageValue === undefined) {
+    if (this.stageValue === undefined || this.stageValue === null) {
       this.value = this.stageValue;
       this.applyPeer(node, true);
       return true;
@@ -250,8 +250,12 @@ class PositionModifier extends ModifierWithKey<Position> {
       GetUINativeModule().common.resetPosition(node);
     }
     else {
-      GetUINativeModule().common.setPosition(node, this.value?.x, this.value?.y);
+      GetUINativeModule().common.setPosition(node, this.value.x, this.value.y);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.x, this.value.x) ||
+    !isBaseOrResourceEqual(this.stageValue.y, this.value.y);
   }
 }
 
@@ -907,7 +911,7 @@ class FocusOnTouchModifier extends Modifier<boolean> {
     }
   }
 }
-class OffsetModifier extends ModifierWithKey<ArkPosition>  {
+class OffsetModifier extends ModifierWithKey<Position> {
   static identity: Symbol = Symbol('offset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -923,7 +927,7 @@ class OffsetModifier extends ModifierWithKey<ArkPosition>  {
   }
 }
 
-class MarkAnchorModifier extends ModifierWithKey<ArkPosition>  {
+class MarkAnchorModifier extends ModifierWithKey<Position> {
   static identity: Symbol = Symbol('markAnchor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1012,7 +1016,7 @@ class PaddingModifier extends ModifierWithKey<ArkPadding> {
   }
 }
 
-class VisibilityModifier extends Modifier<number> {
+class VisibilityModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('visibility');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1020,6 +1024,9 @@ class VisibilityModifier extends Modifier<number> {
     } else {
       GetUINativeModule().common.setVisibility(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 
@@ -1071,8 +1078,7 @@ class AccessibilityDescriptionModifier extends Modifier<string> {
   }
 }
 
-
-class DirectionModifier extends Modifier<string> {
+class DirectionModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('direction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1080,6 +1086,9 @@ class DirectionModifier extends Modifier<string> {
     } else {
       GetUINativeModule().common.setDirection(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class AlignRulesModifier extends Modifier<ArkAlignRules> {
@@ -1127,7 +1136,7 @@ class GridOffsetModifier extends Modifier<number> {
   }
 }
 
-class AlignSelfModifier extends Modifier<number> {
+class AlignSelfModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('alignSelf');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1136,9 +1145,12 @@ class AlignSelfModifier extends Modifier<number> {
       GetUINativeModule().common.setAlignSelf(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class SizeModifier extends ModifierWithKey<ArkSize> {
+class SizeModifier extends ModifierWithKey<SizeOptions> {
   static identity: Symbol = Symbol('size');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1154,7 +1166,7 @@ class SizeModifier extends ModifierWithKey<ArkSize> {
   }
 }
 
-class DisplayPriorityModifier extends Modifier<number> {
+class DisplayPriorityModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('displayPriority');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1162,6 +1174,9 @@ class DisplayPriorityModifier extends Modifier<number> {
     } else {
       GetUINativeModule().common.setDisplayPriority(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -1248,7 +1263,7 @@ class ResponseRegionModifier extends Modifier<ArkResponseRegion> {
     }
   }
 }
-class FlexGrowModifier extends Modifier<number> {
+class FlexGrowModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('flexGrow');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1257,9 +1272,13 @@ class FlexGrowModifier extends Modifier<number> {
       GetUINativeModule().common.setFlexGrow(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
-class FlexShrinkModifier extends Modifier<number> {
+
+class FlexShrinkModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('flexShrink');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1268,9 +1287,12 @@ class FlexShrinkModifier extends Modifier<number> {
       GetUINativeModule().common.setFlexShrink(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
-class AspectRatioModifier extends Modifier<number> {
+class AspectRatioModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('aspectRatio');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1279,9 +1301,12 @@ class AspectRatioModifier extends Modifier<number> {
       GetUINativeModule().common.setAspectRatio(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
-class ConstraintSizeModifier extends ModifierWithKey<ArkConstraintSizeOptions> {
+class ConstraintSizeModifier extends ModifierWithKey<ConstraintSizeOptions> {
   static identity: Symbol = Symbol('constraintSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1300,7 +1325,7 @@ class ConstraintSizeModifier extends ModifierWithKey<ArkConstraintSizeOptions> {
   }
 }
 
-class FlexBasisModifier extends Modifier<number | string> {
+class FlexBasisModifier extends ModifierWithKey<number | string> {
   static identity: Symbol = Symbol('flexBasis');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1308,6 +1333,9 @@ class FlexBasisModifier extends Modifier<number | string> {
     } else {
       GetUINativeModule().common.setFlexBasis(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 
@@ -1601,30 +1629,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   size(value: SizeOptions): this {
-    if (!value) {
-      modifierWithKey(this._modifiersWithKeys, SizeModifier.identity, SizeModifier, undefined);
-    } else {
-      let arkValue: ArkSize = new ArkSize();
-      arkValue.width = value.width;
-      arkValue.height = value.height;
-      modifierWithKey(this._modifiersWithKeys, SizeModifier.identity, SizeModifier, arkValue);
-    }
+    modifierWithKey(this._modifiersWithKeys, SizeModifier.identity, SizeModifier, value);
     return this;
   }
 
   constraintSize(value: ConstraintSizeOptions): this {
-    if (!value) {
-      modifierWithKey(this._modifiersWithKeys, ConstraintSizeModifier.identity,
-        ConstraintSizeModifier, undefined);
-    } else {
-      let arkValue: ArkConstraintSizeOptions = new ArkConstraintSizeOptions();
-      arkValue.minWidth = value.minWidth;
-      arkValue.maxWidth = value.maxWidth;
-      arkValue.minHeight = value.minHeight;
-      arkValue.maxHeight = value.maxHeight;
-      modifierWithKey(this._modifiersWithKeys, ConstraintSizeModifier.identity,
-        ConstraintSizeModifier, arkValue);
-    }
+    modifierWithKey(this._modifiersWithKeys, ConstraintSizeModifier.identity,
+      ConstraintSizeModifier, value);
     return this;
   }
 
@@ -2266,56 +2277,32 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   visibility(value: Visibility): this {
-    if (value in Visibility) {
-      modifier(this._modifiers, VisibilityModifier, value);
-    } else {
-      modifier(this._modifiers, VisibilityModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, VisibilityModifier.identity, VisibilityModifier, value);
     return this;
   }
 
   flexGrow(value: number): this {
-    if (isNumber(value)) {
-      modifier(this._modifiers, FlexGrowModifier, value);
-    } else {
-      modifier(this._modifiers, FlexGrowModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, FlexGrowModifier.identity, FlexGrowModifier, value);
     return this;
   }
 
   flexShrink(value: number): this {
-    if (isNumber(value)) {
-      modifier(this._modifiers, FlexShrinkModifier, value);
-    } else {
-      modifier(this._modifiers, FlexShrinkModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, FlexShrinkModifier.identity, FlexShrinkModifier, value);
     return this;
   }
 
   flexBasis(value: number | string): this {
-    if (isLengthType(value)) {
-      modifier(this._modifiers, FlexBasisModifier, value);
-    } else {
-      modifier(this._modifiers, FlexBasisModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, FlexBasisModifier.identity, FlexBasisModifier, value);
     return this;
   }
 
   alignSelf(value: ItemAlign): this {
-    if (value in ItemAlign) {
-      modifier(this._modifiers, AlignSelfModifier, value);
-    } else {
-      modifier(this._modifiers, AlignSelfModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, AlignSelfModifier.identity, AlignSelfModifier, value);
     return this;
   }
 
   displayPriority(value: number): this {
-    if (isNumber(value)) {
-      modifier(this._modifiers, DisplayPriorityModifier, value);
-    } else {
-      modifier(this._modifiers, DisplayPriorityModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, DisplayPriorityModifier.identity, DisplayPriorityModifier, value);
     return this;
   }
 
@@ -2344,18 +2331,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   direction(value: Direction): this {
-    let direction: string = undefined;
-    if (value in Direction) {
-      modifier(this._modifiers, DirectionModifier, value.toString());
-    } else {
-      switch (value) {
-        case 0: direction = 'Ltr'; break;
-        case 1: direction = 'Rtl'; break;
-        case 2:
-        default: direction = 'Auto'; break;
-      }
-      modifier(this._modifiers, DirectionModifier, direction);
-    }
+    modifierWithKey(this._modifiersWithKeys, DirectionModifier.identity, DirectionModifier, value);
     return this;
   }
 
@@ -2374,26 +2350,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   markAnchor(value: Position): this {
-    if (!value) {
-      modifierWithKey(this._modifiersWithKeys, MarkAnchorModifier.identity, MarkAnchorModifier, undefined);
-    } else {
-      let arkValue = new ArkPosition();
-      arkValue.x = value?.x;
-      arkValue.y = value?.y;
-      modifierWithKey(this._modifiersWithKeys, MarkAnchorModifier.identity, MarkAnchorModifier, arkValue);
-    }
+    modifierWithKey(this._modifiersWithKeys, MarkAnchorModifier.identity, MarkAnchorModifier, value);
     return this;
   }
 
   offset(value: Position): this {
-    if (!value) {
-      modifierWithKey(this._modifiersWithKeys, OffsetModifier.identity, OffsetModifier, undefined);
-    } else {
-      let arkValue = new ArkPosition();
-      arkValue.x = value?.x;
-      arkValue.y = value?.y;
-      modifierWithKey(this._modifiersWithKeys, OffsetModifier.identity, OffsetModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, OffsetModifier.identity, OffsetModifier, value);
     return this;
   }
 
@@ -2486,11 +2448,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   aspectRatio(value: number): this {
-    if (isNumber(value)) {
-      modifier(this._modifiers, AspectRatioModifier, value);
-    } else {
-      modifier(this._modifiers, AspectRatioModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, AspectRatioModifier.identity, AspectRatioModifier, value);
     return this;
   }
 

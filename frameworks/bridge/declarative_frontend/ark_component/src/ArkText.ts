@@ -37,7 +37,7 @@ class FontSizeModifier extends ModifierWithKey<number | string | Resource> {
   }
 }
 
-class FontWeightModifier extends Modifier<string> {
+class FontWeightModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('fontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -46,9 +46,12 @@ class FontWeightModifier extends Modifier<string> {
       GetUINativeModule().text.setFontWeight(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class FontStyleModifier extends Modifier<number> {
+class FontStyleModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('fontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -57,9 +60,12 @@ class FontStyleModifier extends Modifier<number> {
       GetUINativeModule().text.setFontStyle(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class TextAlignModifier extends Modifier<number> {
+class TextAlignModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -68,9 +74,12 @@ class TextAlignModifier extends Modifier<number> {
       GetUINativeModule().text.setTextAlign(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class TextHeightAdaptivePolicyModifier extends Modifier<number> {
+class TextHeightAdaptivePolicyModifier extends ModifierWithKey<TextHeightAdaptivePolicy> {
   static identity: Symbol = Symbol('textHeightAdaptivePolicy');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -79,9 +88,12 @@ class TextHeightAdaptivePolicyModifier extends Modifier<number> {
       GetUINativeModule().text.setHeightAdaptivePolicy(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class TextDraggableModifier extends Modifier<boolean> {
+class TextDraggableModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('textDraggable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -89,6 +101,9 @@ class TextDraggableModifier extends Modifier<boolean> {
     } else {
       GetUINativeModule().text.setDraggable(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -143,7 +158,7 @@ class TextLineHeightModifier extends ModifierWithKey<number | string | Resource>
   }
 }
 
-class TextCopyOptionModifier extends Modifier<number> {
+class TextCopyOptionModifier extends ModifierWithKey<CopyOptions> {
   static identity: Symbol = Symbol('textCopyOption');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -151,6 +166,9 @@ class TextCopyOptionModifier extends Modifier<number> {
     } else {
       GetUINativeModule().text.setCopyOption(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -171,51 +189,69 @@ class TextFontFamilyModifier extends ModifierWithKey<string | Resource> {
   }
 }
 
-class TextMaxLinesModifier extends Modifier<number> {
+class TextMaxLinesModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textMaxLines');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      GetUINativeModule().text.resetMaxLines(node);
+    } else if (!isNumber(this.value)) {
       GetUINativeModule().text.resetMaxLines(node);
     } else {
       GetUINativeModule().text.setMaxLines(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class TextLetterSpacingModifier extends Modifier<number | string> {
+class TextLetterSpacingModifier extends ModifierWithKey<number | string> {
   static identity: Symbol = Symbol('textLetterSpacing');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      GetUINativeModule().text.resetLetterSpacing(node);
+    } else if (!isNumber(this.value) && !isString(this.value)) {
       GetUINativeModule().text.resetLetterSpacing(node);
     } else {
       GetUINativeModule().text.setLetterSpacing(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class TextTextOverflowModifier extends Modifier<number> {
+class TextTextOverflowModifier extends ModifierWithKey<TextOverflow> {
   static identity: Symbol = Symbol('textTextOverflow');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().text.resetTextOverflow(node);
     } else {
-      GetUINativeModule().text.setTextOverflow(node, this.value!);
+      GetUINativeModule().text.setTextOverflow(node, this.value.overflow);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.overflow, this.value.overflow);
   }
 }
 
-class TextBaselineOffsetModifier extends Modifier<number | string> {
+class TextBaselineOffsetModifier extends ModifierWithKey<number | string> {
   static identity: symbol = Symbol('textBaselineOffset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      GetUINativeModule().text.resetBaselineOffset(node);
+    } else if (!isNumber(this.value) && !isString(this.value)) {
       GetUINativeModule().text.resetBaselineOffset(node);
     } else {
       GetUINativeModule().text.setBaselineOffset(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class TextTextCaseModifier extends Modifier<number> {
+class TextTextCaseModifier extends ModifierWithKey<TextCase> {
   static identity: symbol = Symbol('textTextCase');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -223,6 +259,9 @@ class TextTextCaseModifier extends Modifier<number> {
     } else {
       GetUINativeModule().text.setTextCase(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -253,8 +292,8 @@ class TextTextShadowModifier extends ModifierWithKey<ShadowOptions | Array<Shado
       if (!shadow.convertShadowOptions(this.value)) {
         GetUINativeModule().text.resetTextShadow(node);
       } else {
-        GetUINativeModule().text
-          .setTextShadow(node, shadow.radius, shadow.type, shadow.color, shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
+        GetUINativeModule().text.setTextShadow(node, shadow.radius,
+          shadow.type, shadow.color, shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
       }
     }
   }
@@ -283,15 +322,13 @@ class TextTextShadowModifier extends ModifierWithKey<ShadowOptions | Array<Shado
   }
 }
 
-class TextDecorationModifier extends ModifierWithKey<ArkDecoration> {
+class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor }> {
   static identity: Symbol = Symbol('textDecoration');
   applyPeer(node: KNode, reset: boolean): void {
+    //console.log('TextDecorationModifier start')
     if (reset) {
       GetUINativeModule().text.resetDecoration(node);
     } else {
-      if (!(isNumber(this.value.color)) && !(isString(this.value.color)) && !(isResource(this.value.color))) {
-        this.value.color = undefined;
-      }
       GetUINativeModule().text.setDecoration(node, this.value!.type, this.value!.color);
     }
   }
@@ -313,17 +350,16 @@ class TextDecorationModifier extends ModifierWithKey<ArkDecoration> {
 class TextFontModifier extends ModifierWithKey<Font> {
   static identity: Symbol = Symbol('textFont');
   applyPeer(node: KNode, reset: boolean): void {
+    //console.log('TextFontModifier start');
     if (reset) {
       GetUINativeModule().text.resetFont(node);
     } else {
-      if (!(isNumber(this.value.size)) && !(isString(this.value.size)) && !(isResource(this.value.size))) {
-        this.value.size = undefined;
-      }
-      if (!(isString(this.value.family)) && !(isResource(this.value.family))) {
-        this.value.family = undefined;
-      }
+      //console.log('TextFontModifier 1');
+      //console.log('TextFontModifier 2');
+      //console.log('TextFontModifier 2 parames is: ' + JSON.parse(this.value));
       GetUINativeModule().text.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
+    //console.log('TextFontModifier end');
   }
 
   checkObjectDiff(): boolean {
@@ -355,12 +391,6 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     throw new Error('Method not implemented.');
   }
   font(value: Font): TextAttribute {
-    if (!isLengthType(value.weight)) {
-      value.weight = undefined;
-    }
-    if (!(value.style in FontStyle)) {
-      value.style = undefined;
-    }
     modifierWithKey(this._modifiersWithKeys, TextFontModifier.identity, TextFontModifier, value);
     return this;
   }
@@ -381,41 +411,15 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     return this;
   }
   fontStyle(value: FontStyle): TextAttribute {
-    if (isNumber(value)) {
-      modifier(this._modifiers, FontStyleModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, FontStyleModifier.identity, FontStyleModifier, value);
     return this;
   }
   fontWeight(value: any): TextAttribute {
-    let fontWeightStr: string = '400';
-    if (isNumber(value)) {
-      if (value === 0) {
-        fontWeightStr = 'Lighter';
-      } else if (value === 1) {
-        fontWeightStr = 'Normal';
-      } else if (value === 2) {
-        fontWeightStr = 'Regular';
-      } else if (value === 3) {
-        fontWeightStr = 'Medium';
-      } else if (value === 4) {
-        fontWeightStr = 'Bold';
-      } else if (value === 5) {
-        fontWeightStr = 'Bolder';
-      } else {
-        fontWeightStr = value.toString();
-      }
-    } else if (isString(value)) {
-      fontWeightStr = value;
-    }
-    modifier(this._modifiers, FontWeightModifier, fontWeightStr);
+    modifierWithKey(this._modifiersWithKeys, FontWeightModifier.identity, FontWeightModifier, value);
     return this;
   }
   textAlign(value: TextAlign): TextAttribute {
-    let textAlignNum = 0;
-    if (isNumber(value)) {
-      textAlignNum = value;
-    }
-    modifier(this._modifiers, TextAlignModifier, textAlignNum);
+    modifierWithKey(this._modifiersWithKeys, TextAlignModifier.identity, TextAlignModifier, value);
     return this;
   }
   lineHeight(value: number | string | Resource): TextAttribute {
@@ -423,19 +427,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     return this;
   }
   textOverflow(value: { overflow: TextOverflow }): TextAttribute {
-    if (value === null || value === undefined) {
-      modifier(this._modifiers, TextTextOverflowModifier, undefined);
-    } else if (isObject(value)) {
-      let overflowValue = value.overflow;
-      if (isNumber(overflowValue)) {
-        if (!(overflowValue in CopyOptions)) {
-          overflowValue = TextOverflow.Clip;
-        }
-        modifier(this._modifiers, TextTextOverflowModifier, overflowValue);
-      } else {
-        modifier(this._modifiers, TextTextOverflowModifier, undefined);
-      }
-    }
+    modifierWithKey(this._modifiersWithKeys, TextTextOverflowModifier.identity, TextTextOverflowModifier, value);
     return this;
   }
   fontFamily(value: string | Resource): TextAttribute {
@@ -443,82 +435,39 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     return this;
   }
   maxLines(value: number): TextAttribute {
-    if (!isNumber(value)) {
-      modifier(this._modifiers, TextMaxLinesModifier, undefined);
-    } else {
-      modifier(this._modifiers, TextMaxLinesModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextMaxLinesModifier.identity, TextMaxLinesModifier, value);
     return this;
   }
   decoration(value: { type: TextDecorationType; color?: ResourceColor }): TextAttribute {
-    if (value === null || value === undefined) {
-      modifier(this._modifiersWithKeys, TextDecorationModifier.identity, TextDecorationModifier,undefined);
-    } else { 
-      let arkValue: ArkDecoration = new ArkDecoration();
-      if (isNumber(value.type) || (value.type in TextDecorationType)) {
-        arkValue.type = value.type;
-      }
-      if (value.color) {
-        arkValue.color = value.color;
-      }
-      modifierWithKey(this._modifiersWithKeys, TextDecorationModifier.identity, TextDecorationModifier, arkValue);
-    }    
+    modifierWithKey(this._modifiersWithKeys, TextDecorationModifier.identity, TextDecorationModifier, value);
     return this;
   }
   letterSpacing(value: number | string): TextAttribute {
-    if (isLengthType(value)) {
-      modifier(this._modifiers, TextLetterSpacingModifier, value);
-    } else {
-      modifier(this._modifiers, TextLetterSpacingModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextLetterSpacingModifier.identity, TextLetterSpacingModifier, value);
     return this;
   }
   textCase(value: TextCase): TextAttribute {
-    if (!(value in TextCase)) {
-      modifier(this._modifiers, TextTextCaseModifier, undefined);
-    } else {
-      modifier(this._modifiers, TextTextCaseModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextTextCaseModifier.identity, TextTextCaseModifier, value);
     return this;
   }
   baselineOffset(value: number | string): TextAttribute {
-    if (isLengthType(value)) {
-      modifier(this._modifiers, TextBaselineOffsetModifier, value);
-    } else {
-      modifier(this._modifiers, TextBaselineOffsetModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextBaselineOffsetModifier.identity, TextBaselineOffsetModifier, value);
     return this;
   }
   copyOption(value: CopyOptions): TextAttribute {
-    if (isNumber(value)) {
-      modifier(this._modifiers, TextCopyOptionModifier, value);
-    } else {
-      modifier(this._modifiers, TextCopyOptionModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextCopyOptionModifier.identity, TextCopyOptionModifier, value);
     return this;
   }
   draggable(value: boolean): this {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, TextDraggableModifier, value);
-    } else {
-      modifier(this._modifiers, TextDraggableModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextDraggableModifier.identity, TextDraggableModifier, value);
     return this;
   }
   textShadow(value: ShadowOptions | Array<ShadowOptions>): TextAttribute {
-    if (value === null || value === undefined) {
-      modifierWithKey(this._modifiersWithKeys, TextTextShadowModifier.identity, TextTextShadowModifier, undefined);
-    } else { 
-      modifierWithKey(this._modifiersWithKeys, TextTextShadowModifier.identity, TextTextShadowModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextTextShadowModifier.identity, TextTextShadowModifier, value);
     return this;
   }
   heightAdaptivePolicy(value: TextHeightAdaptivePolicy): TextAttribute {
-    if (!(value in TextHeightAdaptivePolicy)) {
-      modifier(this._modifiers, TextHeightAdaptivePolicyModifier, undefined);
-    } else {
-      modifier(this._modifiers, TextHeightAdaptivePolicyModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextHeightAdaptivePolicyModifier.identity, TextHeightAdaptivePolicyModifier, value)
     return this;
   }
   textIndent(value: Length): TextAttribute {
@@ -538,7 +487,6 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     throw new Error('Method not implemented.');
   }
 }
-
 // @ts-ignore
 globalThis.Text.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
