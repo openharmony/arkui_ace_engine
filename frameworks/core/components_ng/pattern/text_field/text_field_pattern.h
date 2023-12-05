@@ -467,26 +467,27 @@ public:
         return !contentController_->IsEmpty();
     }
 
-    bool CursorMoveLeft() override;
+    void CursorMove(CaretMoveIntent direction) override;
+    bool CursorMoveLeft();
     bool CursorMoveLeftOperation();
     bool CursorMoveLeftWord();
     bool CursorMoveLineBegin();
     bool CursorMoveToParagraphBegin();
     bool CursorMoveHome();
-    bool CursorMoveRight() override;
+    bool CursorMoveRight();
     bool CursorMoveRightOperation();
     bool CursorMoveRightWord();
     bool CursorMoveLineEnd();
     bool CursorMoveToParagraphEnd();
     bool CursorMoveEnd();
-    bool CursorMoveUp() override;
-    bool CursorMoveDown() override;
+    bool CursorMoveUp();
+    bool CursorMoveDown();
     bool CursorMoveUpOperation();
     bool CursorMoveDownOperation();
     void SetCaretPosition(int32_t position);
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
     void HandleExtendAction(int32_t action) override;
-    void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip) override;
+    void HandleSelect(CaretMoveIntent direction) override;
     OffsetF GetDragUpperLeftCoordinates() override;
 
     std::vector<RectF> GetTextBoxes() override
@@ -768,12 +769,18 @@ public:
     void HandleSelectionRightWord();
     void HandleSelectionLineEnd();
     void HandleSelectionEnd();
-    void HandleOnUndoAction();
-    void HandleOnRedoAction();
+    bool HandleOnEscape() override;
+    bool HandleOnTab(bool backward) override;
+    void HandleOnUndoAction() override;
+    void HandleOnRedoAction() override;
     void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false);
-    void HandleOnCopy();
-    void HandleOnPaste();
-    void HandleOnCut();
+    void HandleOnSelectAll() override
+    {
+        HandleOnSelectAll(true);
+    }
+    void HandleOnCopy() override;
+    void HandleOnPaste() override;
+    void HandleOnCut() override;
     void HandleOnCameraInput();
     void StripNextLine(std::wstring& data);
     bool OnKeyEvent(const KeyEvent& event);

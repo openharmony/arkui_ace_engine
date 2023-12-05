@@ -26,19 +26,10 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension RESERVE_BOTTOM_HEIGHT = 24.0_vp;
 } // namespace
-const RefPtr<KeyEventHandler>& TextFieldManagerNG::GetKeyEventHandler()
-{
-    if (!keyEventHandler_) {
-        keyEventHandler_ = AceType::MakeRefPtr<KeyEventHandler>();
-    }
-    return keyEventHandler_;
-}
 
 void TextFieldManagerNG::ClearOnFocusTextField()
 {
     onFocusTextField_ = nullptr;
-    CHECK_NULL_VOID(keyEventHandler_);
-    keyEventHandler_->ClearClient();
 }
 
 bool TextFieldManagerNG::OnBackPressed()

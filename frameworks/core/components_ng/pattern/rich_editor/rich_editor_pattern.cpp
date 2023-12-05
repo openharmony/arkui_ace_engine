@@ -25,6 +25,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
@@ -32,6 +33,7 @@
 #include "core/common/clipboard/paste_data.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/ime/text_input_client.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
@@ -2794,119 +2796,26 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
 
 bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    if (keyEvent.action == KeyAction::DOWN) {
-        if (keyEvent.code == KeyCode::KEY_TAB) {
-            return false;
-        }
-        std::string appendElement;
-        if (keyEvent.code == KeyCode::KEY_ENTER || keyEvent.code == KeyCode::KEY_NUMPAD_ENTER ||
-            keyEvent.code == KeyCode::KEY_DPAD_CENTER) {
-            InsertValue("\n");
-            return true;
-        } else if (HandleShiftPressedEvent(keyEvent)) {
-            return true;
-        } else if (keyEvent.IsDirectionalKey()) {
-            HandleDirectionalKey(keyEvent);
-            return true;
-        } else if (keyEvent.IsNumberKey() && !keyEvent.IsCombinationKey()) {
-            appendElement = keyEvent.ConvertCodeToString();
-        } else if (keyEvent.IsLetterKey()) {
-            if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
-                keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
-                HandleOnSelectAll();
-            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
-                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
-                HandleOnCopy();
-            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
-                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
-                HandleOnPaste();
-            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_X }) ||
-                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_X })) {
-                HandleOnCut();
-            }
-        }
-        if (keyEvent.code == KeyCode::KEY_DEL) {
-#if defined(PREVIEW)
-            DeleteForward(1);
-#else
-            DeleteBackward(1);
-#endif
-            return true;
-        }
-        if (keyEvent.code == KeyCode::KEY_FORWARD_DEL) {
-#if defined(PREVIEW)
-            DeleteBackward(1);
-#else
-            DeleteForward(1);
-#endif
-            return true;
-        }
-        ParseAppendValue(keyEvent.code, appendElement);
-        if (!appendElement.empty()) {
-            InsertValue(appendElement);
-            return true;
-        }
-    }
-    return true;
+    return TextInputClient::HandleKeyEvent(keyEvent);
 }
 
-bool RichEditorPattern::HandleShiftPressedEvent(const KeyEvent& event)
+void RichEditorPattern::CursorMove(CaretMoveIntent direction)
 {
-    const static size_t maxKeySizes = 2;
-    wchar_t keyChar;
-
-    auto iterCode = KEYBOARD_SYMBOL.find(event.code);
-    if (event.pressedCodes.size() == 1 && iterCode != KEYBOARD_SYMBOL.end()) {
-        if (iterCode != KEYBOARD_SYMBOL.end()) {
-            keyChar = iterCode->second;
-        } else {
-            return false;
-        }
-    } else if (event.pressedCodes.size() == maxKeySizes && (event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
-                                                               event.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT)) {
-        iterCode = SHIFT_KEYBOARD_SYMBOL.find(event.code);
-        if (iterCode != SHIFT_KEYBOARD_SYMBOL.end()) {
-            keyChar = iterCode->second;
-        } else if (KeyCode::KEY_A <= event.code && event.code <= KeyCode::KEY_Z) {
-            keyChar = static_cast<wchar_t>(event.code) - static_cast<wchar_t>(KeyCode::KEY_A) + UPPER_CASE_A;
-        } else if (KeyCode::KEY_0 <= event.code && event.code <= KeyCode::KEY_9) {
-            keyChar = NUM_SYMBOL[static_cast<int32_t>(event.code) - static_cast<int32_t>(KeyCode::KEY_0)];
-        } else {
-            return false;
-        }
-    } else {
-        return false;
-    }
-    std::wstring appendElement(1, keyChar);
-    InsertValue(StringUtils::ToString(appendElement));
-    return true;
-}
-
-bool RichEditorPattern::HandleDirectionalKey(const KeyEvent& keyEvent)
-{
-    switch (keyEvent.code) {
-        case KeyCode::KEY_DPAD_UP:
-            return CursorMoveUp();
-        case KeyCode::KEY_DPAD_DOWN:
-            return CursorMoveDown();
-        case KeyCode::KEY_DPAD_LEFT:
-            return CursorMoveLeft();
-        case KeyCode::KEY_DPAD_RIGHT:
-            return CursorMoveRight();
-        default:
-            return false;
-    }
-    return false;
-}
-
-void RichEditorPattern::ParseAppendValue(KeyCode keyCode, std::string& appendElement)
-{
-    switch (keyCode) {
-        case KeyCode::KEY_SPACE:
-            appendElement = " ";
+    switch (direction) {
+        case CaretMoveIntent::Left:
+            CursorMoveLeft();
+            break;
+        case CaretMoveIntent::Right:
+            CursorMoveRight();
+            break;
+        case CaretMoveIntent::Up:
+            CursorMoveUp();
+            break;
+        case CaretMoveIntent::Down:
+            CursorMoveDown();
             break;
         default:
-            break;
+            LOGW("Unsupported cursor move operation for rich editor");
     }
 }
 

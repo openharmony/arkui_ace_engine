@@ -1464,13 +1464,6 @@ void RenderTextField::HandleExtendAction(int32_t action)
     }
 }
 
-void RenderTextField::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
-{
-    KeyCode code = static_cast<KeyCode>(keyCode);
-    CursorMoveSkip skip = static_cast<CursorMoveSkip>(cursorMoveSkip);
-    HandleOnSelect(code, skip);
-}
-
 const TextEditingValue& RenderTextField::GetEditingValue() const
 {
     return controller_->GetValue();
