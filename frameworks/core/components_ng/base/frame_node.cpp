@@ -2633,9 +2633,10 @@ void FrameNode::Layout()
         GetLayoutAlgorithm()->SetSkipLayout();
     }
 
+    bool isFocusOnPage = GetHostNode()->GetFocusHub() && GetHostNode()->GetFocusHub()->IsCurrentFocus();
     SaveGeoState();
-    AvoidKeyboard();
-    ExpandSafeArea();
+    AvoidKeyboard(isFocusOnPage);
+    ExpandSafeArea(isFocusOnPage);
 
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", GetTag().c_str(), GetDepth(),
         geometryNode_->GetFrameOffset().ToString().c_str());
