@@ -788,7 +788,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetMaxLines));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOption"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetCopyOption));
-    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetCopyOption"),
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOption"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetCopyOption));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPlaceholderColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetPlaceholderColor));
@@ -920,6 +920,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetState));
     imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDuration"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetDuration));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDuration"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetDuration));
     imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFixedSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetFixedSize));
     imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFixedSize"),

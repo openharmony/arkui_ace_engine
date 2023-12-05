@@ -17,6 +17,8 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 
 namespace OHOS::Ace::NG {
+constexpr int NUM_4 = 4;
+
 ArkUINativeModuleValue StackBridge::SetAlignContent(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -24,12 +26,11 @@ ArkUINativeModuleValue StackBridge::SetAlignContent(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    int32_t align = NUM_4;
     if (secondArg->IsNumber()) {
-        int32_t align = secondArg->Int32Value(vm);
-        GetArkUIInternalNodeAPI()->GetStackModifier().SetAlignContent(nativeNode, align);
-    } else {
-        GetArkUIInternalNodeAPI()->GetStackModifier().ResetAlignContent(nativeNode);
+        align = secondArg->Int32Value(vm);
     }
+    GetArkUIInternalNodeAPI()->GetStackModifier().SetAlignContent(nativeNode, align);
     return panda::JSValueRef::Undefined(vm);
 }
 

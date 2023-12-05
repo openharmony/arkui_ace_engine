@@ -1414,7 +1414,7 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
             std::clamp(shadowType, static_cast<uint32_t>(ShadowType::COLOR), static_cast<uint32_t>(ShadowType::BLUR)));
     }
     Color color;
-    ArkTSUtils::ParseJsColor(vm, colorArg, color);
+    ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color);
     shadows[NUM_5] = color.GetValue();
 
     shadows[NUM_6] = static_cast<uint32_t>((fillArg->IsBoolean()) ? fillArg->BooleaValue() : false);
@@ -2694,7 +2694,7 @@ ArkUINativeModuleValue CommonBridge::SetForegroundColor(ArkUIRuntimeCallInfo *ru
         }
     }
     Color foregroundColor;
-    if (!ArkTSUtils::ParseJsColor(vm, colorArg, foregroundColor)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor)) {
         return panda::JSValueRef::Undefined(vm);
     }
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetForegroundColor(nativeNode, true, foregroundColor.GetValue());
@@ -2954,6 +2954,23 @@ ArkUINativeModuleValue CommonBridge::ResetOffset(ArkUIRuntimeCallInfo *runtimeCa
     return panda::JSValueRef::Undefined(vm);
 }
 
+void ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, ArkUISizeType& result)
+{
+    CalcDimension dimen(0, DimensionUnit::VP);
+    if (ArkTSUtils::ParseJsDimensionVp(vm, value, dimen)) {
+        if (LessOrEqual(dimen.Value(), 0.0)) {
+            dimen.SetValue(0.0);
+            dimen.SetUnit(DimensionUnit::PX);
+        }
+        result.unit = static_cast<int8_t>(dimen.Unit());
+        if (dimen.CalcValue() != "") {
+            result.string = dimen.CalcValue().c_str();
+        } else {
+            result.value = dimen.Value();
+        }
+    }
+}
+
 ArkUINativeModuleValue CommonBridge::SetPadding(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
@@ -2970,26 +2987,10 @@ ArkUINativeModuleValue CommonBridge::SetPadding(ArkUIRuntimeCallInfo *runtimeCal
     struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
     struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
 
-    CalcDimension topDimen(0, DimensionUnit::VP);
-    if (ArkTSUtils::ParseJsDimensionVp(vm, secondArg, topDimen)) {
-        top.value = topDimen.Value();
-        top.unit = static_cast<int8_t>(topDimen.Unit());
-    }
-    CalcDimension rightDimen(0, DimensionUnit::VP);
-    if (ArkTSUtils::ParseJsDimensionVp(vm, thirdArg, rightDimen)) {
-        right.value = rightDimen.Value();
-        right.unit = static_cast<int8_t>(rightDimen.Unit());
-    }
-    CalcDimension bottomDimen(0, DimensionUnit::VP);
-    if (ArkTSUtils::ParseJsDimensionVp(vm, forthArg, bottomDimen)) {
-        bottom.value = bottomDimen.Value();
-        bottom.unit = static_cast<int8_t>(bottomDimen.Unit());
-    }
-    CalcDimension leftDimen(0, DimensionUnit::VP);
-    if (ArkTSUtils::ParseJsDimensionVp(vm, fifthArg, leftDimen)) {
-        left.value = leftDimen.Value();
-        left.unit = static_cast<int8_t>(leftDimen.Unit());
-    }
+    ParsePadding(vm, secondArg, top);
+    ParsePadding(vm, thirdArg, right);
+    ParsePadding(vm, forthArg, bottom);
+    ParsePadding(vm, fifthArg, left);
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetPadding(nativeNode, &top, &right, &bottom, &left);
 
     return panda::JSValueRef::Undefined(vm);
@@ -3015,34 +3016,47 @@ ArkUINativeModuleValue CommonBridge::SetMargin(ArkUIRuntimeCallInfo *runtimeCall
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-
-    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-
+    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType right = { 16.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType left = { 16.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
     CalcDimension topDimen(0, DimensionUnit::VP);
     if (ArkTSUtils::ParseJsDimensionVp(vm, secondArg, topDimen)) {
-        top.value = topDimen.Value();
         top.unit = static_cast<int8_t>(topDimen.Unit());
+        if (topDimen.CalcValue() != "") {
+            top.string = topDimen.CalcValue().c_str();
+        } else {
+            top.value = topDimen.Value();
+        }
     }
     CalcDimension rightDimen(0, DimensionUnit::VP);
     if (ArkTSUtils::ParseJsDimensionVp(vm, thirdArg, rightDimen)) {
-        right.value = rightDimen.Value();
         right.unit = static_cast<int8_t>(rightDimen.Unit());
+        if (rightDimen.CalcValue() != "") {
+            right.string = rightDimen.CalcValue().c_str();
+        } else {
+            right.value = rightDimen.Value();
+        }
     }
     CalcDimension bottomDimen(0, DimensionUnit::VP);
     if (ArkTSUtils::ParseJsDimensionVp(vm, forthArg, bottomDimen)) {
-        bottom.value = bottomDimen.Value();
         bottom.unit = static_cast<int8_t>(bottomDimen.Unit());
+        if (bottomDimen.CalcValue() != "") {
+            bottom.string = bottomDimen.CalcValue().c_str();
+        } else {
+            bottom.value = bottomDimen.Value();
+        }
     }
     CalcDimension leftDimen(0, DimensionUnit::VP);
     if (ArkTSUtils::ParseJsDimensionVp(vm, fifthArg, leftDimen)) {
-        left.value = leftDimen.Value();
         left.unit = static_cast<int8_t>(leftDimen.Unit());
+        if (leftDimen.CalcValue() != "") {
+            left.string = leftDimen.CalcValue().c_str();
+        } else {
+            left.value = leftDimen.Value();
+        }
     }
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetMargin(nativeNode, &top, &right, &bottom, &left);
-
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -3094,12 +3108,14 @@ ArkUINativeModuleValue CommonBridge::SetVisibility(ArkUIRuntimeCallInfo *runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    int32_t value = 0;
     if (secondArg->IsNumber()) {
-        int32_t value = secondArg->Int32Value(vm);
-        GetArkUIInternalNodeAPI()->GetCommonModifier().SetVisibility(nativeNode, value);
-    } else {
-        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetVisibility(nativeNode);
+        value = secondArg->Int32Value(vm);
+        if (value<NUM_0 || value>NUM_2) {
+            value = 0;
+        }
     }
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetVisibility(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -3210,9 +3226,9 @@ ArkUINativeModuleValue CommonBridge::SetDirection(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     std::string dir;
+    int32_t direction = NUM_3;
     if (secondArg->IsString()) {
         dir = secondArg->ToString(vm)->ToString();
-        int32_t direction = NUM_3;
         if (dir == "Ltr") {
             direction = NUM_0;
         } else if (dir == "Rtl") {
@@ -3222,10 +3238,8 @@ ArkUINativeModuleValue CommonBridge::SetDirection(ArkUIRuntimeCallInfo* runtimeC
         } else if (dir == "undefined" && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             direction = NUM_3;
         }
-        GetArkUIInternalNodeAPI()->GetCommonModifier().SetDirection(nativeNode, direction);
-    } else {
-        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetDirection(nativeNode);
     }
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetDirection(nativeNode, direction);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -3303,8 +3317,6 @@ ArkUINativeModuleValue CommonBridge::SetAlignSelf(ArkUIRuntimeCallInfo* runtimeC
     if (secondArg->IsNumber()) {
         uint32_t value = secondArg->Int32Value(vm);
         GetArkUIInternalNodeAPI()->GetCommonModifier().SetAlignSelf(nativeNode, value);
-    } else {
-        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetAlignSelf(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }

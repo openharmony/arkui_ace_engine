@@ -81,7 +81,17 @@ ArkUINativeModuleValue ImageAnimatorBridge::SetDuration(ArkUIRuntimeCallInfo* ru
             duration = DEFAULT_DURATION;
         }
     }
-    secondArg->Int32Value(vm);
+    GetArkUIInternalNodeAPI()->GetImageAnimatorModifier().SetDuration(nativeNode, duration);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageAnimatorBridge::ResetDuration(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    int32_t duration = DEFAULT_DURATION;
     GetArkUIInternalNodeAPI()->GetImageAnimatorModifier().SetDuration(nativeNode, duration);
     return panda::JSValueRef::Undefined(vm);
 }
