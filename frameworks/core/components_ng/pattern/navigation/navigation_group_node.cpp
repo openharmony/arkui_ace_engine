@@ -550,8 +550,7 @@ void NavigationGroupNode::EnterTransitionWithPush(const RefPtr<FrameNode>& node,
     }
     CHECK_NULL_VOID(titleNode);
 
-    option.SetOnFinishEvent([weakNode = WeakPtr<FrameNode>(node), weakNavigation = WeakClaim(this),
-                                id = Container::CurrentId()] {
+    option.SetOnFinishEvent([weakNavigation = WeakClaim(this), id = Container::CurrentId()] {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -559,22 +558,18 @@ void NavigationGroupNode::EnterTransitionWithPush(const RefPtr<FrameNode>& node,
         CHECK_NULL_VOID(taskExecutor);
         // animation finish event should be posted to UI thread.
         taskExecutor->PostTask(
-            [weakNode, weakNavigation]() {
+            [weakNavigation]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;
                 navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-                auto node = weakNode.Upgrade();
-                CHECK_NULL_VOID(node);
-                node->GetEventHub<EventHub>()->SetEnabledInternal(true);
             },
             TaskExecutor::TaskType::UI);
     });
 
     // content
-    node->GetEventHub<EventHub>()->SetEnabledInternal(false);
     node->GetRenderContext()->ClipWithRRect(
         RectF(nodeWidth * HALF, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
     node->GetRenderContext()->UpdateTranslateInXY({ nodeWidth * HALF, 0.0f });
@@ -636,8 +631,7 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
     }
     CHECK_NULL_VOID(titleNode);
 
-    option.SetOnFinishEvent([weakNode = WeakPtr<FrameNode>(node), weakNavigation = WeakClaim(this),
-                                id = Container::CurrentId()] {
+    option.SetOnFinishEvent([weakNavigation = WeakClaim(this), id = Container::CurrentId()] {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -645,16 +639,13 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
         CHECK_NULL_VOID(taskExecutor);
         // animation finish event should be posted to UI thread.
         taskExecutor->PostTask(
-            [weakNode, weakNavigation]() {
+            [weakNavigation]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;
                 navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-                auto node = weakNode.Upgrade();
-                CHECK_NULL_VOID(node);
-                node->GetEventHub<EventHub>()->SetEnabledInternal(true);
             },
             TaskExecutor::TaskType::UI);
     });
@@ -663,7 +654,6 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
             RectF(nodeWidth * PARENT_PAGE_OFFSET, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
     }
     // content
-    node->GetEventHub<EventHub>()->SetEnabledInternal(false);
     node->GetRenderContext()->UpdateTranslateInXY({ -nodeWidth * PARENT_PAGE_OFFSET, 0.0f });
     // title
     titleNode->GetRenderContext()->UpdateTranslateInXY({ nodeWidth * PARENT_TITLE_OFFSET, 0.0f });
