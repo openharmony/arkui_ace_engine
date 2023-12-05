@@ -59,7 +59,7 @@ public:
 
     static void ResetGlobalTransCfg();
 
-    static void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node);
+    static void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false);
 
     // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
     void BeginReferee(int32_t touchId, bool needUpdateChild = false)
