@@ -169,9 +169,12 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         builder->PushStyle(themeTextStyle);
     }
     auto spanContent = GetSpanContent(content);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(textPattern, -1);
-    if (textPattern->GetTextDetectEnable() && !aiSpanMap.empty()) {
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(pattern, -1);
+    auto textLayoutProp = pattern->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProp, -1);
+    if (textLayoutProp->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None && pattern->GetTextDetectEnable() &&
+        !aiSpanMap.empty()) {
         UpdateTextStyleForAISpan(spanContent, builder, textStyle);
     } else {
         UpdateTextStyle(spanContent, builder, textStyle);
