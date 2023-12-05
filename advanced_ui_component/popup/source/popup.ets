@@ -69,7 +69,7 @@ export const defaultTheme: PopupTheme = {
   icon: {
     size: { width: 32, height: 32 },
     margin: { top: 12, bottom: 12, left: 12, right: 12 },
-    fillColor: $r('sys.color.ohos_fa_icon_secondary'),
+    fillColor: '',
     borderRadius: $r('sys.float.ohos_id_corner_radius_default_s')
 
   },
@@ -155,11 +155,11 @@ export function Popup(options: PopupOptions) {
 @Component
 export struct PopupComponent {
   private theme: PopupTheme = defaultTheme;
-  @Prop icon: PopupIconOptions = { image: "" };
+  @Prop icon: PopupIconOptions = { image: '' };
   @Prop title: PopupTextOptions = { text: '' };
   @Prop message: PopupTextOptions = { text: '' };
   @Prop showClose: boolean | Resource = true;
-  @Prop buttons: [PopupButtonOptions?, PopupButtonOptions?] = [{ text: '' },{ text: '' }];
+  @Prop buttons: [PopupButtonOptions?, PopupButtonOptions?] = [{ text: '' }, { text: '' }];
   private onClose: () => void = noop;
   @State closeButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State firstButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
@@ -335,9 +335,23 @@ export struct PopupComponent {
     }
   }
 
+  private getLayoutWeight(): number {
+    let layoutWeight: number
+    if ((this.icon.image !== '' && this.icon.image !== void (0)) ||
+      (this.title.text !== '' && this.title.text !== void (0)) ||
+      (this.showClose || this.showClose === void (0)) ||
+      (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
+      (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
+      layoutWeight = 1
+    } else {
+      layoutWeight = 0
+    }
+    return layoutWeight
+  }
+
   build() {
     Row() {
-      if (this.icon.image !== "") {
+      if (this.icon.image !== '' && this.icon.image !== void (0)) {
         Image(this.getIconImage())
           .width(this.getIconWidth())
           .height(this.getIconHeight())
@@ -345,7 +359,7 @@ export struct PopupComponent {
           .fillColor(this.getIconFillColor())
           .borderRadius(this.getIconBorderRadius())
       }
-      if (this.title.text !== '') {
+      if (this.title.text !== '' && this.title.text !== void (0)) {
         Column() {
           Flex({ alignItems: ItemAlign.Start }) {
             Text(this.getTitleText())
@@ -358,7 +372,7 @@ export struct PopupComponent {
               .fontWeight(this.getTitleFontWeight())
               .fontSize(this.getTitleFontSize())
               .fontColor(this.getTitleFontColor())
-            if (this.showClose) {
+            if (this.showClose || this.showClose === void (0)) {
               Button() {
                 Image(this.getCloseButtonImage())
                   .focusable(true)
@@ -401,7 +415,7 @@ export struct PopupComponent {
           .constraintSize({ maxHeight: this.getScrollMaxHeight() })
 
           Flex({ wrap: FlexWrap.Wrap }) {
-            if (this.buttons?.[0]?.text !== '') {
+            if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
               Button() {
                 Text(this.getFirstButtonText())
                   .maxLines(2)
@@ -427,7 +441,7 @@ export struct PopupComponent {
                 }
               })
             }
-            if (this.buttons?.[1]?.text !== '') {
+            if (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0)) {
               Button() {
                 Text(this.getSecondButtonText())
                   .maxLines(2)
@@ -460,7 +474,7 @@ export struct PopupComponent {
             this.buttonHeight = rect.height as number
           })
         }
-        .layoutWeight(1)
+        .layoutWeight(this.getLayoutWeight())
       }
       else {
         Column() {
@@ -470,14 +484,14 @@ export struct PopupComponent {
                 .fontSize(this.getMessageFontSize())
                 .fontColor(this.getMessageFontColor())
             }
-            .layoutWeight(1)
+            .layoutWeight(this.getLayoutWeight())
             .align(Alignment.TopStart)
             .padding(this.getMessagePadding())
             .scrollBar(BarState.Auto)
             .scrollable(ScrollDirection.Vertical)
             .constraintSize({ maxHeight: this.getScrollMaxHeight() })
 
-            if (this.showClose) {
+            if (this.showClose || this.showClose === void (0)) {
               Button() {
                 Image(this.getCloseButtonImage())
                   .focusable(true)
@@ -505,7 +519,7 @@ export struct PopupComponent {
           .margin(this.getTitleMargin())
 
           Flex({ wrap: FlexWrap.Wrap }) {
-            if (this.buttons?.[0]?.text !== '') {
+            if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
               Button() {
                 Text(this.getFirstButtonText())
                   .maxLines(2)
@@ -531,7 +545,7 @@ export struct PopupComponent {
                 }
               })
             }
-            if (this.buttons?.[1]?.text !== '') {
+            if (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0)) {
               Button() {
                 Text(this.getSecondButtonText())
                   .maxLines(2)
@@ -564,7 +578,7 @@ export struct PopupComponent {
             this.buttonHeight = rect.height as number
           })
         }
-        .layoutWeight(1)
+        .layoutWeight(this.getLayoutWeight())
       }
     }
     .padding(this.getWindowsPadding())
