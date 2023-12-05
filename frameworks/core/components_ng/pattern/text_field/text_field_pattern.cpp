@@ -1565,7 +1565,8 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
 
     if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex) && info.GetSourceDevice() != SourceType::MOUSE) {
         ProcessOverlay(true, true, true, true);
-    } else if (!contentController_->IsEmpty() && info.GetSourceDevice() != SourceType::MOUSE) {
+    } else if (!contentController_->IsEmpty() && info.GetSourceDevice() != SourceType::MOUSE
+        && !IsNormalInlineState()) {
         if (GetNakedCharPosition() >= 0) {
             DelayProcessOverlay(true, true, false);
         } else {
