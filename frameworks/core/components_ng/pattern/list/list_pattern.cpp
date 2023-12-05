@@ -1517,7 +1517,7 @@ void ListPattern::UpdateScrollBarOffset()
     }
     float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     float currentOffset = itemsSize / itemPosition_.size() * itemPosition_.begin()->first - startMainPos_;
-    auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1);
+    auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1) - spaceWidth_;
     if (GetAlwaysEnabled()) {
         estimatedHeight = estimatedHeight - spaceWidth_;
     }
