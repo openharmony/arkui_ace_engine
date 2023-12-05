@@ -6555,24 +6555,7 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     int32_t shadowStyle = 0;
     if (ParseJsInteger<int32_t>(jsValue, shadowStyle)) {
         auto style = static_cast<ShadowStyle>(shadowStyle);
-        auto colorMode = SystemProperties::GetColorMode();
-        if (style == ShadowStyle::None) {
-            return true;
-        }
-        
-        auto container = Container::Current();
-        CHECK_NULL_RETURN(container, false);
-        auto pipelineContext = container->GetPipelineContext();
-        CHECK_NULL_RETURN(pipelineContext, false);
-        
-        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
-        if (!shadowTheme) {
-            LOGW("cannot find theme of shadowStyle, create shadowStyle failed");
-            return false;
-        }
-        
-        shadow = shadowTheme->GetShadow(style, colorMode);
-        return true;
+        return GetShadowFromTheme(style, shadow);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     double radius = 0.0;
@@ -6610,6 +6593,27 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     shadow.SetShadowType(static_cast<ShadowType>(type));
     bool isFilled = jsObj->GetPropertyValue<bool>("fill", false);
     shadow.SetIsFilled(isFilled);
+    return true;
+}
+
+bool JSViewAbstract::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    if (!shadowTheme) {
+        return false;
+    }
+
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
     return true;
 }
 
