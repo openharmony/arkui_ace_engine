@@ -42,6 +42,7 @@ public:
     static bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result);
     static bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &result);
     static bool ParseAllBorder(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result);
+    static bool ParseAllRadius(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result);
     static bool ParseJsFontFamilies(
         const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result);
     static bool ParseJsFontFamiliesFromResource(
