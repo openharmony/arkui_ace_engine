@@ -474,9 +474,11 @@ public:
 
     void RemoveGestureTask(const DelayedTask& task)
     {
-        for (auto& delayedTask : delayedTasks_) {
-            if (delayedTask.recognizer == task.recognizer) {
-                delayedTask.deleted = true;
+        for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end();) {
+            if (iter->recognizer == task.recognizer) {
+                delayedTasks_.erase(iter++);
+            } else {
+                ++iter;
             }
         }
     }

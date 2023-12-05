@@ -33,7 +33,6 @@ struct DelayedTask {
     int64_t timeStamp = 0;
     int32_t time = 0;
     std::function<void()> task;
-    bool deleted = false;
 };
 
 enum class RefereeState { READY, DETECTING, PENDING, PENDING_BLOCKED, SUCCEED_BLOCKED, SUCCEED, FAIL };

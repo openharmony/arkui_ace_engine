@@ -488,22 +488,20 @@ void PipelineContext::ProcessDelayTasks()
         return;
     }
     auto currentTimeStamp = GetSysTimestamp();
-    for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end(); ++iter) {
-        if (iter->timeStamp + static_cast<int64_t>(iter->time) * MILLISECONDS_TO_NANOSECONDS <= currentTimeStamp) {
-            if (!iter->deleted && iter->task) {
-                iter->task();
-            }
-            iter->deleted = true;
+    auto delayedTasks = std::move(delayedTasks_);
+    auto result = std::remove_if(delayedTasks.begin(), delayedTasks.end(), [this, currentTimeStamp](const auto &task) {
+        if (task.timeStamp + static_cast<int64_t>(task.time) * MILLISECONDS_TO_NANOSECONDS > currentTimeStamp) {
+            delayedTasks_.emplace_back(task);
+            return true;
         }
-    }
-
-    for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end();) {
-        if (iter->deleted) {
-            delayedTasks_.erase(iter++);
-        } else {
-            ++iter;
+        return false;
+    });
+    delayedTasks.erase(result, delayedTasks.end());
+    std::for_each(delayedTasks.begin(), delayedTasks.end(), [this](auto &delayedTask) {
+        if (delayedTask.task) {
+            delayedTask.task();
         }
-    }
+    });
 }
 
 void PipelineContext::FlushFrameTrace()
