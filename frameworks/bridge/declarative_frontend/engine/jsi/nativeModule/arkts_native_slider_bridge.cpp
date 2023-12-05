@@ -38,11 +38,11 @@ ArkUINativeModuleValue SliderBridge::SetShowTips(ArkUIRuntimeCallInfo* runtimeCa
     }
 
     std::string content;
-    if (!thirdArg->IsNull()) {
-        content = thirdArg->ToString(vm)->ToString();
+    if (ArkTSUtils::ParseJsString(vm, thirdArg, content)) {
+        GetArkUIInternalNodeAPI()->GetSliderModifier().ResetShowTips(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetSliderModifier().SetShowTips(nativeNode, showTips, content.c_str());
     }
-
-    GetArkUIInternalNodeAPI()->GetSliderModifier().SetShowTips(nativeNode, showTips, content.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -333,7 +333,7 @@ ArkUINativeModuleValue SliderBridge::SetThickness(ArkUIRuntimeCallInfo* runtimeC
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     CalcDimension thickness;
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, thickness, false)) {
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, secondArg, thickness)) {
         GetArkUIInternalNodeAPI()->GetSliderModifier().ResetThickness(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
