@@ -1761,6 +1761,10 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetAnimationDuration));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAnimationDuration"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetAnimationDuration));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBarPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetBarPosition));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetBarPosition));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabs"), tabs);
 }
 

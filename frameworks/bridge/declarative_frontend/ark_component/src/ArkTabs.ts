@@ -10,11 +10,11 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     throw new Error('Method not implemented.');
   }
   vertical(value: boolean): TabsAttribute {
-    modifier(this._modifiers, VerticalModifier, value);
+    modifier(this._modifiers, TabsVerticalModifier, value);
     return this;
   }
   barPosition(value: BarPosition): TabsAttribute {
-    if (isNumber(value) && value >= BarPosition.Start && value < BarPosition.End) {
+    if (isNumber(value) && value >= BarPosition.Start && value <= BarPosition.End) {
       modifier(this._modifiers, BarPositionModifier, value);
     } else {
       modifier(this._modifiers, BarPositionModifier, BarPosition.Start);
@@ -78,6 +78,8 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
       arkDrivider.value.color = undefined;
       arkDrivider.value.startMargin = undefined;
       arkDrivider.value.endMargin = undefined;
+    } else {
+      arkDrivider.value = value;
     }
 
     modifier(this._modifiers, DividerModifier, arkDrivider);
@@ -121,7 +123,8 @@ class DividerModifier extends Modifier<ArkDivider> {
     if (reset) {
       GetUINativeModule().tabs.resetDivider(node);
     } else {
-      GetUINativeModule().tabs.setDivider(node, this.value);
+      GetUINativeModule().tabs.setDivider(node, this.value.value.strokeWidth,
+        this.value.value.color, this.value.value.startMargin, this.value.value.endMargin);
     }
   }
 }
@@ -190,7 +193,7 @@ class BarOverlapModifier extends Modifier<boolean> {
   }
 }
 
-class VerticalModifier extends Modifier<boolean> {
+class TabsVerticalModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('vertical');
 
   applyPeer(node: KNode, reset: boolean): void {

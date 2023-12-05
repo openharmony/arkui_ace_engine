@@ -380,17 +380,27 @@ ArkUINativeModuleValue TabsBridge::SetTabBarWidth(ArkUIRuntimeCallInfo* runtimeC
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension width;
+    ArkUINativeModuleValue undefinedRes = panda::JSValueRef::Undefined(vm);
 
     if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionFromResource(vm, jsValue, DimensionUnit::VP, width)) {
         GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarWidth(nativeNode);
-    } else {
-        if (LessNotEqual(width.Value(), 0.0)) {
-            width.SetValue(0.0);
-        }
-        GetArkUIInternalNodeAPI()->GetTabsModifier().SetTabBarWidth(
-            nativeNode, width.Value(), static_cast<int>(width.Unit()));
+        return undefinedRes;
     }
-    return panda::JSValueRef::Undefined(vm);
+
+    CalcDimension invWidth;
+    if (NearZero(width.Value()) &&
+        ArkTSUtils::ParseJsDimensionFromResource(vm, jsValue, DimensionUnit::INVALID, invWidth) &&
+        invWidth.Unit() == DimensionUnit::INVALID) {
+        GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarWidth(nativeNode);
+        return undefinedRes;
+    }
+
+    if (LessNotEqual(width.Value(), 0.0)) {
+        width.SetValue(0.0);
+    }
+    GetArkUIInternalNodeAPI()->GetTabsModifier().SetTabBarWidth(nativeNode, width.Value(),
+        static_cast<int>(width.Unit()));
+    return undefinedRes;
 }
 
 ArkUINativeModuleValue TabsBridge::ResetTabBarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -411,17 +421,27 @@ ArkUINativeModuleValue TabsBridge::SetTabBarHeight(ArkUIRuntimeCallInfo* runtime
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension height;
+    ArkUINativeModuleValue undefinedRes = panda::JSValueRef::Undefined(vm);
 
     if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionFromResource(vm, jsValue, DimensionUnit::VP, height)) {
         GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarHeight(nativeNode);
-    } else {
-        if (LessNotEqual(height.Value(), 0.0)) {
-            height.SetValue(0.0);
-        }
-        GetArkUIInternalNodeAPI()->GetTabsModifier().SetTabBarHeight(
-            nativeNode, height.Value(), static_cast<int>(height.Unit()));
+        return undefinedRes;
     }
-    return panda::JSValueRef::Undefined(vm);
+
+    CalcDimension invHeight;
+    if (NearZero(height.Value()) &&
+        ArkTSUtils::ParseJsDimensionFromResource(vm, jsValue, DimensionUnit::INVALID, invHeight) &&
+        invHeight.Unit() == DimensionUnit::INVALID) {
+        GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarHeight(nativeNode);
+        return undefinedRes;
+    }
+
+    if (LessNotEqual(height.Value(), 0.0)) {
+        height.SetValue(0.0);
+    }
+    GetArkUIInternalNodeAPI()->GetTabsModifier().SetTabBarHeight(
+        nativeNode, height.Value(), static_cast<int>(height.Unit()));
+    return undefinedRes;
 }
 
 ArkUINativeModuleValue TabsBridge::ResetTabBarHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -475,6 +495,28 @@ ArkUINativeModuleValue TabsBridge::ResetAnimationDuration(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetTabsModifier().ResetAnimationDuration(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetBarPosition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    int32_t barVal = secondArg->ToNumber(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetTabsModifier().SetTabBarPosition(nativeNode, barVal);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetBarPosition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarPosition(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
