@@ -41,6 +41,10 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (!richEditorPattern->HasFocus() && !richEditorPattern->GetTextDetectEnable()) {
         overlayMod->UpdateScrollBar(paintWrapper);
         overlayMod->SetCaretVisible(false);
+        const auto& selection = richEditorPattern->GetTextSelector();
+        if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
+            overlayMod->SetSelectedRects(pManager_->GetRects(selection.GetTextStart(), selection.GetTextEnd()));
+        }
         return;
     }
     auto caretVisible = richEditorPattern->GetCaretVisible();
