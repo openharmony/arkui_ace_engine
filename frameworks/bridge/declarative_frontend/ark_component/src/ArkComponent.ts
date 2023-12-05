@@ -851,15 +851,22 @@ class UseEffectModifier extends Modifier<boolean> {
   }
 }
 
-class ForegroundColorModifier extends Modifier<ArkForegroundColor> {
+class ForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringStrategy> {
   static identity: Symbol = Symbol("foregroundColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetForegroundColor(node);
     }
     else {
-      GetUINativeModule().common.setForegroundColor(node,
-        this.value.color, this.value.strategy);
+      GetUINativeModule().common.setForegroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
@@ -1929,22 +1936,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   foregroundColor(value: ResourceColor | ColoringStrategy): this {
+    modifierWithKey(this._modifiersWithKeys, ForegroundColorModifier.identity, ForegroundColorModifier, value);
     let arkForegroundColor = new ArkForegroundColor
-    if (typeof value === "string") {
-      let lowerValue = value.toLowerCase().trim();
-      if (lowerValue === "invert") {
-        arkForegroundColor.strategy = lowerValue;
-        modifier(this._modifiers, ForegroundColorModifier, arkForegroundColor);
-        return this;
-      }
-    }
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      arkForegroundColor.color = arkColor.getColor();
-      modifier(this._modifiers, ForegroundColorModifier, arkForegroundColor);
-    } else {
-      modifier(this._modifiers, ForegroundColorModifier, undefined);
-    }
     return this;
   }
 
