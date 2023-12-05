@@ -260,10 +260,10 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
     auto downPaint = downHandle.paintRect - offset;
     if (upHandle.isShow && !downHandle.isShow) {
         auto circleOffset = OffsetF(
-            upPaint.GetX() - (spaceBetweenHandle - upPaint.Width()) / 2.0f, upPaint.GetX() - 2 * spaceBetweenHandle);
+            upPaint.GetX() - (spaceBetweenHandle - upPaint.Width()) / 2.0f, upPaint.GetY() - spaceBetweenHandle);
         auto upCircleRect = RectF(circleOffset, SizeF(spaceBetweenHandle, spaceBetweenHandle));
         if (menuRect.IsIntersectWith(upPaint) || menuRect.IsIntersectWith(upCircleRect)) {
-            menuOffset.SetY(upPaint.Bottom() + spaceBetweenText);
+            menuOffset.SetY(upPaint.Bottom() + spaceBetweenText + spaceBetweenHandle);
         }
         return menuOffset;
     }

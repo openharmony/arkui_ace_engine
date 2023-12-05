@@ -281,4 +281,26 @@ void SelectOverlayClient::OnParentScrollStartOrEnd(bool isEnd)
         proxy->ShowOrHiddenMenu(false);
     }
 }
+
+RectF SelectOverlayClient::GetVisibleContentRect(WeakPtr<FrameNode> parent, RectF visibleRect)
+{
+    auto parentNode = parent.Upgrade();
+    CHECK_NULL_RETURN(parentNode, visibleRect);
+    if (parentNode->GetTag() == V2::PAGE_ETS_TAG) {
+        return visibleRect;
+    }
+    auto intersectRect = visibleRect;
+    auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(parentNode->GetPattern());
+    auto geometryNode = parentNode->GetGeometryNode();
+    if (scrollablePattern && geometryNode) {
+        auto parentViewPort = RectF(parentNode->GetTransformRelativeOffset(), geometryNode->GetFrameSize());
+        if (parentViewPort.IsIntersectWith(visibleRect)) {
+            intersectRect = parentViewPort.IntersectRectT(visibleRect);
+        } else {
+            return RectF(0, 0, 0, 0);
+        }
+    }
+    parentNode = parentNode->GetAncestorNodeOfFrame();
+    return GetVisibleContentRect(parentNode, intersectRect);
+}
 } // namespace OHOS::Ace::NG
