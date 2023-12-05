@@ -36,7 +36,11 @@ void SetTextStyle(NodeHandle node, uint32_t color, const char* fontSize, const c
     textStyle.textColor = Color(color);
     CalcDimension fontSizeDimension =
         StringUtils::StringToCalcDimension(std::string(fontSize), false, DimensionUnit::FP);
-    textStyle.fontSize = fontSizeDimension;
+    if (fontSizeDimension.Unit() == DimensionUnit::PERCENT) {
+        textStyle.fontSize = Dimension(-1);
+    } else {
+        textStyle.fontSize = fontSizeDimension;
+    }
     textStyle.fontWeight = StringUtils::StringToFontWeight(fontweight, FontWeight::NORMAL);
     CalendarPickerModelNG::SetTextStyle(frameNode, textStyle);
 }

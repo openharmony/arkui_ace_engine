@@ -1162,10 +1162,10 @@ class IDModifier extends Modifier<string> {
   static identity: Symbol = Symbol("id");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().common.resetID(node);
+      GetUINativeModule().common.resetId(node);
     }
     else {
-      GetUINativeModule().common.setID(node, this.value);
+      GetUINativeModule().common.setId(node, this.value);
     }
   }
 }
@@ -2629,18 +2629,18 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   key(value: string): this {
     if (typeof value === "string") {
-      modifier(this._modifiers, IDModifier, value);
+      modifier(this._modifiers, KeyModifier, value);
     } else {
-      modifier(this._modifiers, IDModifier, undefined);
+      modifier(this._modifiers, KeyModifier, undefined);
     }
     return this;
   }
 
   id(value: string): this {
     if (typeof value === "string") {
-      modifier(this._modifiers, KeyModifier, value);
+      modifier(this._modifiers, IDModifier, value);
     } else {
-      modifier(this._modifiers, KeyModifier, undefined);
+      modifier(this._modifiers, IDModifier, undefined);
     }
     return this;
   }
