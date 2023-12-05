@@ -72,7 +72,7 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
         ContainerScope scope(client->GetInstanceId());
         client->DeleteForward(length);
     };
-    PostSyncTaskToUI(task);
+    PostTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
@@ -206,7 +206,7 @@ void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
                 break;
         }
     };
-    PostSyncTaskToUI(task);
+    PostTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
@@ -221,7 +221,7 @@ void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
         ContainerScope scope(client->GetInstanceId());
         client->HandleSetSelection(start, end);
     };
-    PostSyncTaskToUI(task);
+    PostTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::HandleExtendAction(int32_t action)
