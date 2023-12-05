@@ -373,11 +373,6 @@ void DragDropManager::NotifyDragRegisterFrameNode(std::unordered_map<int32_t, We
         CHECK_NULL_VOID(frameNode);
         auto eventHub = frameNode->GetEventHub<EventHub>();
         if (!CheckParentVisible(frameNode) || (eventHub && !eventHub->IsEnabled())) {
-            if (SystemProperties::GetDebugEnabled()) {
-                LOGI("DragDropManager NotifyDragRegisterFrameNode. Dragged frameNode is %{public}s is InVisible or "
-                     "Disabled",
-                    frameNode->GetTag().c_str());
-            }
             continue;
         }
         auto pattern = frameNode->GetPattern<Pattern>();
@@ -557,8 +552,8 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     auto eventHub = dragFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
     UpdateDragEvent(event, point);
+    auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event, extraParams);
     eventHub->HandleInternalOnDrop(event, extraParams);
     ClearVelocityInfo();
@@ -618,8 +613,8 @@ Rect DragDropManager::GetDragWindowRect(const Point& point)
 {
     if (!previewRect_.IsValid()) {
         ShadowOffsetData shadowOffsetData { -1, -1, -1, -1 };
-        int retOffset = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
-        if (retOffset == 0) {
+        int ret = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
+        if (ret == 0) {
             previewRect_ = Rect(
                 shadowOffsetData.offsetX,
                 shadowOffsetData.offsetY,
@@ -1085,10 +1080,11 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     }
     auto unifiedData = udData;
     event->SetData(unifiedData);
+    RequireSummary();
     event->SetSummary(summaryMap_);
     ShadowOffsetData shadowOffsetData { -1, -1, -1, -1 };
-    int retOffset = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
-    if (retOffset == 0) {
+    ret = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
+    if (ret == 0) {
         previewRect_ = Rect(
             point.GetX() + shadowOffsetData.offsetX,
             point.GetY() + shadowOffsetData.offsetY,
@@ -1096,6 +1092,9 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
             shadowOffsetData.height);
         event->SetPreviewRect(previewRect_);
     } else {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Interaction GetShadowOffset in DragEnd with code:%{public}d", ret);
+        }
         event->SetPreviewRect(previewRect_ + Offset(point.GetX(), point.GetY()));
     }
 #endif // ENABLE_DRAG_FRAMEWORK
