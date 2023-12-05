@@ -3627,6 +3627,13 @@ void RosenRenderContext::OnLightIlluminatedUpdate(const uint32_t lightIlluminate
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnIlluminatedBorderWidthUpdate(const Dimension& illuminatedBorderWidth)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetIlluminatedBorderWidth(static_cast<float>(illuminatedBorderWidth.ConvertToPx()));
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnBloomUpdate(const float bloomIntensity)
 {
     CHECK_NULL_VOID(rsNode_);

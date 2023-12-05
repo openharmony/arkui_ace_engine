@@ -1053,6 +1053,11 @@ public:
         ViewAbstract::SetLightIlluminated(value);
     }
 
+    void SetIlluminatedBorderWidth(const Dimension& value) override
+    {
+        ViewAbstract::SetIlluminatedBorderWidth(value);
+    }
+
     void SetBloom(const float value) override
     {
         ViewAbstract::SetBloom(value);

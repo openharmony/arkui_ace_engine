@@ -331,6 +331,7 @@ public:
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
     static void SetLightIntensity(const float value);
     static void SetLightIlluminated(const uint32_t value);
+    static void SetIlluminatedBorderWidth(const Dimension& value);
     static void SetBloom(const float value);
 
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
