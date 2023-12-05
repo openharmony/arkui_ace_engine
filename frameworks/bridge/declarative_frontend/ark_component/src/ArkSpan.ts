@@ -4,8 +4,6 @@ class SpanFontSizeModifier extends ModifierWithKey<Length> {
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().span.resetFontSize(node);
-    } else if (!isString(this.value) && !isNumber(this.value) && !isResource(this.value)) {
-      GetUINativeModule().span.resetFontSize(node);
     } else {
       GetUINativeModule().span.setFontSize(node, this.value!);
     }
@@ -19,8 +17,6 @@ class SpanFontFamilyModifier extends ModifierWithKey<string | Resource> {
   static identity: Symbol = Symbol('spanFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().span.resetFontFamily(node);
-    } else if (!isString(this.value) && !isResource(this.value)) {
       GetUINativeModule().span.resetFontFamily(node);
     } else {
       GetUINativeModule().span.setFontFamily(node, this.value!);
@@ -36,8 +32,6 @@ class SpanLineHeightModifier extends ModifierWithKey<Length> {
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().span.resetLineHeight(node);
-    } else if (!isNumber(this.value) && !isString(this.value) && !isResource(this.value)) {
-      GetUINativeModule().span.resetLineHeight(node);
     } else {
       GetUINativeModule().span.setLineHeight(node, this.value!);
     }
@@ -47,7 +41,7 @@ class SpanLineHeightModifier extends ModifierWithKey<Length> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class SpanFontStyleModifier extends Modifier<FontStyle> {
+class SpanFontStyleModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('spanFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -56,8 +50,11 @@ class SpanFontStyleModifier extends Modifier<FontStyle> {
       GetUINativeModule().span.setFontStyle(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class SpanTextCaseModifier extends Modifier<TextCase> {
+class SpanTextCaseModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('spanTextCase');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -66,24 +63,24 @@ class SpanTextCaseModifier extends Modifier<TextCase> {
       GetUINativeModule().span.setTextCase(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 class SpanFontColorModifier extends ModifierWithKey<ResourceColor> {
   static identity = Symbol('spanFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().span.resetFontColor(node);
-    } else if (!isString(this.value) && !isNumber(this.value) && !isResource(this.value)) {
-      GetUINativeModule().span.resetFontColor(node);
     } else {
       GetUINativeModule().span.setFontColor(node, this.value!);
     }
   }
-
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class SpanLetterSpacingModifier extends Modifier<string> {
+class SpanLetterSpacingModifier extends ModifierWithKey<string> {
   static identity = Symbol('spanLetterSpacing');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -99,12 +96,6 @@ class SpanFontModifier extends ModifierWithKey<Font> {
     if (reset) {
       GetUINativeModule().span.resetFont(node);
     } else {
-      if (!(isNumber(this.value.size)) && !(isString(this.value.size)) && !(isResource(this.value.size))) {
-        this.value.size = undefined;
-      }
-      if (!(isString(this.value.family)) && !(isResource(this.value.family))) {
-        this.value.family = undefined;
-      }
       GetUINativeModule().span.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
@@ -127,15 +118,12 @@ class SpanFontModifier extends ModifierWithKey<Font> {
     }
   }
 }
-class SpanDecorationModifier extends ModifierWithKey<ArkDecoration> {
+class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType, color?: ResourceColor }> {
   static identity = Symbol('spanDecoration');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().span.resetDecoration(node);
     } else {
-      if (!(isNumber(this.value.color)) && !(isString(this.value.color)) && !(isResource(this.value.color))) {
-        this.value.color = undefined;
-      }
       GetUINativeModule().span.setDecoration(node, this.value.type, this.value.color);
     }
   }
@@ -153,7 +141,7 @@ class SpanDecorationModifier extends ModifierWithKey<ArkDecoration> {
     }
   }
 }
-class SpanFontWeightModifier extends Modifier<string> {
+class SpanFontWeightModifier extends ModifierWithKey<string> {
   static identity = Symbol('spanfontweight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -166,32 +154,11 @@ class SpanFontWeightModifier extends Modifier<string> {
 
 class ArkSpanComponent extends ArkComponent implements CommonMethod<SpanAttribute> {
   decoration(value: { type: TextDecorationType, color?: ResourceColor }): SpanAttribute {
-    if (value === null || value === undefined) {
-      modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, undefined);
-    } else {
-      let arkValue: ArkDecoration = new ArkDecoration();
-      if (isNumber(value.type) || (value.type in TextDecorationType)) {
-        arkValue.type = value.type;
-      }
-      if (value.color) {
-        arkValue.color = value.color;
-      }
-      modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, arkValue);
-    }
+    modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, value);
     return this;
   }
   font(value: Font): SpanAttribute {
-    if (value === null || value === undefined) {
-      modifierWithKey(this._modifiersWithKeys, SpanFontModifier.identity, SpanFontModifier, undefined);
-    } else {
-      if (!isLengthType(value.weight)) {
-        value.weight = undefined;
-      }
-      if (!(value.style in FontStyle)) {
-        value.style = undefined;
-      }
-      modifierWithKey(this._modifiersWithKeys, SpanFontModifier.identity, SpanFontModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, SpanFontModifier.identity, SpanFontModifier, value);
     return this;
   }
   lineHeight(value: Length): SpanAttribute {
@@ -207,19 +174,11 @@ class ArkSpanComponent extends ArkComponent implements CommonMethod<SpanAttribut
     return this;
   }
   fontStyle(value: FontStyle): SpanAttribute {
-    if (value in FontStyle) {
-      modifier(this._modifiers, SpanFontStyleModifier, value);
-    } else {
-      modifier(this._modifiers, SpanFontStyleModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier, value);
     return this;
   }
   fontWeight(value: number | FontWeight | string): SpanAttribute {
-    if (isLengthType(value)) {
-      modifier(this._modifiers, SpanFontWeightModifier, value);
-    } else {
-      modifier(this._modifiers, SpanFontWeightModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, value);
     return this;
   }
   fontFamily(value: string | Resource): SpanAttribute {
@@ -227,19 +186,11 @@ class ArkSpanComponent extends ArkComponent implements CommonMethod<SpanAttribut
     return this;
   }
   letterSpacing(value: number | string): SpanAttribute {
-    if (isLengthType(value)) {
-      modifier(this._modifiers, SpanLetterSpacingModifier, value);
-    } else {
-      modifier(this._modifiers, SpanLetterSpacingModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SpanLetterSpacingModifier.identity, SpanLetterSpacingModifier, value);
     return this;
   }
   textCase(value: TextCase): SpanAttribute {
-    if (value in TextCase) {
-      modifier(this._modifiers, SpanTextCaseModifier, value);
-    } else {
-      modifier(this._modifiers, SpanTextCaseModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SpanTextCaseModifier.identity, SpanTextCaseModifier, value);
     return this;
   }
 }

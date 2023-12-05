@@ -1,16 +1,19 @@
 /// <reference path="./import.ts" />
-class SideBarContainerPositionModifier extends Modifier<number> {
+class SideBarContainerPositionModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('sideBarContainerPosition');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().sideBarContainer.resetSideBarPosition(node);
     } else {
-      GetUINativeModule().sideBarContainer.setSideBarPosition(node, this.value!);
+      GetUINativeModule().sideBarContainer.setSideBarPosition(node, this.value);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
-class SideBarContainerAutoHideModifier extends Modifier<boolean> {
+class SideBarContainerAutoHideModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('sideBarContainerautoHide');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -19,9 +22,12 @@ class SideBarContainerAutoHideModifier extends Modifier<boolean> {
       GetUINativeModule().sideBarContainer.setAutoHide(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class SideBarContainerShowSideBarModifier extends Modifier<boolean> {
+class SideBarContainerShowSideBarModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('sideBarContainerShowSideBar');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -29,6 +35,9 @@ class SideBarContainerShowSideBarModifier extends Modifier<boolean> {
     } else {
       GetUINativeModule().sideBarContainer.setShowSideBar(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -74,7 +83,7 @@ class SideBarContainerMinContentWidthModifier extends ModifierWithKey<Dimension>
   }
 }
 
-class SideBarContainerShowControlButtonModifier extends Modifier<boolean> {
+class SideBarContainerShowControlButtonModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('sideBarContainerShowControlButton');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -82,6 +91,9 @@ class SideBarContainerShowControlButtonModifier extends Modifier<boolean> {
     } else {
       GetUINativeModule().sideBarContainer.setShowControlButton(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -106,8 +118,8 @@ class SideBarContainerControlButtonModifier extends ModifierWithKey<ButtonStyle>
       GetUINativeModule().sideBarContainer.resetControlButton(node);
     } else {
       GetUINativeModule().sideBarContainer.setControlButton(node, this.value.left,
-        this.value.top, this.value.width, this.value.height, this.value.icons.shown,
-        this.value.icons.hidden, this.value.icons.switching);
+        this.value.top, this.value.width, this.value.height, this.value.icons?.shown,
+        this.value.icons?.hidden, this.value.icons?.switching);
     }
   }
 
@@ -119,9 +131,9 @@ class SideBarContainerControlButtonModifier extends ModifierWithKey<ButtonStyle>
       return true;
     }
     else {
-      return !isBaseOrResourceEqual(this.stageValue.icons.shown, this.value.icons.shown) ||
-        !isBaseOrResourceEqual(this.stageValue.icons.hidden, this.value.icons.hidden) ||
-        !isBaseOrResourceEqual(this.stageValue.icons.switching, this.value.icons.switching)
+      return !isBaseOrResourceEqual(this.stageValue.icons?.shown, this.value.icons?.shown) ||
+        !isBaseOrResourceEqual(this.stageValue.icons?.hidden, this.value.icons?.hidden) ||
+        !isBaseOrResourceEqual(this.stageValue.icons?.switching, this.value.icons?.switching)
     }
   }
 }
@@ -154,19 +166,11 @@ class ArkSideBarContainerComponent extends ArkComponent implements SideBarContai
     throw new Error("Method not implemented.");
   }
   autoHide(value: boolean): SideBarContainerAttribute {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, SideBarContainerAutoHideModifier, value);
-    } else {
-      modifier(this._modifiers, SideBarContainerAutoHideModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SideBarContainerAutoHideModifier.identity, SideBarContainerAutoHideModifier, value);
     return this;
   }
   showSideBar(value: boolean): SideBarContainerAttribute {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, SideBarContainerShowSideBarModifier, value);
-    } else {
-      modifier(this._modifiers, SideBarContainerShowSideBarModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SideBarContainerShowSideBarModifier.identity, SideBarContainerShowSideBarModifier, value);
     return this;
   }
 
@@ -194,11 +198,7 @@ class ArkSideBarContainerComponent extends ArkComponent implements SideBarContai
   }
 
   sideBarPosition(value: SideBarPosition): SideBarContainerAttribute {
-    if (value in SideBarPosition) {
-      modifier(this._modifiers, SideBarContainerPositionModifier, value);
-    } else {
-      modifier(this._modifiers, SideBarContainerPositionModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SideBarContainerPositionModifier.identity, SideBarContainerPositionModifier, value);
     return this;
   }
 
@@ -208,11 +208,10 @@ class ArkSideBarContainerComponent extends ArkComponent implements SideBarContai
   }
 
   showControlButton(value: boolean): SideBarContainerAttribute {
-    modifier(this._modifiers, SideBarContainerShowControlButtonModifier, value);
+    modifierWithKey(this._modifiersWithKeys, SideBarContainerShowControlButtonModifier.identity, SideBarContainerShowControlButtonModifier, value);
     return this;
   }
 }
-
 // @ts-ignore
 globalThis.SideBarContainer.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();

@@ -6,9 +6,14 @@ class ImageAnimatorImagesModifier extends ModifierWithKey<Array<ImageFrameInfo>>
       GetUINativeModule().imageAnimator.resetImages(node);
     } else {
       let arkImageFrame: ArkImageFrameInfoToArray = this.convertImageFrames(this.value);
-      GetUINativeModule().imageAnimator.setImages(node, arkImageFrame.arrSrc,
-        arkImageFrame.arrWidth, arkImageFrame.arrHeight, arkImageFrame.arrTop, arkImageFrame.arrLeft,
-        arkImageFrame.arrDuration, arkImageFrame.arrSrc.length);
+      if (!arkImageFrame)
+      {
+        GetUINativeModule().imageAnimator.resetImages(node);
+      } else {
+        GetUINativeModule().imageAnimator.setImages(node, arkImageFrame.arrSrc,
+          arkImageFrame.arrWidth, arkImageFrame.arrHeight, arkImageFrame.arrTop, arkImageFrame.arrLeft,
+          arkImageFrame.arrDuration, arkImageFrame.arrSrc.length);
+      }
     }
   }
 
@@ -20,7 +25,7 @@ class ImageAnimatorImagesModifier extends ModifierWithKey<Array<ImageFrameInfo>>
       let checkItemEqual: Boolean = false;
 
       for (let i: number = 0; i < this.value.length; i++) {
-        this.isEqual(this.stageValue[i], this.value[i])
+        checkItemEqual = this.isEqual(this.stageValue[i], this.value[i])
         if (!checkItemEqual) {
           checkDiff = !checkItemEqual;
           break;
@@ -72,7 +77,7 @@ class ImageAnimatorImagesModifier extends ModifierWithKey<Array<ImageFrameInfo>>
   }
 }
 
-class ImageAnimatorDurationModifier extends Modifier<number> {
+class ImageAnimatorDurationModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('imageAnimatorDuration');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -81,9 +86,12 @@ class ImageAnimatorDurationModifier extends Modifier<number> {
       GetUINativeModule().imageAnimator.setDuration(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
-class ImageAnimatorReverseModifier extends Modifier<boolean> {
+class ImageAnimatorReverseModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('imageAnimatorReverse');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -92,20 +100,12 @@ class ImageAnimatorReverseModifier extends Modifier<boolean> {
       GetUINativeModule().imageAnimator.setReverse(node, this.value);
     }
   }
-}
-
-class ImageAnimatorPreDecodeModifier extends Modifier<number> {
-  static identity: Symbol = Symbol('imageAnimatorPreDecode');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      GetUINativeModule().imageAnimator.resetPreDecode(node);
-    } else {
-      GetUINativeModule().imageAnimator.setPreDecode(node, this.value);
-    }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 
-class ImageAnimatorStateModifier extends Modifier<number> {
+class ImageAnimatorStateModifier extends ModifierWithKey<AnimationStatus> {
   static identity: Symbol = Symbol('imageAnimatorState');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -114,9 +114,12 @@ class ImageAnimatorStateModifier extends Modifier<number> {
       GetUINativeModule().imageAnimator.setState(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
-class ImageAnimatorFixedSizeModifier extends Modifier<boolean> {
+class ImageAnimatorFixedSizeModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('imageAnimatorFixedSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -125,9 +128,12 @@ class ImageAnimatorFixedSizeModifier extends Modifier<boolean> {
       GetUINativeModule().imageAnimator.setFixedSize(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
-class ImageAnimatorFillModeModifier extends Modifier<number> {
+class ImageAnimatorFillModeModifier extends ModifierWithKey<FillMode> {
   static identity: Symbol = Symbol('imageAnimatorFillMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -136,9 +142,12 @@ class ImageAnimatorFillModeModifier extends Modifier<number> {
       GetUINativeModule().imageAnimator.setFillMode(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
-class ImageAnimatorIterationsModeModifier extends Modifier<number> {
+class ImageAnimatorIterationsModeModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('imageAnimatorIterationsMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -147,52 +156,48 @@ class ImageAnimatorIterationsModeModifier extends Modifier<number> {
       GetUINativeModule().imageAnimator.setIterations(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
 class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<ImageAnimatorAttribute> {
   images(value: Array<ImageFrameInfo>): ImageAnimatorAttribute {
-    if (value && value.length > 0) {
-      modifierWithKey(this._modifiersWithKeys, ImageAnimatorImagesModifier.identity,
-        ImageAnimatorImagesModifier, value);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, ImageAnimatorImagesModifier.identity,
-        ImageAnimatorImagesModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorImagesModifier.identity,
+      ImageAnimatorImagesModifier, value);
     return this;
   }
   state(value: AnimationStatus): ImageAnimatorAttribute {
-    if (value) {
-      modifier(this._modifiers, ImageAnimatorStateModifier, value);
-    } else {
-      modifier(this._modifiers, ImageAnimatorStateModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorStateModifier.identity,
+      ImageAnimatorStateModifier, value);
     return this;
   }
   duration(value: number): ImageAnimatorAttribute {
-    modifier(this._modifiers, ImageAnimatorDurationModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorDurationModifier.identity,
+      ImageAnimatorDurationModifier, value);
     return this;
   }
   reverse(value: boolean): ImageAnimatorAttribute {
-    modifier(this._modifiers, ImageAnimatorReverseModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorReverseModifier.identity,
+      ImageAnimatorReverseModifier, value);
     return this;
   }
   fixedSize(value: boolean): ImageAnimatorAttribute {
-    modifier(this._modifiers, ImageAnimatorFixedSizeModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorFixedSizeModifier.identity,
+      ImageAnimatorFixedSizeModifier, value);
     return this;
   }
   preDecode(value: number): ImageAnimatorAttribute {
     throw new Error('Method not implemented.');
   }
   fillMode(value: FillMode): ImageAnimatorAttribute {
-    if (value in FillMode) {
-      modifier(this._modifiers, ImageAnimatorFillModeModifier, value);
-    } else {
-      modifier(this._modifiers, ImageAnimatorFillModeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorFillModeModifier.identity,
+      ImageAnimatorFillModeModifier, value);
     return this;
   }
   iterations(value: number): ImageAnimatorAttribute {
-    modifier(this._modifiers, ImageAnimatorIterationsModeModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorIterationsModeModifier.identity,
+      ImageAnimatorIterationsModeModifier, value);
     return this;
   }
   onStart(event: () => void): ImageAnimatorAttribute {

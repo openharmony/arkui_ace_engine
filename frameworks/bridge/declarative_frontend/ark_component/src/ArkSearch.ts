@@ -1,6 +1,6 @@
 /// <reference path="./import.ts" />
 
-class SearchSelectionMenuHiddenModifier extends Modifier<boolean> {
+class SearchSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
   static identity = Symbol('searchSelectionMenuHidden');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -8,6 +8,9 @@ class SearchSelectionMenuHiddenModifier extends Modifier<boolean> {
     } else {
       GetUINativeModule().search.setSelectionMenuHidden(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 
@@ -17,21 +20,17 @@ class SearchCaretStyleModifier extends ModifierWithKey<CaretStyle> {
     if (reset) {
       GetUINativeModule().search.resetCaretStyle(node);
     } else {
-      if (this.value === null || !isObject(this.value)) {
-        GetUINativeModule().search.resetCaretStyle(node);
-      } else {
-        GetUINativeModule().search.setCaretStyle(node, this.value.width,
-          this.value.color);
-      }
+      GetUINativeModule().search.setCaretStyle(node, this.value.width,
+        this.value.color);
     }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
-      !isBaseOrResourceEqual(this.stageValue.color, this.value.color)
+      !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
   }
 }
 
-class SearchEnableKeyboardOnFocusModifier extends Modifier<boolean> {
+class SearchEnableKeyboardOnFocusModifier extends ModifierWithKey<boolean> {
   static identity = Symbol('searchEnableKeyboardOnFocus');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -39,6 +38,9 @@ class SearchEnableKeyboardOnFocusModifier extends Modifier<boolean> {
     } else {
       GetUINativeModule().search.setEnableKeyboardOnFocus(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 
@@ -48,24 +50,14 @@ class SearchSearchIconModifier extends ModifierWithKey<IconOptions> {
     if (reset) {
       GetUINativeModule().search.resetSearchIcon(node);
     } else {
-      if (this.value === null || !isObject(this.value)) {
-        GetUINativeModule().search.resetSearchIcon(node);
-      } else {
-        GetUINativeModule().search.setSearchIcon(node, this.value.size,
-          this.value.color, this.value.src);
-      }
+      GetUINativeModule().search.setSearchIcon(node, this.value.size,
+        this.value.color, this.value.src);
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !(this.stageValue.size === this.value.size &&
-        this.stageValue.color === this.value.color &&
-        this.stageValue.src === this.value.src);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue.size, this.value.size) ||
+      !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
+      !isBaseOrResourceEqual(this.stageValue.src, this.value.src);
   }
 }
 
@@ -75,32 +67,15 @@ class SearchPlaceholderFontModifier extends ModifierWithKey<Font> {
     if (reset) {
       GetUINativeModule().search.resetPlaceholderFont(node);
     } else {
-      if (!(isNumber(this.value.size)) && !(isString(this.value.size)) && !(isResource(this.value.size))) {
-        this.value.size = undefined;
-      }
-      if (!(isString(this.value.family)) && !(isResource(this.value.family))) {
-        this.value.family = undefined;
-      }
       GetUINativeModule().search.setPlaceholderFont(node, this.value.size,
         this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff(): boolean {
-    if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style) {
-      return true;
-    }
-    if (((isResource(this.stageValue.size) && isResource(this.value.size) &&
-      isResourceEqual(this.stageValue.size, this.value.size)) ||
-      (!isResource(this.stageValue.size) && !isResource(this.value.size) &&
-        this.stageValue.size === this.value.size)) &&
-      ((isResource(this.stageValue.family) && isResource(this.value.family) &&
-        isResourceEqual(this.stageValue.family, this.value.family)) ||
-        (!isResource(this.stageValue.family) && !isResource(this.value.family) &&
-          this.stageValue.family === this.value.family))) {
-      return false;
-    } else {
-      return true;
-    }
+    return this.stageValue.weight !== this.value.weight ||
+      this.stageValue.style !== this.value.style ||
+      !isBaseOrResourceEqual(this.stageValue.size, this.value.size) ||
+      !isBaseOrResourceEqual(this.stageValue.family, this.value.family);
   }
 }
 
@@ -110,22 +85,14 @@ class SearchSearchButtonModifier extends ModifierWithKey<ArkSearchButton> {
     if (reset) {
       GetUINativeModule().search.resetSearchButton(node);
     } else {
-      if (this.value === null || !isObject(this.value)) {
-        GetUINativeModule().search.resetSearchButton(node);
-      } else {
-        GetUINativeModule().search.setSearchButton(node, this.value.value,
-          this.value.fontSize, this.value.fontColor);
-      }
+      GetUINativeModule().search.setSearchButton(node, this.value.value,
+        this.value.fontSize, this.value.fontColor);
     }
   }
   checkObjectDiff(): boolean {
-    if (!(this.stageValue.value === this.value.value)) {
-      return true;
-    }
-    else {
-      return !isBaseOrResourceEqual(this.stageValue.fontSize, this.value.fontSize) ||
-        !isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor);
-    }
+    return this.stageValue.value !== this.value.value ||
+      !isBaseOrResourceEqual(this.stageValue.fontSize, this.value.fontSize) ||
+      !isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor);
   }
 }
 
@@ -139,15 +106,11 @@ class SearchFontColorModifier extends ModifierWithKey<ResourceColor> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
-class SearchCopyOptionModifier extends Modifier<CopyOptions> {
+class SearchCopyOptionModifier extends ModifierWithKey<CopyOptions> {
   static identity = Symbol('searchCopyOption');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -155,6 +118,9 @@ class SearchCopyOptionModifier extends Modifier<CopyOptions> {
     } else {
       GetUINativeModule().search.setCopyOption(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 
@@ -164,31 +130,14 @@ class SearchTextFontModifier extends ModifierWithKey<Font> {
     if (reset) {
       GetUINativeModule().search.resetTextFont(node);
     } else {
-      if (!(isNumber(this.value.size)) && !(isString(this.value.size)) && !(isResource(this.value.size))) {
-        this.value.size = undefined;
-      }
-      if (!(isString(this.value.family)) && !(isResource(this.value.family))) {
-        this.value.family = undefined;
-      }
       GetUINativeModule().search.setTextFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff(): boolean {
-    if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style) {
-      return true;
-    }
-    if (((isResource(this.stageValue.size) && isResource(this.value.size) &&
-      isResourceEqual(this.stageValue.size, this.value.size)) ||
-      (!isResource(this.stageValue.size) && !isResource(this.value.size) &&
-        this.stageValue.size === this.value.size)) &&
-      ((isResource(this.stageValue.family) && isResource(this.value.family) &&
-        isResourceEqual(this.stageValue.family, this.value.family)) ||
-        (!isResource(this.stageValue.family) && !isResource(this.value.family) &&
-          this.stageValue.family === this.value.family))) {
-      return false;
-    } else {
-      return true;
-    }
+    return this.stageValue.weight !== this.value.weight ||
+      this.stageValue.style !== this.value.style ||
+      !isBaseOrResourceEqual(this.stageValue.size, this.value.size) ||
+      !isBaseOrResourceEqual(this.stageValue.family, this.value.family);
   }
 }
 
@@ -202,11 +151,7 @@ class SearchPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -216,27 +161,19 @@ class SearchCancelButtonModifier extends ModifierWithKey<{ style?: CancelButtonS
     if (reset) {
       GetUINativeModule().search.resetCancelButton(node);
     } else {
-      if (this.value === null || !isObject(this.value)) {
-        GetUINativeModule().search.resetCancelButton(node);
-      } else {
-        GetUINativeModule().search.setCancelButton(node, this.value.style,
-          this.value.icon?.size, this.value.icon?.color, this.value.icon?.src);
-      }
+      GetUINativeModule().search.setCancelButton(node, this.value.style,
+        this.value.icon?.size, this.value.icon?.color, this.value.icon?.src);
     }
   }
   checkObjectDiff(): boolean {
-    if (!(this.stageValue.style === this.value.style)) {
-      return true;
-    }
-    else {
-      return !isBaseOrResourceEqual(this.stageValue.icon?.size, this.value.icon?.size) ||
-        !isBaseOrResourceEqual(this.stageValue.icon?.color, this.value.icon?.color) ||
-        !isBaseOrResourceEqual(this.stageValue.icon?.src, this.value.icon?.src)
-    }
+    return this.stageValue.style !== this.value.style ||
+      !isBaseOrResourceEqual(this.stageValue.icon?.size, this.value.icon?.size) ||
+      !isBaseOrResourceEqual(this.stageValue.icon?.color, this.value.icon?.color) ||
+      !isBaseOrResourceEqual(this.stageValue.icon?.src, this.value.icon?.src);
   }
 }
 
-class SearchTextAlignModifier extends Modifier<TextAlign> {
+class SearchTextAlignModifier extends ModifierWithKey<TextAlign> {
   static identity = Symbol('searchTextAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -244,6 +181,9 @@ class SearchTextAlignModifier extends Modifier<TextAlign> {
     } else {
       GetUINativeModule().search.setTextAlign(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 
@@ -299,19 +239,11 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     return this;
   }
   selectionMenuHidden(value: boolean): SearchAttribute {
-    if (value === undefined || !isBoolean(value)) {
-      modifier(this._modifiers, SearchSelectionMenuHiddenModifier, undefined);
-      return this;
-    }
-    modifier(this._modifiers, SearchSelectionMenuHiddenModifier, value);
+    modifierWithKey(this._modifiersWithKeys, SearchSelectionMenuHiddenModifier.identity, SearchSelectionMenuHiddenModifier, value);
     return this;
   }
   enableKeyboardOnFocus(value: boolean): SearchAttribute {
-    if (value === undefined || !isBoolean(value)) {
-      modifier(this._modifiers, SearchEnableKeyboardOnFocusModifier, undefined);
-      return this;
-    }
-    modifier(this._modifiers, SearchEnableKeyboardOnFocusModifier, value);
+    modifierWithKey(this._modifiersWithKeys, SearchEnableKeyboardOnFocusModifier.identity, SearchEnableKeyboardOnFocusModifier, value);
     return this;
   }
   caretStyle(value: CaretStyle): SearchAttribute {
@@ -319,19 +251,8 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     return this;
   }
   cancelButton(value: { style?: CancelButtonStyle, icon?: IconOptions }): SearchAttribute {
-    if (!value) {
-      modifierWithKey(this._modifiersWithKeys, SearchCancelButtonModifier.identity,
-        SearchCancelButtonModifier, undefined);
-    } else {
-      switch (value?.style) {
-        case CancelButtonStyle.CONSTANT: value.style = 0; break;
-        case CancelButtonStyle.INVISIBLE: value.style = 1; break;
-        case CancelButtonStyle.INPUT: value.style = 2; break;
-        default: value.style = undefined; break;
-      }
-      modifierWithKey(this._modifiersWithKeys, SearchCancelButtonModifier.identity,
-        SearchCancelButtonModifier, value);
-    }
+
+    modifierWithKey(this._modifiersWithKeys, SearchCancelButtonModifier.identity, SearchCancelButtonModifier, value);
     return this;
   }
   searchIcon(value: IconOptions): SearchAttribute {
@@ -355,23 +276,11 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     return this;
   }
   copyOption(value: CopyOptions): SearchAttribute {
-    if (value === null || value === undefined) {
-      modifier(this._modifiers, SearchCopyOptionModifier, undefined);
-    } else if (!(value in CopyOptions)) {
-      modifier(this._modifiers, SearchCopyOptionModifier, undefined);
-    } else {
-      modifier(this._modifiers, SearchCopyOptionModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, SearchCopyOptionModifier.identity, SearchCopyOptionModifier, value);
     return this;
   }
   textAlign(value: TextAlign): SearchAttribute {
-    let TEXT_ALIGNS: TextAlign[] = [
-      TextAlign.Start, TextAlign.Center, TextAlign.End, TextAlign.JUSTIFY];
-    if (value >= 0 && value <= TEXT_ALIGNS.length) {
-      modifier(this._modifiers, SearchTextAlignModifier, value);
-    } else {
-      modifier(this._modifiers, SearchTextAlignModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SearchTextAlignModifier.identity, SearchTextAlignModifier, value);
     return this;
   }
 }

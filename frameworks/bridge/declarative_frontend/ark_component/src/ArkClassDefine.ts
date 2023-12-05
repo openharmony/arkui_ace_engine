@@ -893,17 +893,6 @@ class ArkBlockSize {
   }
 }
 
-class ArkDecoration {
-  type: number;
-  color?: ResourceColor | undefined;
-  constructor() {
-    this.type = TextDecorationType.None;
-    this.color = undefined;
-  }
-  isEqual(another: ArkDecoration): boolean {
-    return this.type === another.type && this.color === another.color;
-  }
-}
 class ArkBorder implements Equable {
   arkWidth: ArkBorderWidth;
   arkColor: ArkBorderColor;
@@ -1125,28 +1114,6 @@ class ArkGridColColumnOption implements Equable {
       this.xxl === another.xxl);
   }
 }
-class ArkConstraintSizeOptions {
-  minWidth?: Length | undefined;
-  maxWidth?: Length | undefined;
-  minHeight?: Length | undefined;
-  maxHeight?: Length | undefined;
-
-  constructor() {
-    this.minWidth = undefined;
-    this.maxWidth = undefined;
-    this.minHeight = undefined;
-    this.maxHeight = undefined;
-  }
-
-  isEqual(another: ArkConstraintSizeOptions): boolean {
-    return (
-      this.minWidth === another.minWidth &&
-      this.maxWidth === another.maxWidth &&
-      this.minHeight === another.minHeight &&
-      this.maxHeight === another.maxHeight
-    );
-  }
-}
 
 class ArkSize {
   width: Length | undefined;
@@ -1364,18 +1331,6 @@ class ArkSideBarDividerStyle {
   }
 }
 
-class ArkColumnSplitDividerStyle implements Equable {
-  startMargin?: Dimension;
-  endMargin?: Dimension;
-  constructor() {
-    this.startMargin = undefined;
-    this.endMargin = undefined;
-  }
-  isEqual(another: ArkColumnSplitDividerStyle): boolean {
-    return false;
-  }
-}
-
 class ArkButtonStyle {
   left?: number;
   top?: number;
@@ -1523,33 +1478,6 @@ class ArkPasswordIcon implements Equable {
       this.offIconSrc === another.offIconSrc;
   }
 }
-class ArkCaretStyle implements Equable {
-  width: string | number | undefined;
-  color: number | undefined;
-  constructor() {
-    this.width = undefined;
-    this.color = undefined;
-  }
-  isEqual(another: ArkCaretStyle): boolean {
-    return this.width === another.width &&
-      this.color === another.color;
-  }
-}
-class ArkIconOptions implements Equable {
-  size: string | number | undefined;
-  color: number | undefined;
-  src: string | undefined;
-  constructor() {
-    this.size = undefined;
-    this.color = undefined;
-    this.src = undefined;
-  }
-  isEqual(another: ArkIconOptions): boolean {
-    return this.size === another.color &&
-      this.color === another.color &&
-      this.src === another.src;
-  }
-}
 class ArkSearchButton implements Equable {
   value: string | undefined;
   fontSize: Length | undefined;
@@ -1563,26 +1491,6 @@ class ArkSearchButton implements Equable {
     return (this.value === another.value) &&
       (this.fontSize === another.fontSize) &&
       (this.fontColor === another.fontColor);
-  }
-}
-class ArkCancelButton implements Equable {
-  style: CancelButtonStyle | undefined;
-  color: number | undefined;
-  size: string | number | undefined;
-  src: string | undefined;
-  constructor() {
-    this.style = undefined;
-    this.color = undefined;
-    this.size = undefined;
-    this.src = undefined;
-  }
-  isEqual(another: ArkCancelButton): boolean {
-    return (
-      this.style === another.style &&
-      this.color === another.color &&
-      this.size === another.size &&
-      this.src === another.src
-    );
   }
 }
 class ArkImageFrameInfoToArray implements Equable {
