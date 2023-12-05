@@ -840,6 +840,7 @@ void PipelineBase::Destroy()
     virtualKeyBoardCallback_.clear();
     etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
+    finishFunctions_.clear();
 }
 
 std::string PipelineBase::OnFormRecycle()
