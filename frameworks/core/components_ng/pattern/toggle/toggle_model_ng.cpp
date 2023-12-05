@@ -346,6 +346,24 @@ void ToggleModelNG::SetHoverEffect(HoverEffectType hoverEffect)
     NG::ViewAbstract::SetHoverEffect(hoverEffect);
 }
 
+void ToggleModelNG::Pop()
+{
+    // button is a container but switch or checkbox is not, container should pop container
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto switchPattern = frameNode->GetPattern<SwitchPattern>();
+    if (switchPattern) {
+        ViewStackProcessor::GetInstance()->Pop();
+        return;
+    }
+    auto checkboxPattern = frameNode->GetPattern<CheckBoxPattern>();
+    if (checkboxPattern) {
+        ViewStackProcessor::GetInstance()->Pop();
+        return;
+    }
+    ViewStackProcessor::GetInstance()->PopContainer();
+}
+
 void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor)
 {
     CHECK_NULL_VOID(frameNode);
