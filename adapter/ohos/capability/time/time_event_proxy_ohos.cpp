@@ -65,13 +65,14 @@ TimeEventProxyOhos::~TimeEventProxyOhos()
 
 void TimeEventProxyOhos::OnTimeChange()
 {
-    for (auto&& pair : listeners_) {
-        auto listener = pair.first.Upgrade();
+    for (auto it = listeners_.begin(); it != listeners_.end();) {
+        auto listener = it->first.Upgrade();
         if (listener) {
-            ContainerScope scope(pair.second);
+            ContainerScope scope(it->second);
             listener->OnTimeChange();
+            ++it;
         } else {
-            listeners_.erase(pair);
+            it = listeners_.erase(it);
             if (listeners_.empty()) {
                 CommonEventManager::UnSubscribeCommonEvent(eventFwkSubscriber_);
             }
