@@ -13,11 +13,7 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("stepper_pattern_test_ng") {
+ace_unittest("stepper_test_ng") {
   type = "new"
-  sources = [
-    "stepper_accessibility_property_test_ng.cpp",
-    "stepper_item_pattern_test_ng.cpp",
-    "stepper_pattern_test_ng.cpp",
-  ]
+  sources = [ "stepper_test_ng.cpp" ]
 }

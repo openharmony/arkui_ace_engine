@@ -15,9 +15,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("animator_test_ng") {
   type = "new"
-  sources = [
-    "$ace_root/frameworks/bridge/declarative_frontend/declarative_frontend.cpp",
-    "animator_test_ng.cpp",
-    "mock_jsi_animator_model_ng_impl.cpp",
-  ]
+  sources = [ "animator_test_ng.cpp" ]
 }

@@ -24,7 +24,6 @@
 
 #define protected public
 #define private public
-#include "interfaces/inner_api/ace/ui_content.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 

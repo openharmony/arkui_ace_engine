@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
+
 #define private public
 #define protected public
-#include "gtest/gtest.h"
+
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/event/event_hub.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;

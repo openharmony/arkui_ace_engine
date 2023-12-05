@@ -13,14 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/common/app_bar_helper.h"
+#include "core/common/modal_ui_extension.h"
 
 namespace OHOS::Ace {
-
-RefPtr<NG::FrameNode> AppBarHelper::CreateUIExtensionNode(const std::string& bundleName, const std::string& abilityName,
-    const std::map<std::string, std::string>& params, std::function<void(int32_t)>&& onRelease)
+RefPtr<NG::FrameNode> ModalUIExtension::Create(
+    const AAFwk::Want& /* want */, const ModalUIExtensionCallbacks& /* callbacks */)
 {
     return nullptr;
 }
 
+int32_t ModalUIExtension::GetSessionId(const RefPtr<NG::FrameNode>& /* uiExtNode */)
+{
+    return 0;
+}
 } // namespace OHOS::Ace

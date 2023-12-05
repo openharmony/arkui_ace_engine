@@ -14,7 +14,6 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("list_test_ng") {
-  render = true
   type = "new"
   sources = [
     "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",

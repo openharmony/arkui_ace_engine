@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#define protected public
-#define private public
-#include "core/components/common/layout/grid_system_manager.h"
-#include "core/components_ng/pattern/root/root_pattern.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "core/components/common/layout/grid_system_manager.h"
+#define protected public
+#define private public
+#include "core/components_ng/property/grid_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #undef private
 #undef protected
 
@@ -32,17 +33,17 @@ constexpr int32_t SPANTWO = -10;
 constexpr int32_t OFFSETONE = 5;
 constexpr int32_t INDEX = 1;
 
-const Dimension TESTWIDTH {1.0, DimensionUnit::VP};
-const Dimension TESTLEFT {2.0, DimensionUnit::VP};
-const Dimension TESTRIGHT {3.0, DimensionUnit::VP};
+const Dimension TESTWIDTH { 1.0, DimensionUnit::VP };
+const Dimension TESTLEFT { 2.0, DimensionUnit::VP };
+const Dimension TESTRIGHT { 3.0, DimensionUnit::VP };
 const Dimension TEST_VALUE = Dimension(0.0);
 
-const GridTypedProperty TEST_TYPED0 {GridSizeType::XS, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET};
-const GridTypedProperty TEST_TYPED1 {GridSizeType::SM, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET};
-const GridTypedProperty TEST_TYPED2 {GridSizeType::MD, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET};
-const GridTypedProperty TEST_TYPED3 {GridSizeType::LG, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET};
-const GridTypedProperty TEST_TYPED4 {GridSizeType::XL, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET};
-const GridTypedProperty TEST_TYPED5 {GridSizeType::UNDEFINED, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET};
+const GridTypedProperty TEST_TYPED0 { GridSizeType::XS, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET };
+const GridTypedProperty TEST_TYPED1 { GridSizeType::SM, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET };
+const GridTypedProperty TEST_TYPED2 { GridSizeType::MD, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET };
+const GridTypedProperty TEST_TYPED3 { GridSizeType::LG, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET };
+const GridTypedProperty TEST_TYPED4 { GridSizeType::XL, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET };
+const GridTypedProperty TEST_TYPED5 { GridSizeType::UNDEFINED, DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET };
 
 void MakeProperty(RefPtr<GridProperty> gridProperty)
 {
@@ -76,8 +77,6 @@ public:
 void GridPropertyTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
-    MockPipelineContext::GetCurrent()->rootNode_ =
-        FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, 0, AceType::MakeRefPtr<RootPattern>());
 }
 
 void GridPropertyTestNg::TearDownTestSuite()
@@ -306,7 +305,7 @@ HWTEST_F(GridPropertyTestNg, GetOffset_Test, TestSize.Level1)
      */
     gridProperty->gridInfo_ = columnBuilder.Build();
     gridProperty->gridInfo_->parent_ = builder.Build();
-    gridProperty->gridInfo_->dimOffsets_ = {TESTWIDTH};
+    gridProperty->gridInfo_->dimOffsets_ = { TESTWIDTH };
     auto result_One = gridProperty->GetOffset();
     EXPECT_EQ(result_One, TESTRIGHT);
 
@@ -318,4 +317,4 @@ HWTEST_F(GridPropertyTestNg, GetOffset_Test, TestSize.Level1)
     auto result_Two = gridProperty->GetOffset();
     EXPECT_EQ(result_Two, UNDEFINED_DIMENSION);
 }
-} // namespace OHOS::Ace::Ng
+} // namespace OHOS::Ace::NG

@@ -21,6 +21,11 @@
 
 #define protected public
 #define private public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/unittest/core/pattern/test_ng.h"
+
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -32,10 +37,7 @@
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/unittest/core/pattern/test_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -116,8 +118,8 @@ void IndexerTestNg::GetInstance()
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();
 }
 
-void IndexerTestNg::Create(const std::function<void(IndexerModelNG)>& callback,
-    std::vector<std::string> arrayValue, int32_t selected)
+void IndexerTestNg::Create(
+    const std::function<void(IndexerModelNG)>& callback, std::vector<std::string> arrayValue, int32_t selected)
 {
     IndexerModelNG model;
     model.Create(arrayValue, selected);
@@ -543,12 +545,14 @@ HWTEST_F(IndexerTestNg, IndexerPattern001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerPattern002, TestSize.Level1)
 {
-    Create([](IndexerModelNG model) {
-        model.SetUsingPopup(true);
-        model.SetAlignStyle(0);
-        model.SetPopupUnselectedColor(Color(0x00000000));
-        model.SetOnRequestPopupData(GetPopupData);
-    }, CREATE_ARRAY, 2);
+    Create(
+        [](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetAlignStyle(0);
+            model.SetPopupUnselectedColor(Color(0x00000000));
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
 
     pattern_->MoveIndexByStep(1);
     ASSERT_NE(pattern_->popupNode_, nullptr);
@@ -568,11 +572,13 @@ HWTEST_F(IndexerTestNg, IndexerPattern002, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
 {
-    Create([](IndexerModelNG model) {
-        model.SetUsingPopup(true);
-        model.SetPopupHorizontalSpace(Dimension(50));
-        model.SetOnRequestPopupData(GetPopupData);
-    }, CREATE_ARRAY, 2);
+    Create(
+        [](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetPopupHorizontalSpace(Dimension(50));
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
     pattern_->MoveIndexByStep(1);
 
     ASSERT_NE(pattern_->popupNode_, nullptr);
@@ -580,12 +586,14 @@ HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
     ASSERT_NE(renderContext, nullptr);
     auto rightValue = renderContext->GetPosition().value();
 
-    Create([](IndexerModelNG model) {
-        model.SetUsingPopup(true);
-        model.SetAlignStyle(0);
-        model.SetPopupHorizontalSpace(Dimension(50));
-        model.SetOnRequestPopupData(GetPopupData);
-    }, CREATE_ARRAY, 2);
+    Create(
+        [](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetAlignStyle(0);
+            model.SetPopupHorizontalSpace(Dimension(50));
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
     pattern_->MoveIndexByStep(1);
 
     ASSERT_NE(pattern_->popupNode_, nullptr);
@@ -602,13 +610,15 @@ HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerPattern004, TestSize.Level1)
 {
-    Create([](IndexerModelNG model) {
-        model.SetUsingPopup(true);
-        model.SetPopupSelectedColor(Color(0x00000000));
-        model.SetPopupUnselectedColor(Color(0x00000000));
-        model.SetPopupItemBackground(Color(0x00000000));
-        model.SetOnRequestPopupData(GetPopupData);
-    }, CREATE_ARRAY, 2);
+    Create(
+        [](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetPopupSelectedColor(Color(0x00000000));
+            model.SetPopupUnselectedColor(Color(0x00000000));
+            model.SetPopupItemBackground(Color(0x00000000));
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
     pattern_->MoveIndexByStep(1);
     ASSERT_NE(pattern_->popupNode_, nullptr);
 
@@ -729,7 +739,7 @@ HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
      * @tc.steps: step1. ShowBubble
      */
     Create([](IndexerModelNG model) { model.SetUsingPopup(true); }); // NeedShowPopupView is true.
-    pattern_->MoveIndexByStep(1); // ShowBubble
+    pattern_->MoveIndexByStep(1);                                    // ShowBubble
     ASSERT_NE(pattern_->popupNode_, nullptr);
     auto gesture = pattern_->popupNode_->GetOrCreateGestureEventHub();
     auto onPopupTouchDown = gesture->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
@@ -760,12 +770,14 @@ HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
 HWTEST_F(IndexerTestNg, Event001, TestSize.Level1)
 {
     bool isTrigger = false;
-    Create([&isTrigger](IndexerModelNG model) {
-        model.SetUsingPopup(true);
-        model.SetOnRequestPopupData(GetPopupData);
-        OnPopupSelectedEvent event = [&isTrigger](int32_t) { isTrigger = true; };
-        model.SetOnPopupSelected(std::move(event));
-    }, CREATE_ARRAY, 2);
+    Create(
+        [&isTrigger](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetOnRequestPopupData(GetPopupData);
+            OnPopupSelectedEvent event = [&isTrigger](int32_t) { isTrigger = true; };
+            model.SetOnPopupSelected(std::move(event));
+        },
+        CREATE_ARRAY, 2);
 
     /**
      * @tc.steps: step1. Trigger OnPopupSelected callback.

@@ -13,19 +13,22 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/animator/animator_model_ng.h"
+#include "core/components/common/properties/motion_path_evaluator.h"
 
-namespace OHOS::Ace::Framework {
-namespace {
-} // namespace
+namespace OHOS::Ace {
+MotionPathEvaluator::MotionPathEvaluator(
+    const MotionPathOption& option, const Offset& start, const Offset& end, PositionType type)
+    : motionPathOption_(option), startPoint_(start), endPoint_(end), positionType_(type)
+{}
 
-void AnimatorModelNG::Create(const std::string& animatorId) {}
-
-RefPtr<AnimatorInfo> AnimatorModelNG::GetAnimatorInfo(const std::string& animatorId)
+DimensionOffset DimensionOffsetEvaluator::Evaluate(
+    const DimensionOffset& start, const DimensionOffset& end, float fraction)
 {
-    auto animatorInfo = AceType::MakeRefPtr<AnimatorInfo>();
-    auto animator = AceType::MakeRefPtr<Animator>();
-    animatorInfo->SetAnimator(animator);
-    return animatorInfo;
+    return DimensionOffset();
 }
-} // namespace OHOS::Ace::Framework
+
+float RotateEvaluator::Evaluate(const float& start, const float& end, float fraction)
+{
+    return 0.0f;
+}
+} // namespace OHOS::Ace

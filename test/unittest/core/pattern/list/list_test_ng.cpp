@@ -269,8 +269,8 @@ void ListTestNg::CreateWithSwipeAction(
         ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
         itemModel.SetSwiperAction(nullptr, nullptr, std::move(onOffsetChange), effect);
         itemModel.SetDeleteArea(std::move(item.builderAction), std::move(item.onDelete),
-            std::move(item.onEnterDeleteArea), std::move(item.onExitDeleteArea),
-            std::move(item.onStateChange), item.actionAreaDistance, isStartArea);
+            std::move(item.onEnterDeleteArea), std::move(item.onExitDeleteArea), std::move(item.onStateChange),
+            item.actionAreaDistance, isStartArea);
         {
             RowModelNG rowModel;
             rowModel.Create(std::nullopt, nullptr, "");
@@ -5341,9 +5341,7 @@ HWTEST_F(ListTestNg, ScrollToIndex003, TestSize.Level1)
  */
 HWTEST_F(ListTestNg, ScrollToItemInGroup001, TestSize.Level1)
 {
-    Create([](ListModelNG listModelNG) {
-        CreateGroup(GROUP_NUMBER);
-    });
+    Create([](ListModelNG listModelNG) { CreateGroup(GROUP_NUMBER); });
     constexpr int32_t indexInGroup = 2;
 
     /**
@@ -5403,9 +5401,7 @@ HWTEST_F(ListTestNg, ScrollToItemInGroup001, TestSize.Level1)
  */
 HWTEST_F(ListTestNg, ScrollToItemInGroup002, TestSize.Level1)
 {
-    Create([](ListModelNG listModelNG) {
-        CreateGroup(GROUP_NUMBER);
-    });
+    Create([](ListModelNG listModelNG) { CreateGroup(GROUP_NUMBER); });
     constexpr int32_t indexInGroup = 2;
 
     /**
@@ -6252,8 +6248,8 @@ HWTEST_F(ListTestNg, ListPattern_GetItemRect001, TestSize.Level1)
      * @tc.steps: step4. Get valid ListItem Rect.
      * @tc.expected: Return actual Rect when input valid index.
      */
-    EXPECT_TRUE(IsEqual(
-        pattern_->GetItemRect(1), Rect(0, -ITEM_HEIGHT / 2.0f, FILL_LENGTH.Value() * LIST_WIDTH, ITEM_HEIGHT)));
+    EXPECT_TRUE(
+        IsEqual(pattern_->GetItemRect(1), Rect(0, -ITEM_HEIGHT / 2.0f, FILL_LENGTH.Value() * LIST_WIDTH, ITEM_HEIGHT)));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(3),
         Rect(0, -ITEM_HEIGHT / 2.0f + ITEM_HEIGHT * 2, FILL_LENGTH.Value() * LIST_WIDTH, ITEM_HEIGHT)));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(9),
@@ -6338,8 +6334,7 @@ HWTEST_F(ListTestNg, ListLayout_SafeArea001, TestSize.Level1)
     EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
         .Times(1)
         .WillOnce(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
-    layoutProperty_->UpdateSafeAreaExpandOpts(
-        { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
+    layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->contentEndOffset_, 100);
     EXPECT_TRUE(IsEqual(frameNode_->geometryNode_->GetFrameSize(), SizeF(LIST_WIDTH, LIST_HEIGHT)));
@@ -6361,8 +6356,7 @@ HWTEST_F(ListTestNg, ListLayout_SafeArea002, TestSize.Level1)
     });
 
     EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea).Times(0);
-    layoutProperty_->UpdateSafeAreaExpandOpts(
-        { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP });
+    layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP });
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->contentEndOffset_, 0);
     EXPECT_TRUE(IsEqual(frameNode_->geometryNode_->GetFrameSize(), SizeF(LIST_WIDTH, LIST_HEIGHT)));

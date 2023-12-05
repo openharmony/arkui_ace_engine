@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include "base/geometry/ng/point_t.h"
+#include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "gtest/gtest.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "core/components/scroll/scrollable.h"
@@ -32,7 +33,6 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;

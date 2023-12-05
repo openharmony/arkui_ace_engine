@@ -19,15 +19,6 @@
 
 #include "gtest/gtest.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/geometry/offset.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/scroll/scrollable.h"
-#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/pattern.h"
 #define protected public
 #define private public
 #include "test/mock/base/mock_task_executor.h"
@@ -37,11 +28,20 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
+#include "base/geometry/offset.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/scroll/scrollable.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
@@ -53,6 +53,8 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/constants.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
