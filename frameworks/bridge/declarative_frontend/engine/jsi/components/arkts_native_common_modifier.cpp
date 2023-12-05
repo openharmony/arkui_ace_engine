@@ -990,7 +990,7 @@ void SetLinearGradient(NodeHandle node, const double *values, int32_t valuesLeng
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((values == nullptr) || (valuesLength != NUM_4) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
+    if ((values == nullptr) || (valuesLength != NUM_4) || ((colorsLength % NUM_3) != 0)) {
         return;
     }
     NG::Gradient gradient;
@@ -1029,7 +1029,7 @@ void SetSweepGradient(NodeHandle node, const double* values, int32_t valuesLengt
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((values == nullptr) || (valuesLength != NUM_13) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
+    if ((values == nullptr) || (valuesLength != NUM_13) || ((colorsLength % NUM_3) != 0)) {
         return;
     }
     NG::Gradient gradient;
@@ -1066,7 +1066,7 @@ void SetRadialGradient(NodeHandle node, const double* values, int32_t valuesLeng
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((values == nullptr) || (valuesLength != NUM_10) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
+    if ((values == nullptr) || (valuesLength != NUM_10) || ((colorsLength % NUM_3) != 0)) {
         return;
     }
     NG::Gradient gradient;
@@ -1349,9 +1349,7 @@ void SetBackgroundBlurStyle(NodeHandle node, int32_t blurStyle, int32_t colorMod
             adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
             bgBlurStyle.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
         }
-        if (scale >= 0) {
-            bgBlurStyle.scale = std::clamp(scale, 0.0, 1.0);
-        }
+        bgBlurStyle.scale = std::clamp(scale, 0.0, 1.0);
     }
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
