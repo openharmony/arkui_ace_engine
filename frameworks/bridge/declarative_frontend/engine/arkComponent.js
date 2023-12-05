@@ -11787,11 +11787,11 @@ class ArkTabsComponent extends ArkComponent {
         throw new Error('Method not implemented.');
     }
     vertical(value) {
-        modifier(this._modifiers, VerticalModifier, value);
+        modifier(this._modifiers, TabsVerticalModifier, value);
         return this;
     }
     barPosition(value) {
-        if (isNumber(value) && value >= BarPosition.Start && value < BarPosition.End) {
+        if (isNumber(value) && value >= BarPosition.Start && value <= BarPosition.End) {
             modifier(this._modifiers, BarPositionModifier, value);
         }
         else {
@@ -11850,6 +11850,9 @@ class ArkTabsComponent extends ArkComponent {
             arkDrivider.value.startMargin = undefined;
             arkDrivider.value.endMargin = undefined;
         }
+        else {
+            arkDrivider.value = value;
+        }
         modifier(this._modifiers, DividerModifier, arkDrivider);
         return this;
     }
@@ -11886,7 +11889,7 @@ class DividerModifier extends Modifier {
             GetUINativeModule().tabs.resetDivider(node);
         }
         else {
-            GetUINativeModule().tabs.setDivider(node, this.value);
+            GetUINativeModule().tabs.setDivider(node, this.value.value.strokeWidth, this.value.value.color, this.value.value.startMargin, this.value.value.endMargin);
         }
     }
 }
@@ -11951,17 +11954,17 @@ class BarOverlapModifier extends Modifier {
     }
 }
 BarOverlapModifier.identity = Symbol('barOverlap');
-class VerticalModifier extends Modifier {
+class TabsVerticalModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
-            GetUINativeModule().tabs.resetVertical(node);
+            GetUINativeModule().tabs.resetIsVertical(node);
         }
         else {
-            GetUINativeModule().tabs.setVertical(node, this.value);
+            GetUINativeModule().tabs.setIsVertical(node, this.value);
         }
     }
 }
-VerticalModifier.identity = Symbol('vertical');
+TabsVerticalModifier.identity = Symbol('vertical');
 class AnimationDurationModifier extends Modifier {
     applyPeer(node, reset) {
         if (reset) {
