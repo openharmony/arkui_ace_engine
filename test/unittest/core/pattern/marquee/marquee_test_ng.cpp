@@ -22,6 +22,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/json/json_util.h"
 #include "core/animation/animator.h"
@@ -34,7 +35,6 @@
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -71,25 +71,21 @@ struct TestProperty {
 
 class MarqueeTestNg : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 
 protected:
     static RefPtr<FrameNode> CreateMarqueeParagraph(const TestProperty& testProperty);
 };
 
-void MarqueeTestNg::SetUpTestCase()
+void MarqueeTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
 }
-void MarqueeTestNg::TearDownTestCase()
+void MarqueeTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
 }
-void MarqueeTestNg::SetUp() {}
-void MarqueeTestNg::TearDown() {}
 
 RefPtr<FrameNode> MarqueeTestNg::CreateMarqueeParagraph(const TestProperty& testProperty)
 {

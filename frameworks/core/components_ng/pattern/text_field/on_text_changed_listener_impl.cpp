@@ -261,10 +261,8 @@ void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& ta
     ContainerScope scope(instanceId);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-
     taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI);
 }
 
@@ -277,10 +275,8 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
     ContainerScope scope(instanceId);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-
     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
@@ -303,5 +299,4 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
         PostTaskToUI(task);
     }
 }
-
 } // namespace OHOS::Ace::NG

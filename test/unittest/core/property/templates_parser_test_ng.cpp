@@ -37,7 +37,7 @@ namespace {}
 class TemplatesParserTestNg : public testing::Test {
 public:
     static void SetUpTestSuite() {};
-    static void TeardownTestSuite() {};
+    static void TearDownTestSuite() {};
 };
 
 /**

@@ -188,7 +188,7 @@ std::string ContentController::RemoveErrorTextFromValue(const std::string& value
 std::string ContentController::FilterWithRegex(const std::string& filter, std::string& result)
 {
     std::regex filterRegex(filter);
-    auto errorText = regex_replace(result, filterRegex, "");
+    auto errorText = std::regex_replace(result, filterRegex, "");
     result = RemoveErrorTextFromValue(result, errorText);
     return errorText;
 }

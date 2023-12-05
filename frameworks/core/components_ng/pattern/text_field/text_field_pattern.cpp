@@ -648,8 +648,8 @@ void TextFieldPattern::HandleFocusEvent()
     }
     NotifyOnEditChanged(true);
     auto visible = layoutProperty->GetShowErrorTextValue(false);
-    if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()
-        && !IsNormalInlineState()) {
+    if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType() &&
+        !IsNormalInlineState()) {
         auto renderContext = host->GetRenderContext();
         auto textFieldTheme = GetTheme();
         CHECK_NULL_VOID(textFieldTheme);
@@ -981,8 +981,8 @@ void TextFieldPattern::HandleOnPaste()
         textfield->StripNextLine(pasteData);
         auto originLength = static_cast<int32_t>(textfield->contentController_->GetWideText().length());
         textfield->contentController_->ReplaceSelectedValue(start, end, StringUtils::ToString(pasteData));
-        auto caretMoveLength = static_cast<int32_t>(textfield->contentController_->GetWideText().length()) -
-                               originLength;
+        auto caretMoveLength =
+            static_cast<int32_t>(textfield->contentController_->GetWideText().length()) - originLength;
         auto newCaretPosition = std::clamp(std::max(start, end) + caretMoveLength, 0,
             static_cast<int32_t>(textfield->contentController_->GetWideText().length()));
         textfield->ResetObscureTickCountDown();
@@ -1026,8 +1026,8 @@ void TextFieldPattern::HandleOnCameraInput()
 #ifdef WINDOW_SCENE_SUPPORTED
         auto systemWindowId = GetSCBSystemWindowId();
         if (systemWindowId) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-                "windowId From %{public}u to %{public}u.", textConfig.windowId, systemWindowId);
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "windowId From %{public}u to %{public}u.", textConfig.windowId,
+                systemWindowId);
             textConfig.windowId = systemWindowId;
         }
 #endif
@@ -1184,8 +1184,7 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         CHECK_NULL_VOID(textFieldTheme);
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()
-            && !IsNormalInlineState()) {
+        if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType() && !IsNormalInlineState()) {
             auto radius = textFieldTheme->GetBorderRadiusSize();
             renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
         }
@@ -1213,8 +1212,8 @@ void TextFieldPattern::HandleTouchUp()
             if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
                 renderContext->UpdateBorderRadius(borderRadius_);
             }
-            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() && IsUnspecifiedOrTextType()
-                && !IsNormalInlineState()) {
+            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() && IsUnspecifiedOrTextType() &&
+                !IsNormalInlineState()) {
                 auto textFieldTheme = GetTheme();
                 CHECK_NULL_VOID(textFieldTheme);
                 auto radius = textFieldTheme->GetBorderRadiusSize();
@@ -2171,11 +2170,11 @@ void TextFieldPattern::ShowSelectOverlay(const ShowSelectOverlayParams& showOver
 
 void TextFieldPattern::ShowSelectOverlayAfterDrag()
 {
-    ShowSelectOverlayParams showOverlayParams = {
-        .animation = true, .isShowMenu = true, .isUpdateMenu = true,
+    ShowSelectOverlayParams showOverlayParams = { .animation = true,
+        .isShowMenu = true,
+        .isUpdateMenu = true,
         .firstHandle = selectController_->GetFirstHandleRect(),
-        .secondHandle = selectController_->GetSecondHandleRect()
-    };
+        .secondHandle = selectController_->GetSecondHandleRect() };
     ShowSelectOverlay(showOverlayParams);
 }
 
@@ -2769,14 +2768,15 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
 #ifdef WINDOW_SCENE_SUPPORTED
         auto systemWindowId = GetSCBSystemWindowId();
         if (systemWindowId) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-                "windowId From %{public}u to %{public}u.", textConfig.windowId, systemWindowId);
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "windowId From %{public}u to %{public}u.", textConfig.windowId,
+                systemWindowId);
             textConfig.windowId = systemWindowId;
         }
 #endif
-        TAG_LOGI(
-            AceLogTag::ACE_KEYBOARD, "RequestKeyboard set calling window id:%{public}u"
-            "inputType: %{public}d", textConfig.windowId, textConfig.inputAttribute.inputPattern);
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+            "RequestKeyboard set calling window id:%{public}u"
+            "inputType: %{public}d",
+            textConfig.windowId, textConfig.inputAttribute.inputPattern);
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
 #else
         if (!HasConnection()) {
@@ -2945,8 +2945,8 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
     selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
     if (!IsTextArea() && IsInPasswordMode() && GetTextObscured()) {
         if (wideInsertValue.length() == 1 &&
-            (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::NUMBER_PASSWORD
-            || std::isdigit(insertValue[0]))) {
+            (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::NUMBER_PASSWORD ||
+                std::isdigit(insertValue[0]))) {
             obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
             nakedCharPosition_ = selectController_->GetCaretIndex() - 1;
         } else {
@@ -3617,9 +3617,7 @@ void TextFieldPattern::RecordSubmitEvent() const
                                           TextInputType::VISIBLE_PASSWORD
                                     : false;
     Recorder::EventParamsBuilder builder;
-    builder.SetId(inspectorId)
-        .SetType(host->GetTag())
-        .SetEventType(Recorder::EventType::SEARCH_SUBMIT);
+    builder.SetId(inspectorId).SetType(host->GetTag()).SetEventType(Recorder::EventType::SEARCH_SUBMIT);
     if (!isPwdType) {
         builder.SetText(textEditingValue_.text);
     }
@@ -5771,9 +5769,8 @@ void TextFieldPattern::ShowMenu()
     CloseSelectOverlay(true);
     if (IsSingleHandle()) {
         SetIsSingleHandle(true);
-    } else {
-        SetIsSingleHandle(false);
     }
+    SetIsSingleHandle(false);
     ProcessOverlay(true, true, true);
 }
 } // namespace OHOS::Ace::NG

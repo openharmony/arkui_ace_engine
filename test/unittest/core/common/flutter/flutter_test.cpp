@@ -82,7 +82,7 @@ public:
         auto taskRunner = MakeTaskRunner();
         flutterTaskExecutor_ = AceType::MakeRefPtr<FlutterTaskExecutor>(taskRunner);
     }
-    static void TeardownTestSuite()
+    static void TearDownTestSuite()
     {
         MockContainer::TearDown();
     }

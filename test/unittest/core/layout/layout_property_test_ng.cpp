@@ -112,7 +112,7 @@ public:
     {
         MockPipelineContext::SetUp();
     }
-    static void TeardownTestSuite()
+    static void TearDownTestSuite()
     {
         MockPipelineContext::TearDown();
     }
