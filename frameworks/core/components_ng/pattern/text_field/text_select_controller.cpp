@@ -434,6 +434,7 @@ void TextSelectController::UpdateCaretOffset()
 void TextSelectController::UpdateCaretOffset(const OffsetF& offset)
 {
     caretInfo_.rect.SetOffset(offset);
+    secondHandleInfo_.UpdateOffset(offset);
 }
 
 void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset)
