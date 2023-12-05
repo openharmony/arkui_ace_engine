@@ -40,6 +40,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync.h"
 
 namespace OHOS::Ace::NG {
 class XComponentExtSurfaceCallbackClient;
@@ -102,6 +103,9 @@ public:
         CHECK_NULL_VOID(nativeXComponent_);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        SetExpectedRateRangeInit();
+        OnFrameEventInit();
+        UnregisterOnFrameEventInit();
         auto width = initSize_.Width();
         auto height = initSize_.Height();
         nativeXComponentImpl_->SetXComponentWidth(static_cast<uint32_t>(width));
@@ -177,6 +181,36 @@ public:
     XComponentControllerErrorCode SetExtController(const RefPtr<XComponentPattern>& extPattern);
     XComponentControllerErrorCode ResetExtController(const RefPtr<XComponentPattern>& extPattern);
 
+    void SetExpectedRateRangeInit()
+    {
+        CHECK_NULL_VOID(nativeXComponentImpl_);
+        nativeXComponentImpl_->SetExpectedRateRangeEventCallback([weak = AceType::WeakClaim(this)]() {
+            auto xComponentPattern = weak.Upgrade();
+            CHECK_NULL_VOID(xComponentPattern);
+            xComponentPattern->HandleSetExpectedRateRangeEvent();
+        });
+    }
+
+    void OnFrameEventInit()
+    {
+        CHECK_NULL_VOID(nativeXComponentImpl_);
+        nativeXComponentImpl_->SetOnFrameEventCallback([weak = AceType::WeakClaim(this)]() {
+            auto xComponentPattern = weak.Upgrade();
+            CHECK_NULL_VOID(xComponentPattern);
+            xComponentPattern->HandleOnFrameEvent();
+        });
+    }
+
+    void UnregisterOnFrameEventInit()
+    {
+        CHECK_NULL_VOID(nativeXComponentImpl_);
+        nativeXComponentImpl_->SetUnregisterOnFrameEventCallback([weak = AceType::WeakClaim(this)]() {
+            auto xComponentPattern = weak.Upgrade();
+            CHECK_NULL_VOID(xComponentPattern);
+            xComponentPattern->HandleUnregisterOnFrameEvent();
+        });
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -201,6 +235,9 @@ private:
     void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
     void SetTouchPoint(
         const std::list<TouchLocationInfo>& touchInfoList, int64_t timeStamp, const TouchType& touchType);
+    void HandleSetExpectedRateRangeEvent();
+    void HandleOnFrameEvent();
+    void HandleUnregisterOnFrameEvent();
 
     std::vector<OH_NativeXComponent_HistoricalPoint> SetHistoryPoint(const std::list<TouchLocationInfo>& touchInfoList);
     std::string id_;
@@ -231,6 +268,7 @@ private:
     OffsetF localposition_;
     OffsetF globalPosition_;
     SizeF drawSize_;
+    RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>();
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif

@@ -768,4 +768,43 @@ XComponentControllerErrorCode XComponentPattern::ResetExtController(const RefPtr
     extPattern_.Reset();
     return XCOMPONENT_CONTROLLER_NO_ERROR;
 }
+
+void XComponentPattern::HandleSetExpectedRateRangeEvent()
+{
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    CHECK_NULL_VOID(displaySync_);
+    OH_NativeXComponent_ExpectedRateRange* range = nativeXComponentImpl_->GetRateRange();
+    CHECK_NULL_VOID(range);
+    FrameRateRange frameRateRange;
+    frameRateRange.preferred_ = range->expected;
+    frameRateRange.max_ = range->max;
+    frameRateRange.min_ = range->min;
+    displaySync_->SetExpectedFrameRateRange(std::move(frameRateRange));
+}
+
+void XComponentPattern::HandleOnFrameEvent()
+{
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    CHECK_NULL_VOID(displaySync_);
+    displaySync_->RegisterOnFrameWithData([weak = AceType::WeakClaim(this)](RefPtr<DisplaySyncData> displaySyncData) {
+        auto xComponentPattern = weak.Upgrade();
+        CHECK_NULL_VOID(xComponentPattern);
+        CHECK_NULL_VOID(xComponentPattern->nativeXComponentImpl_->GetOnFrameCallback());
+        xComponentPattern->nativeXComponentImpl_->GetOnFrameCallback()(xComponentPattern->nativeXComponent_.get(),
+            displaySyncData->GetTimestamp(), displaySyncData->GetTargetTimestamp());
+    });
+    displaySync_->AddToPipelineOnContainer();
+}
+
+void XComponentPattern::HandleUnregisterOnFrameEvent()
+{
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    CHECK_NULL_VOID(displaySync_);
+    displaySync_->UnRegisterOnFrame();
+    displaySync_->DelFromPipelineOnContainer();
+}
+
 } // namespace OHOS::Ace::NG
