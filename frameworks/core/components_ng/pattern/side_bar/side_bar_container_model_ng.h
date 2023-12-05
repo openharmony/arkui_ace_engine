@@ -72,7 +72,7 @@ public:
     static void SetDividerColor(FrameNode* frameNode, const Color& color);
     static void SetDividerStartMargin(FrameNode* frameNode, const Dimension& startMargin);
     static void SetDividerEndMargin(FrameNode* frameNode, const Dimension& endMargin);
-
+    static void ResetControlButtonLeft(FrameNode* frameNode);
 private:
     void MarkNeedInitRealSideBarWidth() override;
     static void MarkNeedInitRealSideBarWidth(FrameNode* frameNode);

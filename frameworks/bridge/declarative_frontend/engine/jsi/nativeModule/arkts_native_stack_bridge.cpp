@@ -24,8 +24,12 @@ ArkUINativeModuleValue StackBridge::SetAlignContent(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t align = secondArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetStackModifier().SetAlignContent(nativeNode, align);
+    if (secondArg->IsNumber()) {
+        int32_t align = secondArg->Int32Value(vm);
+        GetArkUIInternalNodeAPI()->GetStackModifier().SetAlignContent(nativeNode, align);
+    } else {
+        GetArkUIInternalNodeAPI()->GetStackModifier().ResetAlignContent(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

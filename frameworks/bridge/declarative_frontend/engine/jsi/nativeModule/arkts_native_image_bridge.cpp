@@ -28,10 +28,14 @@ ArkUINativeModuleValue ImageBridge::SetCopyOption(ArkUIRuntimeCallInfo* runtimeC
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> optionArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t option = secondArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetImageModifier().SetCopyOption(nativeNode, option);
+    if (optionArg->IsNumber()) {
+        int32_t option = optionArg->Int32Value(vm);
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetCopyOption(nativeNode, option);
+    } else {
+        GetArkUIInternalNodeAPI()->GetImageModifier().ResetCopyOption(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -50,10 +54,14 @@ ArkUINativeModuleValue ImageBridge::SetAutoResize(ArkUIRuntimeCallInfo* runtimeC
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> autoResizeArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    bool autoResize = secondArg->ToBoolean(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetImageModifier().SetAutoResize(nativeNode, autoResize);
+    if (autoResizeArg->IsBoolean()) {
+        bool autoResize = autoResizeArg->ToBoolean(vm)->Value();
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetAutoResize(nativeNode, autoResize);
+    } else {
+        GetArkUIInternalNodeAPI()->GetImageModifier().ResetAutoResize(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -77,6 +85,8 @@ ArkUINativeModuleValue ImageBridge::SetObjectRepeat(ArkUIRuntimeCallInfo* runtim
     if (secondArg->IsNumber()) {
         int32_t imageRepeat = secondArg->Int32Value(vm);
         GetArkUIInternalNodeAPI()->GetImageModifier().SetObjectRepeat(nativeNode, imageRepeat);
+    } else {
+        GetArkUIInternalNodeAPI()->GetImageModifier().ResetObjectRepeat(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -101,6 +111,8 @@ ArkUINativeModuleValue ImageBridge::SetRenderMode(ArkUIRuntimeCallInfo* runtimeC
     if (secondArg->IsNumber()) {
         int32_t imageRenderMode = secondArg->Int32Value(vm);
         GetArkUIInternalNodeAPI()->GetImageModifier().SetRenderMode(nativeNode, imageRenderMode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetImageModifier().ResetRenderMode(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -122,8 +134,12 @@ ArkUINativeModuleValue ImageBridge::SetSyncLoad(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    bool syncLoadValue = secondArg->ToBoolean(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetImageModifier().SetSyncLoad(nativeNode, syncLoadValue);
+    if (secondArg->IsBoolean()) {
+        bool syncLoadValue = secondArg->ToBoolean(vm)->Value();
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetSyncLoad(nativeNode, syncLoadValue);
+    } else {
+        GetArkUIInternalNodeAPI()->GetImageModifier().ResetSyncLoad(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -144,8 +160,12 @@ ArkUINativeModuleValue ImageBridge::SetObjectFit(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t objectFitValue = secondArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetImageModifier().SetObjectFit(nativeNode, objectFitValue);
+    if (secondArg->IsNumber()) {
+        int32_t objectFitValue = secondArg->Uint32Value(vm);
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetObjectFit(nativeNode, objectFitValue);
+    } else {
+        GetArkUIInternalNodeAPI()->GetImageModifier().ResetObjectFit(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -166,8 +186,12 @@ ArkUINativeModuleValue ImageBridge::SetFitOriginalSize(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    bool fitOriginalSize = secondArg->ToBoolean(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetImageModifier().SetFitOriginalSize(nativeNode, fitOriginalSize);
+    if (secondArg->IsBoolean()) {
+        bool fitOriginalSize = secondArg->ToBoolean(vm)->Value();
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetFitOriginalSize(nativeNode, fitOriginalSize);
+    } else {
+        GetArkUIInternalNodeAPI()->GetImageModifier().ResetFitOriginalSize(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -190,7 +214,8 @@ ArkUINativeModuleValue ImageBridge::SetSourceSize(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    if (secondArg->IsNumber() && thirdArg->IsNumber()) {
+    if (secondArg->IsNumber() && thirdArg->IsNumber() && secondArg->ToNumber(vm)->Value() >= 0 &&
+        thirdArg->ToNumber(vm)->Value() >= 0) {
         double width = secondArg->ToNumber(vm)->Value();
         double height = thirdArg->ToNumber(vm)->Value();
         GetArkUIInternalNodeAPI()->GetImageModifier().SetSourceSize(nativeNode, width, height);
@@ -245,10 +270,10 @@ ArkUINativeModuleValue ImageBridge::SetFillColor(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, colorArg, color)) {
-        GetArkUIInternalNodeAPI()->GetImageModifier().ResetFillColor(nativeNode);
-    } else {
+    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
         GetArkUIInternalNodeAPI()->GetImageModifier().SetFillColor(nativeNode, color.GetValue());
+    } else {
+        GetArkUIInternalNodeAPI()->GetImageModifier().ResetFillColor(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -304,8 +329,12 @@ ArkUINativeModuleValue ImageBridge::SetImageInterpolation(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t value = secondArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetImageModifier().SetImageInterpolation(nativeNode, value);
+    if (secondArg->IsNumber()) {
+        int32_t value = secondArg->Int32Value(vm);
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetImageInterpolation(nativeNode, value);
+    } else {
+        GetArkUIInternalNodeAPI()->GetImageModifier().ResetImageInterpolation(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -381,10 +410,11 @@ ArkUINativeModuleValue ImageBridge::SetDraggable(ArkUIRuntimeCallInfo* runtimeCa
     bool value;
     if (secondArg->IsBoolean()) {
         value = secondArg->ToBoolean(vm)->Value();
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetImageDraggable(nativeNode, value);
     } else {
-        return panda::JSValueRef::Undefined(vm);
+        GetArkUIInternalNodeAPI()->GetImageModifier().ResetImageDraggable(nativeNode);
     }
-    GetArkUIInternalNodeAPI()->GetImageModifier().SetImageDraggable(nativeNode, value);
+
     return panda::JSValueRef::Undefined(vm);
 }
 

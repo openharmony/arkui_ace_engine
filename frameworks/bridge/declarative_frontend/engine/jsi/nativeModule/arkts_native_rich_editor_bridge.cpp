@@ -26,8 +26,13 @@ ArkUINativeModuleValue RichEditorBridge::SetCopyOptions(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t CopyOptionsValue = secondArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetRichEditorModifier().SetRichEditorCopyOptions(nativeNode, CopyOptionsValue);
+    uint32_t CopyOptionsValue = static_cast<uint32_t>(CopyOptions::Distributed);
+    if (secondArg->IsNumber()) {
+        CopyOptionsValue = secondArg->Uint32Value(vm);
+        GetArkUIInternalNodeAPI()->GetRichEditorModifier().SetRichEditorCopyOptions(nativeNode, CopyOptionsValue);
+    } else {
+        GetArkUIInternalNodeAPI()->GetRichEditorModifier().ResetRichEditorCopyOptions(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

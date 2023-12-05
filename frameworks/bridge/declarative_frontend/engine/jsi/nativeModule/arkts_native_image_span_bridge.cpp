@@ -28,9 +28,13 @@ ArkUINativeModuleValue ImageSpanBridge::SetVerticalAlign(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> verticalAlign = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = node->ToNativePointer(vm)->Value();
-    int32_t value = verticalAlign->Int32Value(vm);
-    if (value >= NUM_1 && value <= SIZE_OF_VERTICAL_ALIGN) {
-        GetArkUIInternalNodeAPI()->GetImageSpanModifier().SetImageSpanVerticalAlign(nativeNode, value);
+    if (verticalAlign->IsNumber()) {
+        int32_t value = verticalAlign->Int32Value(vm);
+        if (value >= NUM_1 && value <= SIZE_OF_VERTICAL_ALIGN) {
+            GetArkUIInternalNodeAPI()->GetImageSpanModifier().SetImageSpanVerticalAlign(nativeNode, value);
+        } else {
+            GetArkUIInternalNodeAPI()->GetImageSpanModifier().ResetImageSpanVerticalAlign(nativeNode);
+        }
     } else {
         GetArkUIInternalNodeAPI()->GetImageSpanModifier().ResetImageSpanVerticalAlign(nativeNode);
     }
@@ -54,9 +58,13 @@ ArkUINativeModuleValue ImageSpanBridge::SetObjectFit(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> objectFit = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = node->ToNativePointer(vm)->Value();
-    int32_t value = objectFit->Int32Value(vm);
-    if (value >= NUM_0 && value <= SIZE_OF_OBJECT_FIT) {
-        GetArkUIInternalNodeAPI()->GetImageSpanModifier().SetImageSpanObjectFit(nativeNode, value);
+    if (objectFit->IsNumber()) {
+        int32_t value = objectFit->Int32Value(vm);
+        if (value >= NUM_0 && value <= SIZE_OF_OBJECT_FIT) {
+            GetArkUIInternalNodeAPI()->GetImageSpanModifier().SetImageSpanObjectFit(nativeNode, value);
+        } else {
+            GetArkUIInternalNodeAPI()->GetImageSpanModifier().ResetImageSpanObjectFit(nativeNode);
+        }
     } else {
         GetArkUIInternalNodeAPI()->GetImageSpanModifier().ResetImageSpanObjectFit(nativeNode);
     }
