@@ -126,5 +126,72 @@ void RectModelNG::SetShapeRectRadius(
     }
 }
 
+void RectModelNG::SetRadiusValue(
+    FrameNode* frameNode, const Dimension& radiusX, const Dimension& radiusY, int32_t index)
+{
+    NG::Radius radius = NG::Radius(radiusX, radiusY);
+    switch (index) {
+        case TOP_LEFT_RADIUS:
+            RectModelNG::SetTopLeftRadius(frameNode, radius);
+            break;
+        case TOP_RIGHT_RADIUS:
+            RectModelNG::SetTopRightRadius(frameNode, radius);
+            break;
+        case BOTTOM_RIGHT_RADIUS:
+            RectModelNG::SetBottomRightRadius(frameNode, radius);
+            break;
+        case BOTTOM_LEFT_RADIUS:
+            RectModelNG::SetBottomLeftRadius(frameNode, radius);
+            break;
+    }
+}
+
+void RectModelNG::SetTopLeftRadius(FrameNode* frameNode, const Radius& topLeftRadius)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RectPaintProperty, TopLeftRadius, topLeftRadius, frameNode);
+}
+
+void RectModelNG::SetTopRightRadius(FrameNode* frameNode, const Radius& topRightRadius)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RectPaintProperty, TopRightRadius, topRightRadius, frameNode);
+}
+
+void RectModelNG::SetBottomLeftRadius(FrameNode* frameNode, const Radius& bottomLeftRadius)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RectPaintProperty, BottomLeftRadius, bottomLeftRadius, frameNode);
+}
+
+void RectModelNG::SetBottomRightRadius(FrameNode* frameNode, const Radius& bottomRightRadius)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RectPaintProperty, BottomRightRadius, bottomRightRadius, frameNode);
+}
+
+void RectModelNG::SetRadiusWidth(FrameNode* frameNode, const Dimension& value)
+{
+    Radius radius;
+    value.IsNegative() ? radius.SetX(Dimension(DEFAULT_RADIUS_VALUE)) : radius.SetX(value);
+    radius.SetY(DEFAULT_RADIUS_INVALID);
+    RectModelNG::UpdateRadius(frameNode, radius);
+}
+
+void RectModelNG::SetRadiusHeight(FrameNode* frameNode, const Dimension& value)
+{
+    Radius radius;
+    value.IsNegative() ? radius.SetY(Dimension(DEFAULT_RADIUS_VALUE)) : radius.SetY(value);
+    radius.SetX(DEFAULT_RADIUS_INVALID);
+    RectModelNG::UpdateRadius(frameNode, radius);
+}
+
+void RectModelNG::UpdateRadius(FrameNode* frameNode, const Radius& radius)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto castRectPaintProperty = frameNode->GetPaintProperty<RectPaintProperty>();
+    if (castRectPaintProperty) {
+        castRectPaintProperty->UpdateTopLeftRadius(radius);
+        castRectPaintProperty->UpdateTopRightRadius(radius);
+        castRectPaintProperty->UpdateBottomLeftRadius(radius);
+        castRectPaintProperty->UpdateBottomRightRadius(radius);
+    }
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_RECT_MODEL_NG_CPP
