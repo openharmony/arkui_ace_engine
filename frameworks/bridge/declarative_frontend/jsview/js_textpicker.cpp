@@ -159,7 +159,7 @@ void ParseTextPickerValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& 
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onValueChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                              const std::vector<std::string>& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -186,7 +186,7 @@ void ParseTextPickerSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onSelectedChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                 const std::vector<double>& index) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -1047,7 +1047,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     std::function<void(const std::string&)> acceptEvent;
     std::function<void(const std::string&)> changeEvent;
     auto onCancel = paramObject->GetProperty("onCancel");
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
         cancelEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
@@ -1356,7 +1356,7 @@ std::map<std::string, NG::DialogTextEvent> JSTextPickerDialog::DialogEvent(const
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto onAccept = paramObject->GetProperty("onAccept");
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
         auto acceptId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
@@ -1393,7 +1393,7 @@ std::map<std::string, NG::DialogGestureEvent> JSTextPickerDialog::DialogCancelEv
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto onCancel = paramObject->GetProperty("onCancel");
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
         auto cancelId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
@@ -1415,7 +1415,7 @@ void JSTextPickerDialog::AddEvent(RefPtr<PickerTextComponent>& picker, const JSC
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto onAccept = paramObject->GetProperty("onAccept");
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
         auto acceptId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
