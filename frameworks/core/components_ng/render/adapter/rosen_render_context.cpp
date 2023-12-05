@@ -3347,6 +3347,7 @@ void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radius
 
 void RosenRenderContext::OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape)
 {
+    CHECK_NULL_VOID(rsNode_);
     if (basicShape) {
         if (!RectIsNull()) {
             RectF rect = GetPaintRectWithoutTransform();
