@@ -65,6 +65,8 @@ const std::function<void(float)> onCallbackEvent = [](float) {};
 const float CONTAINER_WIDTH = 600.0f;
 const float CONTAINER_HEIGHT = 1000.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
+
+const OffsetF OFFSETF { 1.0, 1.0 };
 } // namespace
 class FrameNodeTestNg : public testing::Test {
 public:
@@ -1770,5 +1772,83 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest047, TestSize.Level1)
     EXPECT_NE(FRAME_NODE2->renderContext_, nullptr);
 
     FRAME_NODE2->layoutProperty_ = nullptr;
+}
+
+/**
+ * @tc.name: FrameNodeTouchTest048
+ * @tc.desc: Test method DumpViewDataPageNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest048, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct parameters.
+     */
+    FRAME_NODE2->isActive_ = true;
+    FRAME_NODE2->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
+
+    /**
+     * @tc.steps: step2. call DumpViewDataPageNode.
+     * @tc.expected: expect renderContext_ not nullptr.
+     */
+
+    FRAME_NODE2->DumpViewDataPageNode(viewDataWrap);
+    EXPECT_NE(FRAME_NODE2->renderContext_, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTouchTest049
+ * @tc.desc: Test method GetResponseRegionList
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest049, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct parameters.
+     */
+    FRAME_NODE2->isActive_ = true;
+    FRAME_NODE2->eventHub_->SetEnabled(true);
+
+    DimensionRect responseRect(Dimension(0), Dimension(0), DimensionOffset(OFFSETF));
+    std::vector<DimensionRect> mouseResponseRegion;
+    mouseResponseRegion.emplace_back(responseRect);
+
+    /**
+     * @tc.steps: step2. call GetResponseRegionList.
+     * @tc.expected: expect MouseResponseRegion is not empty.
+     */
+    auto gestureEventHub = FRAME_NODE2->eventHub_->GetOrCreateGestureEventHub();
+    gestureEventHub->SetMouseResponseRegion(mouseResponseRegion);
+
+    auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
+    FRAME_NODE2->GetResponseRegionList(paintRect, 1);
+    EXPECT_FALSE(gestureEventHub->GetMouseResponseRegion().empty());
+}
+
+/**
+ * @tc.name: FrameNodeTouchTest050
+ * @tc.desc: Test method GetResponseRegionList
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest050, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct parameters.
+     */
+    FRAME_NODE2->isActive_ = true;
+
+    /**
+     * @tc.steps: step2. call GetResponseRegionList.
+     * @tc.expected: expect GetResponseRegion is not empty.
+     */
+    std::vector<DimensionRect> responseRegion;
+    responseRegion.push_back(DimensionRect());
+    auto gestureEventHub = FRAME_NODE2->eventHub_->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegion(responseRegion);
+    auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
+    FRAME_NODE2->GetResponseRegionList(paintRect, 1);
+    EXPECT_FALSE(gestureEventHub->GetResponseRegion().empty());
 }
 } // namespace OHOS::Ace::NG
