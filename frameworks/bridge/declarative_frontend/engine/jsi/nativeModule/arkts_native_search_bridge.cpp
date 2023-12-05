@@ -28,6 +28,7 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
+const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 
 ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -81,7 +82,7 @@ ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCa
         value.family = familyStr.c_str();
     }
 
-    if (fiveArg->IsNumber()) {
+    if (!fiveArg->IsNull() && fiveArg->IsNumber()) {
         value.style = fiveArg->Int32Value(vm);
     }
 
@@ -108,7 +109,7 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderColor(ArkUIRuntimeCallInfo* r
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Color color;
     uint32_t result;
-    if (ArkTSUtils::ParseJsColor(vm, secondArg, color)) {
+    if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         result = color.GetValue();
         GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchPlaceholderColor(nativeNode, result);
     } else {
@@ -170,7 +171,7 @@ ArkUINativeModuleValue SearchBridge::SetCaretStyle(ArkUIRuntimeCallInfo* runtime
     }
     Color color;
     uint32_t caretColor;
-    if (ArkTSUtils::ParseJsColor(vm, caretColorArg, color)) {
+    if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color)) {
         caretColor = color.GetValue();
     } else {
         caretColor = textFieldTheme->GetCursorColor().GetValue();
@@ -200,9 +201,9 @@ ArkUINativeModuleValue SearchBridge::SetSearchTextAlign(ArkUIRuntimeCallInfo* ru
 
     if (secondArg->IsNumber()) {
         int32_t value = secondArg->Int32Value(vm);
-        GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchTextAlign(nativeNode, value);
-    } else {
-        GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchTextAlign(nativeNode);
+        if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
+            GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchTextAlign(nativeNode, value);
+        }
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -266,7 +267,7 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
     Color value;
     uint32_t color;
     if (!forthArg->IsUndefined() && !forthArg->IsNull() &&
-        ArkTSUtils::ParseJsColor(vm, forthArg, value)) {
+        ArkTSUtils::ParseJsColorAlpha(vm, forthArg, value)) {
         color = value.GetValue();
     } else {
         color = theme->GetSearchIconColor().GetValue();
@@ -371,7 +372,7 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo* ru
         value.family = familyStr.c_str();
     }
 
-    if (fiveArg->IsNumber()) {
+    if (!fiveArg->IsNull() && fiveArg->IsNumber()) {
         value.style = fiveArg->Int32Value(vm);
     }
     GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchPlaceholderFont(nativeNode, &value);
@@ -421,7 +422,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchIcon(ArkUIRuntimeCallInfo* runtime
     value.unit = static_cast<int8_t>(size.Unit());
 
     Color color;
-    if (ArkTSUtils::ParseJsColor(vm, threeArg, color)) {
+    if (ArkTSUtils::ParseJsColorAlpha(vm, threeArg, color)) {
         value.color = color.GetValue();
     } else {
         value.color = INVALID_COLOR_VALUE;
@@ -484,7 +485,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     value.sizeUnit = static_cast<int8_t>(size.Unit());
 
     Color fontColor;
-    if (ArkTSUtils::ParseJsColor(vm, fourArg, fontColor)) {
+    if (ArkTSUtils::ParseJsColorAlpha(vm, fourArg, fontColor)) {
         value.fontColor = fontColor.GetValue();
     } else {
         value.fontColor = theme->GetSearchButtonTextColor().GetValue();
@@ -520,7 +521,7 @@ ArkUINativeModuleValue SearchBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     Color value;
     uint32_t color = theme->GetTextColor().GetValue();
-    if (ArkTSUtils::ParseJsColor(vm, secondArg, value)) {
+    if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, value)) {
         color = value.GetValue();
     }
     GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchFontColor(nativeNode, color);
@@ -545,13 +546,15 @@ ArkUINativeModuleValue SearchBridge::SetCopyOption(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     
+    auto copyOptions = CopyOptions::Local;
+    uint32_t value = static_cast<uint32_t>(copyOptions);
     if (secondArg->IsNumber()) {
-        uint32_t value = secondArg->Uint32Value(vm);
-        GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchCopyOption(nativeNode, value);
-    } else {
-        GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchCopyOption(nativeNode);
+        value = secondArg->Uint32Value(vm);
+    } else if (!secondArg->IsNumber() && !secondArg->IsUndefined()) {
+        copyOptions = CopyOptions::None;
+        value = static_cast<uint32_t>(copyOptions);
     }
-    
+    GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchCopyOption(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
 }
 

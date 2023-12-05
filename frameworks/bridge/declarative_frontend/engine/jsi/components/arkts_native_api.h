@@ -68,6 +68,7 @@ struct SearchButtonOptionsStruct {
 struct ArkUISizeType {
     double value;
     int8_t unit;
+    const char* string;
 };
 
 struct StringAndInt32 {

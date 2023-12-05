@@ -59,6 +59,7 @@ constexpr uint8_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
 constexpr Dimension DEFAULT_FLEX_BASIS { 0.0, DimensionUnit::AUTO };
 constexpr int32_t DEFAULT_DISPLAY_PRIORITY = 0;
 constexpr int32_t DEFAULT_ID = 0;
+constexpr double DEFAULT_PADDING = 16.0;
 
 BorderStyle ConvertBorderStyle(int32_t value)
 {
@@ -1653,16 +1654,35 @@ void SetPadding(NodeHandle node, const struct ArkUISizeType *top, const struct A
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<OHOS::Ace::CalcDimension> topDimen;
-    std::optional<OHOS::Ace::CalcDimension> rightDimen;
-    std::optional<OHOS::Ace::CalcDimension> bottomDimen;
-    std::optional<OHOS::Ace::CalcDimension> leftDimen;
-
-    topDimen = CalcDimension(top->value, static_cast<DimensionUnit>(top->unit));
-    rightDimen = CalcDimension(right->value, static_cast<DimensionUnit>(right->unit));
-    bottomDimen = CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit));
-    leftDimen = CalcDimension(left->value, static_cast<DimensionUnit>(left->unit));
-    NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(topDimen, bottomDimen, leftDimen, rightDimen);
+    CalcDimension topDimen;
+    CalcDimension rightDimen;
+    CalcDimension bottomDimen;
+    CalcDimension leftDimen;
+    if (top->string != nullptr) {
+        topDimen = CalcDimension(top->string, DimensionUnit::CALC);
+    } else {
+        topDimen = CalcDimension(top->value, static_cast<DimensionUnit>(top->unit));
+    }
+    if (right->string != nullptr) {
+        rightDimen = CalcDimension(right->string, DimensionUnit::CALC);
+    } else {
+        rightDimen = CalcDimension(right->value, static_cast<DimensionUnit>(right->unit));
+    }
+    if (bottom->string != nullptr) {
+        bottomDimen = CalcDimension(bottom->string, DimensionUnit::CALC);
+    } else {
+        bottomDimen = CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit));
+    }
+    if (left->string != nullptr) {
+        leftDimen = CalcDimension(left->string, DimensionUnit::CALC);
+    } else {
+        leftDimen = CalcDimension(left->value, static_cast<DimensionUnit>(left->unit));
+    }
+    NG::PaddingProperty paddings;
+    paddings.top = std::optional<CalcLength>(topDimen);
+    paddings.bottom = std::optional<CalcLength>(bottomDimen);
+    paddings.left = std::optional<CalcLength>(leftDimen);
+    paddings.right = std::optional<CalcLength>(rightDimen);
     ViewAbstract::SetPadding(frameNode, paddings);
 }
 
@@ -1670,7 +1690,12 @@ void ResetPadding(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetPadding(frameNode, NG::CalcLength(0.0));
+    NG::PaddingProperty paddings;
+    paddings.top = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+    paddings.bottom = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+    paddings.left = std::optional<CalcLength>(CalcLength(DEFAULT_PADDING, DimensionUnit::VP));
+    paddings.right = std::optional<CalcLength>(CalcLength(DEFAULT_PADDING, DimensionUnit::VP));
+    ViewAbstract::SetPadding(frameNode, paddings);
 }
 
 /**
@@ -1950,15 +1975,35 @@ void SetMargin(NodeHandle node, const struct ArkUISizeType *top, const struct Ar
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<OHOS::Ace::CalcDimension> topDimen;
-    std::optional<OHOS::Ace::CalcDimension> rightDimen;
-    std::optional<OHOS::Ace::CalcDimension> bottomDimen;
-    std::optional<OHOS::Ace::CalcDimension> leftDimen;
-    topDimen = CalcDimension(top->value, static_cast<DimensionUnit>(top->unit));
-    rightDimen = CalcDimension(right->value, static_cast<DimensionUnit>(right->unit));
-    bottomDimen = CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit));
-    leftDimen = CalcDimension(left->value, static_cast<DimensionUnit>(left->unit));
-    NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(topDimen, bottomDimen, leftDimen, rightDimen);
+    CalcDimension topDimen;
+    CalcDimension rightDimen;
+    CalcDimension bottomDimen;
+    CalcDimension leftDimen;
+    if (top->string != nullptr) {
+        topDimen = CalcDimension(top->string, DimensionUnit::CALC);
+    } else {
+        topDimen = CalcDimension(top->value, static_cast<DimensionUnit>(top->unit));
+    }
+    if (right->string != nullptr) {
+        rightDimen = CalcDimension(right->string, DimensionUnit::CALC);
+    } else {
+        rightDimen = CalcDimension(right->value, static_cast<DimensionUnit>(right->unit));
+    }
+    if (bottom->string != nullptr) {
+        bottomDimen = CalcDimension(bottom->string, DimensionUnit::CALC);
+    } else {
+        bottomDimen = CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit));
+    }
+    if (left->string != nullptr) {
+        leftDimen = CalcDimension(left->string, DimensionUnit::CALC);
+    } else {
+        leftDimen = CalcDimension(left->value, static_cast<DimensionUnit>(left->unit));
+    }
+    NG::PaddingProperty paddings;
+    paddings.top = std::optional<CalcLength>(topDimen);
+    paddings.bottom = std::optional<CalcLength>(bottomDimen);
+    paddings.left = std::optional<CalcLength>(leftDimen);
+    paddings.right = std::optional<CalcLength>(rightDimen);
     ViewAbstract::SetMargin(frameNode, paddings);
 }
 
