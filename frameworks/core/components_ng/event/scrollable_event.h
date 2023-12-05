@@ -86,10 +86,11 @@ public:
     bool IsHitTestBlock() const
     {
         if (scrollable_ && !scrollable_->Idle()) {
-            return std::abs(scrollable_->GetCurrentVelocity()) > SystemProperties::Vp2Px(HTMBLOCK_VELOCITY);
+            return std::abs(
+                scrollable_->GetCurrentVelocity()) > PipelineBase::Vp2PxWithCurrentDensity(HTMBLOCK_VELOCITY);
         }
         if (getAnimateVelocityCallback_) {
-            return std::abs(getAnimateVelocityCallback_()) > SystemProperties::Vp2Px(HTMBLOCK_VELOCITY);
+            return std::abs(getAnimateVelocityCallback_()) > PipelineBase::Vp2PxWithCurrentDensity(HTMBLOCK_VELOCITY);
         }
         return false;
     }

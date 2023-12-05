@@ -451,7 +451,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         auto params = eventAction->GetValue("params");
         auto bundle = bundleName->GetString();
         auto ability = abilityName->GetString();
-        LOGI("on Action called to event handler， bundle:%{public}s ability:%{public}s, params:%{public}s",
+        LOGI("on Action called to event handler, bundle:%{public}s ability:%{public}s, params:%{public}s",
             bundle.c_str(), ability.c_str(), params->GetString().c_str());
         if (bundle.empty() || ability.empty()) {
             LOGE("action ability or bundle is empty");

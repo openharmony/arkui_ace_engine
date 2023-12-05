@@ -150,7 +150,7 @@ public:
     static float GetFontWeightScale();
 
     /*
-     * Get resolution of device.
+     * Get density of default display.
      */
     static double GetResolution()
     {
@@ -314,19 +314,6 @@ public:
         return screenShape_;
     }
 
-    /*
-     * Change px to vp
-     */
-    static double Px2Vp(double pxNum)
-    {
-        return pxNum / resolution_;
-    }
-
-    static double Vp2Px(double pxNum)
-    {
-        return pxNum * resolution_;
-    }
-
     static int GetArkProperties();
 
     static std::string GetArkBundleName();
@@ -420,7 +407,7 @@ private:
     static int32_t deviceHeight_;
     static int32_t devicePhysicalWidth_;
     static int32_t devicePhysicalHeight_;
-    static double resolution_;
+    static double resolution_; // density of the default display
     static DeviceType deviceType_;
     static DeviceOrientation orientation_;
     static std::string brand_;

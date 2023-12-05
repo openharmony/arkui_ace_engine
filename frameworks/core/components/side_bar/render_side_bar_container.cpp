@@ -133,9 +133,10 @@ void RenderSideBarContainer::Update(const RefPtr<Component>& component)
 
     sideBarPosition_ = sideBar_->GetSideBarPositon();
 
-    exceptRegion_.SetRect(SystemProperties::Vp2Px(sideBar_->GetButtonLeft()),
-        SystemProperties::Vp2Px(sideBar_->GetButtonTop()), SystemProperties::Vp2Px(sideBar_->GetButtonWidth()),
-        SystemProperties::Vp2Px(sideBar_->GetButtonHeight()));
+    exceptRegion_.SetRect(PipelineBase::Vp2PxWithCurrentDensity(sideBar_->GetButtonLeft()),
+        PipelineBase::Vp2PxWithCurrentDensity(
+            sideBar_->GetButtonTop()), PipelineBase::Vp2PxWithCurrentDensity(sideBar_->GetButtonWidth()),
+        PipelineBase::Vp2PxWithCurrentDensity(sideBar_->GetButtonHeight()));
 
     if (!isInitialized_) {
         Initialize();
@@ -213,7 +214,7 @@ void RenderSideBarContainer::OnStatusChanged(RenderStatus renderStatus)
 
 void RenderSideBarContainer::UpdateElementPosition(double offset)
 {
-    curPosition_ = Dimension(SystemProperties::Px2Vp(offset), DimensionUnit::VP);
+    curPosition_ = Dimension(PipelineBase::Px2VpWithCurrentDensity(offset), DimensionUnit::VP);
     SetChildrenStatus();
 }
 
@@ -300,7 +301,7 @@ Dimension RenderSideBarContainer::ConvertWidthToVp(const Dimension& width) const
 {
     if (width.Unit() == DimensionUnit::PERCENT) {
         auto layoutSize = GetLayoutSize();
-        double value = SystemProperties::Px2Vp(width.Value() * layoutSize.Width());
+        double value = PipelineBase::Px2VpWithCurrentDensity(width.Value() * layoutSize.Width());
         return Dimension(value, DimensionUnit::VP);
     }
 
@@ -517,9 +518,10 @@ void RenderSideBarContainer::HandleDragUpdate(double xOffset)
     auto maxValue = ConvertWidthToVp(maxSidebarWidth_).ConvertToPx();
     if (sideBarLine > minValue && sideBarLine < maxValue) {
         if (isSideBarWidthUnitPercent) {
-            sidebarWidth_ = ConvertWidthToPercent(Dimension(SystemProperties::Px2Vp(sideBarLine), DimensionUnit::VP));
+            sidebarWidth_ = ConvertWidthToPercent(
+                Dimension(PipelineBase::Px2VpWithCurrentDensity(sideBarLine), DimensionUnit::VP));
         } else {
-            sidebarWidth_ = Dimension(SystemProperties::Px2Vp(sideBarLine), DimensionUnit::VP);
+            sidebarWidth_ = Dimension(PipelineBase::Px2VpWithCurrentDensity(sideBarLine), DimensionUnit::VP);
         }
 
         SetChildrenStatus();
