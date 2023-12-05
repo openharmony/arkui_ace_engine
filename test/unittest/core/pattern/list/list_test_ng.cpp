@@ -435,18 +435,15 @@ void ListTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
 
 void ListTestNg::MouseSelect(Offset start, Offset end)
 {
-    MouseInfo info;
-    info.SetButton(MouseButton::LEFT_BUTTON);
-    info.SetAction(MouseAction::PRESS);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::MOUSE_BUTTON);
     info.SetLocalLocation(start);
-    pattern_->HandleMouseEventWithoutKeyboard(info);
+    pattern_->HandleDragStart(info);
     if (start != end) {
-        info.SetAction(MouseAction::MOVE);
         info.SetLocalLocation(end);
-        pattern_->HandleMouseEventWithoutKeyboard(info);
+        pattern_->HandleDragUpdate(info);
     }
-    info.SetAction(MouseAction::RELEASE);
-    pattern_->HandleMouseEventWithoutKeyboard(info);
+    pattern_->HandleDragEnd(info);
 }
 
 void ListTestNg::DragSwiperItem(int32_t index, float mainDelta, float mainVelocity)
@@ -3444,44 +3441,6 @@ HWTEST_F(ListTestNg, MouseSelect003, TestSize.Level1)
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 3)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 4)->IsSelected());
     EXPECT_TRUE(isFifthItemSelected);
-}
-
-/**
- * @tc.name: MouseSelect004
- * @tc.desc: Test listItem selectable about special condition
- * @tc.type: FUNC
- */
-HWTEST_F(ListTestNg, MouseSelect004, TestSize.Level1)
-{
-    CreateWithItem([](ListModelNG model) { model.SetMultiSelectable(true); });
-
-    /**
-     * @tc.steps: step1. Use RIGHT_BUTTON to select.
-     * @tc.expected: Nothing selected.
-     */
-    MouseInfo info;
-    info.SetButton(MouseButton::RIGHT_BUTTON);
-    info.SetAction(MouseAction::PRESS);
-    info.SetLocalLocation(Offset::Zero());
-    pattern_->HandleMouseEventWithoutKeyboard(info);
-    info.SetAction(MouseAction::MOVE);
-    info.SetLocalLocation(Offset(200.f, 100.f));
-    pattern_->HandleMouseEventWithoutKeyboard(info);
-    for (int32_t index = 0; index < VIEW_LINE_NUMBER; index++) {
-        EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, index)->IsSelected()) << "Index: " << index;
-    }
-
-    /**
-     * @tc.steps: step2. Use LEFT_BUTTON, but with MouseAction::HOVER to select.
-     * @tc.expected: Nothing selected.
-     */
-    info.SetButton(MouseButton::LEFT_BUTTON);
-    info.SetAction(MouseAction::HOVER);
-    info.SetLocalLocation(Offset::Zero());
-    pattern_->HandleMouseEventWithoutKeyboard(info);
-    for (int32_t index = 0; index < VIEW_LINE_NUMBER; index++) {
-        EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, index)->IsSelected()) << "Index: " << index;
-    }
 }
 
 /**

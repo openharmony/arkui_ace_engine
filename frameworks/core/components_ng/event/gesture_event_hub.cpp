@@ -956,6 +956,11 @@ void GestureEventHub::SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc
     gestureJudgeFunc_ = std::move(gestureJudgeFunc);
 }
 
+void GestureEventHub::SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJudgeFunc)
+{
+    gestureJudgeNativeFunc_ = std::move(gestureJudgeFunc);
+}
+
 void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
 {
     CheckClickActuator();

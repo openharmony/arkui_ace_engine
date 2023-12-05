@@ -635,6 +635,7 @@ enum class GestureTypeName {
     ROTATION_GESTURE = 5,
     DRAG = 6,
     CLICK = 7,
+    BOXSELECT = 8,
 };
 
 enum class ModifierKey {

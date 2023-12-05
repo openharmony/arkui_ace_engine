@@ -233,7 +233,7 @@ void GridPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
-bool GridPattern::IsItemSelected(const MouseInfo& info)
+bool GridPattern::IsItemSelected(const GestureEvent& info)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);

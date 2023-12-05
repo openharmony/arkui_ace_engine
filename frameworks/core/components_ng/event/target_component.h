@@ -57,9 +57,16 @@ public:
 
     void SetOnGestureJudgeBegin(GestureJudgeFunc&& onGestureJudgeBegin);
 
+    void SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& onGestureJudgeBegin);
+
     GestureJudgeFunc GetOnGestureJudgeBeginCallback()
     {
         return onGestureJudgeBegin_;
+    }
+
+    GestureJudgeFunc GetOnGestureJudgeNativeBeginCallback()
+    {
+        return onGestureJudgeNativeBegin_;
     }
 
 private:
@@ -68,6 +75,7 @@ private:
     RefPtr<NGGestureRecognizer> nodeGesture_;
     std::list<RefPtr<TargetComponent>> targetComponentChildren_;
     GestureJudgeFunc onGestureJudgeBegin_;
+    GestureJudgeFunc onGestureJudgeNativeBegin_;
     std::set<int32_t> path_;
     SourceType sourceType_ = SourceType::TOUCH;
 };

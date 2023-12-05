@@ -1608,18 +1608,27 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t 
     return false;
 }
 
-HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
+void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetComponent)
 {
-    auto targetComponent = MakeRefPtr<TargetComponent>();
-    targetComponent->SetNode(WeakClaim(this));
     auto gestureHub = eventHub_->GetGestureEventHub();
     if (gestureHub) {
         auto callback = gestureHub->GetOnGestureJudgeBeginCallback();
         if (callback) {
             targetComponent->SetOnGestureJudgeBegin(std::move(callback));
         }
+        auto callbackNative = gestureHub->GetOnGestureJudgeNativeBeginCallback();
+        if (callbackNative) {
+            targetComponent->SetOnGestureJudgeNativeBegin(std::move(callbackNative));
+        }
     }
+}
+
+HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
+{
+    auto targetComponent = MakeRefPtr<TargetComponent>();
+    targetComponent->SetNode(WeakClaim(this));
+    AddJudgeToTargetComponent(targetComponent);
 
     if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
         if (SystemProperties::GetDebugEnabled()) {
