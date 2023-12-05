@@ -5701,7 +5701,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto sheetDetents = paramObj->GetProperty("detents");
     auto backgroundBlurStyle = paramObj->GetProperty("blurStyle");
     auto showCloseIcon = paramObj->GetProperty("showClose");
-    auto type = paramObj->GetProperty("type");
+    auto type = paramObj->GetProperty("preferType");
 
     std::vector<NG::SheetHeight> detents;
     if (ParseSheetDetents(sheetDetents, detents)) {
@@ -5821,6 +5821,11 @@ void JSViewAbstract::ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetH
         }
         if (heightStr == SHEET_HEIGHT_LARGE) {
             detent.sheetMode = NG::SheetMode::LARGE;
+            detent.height.reset();
+            return;
+        }
+        if (heightStr == SHEET_HEIGHT_FITCONTENT) {
+            detent.sheetMode = NG::SheetMode::AUTO;
             detent.height.reset();
             return;
         }
