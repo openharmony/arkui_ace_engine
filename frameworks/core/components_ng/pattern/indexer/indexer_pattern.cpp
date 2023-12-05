@@ -723,9 +723,9 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
     divider.color = indexerTheme->GetPopupSeparateColor();
     listLayoutProperty->UpdateDivider(divider);
     listLayoutProperty->UpdateListDirection(Axis::VERTICAL);
-    auto listPaintProperty = listNode->GetPaintProperty<ListPaintProperty>();
+    auto listPaintProperty = listNode->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(listPaintProperty);
-    listPaintProperty->UpdateBarDisplayMode(DisplayMode::OFF);
+    listPaintProperty->UpdateScrollBarMode(DisplayMode::OFF);
     auto listRenderContext = listNode->GetRenderContext();
     CHECK_NULL_VOID(listRenderContext);
     listRenderContext->SetClipToBounds(true);

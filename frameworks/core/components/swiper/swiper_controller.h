@@ -176,6 +176,16 @@ public:
         return updateCubicCurveCallback_;
     }
 
+    void SetSurfaceChangeCallback(const CommonFunc& surfaceChangeCallback)
+    {
+        surfaceChangeCallback_ = surfaceChangeCallback;
+    }
+
+    const CommonFunc& GetSurfaceChangeCallback() const
+    {
+        return surfaceChangeCallback_;
+    }
+
 private:
     SwipeToImpl swipeToImpl_;
     SwipeToWithoutAnimationImpl swipeToWithoutAnimationImpl_;
@@ -190,6 +200,7 @@ private:
     CommonFunc addSwiperEventCallback_;
     TurnPageRateFunc turnPageRateCallback_;
     CommonFunc updateCubicCurveCallback_;
+    CommonFunc surfaceChangeCallback_;
 };
 
 } // namespace OHOS::Ace

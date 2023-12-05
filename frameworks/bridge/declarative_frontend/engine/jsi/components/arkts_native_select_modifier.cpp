@@ -29,7 +29,7 @@ const int POS_1 = 1;
 const int POS_2 = 1;
 const char* ERR_CODE = "-1";
 const int SIZE_OF_TWO = 2;
-const int DEFAULT_SELECT = -1;
+const int DEFAULT_SELECT = 0;
 
 void SetSpace(NodeHandle node, float value, int unit)
 {
@@ -48,6 +48,9 @@ void SetSelected(NodeHandle node, int32_t idx)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (idx < -1) {
+        idx = -1;
+    }
     SelectModelNG::SetSelected(frameNode, idx);
 }
 void SetSelectFontColor(NodeHandle node, const uint32_t color)

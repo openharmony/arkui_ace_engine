@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/patternlock_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
 #include "core/components_v2/pattern_lock/pattern_lock_component.h"
 
@@ -242,9 +243,11 @@ void JSPatternLock::SetDotConnect(const JSCallbackInfo& args)
     }
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onDotConnect = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t code) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDotConnect = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                            int32_t code) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-
+        PipelineContext::SetCallBackNode(node);
         JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(code));
         func->ExecuteJS(1, &newJSVal);
     };

@@ -17,15 +17,15 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCREEN_PATTERN_H
 
 #include "session/screen/include/screen_session.h"
-
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "input_manager.h"
 
 namespace OHOS::Ace::NG {
 class ScreenPattern : public StackPattern {
     DECLARE_ACE_TYPE(ScreenPattern, StackPattern);
 
 public:
-    explicit ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession) : screenSession_(screenSession) {}
+    explicit ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession);
     ~ScreenPattern() override = default;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
@@ -45,6 +45,8 @@ protected:
 private:
     void UpdateDisplayInfo();
     void DeduplicateDisplayInfo();
+    void UpdateToInputManager(float rotation);
+    void InputManagerUpdateDisplayInfo(RectF paintRect, MMI::DisplayInfo displayInfo, MMI::WindowInfo windowInfo);
 
     sptr<Rosen::ScreenSession> screenSession_;
 

@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toggle/toggle_theme.h"
@@ -154,6 +155,16 @@ void ToggleButtonPattern::MarkIsSelected(bool isSelected)
     }
 }
 
+void ToggleButtonPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (!inspectorId.empty()) {
+        Recorder::NodeDataCache::Get().PutBool(inspectorId, isOn_.value_or(false));
+    }
+}
+
 void ToggleButtonPattern::HandleEnabled()
 {
     auto host = GetHost();
@@ -257,7 +268,9 @@ void ToggleButtonPattern::InitButtonAndText()
         layoutProperty->UpdateFontSize(textLayoutProperty->GetFontSizeValue(textFontSize_));
     }
     layoutProperty->UpdateLabel(textLayoutProperty->GetContentValue(""));
-    textLayoutProperty->UpdateTextColor(textColor_);
+    if (!textLayoutProperty->GetTextColor().has_value()) {
+        textLayoutProperty->UpdateTextColor(textColor_);
+    }
 
     if (!textLayoutProperty->GetMarginProperty()) {
         MarginProperty margin;

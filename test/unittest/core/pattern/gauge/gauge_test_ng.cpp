@@ -35,7 +35,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -102,12 +102,12 @@ public:
 
 void GaugeTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void GaugeTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -229,7 +229,7 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest003, TestSize.Level1)
     layoutConstraintSizevalid.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressTheme>()));
     auto gaugeSize = gaugeLayoutAlgorithm->MeasureContent(layoutConstraintSizevalid, &layoutWrapper).value();
     EXPECT_EQ(gaugeSize, SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
@@ -636,7 +636,7 @@ HWTEST_F(GaugeTestNg, GaugePaintTest001, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
     RenderRingInfo data;
     Testing::MockCanvas rsCanvas;
@@ -675,7 +675,7 @@ HWTEST_F(GaugeTestNg, GaugePaintTest002, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
     RenderRingInfo data;
     Testing::MockCanvas rsCanvas;
@@ -711,7 +711,7 @@ HWTEST_F(GaugeTestNg, GaugePaintTest003, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
     RenderRingInfo data;
     Testing::MockCanvas rsCanvas;
@@ -747,7 +747,7 @@ HWTEST_F(GaugeTestNg, GaugePaintTest004, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
     RenderRingInfo data;
     Testing::MockCanvas rsCanvas;
@@ -783,7 +783,7 @@ HWTEST_F(GaugeTestNg, GaugePaintTest005, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
     RenderRingInfo data;
     Testing::MockCanvas rsCanvas;
@@ -823,7 +823,7 @@ HWTEST_F(GaugeTestNg, GaugePaintTest006, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
     RenderRingInfo data;
     Testing::MockCanvas rsCanvas;
@@ -866,7 +866,7 @@ HWTEST_F(GaugeTestNg, GaugePaintTest007, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
     RenderRingInfo data;
     Testing::MockCanvas rsCanvas;
@@ -906,7 +906,7 @@ HWTEST_F(GaugeTestNg, GaugePaintTest008, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
     RenderRingInfo data;
     Testing::MockCanvas rsCanvas;
@@ -946,7 +946,7 @@ HWTEST_F(GaugeTestNg, GaugePaintTest009, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
     RenderRingInfo data;
     Testing::MockCanvas rsCanvas;
@@ -989,7 +989,7 @@ HWTEST_F(GaugeTestNg, GaugePaintTest010, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
     RenderRingInfo data;
     Testing::MockCanvas rsCanvas;
@@ -1048,7 +1048,7 @@ HWTEST_F(GaugeTestNg, NewPaint001, TestSize.Level1)
      * @tc.steps: step1. Mock theme manager and create GaugePaintMethod.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto gaugeTheme = AceType::MakeRefPtr<GaugeTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(gaugeTheme));
 
@@ -1160,7 +1160,7 @@ HWTEST_F(GaugeTestNg, DrawHighLight001, TestSize.Level1)
     geometryNode->UpdatePaddingWithBorder(padding);
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressTheme>()));
 
     /**
@@ -1219,7 +1219,7 @@ HWTEST_F(GaugeTestNg, NewDrawIndicator001, TestSize.Level1)
     geometryNode->UpdatePaddingWithBorder(padding);
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressTheme>()));
 
     ImageSourceInfo imageSourceInfo;
@@ -1275,7 +1275,7 @@ HWTEST_F(GaugeTestNg, Measure001, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(gaugeLayoutAlgorithm));
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressTheme>()));
 
     /**
@@ -1372,7 +1372,7 @@ HWTEST_F(GaugeTestNg, Layout001, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(gaugeLayoutAlgorithm));
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressTheme>()));
 
     layoutProperty->UpdateIsShowDescription(true);
@@ -1425,7 +1425,7 @@ HWTEST_F(GaugeTestNg, OnModifyDone, TestSize.Level1)
      * @tc.steps: step1. Mock theme manager and create GaugePattern.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto gaugeTheme = AceType::MakeRefPtr<GaugeTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(gaugeTheme));
 
@@ -1488,7 +1488,7 @@ HWTEST_F(GaugeTestNg, InitLimitValueText, TestSize.Level1)
      * @tc.steps: step1. Mock theme manager and create GaugePattern.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto gaugeTheme = AceType::MakeRefPtr<GaugeTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(gaugeTheme));
 

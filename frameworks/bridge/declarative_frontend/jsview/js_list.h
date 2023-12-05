@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,8 @@ public:
     static void SetDivider(const JSCallbackInfo& args);
     static void SetDirection(int32_t direction);
     static void SetScrollBar(const JSCallbackInfo& info);
+    static void SetScrollBarColor(const std::string& color);
+    static void SetScrollBarWidth(const JSCallbackInfo& scrollWidth);
     static void SetEdgeEffect(const JSCallbackInfo& info);
     static void SetEditMode(bool editMode);
     static void SetCachedCount(const JSCallbackInfo& info);
@@ -76,7 +78,6 @@ public:
     static void ItemDragMoveCallback(const JSCallbackInfo& info);
     static void ItemDragLeaveCallback(const JSCallbackInfo& info);
     static void ItemDropCallback(const JSCallbackInfo& info);
-    static void JsClip(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

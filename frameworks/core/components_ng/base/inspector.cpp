@@ -20,10 +20,14 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/stage/page_info.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/base/memory/type_info_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -32,6 +36,8 @@ const char INSPECTOR_ID[] = "$ID";
 const char INSPECTOR_RECT[] = "$rect";
 const char INSPECTOR_ATTRS[] = "$attrs";
 const char INSPECTOR_ROOT[] = "root";
+const char INSPECTOR_PAGE_URL[] = "pageUrl";
+const char INSPECTOR_NAV_DST_NAME[] = "navDstName";
 const char INSPECTOR_WIDTH[] = "width";
 const char INSPECTOR_HEIGHT[] = "height";
 const char INSPECTOR_RESOLUTION[] = "$resolution";
@@ -40,6 +46,13 @@ const char INSPECTOR_DEBUGLINE[] = "$debugLine";
 #ifdef PREVIEW
 const char INSPECTOR_VIEW_ID[] = "$viewID";
 #endif
+const char INSPECTOR_ATTR_ID[] = "id";
+const char INSPECTOR_LABEL[] = "label";
+const char INSPECTOR_CONTENT[] = "content";
+const char INSPECTOR_ENABLED[] = "enabled";
+const char INSPECTOR_OPACITY[] = "opacity";
+const char INSPECTOR_ZINDEX[] = "zindex";
+const char INSPECTOR_VISIBILITY[] = "visibility";
 
 const uint32_t LONG_PRESS_DELAY = 1000;
 RectF deviceRect;
@@ -115,9 +128,14 @@ void GetSpanInspector(
 {
     // span rect follows parent text size
     auto spanParentNode = parent->GetParent();
+    while (spanParentNode != nullptr) {
+        if (AceType::InstanceOf<NG::FrameNode>(spanParentNode)) {
+            break;
+        }
+        spanParentNode = spanParentNode->GetParent();
+    }
     CHECK_NULL_VOID(spanParentNode);
     auto node = AceType::DynamicCast<FrameNode>(spanParentNode);
-    CHECK_NULL_VOID(node);
     auto jsonNode = JsonUtil::Create(true);
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
@@ -222,9 +240,14 @@ void GetSpanInspector(
 {
     // span rect follows parent text size
     auto spanParentNode = parent->GetParent();
+    while (spanParentNode != nullptr) {
+        if (AceType::InstanceOf<NG::FrameNode>(spanParentNode)) {
+            break;
+        }
+        spanParentNode = spanParentNode->GetParent();
+    }
     CHECK_NULL_VOID(spanParentNode);
     auto node = AceType::DynamicCast<FrameNode>(spanParentNode);
-    CHECK_NULL_VOID(node);
     auto jsonNode = JsonUtil::Create(true);
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
@@ -471,6 +494,129 @@ std::string Inspector::GetSubWindowInspector(bool isLayoutInspector)
     GetFrameNodeChildren(overlayNode, children, pageId);
 
     return GetInspectorInfo(children, 0, std::move(jsonRoot), isLayoutInspector);
+}
+
+void FillSimplifiedInspectorAttrs(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode)
+{
+    auto tmpJson = JsonUtil::Create(true);
+    parent->ToJsonValue(tmpJson);
+    jsonNode->Put(INSPECTOR_ATTR_ID, tmpJson->GetString(INSPECTOR_ATTR_ID).c_str());
+
+    auto jsonObject = JsonUtil::Create(true);
+    if (tmpJson->Contains(INSPECTOR_LABEL)) {
+        jsonObject->Put(INSPECTOR_LABEL, tmpJson->GetString(INSPECTOR_LABEL).c_str());
+    }
+    if (tmpJson->Contains(INSPECTOR_CONTENT)) {
+        jsonObject->Put(INSPECTOR_CONTENT, tmpJson->GetString(INSPECTOR_CONTENT).c_str());
+    }
+    jsonObject->Put(INSPECTOR_ENABLED, tmpJson->GetBool(INSPECTOR_ENABLED));
+    jsonObject->Put(INSPECTOR_OPACITY, tmpJson->GetDouble(INSPECTOR_OPACITY));
+    jsonObject->Put(INSPECTOR_ZINDEX, tmpJson->GetInt(INSPECTOR_ZINDEX));
+    jsonObject->Put(INSPECTOR_VISIBILITY, tmpJson->GetString(INSPECTOR_VISIBILITY).c_str());
+    jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
+
+    jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
+}
+
+void GetSimplifiedSpanInspector(
+    const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, int pageId)
+{
+    // span rect follows parent text size
+    auto spanParentNode = parent->GetParent();
+    CHECK_NULL_VOID(spanParentNode);
+    auto node = AceType::DynamicCast<FrameNode>(spanParentNode);
+    CHECK_NULL_VOID(node);
+    auto jsonNode = JsonUtil::Create(true);
+
+    FillSimplifiedInspectorAttrs(parent, jsonNode);
+
+    jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
+    RectF rect = node->GetTransformRectRelativeToWindow();
+    jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
+    jsonNodeArray->Put(jsonNode);
+}
+
+void GetSimplifiedInspectorChildren(
+    const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, int pageId, bool isActive)
+{
+    // Span is a special case in Inspector since span inherits from UINode
+    if (AceType::InstanceOf<SpanNode>(parent)) {
+        GetSimplifiedSpanInspector(parent, jsonNodeArray, pageId);
+        return;
+    }
+    auto jsonNode = JsonUtil::Create(true);
+    jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
+    auto node = AceType::DynamicCast<FrameNode>(parent);
+    auto ctx = node->GetRenderContext();
+
+    RectF rect;
+    isActive = isActive && node->IsActive();
+    if (isActive) {
+        rect = node->GetTransformRectRelativeToWindow();
+    }
+
+    jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
+
+    FillSimplifiedInspectorAttrs(parent, jsonNode);
+
+    std::vector<RefPtr<NG::UINode>> children;
+    for (const auto& item : parent->GetChildren()) {
+        GetFrameNodeChildren(item, children, pageId);
+    }
+    auto jsonChildrenArray = JsonUtil::CreateArray(true);
+    for (auto uiNode : children) {
+        GetSimplifiedInspectorChildren(uiNode, jsonChildrenArray, pageId, isActive);
+    }
+    if (jsonChildrenArray->GetArraySize()) {
+        jsonNode->Put(INSPECTOR_CHILDREN, jsonChildrenArray);
+    }
+    jsonNodeArray->Put(jsonNode);
+}
+
+std::string Inspector::GetSimplifiedInspector(int32_t containerId)
+{
+    TAG_LOGI(AceLogTag::ACE_UIEVENT, "GetSimplifiedInspector start: container %{public}d", containerId);
+    auto jsonRoot = JsonUtil::Create(true);
+    jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
+
+    auto context = NG::PipelineContext::GetContextByContainerId(containerId);
+    CHECK_NULL_RETURN(context, jsonRoot->ToString());
+    auto scale = context->GetViewScale();
+    auto rootHeight = context->GetRootHeight();
+    auto rootWidth = context->GetRootWidth();
+    deviceRect.SetRect(0, 0, rootWidth * scale, rootHeight * scale);
+    jsonRoot->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
+    jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
+    jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
+
+    auto pageRootNode = context->GetStageManager()->GetLastPage();
+    CHECK_NULL_RETURN(pageRootNode, jsonRoot->ToString());
+
+    auto pagePattern = pageRootNode->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, jsonRoot->ToString());
+    auto pageInfo = pagePattern->GetPageInfo();
+    CHECK_NULL_RETURN(pageInfo, jsonRoot->ToString());
+    jsonRoot->Put(INSPECTOR_PAGE_URL, pageInfo->GetPageUrl().c_str());
+    jsonRoot->Put(INSPECTOR_NAV_DST_NAME, Recorder::EventRecorder::Get().GetNavDstName().c_str());
+
+    auto pageId = context->GetStageManager()->GetLastPage()->GetPageId();
+    std::vector<RefPtr<NG::UINode>> children;
+    for (const auto& item : pageRootNode->GetChildren()) {
+        GetFrameNodeChildren(item, children, pageId);
+    }
+    auto overlayNode = GetOverlayNode(pageRootNode);
+    if (overlayNode) {
+        GetFrameNodeChildren(overlayNode, children, pageId);
+    }
+    auto jsonNodeArray = JsonUtil::CreateArray(true);
+    for (auto& uiNode : children) {
+        GetSimplifiedInspectorChildren(uiNode, jsonNodeArray, pageId, true);
+    }
+    if (jsonNodeArray->GetArraySize()) {
+        jsonRoot->Put(INSPECTOR_CHILDREN, jsonNodeArray);
+    }
+
+    return jsonRoot->ToString();
 }
 
 bool Inspector::SendEventByKey(const std::string& key, int action, const std::string& params)

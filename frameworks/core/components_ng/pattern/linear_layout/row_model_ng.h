@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_ROW_MODEL_NG_H
 
 #include "base/utils/macros.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_layout/row_model.h"
 
 namespace OHOS::Ace::NG {
@@ -27,6 +28,8 @@ public:
     void SetAlignItems(FlexAlign flexAlign) override;
     void SetJustifyContent(FlexAlign flexAlign) override;
     void CreateWithWrap() override {}
+    static void SetJustifyContent(FrameNode* frameNode, FlexAlign flexAlign);
+    static void SetAlignItems(FrameNode* frameNode, FlexAlign flexAlign);
 };
 
 } // namespace OHOS::Ace::NG

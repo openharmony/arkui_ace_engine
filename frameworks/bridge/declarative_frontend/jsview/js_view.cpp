@@ -23,13 +23,16 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
+#include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_full_update_model.h"
 #include "core/components_ng/base/view_full_update_model_ng.h"
@@ -168,7 +171,7 @@ JSViewFullUpdate::~JSViewFullUpdate()
     jsViewFunction_.Reset();
 };
 
-RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
+RefPtr<AceType> JSViewFullUpdate::CreateViewNode(bool isTitleNode)
 {
     auto appearFunc = [weak = AceType::WeakClaim(this)] {
         auto jsView = weak.Upgrade();
@@ -540,7 +543,7 @@ JSViewPartialUpdate::~JSViewPartialUpdate()
     jsViewFunction_.Reset();
 };
 
-RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
+RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
 {
     auto updateViewIdFunc = [weak = AceType::WeakClaim(this)](const std::string viewId) {
         auto jsView = weak.Upgrade();
@@ -658,9 +661,6 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
     };
 
     auto setActiveFunc = [weak = AceType::WeakClaim(this)](bool active) -> void {
-        if (!AceApplicationInfo::GetInstance().IsDelayedUpdateOnInactive()) {
-            return;
-        }
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ContainerScope scope(jsView->GetInstanceId());
@@ -729,6 +729,17 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
             jsView->jsViewFunction_->ExecutePlaceChildren(layoutWrapper);
         };
         info.placeChildrenFunc = std::move(placeChildren);
+    }
+
+    JSRef<JSObject> jsViewExtraInfo = jsViewObject_->GetProperty("extraInfo_");
+    if (!jsViewExtraInfo->IsUndefined()) {
+        JSRef<JSVal> jsPage = jsViewExtraInfo->GetProperty("page");
+        JSRef<JSVal> jsLine = jsViewExtraInfo->GetProperty("line");
+        info.extraInfo = {.page = jsPage->ToString(), .line = jsLine->ToNumber<int32_t>()};
+    }
+    
+    if (isTitleNode) {
+        info.isCustomTitle = true;
     }
 
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(info));
@@ -902,6 +913,30 @@ void JSViewPartialUpdate::OnDumpInfo(const std::vector<std::string>& params)
     jsViewFunction_->ExecuteOnDumpInfo(params);
 }
 
+void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
+{
+    auto result = NG::UIObserverHandler::GetInstance().GetNavigationState(GetViewNode());
+    if (result) {
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        obj->SetProperty<std::string>("navigationId", result->navigationId);
+        obj->SetProperty<std::string>("name", result->name);
+        obj->SetProperty<int32_t>("state", static_cast<int32_t>(result->state));
+        info.SetReturnValue(obj);
+    }
+}
+
+void JSViewPartialUpdate::JSGetUIContext(const JSCallbackInfo& info)
+{
+    ContainerScope scope(GetInstanceId());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto context = frontend->GetContextValue();
+    auto jsVal = JsConverter::ConvertNapiValueToJsVal(context);
+    info.SetReturnValue(jsVal);
+}
+
 void JSViewPartialUpdate::JSBind(BindingTarget object)
 {
     LOGD("JSViewPartialUpdate::Bind");
@@ -925,7 +960,9 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "findChildByIdForPreview", &JSViewPartialUpdate::FindChildByIdForPreview);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "resetRecycleCustomNode", &JSViewPartialUpdate::JSResetRecycleCustomNode);
-    JSClass<JSViewPartialUpdate>::Method("invalidateLayout", &JSViewPartialUpdate::JsInvalidateLayout);
+    JSClass<JSViewPartialUpdate>::CustomMethod(
+        "queryNavDestinationInfo", &JSViewPartialUpdate::JSGetNavDestinationInfo);
+    JSClass<JSViewPartialUpdate>::CustomMethod("getUIContext", &JSViewPartialUpdate::JSGetUIContext);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 
@@ -1023,9 +1060,4 @@ void JSViewPartialUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
     return;
 }
 
-void JSViewPartialUpdate::JsInvalidateLayout()
-{
-    ACE_FUNCTION_TRACE();
-    ViewPartialUpdateModel::GetInstance()->InvalidateLayout(viewNode_);
-}
 } // namespace OHOS::Ace::Framework

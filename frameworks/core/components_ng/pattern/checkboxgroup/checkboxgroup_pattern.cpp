@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
+
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
@@ -307,6 +309,7 @@ void CheckBoxGroupPattern::UpdateState()
             if (selectAll || (!selectAll && !isFirstCreated_)) {
                 UpdateUIStatus(selectAll);
             }
+            initSelected_ = selectAll;
         }
         isFirstCreated_ = false;
         pattern->SetPreGroup(group);
@@ -340,6 +343,46 @@ void CheckBoxGroupPattern::UpdateState()
         }
     }
     updateFlag_ = false;
+}
+
+void CheckBoxGroupPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (inspectorId.empty()) {
+        return;
+    }
+
+    auto eventHub = host->GetEventHub<CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    std::vector<std::string> vec;
+    if (initSelected_) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto stageManager = pipelineContext->GetStageManager();
+        CHECK_NULL_VOID(stageManager);
+        auto pageNode = stageManager->GetLastPage();
+        CHECK_NULL_VOID(pageNode);
+        auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
+        auto checkBoxGroupMap = pageEventHub->GetCheckBoxGroupMap();
+        const auto& list = checkBoxGroupMap[eventHub->GetGroupName()];
+        for (auto&& item : list) {
+            auto node = item.Upgrade();
+            if (!node || node == host) {
+                continue;
+            }
+            if (node->GetTag() == V2::CHECKBOXGROUP_ETS_TAG) {
+                continue;
+            }
+            auto paintProperty = node->GetPaintProperty<CheckBoxPaintProperty>();
+            CHECK_NULL_VOID(paintProperty);
+            auto eventHub = node->GetEventHub<CheckBoxEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            vec.push_back(eventHub->GetName());
+        }
+    }
+    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, eventHub->GetGroupName(), vec);
 }
 
 void CheckBoxGroupPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool select)

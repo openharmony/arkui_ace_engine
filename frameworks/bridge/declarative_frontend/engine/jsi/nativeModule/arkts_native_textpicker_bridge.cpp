@@ -12,8 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h"
+
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 const std::string FORMAT_FONT = "%s|%s|%s";
@@ -23,52 +25,6 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
-
-bool TextpickerBridge::ParseDimensionNG(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
-    DimensionUnit defaultUnit, bool isSupportPercent = true)
-{
-    if (jsValue->IsNumber()) {
-        result = CalcDimension(jsValue->ToNumber(vm)->Value(), defaultUnit);
-        return true;
-    }
-    if (jsValue->IsString()) {
-        auto value = jsValue->ToString(vm)->ToString();
-        if (value.back() == '%' && !isSupportPercent) {
-            return false;
-        }
-        return StringUtils::StringToCalcDimensionNG(jsValue->ToString(vm)->ToString(), result, false, defaultUnit);
-    }
-    // resouce ignore by design
-    return false;
-}
-bool TextpickerBridge::ParseDimensionVpNG(
-    const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result, bool isSupportPercent = true)
-{
-    return ParseDimensionNG(vm, jsValue, result, DimensionUnit::VP, isSupportPercent);
-}
-
-bool TextpickerBridge::ParseJsIntegerArray(Local<JSValueRef> values, EcmaVM* vm, std::vector<uint32_t>& result)
-{
-    Local<panda::ArrayRef> valueArray = static_cast<Local<panda::ArrayRef>>(values);
-    for (size_t i = 0; i < valueArray->Length(vm); i++) {
-        Local<JSValueRef> value = valueArray->GetValueAt(vm, values, i);
-        if (value->IsNumber()) {
-            result.emplace_back(value->Uint32Value(vm));
-        } else {
-            return false;
-        }
-    }
-    return true;
-}
-
-std::string TextpickerBridge::GetStringFromJS(const EcmaVM* vm, const Local<JSValueRef>& value)
-{
-    if (!value->IsNull() && value->IsString()) {
-        return value->ToString(vm)->ToString();
-    } else {
-        return std::string("-1");
-    }
-}
 
 ArkUINativeModuleValue TextpickerBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -99,10 +55,14 @@ ArkUINativeModuleValue TextpickerBridge::SetCanLoop(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    bool canLoop = secondArg->ToBoolean(vm)->Value();
+    bool canLoop = true;
+    if (secondArg->IsBoolean()) {
+        canLoop = secondArg->ToBoolean(vm)->Value();
+    }
     GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerCanLoop(nativeNode, canLoop);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TextpickerBridge::SetSelectedIndex(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -114,7 +74,7 @@ ArkUINativeModuleValue TextpickerBridge::SetSelectedIndex(ArkUIRuntimeCallInfo* 
 
     if (secondArg->IsArray(vm)) {
         std::vector<uint32_t> selectedValues;
-        if (!TextpickerBridge::ParseJsIntegerArray(secondArg, vm, selectedValues)) {
+        if (!ArkTSUtils::ParseJsIntegerArray(vm, secondArg, selectedValues)) {
             selectedValues.clear();
             GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerSelectedIndex(
                 nativeNode, selectedValues.data(), -1);
@@ -150,9 +110,9 @@ ArkUINativeModuleValue TextpickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     uint32_t color = colorArg->Uint32Value(vm);
-    std::string fontSize = TextpickerBridge::GetStringFromJS(vm, fontSizeArg);
-    std::string weight = TextpickerBridge::GetStringFromJS(vm, fontWeightArg);
-    std::string fontFamily = TextpickerBridge::GetStringFromJS(vm, fontFamilyArg);
+    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArg);
+    std::string weight = ArkTSUtils::GetStringFromJS(vm, fontWeightArg);
+    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArg);
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull()) {
         styleVal = fontStyleArg->Int32Value(vm);
@@ -164,6 +124,7 @@ ArkUINativeModuleValue TextpickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
         nativeNode, color, fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TextpickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -177,9 +138,9 @@ ArkUINativeModuleValue TextpickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     uint32_t color = colorArg->Uint32Value(vm);
-    std::string fontSize = TextpickerBridge::GetStringFromJS(vm, fontSizeArg);
-    std::string weight = TextpickerBridge::GetStringFromJS(vm, fontWeightArg);
-    std::string fontFamily = TextpickerBridge::GetStringFromJS(vm, fontFamilyArg);
+    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArg);
+    std::string weight = ArkTSUtils::GetStringFromJS(vm, fontWeightArg);
+    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArg);
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull()) {
         styleVal = fontStyleArg->Int32Value(vm);
@@ -191,6 +152,7 @@ ArkUINativeModuleValue TextpickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
         nativeNode, color, fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TextpickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -204,9 +166,9 @@ ArkUINativeModuleValue TextpickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     
     uint32_t color = colorArg->Uint32Value(vm);
-    std::string fontSize = TextpickerBridge::GetStringFromJS(vm, fontSizeArg);
-    std::string weight = TextpickerBridge::GetStringFromJS(vm, fontWeightArg);
-    std::string fontFamily = TextpickerBridge::GetStringFromJS(vm, fontFamilyArg);
+    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArg);
+    std::string weight = ArkTSUtils::GetStringFromJS(vm, fontWeightArg);
+    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArg);
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull()) {
         styleVal = fontStyleArg->Int32Value(vm);
@@ -218,6 +180,7 @@ ArkUINativeModuleValue TextpickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
         nativeNode, color, fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TextpickerBridge::SetDefaultPickerItemHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -227,8 +190,8 @@ ArkUINativeModuleValue TextpickerBridge::SetDefaultPickerItemHeight(ArkUIRuntime
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     CalcDimension height;
-    if (jsValue->IsUndefined() || !ParseDimensionVpNG(vm, jsValue, height)) {
-        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetWidth(nativeNode);
+    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
+        GetArkUIInternalNodeAPI()->GetTextpickerModifier().ResetTextpickerDefaultPickerItemHeight(nativeNode);
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
             height.SetValue(0.0);
@@ -238,6 +201,7 @@ ArkUINativeModuleValue TextpickerBridge::SetDefaultPickerItemHeight(ArkUIRuntime
     }
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TextpickerBridge::ResetCanLoop(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -247,6 +211,7 @@ ArkUINativeModuleValue TextpickerBridge::ResetCanLoop(ArkUIRuntimeCallInfo* runt
     GetArkUIInternalNodeAPI()->GetTextpickerModifier().ResetTextpickerCanLoop(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TextpickerBridge::ResetSelectedIndex(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -256,6 +221,7 @@ ArkUINativeModuleValue TextpickerBridge::ResetSelectedIndex(ArkUIRuntimeCallInfo
     GetArkUIInternalNodeAPI()->GetTextpickerModifier().ResetTextpickerSelected(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TextpickerBridge::ResetTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -265,6 +231,7 @@ ArkUINativeModuleValue TextpickerBridge::ResetTextStyle(ArkUIRuntimeCallInfo* ru
     GetArkUIInternalNodeAPI()->GetTextpickerModifier().ResetTextpickerTextStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TextpickerBridge::ResetSelectedTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -274,6 +241,7 @@ ArkUINativeModuleValue TextpickerBridge::ResetSelectedTextStyle(ArkUIRuntimeCall
     GetArkUIInternalNodeAPI()->GetTextpickerModifier().ResetTextpickerSelectedTextStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TextpickerBridge::ResetDisappearTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -283,6 +251,7 @@ ArkUINativeModuleValue TextpickerBridge::ResetDisappearTextStyle(ArkUIRuntimeCal
     GetArkUIInternalNodeAPI()->GetTextpickerModifier().ResetTextpickerDisappearTextStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TextpickerBridge::ResetDefaultPickerItemHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

@@ -19,7 +19,9 @@
 #include <memory>
 
 #include "base/memory/ace_type.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components/panel/sliding_events.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
@@ -55,6 +57,31 @@ public:
             auto changEvent = std::make_shared<SlidingPanelSizeChangeEvent>(mode, width, height);
             changeEvent_(changEvent.get());
         }
+        if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            return;
+        }
+        Recorder::EventParamsBuilder builder;
+        auto host = GetFrameNode();
+        if (host) {
+            auto id = host->GetInspectorIdValue("");
+            builder.SetId(id).SetType(host->GetHostTag());
+        }
+        std::string modeDesc;
+        if (mode == PanelMode::MINI) {
+            modeDesc = "Mini";
+        } else if (mode == PanelMode::HALF) {
+            modeDesc = "Half";
+        } else if (mode == PanelMode::FULL) {
+            modeDesc = "Full";
+        } else if (mode == PanelMode::AUTO) {
+            modeDesc = "Auto";
+        } else if (mode == PanelMode::CUSTOM) {
+            modeDesc = "Custom";
+        } else {
+            modeDesc = "";
+        }
+        builder.SetText(modeDesc);
+        Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
 
     void FireHeightChangeEvent(float currentOffset) const

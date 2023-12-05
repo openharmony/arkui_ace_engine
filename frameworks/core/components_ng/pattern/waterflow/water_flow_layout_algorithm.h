@@ -36,6 +36,10 @@ public:
     {
         return std::move(layoutInfo_);
     }
+    void SetCanOverScroll(bool canOverScroll)
+    {
+        canOverScroll_ = canOverScroll;
+    }
 
 private:
     FlowItemPosition GetItemPosition(int32_t index);
@@ -51,6 +55,7 @@ private:
         return index + layoutInfo_.footerIndex_ + 1;
     }
     float MeasuerFooter(LayoutWrapper* layoutWrapper);
+    void LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse);
 
     std::map<int32_t, float> itemsCrossSize_;
     std::map<int32_t, float> itemsCrossPosition_;
@@ -60,6 +65,7 @@ private:
     float crossGap_ = 0.0f;
     float mainSize_ = 0.0f;
     float footerMainSize_ = 0.0f;
+    bool canOverScroll_ = false;
     WaterFlowLayoutInfo layoutInfo_;
 };
 } // namespace OHOS::Ace::NG

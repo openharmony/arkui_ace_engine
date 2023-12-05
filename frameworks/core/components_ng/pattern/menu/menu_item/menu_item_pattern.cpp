@@ -21,6 +21,8 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -106,12 +108,13 @@ void UpdateFontFamily(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayou
 }
 
 void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimension& horizontalSize,
-    const Dimension& verticalSize, const Color& color)
+    const Dimension& verticalSize, const Color& color, const bool& useDefaultIcon)
 {
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetSrc(src);
-    imageSourceInfo.SetFillColor(color);
-
+    if (useDefaultIcon) {
+        imageSourceInfo.SetFillColor(color);
+    }
     auto props = node->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateImageSourceInfo(imageSourceInfo);
@@ -120,10 +123,11 @@ void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimens
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     props->UpdateCalcLayoutProperty(layoutConstraint);
-
-    auto iconRenderProperty = node->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(iconRenderProperty);
-    iconRenderProperty->UpdateSvgFillColor(color);
+    if (useDefaultIcon) {
+        auto iconRenderProperty = node->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(iconRenderProperty);
+        iconRenderProperty->UpdateSvgFillColor(color);
+    }
 }
 } // namespace
 
@@ -171,6 +175,37 @@ void MenuItemPattern::OnModifyDone()
     SetAccessibilityAction();
 
     host->GetRenderContext()->SetClipToBounds(true);
+}
+
+void MenuItemPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (inspectorId.empty()) {
+        return;
+    }
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+    auto content = itemProperty->GetContent().value_or("");
+    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, content, isSelected_);
+}
+
+void MenuItemPattern::RecordChangeEvent() const
+{
+    if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+    auto content = itemProperty->GetContent().value_or("");
+    Recorder::EventParamsBuilder builder;
+    builder.SetId(inspectorId).SetType(host->GetTag()).SetChecked(isSelected_).SetText(content);
+    Recorder::EventRecorder::Get().OnChange(std::move(builder));
+    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, content, isSelected_);
 }
 
 RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()
@@ -316,6 +351,7 @@ void MenuItemPattern::RegisterOnClick()
         if (onChange) {
             LOGI("trigger onChange");
             onChange(pattern->IsSelected());
+            pattern->RecordChangeEvent();
         }
         host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
 
@@ -597,7 +633,7 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     UpdateIconSrc(selectIcon_, iconPath, selectTheme->GetIconSideLength(), selectTheme->GetIconSideLength(),
-        selectTheme->GetMenuIconColor());
+        selectTheme->GetMenuIconColor(), userIcon.empty());
 
     auto renderContext = selectIcon_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -633,7 +669,7 @@ void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
     CHECK_NULL_VOID(selectTheme);
     auto iconWidth = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconWidth();
     auto iconHeight = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconHeight();
-    UpdateIconSrc(iconNode, iconSrc, iconWidth, iconHeight, selectTheme->GetMenuIconColor());
+    UpdateIconSrc(iconNode, iconSrc, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
 
     iconNode->MountToParent(row, ((isStart && selectIcon_) || (!isStart && label_)) ? 1 : 0);
     iconNode->MarkModifyDone();
@@ -700,6 +736,9 @@ void MenuItemPattern::UpdateTextNodes()
         host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
     CHECK_NULL_VOID(rightRow);
     UpdateText(rightRow, menuProperty, true);
+    if (IsDisabled()) {
+        UpdateDisabledStyle();
+    }
 }
 
 bool MenuItemPattern::IsDisabled()
@@ -717,6 +756,9 @@ void MenuItemPattern::UpdateDisabledStyle()
     auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     content_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
+    auto textLayoutProperty = content_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
     content_->MarkModifyDone();
 }
 
@@ -741,6 +783,7 @@ void MenuItemPattern::SetAccessibilityAction()
         }
         if (onChange) {
             onChange(pattern->IsSelected());
+            pattern->RecordChangeEvent();
         }
         auto context = host->GetRenderContext();
         CHECK_NULL_VOID(context);

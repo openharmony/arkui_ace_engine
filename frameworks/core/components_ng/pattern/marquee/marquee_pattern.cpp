@@ -37,6 +37,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -137,7 +138,7 @@ void MarqueePattern::StartMarqueeAnimation()
         repeatCount = 1;
     }
     FireStartEvent();
-    bool needSecondPlay = repeatCount != 1 ? true : false;
+    bool needSecondPlay = repeatCount != 1;
     PlayMarqueeAnimation(0.0f, repeatCount, needSecondPlay);
 }
 
@@ -151,9 +152,13 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
     CHECK_NULL_VOID(textNode);
     auto textGeoNode = textNode->GetGeometryNode();
     CHECK_NULL_VOID(textGeoNode);
+    auto textWidth = textGeoNode->GetFrameSize().Width();
     auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto step = paintProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx());
+    if (GreatNotEqual(step, textWidth)) {
+        step = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
+    }
     auto end = CalculateEnd();
     auto duration = static_cast<int32_t>(std::abs(end - start) * DEFAULT_MARQUEE_SCROLL_DELAY);
     if (GreatNotEqual(step, 0.0)) {

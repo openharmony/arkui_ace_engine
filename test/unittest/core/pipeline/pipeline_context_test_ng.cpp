@@ -14,6 +14,7 @@
  */
 #include <algorithm>
 #include <cstdint>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -26,17 +27,21 @@
 #define protected public
 #include "common_constants.h"
 #include "mock_schedule_task.h"
+#include "test/mock/base/mock_mouse_style.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_font_manager.h"
 #include "test/mock/core/common/mock_frontend.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_window.h"
+#include "test/mock/core/pattern/mock_pattern.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 #include "base/json/json_util.h"
+#include "base/log/dump_log.h"
 #include "base/log/frame_report.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "test/mock/base/mock_mouse_style.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
@@ -56,14 +61,12 @@
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/key_event_handler.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_ng/render/drawing_forward.h"
-#include "test/mock/core/pattern/mock_pattern.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/event/mouse_event.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -899,7 +902,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
      */
     manager->isDragged_ = true;
     manager->currentId_ = DEFAULT_INT1;
-    context_->OnDragEvent(DEFAULT_INT1, DEFAULT_INT1, DragEventAction::DRAG_EVENT_END);
+    context_->OnDragEvent({ DEFAULT_INT1, DEFAULT_INT1 }, DragEventAction::DRAG_EVENT_END);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
 
     /**
@@ -908,7 +911,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
      */
     manager->isDragged_ = true;
     manager->currentId_ = DEFAULT_INT1;
-    context_->OnDragEvent(DEFAULT_INT1, DEFAULT_INT1, DragEventAction::DRAG_EVENT_MOVE);
+    context_->OnDragEvent({ DEFAULT_INT1, DEFAULT_INT1 }, DragEventAction::DRAG_EVENT_MOVE);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
 
     /**
@@ -917,7 +920,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
      */
     manager->isDragged_ = false;
     manager->currentId_ = DEFAULT_INT1;
-    context_->OnDragEvent(DEFAULT_INT10, DEFAULT_INT10, DragEventAction::DRAG_EVENT_END);
+    context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_END);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
 
     /**
@@ -926,7 +929,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
      */
     manager->isDragged_ = false;
     manager->currentId_ = DEFAULT_INT1;
-    context_->OnDragEvent(DEFAULT_INT10, DEFAULT_INT10, DragEventAction::DRAG_EVENT_MOVE);
+    context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_MOVE);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT10);
 }
 
@@ -966,7 +969,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg018, TestSize.Level1)
     pattern->moveX_ = DEFAULT_DOUBLE2;
     context_->windowModal_ = WindowModal::CONTAINER_MODAL;
     context_->ShowContainerTitle(true);
-    EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE1);
+    EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE2);
 }
 
 /**
@@ -1005,7 +1008,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg019, TestSize.Level1)
     pattern->moveX_ = DEFAULT_DOUBLE2;
     context_->windowModal_ = WindowModal::CONTAINER_MODAL;
     context_->SetAppTitle(TEST_TAG);
-    EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE1);
+    EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE2);
 }
 
 /**
@@ -1044,7 +1047,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg020, TestSize.Level1)
     pattern->moveX_ = DEFAULT_DOUBLE2;
     context_->windowModal_ = WindowModal::CONTAINER_MODAL;
     context_->SetAppIcon(nullptr);
-    EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE1);
+    EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE2);
 }
 
 /**
@@ -1359,6 +1362,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg025, TestSize.Level1)
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
 
+    std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
+    ASSERT_NE(ostream, nullptr);
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
     /**
      * @tc.steps2: init a vector with some string params and
                 call OnDumpInfo with every param array.
@@ -1405,7 +1411,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg026, TestSize.Level1)
     auto frontend = AceType::MakeRefPtr<MockFrontend>();
     EXPECT_CALL(*frontend, OnBackPressed()).WillRepeatedly(testing::Return(true));
     context_->weakFrontend_ = frontend;
-    context_->fullScreenManager_->RequestFullScreen(nullptr); // Set the return value of OnBackPressed to true;
+    auto frameNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId, nullptr);
+    context_->fullScreenManager_->RequestFullScreen(frameNode); // Set the return value of OnBackPressed to true;
     EXPECT_TRUE(context_->OnBackPressed());
 
     /**
@@ -1414,7 +1422,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg026, TestSize.Level1)
      * @tc.expected: The return value of function is true.
      */
     // Set the return value of OnBackPressed of fullScreenManager_ to true;
-    context_->fullScreenManager_->ExitFullScreen(nullptr);
+    context_->fullScreenManager_->ExitFullScreen(frameNode);
     EXPECT_TRUE(context_->OnBackPressed());
 
     /**
@@ -1432,7 +1440,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg026, TestSize.Level1)
      * @tc.expected: The return value of function is true.
      */
     // Set the return value of RemoveOverlay of overlayManager_ to true;
-    context_->overlayManager_->CloseDialog(nullptr);
+    context_->overlayManager_->CloseDialog(frameNode);
     EXPECT_TRUE(context_->OnBackPressed());
 }
 
@@ -2271,7 +2279,7 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg006, TestSize.Level1)
      * @tc.expected: afterLayoutTasks_ in the taskScheduler size is 0.
      */
     taskScheduler.FlushTask();
-    EXPECT_EQ(taskScheduler.afterLayoutTasks_.size(), 2);
+    EXPECT_EQ(taskScheduler.afterLayoutTasks_.size(), 0);
 }
 
 /**
@@ -2783,7 +2791,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg060, TestSize.Level1)
     auto columNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
     CHECK_NULL_VOID(columNode);
 
-    std::vector<std::vector<int>> params = { { 500, 400, 100 }, { 300, 100, 200 }, { 400, -300, 400 },
+    std::vector<std::vector<int>> params = { { 100, 400, 100 }, { 300, 100, 300 }, { 400, -300, 400 },
         { 200, 0, 200 } };
     for (int turn = 0; turn < params.size(); turn++) {
         context_->rootHeight_ = params[turn][0];
@@ -2809,20 +2817,20 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg061, TestSize.Level1)
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
 
     /**
-     * @tc.steps2: Call the function WindowUnFocus with WindowFocus(false).
-     * @tc.expected: containerPattern isFocus_ is false.
-     */
-    containerPattern->WindowFocus(false);
-    containerPattern->OnWindowForceUnfocused();
-    EXPECT_FALSE(containerPattern->isFocus_);
-
-    /**
      * @tc.steps3: Call the function WindowUnFocus with WindowFocus(true).
      * @tc.expected: containerPattern isFocus_ is true.
      */
     containerPattern->isFocus_ = true;
     containerPattern->OnWindowForceUnfocused();
     EXPECT_TRUE(containerPattern->isFocus_);
+
+    /**
+     * @tc.steps2: Call the function WindowUnFocus with WindowFocus(false).
+     * @tc.expected: containerPattern isFocus_ is false.
+     */
+    containerPattern->WindowFocus(false);
+    containerPattern->OnWindowForceUnfocused();
+    EXPECT_FALSE(containerPattern->isFocus_);
 }
 
 /**
@@ -2837,28 +2845,32 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg062, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
-    
+    ASSERT_NE(context_->GetWindow(), nullptr);
+    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::DEFAULT);
+
     /**
      * @tc.steps2: set cursor with an exceptional value.
      * @tc.expected: context_->cursor_ is MouseFormat::DEFAULT.
      */
     context_->SetCursor(EXCEPTIONAL_CURSOR);
-    ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
+    ASSERT_NE(context_->GetWindow(), nullptr);
+    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::DEFAULT);
 
     /**
      * @tc.steps3: set cursor with a normal value.
      * @tc.expected: context_->cursor_ is correct value.
      */
     context_->SetCursor(static_cast<int32_t>(MouseFormat::EAST));
-    ASSERT_EQ(context_->cursor_, MouseFormat::EAST);
+    ASSERT_NE(context_->GetWindow(), nullptr);
+    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::EAST);
 
     /**
      * @tc.steps4: restore mouse style.
      * @tc.expected: context_->cursor_ is MouseFormat::DEFAULT.
      */
     context_->RestoreDefault();
-    ASSERT_EQ(context_->cursor_, MouseFormat::DEFAULT);
+    ASSERT_NE(context_->GetWindow(), nullptr);
+    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::DEFAULT);
 }
 
 /**
@@ -2893,51 +2905,171 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg063, TestSize.Level1)
 
 /**
  * @tc.name: PipelineContextTestNg064
- * @tc.desc: Test the function UpdateTitleInTargetPos.
+ * @tc.desc: Test history and current.
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
 {
     /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
+     * @tc.steps1: history and current timestamps are equal to nanoTimeStamp
+     * @tc.expected: Expect the result to be (0.0, 0.0)
      */
-    ASSERT_NE(context_, nullptr);
-    context_->SetupRootElement();
-    ASSERT_NE(context_->rootNode_, nullptr);
-    auto containerNode = AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front());
-    ASSERT_NE(containerNode, nullptr);
-    auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
-    ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(frameNode_, nullptr);
-    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildren().back());
-    ASSERT_NE(floatingTitleNode, nullptr);
-    auto floatingGeometryNode = floatingTitleNode->geometryNode_;
-    ASSERT_NE(floatingGeometryNode, nullptr);
-    auto floatingLayoutProperty = floatingTitleNode->GetLayoutProperty();
-    ASSERT_NE(floatingLayoutProperty, nullptr);
+    std::tuple<float, float, uint64_t> history_fs = std::make_tuple(1.0f, 1.0f, 1000);
+    std::tuple<float, float, uint64_t> current_fs = std::make_tuple(2.0f, 2.0f, 2000);
+    uint64_t nanoTimeStampFs = 1000;
+    auto result_fs = context_->LinearInterpolation(history_fs, current_fs, nanoTimeStampFs);
+    EXPECT_EQ(result_fs, std::make_pair(0.0f, 0.0f));
 
     /**
-     * @tc.steps2: Call the function UpdateTitleInTargetPos with isShow = true.
-     * @tc.expected: Floating title should be visible.
+     * @tc.steps2: history and current timestamps are equal to nanoTimeStamp
+     * @tc.expected: Expect the result to be (0.0, 0.0)
      */
-    context_->UpdateTitleInTargetPos(true, 0);
-    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
+    std::tuple<float, float, uint64_t> history_se = std::make_tuple(1.0f, 1.0f, 2000);
+    std::tuple<float, float, uint64_t> current_se = std::make_tuple(2.0f, 2.0f, 1000);
+    uint64_t nanoTimeStampSe = 1500;
+    auto result_se = context_->LinearInterpolation(history_se, current_se, nanoTimeStampSe);
+    EXPECT_EQ(result_se, std::make_pair(0.0f, 0.0f));
 
     /**
-     * @tc.steps3: Call the function UpdateTitleInTargetPos with isShow = false.
-     * @tc.expected: Floating title should be gone.
+     * @tc.steps3: history and current timestamps are equal to nanoTimeStamp
+     * @tc.expected: Expect the result to be (1.75, 1.75)
      */
-    context_->UpdateTitleInTargetPos(false, 0);
-    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::GONE);
+    std::tuple<float, float, uint64_t> history_th = std::make_tuple(1.0f, 1.0f, 1000);
+    std::tuple<float, float, uint64_t> current_th = std::make_tuple(2.0f, 2.0f, 3000);
+    uint64_t nanoTimeStampTh = 2500;
+    auto result_th = context_->LinearInterpolation(history_th, current_th, nanoTimeStampTh);
+    EXPECT_EQ(result_th, std::make_pair(1.75f, 1.75f));
 
     /**
-     * @tc.steps4: Call the function UpdateTitleInTargetPos with target position.
-     * @tc.expected: Floating title should be visible in target position.
+     * @tc.steps4: nanoTimeStamp is less than history timestamp
+     * @tc.expected: Expect the result to be (0.0, 0.0)
      */
-    context_->UpdateTitleInTargetPos(true, 20);
-    EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
-    EXPECT_EQ(floatingGeometryNode->GetFrameRect().Top(), 20);
+    std::tuple<float, float, uint64_t> history_for = std::make_tuple(1.0f, 1.0f, 1000);
+    std::tuple<float, float, uint64_t> current_for = std::make_tuple(2.0f, 2.0f, 2000);
+    uint64_t nanoTimeStampFor = 500;
+    auto result_for = context_->LinearInterpolation(history_for, current_for, nanoTimeStampFor);
+    EXPECT_EQ(result_for, std::make_pair(0.0f, 0.0f));
+
+    /**
+     * @tc.steps5: nanoTimeStamp is less than current timestamp
+     * @tc.expected: Expect non-zero value
+     */
+    std::tuple<float, float, uint64_t> history_fie = std::make_tuple(1.0f, 1.0f, 1000);
+    std::tuple<float, float, uint64_t> current_fie = std::make_tuple(2.0f, 2.0f, 2000);
+    uint64_t nanoTimeStampFie = 1500;
+    auto result_fie = context_->LinearInterpolation(history_fie, current_fie, nanoTimeStampFie);
+    EXPECT_NE(result_fie, std::make_pair(0.0f, 0.0f));
+
+    /**
+     * @tc.steps6: nanoTimeStamp is greater than current timestamp
+     * @tc.expected: Expect non-zero value
+     */
+    std::tuple<float, float, uint64_t> history_six = std::make_tuple(1.0f, 1.0f, 1000);
+    std::tuple<float, float, uint64_t> current_six = std::make_tuple(2.0f, 2.0f, 2000);
+    uint64_t nanoTimeStampSix = 2500;
+    auto result_six = context_->LinearInterpolation(history_six, current_six, nanoTimeStampSix);
+    EXPECT_NE(result_six, std::make_pair(0.0f, 0.0f));
 }
+
+/**
+ * @tc.name: PipelineContextTestNg065
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg065, TestSize.Level1)
+{
+    std::vector<TouchEvent> emptyHistory;
+    std::vector<TouchEvent> emptyCurrent;
+    uint64_t nanoTimeStamp = 1234567890;
+    bool isScreen = true;
+    std::pair<float, float> result = context_->GetResampleCoord(emptyHistory, emptyCurrent, nanoTimeStamp, isScreen);
+    EXPECT_FLOAT_EQ(0.0f, result.first);
+    EXPECT_FLOAT_EQ(0.0f, result.second);
 }
-} // namespace OHOS::Ace::NG
+
+/**
+ * @tc.name: PipelineContextTestNg066
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg066, TestSize.Level1)
+{
+    auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
+    auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
+    auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
+    auto timeStampFour = TimeStamp(std::chrono::nanoseconds(4000));
+    std::vector<TouchEvent> history;
+    history.push_back(TouchEvent{.x = 100.0f, .y = 200.0f, .time = timeStampAce});
+    history.push_back(TouchEvent{.x = 150.0f, .y = 250.0f, .time = timeStampTwo});
+    std::vector<TouchEvent> current;
+    current.push_back(TouchEvent{.x = 200.0f, .y = 300.0f, .time = timeStampThree});
+    current.push_back(TouchEvent{.x = 250.0f, .y = 350.0f, .time = timeStampFour});
+    
+    auto resampledCoord = context_->GetResampleCoord(history, current, 2500, true);
+    
+    ASSERT_FLOAT_EQ(0.0f, std::get<0>(resampledCoord));
+    ASSERT_FLOAT_EQ(0.0f, std::get<1>(resampledCoord));
+}
+
+/**
+ * @tc.name: PipelineContextTestNg067
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg067, TestSize.Level1)
+{
+    std::vector<TouchEvent> history;
+    std::vector<TouchEvent> current;
+    
+    auto resampledCoord = context_->GetResampleCoord(history, current, 2500, true);
+    
+    ASSERT_FLOAT_EQ(0.0f, std::get<0>(resampledCoord));
+    ASSERT_FLOAT_EQ(0.0f, std::get<1>(resampledCoord));
+}
+
+/**
+ * @tc.name: PipelineContextTestNg068
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg068, TestSize.Level1)
+{
+    auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
+    auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
+    std::vector<TouchEvent> current;
+    current.push_back(TouchEvent{.x = 100.0f, .y = 200.0f, .time = timeStampAce});
+    current.push_back(TouchEvent{.x = 150.0f, .y = 250.0f, .time = timeStampTwo});
+    uint64_t nanoTimeStamp = 1500;
+
+    TouchEvent latestPoint = context_->GetLatestPoint(current, nanoTimeStamp);
+
+    ASSERT_FLOAT_EQ(100.0f, latestPoint.x);
+    ASSERT_FLOAT_EQ(200.0f, latestPoint.y);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg069
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg069, TestSize.Level1)
+{
+    auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
+    auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
+    auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
+    auto timeStampFour = TimeStamp(std::chrono::nanoseconds(4000));
+    std::vector<TouchEvent> history;
+    history.push_back(TouchEvent{.x = 100.0f, .y = 200.0f, .time = timeStampAce});
+    history.push_back(TouchEvent{.x = 150.0f, .y = 250.0f, .time = timeStampTwo});
+    std::vector<TouchEvent> current;
+    current.push_back(TouchEvent{.x = 200.0f, .y = 300.0f, .time = timeStampThree});
+    current.push_back(TouchEvent{.x = 250.0f, .y = 350.0f, .time = timeStampFour});
+    uint64_t nanoTimeStamp = 2500;
+
+    TouchEvent resampledTouchEvent = context_->GetResampleTouchEvent(history, current, nanoTimeStamp);
+
+    ASSERT_FLOAT_EQ(175.0f, resampledTouchEvent.x);
+    ASSERT_FLOAT_EQ(275.0f, resampledTouchEvent.y);
+}
+} // namespace NG
+} // namespace OHOS::Ace

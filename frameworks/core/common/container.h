@@ -30,15 +30,19 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/display_info.h"
 #include "core/common/frontend.h"
 #include "core/common/page_url_checker.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/settings.h"
 #include "core/common/window.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
+#include "core/event/pointer_event.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/common/container_consts.h"
 
 namespace OHOS::Ace {
 
@@ -49,24 +53,8 @@ using MouseEventCallback = std::function<void(const MouseEvent&, const std::func
 using AxisEventCallback = std::function<void(const AxisEvent&, const std::function<void()>&)>;
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
-using DragEventCallBack = std::function<void(int32_t x, int32_t y, const DragEventAction& action)>;
+using DragEventCallBack = std::function<void(const PointerEvent& pointerEvent, const DragEventAction& action)>;
 using StopDragCallback = std::function<void()>;
-
-enum ContainerType {
-    STAGE_CONTAINER = 1,
-    FA_CONTAINER,
-    PA_SERVICE_CONTAINER,
-    PA_DATA_CONTAINER,
-    PA_FORM_CONTAINER,
-    FA_SUBWINDOW_CONTAINER,
-    COMPONENT_SUBWINDOW_CONTAINER = 10,
-    PLUGIN_SUBCONTAINER = 20,
-};
-
-constexpr int32_t CONTAINER_ID_DIVIDE_SIZE = 100000;
-constexpr int32_t MIN_PLUGIN_SUBCONTAINER_ID = PLUGIN_SUBCONTAINER * CONTAINER_ID_DIVIDE_SIZE;
-constexpr int32_t MIN_SUBCONTAINER_ID = COMPONENT_SUBWINDOW_CONTAINER * CONTAINER_ID_DIVIDE_SIZE;
-constexpr int32_t MIN_PA_SERVICE_ID = PA_SERVICE_CONTAINER * CONTAINER_ID_DIVIDE_SIZE;
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
@@ -152,6 +140,18 @@ public:
     virtual void ProcessScreenOnEvents() {}
 
     virtual void ProcessScreenOffEvents() {}
+
+    virtual void SetOrientation(Orientation orientation) {}
+
+    virtual Orientation GetOrientation()
+    {
+        return Orientation::UNSPECIFIED;
+    }
+
+    virtual RefPtr<DisplayInfo> GetDisplayInfo()
+    {
+        return {};
+    }
 
     virtual std::string GetHapPath() const
     {
@@ -246,7 +246,9 @@ public:
 
     static int32_t CurrentId();
     static RefPtr<Container> Current();
+    static RefPtr<Container> GetContainer(int32_t containerId);
     static RefPtr<Container> GetActive();
+    static RefPtr<Container> GetDefault();
     static RefPtr<Container> GetFoucsed();
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static void UpdateCurrent(int32_t id);

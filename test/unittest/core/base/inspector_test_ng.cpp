@@ -26,7 +26,7 @@
 #define private public
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
@@ -49,11 +49,11 @@ class InspectorTestNg : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
-        MockPipelineBase::SetUp();
+        MockPipelineContext::SetUp();
     }
     static void TeardownTestSuite()
     {
-        MockPipelineBase::TearDown();
+        MockPipelineContext::TearDown();
     }
 };
 
@@ -338,5 +338,40 @@ HWTEST_F(InspectorTestNg, InspectorTestNg007, TestSize.Level1)
     EXPECT_EQ(test, "{\"$type\":\"root\",\"width\":\"0.000000\",\"height\":\"0.000000\",\"$resolution\":\"0.000000\"}");
 
     context1->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: InspectorTestNg008
+ * @tc.desc: Test the GetRectangleById
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat frameNode
+     * @tc.expected: expect the function is run ok
+     */
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> ONE = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    /**
+     * @tc.steps: step2. assign value to rootNode_
+     * @tc.expected: rootNode_ pass non-null check.
+     */
+    context->rootNode_ = ONE;
+    context->rootNode_->SetGeometryNode(AceType::MakeRefPtr<GeometryNode>());
+
+    /**
+     * @tc.steps: step3. construct assignments and call GetRectangleById.
+     * @tc.expected: expect the GetRectangleById is run ok and result is expected.
+     */
+    OHOS::Ace::NG::Rectangle rect;
+    string key = "";
+    Inspector::GetRectangleById(key, rect);
+    float zResult = 1.0f;
+    EXPECT_EQ(rect.scale.z, zResult);
+    context->rootNode_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

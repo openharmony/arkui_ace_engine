@@ -26,7 +26,7 @@
 #include "mock/mock_form_utils.h"
 #include "mock/mock_sub_container.h"
 #include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 
 #include "core/common/ace_engine.h"
@@ -67,13 +67,13 @@ protected:
 
 void FormTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     MockContainer::SetUp();
 }
 
 void FormTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
 
@@ -209,6 +209,7 @@ HWTEST_F(FormTestNg, FormModelNGTest001, TestSize.Level1)
     ASSERT_NE(property, nullptr);
     auto formInfo = property->GetRequestFormInfoValue();
     ASSERT_EQ(formInfo.dimension, 1);
+    ASSERT_EQ(formInfo.renderingMode, 0);
     EXPECT_FALSE(formInfo.allowUpdate);
     ASSERT_EQ(formInfo.moduleName, "test form");
 }

@@ -94,6 +94,12 @@ ace_unittest("touch_event_test_ng") {
   sources = [ "touch_event_test_ng.cpp" ]
 }
 
+ace_unittest("response_ctrl_test_ng") {
+  type = "new"
+  module_output = "events"
+  sources = [ "response_ctrl_test_ng.cpp" ]
+}
+
 group("core_event_unittest") {
   testonly = true
   deps = [
@@ -106,6 +112,7 @@ group("core_event_unittest") {
     ":input_event_hub_test_ng",
     ":long_press_event_test_ng",
     ":pan_event_test_ng",
+    ":response_ctrl_test_ng",
     ":scrollable_event_test_ng",
     ":state_style_test_ng",
     ":touch_event_test_ng",

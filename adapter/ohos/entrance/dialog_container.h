@@ -174,7 +174,7 @@ public:
     static bool OnBackPressed(int32_t instanceId);
 
 private:
-    void InitPipelineContext(std::unique_ptr<Window> window, int32_t instanceId, double density, int32_t width,
+    void InitPipelineContext(std::shared_ptr<Window> window, int32_t instanceId, double density, int32_t width,
         int32_t height, uint32_t windowId);
     void InitializeFrontend();
     void InitializeCallback();
@@ -189,7 +189,7 @@ private:
     void InitializeSurfaceDestroyCallback();
     void InitializeDragEventCallback();
 
-    void AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
+    void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
         uint32_t windowId);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;

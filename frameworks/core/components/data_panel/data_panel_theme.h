@@ -38,35 +38,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->backgroundColor_ = themeConstants->GetColor(THEME_DATA_PANEL_BACKGROUND_COLOR);
-            theme->thickness_ = themeConstants->GetDimension(THEME_DATA_PANEL_THICKNESS);
-            theme->defaultHeight_ = themeConstants->GetDimension(THEME_DATA_PANEL_HEIGHT);
-            theme->defaultWidth_ = themeConstants->GetDimension(THEME_DATA_PANEL_WIDTH);
-            theme->loadingColors_.first = themeConstants->GetColor(THEME_DATA_PANEL_LOADING_START_COLOR);
-            theme->loadingColors_.second = themeConstants->GetColor(THEME_DATA_PANEL_LOADING_END_COLOR);
-            theme->progressColors_.first = themeConstants->GetColor(THEME_DATA_PANEL_PROGRESS_START_COLOR);
-            theme->progressColors_.second = themeConstants->GetColor(THEME_DATA_PANEL_PROGRESS_END_COLOR);
-            theme->percentageColors_.emplace_back(themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_1_START),
-                themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_1_END));
-            theme->percentageColors_.emplace_back(themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_2_START),
-                themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_2_END));
-            theme->percentageColors_.emplace_back(themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_3_START),
-                themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_3_END));
-            theme->percentageColors_.emplace_back(themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_4_START),
-                themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_4_END));
-            theme->percentageColors_.emplace_back(themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_5_START),
-                themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_5_END));
-            theme->percentageColors_.emplace_back(themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_6_START),
-                themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_6_END));
-            theme->percentageColors_.emplace_back(themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_7_START),
-                themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_7_END));
-            theme->percentageColors_.emplace_back(themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_8_START),
-                themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_8_END));
-            theme->percentageColors_.emplace_back(themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_9_START),
-                themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_9_END));
-            theme->trackShadowRadius_ = themeConstants->GetDimension(THEME_DATA_PANEL_TRACKSHADOW_RADIU);
-            theme->trackShadowOffsetX_ = themeConstants->GetDimension(THEME_DATA_PANEL_TRACKSHADOW_OFFSETX);
-            theme->trackShadowOffsetY_ = themeConstants->GetDimension(THEME_DATA_PANEL_TRACKSHADOW_OFFSETY);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -82,6 +53,11 @@ public:
                 LOGW("find pattern of datapanel fail");
                 return;
             }
+            theme->thickness_ = dataPanelPattern->GetAttr<Dimension>("datapanel_thickness", 0.0_vp);
+            theme->defaultHeight_ = dataPanelPattern->GetAttr<Dimension>("datapanel_height", 0.0_vp);
+            theme->defaultWidth_ = dataPanelPattern->GetAttr<Dimension>("datapanel_width", 0.0_vp);
+            theme->trackShadowOffsetX_ = dataPanelPattern->GetAttr<Dimension>("datapanel_trackshadow_offsetx", 0.0_vp);
+            theme->trackShadowOffsetY_ = dataPanelPattern->GetAttr<Dimension>("datapanel_trackshadow_offsety", 0.0_vp);
             theme->backgroundColor_ = dataPanelPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::BLACK);
             theme->trackShadowRadius_ = dataPanelPattern->GetAttr<Dimension>(DATA_PANEL_TRACK_SHADOW_RADIU, 0.0_vp);
             theme->loadingColors_.first = dataPanelPattern->GetAttr<Color>(DATA_PANEL_LOADING_COLOR_END, Color::BLACK);

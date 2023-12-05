@@ -35,7 +35,7 @@ class ACE_EXPORT ModelPattern : public Pattern {
 public:
     ModelPattern(uint32_t key, Render3D::SurfaceType surfaceType, const std::string& bundleName,
         const std::string& moduleName);
-    ~ModelPattern() override = default;
+    ~ModelPattern() override;
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {

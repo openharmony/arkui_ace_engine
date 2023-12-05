@@ -29,6 +29,7 @@ namespace {
 constexpr char FORM_RENDERER_ALLOW_UPDATE[] = "allowUpdate";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
 constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
+constexpr char TRANSPARENT_COLOR[] = "#00FFFFFF";
 } // namespace
 
 using EventHandler = OHOS::AppExecFwk::EventHandler;
@@ -92,6 +93,10 @@ void FormRenderer::InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppE
         return;
     }
     rsSurfaceNode->SetBounds(0.0f, 0.0f, width_, height_);
+    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) {
+        HILOG_INFO("InitUIContent SetFormBackgroundColor #00FFFFFF");
+        uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
+    }
     uiContent_->Foreground();
 }
 
@@ -101,6 +106,8 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
     width_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f);
     height_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 0.0f);
     proxy_ = want.GetRemoteObject(FORM_RENDERER_PROCESS_ON_ADD_SURFACE);
+    renderingMode_ = (AppExecFwk::Constants::RenderingMode)want.GetIntParam(
+        OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, 0);
 }
 
 void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -113,7 +120,12 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
     ParseWant(want);
     InitUIContent(want, formJsInfo);
     SetRenderDelegate(proxy_);
-    OnSurfaceCreate(formJsInfo);
+    if (want.HasParameter(OHOS::AppExecFwk::Constants::FORM_STATUS_DATA)) {
+        std::string statusData = want.GetStringParam(OHOS::AppExecFwk::Constants::FORM_STATUS_DATA);
+        RecoverForm(statusData);
+    }
+    OnSurfaceCreate(formJsInfo, want.GetBoolParam(
+        OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false));
 }
 
 void FormRenderer::ReloadForm(const std::string& url)
@@ -191,10 +203,12 @@ void FormRenderer::OnSurfaceChange(float width, float height)
         HILOG_ERROR("form renderer delegate is null!");
         return;
     }
+    HILOG_INFO("Form OnSurfaceChange!");
     formRendererDelegate_->OnSurfaceChange(width, height);
 }
 
-void FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+void FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo,
+    bool isRecoverFormToHandleClickEvent)
 {
     if (!formRendererDispatcherImpl_) {
         HILOG_ERROR("form renderer dispatcher is null!");
@@ -206,6 +220,8 @@ void FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInf
     }
     OHOS::AAFwk::Want newWant;
     newWant.SetParam(FORM_RENDERER_DISPATCHER, formRendererDispatcherImpl_->AsObject());
+    newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT,
+        isRecoverFormToHandleClickEvent);
     auto rsSurfaceNode = uiContent_->GetFormRootNode();
     HILOG_INFO("Form OnSurfaceCreate!");
     formRendererDelegate_->OnSurfaceCreate(rsSurfaceNode, formJsInfo, newWant);
@@ -361,7 +377,30 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
         backgroundColor_ = backgroundColor;
         uiContent_->SetFormBackgroundColor(backgroundColor_);
     }
+    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) {
+        HILOG_INFO("AttachUIContent SetFormBackgroundColor #00FFFFFF");
+        uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
+    }
+
     uiContent_->Foreground();
+}
+
+void FormRenderer::RecycleForm(std::string& statusData)
+{
+    if (uiContent_ == nullptr) {
+        HILOG_ERROR("RecycleForm, uiContent_ is null!");
+        return;
+    }
+    statusData = uiContent_->RecycleForm();
+}
+
+void FormRenderer::RecoverForm(const std::string& statusData)
+{
+    if (uiContent_ == nullptr) {
+        HILOG_ERROR("RecoverForm, uiContent_ is null!");
+        return;
+    }
+    uiContent_->RecoverForm(statusData);
 }
 } // namespace Ace
 } // namespace OHOS

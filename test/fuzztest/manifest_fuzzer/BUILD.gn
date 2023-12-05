@@ -22,10 +22,6 @@ ohos_fuzztest("ManifestFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file =
       "//foundation/arkui/ace_engine/test/fuzztest/manifest_fuzzer"
-  include_dirs = [
-    "$ace_root",
-    "$ace_root/frameworks",
-  ]
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
@@ -50,13 +46,7 @@ ohos_fuzztest("ManifestFuzzTest") {
     "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
     "manifest_fuzzer.cpp",
   ]
-
-  ldflags = []
-  cflags = []
-  if (ace_engine_feature_enable_coverage) {
-    cflags += [ "--coverage" ]
-    ldflags += [ "--coverage" ]
-  }
+  configs = [ "$ace_root/test/fuzztest:ace_fuzz_config" ]
 }
 
 ###############################################################################

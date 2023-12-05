@@ -26,7 +26,7 @@ void RichEditorModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::RICH_EDITOR_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::RICH_EDITOR_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     stack->Push(frameNode);
@@ -139,5 +139,30 @@ void RichEditorModelNG::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& f
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPaste(std::move(func));
+}
+
+void RichEditorModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOptions, frameNode);
+}
+
+void RichEditorModelNG::SetTextDetectEnable(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTextDetectEnable(value);
+}
+
+void RichEditorModelNG::SetTextDetectConfig(const std::string& value,
+    std::function<void(const std::string&)>&& onResult)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTextDetectTypes(value);
+    pattern->SetOnResult(std::move(onResult));
 }
 } // namespace OHOS::Ace::NG

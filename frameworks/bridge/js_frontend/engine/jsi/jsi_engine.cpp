@@ -3226,7 +3226,8 @@ void JsiEngine::RegisterInitWorkerFunc()
     if (debugVersion) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    auto&& initWorkerFunc = [weakInstance, libraryPath](NativeEngine* nativeEngine) {
+    auto&& initWorkerFunc = [weakInstance, libraryPath, debugVersion, instanceId = instanceId_](
+                                NativeEngine* nativeEngine) {
         LOGI("WorkerCore RegisterInitWorkerFunc called");
         if (nativeEngine == nullptr) {
             LOGE("nativeEngine is nullptr");
@@ -3249,8 +3250,9 @@ void JsiEngine::RegisterInitWorkerFunc()
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
         bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
-        panda::JSNApi::DebugOption debugOption = {libraryPath.c_str(), debugMode};
-        panda::JSNApi::StartDebugger(vm, debugOption, gettid(), workerPostTask);
+        panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode };
+        JSNApi::NotifyDebugMode(
+            gettid(), vm, libraryPath.c_str(), debugOption, instanceId, workerPostTask, debugVersion, debugMode);
 #endif
         instance->RegisterConsoleModule(arkNativeEngine);
         // load jsfwk

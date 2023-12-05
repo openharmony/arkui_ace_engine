@@ -23,10 +23,6 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file =
       "//foundation/arkui/ace_engine/test/fuzztest/imageloader_fuzzer"
-  include_dirs = [
-    "$ace_root",
-    "$ace_root/frameworks",
-  ]
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
@@ -37,6 +33,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$cjson_root:cjson",
   ]
   sources = [
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/image/image_cache.cpp",
     "$ace_root/frameworks/core/image/image_compressor.cpp",
     "$ace_root/frameworks/core/image/image_file_cache.cpp",
@@ -49,11 +46,13 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
     "imageloader_fuzzer.cpp",
   ]
-  defines = [ "FUZZTEST" ]
-  ldflags = []
-  if (ace_engine_feature_enable_coverage) {
-    cflags += [ "--coverage" ]
-    ldflags += [ "--coverage" ]
+  configs = [ "$ace_root/test/fuzztest:ace_fuzz_config" ]
+  if (ace_use_rosen_drawing) {
+    include_dirs += [
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
+    ]
+    external_deps = [ "graphic_2d:2d_graphics" ]
   }
 }
 

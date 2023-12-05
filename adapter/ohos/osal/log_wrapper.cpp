@@ -22,7 +22,7 @@
 #include "hilog/log.h"
 
 #ifdef ACE_INSTANCE_LOG
-#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #endif
 
 extern "C" {
@@ -82,6 +82,7 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_RICH_TEXT, "AceRichText" },
     { AceLogTag::ACE_WEB, "AceWeb" },
     { AceLogTag::ACE_FOCUS, "AceFocus" },
+    { AceLogTag::ACE_MOUSE, "AceMouse" },
     { AceLogTag::ACE_GESTURE, "AceGesture" },
     { AceLogTag::ACE_IMAGE, "AceImage" },
     { AceLogTag::ACE_RATING, "AceRating" },
@@ -99,7 +100,7 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_BORDER_IMAGE, "AceBorderImage" },
     { AceLogTag::ACE_LINEAR_SPLIT, "AceLinearSplit" },
     { AceLogTag::ACE_GRID, "AceGrid" },
-    { AceLogTag::ACE_PLUGINCOMPONENT, "AcePluginComponent" },
+    { AceLogTag::ACE_PLUGIN_COMPONENT, "AcePluginComponent" },
     { AceLogTag::ACE_UIEXTENSIONCOMPONENT, "AceUiExtensionComponent" },
     { AceLogTag::ACE_IF, "AceIf" },
     { AceLogTag::ACE_FOREACH, "AceForEach" },
@@ -110,7 +111,9 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_DATE_PICKER, "AceDatePicker" },
     { AceLogTag::ACE_TEXT_PICKER, "AceTextPicker" },
     { AceLogTag::ACE_AUTO_FILL, "AceAutoFill" },
+    { AceLogTag::ACE_KEYBOARD, "AceKeyboard" },
     { AceLogTag::ACE_UIEVENT, "UIEvent" },
+    { AceLogTag::ACE_DISPLAY_SYNC, "AceDisplaySync" },
 };
 
 const char* APP_DOMAIN_CONTENT = "JSApp";
@@ -150,13 +153,11 @@ void LogWrapper::PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const
 #endif
 }
 
+#ifdef ACE_INSTANCE_LOG
 int32_t LogWrapper::GetId()
 {
-#ifdef ACE_INSTANCE_LOG
-    return Container::CurrentId();
-#else
-    return 0;
-#endif
+    return ContainerScope::CurrentId();
 }
+#endif
 
 } // namespace OHOS::Ace

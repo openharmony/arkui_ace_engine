@@ -20,12 +20,6 @@ module_output_path = "ace_engine/ace_engine/res2"
 ohos_fuzztest("Res2FuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file = "//foundation/arkui/ace_engine/test/fuzztest/res2_fuzzer"
-  include_dirs = [
-    "$ace_root/frameworks/base/json",
-    "$ace_root/frameworks/base/",
-    "$ace_root/frameworks",
-    "$ace_root",
-  ]
 
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
@@ -39,6 +33,7 @@ ohos_fuzztest("Res2FuzzTest") {
 
   sources = [
     "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/flutter/flutter_asset_manager.cpp",
     "$ace_root/frameworks/core/components/test/unittest/theme/theme_mock.cpp",
     "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
@@ -46,18 +41,7 @@ ohos_fuzztest("Res2FuzzTest") {
     "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
   ]
 
-  configs = [ ":config_theme_manager_test" ]
-
-  ldflags = []
-  cflags = []
-  if (ace_engine_feature_enable_coverage) {
-    cflags += [ "--coverage" ]
-    ldflags += [ "--coverage" ]
-  }
-}
-
-config("config_theme_manager_test") {
-  visibility = [ ":*" ]
+  configs = [ "$ace_root/test/fuzztest:ace_fuzz_config" ]
 }
 
 ###############################################################################

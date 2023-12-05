@@ -22,12 +22,14 @@
 #include "base/log/ace_trace.h"
 #include "base/log/jank_frame_report.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 
 #ifdef USE_ARK_ENGINE
@@ -199,6 +201,18 @@ const AnimationOption JSViewContext::CreateAnimation(
         }
     }
 
+    int32_t fRRmin = 0;
+    int32_t fRRmax = 0;
+    int32_t fRRExpected = 0;
+    JSRef<JSVal> rateRangeObjectArgs = animationArgs->GetProperty("expectedFrameRateRange");
+    if (rateRangeObjectArgs->IsObject()) {
+        JSRef<JSObject> rateRangeObj = JSRef<JSObject>::Cast(rateRangeObjectArgs);
+        fRRmin = rateRangeObj->GetPropertyValue<int32_t>("min", -1);
+        fRRmax = rateRangeObj->GetPropertyValue<int32_t>("max", -1);
+        fRRExpected = rateRangeObj->GetPropertyValue<int32_t>("expected", -1);
+    }
+    RefPtr<FrameRateRange> frameRateRange = AceType::MakeRefPtr<FrameRateRange>(fRRmin, fRRmax, fRRExpected);
+
     option.SetDuration(duration);
     option.SetDelay(delay);
     option.SetIteration(iterations);
@@ -206,6 +220,7 @@ const AnimationOption JSViewContext::CreateAnimation(
     option.SetAnimationDirection(direction);
     option.SetCurve(curve);
     option.SetFinishCallbackType(finishCallbackType);
+    option.SetFrameRateRange(frameRateRange);
     return option;
 }
 
@@ -217,9 +232,14 @@ std::function<float(float)> ParseCallBackFunction(const JSRef<JSObject>& obj)
         JSRef<JSObject> curveobj = JSRef<JSObject>::Cast(curveVal);
         JSRef<JSVal> onCallBack = curveobj->GetProperty("__curveCustomFunc");
         if (onCallBack->IsFunction()) {
+            WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
             RefPtr<JsFunction> jsFuncCallBack =
                 AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
-            customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId()](float time) -> float {
+            customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId(), node = frameNode]
+                (float time) -> float {
+                auto pipelineContext = PipelineContext::GetCurrentContext();
+                CHECK_NULL_RETURN(pipelineContext, 1.0f);
+                pipelineContext->UpdateCurrentActiveNode(node);
                 ContainerScope scope(id);
                 JSRef<JSVal> params[1];
                 params[0] = JSRef<JSVal>::Make(ToJSValue(time));
@@ -262,12 +282,18 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentId()]() {
+                            id = Container::CurrentId(), node = frameNode]() mutable {
+            CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
             func->Execute();
+            func = nullptr;
         };
     }
 
@@ -322,12 +348,18 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     std::function<void()> onFinishEvent;
     auto traceStreamPtr = std::make_shared<std::stringstream>();
     if (onFinish->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentId(), traceStreamPtr]() {
+                            id = Container::CurrentId(), traceStreamPtr, node = frameNode]() mutable {
+            CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
             func->Execute();
+            func = nullptr;
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     } else {

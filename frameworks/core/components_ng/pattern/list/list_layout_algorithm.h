@@ -271,7 +271,13 @@ public:
     void HandleJumpEnd(LayoutWrapper* layoutWrapper);
 
     bool NoNeedJump(LayoutWrapper* layoutWrapper, float startPos, float endPos,
-        int32_t startIndex, int32_t endIndex);
+        int32_t startIndex, int32_t endIndex, int32_t jumpIndex, float jumpIndexStartPos);
+
+    bool CheckNoNeedJumpListItem(LayoutWrapper* layoutWrapper, float startPos, float endPos,
+        int32_t startIndex, int32_t endIndex, int32_t jumpIndex);
+
+    bool CheckNoNeedJumpListItemGroup(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t endIndex,
+        int32_t jumpIndex, float jumpIndexStartPos);
 
     virtual float MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex);
 
@@ -303,6 +309,15 @@ public:
     }
 
     bool CheckJumpValid(LayoutWrapper* layoutWrapper);
+
+    float GetListGroupItemHeight(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
+
+    bool JudgeInOfScreenScrollAutoType(const RefPtr<LayoutWrapper>& layoutWrapper,
+        const RefPtr<ListLayoutProperty>& layoutProperty, float topPos, float bottomPos);
+
+    void JudgeOutOfScreenScrollAutoType(const RefPtr<LayoutWrapper>& layoutWrapper,
+        const RefPtr<ListLayoutProperty>& layoutProperty, int32_t indexInGroup, int32_t judgeIndex,
+        int32_t startIndex, int32_t endIndex);
 
 protected:
     virtual void UpdateListItemConstraint(

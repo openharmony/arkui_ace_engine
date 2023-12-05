@@ -22,7 +22,7 @@ class ImageSpanVerticalAlignModifier extends Modifier<number> {
 }
 class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
     objectFit(value: ImageFit): ImageSpanAttribute {
-        if (value) {
+        if (value in ImageFit) {
             modifier(this._modifiers, ImageSpanObjectFitModifier, value);
         } else {
             modifier(this._modifiers, ImageSpanObjectFitModifier, undefined);
@@ -30,7 +30,7 @@ class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
         return this;
     }
     verticalAlign(value: ImageSpanAlignment): ImageSpanAttribute {
-        if (value) {
+        if (value in ImageSpanAlignment) {
             modifier(this._modifiers, ImageSpanVerticalAlignModifier, value);
         } else {
             modifier(this._modifiers, ImageSpanVerticalAlignModifier, undefined);

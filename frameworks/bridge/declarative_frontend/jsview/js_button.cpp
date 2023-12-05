@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
@@ -383,9 +384,6 @@ void JSButton::JsPadding(const JSCallbackInfo& info)
 Edge JSButton::GetOldPadding(const JSCallbackInfo& info)
 {
     Edge padding;
-    if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
-        return padding;
-    }
 
     if (info[0]->IsNumber()) {
         CalcDimension edgeValue;
@@ -393,20 +391,17 @@ Edge JSButton::GetOldPadding(const JSCallbackInfo& info)
             padding = Edge(edgeValue);
         }
     } else if (info[0]->IsObject()) {
-        auto object = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!object) {
-            return padding;
-        }
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
         CalcDimension left = CalcDimension(0.0, DimensionUnit::VP);
         CalcDimension top = CalcDimension(0.0, DimensionUnit::VP);
         CalcDimension right = CalcDimension(0.0, DimensionUnit::VP);
         CalcDimension bottom = CalcDimension(0.0, DimensionUnit::VP);
-        if (object->Contains("top") || object->Contains("bottom") || object->Contains("left") ||
-            object->Contains("right")) {
-            ParseJsonDimensionVp(object->GetValue("left"), left);
-            ParseJsonDimensionVp(object->GetValue("top"), top);
-            ParseJsonDimensionVp(object->GetValue("right"), right);
-            ParseJsonDimensionVp(object->GetValue("bottom"), bottom);
+        if (jsObj->HasProperty("top") || jsObj->HasProperty("bottom")
+            || jsObj->HasProperty("left") || jsObj->HasProperty("right")) {
+            ParseJsDimensionVp(jsObj->GetProperty("left"), left);
+            ParseJsDimensionVp(jsObj->GetProperty("top"), top);
+            ParseJsDimensionVp(jsObj->GetProperty("right"), right);
+            ParseJsDimensionVp(jsObj->GetProperty("bottom"), bottom);
         }
         padding = Edge(left, top, right, bottom);
     }
@@ -513,15 +508,18 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
     }
 
     auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](GestureEvent& info) {
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = targetNode](GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info);
     };
-
-    auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](const ClickInfo* info) {
+    auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = targetNode](
+                       const ClickInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(*info);
     };
 

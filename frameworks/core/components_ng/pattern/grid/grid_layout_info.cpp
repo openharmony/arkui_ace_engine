@@ -125,6 +125,21 @@ void GridLayoutInfo::UpdateEndLine(float mainSize, float mainGap)
     }
 }
 
+void GridLayoutInfo::UpdateEndIndex(float overScrollOffset, float mainSize, float mainGap)
+{
+    auto remainSize = mainSize - overScrollOffset;
+    for (auto i = startMainLineIndex_; i < endMainLineIndex_; ++i) {
+        remainSize -= (lineHeightMap_[i] + mainGap);
+        if (LessOrEqual(remainSize + mainGap, 0)) {
+            auto endLine = gridMatrix_.find(i);
+            CHECK_NULL_VOID(endLine != gridMatrix_.end());
+            CHECK_NULL_VOID(!endLine->second.empty());
+            endIndex_ = endLine->second.rbegin()->second;
+            break;
+        }
+    }
+}
+
 float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
 {
     float lineHeight = 0.0f;

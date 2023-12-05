@@ -54,6 +54,7 @@ public:
     {
         auto value = MakeRefPtr<MenuLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+        value->propIsRectInTarget_ = CloneIsRectInTarget();
         value->propMenuOffset_ = CloneMenuOffset();
         value->propTargetSize_ = CloneTargetSize();
         value->propPositionOffset_ = ClonePositionOffset();
@@ -69,6 +70,7 @@ public:
     void Reset() override
     {
         LayoutProperty::Reset();
+        ResetIsRectInTarget();
         ResetMenuOffset();
         ResetTargetSize();
         ResetPositionOffset();
@@ -80,6 +82,8 @@ public:
         ResetMenuWidth();
     }
 
+    // if is a rect in target frameNode
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsRectInTarget, bool, PROPERTY_UPDATE_MEASURE);
     // target frameNode that this menu belongs to
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuOffset, NG::OffsetF, PROPERTY_UPDATE_MEASURE);
     // target frameNode size, null for click show menu

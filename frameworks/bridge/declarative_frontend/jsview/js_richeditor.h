@@ -40,6 +40,8 @@ public:
     static void SetCopyOptions(const JSCallbackInfo& info);
     static void BindSelectionMenu(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
+    static void JsEnableDataDetector(const JSCallbackInfo& info);
+    static void JsDataDetectorConfig(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
     static JSRef<JSVal> CreateJSSelection(const RichEditorSelection& selectInfo);
@@ -84,6 +86,8 @@ public:
     }
     void AddImageSpan(const JSCallbackInfo& args);
     void AddTextSpan(const JSCallbackInfo& args);
+    void AddPlaceholderSpan(const JSCallbackInfo& args);
+    void ParseOptions(const JSCallbackInfo& args, SpanOptionBase& placeholderSpan);
     void DeleteSpans(const JSCallbackInfo& args);
     ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
     void ParseJsTextStyle(
@@ -106,6 +110,8 @@ private:
     bool IsPixelMap(const JSRef<JSVal>& jsValue);
     bool IsDrawable(const JSRef<JSVal>& jsValue);
     void ParseTextDecoration(
+        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
+    void ParseTextShadow(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
 
     static JSRef<JSVal> CreateJSSpansInfo(const RichEditorSelection& info);

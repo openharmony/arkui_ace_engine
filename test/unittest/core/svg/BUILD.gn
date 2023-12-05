@@ -40,6 +40,10 @@ ohos_unittest("parse_test_ng") {
 
   sources = [ "parse_test_ng.cpp" ]
 
+  if (ace_use_rosen_drawing) {
+    defines = [ "ACE_ENABLE_GPU" ]
+  }
+
   deps = [
     "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
@@ -64,6 +68,7 @@ ohos_unittest("svg_dom_test_ng") {
   module_out_path = svg_test_output_path
 
   sources = [
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/image_painter_utils.cpp",
     "$ace_root/frameworks/core/components_ng/svg/svg_context.cpp",
     "$ace_root/frameworks/core/components_ng/svg/svg_dom.cpp",

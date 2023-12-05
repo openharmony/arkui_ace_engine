@@ -34,6 +34,8 @@
 
 namespace OHOS::Ace {
 constexpr uint8_t KEYS_MAX_VALUE = 3;
+constexpr int64_t EVENT_CLEAR_DURATION = 3000;
+constexpr int64_t TRANSLATE_NS_TO_MS = 1000000;
 const std::string SHORT_CUT_VALUE_X = "X";
 const std::string SHORT_CUT_VALUE_Y = "Y";
 const std::string SHORT_CUT_VALUE_Z = "Z";
@@ -92,6 +94,10 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     refereeNG_->CheckSourceTypeChange(touchPoint.sourceType);
     if (refereeNG_->QueryAllDone(touchPoint.id)) {
         refereeNG_->CleanGestureScope(touchPoint.id);
+        if (touchTestResults_.empty() && refereeNG_->QueryAllDone()) {
+            responseCtrl_->Reset();
+            refereeNG_->CleanAll();
+        }
     }
     if (frameNode->HaveSecurityComponent()) {
         std::vector<NG::RectF> rect;
@@ -126,6 +132,9 @@ void EventManager::TouchTest(
     }
     ACE_FUNCTION_TRACE();
     CHECK_NULL_VOID(frameNode);
+    if (axisTouchTestResults_.empty() && refereeNG_->QueryAllDone()) {
+        responseCtrl_->Reset();
+    }
     // collect
     const NG::PointF point { event.x, event.y };
     if (frameNode->HaveSecurityComponent()) {
@@ -302,7 +311,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
 #ifdef ENABLE_DRAG_FRAMEWORK
-    if (isDragging_ && (point.type == TouchType::PULL_MOVE || point.pullType == TouchType::PULL_MOVE)) {
+    if (point.type == TouchType::PULL_MOVE || point.pullType == TouchType::PULL_MOVE) {
         isDragging_ = false;
         point.type = TouchType::CANCEL;
     }
@@ -311,22 +320,28 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         point.type = TouchType::UP;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
-    ACE_SCOPED_TRACE("DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d",
-        point.id, point.x, point.y, (int)point.type);
     const auto iter = touchTestResults_.find(point.id);
     if (iter == touchTestResults_.end()) {
         LOGI("the %{public}d touch test result does not exist!", point.id);
         return false;
     }
+    ACE_SCOPED_TRACE("DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d",
+        point.id, point.x, point.y, (int)point.type);
 
     if (point.type == TouchType::DOWN) {
+        int64_t currentEventTime = static_cast<int64_t>(point.time.time_since_epoch().count());
+        int64_t lastEventTime = static_cast<int64_t>(lastEventTime_.time_since_epoch().count());
+        int64_t duration = static_cast<int64_t>((currentEventTime - lastEventTime) / TRANSLATE_NS_TO_MS);
+        if (duration >= EVENT_CLEAR_DURATION) {
+            refereeNG_->ForceCleanGestureReferee();
+        }
         // first collect gesture into gesture referee.
         if (Container::IsCurrentUseNewPipeline()) {
             refereeNG_->AddGestureToScope(point.id, iter->second);
         }
         // add gesture snapshot to dump
         for (const auto& target : iter->second) {
-            AddGestureSnapshot(point.id, target);
+            AddGestureSnapshot(point.id, 0, target);
         }
     }
 
@@ -377,8 +392,12 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         refereeNG_->CleanGestureScope(point.id);
         referee_->CleanGestureScope(point.id);
         touchTestResults_.erase(point.id);
+        if (touchTestResults_.empty()) {
+            refereeNG_->CleanRedundanceScope();
+        }
     }
 
+    lastEventTime_ = point.time;
     return true;
 }
 
@@ -446,13 +465,15 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
 
 bool EventManager::DispatchTabIndexEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& mainView)
 {
-    LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
-        event.action, event.repeatTime);
     CHECK_NULL_RETURN(mainView, false);
+    TAG_LOGD(AceLogTag::ACE_FOCUS,
+        "Dispatch tab index event: code:%{public}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
+        event.action, mainView->GetTag().c_str(), mainView->GetId());
     auto mainViewFocusHub = mainView->GetFocusHub();
     CHECK_NULL_RETURN(mainViewFocusHub, false);
     if (mainViewFocusHub->HandleFocusByTabIndex(event)) {
-        LOGI("Tab index focus system handled this event");
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Tab index handled the key event: code:%{public}d/action:%{public}d", event.code,
+            event.action);
         return true;
     }
     return false;
@@ -461,15 +482,18 @@ bool EventManager::DispatchTabIndexEventNG(const KeyEvent& event, const RefPtr<N
 bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode)
 {
     CHECK_NULL_RETURN(focusNode, false);
-    LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
-        event.action, event.repeatTime);
+    TAG_LOGD(AceLogTag::ACE_FOCUS,
+        "Dispatch key event: code:%{public}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
+        event.action, focusNode->GetTag().c_str(), focusNode->GetId());
     auto focusNodeHub = focusNode->GetFocusHub();
     CHECK_NULL_RETURN(focusNodeHub, false);
     if (focusNodeHub->HandleKeyEvent(event)) {
-        LOGI("Default focus system handled this event");
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus system handled the key event: code:%{public}d/action:%{public}d",
+            event.code, event.action);
         return true;
     }
-    LOGD("Use platform to handle this event");
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:%{public}d/action:%{public}d",
+        event.code, event.action);
     return false;
 }
 
@@ -577,46 +601,46 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
 
 void EventManager::LogPrintMouseTest()
 {
-#ifdef ACE_DEBUG_LOG
     if (!SystemProperties::GetDebugEnabled()) {
         return;
     }
     if (currMouseTestResults_.empty()) {
-        LOGD("Mouse test onMouse result is empty.");
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "Mouse test onMouse result is empty.");
     } else {
         for (const auto& result : currMouseTestResults_) {
-            LOGD("Mouse test onMouse result: %{public}s/%{public}d.", result->GetNodeName().c_str(),
-                result->GetNodeId());
+            TAG_LOGI(AceLogTag::ACE_MOUSE, "Mouse test onMouse result: %{public}s/%{public}d.",
+                result->GetNodeName().c_str(), result->GetNodeId());
         }
     }
     if (lastHoverTestResults_.empty()) {
-        LOGD("Mouse test onHover last result is empty.");
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "Mouse test onHover last result is empty.");
     } else {
         for (const auto& result : lastHoverTestResults_) {
-            LOGD("Mouse test onHover last result: %{public}s/%{public}d.", result->GetNodeName().c_str(),
-                result->GetNodeId());
+            TAG_LOGI(AceLogTag::ACE_MOUSE, "Mouse test onHover last result: %{public}s/%{public}d.",
+                result->GetNodeName().c_str(), result->GetNodeId());
         }
     }
     if (currHoverTestResults_.empty()) {
-        LOGD("Mouse test onHover current result is empty.");
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "Mouse test onHover current result is empty.");
     } else {
         for (const auto& result : currHoverTestResults_) {
-            LOGD("Mouse test onHover current result: %{public}s/%{public}d.", result->GetNodeName().c_str(),
-                result->GetNodeId());
+            TAG_LOGI(AceLogTag::ACE_MOUSE, "Mouse test onHover current result: %{public}s/%{public}d.",
+                result->GetNodeName().c_str(), result->GetNodeId());
         }
     }
     auto lastNode = lastHoverNode_.Upgrade();
     auto currNode = currHoverNode_.Upgrade();
-    LOGD("Mouse test last/current hoverEffect node: %{public}s/%{public}d / %{public}s/%{public}d",
+    TAG_LOGI(AceLogTag::ACE_MOUSE,
+        "Mouse test last/current hoverEffect node: %{public}s/%{public}d / %{public}s/%{public}d",
         lastNode ? lastNode->GetTag().c_str() : "NULL", lastNode ? lastNode->GetId() : -1,
         currNode ? currNode->GetTag().c_str() : "NULL", currNode ? currNode->GetId() : -1);
-#endif
 }
 
 void EventManager::MouseTest(
     const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict)
 {
-    LOGD("Mouse test start. Mouse event is (%{public}f,%{public}f), button: %{public}d, action: %{public}d", event.x,
+    TAG_LOGD(AceLogTag::ACE_MOUSE,
+        "Mouse test start. Event is (%{public}f,%{public}f), button: %{public}d, action: %{public}d", event.x,
         event.y, event.button, event.action);
     CHECK_NULL_VOID(frameNode);
     const NG::PointF point { event.x, event.y };
@@ -627,7 +651,7 @@ void EventManager::MouseTest(
     }
     frameNode->TouchTest(point, point, point, touchRestrict, testResult, event.GetId());
     if (testResult.empty()) {
-        LOGD("mouse hover test result is empty");
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse hover test result is empty.");
     }
     currMouseTestResults_.clear();
     HoverTestResult hoverTestResult;
@@ -649,9 +673,11 @@ void EventManager::MouseTest(
         }
     }
     if (event.action == MouseAction::WINDOW_LEAVE) {
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "Exit hover by leave-window event.");
         lastHoverTestResults_ = std::move(currHoverTestResults_);
         currHoverTestResults_.clear();
     } else if (event.action == MouseAction::WINDOW_ENTER) {
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "Enter hover by enter-window event.");
         lastHoverTestResults_.clear();
         currHoverTestResults_ = std::move(hoverTestResult);
     } else {
@@ -661,12 +687,13 @@ void EventManager::MouseTest(
     lastHoverNode_ = currHoverNode_;
     currHoverNode_ = hoverNode;
     LogPrintMouseTest();
-    LOGD("Mouse test end.");
+    TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test end.");
 }
 
 bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
 {
-    LOGD("DispatchMouseEventNG: button is %{public}d, action is %{public}d.", event.button, event.action);
+    TAG_LOGD(AceLogTag::ACE_MOUSE, "Handle mouse event. Button: %{public}d. Action: %{public}d.", event.button,
+        event.action);
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE ||
         event.action == MouseAction::MOVE || event.action == MouseAction::WINDOW_ENTER ||
         event.action == MouseAction::WINDOW_LEAVE) {
@@ -713,7 +740,8 @@ void EventManager::DoMouseActionRelease()
 
 void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)
 {
-    LOGD("DispatchMouseHoverAnimationNG: button is %{public}d, action is %{public}d.", event.button, event.action);
+    TAG_LOGD(AceLogTag::ACE_MOUSE, "Handle hover effect. Button: %{public}d. Action: %{public}d.", event.button,
+        event.action);
     auto hoverNodeCur = currHoverNode_.Upgrade();
     auto hoverNodePre = lastHoverNode_.Upgrade();
     if (event.action == MouseAction::PRESS) {
@@ -746,7 +774,8 @@ void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)
 
 bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
 {
-    LOGD("DispatchMouseHoverEventNG: button is %{public}d, action is %{public}d.", event.button, event.action);
+    TAG_LOGD(AceLogTag::ACE_MOUSE, "Handle hover event. Button: %{public}d. Action: %{public}d.", event.button,
+        event.action);
     auto lastHoverEndNode = lastHoverTestResults_.begin();
     auto currHoverEndNode = currHoverTestResults_.begin();
     RefPtr<HoverEventTarget> lastHoverEndNodeTarget;
@@ -1261,6 +1290,7 @@ EventManager::EventManager()
     LOGD("EventManger Constructor.");
     refereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
     referee_ = AceType::MakeRefPtr<GestureReferee>();
+    responseCtrl_ = AceType::MakeRefPtr<NG::ResponseCtrl>();
 
     auto callback = [weak = WeakClaim(this)](size_t touchId) -> bool {
         auto eventManager = weak.Upgrade();
@@ -1319,7 +1349,7 @@ void EventManager::DumpEvent() const
     }
 }
 
-void EventManager::AddGestureSnapshot(int32_t finger, const RefPtr<TouchEventTarget>& target)
+void EventManager::AddGestureSnapshot(int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target)
 {
     if (!target) {
         return;
@@ -1329,13 +1359,14 @@ void EventManager::AddGestureSnapshot(int32_t finger, const RefPtr<TouchEventTar
     if (frameNode) {
         info->nodeId = frameNode->GetId();
     }
+    info->depth = depth;
     eventTree_.AddGestureSnapshot(finger, std::move(info));
 
     // add child gesture if target is group
     auto group = AceType::DynamicCast<NG::RecognizerGroup>(target);
     if (group) {
         for (const auto& child : group->GetGroupRecognizer()) {
-            AddGestureSnapshot(finger, child);
+            AddGestureSnapshot(finger, depth + 1, child);
         }
     }
 }

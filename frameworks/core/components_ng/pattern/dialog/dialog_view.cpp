@@ -83,12 +83,12 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
             break;
     }
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
     RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(tag, nodeId,
         AceType::MakeRefPtr<DialogPattern>(dialogTheme, customNode));
 
     if (customNode) {
-        customNode->Build();
+        customNode->Build(nullptr);
     }
 
     // update layout and render props

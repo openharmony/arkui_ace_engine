@@ -23,7 +23,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #undef private
 #undef protected
@@ -66,11 +66,11 @@ class DrawingPropConvertorTestNg : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
-        NG::MockPipelineBase::SetUp();
+        NG::MockPipelineContext::SetUp();
     }
     static void TeardownTestSuite()
     {
-        NG::MockPipelineBase::TearDown();
+        NG::MockPipelineContext::TearDown();
     }
 };
 
@@ -435,7 +435,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg012, TestSize.Lev
      * @tc.steps1: create textStyle object and set input context is not null.
      */
     TextStyle textStyle(FONT_FAMILIES, FONT_SIZE, FONT_WEIGHT, FONT_STYLE, TEXT_COLOR_RED);
-    RefPtr<PipelineBase> pipelineContext = NG::MockPipelineBase::pipeline_;
+    RefPtr<PipelineBase> pipelineContext = NG::MockPipelineContext::pipeline_;
 
     /**
      * @tc.steps2: call ToRSTextStyle and set values of textStyle.
@@ -543,7 +543,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg014, TestSize.Lev
      * @tc.steps1: create textStyle object.
      */
     TextStyle testTextStyle(FONT_FAMILIES, FONT_SIZE_0, FONT_WEIGHT, FONT_STYLE, TEXT_COLOR_RED);
-    RefPtr<PipelineBase> pipelineContext = NG::MockPipelineBase::pipeline_;
+    RefPtr<PipelineBase> pipelineContext = NG::MockPipelineContext::pipeline_;
 
     /**
      * @tc.steps2: call ToRSTextStyle and set pipelineContext->minPlatformVersion_ is 6.

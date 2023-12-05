@@ -20,11 +20,13 @@
 #include <sys/time.h>
 
 #include "base/i18n/localization.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/event/time/time_event_proxy.h"
 #include "core/pipeline/base/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -84,6 +86,10 @@ void TextClockPattern::OnAttachToFrameNode()
 {
     InitTextClockController();
     InitUpdateTimeTextCallBack();
+    auto* eventProxy = TimeEventProxy::GetInstance();
+    if (eventProxy) {
+        eventProxy->Register(WeakClaim(this));
+    }
 }
 
 void TextClockPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -311,7 +317,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
 
     // parse input format
     formatElementMap.clear();
-    bool is24H = false; // false: 12H  true:24H
+    bool is24H = is24H_;
     ParseInputFormat(is24H);
 
     // get date time from third party
@@ -340,11 +346,19 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
         if (isForm_) {
             TextClockFormatElement tempFormatElement;
             std::vector<std::string> formSplitter = { "h", ":", "m" };
-            for (auto i = 0; i < formSplitter.size(); i++) {
-                tempFormatElement.formatElement = formSplitter[i];
-                tempFormatElement.formatElementNum = formSplitter[i].length();
-                formatElementMap[i] = tempFormatElement;
-            }
+            formatElementMap.clear();
+            tempFormatElement.formatElement = formSplitter[0];
+            tempFormatElement.elementKey = 'h';
+            tempFormatElement.formatElementNum = (int32_t)(TextClockElementIndex::CUR_HOUR_INDEX);
+            formatElementMap[0] = tempFormatElement;
+            tempFormatElement.formatElement = formSplitter[1];
+            tempFormatElement.elementKey = ':';
+            tempFormatElement.formatElementNum = (int32_t)(TextClockElementIndex::CUR_MAX_INDEX);
+            formatElementMap[1] = tempFormatElement;
+            tempFormatElement.formatElement = formSplitter[2];
+            tempFormatElement.elementKey = 'm';
+            tempFormatElement.formatElementNum = (int32_t)(TextClockElementIndex::CUR_MINUTE_INDEX);
+            formatElementMap[2] = tempFormatElement;
             outputDateTime = SpliceDateTime(curDateTime);
         } else {
             outputDateTime = dateTimeValue;
@@ -356,6 +370,9 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
 void TextClockPattern::ParseInputFormat(bool& is24H)
 {
     std::string inputFormat = (GetFormat() == DEFAULT_FORMAT) ? "aa h:m:s" : GetFormat();
+    if (inputFormat == FORM_FORMAT && isForm_) {
+        inputFormat = "h:m";
+    }
     std::vector<std::string> formatSplitter;
     auto i = 0;
     auto j = 0;
@@ -686,5 +703,11 @@ RefPtr<FrameNode> TextClockPattern::GetTextNode()
         return nullptr;
     }
     return textNode;
+}
+
+void TextClockPattern::OnTimeChange()
+{
+    is24H_ = SystemProperties::Is24HourClock();
+    UpdateTimeText();
 }
 } // namespace OHOS::Ace::NG

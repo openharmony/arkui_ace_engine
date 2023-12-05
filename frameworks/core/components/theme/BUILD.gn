@@ -53,6 +53,7 @@ template("ace_core_components_theme_set") {
     sources = [
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
       "app_theme.cpp",
+      "blur_style_theme.cpp",
       "icon_theme.cpp",
       "theme_attributes.cpp",
       "theme_constants.cpp",

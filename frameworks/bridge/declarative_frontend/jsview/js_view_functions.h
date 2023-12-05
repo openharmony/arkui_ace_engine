@@ -19,7 +19,6 @@
 #include <string>
 
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/custom/custom_measure_layout_param.h"
 #include "core/pipeline/base/composed_component.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -70,6 +69,8 @@ public:
     void ExecuteAboutToRecycle();
     void ExecuteSetActive(bool active);
     void ExecuteOnDumpInfo(const std::vector<std::string>& params);
+    std::string ExecuteOnFormRecycle();
+    void ExecuteOnFormRecover(const std::string &statusData);
 
     bool HasPageTransition() const;
     bool HasMeasure() const;
@@ -97,8 +98,6 @@ private:
     JSWeak<JSFunc> jsMeasureSizeFunc_;
     JSWeak<JSFunc> jsLayoutFunc_;
     JSWeak<JSFunc> jsPlaceChildrenFunc_;
-    JSWeak<JSFunc> jsObserveOnMeasureSizeFunc_;
-    JSWeak<JSFunc> jsObserveOnPlaceChildFunc_;
     JSWeak<JSFunc> jsAboutToRenderFunc_;
     JSWeak<JSFunc> jsAboutToBeDeletedFunc_;
     JSWeak<JSFunc> jsRenderDoneFunc_;
@@ -120,6 +119,8 @@ private:
     JSWeak<JSFunc> jsAboutToRecycleFunc_;
     JSWeak<JSFunc> jsSetActive_;
     JSWeak<JSFunc> jsOnDumpInfo_;
+    JSWeak<JSFunc>jsOnFormRecycleFunc_;
+    JSWeak<JSFunc>jsOnFormRecoverFunc_;
 
     JSExecutionContext context_;
 };

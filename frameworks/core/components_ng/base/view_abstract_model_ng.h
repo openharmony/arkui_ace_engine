@@ -299,6 +299,74 @@ public:
         ViewAbstract::SetBorderStyle(borderStyles);
     }
 
+    void SetOuterBorderRadius(const Dimension& value) override
+    {
+        ViewAbstract::SetOuterBorderRadius(value);
+    }
+
+    void SetOuterBorderRadius(const std::optional<Dimension>& radiusTopLeft,
+        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight) override
+    {
+        NG::BorderRadiusProperty borderRadius;
+        borderRadius.radiusTopLeft = radiusTopLeft;
+        borderRadius.radiusTopRight = radiusTopRight;
+        borderRadius.radiusBottomLeft = radiusBottomLeft;
+        borderRadius.radiusBottomRight = radiusBottomRight;
+        borderRadius.multiValued = true;
+        ViewAbstract::SetOuterBorderRadius(borderRadius);
+    }
+
+    void SetOuterBorderColor(const Color& value) override
+    {
+        ViewAbstract::SetOuterBorderColor(value);
+    }
+    void SetOuterBorderColor(const std::optional<Color>& colorLeft, const std::optional<Color>& colorRight,
+        const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) override
+    {
+        NG::BorderColorProperty borderColors;
+        borderColors.leftColor = colorLeft;
+        borderColors.rightColor = colorRight;
+        borderColors.topColor = colorTop;
+        borderColors.bottomColor = colorBottom;
+        borderColors.multiValued = true;
+        ViewAbstract::SetOuterBorderColor(borderColors);
+    }
+
+    void SetOuterBorderWidth(const Dimension& value) override
+    {
+        ViewAbstract::SetOuterBorderWidth(value);
+    }
+
+    void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override
+    {
+        NG::BorderWidthProperty borderWidth;
+        borderWidth.leftDimen = left;
+        borderWidth.rightDimen = right;
+        borderWidth.topDimen = top;
+        borderWidth.bottomDimen = bottom;
+        borderWidth.multiValued = true;
+        ViewAbstract::SetOuterBorderWidth(borderWidth);
+    }
+
+    void SetOuterBorderStyle(const BorderStyle& value) override
+    {
+        ViewAbstract::SetOuterBorderStyle(value);
+    }
+
+    void SetOuterBorderStyle(const std::optional<BorderStyle>& styleLeft, const std::optional<BorderStyle>& styleRight,
+        const std::optional<BorderStyle>& styleTop, const std::optional<BorderStyle>& styleBottom) override
+    {
+        NG::BorderStyleProperty borderStyles;
+        borderStyles.styleLeft = styleLeft.value_or(BorderStyle::SOLID);
+        borderStyles.styleRight = styleRight.value_or(BorderStyle::SOLID);
+        borderStyles.styleTop = styleTop.value_or(BorderStyle::SOLID);
+        borderStyles.styleBottom = styleBottom.value_or(BorderStyle::SOLID);
+        borderStyles.multiValued = true;
+        ViewAbstract::SetOuterBorderStyle(borderStyles);
+    }
+
     void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override
     {
         CHECK_NULL_VOID(borderImage);
@@ -355,6 +423,11 @@ public:
     void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override
     {
         ViewAbstract::SetAlignRules(alignRules);
+    }
+
+    void SetBias(const BiasPair& biasPair) override
+    {
+        ViewAbstract::SetBias(biasPair);
     }
 
     void SetUseAlign(
@@ -719,6 +792,11 @@ public:
         ViewAbstract::SetDraggable(draggable);
     }
 
+    void SetDragPreviewOptions(const DragPreviewOption& previewOption) override
+    {
+        ViewAbstract::SetDragPreviewOptions(previewOption);
+    }
+
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override
     {
         auto dragStart = [dragStartFunc = std::move(onDragStart)](const RefPtr<OHOS::Ace::DragEvent>& event,
@@ -799,6 +877,11 @@ public:
     void SetTouchable(bool touchable) override
     {
         ViewAbstract::SetTouchable(touchable);
+    }
+
+    void SetMonopolizeEvents(bool monopolizeEvents) override
+    {
+        ViewAbstract::SetMonopolizeEvents(monopolizeEvents);
     }
 
     void SetFocusable(bool focusable) override
@@ -883,7 +966,9 @@ public:
         std::function<void()>&& onDisappear) override;
 
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
-        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear) override;
+        std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss) override;
+    void DismissSheet() override;
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
@@ -949,6 +1034,8 @@ public:
     {
         ViewAbstract::DisableOnBlur();
     }
+    
+    static void SetAccessibilityText(FrameNode* frameNode, const std::string& text);
 
     void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override
@@ -970,7 +1057,16 @@ public:
     {
         ViewAbstract::SetBloom(value);
     }
+    
+    static void SetAccessibilityGroup(FrameNode* frameNode, bool accessible);
 
+    static void SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance);
+    static void SetAccessibilityDescription(FrameNode* frameNode, const std::string& description);
+    static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
+        const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
+    {
+        ViewAbstract::SetKeyboardShortcut(frameNode, value, keys, std::move(onKeyboardShortcutAction));
+    }
 private:
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);

@@ -26,6 +26,7 @@
 
 namespace OHOS::Ace {
 namespace {
+constexpr float MAX_TIME = 1000000000.0f;
 
 int32_t g_controllerId = 0;
 int32_t AllocControllerId()
@@ -544,7 +545,7 @@ void Animator::Finish()
     LOGD("animation finish. id: %{public}d", controllerId_);
     if (motion_) {
         // Notify motion with big time to let motion end in final state.
-        motion_->OnTimestampChanged(static_cast<float>(INT_MAX), 0.0f, false);
+        motion_->OnTimestampChanged(MAX_TIME, 0.0f, false);
         Stop();
         return;
     }
@@ -576,7 +577,7 @@ void Animator::Cancel()
     }
     if (motion_) {
         // Notify motion with big time to let motion end in final state.
-        motion_->OnTimestampChanged(static_cast<float>(INT_MAX), 0.0f, false);
+        motion_->OnTimestampChanged(MAX_TIME, 0.0f, false);
     }
     if (scheduler_ && scheduler_->IsActive()) {
         scheduler_->Stop();
@@ -593,6 +594,9 @@ int32_t Animator::GetId() const
 void Animator::OnFrame(int64_t duration)
 {
     CHECK_RUN_ON(UI);
+    if (iteration_ == ANIMATION_REPEAT_INFINITE) {
+        ACE_SCOPED_TRACE("onFrame %s", animatorName_.c_str());
+    }
     // notify child first
     for (auto& controller : proxyControllers_) {
         controller->OnFrame(duration);
@@ -641,7 +645,7 @@ void Animator::NotifyInterpolator(int32_t playedTime)
             isCurDirection_ = !isCurDirection_;
         }
         // make playedTime in range 0 ~ INTERPOLATE_DURATION_MAX
-        if (repeatTimesLeft_ == 0 || scaledDuration_ == 0) {
+        if (repeatTimesLeft_ == 0 || (scaledDuration_ == 0 && repeatTimesLeft_ != ANIMATION_REPEAT_INFINITE)) {
             LOGD("animation stop, repeatTimesLeft: %{public}d, duration: %{public}d, id: %{public}d", repeatTimesLeft_,
                 scaledDuration_, controllerId_);
             repeatTimesLeft_ = 0;

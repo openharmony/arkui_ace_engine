@@ -56,6 +56,7 @@
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_window.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/window.h"
 #include "core/components/theme/app_theme.h"
@@ -102,23 +103,34 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool useNewPip
         SetUseNewPipeline();
     }
     ThemeConstants::InitDeviceType();
-#ifndef ENABLE_ROSEN_BACKEND
-    auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
-    auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>(state->GetTaskRunners());
-    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
-        flutterTaskExecutor->InitJsThread();
-    }
-#else
-    auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    flutterTaskExecutor->InitPlatformThread(useCurrentEventRunner);
-    // No need to create JS Thread for DECLARATIVE_JS
-    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
-        flutterTaskExecutor->InitJsThread();
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        auto taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>();
+        taskExecutorImpl->InitPlatformThread(useCurrentEventRunner);
+        if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
+            taskExecutorImpl->InitJsThread();
+        } else {
+            GetSettings().useUIAsJSThread = true;
+        }
+        taskExecutor_ = taskExecutorImpl;
     } else {
-        GetSettings().useUIAsJSThread = true;
-    }
+#ifndef ENABLE_ROSEN_BACKEND
+        auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
+        auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>(state->GetTaskRunners());
+        if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
+            flutterTaskExecutor->InitJsThread();
+        }
+#else
+        auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+        flutterTaskExecutor->InitPlatformThread(useCurrentEventRunner);
+        // No need to create JS Thread for DECLARATIVE_JS
+        if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
+            flutterTaskExecutor->InitJsThread();
+        } else {
+            GetSettings().useUIAsJSThread = true;
+        }
 #endif
-    taskExecutor_ = flutterTaskExecutor;
+        taskExecutor_ = flutterTaskExecutor;
+    }
 }
 
 void AceContainer::Initialize()
@@ -677,21 +689,35 @@ void AceContainer::AddAssetPath(
 {
     auto container = GetContainerInstance(instanceId);
     CHECK_NULL_VOID(container);
-
-    if (!container->assetManager_) {
-        RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-        container->assetManager_ = flutterAssetManager;
-        if (container->frontend_) {
-            container->frontend_->SetAssetManager(flutterAssetManager);
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        if (!container->assetManager_) {
+            RefPtr<AssetManagerImpl> assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+            container->assetManager_ = assetManagerImpl;
+            if (container->frontend_) {
+                container->frontend_->SetAssetManager(assetManagerImpl);
+            }
         }
-    }
+        auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+        if (fileAssetProvider->Initialize("", paths)) {
+            LOGI("Push AssetProvider to queue.");
+            container->assetManager_->PushBack(std::move(fileAssetProvider));
+        }
+    } else {
+        if (!container->assetManager_) {
+            RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+            container->assetManager_ = flutterAssetManager;
+            if (container->frontend_) {
+                container->frontend_->SetAssetManager(flutterAssetManager);
+            }
+        }
 
-    for (const auto& path : paths) {
-        LOGD("Current path is: %{private}s", path.c_str());
-        auto dirAssetProvider = AceType::MakeRefPtr<DirAssetProvider>(
-            path, std::make_unique<flutter::DirectoryAssetBundle>(
-                      fml::OpenDirectory(path.c_str(), false, fml::FilePermission::kRead)));
-        container->assetManager_->PushBack(std::move(dirAssetProvider));
+        for (const auto& path : paths) {
+            LOGD("Current path is: %{private}s", path.c_str());
+            auto dirAssetProvider = AceType::MakeRefPtr<DirAssetProvider>(
+                path, std::make_unique<flutter::DirectoryAssetBundle>(
+                          fml::OpenDirectory(path.c_str(), false, fml::FilePermission::kRead)));
+            container->assetManager_->PushBack(std::move(dirAssetProvider));
+        }
     }
 }
 #else
@@ -800,7 +826,7 @@ void AceContainer::SetView(AceViewPreview* view, double density, int32_t width, 
         return;
     }
 
-    std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
+    auto window = std::make_shared<Window>(std::move(platformWindow));
     container->AttachView(std::move(window), view, density, width, height);
 }
 #else
@@ -812,14 +838,14 @@ void AceContainer::SetView(AceViewPreview* view, sptr<Rosen::Window> rsWindow, d
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
     container->AttachView(std::move(window), view, density, width, height, callback);
 }
 #endif
 
 #ifndef ENABLE_ROSEN_BACKEND
 void AceContainer::AttachView(
-    std::unique_ptr<Window> window, AceViewPreview* view, double density, int32_t width, int32_t height)
+    std::shared_ptr<Window> window, AceViewPreview* view, double density, int32_t width, int32_t height)
 {
     ContainerScope scope(instanceId_);
     aceView_ = view;
@@ -827,11 +853,22 @@ void AceContainer::AttachView(
 
     auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
     ACE_DCHECK(state != nullptr);
-    auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
-    flutterTaskExecutor->InitOtherThreads(state->GetTaskRunners());
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        auto taskExecutorImpl = AceType::DynamicCast<TaskExecutorImpl>(taskExecutorImpl_);
+        taskExecutorImpl->InitOtherThreads(state->GetTaskRunners());
+        if (type_ == FrontendType::DECLARATIVE_JS) {
+            // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
+            taskExecutorImpl->InitJsThread(false);
+        }
+    } else {
+        auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
+        flutterTaskExecutor->InitOtherThreads(state->GetTaskRunners());
+        if (type_ == FrontendType::DECLARATIVE_JS) {
+            // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
+            flutterTaskExecutor->InitJsThread(false);
+        }
+    }
     if (type_ == FrontendType::DECLARATIVE_JS) {
-        // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
-        flutterTaskExecutor->InitJsThread(false);
         InitializeFrontend();
         auto front = GetFrontend();
         if (front) {
@@ -910,19 +947,31 @@ void AceContainer::AttachView(
     AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
 }
 #else
-void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* view, double density, int32_t width,
+void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* view, double density, int32_t width,
     int32_t height, UIEnvCallback callback)
 {
     ContainerScope scope(instanceId_);
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
 
-    auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
-    CHECK_NULL_VOID(flutterTaskExecutor);
-    flutterTaskExecutor->InitOtherThreads(aceView_->GetThreadModel());
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        auto taskExecutorImpl = AceType::DynamicCast<TaskExecutorImpl>(taskExecutor_);
+        CHECK_NULL_VOID(taskExecutorImpl);
+        taskExecutorImpl->InitOtherThreads(aceView_->GetThreadModelImpl());
+        if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::ETS_CARD) {
+            // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
+            taskExecutorImpl->InitJsThread(false);
+        }
+    } else {
+        auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
+        CHECK_NULL_VOID(flutterTaskExecutor);
+        flutterTaskExecutor->InitOtherThreads(aceView_->GetThreadModel());
+        if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::ETS_CARD) {
+            // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
+            flutterTaskExecutor->InitJsThread(false);
+        }
+    }
     if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::ETS_CARD) {
-        // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
-        flutterTaskExecutor->InitJsThread(false);
         InitializeFrontend();
         SetHspBufferTrackerCallback();
         SetMockModuleListToJsEngine();

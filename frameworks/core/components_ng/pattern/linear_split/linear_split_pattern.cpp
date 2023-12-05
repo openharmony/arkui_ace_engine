@@ -440,6 +440,10 @@ void LinearSplitPattern::HandleMouseEvent(MouseInfo& info)
             pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         }
     }
+    if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+        dragedSplitIndex_ = DEFAULT_DRAG_INDEX;
+        isDragedMoving_ = false;
+    }
     pipeline->FreeMouseStyleHoldNode(frameId);
 }
 

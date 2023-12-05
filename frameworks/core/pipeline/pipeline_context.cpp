@@ -684,6 +684,8 @@ void PipelineContext::FlushRenderFinish()
     }
 }
 
+void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
+
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 {
     CHECK_RUN_ON(UI);
@@ -3127,7 +3129,7 @@ void PipelineContext::ProcessDragEventEnd(
     SetInitRenderNode(nullptr);
 }
 
-void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
+void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action)
 {
     if (!clipboard_) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(GetTaskExecutor());
@@ -3161,10 +3163,10 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     }
 
     RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
-    event->SetX(ConvertPxToVp(Dimension(x, DimensionUnit::PX)));
-    event->SetY(ConvertPxToVp(Dimension(y, DimensionUnit::PX)));
+    event->SetX(ConvertPxToVp(Dimension(pointerEvent.x, DimensionUnit::PX)));
+    event->SetY(ConvertPxToVp(Dimension(pointerEvent.y, DimensionUnit::PX)));
 
-    Point globalPoint(x, y);
+    Point globalPoint(pointerEvent.x, pointerEvent.y);
 
     if (action == DragEventAction::DRAG_EVENT_START) {
         pageOffset_ = GetPageRect().GetOffset();

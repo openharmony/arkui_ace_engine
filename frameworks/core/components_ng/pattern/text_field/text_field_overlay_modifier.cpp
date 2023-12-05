@@ -32,6 +32,7 @@ constexpr Dimension MAGNIFIER_OFFSET_Y = 4.0_vp;
 constexpr Dimension PIXEL_MAP_IMAGE_OFFSET = 4.0_vp;
 constexpr Dimension CLOSE_MAGNIFIER_MAX_OFFSET_X = 70.0_vp;
 constexpr Dimension MAGNIFIER_BOUNDRY_WIDTH = 1.0_vp;
+constexpr Dimension DEFAULT_STATUS_BAR_HEIGHT = 48.0_vp;
 } // namespace
 
 TextFieldOverlayModifier::TextFieldOverlayModifier(
@@ -153,7 +154,8 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     float clipRectHeight = 0.0f;
     clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
     RSRect clipInnerRect;
-    if (inputStyle_ == InputStyle::DEFAULT || isTextArea) {
+    auto defaultStyle = !textFieldPattern->IsNormalInlineState() || isTextArea;
+    if (defaultStyle) {
         clipInnerRect = RSRect(paintOffset.GetX(), paintOffset.GetY(),
             paintOffset.GetX() + contentSize_->Get().Width() + textFieldPattern->GetInlinePadding(), clipRectHeight);
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
@@ -165,13 +167,13 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     // for default style, selection height is equal to the content height
     for (const auto& textBox : textBoxes) {
         canvas.DrawRect(RSRect(textBox.Left() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
-            inputStyle_ == InputStyle::DEFAULT || isTextArea
+            defaultStyle
                 ? (textBox.Top() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
                 : 0.0f,
             textBox.Right() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
-            inputStyle_ == InputStyle::DEFAULT || isTextArea
+            defaultStyle
                 ? (textBox.Bottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
-                : textFieldPattern->GetFrameRect().Height()));
+                         : textFieldPattern->GetFrameRect().Height()));
     }
     canvas.DetachBrush();
     canvas.Restore();
@@ -203,19 +205,8 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
         clipRectHeight);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     auto caretRect = textFieldPattern->GetCaretRect();
-    // Adjust the cursor to the viewable area.
-    auto textRectRightBoundary = textFieldPattern->IsTextArea()
-                                     ? contentOffset_->Get().GetX() + contentSize_->Get().Width()
-                                     : textRect_.GetX() + textRect_.Width();
-    if (GreatOrEqual(caretRect.GetX() + caretRect.Width(), textRectRightBoundary) &&
-        (textFieldPattern->IsTextArea() || GreatOrEqual(std::ceil(textRect_.Width()), contentSize_->Get().Width()) ||
-            textFieldPattern->GetTextAlign() == TextAlign::END) &&
-        GreatNotEqual(contentSize_->Get().Width(), 0.0) && !textFieldPattern->GetTextValue().empty()) {
-        caretRect.SetLeft(textRectRightBoundary - caretRect.Width());
-    }
-
-    canvas.DrawRect(RSRect(caretRect.GetX() - (static_cast<float>(cursorWidth_->Get()) / 2), caretRect.GetY(),
-        caretRect.GetX() + (static_cast<float>(cursorWidth_->Get()) / 2), caretRect.GetY() + caretRect.Height()));
+    canvas.DrawRect(RSRect(caretRect.GetX(), caretRect.GetY(),
+        caretRect.GetX() + (static_cast<float>(cursorWidth_->Get())), caretRect.GetY() + caretRect.Height()));
     canvas.DetachBrush();
     canvas.Restore();
 }
@@ -328,7 +319,7 @@ bool TextFieldOverlayModifier::GetMagnifierRect(
         }
     }
     startY = cursorOffsetY - magnifierHeight - magnifierOffsetY;
-    if (startY < 0 && (pattern->GetParentGlobalOffset().GetY() + startY) < 0) {
+    if ((pattern->GetParentGlobalOffset().GetY() + startY) < DEFAULT_STATUS_BAR_HEIGHT.ConvertToPx()) {
         startY = cursorOffsetY + pattern->GetLineHeight() + magnifierHeight + magnifierOffsetY;
     }
     startX = std::max(startX, 0.0f);
@@ -410,8 +401,7 @@ void TextFieldOverlayModifier::PaintShadow(const RSPath& path, const Shadow& sha
     RSPoint3 lightPos = { rsPath.GetBounds().GetLeft() / 2 + rsPath.GetBounds().GetRight(),
         rsPath.GetBounds().GetTop() / 2.0 + rsPath.GetBounds().GetBottom() / 2.0, shadow.GetLightHeight() };
 #else
-    auto tmpPath = rsPath.GetCmdList()->Playback();
-    auto bounds = tmpPath->GetBounds();
+    auto bounds = rsPath.GetBounds();
     RSPoint3 lightPos = { bounds.GetLeft() / 2.0 + bounds.GetRight() / 2.0,
         bounds.GetTop() / 2.0 + bounds.GetBottom() / 2.0, shadow.GetLightHeight() };
 #endif

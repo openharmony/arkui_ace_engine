@@ -40,10 +40,23 @@ public:
                 return theme;
             }
             theme = AceType::Claim(new CardTheme());
-            theme->borderRadius_ = themeConstants->GetDimension(THEME_CARD_BORDER_RADIUS);
-            theme->backgroundColor_ = themeConstants->GetColor(THEME_CARD_BACKGROUND_COLOR);
-            theme->blurRadius_ = themeConstants->GetDimension(THEME_CARD_BLUR_RADIUS);
+            ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
+        }
+
+        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<CardTheme>& theme) const
+        {
+            if (!themeStyle) {
+                return;
+            }
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_CARD, nullptr);
+            if (!pattern) {
+                LOGW("find pattern of card fail");
+                return;
+            }
+            theme->borderRadius_ = pattern->GetAttr<Dimension>("card_border_radius", 16.0_vp);
+            theme->backgroundColor_ = pattern->GetAttr<Color>("card_bg_color", Color(0xff202224));
+            theme->blurRadius_ = pattern->GetAttr<Dimension>("card_blur_radius", 10.0_px);
         }
     };
 

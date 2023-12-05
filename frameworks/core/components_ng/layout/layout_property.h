@@ -93,6 +93,11 @@ public:
         return borderWidth_;
     }
 
+    const std::unique_ptr<BorderWidthProperty>& GetOuterBorderWidthProperty() const
+    {
+        return outerBorderWidth_;
+    }
+
     const std::unique_ptr<PositionProperty>& GetPositionProperty() const
     {
         return positionProperty_;
@@ -128,6 +133,8 @@ public:
     void UpdateMargin(const MarginProperty& value);
 
     void UpdateBorderWidth(const BorderWidthProperty& value);
+
+    void UpdateOuterBorderWidth(const BorderWidthProperty& value);
 
     void UpdateAlignment(Alignment value);
 
@@ -193,6 +200,8 @@ public:
     void ResetAlignSelf();
 
     void UpdateAlignRules(const std::map<AlignDirection, AlignRule>& alignRules);
+
+    void UpdateBias(const BiasPair& biasPair);
 
     void UpdateDisplayIndex(int32_t displayIndex);
 
@@ -300,6 +309,7 @@ private:
     std::unique_ptr<SafeAreaInsets> safeAreaInsets_;
 
     std::unique_ptr<BorderWidthProperty> borderWidth_;
+    std::unique_ptr<BorderWidthProperty> outerBorderWidth_;
     std::unique_ptr<MagicItemProperty> magicItemProperty_;
     std::unique_ptr<PositionProperty> positionProperty_;
     std::unique_ptr<FlexItemProperty> flexItemProperty_;

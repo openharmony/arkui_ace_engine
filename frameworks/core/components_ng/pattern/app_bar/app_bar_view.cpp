@@ -64,7 +64,6 @@ RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
 #endif
     content->GetLayoutProperty()->UpdateLayoutWeight(1.0f);
     content->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto stagePattern = content->GetPattern<StagePattern>();
     return atom;
 }
 
@@ -82,7 +81,7 @@ void AppBarView::iniBehavior()
         CHECK_NULL_VOID(backButton);
         if (content->GetChildren().size() > 1) {
             backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-            if (!hasBeSetted) {
+            if (!isVisibleSetted) {
                 titleBar->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
             }
             return;
@@ -159,11 +158,14 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
 RefPtr<FrameNode> AppBarView::BuildFaButton()
 {
     auto buttonNode = BuildIconButton(InternalResource::ResourceId::APP_BAR_FA_SVG, nullptr, false);
+    CHECK_NULL_RETURN(buttonNode, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    renderContext->UpdatePosition(OffsetT<Dimension>());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-    auto buttonId = buttonNode->GetId();
-    auto clickCallback = [pipeline, appBarTheme, buttonId](GestureEvent& info) {
+    auto clickCallback = [pipeline, appBarTheme, buttonNode](GestureEvent& info) {
 #ifdef PREVIEW
         LOGW("[Engine Log] Unable to show the SharePanel in the Previewer. Perform this operation on the "
              "emulator or a real device instead.");
@@ -176,7 +178,7 @@ RefPtr<FrameNode> AppBarView::BuildFaButton()
                 appBarTheme->GetBundleName().c_str(), appBarTheme->GetAbilityName().c_str());
             pipeline->FireSharePanelCallback(appBarTheme->GetBundleName(), appBarTheme->GetAbilityName());
         } else {
-            BindContentCover(buttonId);
+            BindContentCover(buttonNode);
         }
 #endif
     };
@@ -238,7 +240,7 @@ RefPtr<FrameNode> AppBarView::BuildIconButton(
     return buttonNode;
 }
 
-void AppBarView::BindContentCover(int32_t targetId)
+void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode)
 {
     if (OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName().empty()) {
         LOGE("UIExtension BundleName is empty.");
@@ -257,13 +259,13 @@ void AppBarView::BindContentCover(int32_t targetId)
     }
     NG::ModalStyle modalStyle;
     modalStyle.modalTransition = NG::ModalTransition::NONE;
-    auto buildNodeFunc = [targetId, overlayManager, &modalStyle, &stageAbilityName]() -> RefPtr<UINode> {
-        auto onRelease = [overlayManager, &modalStyle, targetId](int32_t releaseCode) {
-            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
+    auto buildNodeFunc = [targetNode, overlayManager, &modalStyle, &stageAbilityName]() -> RefPtr<UINode> {
+        auto onRelease = [overlayManager, &modalStyle, targetNode](int32_t releaseCode) {
+            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetNode);
         };
-        auto onError = [overlayManager, &modalStyle, targetId](
+        auto onError = [overlayManager, &modalStyle, targetNode](
                            int32_t code, const std::string& name, const std::string& message) {
-            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
+            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetNode);
         };
 
         // Create parameters of UIExtension.
@@ -295,12 +297,11 @@ void AppBarView::BindContentCover(int32_t targetId)
         uiExtNode->MarkModifyDone();
         return uiExtNode;
     };
-    overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, targetId);
+    overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, targetNode);
 }
 
 void AppBarView::SetVisible(bool visible)
 {
-    hasBeSetted = true;
     CHECK_NULL_VOID(atom_);
     auto uiRow = atom_->GetFirstChild();
     CHECK_NULL_VOID(uiRow);
@@ -308,6 +309,7 @@ void AppBarView::SetVisible(bool visible)
     row->GetLayoutProperty()->UpdateVisibility(visible ? VisibleType::VISIBLE : VisibleType::GONE);
     row->MarkModifyDone();
     row->MarkDirtyNode();
+    isVisibleSetted = true;
 }
 
 void AppBarView::SetRowColor(const std::optional<Color>& color)
@@ -326,6 +328,7 @@ void AppBarView::SetRowColor(const std::optional<Color>& color)
     }
     row->MarkModifyDone();
     row->MarkDirtyNode();
+    isRowColorSetted = color.has_value();
 }
 
 void AppBarView::SetContent(const std::string& content)
@@ -371,6 +374,7 @@ void AppBarView::SetIconColor(const std::optional<Color>& color)
     auto faIcon = AceType::DynamicCast<FrameNode>(uiFaIcon);
     SetEachIconColor(backIcon, color, InternalResource::ResourceId::APP_BAR_BACK_SVG);
     SetEachIconColor(faIcon, color, InternalResource::ResourceId::APP_BAR_FA_SVG);
+    isIconColorSetted = color.has_value();
 }
 
 void AppBarView::SetRowWidth(const Dimension& width)
@@ -394,9 +398,39 @@ void AppBarView::SetEachIconColor(
 {
     CHECK_NULL_VOID(icon);
     ImageSourceInfo info;
-    info.SetResourceId(image, color);
+    if (color.has_value()) {
+        info.SetResourceId(image, color);
+    } else {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
+        info.SetResourceId(image, appBarTheme->GetTextColor());
+    }
     icon->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(info);
     icon->MarkModifyDone();
     icon->MarkDirtyNode();
+}
+
+void AppBarView::IniColor()
+{
+    CHECK_NULL_VOID(atom_);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
+
+    auto row = atom_->GetFirstChild();
+    auto label = AceType::DynamicCast<FrameNode>(row->GetLastChild());
+    CHECK_NULL_VOID(label);
+    auto textLayoutProperty = label->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColor(appBarTheme->GetTextColor());
+
+    if (!isRowColorSetted) {
+        SetRowColor(std::nullopt);
+    }
+
+    if (!isIconColorSetted) {
+        SetIconColor(std::nullopt);
+    }
 }
 } // namespace OHOS::Ace::NG

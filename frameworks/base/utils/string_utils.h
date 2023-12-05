@@ -74,6 +74,11 @@ inline std::wstring ToWstring(const std::string& str)
     return result == DEFAULT_WSTRING ? L"" : result;
 }
 
+inline bool IsLetterOrNumberForWchar(wchar_t chr)
+{
+    return (chr >= L'0' && chr <= L'9') || (chr >= L'a' && chr <= L'z') || (chr >= L'A' && chr <= L'Z');
+}
+
 inline std::string ToString(const std::wstring& str)
 {
     if (str == DEFAULT_WSTRING) {

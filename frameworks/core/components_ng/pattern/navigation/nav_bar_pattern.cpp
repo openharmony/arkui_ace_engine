@@ -542,6 +542,8 @@ void NavBarPattern::OnAttachToFrameNode()
     if (theme && theme->GetNavBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
+    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
+    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
 void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -724,6 +726,9 @@ void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
 {
     auto navBarNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(navBarNode);
+    if (isTitleMenuNodeShowing_ == navBarNode->IsTitleMenuNodeShowing()) {
+        return;
+    }
     if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
         isTitleMenuNodeShowing_ = navBarNode->IsTitleMenuNodeShowing();
     }
@@ -795,6 +800,15 @@ bool NavBarPattern::IsTitleModeFree()
     auto navBarLayoutProperty = frameNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_RETURN(navBarLayoutProperty, false);
     return navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE;
+}
+
+bool NavBarPattern::IsTitleBarHide()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto navBarLayoutProperty = frameNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_RETURN(navBarLayoutProperty, false);
+    return navBarLayoutProperty->GetHideTitleBar().value_or(false);
 }
 
 void NavBarPattern::WindowFocus(bool isFocus)

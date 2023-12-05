@@ -44,20 +44,22 @@ public:
         return fingers_;
     }
 
+    void ForceCleanRecognizer() override
+    {
+        touchPoints_.clear();
+        fingerList_.clear();
+        activeFingers_.clear();
+        currentFingers_ = 0;
+        refereeState_ = RefereeState::READY;
+        disposal_ = GestureDisposal::NONE;
+    }
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override
     {
         touchPoints_[touchId] = {};
     }
 
-    void OnFinishGestureReferee(int32_t touchId, bool isBlocked) override
-    {
-        touchPoints_.erase(touchId);
-        activeFingers_.remove(touchId);
-        if (touchPoints_.empty()) {
-            ResetStatusOnFinish(isBlocked);
-        }
-    }
+    void OnFinishGestureReferee(int32_t touchId, bool isBlocked) override;
 
     void OnResetStatus() override
     {
@@ -65,6 +67,8 @@ protected:
         fingerList_.clear();
         activeFingers_.clear();
     }
+
+    bool IsNeedResetStatus();
 
     bool IsActiveFinger(int32_t touchId) const
     {

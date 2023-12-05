@@ -30,7 +30,7 @@ void LinearSplitModelNG::Create(SplitType splitType)
     std::string tag = splitType == SplitType::ROW_SPLIT ? V2::ROW_SPLIT_ETS_TAG : V2::COLUMN_SPLIT_ETS_TAG;
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         tag, nodeId, [splitType]() { return AceType::MakeRefPtr<LinearSplitPattern>(splitType); });
     stack->Push(frameNode);
@@ -47,4 +47,15 @@ void LinearSplitModelNG::SetDivider(NG::SplitType splitType, const ItemDivider& 
     ACE_UPDATE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, divider);
 }
 
-} // namespace OHOS::Ace::NG
+void LinearSplitModelNG::SetResizeable(FrameNode* frameNode, NG::SplitType splitType, bool resizeable)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Resizeable, resizeable, frameNode);
+}
+void LinearSplitModelNG::SetDivider(FrameNode* frameNode, NG::SplitType splitType, const ItemDivider& divider)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, divider, frameNode);
+}
+}
+// namespace OHOS::Ace::NG

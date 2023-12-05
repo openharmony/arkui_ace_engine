@@ -80,6 +80,7 @@ public:
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     bool IsFormRequestsEmpty();
     const std::vector<FormRequest>& GetAllRendererFormRequests() const;
+    void RecycleForm(std::string& statusData) const;
 private:
     void InnerAddForm(const FormRequest& formRequest);
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;

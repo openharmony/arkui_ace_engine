@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
@@ -169,7 +170,15 @@ void MenuPattern::OnAttachToFrameNode()
                                               const OffsetF& /* origin */) {
         auto menuNode = menuNodeWk.Upgrade();
         CHECK_NULL_VOID(menuNode);
-        menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        auto menuWarpper = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWarpper);
+        auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(warpperPattern);
+        if (!warpperPattern->IsHided()) {
+            menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
     };
     targetNode->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
 }
@@ -390,17 +399,21 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
 
 void MenuPattern::HideMenu(bool isMenuOnTouch) const
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto expandDisplay = theme->GetExpandDisplay();
     auto wrapper = GetMenuWrapper();
     CHECK_NULL_VOID(wrapper);
     if (wrapper->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
         return;
     }
-    if (IsContextMenu()) {
+    if (IsContextMenu() || expandDisplay) {
         SubwindowManager::GetInstance()->HideMenuNG(wrapper, targetId_);
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch);
@@ -457,6 +470,10 @@ uint32_t MenuPattern::GetInnerMenuCount() const
     uint32_t depth = 0;
     while (child && depth < MAX_SEARCH_DEPTH) {
         // found component <Menu>
+        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            child = child->GetFrameChildByIndex(0, false);
+            continue;
+        }
         if (child->GetTag() == V2::MENU_ETS_TAG) {
             auto parent = child->GetParent();
             CHECK_NULL_RETURN(parent, 0);
@@ -480,6 +497,10 @@ RefPtr<FrameNode> MenuPattern::GetFirstInnerMenu() const
     auto child = host->GetChildAtIndex(0);
     while (child && depth < MAX_SEARCH_DEPTH) {
         // found component <Menu>
+        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            child = child->GetFrameChildByIndex(0, false);
+            continue;
+        }
         if (child->GetTag() == V2::MENU_ETS_TAG) {
             return AceType::DynamicCast<FrameNode>(child);
         }
@@ -620,8 +641,10 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
 
-    auto bgColor = theme->GetBackgroundColor();
-    renderContext->UpdateBackgroundColor(bgColor);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()) {
+        auto bgColor = theme->GetBackgroundColor();
+        renderContext->UpdateBackgroundColor(bgColor);
+    }
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
     // make menu round rect
     BorderRadiusProperty borderRadius;

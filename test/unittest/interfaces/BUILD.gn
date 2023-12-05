@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("viewport_config_test") {
@@ -26,6 +25,7 @@ ohos_unittest("ui_content_test") {
   module_out_path = "$interface_test_output_path/inner_api"
 
   sources = [
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/interfaces/inner_api/ace/ui_content.cpp",
     "ui_content_test.cpp",
   ]
@@ -68,12 +68,6 @@ ohos_unittest("form_render_test") {
     "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
   sources = [
-    # mock
-    "$ace_root/frameworks/core/components/common/properties/color.cpp",
-    "$ace_root/test/mock/core/pipeline/mock_pipeline_base.cpp",
-    "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
-
-    # self
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_proxy.cpp",
@@ -82,13 +76,37 @@ ohos_unittest("form_render_test") {
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_proxy.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_group.cpp",
+    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
+    "$ace_root/test/mock/base/mock_ressched_report.cpp",
+    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
+    "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
+    "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
+    "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
+    "$ace_root/test/unittest/core/event/mock_scrollable.cpp",
     "form_render_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 
   deps = [
-    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",

@@ -174,6 +174,11 @@ public:
     }
 
 private:
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
+
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);

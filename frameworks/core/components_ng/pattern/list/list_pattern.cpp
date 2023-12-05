@@ -68,15 +68,15 @@ void ListPattern::OnModifyDone()
     if (!GetScrollableEvent()) {
         InitScrollableEvent();
     }
-    auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-    SetEdgeEffect(edgeEffect);
 
-    auto defaultDisplayMode = DisplayMode::OFF;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        defaultDisplayMode = DisplayMode::AUTO;
+    SetEdgeEffect();
+
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetScrollBarProperty()) {
+        SetScrollBar(paintProperty->GetScrollBarProperty());
     }
-    auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
-    SetScrollBar(listPaintProperty->GetBarDisplayMode().value_or(defaultDisplayMode));
+
     SetChainAnimation();
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
@@ -233,20 +233,32 @@ ScrollAlign ListPattern::GetScrollAlignByScrollSnapAlign() const
 
 float ListPattern::CalculateTargetPos(float startPos, float endPos)
 {
-    float downOffset = 0.0f;
-    float upOffset = 0.0f;
-    if (Negative(startPos)) {
-        downOffset = -startPos;
+    float topOffset = startPos;
+    float bottomOffset = endPos - contentMainSize_;
+    if (GreatOrEqual(startPos, 0.0f) && LessOrEqual(endPos, contentMainSize_)) {
+        return 0.0f;
     }
-    if (GreatNotEqual(endPos, contentMainSize_)) {
-        upOffset = endPos - contentMainSize_;
+    if ((NearEqual(startPos, 0.0f) && GreatNotEqual(endPos, contentMainSize_)) ||
+        (LessNotEqual(startPos, 0.0f) && NearEqual(endPos, contentMainSize_))) {
+        return 0.0f;
     }
-
-    if (LessNotEqual(downOffset, upOffset)) {
-        return -downOffset;
+    if (LessNotEqual(startPos, 0.0f) && GreatNotEqual(endPos, contentMainSize_)) {
+        if (GreatOrEqual(std::abs(topOffset), std::abs(bottomOffset))) {
+            return bottomOffset;
+        } else {
+            return topOffset;
+        }
     }
-    if (LessNotEqual(upOffset, downOffset)) {
-        return upOffset;
+    if (GreatNotEqual(std::abs(topOffset), std::abs(bottomOffset))) {
+        return bottomOffset;
+    } else if (LessNotEqual(std::abs(topOffset), std::abs(bottomOffset))) {
+        return topOffset;
+    } else {
+        if (LessNotEqual(startPos, 0.0f)) {
+            return topOffset;
+        } else {
+            return bottomOffset;
+        }
     }
     return 0.0f;
 }
@@ -295,37 +307,20 @@ void ListPattern::ProcessEvent(
     paintStateFlag_ = !NearZero(finalOffset) && !isJump;
     isFramePaintStateValid_ = true;
     auto onScroll = listEventHub->GetOnScroll();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) && scrollStop_ && !GetScrollAbort()) {
-        auto source = GetScrollSource();
-        auto offsetPX = Dimension(finalOffset);
-        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-        if (onScroll) {
-            if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR) {
-                onScroll(offsetVP, ScrollState::SCROLL);
-                onScroll(0.0_vp, ScrollState::IDLE);
-            } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
-                       source == SCROLL_FROM_ANIMATION_CONTROLLER || source == SCROLL_FROM_BAR_FLING) {
-                onScroll(offsetVP, ScrollState::FLING);
-                onScroll(0.0_vp, ScrollState::IDLE);
-            } else {
-                onScroll(offsetVP, ScrollState::IDLE);
-            }
-        }
-    } else if (onScroll && !NearZero(finalOffset)) {
-        auto source = GetScrollSource();
-        auto offsetPX = Dimension(finalOffset);
-        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN) &&
-            (source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR || source == SCROLL_FROM_ANIMATION_CONTROLLER)) {
-            source = SCROLL_FROM_NONE;
-        }
-        if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR) {
-            onScroll(offsetVP, ScrollState::SCROLL);
-        } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
-                   source == SCROLL_FROM_ANIMATION_CONTROLLER || source == SCROLL_FROM_BAR_FLING) {
-            onScroll(offsetVP, ScrollState::FLING);
+    if (onScroll) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            FireOnScroll(finalOffset, onScroll);
         } else {
-            onScroll(offsetVP, ScrollState::IDLE);
+            if (!NearZero(finalOffset)) {
+                auto offsetPX = Dimension(finalOffset);
+                auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
+                auto source = GetScrollSource();
+                if (source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR ||
+                    source == SCROLL_FROM_ANIMATION_CONTROLLER) {
+                    source = SCROLL_FROM_NONE;
+                }
+                onScroll(offsetVP, GetScrollState(source));
+            }
         }
     }
 
@@ -369,9 +364,7 @@ void ListPattern::ProcessEvent(
             }
             StartScrollBarAnimatorByProxy();
         }
-        if (!GetScrollAbort()) {
-            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-        }
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
         scrollStop_ = false;
         SetScrollAbort(false);
     }
@@ -382,7 +375,7 @@ void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
+    auto listPaintProperty = host->GetPaintProperty<ScrollablePaintProperty>();
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     auto stickyStyle = listLayoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
     bool barNeedPaint = GetScrollBar() ? GetScrollBar()->NeedPaint() : false;
@@ -549,7 +542,7 @@ bool ListPattern::IsAtTop() const
                                          contentMainSize_ / 2.0f - startItemHeight / 2.0f);
     }
 
-    return (startIndex_ == 0) && NonNegative(startMainPos_ - currentDelta_ + GetChainDelta(0));
+    return (startIndex_ == 0) && NonNegative(startMainPos_ - currentDelta_ + GetChainDelta(0) - contentStartOffset_);
 }
 
 bool ListPattern::IsAtBottom() const
@@ -561,7 +554,7 @@ bool ListPattern::IsAtBottom() const
     }
 
     return endIndex_ == maxListItemIndex_ &&
-           LessOrEqual(endMainPos_ - currentDelta_ + GetChainDelta(endIndex_), contentMainSize_);
+           LessOrEqual(endMainPos_ - currentDelta_ + GetChainDelta(endIndex_), contentMainSize_ - contentEndOffset_);
 }
 
 bool ListPattern::OutBoundaryCallback()
@@ -725,11 +718,6 @@ void ListPattern::OnScrollEndCallback()
     SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
-}
-
-void ListPattern::OnScrollStartCallback()
-{
-    FireOnScrollStart();
 }
 
 SizeF ListPattern::GetContentSize() const
@@ -1239,6 +1227,29 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
     FireAndCleanScrollingListener();
 }
 
+bool ListPattern::CheckTargetValid(int32_t index, int32_t indexInGroup)
+{
+    auto host = GetHost();
+    auto totalItemCount = host->GetTotalChildCount();
+    if ((index < 0) || (index >= totalItemCount)) {
+        return false;
+    }
+    auto groupWrapper = host->GetOrCreateChildByIndex(index);
+    CHECK_NULL_RETURN(groupWrapper, false);
+    if (groupWrapper->GetHostTag() != V2::LIST_ITEM_GROUP_ETS_TAG) {
+        return false;
+    }
+    auto groupNode = groupWrapper->GetHostNode();
+    CHECK_NULL_RETURN(groupNode, false);
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(groupPattern, false);
+    auto groupItemCount = groupWrapper->GetTotalChildCount() - groupPattern->GetItemStartIndex();
+    if ((indexInGroup < 0) || (indexInGroup >= groupItemCount)) {
+        return false;
+    }
+    return true;
+}
+
 void ListPattern::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
@@ -1248,10 +1259,12 @@ void ListPattern::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool 
         smooth_ = smooth;
         if (smooth_) {
             if (!AnimateToTarget(index, indexInGroup, align)) {
-                targetIndex_ = index;
-                currentDelta_ = 0;
-                targetIndexInGroup_ = indexInGroup;
-                scrollAlign_ = align;
+                if (CheckTargetValid(index, indexInGroup)) {
+                    targetIndex_ = index;
+                    currentDelta_ = 0;
+                    targetIndexInGroup_ = indexInGroup;
+                    scrollAlign_ = align;
+                }
             }
         } else {
             jumpIndex_ = index;
@@ -1374,6 +1387,15 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
             }
             break;
         case ScrollAlign::AUTO:
+            float itemStartPos = paddingBeforeContent + startPos + itemPosInGroup.value().first;
+            float itemEndPos = paddingBeforeContent + startPos + itemPosInGroup.value().second;
+            if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
+                itemStartPos -= groupPattern->GetHeaderMainSize();
+            }
+            if (stickyStyle == V2::StickyStyle::FOOTER || stickyStyle == V2::StickyStyle::BOTH) {
+                itemEndPos += groupPattern->GetFooterMainSize();
+            }
+            targetPos = CalculateTargetPos(itemStartPos, itemEndPos);
             break;
     }
     return true;
@@ -1399,6 +1421,9 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
             }
         }
     } else {
+        if (indexInGroup.has_value()) {
+            return false;
+        }
         GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
     }
     if (!NearZero(targetPos)) {
@@ -1554,7 +1579,7 @@ void ListPattern::SetChainAnimation()
 {
     auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
-    auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
+    auto edgeEffect = GetEdgeEffect();
     int32_t lanes = std::max(listLayoutProperty->GetLanes().value_or(1), 1);
     bool autoLanes = listLayoutProperty->HasLaneMinLength() || listLayoutProperty->HasLaneMaxLength();
     bool animation = listLayoutProperty->GetChainAnimation().value_or(false);
@@ -1857,13 +1882,15 @@ int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
 
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
+    ScrollablePattern::ToJsonValue(json);
     json->Put("multiSelectable", multiSelectable_);
     json->Put("startIndex", startIndex_);
     if (!itemPosition_.empty()) {
         json->Put("itemStartPos", itemPosition_.begin()->second.startPos);
     }
-    json->Put("friction", GetFriction());
-    json->Put("edgeEffectAlwaysEnabled", GetAlwaysEnabled());
+    auto JsonEdgeEffectOptions = JsonUtil::Create(true);
+    JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
+    json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -2108,5 +2135,14 @@ void ListPattern::DumpAdvanceInfo()
     IsAtTop() ? DumpLog::GetInstance().AddDesc("IsAtTop:true") : DumpLog::GetInstance().AddDesc("IsAtTop:false");
     IsAtBottom() ? DumpLog::GetInstance().AddDesc("IsAtBottom:true")
                  : DumpLog::GetInstance().AddDesc("IsAtBottom:false");
+}
+
+DisplayMode ListPattern::GetDefaultScrollBarDisplayMode() const
+{
+    auto defaultDisplayMode = DisplayMode::OFF;
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        defaultDisplayMode = DisplayMode::AUTO;
+    }
+    return defaultDisplayMode;
 }
 } // namespace OHOS::Ace::NG

@@ -2281,26 +2281,4 @@ void JSCanvasRenderer::JsClearRect(const JSCallbackInfo& info)
         CanvasRendererModel::GetInstance()->ClearRect(baseInfo, rect);
     }
 }
-
-void JSCanvasRenderer::SetCanvasPattern(const RefPtr<AceType>& canvas)
-{
-    canvasPattern_ = canvas;
-    isOffscreen_ = false;
-    BaseInfo baseInfo;
-    baseInfo.canvasPattern = canvasPattern_;
-    baseInfo.offscreenPattern = offscreenPattern_;
-    baseInfo.isOffscreen = isOffscreen_;
-    CanvasRendererModel::GetInstance()->SetShadowColor(baseInfo, Color::TRANSPARENT);
-}
-
-void JSCanvasRenderer::SetOffscreenPattern(const RefPtr<AceType>& offscreenCanvas)
-{
-    offscreenPattern_ = offscreenCanvas;
-    isOffscreen_ = true;
-    BaseInfo baseInfo;
-    baseInfo.canvasPattern = canvasPattern_;
-    baseInfo.offscreenPattern = offscreenPattern_;
-    baseInfo.isOffscreen = isOffscreen_;
-    CanvasRendererModel::GetInstance()->SetShadowColor(baseInfo, Color::TRANSPARENT);
-}
 } // namespace OHOS::Ace::Framework

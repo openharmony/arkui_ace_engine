@@ -24,6 +24,7 @@
 #include "runtime.h"
 #include "ui_content.h"
 #include "event_handler.h"
+#include "form_constants.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -49,7 +50,7 @@ public:
     void SetAllowUpdate(bool allowUpdate);
     bool IsAllowUpdate();
 
-    void OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo, bool isRecoverFormToHandleClickEvent);
     void OnSurfaceReuse(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void OnActionEvent(const std::string& action);
     void OnError(const std::string& code, const std::string& msg);
@@ -57,6 +58,8 @@ public:
     void OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos);
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     void AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void RecycleForm(std::string& statusData);
+    void RecoverForm(const std::string& statusData);
 
 private:
     void InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
@@ -68,6 +71,7 @@ private:
     float width_ = 0.0f;
     float height_ = 0.0f;
     std::string backgroundColor_;
+    AppExecFwk::Constants::RenderingMode renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
     std::vector<std::string> cachedInfos_;
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;

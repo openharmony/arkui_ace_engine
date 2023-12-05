@@ -126,6 +126,8 @@ public:
     void OnAccessibilityEvent(
         const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList);
 
+    void HandleDragEvent(const PointerEvent& info) override;
+
 private:
     enum ReleaseCode {
         DESTROY_NORMAL = 0,
@@ -156,8 +158,10 @@ private:
 
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
+    void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
+    void HandleHoverEvent(bool isHover);
     void UnregisterAbilityResultListener();
 
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -181,6 +185,8 @@ private:
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> hoverEvent_;
+    std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
 
     std::function<void()> onModalDestroy_;
     std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onModalRemoteReadyCallback_;

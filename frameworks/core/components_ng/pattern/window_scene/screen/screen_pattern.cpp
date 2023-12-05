@@ -17,7 +17,6 @@
 
 #include <mutex>
 
-#include "input_manager.h"
 #include "ipc_skeleton.h"
 #include "root_scene.h"
 #include "ui/rs_display_node.h"
@@ -26,6 +25,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -57,6 +57,16 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree)
 }
 } // namespace
 
+
+ScreenPattern::ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession)
+{
+    screenSession_ = screenSession;
+    if (screenSession_ != nullptr) {
+        screenSession_->SetUpdateToInputManagerCallback(std::bind(&ScreenPattern::UpdateToInputManager,
+            this, std::placeholders::_1));
+    }
+}
+
 void ScreenPattern::OnAttachToFrameNode()
 {
     CHECK_NULL_VOID(screenSession_);
@@ -66,6 +76,10 @@ void ScreenPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetScreenNode(host);
+
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(displayNode);
@@ -74,7 +88,19 @@ void ScreenPattern::OnAttachToFrameNode()
 void ScreenPattern::UpdateDisplayInfo()
 {
     CHECK_NULL_VOID(screenSession_);
+    auto displayNode = screenSession_->GetDisplayNode();
+    CHECK_NULL_VOID(displayNode);
+    auto displayNodeRotation = displayNode->GetStagingProperties().GetRotation();
+    if (displayNodeRotation < DIRECTION0) {
+        displayNodeRotation = -displayNodeRotation;
+    }
 
+    UpdateToInputManager(displayNodeRotation);
+}
+
+void ScreenPattern::UpdateToInputManager(float rotation)
+{
+    CHECK_NULL_VOID(screenSession_);
     auto pid = getprocpid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto screenId = screenSession_->GetScreenId();
@@ -83,18 +109,12 @@ void ScreenPattern::UpdateDisplayInfo()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
     auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     auto paintRect = renderContext->GetPaintRectWithTransform();
-    auto displayNode = screenSession_->GetDisplayNode();
-
     auto tempHeight = paintRect.Height();
     auto tempWidth = paintRect.Width();
-    auto displayNodeRotation = displayNode->GetStagingProperties().GetRotation();
-    if (displayNodeRotation < DIRECTION0) {
-        displayNodeRotation = -displayNodeRotation;
-    }
-    if (displayNodeRotation != DIRECTION0 && displayNodeRotation != DIRECTION180) {
+    if (rotation != DIRECTION0 && rotation != DIRECTION180) {
         auto temp = tempWidth;
         tempWidth = tempHeight;
         tempHeight = temp;
@@ -106,7 +126,6 @@ void ScreenPattern::UpdateDisplayInfo()
         tempWidth,
         tempHeight,
     };
-
     MMI::WindowInfo windowInfo = {
         .id = 0,    // root scene id 0
         .pid = pid,
@@ -117,7 +136,6 @@ void ScreenPattern::UpdateDisplayInfo()
         .agentWindowId = 0, // root scene id 0
         .flags = 0  // touchable
     };
-
     MMI::DisplayInfo displayInfo = {
         .id = screenId,
         .x = paintRect.Left(),
@@ -127,9 +145,14 @@ void ScreenPattern::UpdateDisplayInfo()
         .dpi = dpi,
         .name = "display" + std::to_string(screenId),
         .uniq = "default" + std::to_string(screenId),
-        .direction = ConvertDegreeToMMIRotation(displayNodeRotation)
+        .direction = ConvertDegreeToMMIRotation(rotation)
     };
+    InputManagerUpdateDisplayInfo(paintRect, displayInfo, windowInfo);
+}
 
+void ScreenPattern::InputManagerUpdateDisplayInfo(RectF paintRect,
+    MMI::DisplayInfo displayInfo, MMI::WindowInfo windowInfo)
+{
     std::lock_guard<std::mutex> lock(g_vecLock);
     DeduplicateDisplayInfo();
     g_displayInfoVector.insert(g_displayInfoVector.begin(), displayInfo);
@@ -149,7 +172,7 @@ void ScreenPattern::DeduplicateDisplayInfo()
     auto screenId = screenSession_->GetScreenId();
     auto it = std::remove_if(g_displayInfoVector.begin(), g_displayInfoVector.end(),
         [screenId](MMI::DisplayInfo displayInfo) {
-            return displayInfo.id == screenId;
+            return displayInfo.id == static_cast<int32_t>(screenId);
         });
     g_displayInfoVector.erase(it, g_displayInfoVector.end());
 }
@@ -166,7 +189,7 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(window, false);
     auto rootScene = static_cast<Rosen::RootScene*>(window->GetRSWindow().GetRefPtr());
     CHECK_NULL_RETURN(rootScene, false);
-    auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
+    auto screenBounds = screenSession_->GetScreenProperty().GetPhyBounds();
     Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
         screenBounds.rect_.width_, screenBounds.rect_.height_ };
     float density = screenSession_->GetScreenProperty().GetDefaultDensity();

@@ -311,9 +311,9 @@ private:
 
 #ifndef ENABLE_ROSEN_BACKEND
     void AttachView(
-        std::unique_ptr<Window> window, AceViewPreview* view, double density, int32_t width, int32_t height);
+        std::shared_ptr<Window> window, AceViewPreview* view, double density, int32_t width, int32_t height);
 #else
-    void AttachView(std::unique_ptr<Window> window, AceViewPreview* view, double density, int32_t width, int32_t height,
+    void AttachView(std::shared_ptr<Window> window, AceViewPreview* view, double density, int32_t width, int32_t height,
         UIEnvCallback callback);
 #endif
 

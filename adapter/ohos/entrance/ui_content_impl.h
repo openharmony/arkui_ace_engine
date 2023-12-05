@@ -19,6 +19,7 @@
 #include <list>
 
 #include "ability_info.h"
+#include "display_manager.h"
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "key_event.h"
@@ -28,6 +29,7 @@
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/common/asset_manager_impl.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Accessibility {
@@ -88,6 +90,9 @@ public:
     bool NeedSoftKeyboard() override;
 
     void SetOnWindowFocused(const std::function<void()>& callback) override;
+
+    // Actually paint size of window
+    void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) override;
 
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
@@ -212,7 +217,10 @@ public:
 
     bool NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset) override;
+
+    std::string RecycleForm() override;
     
+    void RecoverForm(const std::string& statusData) override;
 private:
     void InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -232,6 +240,7 @@ private:
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
+    OHOS::sptr<OHOS::Rosen::DisplayManager::IFoldStatusListener> foldStatusListener_ = nullptr;
 
     // ITouchOutsideListener is used for touching out of hot areas of window.
     OHOS::sptr<OHOS::Rosen::ITouchOutsideListener> touchOutsideListener_ = nullptr;

@@ -174,8 +174,8 @@ void RosenRenderFocusAnimation::PaintGlow(RSCanvas* canvas, RSBrush& brush, int3
         mAlpha =
             static_cast<uint8_t>(MIN_TRANSPARENCY + progress_ * ((MAX_TRANSPARENCY - MIN_TRANSPARENCY) / RIGHT_ANGLE));
     }
-    RSColorQuad boundaryColor = RSColor::ColorQuadSetARGB(red, green, blue, mAlpha);
-    RSColorQuad glowColor = RSColor::ColorQuadSetARGB(red, green, blue, MAX_ALPHA);
+    RSColorQuad boundaryColor = RSColor::ColorQuadSetARGB(mAlpha, red, green, blue);
+    RSColorQuad glowColor = RSColor::ColorQuadSetARGB(MAX_ALPHA, red, green, blue);
     std::vector<RSColorQuad> colors = { boundaryColor, boundaryColor, glowColor, glowColor, boundaryColor,
         boundaryColor };
 

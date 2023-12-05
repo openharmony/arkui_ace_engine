@@ -329,9 +329,14 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto child = children.front();
     auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+    // is PcDevice MultipleDialog Offset to the bottom right
     if (dialogTheme->GetMultipleDialogDisplay() != "stack" && !dialogProp->GetIsModal().value_or(true) &&
         dialogProp->GetShowInSubWindowValue(false)) {
-        MultipleDialog(dialogProp, childSize, selfSize);
+        auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(subWindowId_);
+        CHECK_NULL_VOID(subWindow);
+        auto subOverlayManager = subWindow->GetOverlayManager();
+        CHECK_NULL_VOID(subOverlayManager);
+        MultipleDialog(dialogProp, childSize, selfSize, subOverlayManager);
     }
     dialogOffset_ = dialogProp->GetDialogOffset().value_or(DimensionOffset());
     alignment_ = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
@@ -358,7 +363,6 @@ bool DialogLayoutAlgorithm::IsDialogTouchingBoundary(OffsetF topLeftPoint, SizeF
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto safeAreaInsets = pipelineContext->GetSafeArea();
-    CHECK_NULL_RETURN(pipelineContext, false);
     float bottomSecurity = static_cast<float>(PORTRAIT_BOTTOM_SECURITY.ConvertToPx());
     auto height = safeAreaInsets.bottom_.start == 0 ? selfSize.Height() - bottomSecurity : safeAreaInsets.bottom_.start;
     auto width = selfSize.Width();
@@ -372,13 +376,9 @@ bool DialogLayoutAlgorithm::IsDialogTouchingBoundary(OffsetF topLeftPoint, SizeF
     return true;
 }
 
-void DialogLayoutAlgorithm::MultipleDialog(
-    const RefPtr<DialogLayoutProperty>& dialogProp, const SizeF& childSize, const SizeF& selfSize)
+void DialogLayoutAlgorithm::MultipleDialog(const RefPtr<DialogLayoutProperty>& dialogProp, const SizeF& childSize,
+    const SizeF& selfSize, const RefPtr<OverlayManager> subOverlayManager)
 {
-    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(subWindowId_);
-    CHECK_NULL_VOID(subWindow);
-    auto subOverlayManager = subWindow->GetOverlayManager();
-    CHECK_NULL_VOID(subOverlayManager);
     std::map<int32_t, RefPtr<FrameNode>> DialogMap(
         subOverlayManager->GetDialogMap().begin(), subOverlayManager->GetDialogMap().end());
     int dialogMapSize = static_cast<int>(DialogMap.size());

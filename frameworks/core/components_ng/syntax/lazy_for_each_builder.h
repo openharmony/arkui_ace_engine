@@ -279,7 +279,7 @@ public:
         CHECK_NULL_RETURN(itemInfo.second, nullptr);
         cache.try_emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
         ViewStackProcessor::GetInstance()->SetPredict(itemInfo.second);
-        itemInfo.second->Build();
+        itemInfo.second->Build(nullptr);
         auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false));
         if (frameNode && frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
             frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
@@ -379,7 +379,7 @@ public:
 
     virtual void RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) = 0;
 
-    virtual void UnregisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) = 0;
+    virtual void UnregisterDataChangeListener(V2::DataChangeListener* listener) = 0;
 
     void SetCacheCount(int32_t cacheCount)
     {

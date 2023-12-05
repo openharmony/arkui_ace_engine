@@ -28,6 +28,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
 #include "core/common/manager_interface.h"
@@ -99,6 +100,13 @@ PipelineBase::~PipelineBase()
 {
     std::lock_guard lock(destructMutex_);
     LOG_DESTROY();
+}
+
+void PipelineBase::SetCallBackNode(const WeakPtr<NG::FrameNode>& node)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(node);
 }
 
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
@@ -494,16 +502,22 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 
 std::function<void()> PipelineBase::GetWrappedAnimationCallback(const std::function<void()>& finishCallback)
 {
-    auto wrapFinishCallback = [weak = AceType::WeakClaim(this), finishCallback]() {
+    auto finishPtr = std::make_shared<std::function<void()>>(finishCallback);
+    finishFunctions_.emplace(finishPtr);
+    auto wrapFinishCallback = [weak = AceType::WeakClaim(this),
+                                  finishWeak = std::weak_ptr<std::function<void()>>(finishPtr)]() {
         auto context = weak.Upgrade();
         if (!context) {
             return;
         }
         context->GetTaskExecutor()->PostTask(
-            [finishCallback, weak]() {
+            [weak, finishWeak]() {
                 auto context = weak.Upgrade();
                 CHECK_NULL_VOID(context);
-                if (!finishCallback) {
+                auto finishPtr = finishWeak.lock();
+                CHECK_NULL_VOID(finishPtr);
+                context->finishFunctions_.erase(finishPtr);
+                if (!(*finishPtr)) {
                     if (context->IsFormRender()) {
                         TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
                         context->SetIsFormAnimation(false);
@@ -513,13 +527,13 @@ std::function<void()> PipelineBase::GetWrappedAnimationCallback(const std::funct
                 if (context->IsFormRender()) {
                     TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
                     context->SetFormAnimationFinishCallback(true);
-                    finishCallback();
+                    (*finishPtr)();
                     context->FlushBuild();
                     context->SetFormAnimationFinishCallback(false);
                     context->SetIsFormAnimation(false);
                     return;
                 }
-                finishCallback();
+                (*finishPtr)();
             },
             TaskExecutor::TaskType::UI);
     };
@@ -669,6 +683,11 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction);
+}
+
+void PipelineBase::OnFoldStatusChanged(FoldStatus foldStatus)
+{
+    OnFoldStatusChange(foldStatus);
 }
 
 double PipelineBase::ModifyKeyboardHeight(double keyboardHeight) const
@@ -821,5 +840,22 @@ void PipelineBase::Destroy()
     virtualKeyBoardCallback_.clear();
     etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
+}
+
+std::string PipelineBase::OnFormRecycle()
+{
+    if (onFormRecycle_) {
+        return onFormRecycle_();
+    }
+    LOGE("onFormRecycle_ is null.");
+    return "";
+}
+
+void PipelineBase::OnFormRecover(const std::string& statusData)
+{
+    if (onFormRecover_) {
+        return onFormRecover_(statusData);
+    }
+    LOGE("onFormRecover_ is null.");
 }
 } // namespace OHOS::Ace

@@ -17,7 +17,6 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "bridge/common/utils/utils.h"
@@ -28,6 +27,8 @@ constexpr int SIZE_OF_THREE = 3;
 constexpr int POS_0 = 0;
 constexpr int POS_1 = 1;
 constexpr int POS_2 = 2;
+const char DEFAULT_DELIMITER = '|';
+const float DEFAULT_PICKER_ITEM_HEIGHT = -1.0;
 
 void SetTextpickerBackgroundColor(NodeHandle node, uint32_t color)
 {
@@ -247,7 +248,6 @@ void ResetTextpickerDisappearTextStyle(NodeHandle node)
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
-
     TextPickerModelNG::SetDisappearTextStyle(frameNode, pickerTheme, pickerTextStyle);
 }
 
@@ -255,16 +255,16 @@ void SetTextpickerDefaultPickerItemHeight(NodeHandle node, float dVal, int dUnit
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextPickerModelNG::SetDefaultPickerItemHeight(frameNode, Dimension(dVal, static_cast<DimensionUnit>(dUnit)));
+    TextPickerModelNG::SetDefaultPickerItemHeight(
+        frameNode, Dimension(dVal, static_cast<DimensionUnit>(dUnit)));
 }
 
 void ResetTextpickerDefaultPickerItemHeight(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    float dVal = -1.0;
-    DimensionUnit dUnit = DimensionUnit::FP;
-    TextPickerModelNG::SetDefaultPickerItemHeight(frameNode, Dimension(dVal, dUnit));
+    TextPickerModelNG::SetDefaultPickerItemHeight(
+        frameNode, Dimension(DEFAULT_PICKER_ITEM_HEIGHT, DimensionUnit::FP));
 }
 
 NG::PickerTextStyle GetPickerTextStyle(uint32_t color, const char* fontInfo, int32_t styleVal)
@@ -274,7 +274,7 @@ NG::PickerTextStyle GetPickerTextStyle(uint32_t color, const char* fontInfo, int
 
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
-    StringUtils::StringSplitter(fontValues, ':', res);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
 
     if (res.size() != SIZE_OF_THREE) {
         return textStyle;
@@ -296,6 +296,7 @@ NG::PickerTextStyle GetPickerTextStyle(uint32_t color, const char* fontInfo, int
     textStyle.fontStyle = static_cast<Ace::FontStyle>(styleVal);
     return textStyle;
 }
+
 ArkUITextpickerModifierAPI GetTextpickerModifier()
 {
     static const ArkUITextpickerModifierAPI modifier = {

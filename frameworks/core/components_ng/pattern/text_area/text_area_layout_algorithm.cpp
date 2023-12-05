@@ -27,7 +27,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float PARAGRAPH_SAVE_BOUNDARY = 1.0f;
-constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
 } // namespace
 std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
@@ -68,31 +67,6 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
     }
 }
 
-float TextAreaLayoutAlgorithm::CounterNodeMeasure(float contentWidth, LayoutWrapper* layoutWrapper)
-{
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, 0.0f);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(pattern, 0.0f);
-    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(textFieldLayoutProperty, 0.0f);
-    auto isInlineStyle = pattern->IsNormalInlineState();
-    if (textFieldLayoutProperty->GetShowCounterValue(false) && textFieldLayoutProperty->HasMaxLength() &&
-        !isInlineStyle) {
-        auto counterNodeLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-        if (counterNodeLayoutWrapper) {
-            auto textLength =
-                static_cast<uint32_t>(showPlaceHolder_ ? 0 : StringUtils::ToWstring(textContent_).length());
-            auto maxLength = static_cast<uint32_t>(textFieldLayoutProperty->GetMaxLength().value());
-            LayoutConstraintF textContentConstraint;
-            textContentConstraint.UpdateIllegalSelfIdealSizeWithCheck(OptionalSizeF(contentWidth, std::nullopt));
-            CounterNodeMeasureContent(textLength, maxLength, textContentConstraint, counterNodeLayoutWrapper);
-            return counterNodeLayoutWrapper->GetGeometryNode()->GetFrameSize().Height();
-        }
-    }
-    return 0.0f;
-}
-
 void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
@@ -110,9 +84,9 @@ void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentHeight = contentSize.Height();
     }
     // Add children height;
-    auto counterNodeLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    if (counterNodeLayoutWrapper) {
-        auto counterSize = counterNodeLayoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto counterNode = pattern->GetCounterNode().Upgrade();
+    if (counterNode && !pattern->IsNormalInlineState()) {
+        auto counterSize = counterNode->GetGeometryNode()->GetFrameSize();
         contentHeight += counterSize.Height();
     }
 
@@ -146,36 +120,6 @@ void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 }
 
-void TextAreaLayoutAlgorithm::CounterNodeMeasureContent(uint32_t textLength, uint32_t maxLength,
-    const LayoutConstraintF& contentConstraint, RefPtr<LayoutWrapper>& layoutWrapper)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    TextStyle countTextStyle = (textLength != maxLength) ? theme->GetCountTextStyle() : theme->GetOverCountTextStyle();
-    auto textNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(textLayoutProperty);
-
-    std::string counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
-    textLayoutProperty->UpdateContent(counterText);
-    textLayoutProperty->UpdateFontSize(countTextStyle.GetFontSize());
-    textLayoutProperty->UpdateTextColor(countTextStyle.GetTextColor());
-    textLayoutProperty->UpdateFontWeight(countTextStyle.GetFontWeight());
-    textLayoutProperty->UpdateTextAlign(TextAlign::END);
-    textLayoutProperty->UpdateMaxLines(COUNTER_TEXT_MAXLINE);
-
-    auto host = textNode->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->UpdateForegroundColor(countTextStyle.GetTextColor());
-
-    layoutWrapper->Measure(contentConstraint);
-}
-
 void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     // update child position.
@@ -185,6 +129,14 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize() -
                 SizeF(pattern->GetHorizontalPaddingAndBorderSum(), pattern->GetVerticalPaddingAndBorderSum());
+    
+    // Remove counterNode height.
+    auto counterNode = pattern->GetCounterNode().Upgrade();
+    if (counterNode && !pattern->IsNormalInlineState()) {
+        auto counterHeight = counterNode->GetGeometryNode()->GetFrameSize().Height();
+        size.SetHeight(size.Height() - counterHeight);
+    }
+
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -201,7 +153,11 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     // Update text position.
     if (LessOrEqual(textRect_.Height(), content->GetRect().Height())) {
-        OffsetF textRectOffSet = Alignment::GetAlignPosition(size, textRect_.GetSize(), align);
+        auto textRect = textRect_.GetSize();
+        if (LessOrEqual(textRect.Height(), 0.0)) {
+            textRect.SetHeight(content->GetRect().Height());
+        }
+        OffsetF textRectOffSet = Alignment::GetAlignPosition(size, textRect, align);
         textRect_.SetOffset(OffsetF(0.0f, textRectOffSet.GetY()) + offsetBase);
         content->SetOffset(OffsetF(0.0f, textRectOffSet.GetY()) + offsetBase);
     } else {
@@ -211,26 +167,7 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // CounterNode Layout.
     auto isInlineStyle = pattern->IsNormalInlineState();
     if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength() && !isInlineStyle) {
-        CounterLayout(layoutWrapper);
-    }
-}
-
-void TextAreaLayoutAlgorithm::CounterLayout(LayoutWrapper* layoutWrapper)
-{
-    auto counterNodeLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    if (counterNodeLayoutWrapper) {
-        auto frameNode = layoutWrapper->GetHostNode();
-        CHECK_NULL_VOID(frameNode);
-        auto pattern = frameNode->GetPattern<TextFieldPattern>();
-        CHECK_NULL_VOID(pattern);
-        auto frameRect = layoutWrapper->GetGeometryNode()->GetFrameRect();
-        auto textGeometryNode = counterNodeLayoutWrapper->GetGeometryNode();
-        CHECK_NULL_VOID(textGeometryNode);
-        const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
-        CHECK_NULL_VOID(content);
-        textGeometryNode->SetFrameOffset(OffsetF(content->GetRect().GetX(),
-            frameRect.Height() - pattern->GetPaddingBottom() - textGeometryNode->GetFrameRect().Height()));
-        counterNodeLayoutWrapper->Layout();
+        TextFieldLayoutAlgorithm::CounterLayout(layoutWrapper);
     }
 }
 } // namespace OHOS::Ace::NG

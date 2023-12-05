@@ -474,7 +474,7 @@ public:
     std::function<void()> GetMousePixelMapCallback(const GestureEvent& info);
     OffsetF GetPixelMapOffset(
         const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const bool needScale = false) const;
-    float GetPixelMapScale(const int32_t height, const int32_t width) const;
+    float GetPixelMapScale(const DragPreviewOption& option, const int32_t height, const int32_t width) const;
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
@@ -496,6 +496,10 @@ public:
     {
         return dragEventActuator_;
     }
+
+    bool GetMonopolizeEvents() const;
+
+    void SetMonopolizeEvents(bool monopolizeEvents);
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -549,6 +553,7 @@ private:
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
+    bool monopolizeEvents_ = false;
 };
 
 } // namespace OHOS::Ace::NG

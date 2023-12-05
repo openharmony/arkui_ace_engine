@@ -88,12 +88,13 @@ public:
     void SetIndents(const std::vector<float>& indents) override;
     bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) override;
     std::u16string GetParagraphText() override;
+    const ParagraphStyle& GetParagraphStyle() const override;
 
 private:
     void CreateBuilder();
     inline size_t GetParagraphLength() const
     {
-        return text_.length() + placeHolderIndex_ + 1;
+        return text_.length() + placeholderIndex_ + 1;
     }
     float MakeEmptyOffsetX();
 
@@ -108,7 +109,7 @@ private:
     std::shared_ptr<RSFontCollection> fontCollection_;
 #endif
     std::u16string text_;
-    int32_t placeHolderIndex_ = -1;
+    int32_t placeholderIndex_ = -1;
     TextAlign textAlign_;
     static uint32_t destructCount;
 

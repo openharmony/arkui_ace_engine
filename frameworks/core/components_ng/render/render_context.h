@@ -102,6 +102,20 @@ public:
 
     virtual void SetBorderRadius(const BorderRadiusProperty& value) {}
 
+    virtual void SetBorderStyle(const BorderStyleProperty& value) {};
+
+    virtual void SetBorderColor(const BorderColorProperty& value) {};
+
+    virtual void SetBorderWidth(const BorderWidthProperty& value) {};
+
+    virtual void SetOuterBorderRadius(const BorderRadiusProperty& value) {};
+
+    virtual void SetOuterBorderStyle(const BorderStyleProperty& value) {};
+
+    virtual void SetOuterBorderColor(const BorderColorProperty& value) {};
+
+    virtual void SetOuterBorderWidth(const BorderWidthProperty& value) {};
+
     // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
     // will be unaffected by parent's transition.
     virtual void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) {};
@@ -129,6 +143,10 @@ public:
     virtual void SetSurfaceChangedCallBack(
         const std::function<void(float, float, float, float)>& callback) {}
     virtual void RemoveSurfaceChangedCallBack() {}
+
+    virtual void MarkNewFrameAvailable(void* nativeWindow) {}
+    virtual void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) {}
+    virtual void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) {}
 
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
@@ -433,6 +451,13 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderColor, BorderColorProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderStyle, BorderStyleProperty);
 
+    // Outer Border
+    ACE_DEFINE_PROPERTY_GROUP(OuterBorder, OuterBorderProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(OuterBorder, OuterBorderRadius, BorderRadiusProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(OuterBorder, OuterBorderWidth, BorderWidthProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(OuterBorder, OuterBorderColor, BorderColorProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(OuterBorder, OuterBorderStyle, BorderStyleProperty);
+
     // PointLight
     ACE_DEFINE_PROPERTY_GROUP(PointLight, PointLightProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightPosition, TranslateOptions);
@@ -506,6 +531,11 @@ public:
         return 0;
     }
 
+    virtual bool IsUniRenderEnabled()
+    {
+        return true;
+    }
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -536,6 +566,11 @@ protected:
     virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}
     virtual void OnBorderColorUpdate(const BorderColorProperty& value) {}
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
+
+    virtual void OnOuterBorderWidthUpdate(const BorderWidthProperty& value) {}
+    virtual void OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value) {}
+    virtual void OnOuterBorderColorUpdate(const BorderColorProperty& value) {}
+    virtual void OnOuterBorderStyleUpdate(const BorderStyleProperty& value) {}
 
     virtual void OnLightPositionUpdate(const TranslateOptions& value) {}
     virtual void OnLightIntensityUpdate(const float value) {}
@@ -579,6 +614,7 @@ protected:
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
 
 private:
+    friend class ViewAbstract;
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
 

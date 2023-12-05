@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@
 #include "bridge/common/dom/dom_type.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/theme/icon_theme.h"
@@ -48,9 +49,6 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/components_ng/pattern/list/list_layout_property.h"
-#include "core/components_ng/pattern/list/list_paint_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
@@ -141,8 +139,7 @@ void DialogPattern::HandleClick(const GestureEvent& info)
             CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
-            CHECK_NULL_VOID(overlayManager->GetMaskNode());
-            if (GetHost()->GetId() == overlayManager->GetMaskNode()->GetId()) {
+            if (GetHost()->GetId() == overlayManager->GetMaskNodeId()) {
                 overlayManager->PopModalDialog();
             }
         }
@@ -165,12 +162,15 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
     auto hub = host->GetEventHub<DialogEventHub>();
     if (buttonIdx != -1) {
         hub->FireSuccessEvent(buttonIdx);
+        RecordEvent(buttonIdx);
     } else {
         // trigger onCancel callback
         hub->FireCancelEvent();
+        RecordEvent(buttonIdx);
     }
     if (dialogProperties_.isShowInSubWindow) {
         SubwindowManager::GetInstance()->DeleteHotAreas(overlayManager->GetSubwindowId(), host->GetId());
+        SubwindowManager::GetInstance()->HideDialogSubWindow(overlayManager->GetSubwindowId());
     }
     overlayManager->CloseDialog(host);
     if (dialogProperties_.isShowInSubWindow && dialogProperties_.isModal) {
@@ -178,7 +178,31 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
         CHECK_NULL_VOID(parentPipelineContext);
         auto parentOverlayManager = parentPipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(parentOverlayManager);
-        parentOverlayManager->CloseMask();
+        auto maskNode = parentOverlayManager->GetDialog(parentOverlayManager->GetMaskNodeId());
+        CHECK_NULL_VOID(maskNode);
+        parentOverlayManager->CloseDialog(maskNode);
+    }
+}
+
+void DialogPattern::RecordEvent(int32_t btnIndex) const
+{
+    std::string btnText;
+    if (btnIndex >= 0 && (size_t) btnIndex < dialogProperties_.buttons.size()) {
+        btnText = dialogProperties_.buttons.at(btnIndex).text;
+    }
+    Recorder::EventType eventType;
+    if (btnIndex == -1) {
+        eventType = Recorder::EventType::DIALOG_CANCEL;
+    } else {
+        eventType = Recorder::EventType::DIALOG_ACTION;
+    }
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder.SetEventType(eventType)
+            .SetText(btnText)
+            .SetExtra(Recorder::KEY_TITLE, title_)
+            .SetExtra(Recorder::KEY_SUB_TITLE, subtitle_);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
 }
 
@@ -734,6 +758,21 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
     auto hub = itemRow->GetOrCreateGestureEventHub();
     if (item.action) {
         hub->AddClickEvent(item.action);
+        auto recordEvent = [weak = WeakClaim(this), title = item.title](GestureEvent& info) {
+            if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+                return;
+            }
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            Recorder::EventParamsBuilder builder;
+            builder.SetEventType(Recorder::EventType::DIALOG_SELECT)
+                .SetText(title)
+                .SetExtra(Recorder::KEY_TITLE, pattern->title_)
+                .SetExtra(Recorder::KEY_SUB_TITLE, pattern->subtitle_);
+            Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+        };
+        auto recordEventPtr = MakeRefPtr<ClickEvent>(std::move(recordEvent));
+        hub->AddClickEvent(recordEventPtr);
     }
 
     // close dialog when clicked
@@ -795,7 +834,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheet(const std::vector<ActionSheetInfo>& 
         .bottom = padding,
     };
     list->GetLayoutProperty()->UpdatePadding(sheetPadding);
-    list->GetPaintProperty<ListPaintProperty>()->UpdateBarDisplayMode(DisplayMode::OFF);
+    list->GetPaintProperty<ScrollablePaintProperty>()->UpdateScrollBarMode(DisplayMode::OFF);
 
     for (auto&& item : sheets) {
         auto itemNode = BuildSheetItem(item);

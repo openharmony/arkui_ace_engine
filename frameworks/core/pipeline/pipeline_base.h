@@ -34,12 +34,14 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/animation/schedule_task.h"
 #include "core/common/clipboard/clipboard_proxy.h"
+#include "core/common/display_info.h"
 #include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window_animation_config.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -48,9 +50,11 @@
 #include "core/event/mouse_event.h"
 #include "core/event/rotation_event.h"
 #include "core/event/touch_event.h"
+#include "core/event/pointer_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -104,6 +108,8 @@ public:
     static RefPtr<PipelineBase> GetMainPipelineContext();
 
     static RefPtr<ThemeManager> CurrentThemeManager();
+
+    static void SetCallBackNode(const WeakPtr<NG::FrameNode>& node);
 
     virtual void SetupRootElement() = 0;
 
@@ -161,12 +167,14 @@ public:
     virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
 
     // Called by view
-    virtual void OnDragEvent(int32_t x, int32_t y, DragEventAction action) = 0;
+    virtual void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) = 0;
 
     // Called by view when idle event.
     virtual void OnIdle(int64_t deadline) = 0;
 
     virtual void SetBuildAfterCallback(const std::function<void()>& callback) = 0;
+
+    virtual void DispatchDisplaySync(uint64_t nanoTimestamp) = 0;
 
     virtual void FlushAnimation(uint64_t nanoTimestamp) = 0;
 
@@ -442,6 +450,16 @@ public:
             sharedImageManager_ = MakeRefPtr<SharedImageManager>(taskExecutor_);
         }
         return sharedImageManager_;
+    }
+
+    const RefPtr<UIDisplaySyncManager>& GetOrCreateUIDisplaySyncManager()
+    {
+        std::call_once(displaySyncFlag_, [this]() {
+            if (!uiDisplaySyncManager_) {
+                uiDisplaySyncManager_ = MakeRefPtr<UIDisplaySyncManager>();
+            }
+        });
+        return uiDisplaySyncManager_;
     }
 
     Window* GetWindow()
@@ -738,6 +756,14 @@ public:
         Rect keyboardArea, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
+    void OnFoldStatusChanged(FoldStatus foldStatus);
+
+    using foldStatusChangedCallback = std::function<bool(FoldStatus)>;
+    void SetFoldStatusChangeCallback(foldStatusChangedCallback&& listener)
+    {
+        foldStatusChangedCallback_.emplace_back(std::move(listener));
+    }
+
     using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
     void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
     {
@@ -897,7 +923,9 @@ public:
     void RemoveJsFormVsyncCallback(int32_t subWindowId);
 
     virtual void SetIsLayoutFullScreen(bool isLayoutFullScreen) {}
+    virtual void SetIsNeedAvoidWindow(bool isLayoutFullScreen) {}
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) {}
+    virtual void OnFoldStatusChange(FoldStatus foldStatus) {}
 
     void SetIsAppWindow(bool isAppWindow)
     {
@@ -978,22 +1006,28 @@ public:
         return onFocus_;
     }
 
+    virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
+
+    virtual std::string GetCurrentExtraInfo() { return ""; }
     virtual void UpdateTitleInTargetPos(bool isShow = true, int32_t height = 0) {}
 
-    virtual void SetCursor(int32_t cursorValue)
+    virtual void SetCursor(int32_t cursorValue) {}
+
+    virtual void RestoreDefault() {}
+
+    void SetOnFormRecycleCallback(std::function<std::string()>&& onFormRecycle)
     {
-        cursor_ = static_cast<MouseFormat>(cursorValue);
+        onFormRecycle_ = std::move(onFormRecycle);
     }
 
-    virtual void RestoreDefault()
+    std::string OnFormRecycle();
+
+    void SetOnFormRecoverCallback(std::function<void(std::string)>&& onFormRecover)
     {
-        cursor_ = MouseFormat::DEFAULT;
+        onFormRecover_ = std::move(onFormRecover);
     }
 
-    MouseFormat GetCursor() const
-    {
-        return cursor_;
-    }
+    void OnFormRecover(const std::string& statusData);
 
 protected:
     virtual bool MaybeRelease() override;
@@ -1033,6 +1067,7 @@ protected:
 
     std::list<configChangedCallback> configChangedCallback_;
     std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
+    std::list<foldStatusChangedCallback> foldStatusChangedCallback_;
 
     bool isRebuildFinished_ = false;
     bool isJsCard_ = false;
@@ -1115,7 +1150,17 @@ protected:
     std::atomic<bool> onFocus_ = true;
     uint64_t lastTouchTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
-    MouseFormat cursor_ = MouseFormat::DEFAULT;
+    struct FunctionHash {
+        std::size_t operator()(const std::shared_ptr<std::function<void()>>& functionPtr) const
+        {
+            return std::hash<std::function<void()>*>()(functionPtr.get());
+        }
+    };
+    std::function<std::string()> onFormRecycle_;
+    std::function<void(std::string)> onFormRecover_;
+
+    std::once_flag displaySyncFlag_;
+    RefPtr<UIDisplaySyncManager> uiDisplaySyncManager_;
 
 private:
     void DumpFrontend() const;
@@ -1134,6 +1179,7 @@ private:
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
+    std::unordered_set<std::shared_ptr<std::function<void()>>, FunctionHash> finishFunctions_;
     bool isFormAnimationFinishCallback_ = false;
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;

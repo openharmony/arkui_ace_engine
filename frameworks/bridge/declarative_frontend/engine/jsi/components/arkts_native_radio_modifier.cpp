@@ -17,7 +17,6 @@
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 
@@ -42,6 +41,7 @@ void SetRadioStyle(NodeHandle node,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+
     RadioModelNG::SetCheckedBackgroundColor(frameNode, Color(checkedBackgroundColor));
     RadioModelNG::SetUncheckedBorderColor(frameNode, Color(uncheckedBorderColor));
     RadioModelNG::SetIndicatorColor(frameNode, Color(indicatorColor));

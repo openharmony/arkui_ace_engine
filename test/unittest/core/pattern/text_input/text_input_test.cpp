@@ -17,7 +17,9 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "gtest/gtest.h"
 
@@ -27,8 +29,8 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_data_detector_mgr.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -40,6 +42,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/type_definition.h"
+#include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ime/constant.h"
 #include "core/common/ime/text_editing_value.h"
 #include "core/common/ime/text_input_action.h"
@@ -61,6 +64,7 @@
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
 
+
 #undef private
 #undef protected
 
@@ -78,7 +82,12 @@ constexpr int32_t MAX_FORWARD_NUMBER = 30;
 constexpr uint32_t DEFAULT_MAX_LINES = 1;
 constexpr uint32_t DEFAULT_MAX_LENGTH = 30;
 constexpr int32_t MIN_PLATFORM_VERSION = 10;
+constexpr int32_t WORD_LIMIT_LEN = 5;
+constexpr int32_t WORD_LIMIT_RETURN = 2;
+constexpr int32_t BEYOND_LIMIT_RETURN = 4;
+constexpr int32_t DEFAULT_RETURN_VALUE = -1;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
+const std::string HELLO_TEXT = "hello";
 const std::string DEFAULT_PLACE_HOLDER = "please input text here";
 const Color DEFAULT_PLACE_HODER_COLOR = Color::RED;
 const Color DEFAULT_SELECTED_BACKFROUND_COLOR = Color::BLUE;
@@ -103,19 +112,11 @@ struct TestItem {
     {}
     TestItem() = default;
 };
-struct ExpectParagaphParams {
-    float height = 50.0f;
-    float longestLine = 460.0f;
-    float maxWidth = 460.0f;
-    size_t lineCount = 1;
-    bool firstCalc = true;
-    bool secondCalc = true;
-};
 constexpr float CONTEXT_WIDTH_VALUE = 300.0f;
 constexpr float CONTEXT_HEIGHT_VALUE = 150.0f;
 } // namespace
 
-class TextInputBase : public testing::Test, public TestNG {
+class TextInputBase : public TestNG {
 protected:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -125,7 +126,6 @@ protected:
         const std::function<void(TextFieldModelNG&)>& callback = nullptr);
     void RunMeasureAndLayout();
     void GetFocus();
-    static void ExpectCallParagraphMethods(ExpectParagaphParams params);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<TextFieldPattern> pattern_;
@@ -136,11 +136,9 @@ protected:
 
 void TextInputBase::SetUpTestSuite()
 {
-    MockContainer::SetUp();
-    MockPipelineBase::SetUp();
-    MockPipelineBase::GetCurrent()->SetRootSize(DEVICE_WIDTH, DEVICE_HEIGHT);
+    TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
     textFieldTheme->iconSize_ = Dimension(ICON_SIZE, DimensionUnit::VP);
     textFieldTheme->iconHotZoneSize_ = Dimension(ICON_HOT_ZONE_SIZE, DimensionUnit::VP);
@@ -154,16 +152,14 @@ void TextInputBase::SetUpTestSuite()
             }
             return textFieldTheme;
         });
-    MockPipelineBase::GetCurrent()->SetMinPlatformVersion(MIN_PLATFORM_VERSION);
-    MockPipelineBase::GetCurrent()->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(MIN_PLATFORM_VERSION);
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
 void TextInputBase::TearDownTestSuite()
 {
-    MockContainer::TearDown();
-    MockPipelineBase::TearDown();
-    MockParagraph::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 void TextInputBase::TearDown()
@@ -173,20 +169,6 @@ void TextInputBase::TearDown()
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
-}
-
-void TextInputBase::ExpectCallParagraphMethods(ExpectParagaphParams params)
-{
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, PushStyle(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, AddText(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, PopStyle()).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, Build()).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, Layout(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(params.height));
-    EXPECT_CALL(*paragraph, GetLongestLine()).WillRepeatedly(Return(params.longestLine));
-    EXPECT_CALL(*paragraph, GetMaxWidth()).WillRepeatedly(Return(params.maxWidth));
-    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(params.lineCount));
 }
 
 void TextInputBase::CreateTextField(
@@ -210,7 +192,6 @@ void TextInputBase::CreateTextField(
 
 void TextInputBase::RunMeasureAndLayout()
 {
-    ExpectCallParagraphMethods(ExpectParagaphParams());
     frameNode_->SetActive();
     frameNode_->SetRootMeasureNode(true);
     frameNode_->UpdateLayoutPropertyFlag();
@@ -232,7 +213,38 @@ class TextInputCursorTest : public TextInputBase {};
 class TextFieldControllerTest : public TextInputBase {};
 class TextFieldKeyEventHandlerTest : public TextInputBase {};
 class TextFiledAttrsTest : public TextInputBase {};
-class TextFieldUXTest : public TextInputBase {};
+class TextFieldUXTest : public TextInputBase {
+protected:
+    void InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr);
+};
+
+void TextFieldUXTest::InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr)
+{
+    EXPECT_CALL(mockDataDetectorMgr, GetCursorPosition(_, _))
+            .WillRepeatedly([](const std::string &text, int8_t offset) -> int8_t {
+                if (text.empty()) {
+                    return DEFAULT_RETURN_VALUE;
+                }
+                if (text.length() <= WORD_LIMIT_LEN) {
+                    return WORD_LIMIT_RETURN;
+                } else {
+                    return BEYOND_LIMIT_RETURN;
+                }
+            });
+
+    EXPECT_CALL(mockDataDetectorMgr, GetWordSelection(_, _))
+            .WillRepeatedly([](const std::string &text, int8_t offset) -> std::vector<int8_t> {
+                if (text.empty()) {
+                    return std::vector<int8_t> { -1, -1 };
+                }
+
+                if (text.length() <= WORD_LIMIT_LEN) {
+                    return std::vector<int8_t> { 2, 3 };
+                } else {
+                    return std::vector<int8_t> { 0, 2 };
+                }
+            });
+}
 
 /**
  * @tc.name: LayoutProperty001
@@ -872,60 +884,6 @@ HWTEST_F(TextInputCursorTest, OnHandleMove003, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnHandleMove004
- * @tc.desc: Test the clip board interface
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputCursorTest, OnHandleMove004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: steps1. Initialize text input and Move the handles and then do handle selection.
-     */
-    int32_t start = 5;
-    int32_t end = 10;
-    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
-
-    /**
-     * @tc.steps: Move the handles and selection line begin.
-     *            Verify the selection data.
-     */
-    pattern_->HandleSetSelection(start, end);
-    pattern_->HandleSelectionLineBegin();
-    RunMeasureAndLayout();
-    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end);
-
-    /**
-     * @tc.steps: Move the handles and selection line end.
-     *            Verify the selection data.
-     */
-    pattern_->HandleSetSelection(start, end);
-    pattern_->HandleSelectionLineEnd();
-    RunMeasureAndLayout();
-    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
-
-    /**
-     * @tc.steps: Move the handles and selection home.
-     *            Verify the selection data.
-     */
-    pattern_->HandleSelectionHome();
-    RunMeasureAndLayout();
-    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 0);
-
-    /**
-     * @tc.steps: Move the handles and selection end.
-     *            Verify the selection data.
-     */
-    pattern_->HandleSetSelection(start, end);
-    pattern_->HandleSelectionEnd();
-    RunMeasureAndLayout();
-    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
-}
-
-/**
  * @tc.name: CursonMoveLeftTest001
  * @tc.desc: Test the curson move left
  * @tc.type: FUNC
@@ -1540,98 +1498,6 @@ HWTEST_F(TextFieldControllerTest, TextFiledControllerTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: KeyEventHandler001
- * @tc.desc: Test KeyEventHandler HandleShiftPressedEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldKeyEventHandlerTest, KeyEventHandler001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize insert text and key event handler
-     */
-    CreateTextField(DEFAULT_TEXT);
-
-    auto keyEventHandler = AceType::MakeRefPtr<KeyEventHandler>();
-    keyEventHandler->UpdateWeakPattern(pattern_);
-
-    /**
-     * @tc.steps: step2. Initialize key event and press ` into text
-     */
-    KeyEvent event;
-    std::vector<KeyCode> presscodes = {};
-    event.code = KeyCode::KEY_GRAVE;
-    presscodes.emplace_back(event.code);
-    event.pressedCodes = presscodes;
-    auto ret = keyEventHandler->HandleShiftPressedEvent(event);
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.expected: call func HandleShiftPressedEvent result is true and add ` to text
-     */
-    EXPECT_TRUE(ret);
-    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijklmnopqrstuvwxyz`"), 0)
-        << "Text is " + pattern_->GetTextValue();
-
-    /**
-     * @tc.steps: step3. press A to text
-     * @tc.expected: call func HandleShiftPressedEvent result is true and add ` to text
-     */
-    event.code = KeyCode::KEY_A;
-    ret = keyEventHandler->HandleShiftPressedEvent(event);
-    RunMeasureAndLayout();
-    EXPECT_FALSE(ret);
-    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijklmnopqrstuvwxyz`"), 0)
-        << "Text is " + pattern_->GetTextValue();
-
-    /**
-     * @tc.steps: step4. press left shift + right shift + - to text
-     * @tc.expected: call func HandleShiftPressedEvent result is true and add 3 to text
-     */
-    event.pressedCodes.clear();
-    event.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
-    event.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
-    event.code = KeyCode::KEY_MINUS;
-    ret = keyEventHandler->HandleShiftPressedEvent(event);
-    RunMeasureAndLayout();
-    EXPECT_TRUE(ret);
-    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijklmnopqrstuvwxyz`_"), 0)
-        << "Text is " + pattern_->GetTextValue();
-
-    /**
-     * @tc.steps: step5. press left shift + right shift + D to text
-     * @tc.expected: call func HandleShiftPressedEvent result is true and add D to text
-     */
-    event.code = KeyCode::KEY_D;
-    ret = keyEventHandler->HandleShiftPressedEvent(event);
-    RunMeasureAndLayout();
-    EXPECT_TRUE(ret);
-    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijklmnopqrstuvwxyz`_D"), 0)
-        << "Text is " + pattern_->GetTextValue();
-
-    /**
-     * @tc.steps: step6. press left shift + right shift + 5 to text
-     * @tc.expected: call func HandleShiftPressedEvent result is true and add % to text
-     */
-    event.code = KeyCode::KEY_5;
-    ret = keyEventHandler->HandleShiftPressedEvent(event);
-    RunMeasureAndLayout();
-    EXPECT_TRUE(ret);
-    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijklmnopqrstuvwxyz`_D%"), 0)
-        << "Text is " + pattern_->GetTextValue();
-
-    /**
-     * @tc.steps: step7. press left shift + right shift + blank to text
-     * @tc.expected: text is not changed
-     */
-    event.code = KeyCode::KEY_SPACE;
-    ret = keyEventHandler->HandleShiftPressedEvent(event);
-    RunMeasureAndLayout();
-    EXPECT_FALSE(ret);
-    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijklmnopqrstuvwxyz`_D%"), 0)
-        << "Text is " + pattern_->GetTextValue();
-}
-
-/**
  * @tc.name: KeyEventHandler002
  * @tc.desc: Test KeyEventHandler HandleDirectionalKey
  * @tc.type: FUNC
@@ -1732,6 +1598,281 @@ HWTEST_F(TextFieldKeyEventHandlerTest, KeyEventHandler003, TestSize.Level1)
     event.pressedCodes.emplace_back(event.code);
     auto ret = keyEventHandler->HandleDirectionalMoveKey(event);
     EXPECT_FALSE(ret) << "KeyCode: " + std::to_string(static_cast<int>(event.code));
+}
+
+/**
+ * @tc.name: KeyEventHandler004
+ * @tc.desc: Test KeyEventHandler IsCtrlShiftWith
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventHandlerTest, KeyEventHandler004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_GRAVE, L'`' },
+        { KeyCode::KEY_MINUS, L'-' },
+        { KeyCode::KEY_EQUALS, L'=' },
+        { KeyCode::KEY_LEFT_BRACKET, L'[' },
+        { KeyCode::KEY_RIGHT_BRACKET, L']' },
+        { KeyCode::KEY_BACKSLASH, L'\\' },
+        { KeyCode::KEY_SEMICOLON, L';' },
+        { KeyCode::KEY_APOSTROPHE, L'\'' },
+        { KeyCode::KEY_COMMA, L',' },
+        { KeyCode::KEY_PERIOD, L'.' },
+        { KeyCode::KEY_SLASH, L'/' },
+        { KeyCode::KEY_SPACE, L' ' },
+        { KeyCode::KEY_NUMPAD_DIVIDE, L'/' },
+        { KeyCode::KEY_NUMPAD_MULTIPLY, L'*' },
+        { KeyCode::KEY_NUMPAD_SUBTRACT, L'-' },
+        { KeyCode::KEY_NUMPAD_ADD, L'+' },
+        { KeyCode::KEY_NUMPAD_DOT, L'.' },
+        { KeyCode::KEY_NUMPAD_COMMA, L',' },
+        { KeyCode::KEY_NUMPAD_EQUALS, L'=' },
+    };
+
+    /**
+     * @tc.expected: Calling the keyboard event interface
+     */
+    std::string result;
+    for (auto code : symbols) {
+        event.pressedCodes.clear();
+        event.pressedCodes.push_back(code.first);
+        event.code = code.first;
+        auto ret = pattern_->OnKeyEvent(event);
+        RunMeasureAndLayout();
+        std::wstring appendElement(1, code.second);
+        result.append(StringUtils::ToString(appendElement));
+        EXPECT_EQ(pattern_->GetTextValue(), result);
+        EXPECT_TRUE(ret);
+    }
+}
+
+/**
+ * @tc.name: KeyEventHandler005
+ * @tc.desc: Test KeyEventHandler IsCtrlShiftWith
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventHandlerTest, KeyEventHandler005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+    std::vector<KeyCode> shiftCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_GRAVE, L'~' },
+        { KeyCode::KEY_MINUS, L'_' },
+        { KeyCode::KEY_EQUALS, L'+' },
+        { KeyCode::KEY_LEFT_BRACKET, L'{' },
+        { KeyCode::KEY_RIGHT_BRACKET, L'}' },
+        { KeyCode::KEY_BACKSLASH, L'|' },
+        { KeyCode::KEY_SEMICOLON, L':' },
+        { KeyCode::KEY_APOSTROPHE, L'\"' },
+        { KeyCode::KEY_COMMA, L'<' },
+        { KeyCode::KEY_PERIOD, L'>' },
+        { KeyCode::KEY_SLASH, L'?' },
+    };
+
+    /**
+     * @tc.expected: Calling the keyboard event interface
+     */
+    std::string result;
+    for (auto shift : shiftCodes) {
+        for (auto code : symbols) {
+            event.pressedCodes.clear();
+            event.pressedCodes.push_back(shift);
+            event.pressedCodes.push_back(code.first);
+            event.code = code.first;
+            auto ret = pattern_->OnKeyEvent(event);
+            RunMeasureAndLayout();
+            std::wstring appendElement(1, code.second);
+            result.append(StringUtils::ToString(appendElement));
+            EXPECT_EQ(pattern_->GetTextValue(), result);
+            EXPECT_TRUE(ret);
+        }
+    }
+}
+
+/**
+ * @tc.name: KeyEventHandler006
+ * @tc.desc: Test KeyEventHandler Shift + A-Z
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventHandlerTest, KeyEventHandler006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+    std::vector<KeyCode> shiftCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_A, 'A' },
+        { KeyCode::KEY_B, 'B' },
+        { KeyCode::KEY_C, 'C' },
+        { KeyCode::KEY_D, 'D' },
+        { KeyCode::KEY_E, 'E' },
+        { KeyCode::KEY_F, 'F' },
+        { KeyCode::KEY_G, 'G' },
+        { KeyCode::KEY_H, 'H' },
+        { KeyCode::KEY_I, 'I' },
+        { KeyCode::KEY_J, 'J' },
+        { KeyCode::KEY_K, 'K' },
+        { KeyCode::KEY_L, 'L' },
+        { KeyCode::KEY_M, 'M' },
+        { KeyCode::KEY_N, 'N' },
+        { KeyCode::KEY_O, 'O' },
+        { KeyCode::KEY_P, 'P' },
+        { KeyCode::KEY_Q, 'Q' },
+        { KeyCode::KEY_R, 'R' },
+        { KeyCode::KEY_S, 'S' },
+        { KeyCode::KEY_T, 'T' },
+        { KeyCode::KEY_U, 'U' },
+        { KeyCode::KEY_V, 'V' },
+        { KeyCode::KEY_W, 'W' },
+        { KeyCode::KEY_X, 'X' },
+        { KeyCode::KEY_Y, 'Y' },
+        { KeyCode::KEY_Z, 'Z' },
+    };
+
+    /**
+     * @tc.expected: lowercase to uppercase
+     */
+    std::string result;
+    for (auto shift : shiftCodes) {
+        for (auto code : symbols) {
+            event.pressedCodes.clear();
+            EXPECT_EQ(event.pressedCodes.size(), 0);
+            event.pressedCodes.push_back(shift);
+            event.pressedCodes.push_back(code.first);
+            event.code = code.first;
+            auto ret = pattern_->OnKeyEvent(event);
+            RunMeasureAndLayout();
+            std::wstring appendElement(1, code.second);
+            result.append(StringUtils::ToString(appendElement));
+            EXPECT_EQ(pattern_->GetTextValue(), result);
+            EXPECT_TRUE(ret);
+        }
+    }
+}
+
+/**
+ * @tc.name: KeyEventHandler007
+ * @tc.desc: Test KeyEventHandler Shift + 0-9
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventHandlerTest, KeyEventHandler007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    std::vector<KeyCode> shiftCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_0, ')' },
+        { KeyCode::KEY_1, '!' },
+        { KeyCode::KEY_2, '@' },
+        { KeyCode::KEY_3, '#' },
+        { KeyCode::KEY_4, '$' },
+        { KeyCode::KEY_5, '%' },
+        { KeyCode::KEY_6, '^' },
+        { KeyCode::KEY_7, '&' },
+        { KeyCode::KEY_8, '*' },
+        { KeyCode::KEY_9, '(' },
+    };
+
+    /**
+     * @tc.expected: shift + number to input
+     */
+    std::string result;
+    for (auto shift : shiftCodes) {
+        for (auto code : symbols) {
+            event.pressedCodes.clear();
+            EXPECT_EQ(event.pressedCodes.size(), 0);
+            event.pressedCodes.push_back(shift);
+            event.pressedCodes.push_back(code.first);
+            event.code = code.first;
+            auto ret = pattern_->OnKeyEvent(event);
+            RunMeasureAndLayout();
+            std::wstring appendElement(1, code.second);
+            result.append(StringUtils::ToString(appendElement));
+            EXPECT_EQ(pattern_->GetTextValue(), result);
+            EXPECT_TRUE(ret);
+        }
+    }
+}
+
+/**
+ * @tc.name: KeyEventHandler008
+ * @tc.desc: Test KeyEventHandler Shift + 0-9
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventHandlerTest, KeyEventHandler008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    std::vector<KeyCode> shiftCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
+
+    /**
+     * @tc.expected: shift + F10 to input
+     */
+    std::string result;
+    for (auto shift : shiftCodes) {
+        event.pressedCodes.clear();
+        event.pressedCodes.push_back(shift);
+        event.pressedCodes.push_back(KeyCode::KEY_F10);
+        event.code = KeyCode::KEY_F10;
+        auto ret = pattern_->OnKeyEvent(event);
+        RunMeasureAndLayout();
+        EXPECT_TRUE(ret);
+    }
 }
 
 /**
@@ -2345,5 +2486,85 @@ HWTEST_F(TextFieldUXTest, TabGetFocus001, TestSize.Level1)
     pattern_->OnKeyEvent(event);
     EXPECT_EQ(pattern_->GetTextSelectController()->GetFirstHandleOffset().GetX(),
         pattern_->GetTextSelectController()->GetSecondHandleOffset().GetX());
+}
+
+/**
+ * @tc.name: NeedSoftKeyboard001
+ * @tc.desc: Test NeedSoftKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, NeedSoftKeyboard001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input
+    */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+    * @tc.steps: step2. Test whether text field need soft keyboard.
+    */
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_TRUE(pattern_->NeedSoftKeyboard());
+}
+/*
+* @tc.name: AdjustWordCursorAndSelect01
+* @tc.desc: Test .adjust word cursor and select(true)
+* @tc.type: FUNC
+*/
+HWTEST_F(TextFieldUXTest, AdjustWordCursorAndSelect01, TestSize.Level1)
+{
+    using namespace std::chrono;
+    /**
+     * @tc.steps: step1. Initialize text input "hello"
+    */
+    CreateTextField(HELLO_TEXT);
+    pattern_->selectController_->lastAiPosTimeStamp_ = high_resolution_clock::now();
+    pattern_->lastClickTimeStamp_ = pattern_->selectController_->lastAiPosTimeStamp_ + seconds(2);
+
+    MockDataDetectorMgr mockDataDetectorMgr;
+    InitAdjustObject(mockDataDetectorMgr);
+
+    std::string content = pattern_->contentController_->GetTextValue();
+    int32_t pos = 3;
+    mockDataDetectorMgr.AdjustCursorPosition(pos, content, pattern_->selectController_->lastAiPosTimeStamp_,
+                                             pattern_->lastClickTimeStamp_);
+    EXPECT_EQ(pos, 2);
+
+    int32_t start = 1;
+    int32_t end = 3;
+    mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
+    EXPECT_EQ(start, 2);
+    EXPECT_EQ(end, 3);
+    /**
+     * @tc.steps: step2. assign text as default text
+    */
+    pos = 1;
+    pattern_->contentController_->SetTextValue(DEFAULT_TEXT);
+    content = pattern_->contentController_->GetTextValue();
+    mockDataDetectorMgr.AdjustCursorPosition(pos, content, pattern_->selectController_->lastAiPosTimeStamp_,
+                                             pattern_->lastClickTimeStamp_);
+    EXPECT_EQ(pos, 4);
+
+    start = 1;
+    end = 3;
+    mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
+    EXPECT_EQ(start, 0);
+    EXPECT_EQ(end, 2);
+
+    /**
+     * @tc.steps: step3. assign text as empty
+    */
+    pos = 2;
+    pattern_->contentController_->Reset();
+    content = pattern_->contentController_->GetTextValue();
+    mockDataDetectorMgr.AdjustCursorPosition(pos, content, pattern_->selectController_->lastAiPosTimeStamp_,
+                                             pattern_->lastClickTimeStamp_);
+    EXPECT_EQ(pos, -1);
+
+    start = 1;
+    end = 3;
+    mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
+    EXPECT_EQ(start, -1);
+    EXPECT_EQ(end, -1);
 }
 } // namespace OHOS::Ace::NG

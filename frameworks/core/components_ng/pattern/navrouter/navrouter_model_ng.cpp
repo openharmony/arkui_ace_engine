@@ -31,7 +31,7 @@ void NavRouterModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVROUTER_VIEW_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVROUTER_VIEW_ETS_TAG, nodeId);
     auto navRouterNode = NavRouterGroupNode::GetOrCreateGroupNode(
         V2::NAVROUTER_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavRouterPattern>(); });
     stack->Push(navRouterNode);
@@ -48,6 +48,16 @@ void NavRouterModelNG::SetOnStateChange(std::function<void(bool isActivated)>&& 
 void NavRouterModelNG::SetNavRouteMode(int32_t mode)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navRouterGroupNode = AceType::DynamicCast<NavRouterGroupNode>(frameNode);
+    CHECK_NULL_VOID(navRouterGroupNode);
+    auto navRouterPattern = navRouterGroupNode->GetPattern<NavRouterPattern>();
+    CHECK_NULL_VOID(navRouterPattern);
+    navRouterPattern->SetNavRouteMode(static_cast<NG::NavRouteMode>(mode));
+}
+
+void NavRouterModelNG::SetNavRouteMode(FrameNode* frameNode, int32_t mode)
+{
+    CHECK_NULL_VOID(frameNode);
     auto navRouterGroupNode = AceType::DynamicCast<NavRouterGroupNode>(frameNode);
     CHECK_NULL_VOID(navRouterGroupNode);
     auto navRouterPattern = navRouterGroupNode->GetPattern<NavRouterPattern>();

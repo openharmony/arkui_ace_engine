@@ -145,6 +145,9 @@ void TextTimerPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetItalicFontStyle().has_value()) {
         textLayoutProperty->UpdateItalicFontStyle(layoutProperty->GetItalicFontStyle().value());
     }
+    if (layoutProperty->GetTextShadow().has_value()) {
+        textLayoutProperty->UpdateTextShadow(layoutProperty->GetTextShadow().value());
+    }
 }
 
 void TextTimerPattern::OnAttachToFrameNode()

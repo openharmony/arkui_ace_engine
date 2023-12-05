@@ -17,8 +17,5 @@ ace_unittest("indexer_test_ng") {
   render = true
   flutter_skia = true
   type = "new"
-  sources = [
-    "$ace_root/test/unittest/core/pattern/test_ng.cpp",
-    "indexer_test_ng.cpp",
-  ]
+  sources = [ "indexer_test_ng.cpp" ]
 }

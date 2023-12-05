@@ -46,6 +46,7 @@ class AccessibilityElementInfo;
 }
 namespace Rosen {
 class Window;
+struct Rect;
 enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 enum class MaximizeMode : uint32_t;
@@ -89,6 +90,7 @@ public:
     static std::unique_ptr<UIContent> Create(OHOS::AppExecFwk::Ability* ability);
     static void ShowDumpHelp(std::vector<std::string>& info);
     static UIContent* GetUIContent(int32_t instanceId);
+    static std::string GetCurrentUIStackInfo();
 
     virtual ~UIContent() = default;
 
@@ -240,6 +242,21 @@ public:
         return false;
     }
 
+    /**
+     * @description: Recycle form.
+     * @return return Json string of status data of ArkTS form.
+     */
+    virtual std::string RecycleForm()
+    {
+        return "";
+    }
+
+    /**
+     * @description: Recover form.
+     * @param statusData Indicates json string of status data of ArkTS form.
+     */
+    virtual void RecoverForm(const std::string &statusData) {}
+
 #ifndef PREVIEW
     virtual void SearchElementInfoByAccessibilityId(
         int32_t elementId, int32_t mode,
@@ -269,6 +286,10 @@ public:
      * @param callback callback func.
      */
     virtual void SetFrameLayoutFinishCallback(std::function<void()>&& callback) {};
+
+    // Actually paint size of window
+    virtual void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) {};
+
 };
 
 } // namespace OHOS::Ace

@@ -15,7 +15,9 @@
 
 #include "core/image/image_cache.h"
 
+#include <string>
 
+#include "base/log/dump_log.h"
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/image/image_object.h"
 
@@ -43,52 +45,19 @@ RefPtr<ImageCache> ImageCache::Create()
 void ImageCache::Purge() {}
 #endif
 
-template<typename T>
-void ImageCache::CacheWithCountLimitLRU(const std::string& key, const T& cacheObj, std::list<CacheNode<T>>& cacheList,
-    std::unordered_map<std::string, typename std::list<CacheNode<T>>::iterator>& cache,
-    const std::atomic<size_t>& capacity)
-{
-    auto iter = cache.find(key);
-    if (iter == cache.end()) {
-        if (cache.size() == capacity) {
-            cache.erase(cacheList.back().cacheKey);
-            cacheList.pop_back();
-        }
-        cacheList.emplace_front(key, cacheObj);
-        cache.emplace(key, cacheList.begin());
-    } else {
-        iter->second->cacheObj = cacheObj;
-        cacheList.splice(cacheList.begin(), cacheList, iter->second);
-        iter->second = cacheList.begin();
-    }
-}
-
-template<typename T>
-T ImageCache::GetCacheObjWithCountLimitLRU(const std::string& key, std::list<CacheNode<T>>& cacheList,
-    std::unordered_map<std::string, typename std::list<CacheNode<T>>::iterator>& cache)
-{
-    auto iter = cache.find(key);
-    if (iter != cache.end()) {
-        cacheList.splice(cacheList.begin(), cacheList, iter->second);
-        iter->second = cacheList.begin();
-        return iter->second->cacheObj;
-    }
-    return nullptr;
-}
-
 void ImageCache::CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image)
 {
     if (key.empty() || capacity_ == 0) {
         return;
     }
     std::scoped_lock lock(imageCacheMutex_);
-    CacheWithCountLimitLRU<std::shared_ptr<CachedImage>>(key, image, cacheList_, imageCache_, capacity_);
+    CountLimitLRU::CacheWithCountLimitLRU<std::shared_ptr<CachedImage>>(key, image, cacheList_, imageCache_, capacity_);
 }
 
 std::shared_ptr<CachedImage> ImageCache::GetCacheImage(const std::string& key)
 {
     std::scoped_lock lock(imageCacheMutex_);
-    return GetCacheObjWithCountLimitLRU<std::shared_ptr<CachedImage>>(key, cacheList_, imageCache_);
+    return CountLimitLRU::GetCacheObjWithCountLimitLRU<std::shared_ptr<CachedImage>>(key, cacheList_, imageCache_);
 }
 
 void ImageCache::CacheImgObjNG(const std::string& key, const RefPtr<NG::ImageObject>& imgObj)
@@ -97,13 +66,15 @@ void ImageCache::CacheImgObjNG(const std::string& key, const RefPtr<NG::ImageObj
         return;
     }
     std::scoped_lock lock(imgObjMutex_);
-    CacheWithCountLimitLRU<RefPtr<NG::ImageObject>>(key, imgObj, cacheImgObjListNG_, imgObjCacheNG_, imgObjCapacity_);
+    CountLimitLRU::CacheWithCountLimitLRU<RefPtr<NG::ImageObject>>(
+        key, imgObj, cacheImgObjListNG_, imgObjCacheNG_, imgObjCapacity_);
 }
 
 RefPtr<NG::ImageObject> ImageCache::GetCacheImgObjNG(const std::string& key)
 {
     std::scoped_lock lock(imgObjMutex_);
-    return GetCacheObjWithCountLimitLRU<RefPtr<NG::ImageObject>>(key, cacheImgObjListNG_, imgObjCacheNG_);
+    return CountLimitLRU::GetCacheObjWithCountLimitLRU<RefPtr<NG::ImageObject>>(
+        key, cacheImgObjListNG_, imgObjCacheNG_);
 }
 
 void ImageCache::CacheImgObj(const std::string& key, const RefPtr<ImageObject>& imgObj)
@@ -112,13 +83,14 @@ void ImageCache::CacheImgObj(const std::string& key, const RefPtr<ImageObject>& 
         return;
     }
     std::scoped_lock lock(imgObjMutex_);
-    CacheWithCountLimitLRU<RefPtr<ImageObject>>(key, imgObj, cacheImgObjList_, imgObjCache_, imgObjCapacity_);
+    CountLimitLRU::CacheWithCountLimitLRU<RefPtr<ImageObject>>(
+        key, imgObj, cacheImgObjList_, imgObjCache_, imgObjCapacity_);
 }
 
 RefPtr<ImageObject> ImageCache::GetCacheImgObj(const std::string& key)
 {
     std::scoped_lock lock(imgObjMutex_);
-    return GetCacheObjWithCountLimitLRU<RefPtr<ImageObject>>(key, cacheImgObjList_, imgObjCache_);
+    return CountLimitLRU::GetCacheObjWithCountLimitLRU<RefPtr<ImageObject>>(key, cacheImgObjList_, imgObjCache_);
 }
 
 void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageData>& imageData)
@@ -129,8 +101,8 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageDa
     std::scoped_lock lock(dataCacheMutex_);
     auto dataSize = imageData->GetSize();
     if (dataSize > (dataSizeLimit_ >> 1)) { // if data is longer than half limit, do not cache it.
-        LOGW("data is %{public}d, bigger than half limit %{public}d, do not cache it", static_cast<int32_t>(dataSize),
-            static_cast<int32_t>(dataSizeLimit_ >> 1));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "data is %{public}d, bigger than half limit %{public}d, do not cache it",
+            static_cast<int32_t>(dataSize), static_cast<int32_t>(dataSizeLimit_ >> 1));
         return;
     }
     auto iter = imageDataCache_.find(key);
@@ -220,5 +192,22 @@ void ImageCache::Clear()
         cacheImgObjList_.clear();
         imgObjCache_.clear();
     }
+}
+
+void ImageCache::DumpCacheInfo()
+{
+    auto cacheSize = dataCacheList_.size();
+    DumpLog::GetInstance().Print("------------ImageCacheInfo------------");
+    DumpLog::GetInstance().Print("Cache count: " + std::to_string(cacheSize));
+    if (cacheSize == 0) {
+        return;
+    }
+    auto totalCount = 0;
+    for (const auto& item : dataCacheList_) {
+        auto imageObj = item.cacheObj;
+        totalCount += imageObj->GetSize();
+        DumpLog::GetInstance().Print("Cache Obj: " + imageObj->ToString());
+    }
+    DumpLog::GetInstance().Print("Cache total size: " + std::to_string(totalCount));
 }
 } // namespace OHOS::Ace

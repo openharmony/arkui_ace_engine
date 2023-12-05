@@ -32,7 +32,7 @@ public:
     void SetColumnsGap(const Dimension& value) override;
     void SetRowsGap(const Dimension& value) override;
     void SetGridHeight(const Dimension& value) override;
-    void SetScrollBarMode(int32_t value) override;
+    void SetScrollBarMode(DisplayMode value) override;
     void SetScrollBarColor(const std::string& value) override;
     void SetScrollBarWidth(const std::string& value) override;
     void SetCachedCount(int32_t value) override;
@@ -66,6 +66,11 @@ public:
     void SetOnScrollStop(std::function<void()>&& onScrollStop) override {};
     void SetOnReachStart(std::function<void()>&& onReachStart) override {};
     void SetOnReachEnd(std::function<void()>&& onReachEnd) override {};
+
+    DisplayMode GetDisplayMode() const override
+    {
+        return DisplayMode::OFF;
+    };
 
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;

@@ -169,12 +169,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                     HideFilter();
                     SubwindowManager::GetInstance()->HideMenuNG(false, true);
-                    AnimationOption option;
-                    option.SetDuration(PIXELMAP_ANIMATION_DURATION);
-                    option.SetCurve(Curves::SHARP);
-                    AnimationUtils::Animate(
-                        option, [renderContext]() { renderContext->UpdateOpacity(SCALE_NUMBER); },
-                        option.GetOnFinishEvent());
                 }
             }
         }
@@ -547,6 +541,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     // create imageNode
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
     auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
     renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -577,7 +572,10 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
         manager->MountPixelMapToRootNode(columnNode);
     }
     imageNode->MarkModifyDone();
-    ShowPixelMapAnimation(imageNode);
+    auto focusHub = frameNode->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
+    ShowPixelMapAnimation(imageNode, hasContextMenu);
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("DragEvent set pixelMap success.");
     }
@@ -668,7 +666,7 @@ void DragEventActuator::BindClickEvent(const RefPtr<FrameNode>& columnNode)
     columnGestureHub->AddClickEvent(clickListener);
 }
 
-void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode)
+void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, bool hasContextMenu)
 {
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
@@ -685,15 +683,17 @@ void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode
 
     AnimationUtils::Animate(
         option,
-        [imageContext, shadow]() mutable {
+        [imageContext, shadow, hasContextMenu]() mutable {
             auto color = shadow->GetColor();
             auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
             shadow->SetColor(newColor);
             imageContext->UpdateBackShadow(shadow.value());
             imageContext->UpdateTransformScale({ PIXELMAP_ANIMATION_SCALE, PIXELMAP_ANIMATION_SCALE });
-            BorderRadiusProperty borderRadius;
-            borderRadius.SetRadius(PIXELMAP_BORDER_RADIUS);
-            imageContext->UpdateBorderRadius(borderRadius);
+            if (hasContextMenu) {
+                BorderRadiusProperty borderRadius;
+                borderRadius.SetRadius(PIXELMAP_BORDER_RADIUS);
+                imageContext->UpdateBorderRadius(borderRadius);
+            }
         },
         option.GetOnFinishEvent());
 }
@@ -816,7 +816,8 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     auto pixelMap = gestureHub->GetPixelMap();
     float scale = 1.0f;
     if (pixelMap) {
-        scale = gestureHub->GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
+        scale =
+            gestureHub->GetPixelMapScale(dragNode->GetDragPreviewOption(), pixelMap->GetHeight(), pixelMap->GetWidth());
     }
     auto context = dragNode->GetRenderContext();
     CHECK_NULL_VOID(context);

@@ -29,6 +29,7 @@
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/frontend.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
@@ -54,6 +55,7 @@ public:
     using SurfaceChangedCallbackMap =
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>>;
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
+    using FoldStatusChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldStatus)>>;
     using PredictTask = std::function<void(int64_t, bool)>;
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
@@ -67,6 +69,8 @@ public:
     static RefPtr<PipelineContext> GetCurrentContext();
 
     static RefPtr<PipelineContext> GetMainPipelineContext();
+
+    static RefPtr<PipelineContext> GetContextByContainerId(int32_t containerId);
 
     static float GetCurrentRootWidth();
 
@@ -132,7 +136,7 @@ public:
         return false;
     }
 
-    void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override;
+    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) override;
 
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
@@ -383,6 +387,20 @@ public:
         surfaceChangedCallbackMap_.erase(callbackId);
     }
 
+    int32_t RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback)
+    {
+        if (callback) {
+            foldStatusChangedCallbackMap_.emplace(callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnRegisterFoldStatusChangedCallback(int32_t callbackId)
+    {
+        foldStatusChangedCallbackMap_.erase(callbackId);
+    }
+
     int32_t RegisterSurfacePositionChangedCallback(std::function<void(int32_t, int32_t)>&& callback)
     {
         if (callback) {
@@ -432,6 +450,7 @@ public:
 
     void SetIgnoreViewSafeArea(bool value) override;
     void SetIsLayoutFullScreen(bool value) override;
+    void SetIsNeedAvoidWindow(bool value) override;
 
     void AddAnimationClosure(std::function<void()>&& animation);
     void FlushAnimationClosure();
@@ -455,22 +474,43 @@ public:
 
     void RemoveGestureTask(const DelayedTask& task)
     {
-        for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end();) {
-            if (iter->recognizer == task.recognizer) {
-                delayedTasks_.erase(iter++);
-            } else {
-                ++iter;
+        for (auto& delayedTask : delayedTasks_) {
+            if (delayedTask.recognizer == task.recognizer) {
+                delayedTask.deleted = true;
             }
         }
     }
 
+    void SetScreenNode(const RefPtr<FrameNode>& node)
+    {
+        CHECK_NULL_VOID(node);
+        screenNode_ = AceType::WeakClaim(AceType::RawPtr(node));
+    }
+    RefPtr<FrameNode> GetScreenNode() const
+    {
+        return screenNode_.Upgrade();
+    }
+
     void SetJSViewActive(bool active, WeakPtr<CustomNode> custom);
 
+    void UpdateCurrentActiveNode(const WeakPtr<FrameNode>& node) override
+    {
+        activeNode_ = std::move(node);
+    }
+
+    const WeakPtr<FrameNode>& GetCurrentActiveNode() const
+    {
+        return activeNode_;
+    }
+
+    std::string GetCurrentExtraInfo() override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
 
     void SetCursor(int32_t cursorValue) override;
 
     void RestoreDefault() override;
+
+    void OnFoldStatusChange(FoldStatus foldStatus) override;
 
     // for frontend animation interface.
     void OpenFrontendAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
@@ -487,6 +527,7 @@ protected:
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
     void FlushFrameTrace();
+    void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
 
@@ -526,7 +567,7 @@ private:
 
     // only used for static form.
     void UpdateFormLinkInfos();
-    
+
     void FlushFrameRate();
 
     template<typename T>
@@ -585,6 +626,7 @@ private:
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
+    FoldStatusChangedCallbackMap foldStatusChangedCallbackMap_;
 
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
@@ -604,6 +646,7 @@ private:
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     WeakPtr<FrameNode> dirtyDefaultFocusNode_;
+    WeakPtr<FrameNode> screenNode_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
     uint64_t resampleTimeStamp_ = 0;
@@ -616,6 +659,7 @@ private:
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;
+    WeakPtr<FrameNode> activeNode_;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;

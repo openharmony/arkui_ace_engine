@@ -27,6 +27,10 @@ RichEditorContentModifier::RichEditorContentModifier(const std::optional<TextSty
     AttachProperty(richTextRectX_);
     richTextRectY_ = AceType::MakeRefPtr<PropertyFloat>(richEditorPattern->GetTextRect().GetY());
     AttachProperty(richTextRectY_);
+    clipOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
+    AttachProperty(clipOffset_);
+    clipSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
+    AttachProperty(clipSize_);
 }
 
 void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
@@ -47,5 +51,11 @@ void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
         offset.AddY(info.paragraph->GetHeight());
     }
     canvas.Restore();
+
+    auto clipOffset = clipOffset_->Get();
+    auto size = clipSize_->Get();
+    auto clipRect = RSRect(
+        clipOffset.GetX(), clipOffset.GetY(), clipOffset.GetX() + size.Width(), clipOffset.GetY() + size.Height());
+    drawingContext.canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
 }
 } // namespace OHOS::Ace::NG

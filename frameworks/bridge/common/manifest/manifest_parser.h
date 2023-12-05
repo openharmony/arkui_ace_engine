@@ -51,14 +51,12 @@ public:
         return manifestAppInfo_->GetMinPlatformVersion();
     }
 
-#if defined(PREVIEW)
     void SetPagePath(const std::string& pagePath)
     {
         if (manifestRouter_) {
             manifestRouter_->InsertPageList(pagePath);
         }
     }
-#endif
 
     void Parse(const std::string& url);
     void Printer();

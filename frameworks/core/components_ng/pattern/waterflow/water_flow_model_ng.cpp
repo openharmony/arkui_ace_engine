@@ -16,17 +16,18 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
 namespace OHOS::Ace::NG {
 void WaterFlowModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::WATERFLOW_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::WATERFLOW_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::WATERFLOW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WaterFlowPattern>(); });
     stack->Push(frameNode);
@@ -173,29 +174,41 @@ void WaterFlowModelNG::SetScrollEnabled(bool scrollEnabled)
 
 void WaterFlowModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnReachStart(std::move(onReachStart));
+    ScrollableModelNG::SetOnReachStart(std::move(onReachStart));
 }
 
 void WaterFlowModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnReachEnd(std::move(onReachEnd));
+    ScrollableModelNG::SetOnReachEnd(std::move(onReachEnd));
 }
 
 void WaterFlowModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin)
+{
+    ScrollableModelNG::SetOnScrollFrameBegin(std::move(ScrollFrameBegin));
+}
+
+void WaterFlowModelNG::SetOnScroll(std::function<void(Dimension, ScrollState)>&& onScroll)
+{
+    ScrollableModelNG::SetOnScroll(std::move(onScroll));
+}
+
+void WaterFlowModelNG::SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
+{
+    ScrollableModelNG::SetOnScrollStart(std::move(onScrollStart));
+}
+
+void WaterFlowModelNG::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
+{
+    ScrollableModelNG::SetOnScrollStop(std::move(onScrollStop));
+}
+
+void WaterFlowModelNG::SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScrollFrameBegin(std::move(ScrollFrameBegin));
+    eventHub->SetOnScrollIndex(std::move(onScrollIndex));
 }
 
 void WaterFlowModelNG::SetFriction(double friction)
@@ -210,5 +223,23 @@ void WaterFlowModelNG::SetFriction(double friction)
 void WaterFlowModelNG::SetCachedCount(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value);
+}
+
+void WaterFlowModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+{
+    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);
+}
+
+void WaterFlowModelNG::SetScrollBarMode(DisplayMode value)
+{
+    ScrollableModelNG::SetScrollBarMode(value);
+}
+void WaterFlowModelNG::SetScrollBarColor(const std::string& value)
+{
+    ScrollableModelNG::SetScrollBarColor(value);
+}
+void WaterFlowModelNG::SetScrollBarWidth(const std::string& value)
+{
+    ScrollableModelNG::SetScrollBarWidth(value);
 }
 } // namespace OHOS::Ace::NG

@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_water_flow.h"
+#include "bridge/declarative_frontend/jsview/js_water_flow.h"
 
-#include "bridge/declarative_frontend/jsview/js_list.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_scrollable.h"
+#include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
-#include "frameworks/bridge/declarative_frontend/jsview/models/water_flow_model_impl.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "bridge/declarative_frontend/jsview/models/water_flow_model_impl.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<WaterFlowModel> WaterFlowModel::instance_ = nullptr;
@@ -118,8 +118,18 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWaterFlow>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSWaterFlow>::StaticMethod("friction", &JSWaterFlow::SetFriction);
-    JSClass<JSWaterFlow>::StaticMethod("clip", &JSList::JsClip);
+    JSClass<JSWaterFlow>::StaticMethod("clip", &JSScrollable::JsClip);
     JSClass<JSWaterFlow>::StaticMethod("cachedCount", &JSWaterFlow::SetCachedCount);
+    JSClass<JSWaterFlow>::StaticMethod("edgeEffect", &JSWaterFlow::SetEdgeEffect);
+
+    JSClass<JSWaterFlow>::StaticMethod("onScroll", &JSWaterFlow::JsOnScroll);
+    JSClass<JSWaterFlow>::StaticMethod("onScrollStart", &JSWaterFlow::JsOnScrollStart);
+    JSClass<JSWaterFlow>::StaticMethod("onScrollStop", &JSWaterFlow::JsOnScrollStop);
+    JSClass<JSWaterFlow>::StaticMethod("onScrollIndex", &JSWaterFlow::JsOnScrollIndex);
+
+    JSClass<JSWaterFlow>::StaticMethod("scrollBar", &JSWaterFlow::SetScrollBar, opt);
+    JSClass<JSWaterFlow>::StaticMethod("scrollBarWidth", &JSWaterFlow::SetScrollBarWidth, opt);
+    JSClass<JSWaterFlow>::StaticMethod("scrollBarColor", &JSWaterFlow::SetScrollBarColor, opt);
 
     JSClass<JSWaterFlow>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -326,5 +336,88 @@ void JSWaterFlow::SetCachedCount(const JSCallbackInfo& info)
     }
 
     WaterFlowModel::GetInstance()->SetCachedCount(cachedCount);
+}
+
+void JSWaterFlow::SetEdgeEffect(const JSCallbackInfo& info)
+{
+    auto edgeEffect = JSScrollable::ParseEdgeEffect(info, WaterFlowModel::GetInstance()->GetEdgeEffect());
+    auto alwaysEnabled =
+        JSScrollable::ParseAlwaysEnable(info, WaterFlowModel::GetInstance()->GetAlwaysEnableEdgeEffect());
+    WaterFlowModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
+}
+
+void JSWaterFlow::JsOnScroll(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                            const CalcDimension& scrollOffset, const ScrollState& scrollState) {
+            auto params = ConvertToJSValues(scrollOffset, scrollState);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            return;
+        };
+        WaterFlowModel::GetInstance()->SetOnScroll(std::move(onScroll));
+    }
+    args.ReturnSelf();
+}
+
+void JSWaterFlow::JsOnScrollStart(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        WaterFlowModel::GetInstance()->SetOnScrollStart(std::move(onScrollStart));
+    }
+    args.ReturnSelf();
+}
+
+void JSWaterFlow::JsOnScrollStop(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        WaterFlowModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
+    }
+    args.ReturnSelf();
+}
+
+void JSWaterFlow::JsOnScrollIndex(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                 const int32_t first, const int32_t last) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(first, last);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            return;
+        };
+        WaterFlowModel::GetInstance()->SetOnScrollIndex(std::move(onScrollIndex));
+    }
+    args.ReturnSelf();
+}
+
+void JSWaterFlow::SetScrollBar(const JSCallbackInfo& info)
+{
+    auto displayMode = JSScrollable::ParseDisplayMode(info, WaterFlowModel::GetDisplayMode());
+    WaterFlowModel::GetInstance()->SetScrollBarMode(displayMode);
+}
+
+void JSWaterFlow::SetScrollBarColor(const std::string& color)
+{
+    auto scrollBarColor = JSScrollable::ParseBarColor(color);
+    if (!scrollBarColor.empty()) {
+        WaterFlowModel::GetInstance()->SetScrollBarColor(scrollBarColor);
+    }
+}
+
+void JSWaterFlow::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
+{
+    auto scrollBarWidth = JSScrollable::ParseBarWidth(scrollWidth);
+    if (!scrollBarWidth.empty()) {
+        WaterFlowModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
+    }
 }
 } // namespace OHOS::Ace::Framework

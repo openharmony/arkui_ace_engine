@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <vector>
 
@@ -182,11 +183,12 @@ public:
     }
 #endif
 
-// ArkTsCard start
+    // ArkTsCard start
     static void PreloadAceModuleCard(void* runtime, const std::unordered_set<std::string>& formModuleList);
     static void ReloadAceModuleCard(void* runtime, const std::unordered_set<std::string>& formModuleList);
-// ArkTsCard end
+    // ArkTsCard end
     static bool IsPlugin();
+
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -197,11 +199,12 @@ private:
     void InitJsContextModuleObject();
     void InitGroupJsBridge();
     static shared_ptr<JsRuntime> InnerGetCurrentRuntime();
-    shared_ptr<JsValue> CallGetUIContextFunc(const shared_ptr<JsRuntime>& runtime,
-        const std::vector<shared_ptr<JsValue>>& argv);
+    shared_ptr<JsValue> CallGetUIContextFunc(
+        const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
     std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
     static std::map<std::string, std::string> mediaResourceFileMap_;
+    static std::shared_mutex sharedMutex_;
 
     // runningPage_ is the page that is loaded and rendered successfully, while stagingPage_ is to
     // handle all page routing situation, which include two stages:
@@ -227,6 +230,7 @@ private:
     static bool isModuleInitialized_;
     static shared_ptr<JsRuntime> globalRuntime_;
     shared_ptr<JsValue> uiContext_;
+    static std::shared_mutex globalRuntimeMutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngineInstance);
 };
@@ -247,8 +251,8 @@ public:
 #if !defined(PREVIEW)
     bool IsModule();
 
-    void LoadJsWithModule(std::string& urlName,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
+    void LoadJsWithModule(
+        std::string& urlName, const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
 
     void LoadPluginJsWithModule(std::string& urlName);
 
@@ -332,8 +336,7 @@ public:
 
     void SetContext(int32_t instanceId, NativeReference* context) override;
 
-    void SetErrorEventHandler(
-        std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
+    void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
@@ -393,17 +396,19 @@ public:
     void SetHspBufferTrackerCallback(std::function<bool(const std::string&, uint8_t**, size_t*)>&& callback);
     // Support to execute the ets code mocked by developer
     void SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo);
+    bool IsComponentPreview() override;
 #endif
     static void AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
         const std::string& namedRoute, panda::Local<panda::ObjectRef> params);
     bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
     std::string SearchRouterRegisterMap(const std::string& pageName) override;
     bool UpdateRootComponent() override;
-    bool LoadPluginComponent(const std::string &url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
+    bool LoadPluginComponent(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
     static void SetEntryObject(const panda::Global<panda::ObjectRef>& obj)
     {
         obj_ = obj;
     }
+    bool ExecuteJs(const uint8_t* content, int32_t size) override;
 
 private:
     bool CallAppFunc(const std::string& appFuncName);

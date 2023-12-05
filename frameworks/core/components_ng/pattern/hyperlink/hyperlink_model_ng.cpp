@@ -25,7 +25,7 @@ void HyperlinkModelNG::Create(const std::string& address, const std::string& con
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::HYPERLINK_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::HYPERLINK_ETS_TAG, nodeId);
     auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(
         V2::HYPERLINK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
 
@@ -79,5 +79,14 @@ void HyperlinkModelNG::SetDraggable(bool draggable)
         gestureHub->InitDragDropEvent();
     }
     frameNode->SetDraggable(draggable);
+}
+
+
+void HyperlinkModelNG::SetColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, ForegroundColor, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, value, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
 }
 } // namespace OHOS::Ace::NG

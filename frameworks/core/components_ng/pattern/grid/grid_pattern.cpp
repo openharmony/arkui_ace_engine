@@ -130,8 +130,7 @@ void GridPattern::OnModifyDone()
         InitScrollableEvent();
     }
 
-    auto edgeEffect = gridLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
-    SetEdgeEffect(edgeEffect);
+    SetEdgeEffect();
 
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -273,15 +272,6 @@ void GridPattern::FireOnScrollStart()
     onScrollStart();
 }
 
-bool GridPattern::OnScrollCallback(float offset, int32_t source)
-{
-    if (source == SCROLL_FROM_START) {
-        FireOnScrollStart();
-        return true;
-    }
-    return ScrollablePattern::OnScrollCallback(offset, source);
-}
-
 SizeF GridPattern::GetContentSize() const
 {
     auto host = GetHost();
@@ -342,21 +332,15 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
     auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
-    float overScroll = 0.0f;
     if (gridLayoutInfo_.offsetEnd_) {
-        overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
+        auto overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
         if (source == SCROLL_FROM_UPDATE) {
             auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.currentOffset_ + offset * friction;
-            overScroll += offset * friction;
         } else {
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.currentOffset_ += offset;
-            overScroll += offset;
-        }
-        if (IsOutOfBoundary()) {
-            HandleScrollBarOutBoundary(overScroll);
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
@@ -376,10 +360,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.currentOffset_ += offset;
         }
-        overScroll = gridLayoutInfo_.currentOffset_;
-        if (IsOutOfBoundary()) {
-            HandleScrollBarOutBoundary(overScroll);
-        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (LessNotEqual(gridLayoutInfo_.currentOffset_, 0.0)) {
@@ -393,7 +373,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         gridLayoutInfo_.offsetUpdated_ = true;
     }
     gridLayoutInfo_.currentOffset_ += offset;
-    HandleScrollBarOutBoundary(overScroll);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
@@ -415,9 +394,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto offsetVpValue = offsetPx.ConvertToVp();
     offset.SetValue(offsetVpValue);
     scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, offset);
-    if (firstShow_ || gridLayoutInfo_.startIndex_ != gridLayoutInfo.startIndex_) {
+    if (!isInitialized_ || gridLayoutInfo_.startIndex_ != gridLayoutInfo.startIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
-        firstShow_ = false;
     }
 
     bool indexChanged = (gridLayoutInfo.startIndex_ != gridLayoutInfo_.startIndex_) ||
@@ -444,6 +422,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckRestartSpring();
     CheckScrollable();
     MarkSelectedItems();
+    isInitialized_ = true;
     return false;
 }
 
@@ -479,34 +458,8 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     CHECK_NULL_VOID(gridEventHub);
 
     auto onScroll = gridEventHub->GetOnScroll();
-    auto scrollSource = GetScrollSource();
-    if (scrollStop_ && !GetScrollAbort()) {
-        auto offsetPX = Dimension(finalOffset);
-        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-        if (onScroll) {
-            if (scrollSource == SCROLL_FROM_UPDATE || scrollSource == SCROLL_FROM_AXIS ||
-                scrollSource == SCROLL_FROM_BAR) {
-                onScroll(offsetVP, ScrollState::SCROLL);
-                onScroll(0.0_vp, ScrollState::IDLE);
-            } else if (scrollSource == SCROLL_FROM_ANIMATION || scrollSource == SCROLL_FROM_ANIMATION_SPRING ||
-                       scrollSource == SCROLL_FROM_ANIMATION_CONTROLLER || scrollSource == SCROLL_FROM_BAR_FLING) {
-                onScroll(offsetVP, ScrollState::FLING);
-                onScroll(0.0_vp, ScrollState::IDLE);
-            } else {
-                onScroll(offsetVP, ScrollState::IDLE);
-            }
-        }
-    } else if (onScroll && !NearZero(finalOffset)) {
-        auto offsetPX = Dimension(finalOffset);
-        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-        if (scrollSource == SCROLL_FROM_UPDATE || scrollSource == SCROLL_FROM_AXIS || scrollSource == SCROLL_FROM_BAR) {
-            onScroll(offsetVP, ScrollState::SCROLL);
-        } else if (scrollSource == SCROLL_FROM_ANIMATION || scrollSource == SCROLL_FROM_ANIMATION_SPRING ||
-                   scrollSource == SCROLL_FROM_ANIMATION_CONTROLLER || scrollSource == SCROLL_FROM_BAR_FLING) {
-            onScroll(offsetVP, ScrollState::FLING);
-        } else {
-            onScroll(offsetVP, ScrollState::IDLE);
-        }
+    if (onScroll) {
+        FireOnScroll(finalOffset, onScroll);
     }
 
     if (indexChanged) {
@@ -518,9 +471,8 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
 
     auto onReachStart = gridEventHub->GetOnReachStart();
     if (onReachStart && gridLayoutInfo_.startIndex_ == 0) {
-        if (!initialIndex_) {
+        if (!isInitialized_) {
             onReachStart();
-            initialIndex_ = true;
         }
 
         if (!NearZero(finalOffset)) {
@@ -556,9 +508,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
             }
             StartScrollBarAnimatorByProxy();
         }
-        if (!GetScrollAbort()) {
-            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-        }
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
         scrollStop_ = false;
         SetScrollAbort(false);
     }
@@ -576,11 +526,6 @@ void GridPattern::OnScrollEndCallback()
     SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
-}
-
-void GridPattern::OnScrollStartCallback()
-{
-    FireOnScrollStart();
 }
 
 std::pair<bool, bool> GridPattern::IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex)
@@ -1261,10 +1206,12 @@ void GridPattern::ScrollBy(float offset)
 
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    Pattern::ToJsonValue(json);
+    ScrollablePattern::ToJsonValue(json);
     json->Put("multiSelectable", multiSelectable_ ? "true" : "false");
     json->Put("supportAnimation", supportAnimation_ ? "true" : "false");
-    json->Put("friction", GetFriction());
+    auto JsonEdgeEffectOptions = JsonUtil::Create(true);
+    JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
+    json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
 }
 
 void GridPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
@@ -1355,11 +1302,7 @@ void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     if (!isConfigScrollable_) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     ScrollablePattern::AnimateTo(position, duration, curve, smooth);
-    FireOnScrollStart();
 }
 
 void GridPattern::ScrollTo(float position)
@@ -1472,19 +1415,24 @@ void GridPattern::UpdateScrollBarOffset()
         }
     }
     auto viewSize = geometryNode->GetFrameSize();
+    auto overScroll = 0.0f;
+    if (Positive(gridLayoutInfo_.currentOffset_)) {
+        overScroll = gridLayoutInfo_.currentOffset_;
+    } else {
+        overScroll = gridLayoutInfo_.lastMainSize_ - estimatedHeight + offset;
+        overScroll = Positive(overScroll) ? overScroll : 0.0f;
+    }
+    HandleScrollBarOutBoundary(overScroll);
     UpdateScrollBarRegion(offset, estimatedHeight, Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 }
 
-RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
+DisplayMode GridPattern::GetDefaultScrollBarDisplayMode() const
 {
     auto defaultDisplayMode = DisplayMode::OFF;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         defaultDisplayMode = DisplayMode::AUTO;
     }
-    auto property = MakeRefPtr<ScrollablePaintProperty>();
-    // default "scrollBar" attribute of Grid is BarState.Off
-    property->UpdateScrollBarMode(defaultDisplayMode);
-    return property;
+    return defaultDisplayMode;
 }
 
 int32_t GridPattern::GetOriginalIndex() const
@@ -1673,7 +1621,6 @@ void GridPattern::DumpAdvanceInfo()
                         : DumpLog::GetInstance().AddDesc("isConfigScrollable:false");
     scrollable_ ? DumpLog::GetInstance().AddDesc("scrollable:true")
                 : DumpLog::GetInstance().AddDesc("scrollable:false");
-    firstShow_ ? DumpLog::GetInstance().AddDesc("firstShow:true") : DumpLog::GetInstance().AddDesc("firstShow:false");
     gridLayoutInfo_.lastCrossCount_.has_value()
         ? DumpLog::GetInstance().AddDesc("lastCrossCount:" + std::to_string(gridLayoutInfo_.lastCrossCount_.value()))
         : DumpLog::GetInstance().AddDesc("lastCrossCount:null");
@@ -1689,7 +1636,6 @@ void GridPattern::DumpAdvanceInfo()
                                    : DumpLog::GetInstance().AddDesc("offsetUpdated:false");
     DumpLog::GetInstance().AddDesc("animatorOffset:" + std::to_string(animatorOffset_));
     DumpLog::GetInstance().AddDesc("scrollStop:" + std::to_string(scrollStop_));
-    DumpLog::GetInstance().AddDesc("initialIndex:" + std::to_string(initialIndex_));
     DumpLog::GetInstance().AddDesc("prevHeight:" + std::to_string(prevHeight_));
     DumpLog::GetInstance().AddDesc("currentHeight:" + std::to_string(currentHeight_));
     DumpLog::GetInstance().AddDesc("endHeight:" + std::to_string(endHeight_));

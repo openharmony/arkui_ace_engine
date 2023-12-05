@@ -40,9 +40,7 @@ public:
     std::string GetEntry(const std::string& suffix = ".js") const;
     const std::list<std::string>& GetPageList();
     void RouterParse(const std::unique_ptr<JsonValue>& router);
-#if defined(PREVIEW)
     void InsertPageList(const std::string& uri);
-#endif
 
 private:
     std::string pagePath_;

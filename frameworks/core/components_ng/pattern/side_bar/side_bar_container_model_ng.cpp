@@ -54,7 +54,7 @@ void SideBarContainerModelNG::Create()
     }
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::SIDE_BAR_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SIDE_BAR_ETS_TAG, nodeId);
     auto sideBarContainerNode = FrameNode::GetOrCreateFrameNode(
         V2::SIDE_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SideBarContainerPattern>(); });
 
@@ -232,5 +232,126 @@ void SideBarContainerModelNG::SetOnChangeEvent(std::function<void(const bool)>&&
     auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
+void SideBarContainerModelNG::SetSideBarWidth(FrameNode* frameNode, const Dimension& sideBarWidth)
+{
+    MarkNeedInitRealSideBarWidth(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarWidth, sideBarWidth, frameNode);
+}
+
+void SideBarContainerModelNG::SetMinSideBarWidth(FrameNode* frameNode, const Dimension& minSideBarWidth)
+{
+    MarkNeedInitRealSideBarWidth(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinSideBarWidth, minSideBarWidth, frameNode);
+}
+
+void SideBarContainerModelNG::SetControlButtonWidth(FrameNode* frameNode, const Dimension& width)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonWidth, width, frameNode);
+}
+
+void SideBarContainerModelNG::SetControlButtonHeight(FrameNode* frameNode, const Dimension& height)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHeight, height, frameNode);
+}
+
+void SideBarContainerModelNG::SetControlButtonLeft(FrameNode* frameNode, const Dimension& left)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonLeft, left, frameNode);
+}
+
+void SideBarContainerModelNG::SetControlButtonTop(FrameNode* frameNode, const Dimension& top)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonTop, top, frameNode);
+}
+
+void SideBarContainerModelNG::SetControlButtonShowIconInfo(
+    FrameNode* frameNode, const std::string& showIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap)
+{
+    auto controlButtonShowIconInfo = CreateSourceInfo(showIconStr, isPixelMap, pixMap);
+    if (controlButtonShowIconInfo.IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            SideBarContainerLayoutProperty, ControlButtonShowIconInfo, controlButtonShowIconInfo, frameNode);
+    }
+}
+
+void SideBarContainerModelNG::SetControlButtonHiddenIconInfo(
+    FrameNode* frameNode, const std::string& hiddenIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap)
+{
+    auto controlButtonHiddenIconInfo = CreateSourceInfo(hiddenIconStr, isPixelMap, pixMap);
+    if (controlButtonHiddenIconInfo.IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            SideBarContainerLayoutProperty, ControlButtonHiddenIconInfo, controlButtonHiddenIconInfo, frameNode);
+    }
+}
+
+void SideBarContainerModelNG::SetControlButtonSwitchingIconInfo(
+    FrameNode* frameNode, const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap)
+{
+    auto controlButtonSwitchingIconInfo = CreateSourceInfo(switchingIconStr, isPixelMap, pixMap);
+    if (controlButtonSwitchingIconInfo.IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo, controlButtonSwitchingIconInfo, frameNode);
+    }
+}
+
+void SideBarContainerModelNG::MarkNeedInitRealSideBarWidth(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->MarkNeedInitRealSideBarWidth(true);
+}
+
+void SideBarContainerModelNG::SetShowControlButton(FrameNode* frameNode, bool showControlButton)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ShowControlButton, showControlButton, frameNode);
+}
+
+void SideBarContainerModelNG::SetAutoHide(FrameNode* frameNode, bool autoHide)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, AutoHide, autoHide, frameNode);
+}
+
+void SideBarContainerModelNG::SetMaxSideBarWidth(FrameNode* frameNode, const Dimension& maxSideBarWidth)
+{
+    MarkNeedInitRealSideBarWidth(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MaxSideBarWidth, maxSideBarWidth, frameNode);
+}
+
+void SideBarContainerModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension& minContentWidth)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth, frameNode);
+}
+
+void SideBarContainerModelNG::SetSideBarPosition(FrameNode* frameNode, SideBarPosition sideBarPosition)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarPosition, sideBarPosition, frameNode);
+}
+
+void SideBarContainerModelNG::SetShowSideBar(FrameNode* frameNode, bool isShow)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ShowSideBar, isShow, frameNode);
+}
+
+void SideBarContainerModelNG::SetDividerStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStrokeWidth, strokeWidth, frameNode);
+}
+
+void SideBarContainerModelNG::SetDividerColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerColor, color, frameNode);
+}
+
+void SideBarContainerModelNG::SetDividerStartMargin(FrameNode* frameNode, const Dimension& startMargin)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStartMargin, startMargin, frameNode);
+}
+
+void SideBarContainerModelNG::SetDividerEndMargin(FrameNode* frameNode, const Dimension& endMargin)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerEndMargin, endMargin, frameNode);
 }
 } // namespace OHOS::Ace::NG

@@ -22,6 +22,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/form/resource/form_request_data.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/form/form_event_hub.h"
 #include "core/components_ng/pattern/form/form_model.h"
 #include "core/components_ng/pattern/form/form_node.h"
@@ -41,6 +42,12 @@ public:
     void SetOnLoad(std::function<void(const std::string&)>&& onLoad) override;
     void SetVisible(VisibleType visible) override;
     void SetVisibility(VisibleType visible) override;
+    
+    static void SetVisibility(FrameNode* frameNode, VisibleType visible);
+    static void AllowUpdate(FrameNode* frameNode, bool value);
+    static void SetDimension(FrameNode* frameNode, int32_t value);
+    static void SetModuleName(FrameNode* frameNode, const std::string& value);
+    static void SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_MODEL_NG_H

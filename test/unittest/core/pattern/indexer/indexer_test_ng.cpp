@@ -35,7 +35,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -54,7 +54,7 @@ std::vector<std::string> GetMorePopupData(int32_t)
 }
 } // namespace
 
-class IndexerTestNg : public testing::Test, public TestNG {
+class IndexerTestNg : public TestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -80,7 +80,8 @@ public:
 
 void IndexerTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<IndexerTheme>()));
@@ -88,7 +89,8 @@ void IndexerTestNg::SetUpTestSuite()
 
 void IndexerTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
+    MockParagraph::TearDown();
 }
 
 void IndexerTestNg::SetUp() {}
@@ -123,7 +125,7 @@ void IndexerTestNg::Create(const std::function<void(IndexerModelNG)>& callback,
         callback(model);
     }
     GetInstance();
-    RunMeasureAndLayout(frameNode_);
+    FlushLayoutTask(frameNode_);
 }
 
 float IndexerTestNg::GetFirstChildOffsetY()

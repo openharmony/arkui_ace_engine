@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/refresh/refresh_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -72,6 +73,7 @@ void RefreshPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToBounds(true);
+    host->GetRenderContext()->UpdateClipEdge(true);
 }
 
 void RefreshPattern::OnModifyDone()
@@ -551,6 +553,14 @@ void RefreshPattern::FireStateChange(int32_t value)
     auto refreshEventHub = GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(refreshEventHub);
     refreshEventHub->FireOnStateChange(value);
+    if (refreshStatus_ == RefreshStatus::REFRESH && Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto inspectorId = host->GetInspectorId().value_or("");
+        Recorder::EventParamsBuilder builder;
+        builder.SetId(inspectorId).SetType(host->GetTag()).SetEventType(Recorder::EventType::REFRESH);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
 }
 
 void RefreshPattern::FireRefreshing()

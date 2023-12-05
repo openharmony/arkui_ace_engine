@@ -24,8 +24,7 @@ namespace OHOS::Ace {
 extern "C" {
 #endif
 #endif /* End of #ifdef __cplusplus */
-void StartConnect(const std::string& pkgName);
-
+void StartConnect(const std::string& processName, const std::string& pkgName, bool isDebug, Callback cb);
 void StopConnect();
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,11 +36,20 @@ class ConnectManagement {
 public:
     ConnectManagement() = default;
     ~ConnectManagement() {}
+    void SetProcessName(const std::string& processName);
+    std::string GetProcessName();
     void SetPkgName(const std::string& pkgName);
     std::string GetPkgName();
+    void SetDebug(bool isDebug);
+    bool GetDebug();
+    void SetCallback(Callback cb);
+    Callback GetCallback();
 
 private:
+    std::string processName_;
     std::string pkgName_;
+    bool isDebug_;
+    Callback cb_;
 };
 } // namespace OHOS::Ace
 

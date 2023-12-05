@@ -29,7 +29,7 @@
 #include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -75,12 +75,12 @@ void ScrollableEventTestNg::TearDownTestSuite()
 
 void ScrollableEventTestNg::SetUp()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void ScrollableEventTestNg::TearDown()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**

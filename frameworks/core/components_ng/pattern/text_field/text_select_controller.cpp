@@ -59,17 +59,27 @@ RectF TextSelectController::CalculateEmptyValueCaretRect() const
     switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
         case TextAlign::START:
             rect.SetLeft(contentRect_.GetX());
-            return rect;
+            break;
         case TextAlign::CENTER:
             rect.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width() / 2.0f);
-            return rect;
+            break;
         case TextAlign::END:
             rect.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width() -
                          static_cast<float>(caretInfo_.rect.Width()));
-            return rect;
+            break;
         default:
-            return rect;
+            break;
     }
+
+    auto align = Alignment::TOP_CENTER;
+    if (layoutProperty->GetPositionProperty()) {
+        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
+    }
+    OffsetF offset = Alignment::GetAlignPosition(contentRect_.GetSize(), rect.GetSize(), align);
+    rect.SetTop(offset.GetY() + contentRect_.GetY());
+    
+    AdjustHandleAtEdge(rect);
+    return rect;
 }
 
 void TextSelectController::FitCaretMetricsToContentRect(CaretMetricsF& caretMetrics)
@@ -127,7 +137,7 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
     UpdateCaretIndex(index);
     if (!contentController_->IsEmpty()) {
         UpdateCaretRectByPositionNearTouchOffset(index, localOffset);
-        MoveHandleToContentRect(caretInfo_.rect);
+        MoveHandleToContentRect(caretInfo_.rect, 0.0f, true);
         UpdateRecordCaretIndex(caretInfo_.index);
     } else {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
@@ -167,6 +177,10 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
             pos + GetGraphemeClusterLength(contentController_->GetWideText(), pos, true));
     }
 
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT,
+            "current word position = %{public}d, select position {start:%{public}d, end:%{public}d}", pos, start, end);
+    }
     UpdateHandleIndex(start, end);
     auto index = ConvertTouchOffsetToPosition(localOffset);
     auto textLength = static_cast<int32_t>(contentController_->GetWideText().length());
@@ -246,7 +260,8 @@ std::vector<RectF> TextSelectController::GetSelectedRects() const
     return selectedRects;
 }
 
-void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment)
+void TextSelectController::MoveHandleToContentRect(
+    RectF& handleRect, float boundaryAdjustment, bool isAdjustUnconditionally) const
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
@@ -280,6 +295,26 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boun
         }
     }
     textFiled->SetTextRect(textRect);
+    AdjustHandleAtEdge(handleRect, isAdjustUnconditionally);
+}
+
+void TextSelectController::AdjustHandleAtEdge(RectF& handleRect, bool isAdjustUnconditionally) const
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFiled = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textFiled);
+    handleRect.SetOffset(OffsetF(handleRect.GetX() - handleRect.Width() / 2, handleRect.GetY()));
+    // Adjusted handle to the content area when they are at the content area boundary.
+    if (handleRect.GetX() < contentRect_.GetX()) {
+        handleRect.SetOffset(OffsetF(contentRect_.GetX(), handleRect.GetY()));
+    }
+
+    auto textRectRightBoundary = contentRect_.GetX() + contentRect_.Width();
+    if (GreatNotEqual(handleRect.GetX() + handleRect.Width(), textRectRightBoundary) &&
+        GreatNotEqual(contentRect_.Width(), 0.0) && !textFiled->GetTextValue().empty()) {
+        handleRect.SetLeft(textRectRightBoundary - handleRect.Width());
+    }
 }
 
 void TextSelectController::MoveFirstHandleToContentRect(int32_t index)
@@ -318,7 +353,7 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index)
     FireSelectEvent();
 }
 
-void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity textAffinity)
+void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity textAffinity, bool isEditorValueChanged)
 {
     index = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
     CaretMetricsF CaretMetrics;
@@ -342,10 +377,16 @@ void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity te
 
     // Adjusts one character width.
     float boundaryAdjustment = 0.0f;
-    auto textRect = textFiled->GetTextRect();
-    if (GreatNotEqual(textRect.Width(), contentRect_.Width()) && GreatNotEqual(contentRect_.Width(), 0.0) &&
-        caretInfo_.index < static_cast<int32_t>(contentController_->GetWideText().length())) {
-        boundaryAdjustment = paragraph_->GetCharacterWidth(caretInfo_.index);
+    if (isEditorValueChanged) {
+        auto textRect = textFiled->GetTextRect();
+        if (GreatNotEqual(textRect.Width(), contentRect_.Width()) && GreatNotEqual(contentRect_.Width(), 0.0) &&
+            caretInfo_.index < static_cast<int32_t>(contentController_->GetWideText().length())) {
+            boundaryAdjustment = paragraph_->GetCharacterWidth(caretInfo_.index);
+            if (SystemProperties::GetDebugEnabled()) {
+                TAG_LOGI(AceLogTag::ACE_TEXT, "caretInfo_.index = %{public}d, boundaryAdjustment =%{public}f",
+                    caretInfo_.index, boundaryAdjustment);
+            }
+        }
     }
 
     MoveHandleToContentRect(caretRect, boundaryAdjustment);

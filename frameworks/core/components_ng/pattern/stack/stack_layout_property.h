@@ -19,7 +19,7 @@
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT StackLayoutProperty final : public LayoutProperty {
+class ACE_EXPORT StackLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(StackLayoutProperty, LayoutProperty);
 
 public:

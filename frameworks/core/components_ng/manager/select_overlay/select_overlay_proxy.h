@@ -66,6 +66,7 @@ public:
     bool IsSingleHandleMenuShow();
     bool IsHandleShow();
     bool IsSingleHandle();
+    bool IsHandleReverse();
     SelectOverlayInfo GetSelectOverlayMangerInfo();
 
 private:

@@ -30,6 +30,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/common/recorder/exposure_processor.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
@@ -100,7 +101,7 @@ public:
     {
         return checkboxFlag_;
     }
-    void OnInspectorIdUpdate(const std::string& /*unused*/) override;
+    void OnInspectorIdUpdate(const std::string& id) override;
 
     struct ZIndexComparator {
         bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
@@ -400,6 +401,16 @@ public:
         customerSet_ = true;
     }
 
+    void SetDragPreviewOptions(const DragPreviewOption& previewOption)
+    {
+        previewOption_ = previewOption;
+    }
+
+    DragPreviewOption GetDragPreviewOption() const
+    {
+        return previewOption_;
+    }
+
     void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
     {
         builderFunc_ = std::move(buildFunc);
@@ -579,7 +590,6 @@ public:
     }
 
     virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
-    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     bool IsFirstBuilding() const
     {
@@ -612,6 +622,10 @@ public:
         int32_t offset, Accessibility::AccessibilityElementInfo& output);
     bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset);
+    std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
+    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
+
+    bool GetMonopolizeEvents() const;
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -659,6 +673,9 @@ private:
         std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
     void OnVisibleAreaChangeCallback(
         VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio, bool isHandled);
+
+    void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
+
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
     // set costom background layoutConstraint
@@ -671,6 +688,8 @@ private:
     void AddFrameNodeSnapshot(bool isHit, int32_t parentId);
 
     int32_t GetNodeExpectedRate();
+
+    void RecordExposureIfNeed(const std::string& inspectorId);
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -735,6 +754,10 @@ private:
     RefPtr<FrameNode> overlayNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
+
+    DragPreviewOption previewOption_ { DragPreviewMode::AUTO };
+
+    RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

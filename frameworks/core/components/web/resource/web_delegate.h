@@ -30,6 +30,7 @@
 #include <EGL/eglext.h>
 #include <GLES3/gl3.h>
 #include "base/image/pixel_map.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
@@ -403,6 +404,9 @@ public:
         RELEASED,
     };
 
+    // for webcontoller, the enum is same as web_webview and core side
+    enum class JavaScriptObjIdErrorCode : int32_t { WEBCONTROLLERERROR = -2, WEBVIEWCONTROLLERERROR = -1, END = 0 };
+
     WebDelegate() = delete;
     ~WebDelegate() override;
     WebDelegate(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type)
@@ -495,6 +499,7 @@ public:
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
     void OnFocus();
+    bool NeedSoftKeyboard();
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
     void OnScreenCaptureRequest(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request);
@@ -524,6 +529,10 @@ public:
     }
     void NotifyMemoryLevel(int32_t level);
     void SetAudioMuted(bool muted);
+    void SetRichtextIdentifier(std::optional<std::string>& richtextData)
+    {
+        richtextData_ = richtextData;
+    }
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -531,6 +540,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
     RefPtr<WebResponse> OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool IsEmptyOnInterceptRequest();
+    void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
     void OnProgressChanged(int param);
@@ -814,6 +824,7 @@ private:
     float lowerFrameRateVisibleRatio_ = 0.1;
     std::optional<ScriptItems> scriptItems_;
     bool accessibilityState_ = false;
+    std::optional<std::string> richtextData_;
 #endif
 };
 

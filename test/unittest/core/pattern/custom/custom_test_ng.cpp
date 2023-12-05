@@ -24,7 +24,7 @@
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -48,23 +48,23 @@ public:
 void CustomTestNg::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "CustomTestNg SetUpTestCase";
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void CustomTestNg::TearDownTestSuite()
 {
     GTEST_LOG_(INFO) << "CustomTestNg TearDownTestCase";
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void CustomTestNg::SetUp()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void CustomTestNg::TearDown()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 RefPtr<FrameNode> CustomTestNg::CreateNode(const std::string& tag)
@@ -107,7 +107,7 @@ HWTEST_F(CustomTestNg, CustomTest001, TestSize.Level1)
      * @tc.steps: step4. Invoke Build and AdjustLayoutWrapperTree.
      * @tc.expected: parentLayoutWrapper's childCount is zero.
      */
-    customNode->Build();
+    customNode->Build(nullptr);
     customNode->AdjustLayoutWrapperTree(parentLayoutWrapper, false, false);
     EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), CHILD_COUNT_0);
 
@@ -118,7 +118,7 @@ HWTEST_F(CustomTestNg, CustomTest001, TestSize.Level1)
         return AceType::DynamicCast<UINode>(uiNode);
     };
     customNode->SetRenderFunction(std::move(renderFunction));
-    customNode->Build();
+    customNode->Build(nullptr);
     customNode->AdjustLayoutWrapperTree(parentLayoutWrapper, false, false);
     EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), CHILD_COUNT_0);
 }
@@ -154,7 +154,7 @@ HWTEST_F(CustomTestNg, CustomTest002, TestSize.Level1)
      * @tc.steps: step4. Invoke Build and AdjustLayoutWrapperTree.
      * @tc.expected: parentLayoutWrapper's childCount is zero.
      */
-    customNode->Build();
+    customNode->Build(nullptr);
     customNode->AdjustLayoutWrapperTree(parentLayoutWrapper, false, false);
     EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), CHILD_COUNT_0);
 
@@ -165,9 +165,9 @@ HWTEST_F(CustomTestNg, CustomTest002, TestSize.Level1)
         return AceType::DynamicCast<UINode>(uiNode);
     };
     customNode->SetRenderFunction(std::move(renderFunction));
-    customNode->Build();
+    customNode->Build(nullptr);
     customNode->AdjustLayoutWrapperTree(parentLayoutWrapper, false, false);
-    EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), CHILD_COUNT_1);
+    EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), CHILD_COUNT_0);
 }
 
 /**

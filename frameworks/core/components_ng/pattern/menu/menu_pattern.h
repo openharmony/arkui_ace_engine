@@ -284,6 +284,16 @@ public:
     {
         return hasLaid_;
     }
+
+    void SetTargetSize(const SizeF& size)
+    {
+        targetSize_ = size;
+    }
+
+    SizeF GetTargetSize() const
+    {
+        return targetSize_;
+    }
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -338,6 +348,7 @@ private:
 	
     bool isWidthModifiedBySelect_ = false;
     bool hasLaid_ = false;
+    SizeF targetSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

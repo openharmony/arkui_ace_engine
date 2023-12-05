@@ -398,7 +398,7 @@ public:
         radius0_ = std::max(radius0_, 0.0f);
         radius1_ = std::max(radius1_, 0.0f);
         return RSRecordingShaderEffect::CreateTwoPointConical(
-            center_, radius0_, center_, radius1_, colors, pos, tileMode);
+            center_, radius0_, center_, radius1_, colors, pos, tileMode, &matrix);
     }
 
     static std::unique_ptr<GradientShader> CreateRadialGradient(const NG::Gradient& gradient, const RSSize& size)
@@ -990,7 +990,7 @@ void DrawingDecorationPainter::PaintColorBlend(const RSRoundRect& rRect, RSCanva
             brush.SetAntiAlias(true);
             RSFilter filter;
             filter.SetColorFilter(RSRecordingColorFilter::CreateBlendModeColorFilter(RSColor::ColorQuadSetARGB(
-                colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue(), colorBlend.GetAlpha()),
+                colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
                 RSBlendMode::PLUS));
             brush.SetFilter(filter);
             RSSaveLayerOps slr(nullptr, &brush, RSSaveLayerOps::Flags::INIT_WITH_PREVIOUS);

@@ -32,6 +32,10 @@
 #define private public
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -47,24 +51,22 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/property/measure_property.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/unittest/core/pattern/test_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float WATERFLOW_WIDTH = 480.f;
+constexpr float WATERFLOW_HEIGHT = 800.f;
 constexpr int32_t TOTAL_LINE_NUMBER = 10;
 constexpr int32_t VIEW_LINE_NUMBER = 8;
-constexpr float ITEM_HEIGHT = DEVICE_HEIGHT / VIEW_LINE_NUMBER;
+constexpr float ITEM_HEIGHT = WATERFLOW_HEIGHT / VIEW_LINE_NUMBER;
 } // namespace
 
-class WaterFlowTestNg : public testing::Test, public TestNG {
+class WaterFlowTestNg : public TestNG {
 protected:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -75,7 +77,7 @@ protected:
     void Create(const std::function<void(WaterFlowModelNG)>& callback = nullptr);
     void CreateWithItem(const std::function<void(WaterFlowModelNG)>& callback = nullptr);
     static void CreateItem(int32_t number = 10);
-    void UpdateCurrentOffset(float offset);
+    void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void MouseSelect(Offset start, Offset end);
     void MouseSelectRelease();
     static std::function<void()> GetDefaultHeaderBuilder();
@@ -91,20 +93,17 @@ protected:
 
 void WaterFlowTestNg::SetUpTestSuite()
 {
-    MockContainer::SetUp();
-    MockPipelineBase::SetUp();
-    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    TestNG::SetUpTestSuite();
     // set buttonTheme to themeManager before using themeManager to get buttonTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
 }
 
 void WaterFlowTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
-    MockContainer::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 void WaterFlowTestNg::SetUp() {}
@@ -132,12 +131,14 @@ void WaterFlowTestNg::Create(const std::function<void(WaterFlowModelNG)>& callba
     RefPtr<ScrollControllerBase> positionController = model.CreateScrollController();
     RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
     model.Create();
+    ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(WATERFLOW_HEIGHT));
     model.SetScroller(positionController, scrollBarProxy);
     if (callback) {
         callback(model);
     }
     GetInstance();
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
+    FlushLayoutTask(frameNode_);
 }
 
 void WaterFlowTestNg::CreateWithItem(const std::function<void(WaterFlowModelNG)>& callback)
@@ -155,16 +156,16 @@ void WaterFlowTestNg::CreateItem(int32_t number)
     for (int32_t i = 0; i < number; i++) {
         WaterFlowItemModelNG waterFlowItemModel;
         waterFlowItemModel.Create();
-        SetWidth(FILL_LENGTH);
-        SetHeight(Dimension(ITEM_HEIGHT));
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        ViewAbstract::SetHeight(CalcLength(Dimension(ITEM_HEIGHT)));
         ViewStackProcessor::GetInstance()->Pop();
     }
 }
 
-void WaterFlowTestNg::UpdateCurrentOffset(float offset)
+void WaterFlowTestNg::UpdateCurrentOffset(float offset, int32_t source)
 {
-    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
+    pattern_->UpdateCurrentOffset(offset, source);
+    FlushLayoutTask(frameNode_);
 }
 
 std::function<void()> WaterFlowTestNg::GetDefaultHeaderBuilder()
@@ -172,22 +173,20 @@ std::function<void()> WaterFlowTestNg::GetDefaultHeaderBuilder()
     return []() {
         RowModelNG rowModel;
         rowModel.Create(std::nullopt, nullptr, "");
-        SetWidth(Dimension(1.0, DimensionUnit::PERCENT));
-        SetHeight(Dimension(50.f));
+        ViewAbstract::SetWidth(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)));
+        ViewAbstract::SetHeight(CalcLength(Dimension(50.f)));
     };
 }
 
 AssertionResult WaterFlowTestNg::IsEqualTotalOffset(float expectOffset)
 {
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
+    FlushLayoutTask(frameNode_);
     float currentOffset = pattern_->GetTotalOffset();
     if (NearEqual(currentOffset, expectOffset)) {
         return testing::AssertionSuccess();
     }
-    return AssertionFailure() <<
-        "currentOffset: " << currentOffset <<
-        " != " <<
-        "expectOffset: " << expectOffset;
+    return AssertionFailure() << "currentOffset: " << currentOffset << " != "
+                              << "expectOffset: " << expectOffset;
 }
 
 /**
@@ -295,9 +294,7 @@ HWTEST_F(WaterFlowTestNg, Property004, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, Property006, TestSize.Level1)
 {
-    CreateWithItem([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("repeat(3, 2fr)");
-    });
+    CreateWithItem([](WaterFlowModelNG model) { model.SetColumnsTemplate("repeat(3, 2fr)"); });
     EXPECT_EQ(pattern_->GetRows(), VIEW_LINE_NUMBER / 2);
 }
 
@@ -338,9 +335,7 @@ HWTEST_F(WaterFlowTestNg, Property008, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, Property009, TestSize.Level1)
 {
-    CreateWithItem([](WaterFlowModelNG model) {
-        model.SetScrollEnabled(true);
-    });
+    CreateWithItem([](WaterFlowModelNG model) { model.SetScrollEnabled(true); });
     EXPECT_EQ(layoutProperty_->GetScrollEnabled(), true);
     layoutProperty_->UpdateScrollEnabled(false);
     EXPECT_EQ(layoutProperty_->GetScrollEnabled(), false);
@@ -374,9 +369,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, WaterFlowTest002, TestSize.Level1)
 {
-    CreateWithItem([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-    });
+    CreateWithItem([](WaterFlowModelNG model) { model.SetColumnsTemplate("1fr 1fr 1fr"); });
 
     /**
      * @tc.steps: step1. When setting fixed rows and columns, check the status of child nodes in the waterFlow.
@@ -395,9 +388,11 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest002, TestSize.Level1)
 HWTEST_F(WaterFlowTestNg, WaterFlowTest003, TestSize.Level1)
 {
     CreateWithItem([](WaterFlowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
+        ViewAbstract::SetHeight(CalcLength(200.f));
         model.SetColumnsTemplate("1fr 1fr 1fr");
     });
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    FlushLayoutTask(frameNode_);
     for (int32_t i = 0; i < 6; ++i) {
         EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
@@ -411,9 +406,11 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest003, TestSize.Level1)
 HWTEST_F(WaterFlowTestNg, WaterFlowTest004, TestSize.Level1)
 {
     CreateWithItem([](WaterFlowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
+        ViewAbstract::SetHeight(CalcLength(250.f));
         model.SetColumnsTemplate("1fr 1fr 1fr");
     });
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 250.f);
+    FlushLayoutTask(frameNode_);
     for (int32_t i = 0; i < 9; ++i) {
         EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
@@ -427,11 +424,13 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest004, TestSize.Level1)
 HWTEST_F(WaterFlowTestNg, WaterFlowTest005, TestSize.Level1)
 {
     CreateWithItem([](WaterFlowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
+        ViewAbstract::SetHeight(CalcLength(200.f));
         model.SetColumnsTemplate("1fr 1fr 1fr");
     });
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    FlushLayoutTask(frameNode_);
     pattern_->UpdateCurrentOffset(-50.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    FlushLayoutTask(frameNode_);
     for (int32_t i = 0; i < 9; ++i) {
         EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
@@ -445,11 +444,13 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest005, TestSize.Level1)
 HWTEST_F(WaterFlowTestNg, WaterFlowTest006, TestSize.Level1)
 {
     CreateWithItem([](WaterFlowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
+        ViewAbstract::SetHeight(CalcLength(200.f));
         model.SetColumnsTemplate("1fr 1fr 1fr");
     });
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    FlushLayoutTask(frameNode_);
     pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    FlushLayoutTask(frameNode_);
     for (int32_t i = 3; i < 9; ++i) {
         EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
@@ -464,12 +465,14 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest007, TestSize.Level1)
 {
     WaterFlowModelNG waterFlowModelNG;
     waterFlowModelNG.Create();
+    ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(200.f));
     waterFlowModelNG.SetColumnsTemplate("1fr 1fr 1fr");
     CreateItem(9);
     GetInstance();
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    FlushLayoutTask(frameNode_);
     pattern_->UpdateStartIndex(8);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    FlushLayoutTask(frameNode_);
     for (int32_t i = 0; i < 3; ++i) {
         EXPECT_FALSE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
@@ -483,11 +486,13 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest007, TestSize.Level1)
 HWTEST_F(WaterFlowTestNg, WaterFlowTest008, TestSize.Level1)
 {
     CreateWithItem([](WaterFlowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
+        ViewAbstract::SetHeight(CalcLength(200.f));
         model.SetColumnsTemplate("1fr 1fr 1fr");
     });
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    FlushLayoutTask(frameNode_);
     pattern_->UpdateStartIndex(1);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    FlushLayoutTask(frameNode_);
     for (int32_t i = 6; i < 9; ++i) {
         EXPECT_FALSE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
@@ -501,11 +506,13 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest008, TestSize.Level1)
 HWTEST_F(WaterFlowTestNg, WaterFlowTest009, TestSize.Level1)
 {
     CreateWithItem([](WaterFlowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
+        ViewAbstract::SetHeight(CalcLength(200.f));
         model.SetColumnsTemplate("1fr 1fr 1fr");
     });
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    FlushLayoutTask(frameNode_);
     pattern_->UpdateStartIndex(3);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    FlushLayoutTask(frameNode_);
     for (int32_t i = 0; i < 6; ++i) {
         EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
@@ -519,16 +526,18 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest009, TestSize.Level1)
 HWTEST_F(WaterFlowTestNg, WaterFlowTest010, TestSize.Level1)
 {
     CreateWithItem([](WaterFlowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
+        ViewAbstract::SetHeight(CalcLength(200.f));
         model.SetColumnsTemplate("1fr 1fr 1fr");
     });
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    FlushLayoutTask(frameNode_);
     pattern_->UpdateStartIndex(9);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(9, false)->IsActive());
     EXPECT_FALSE(frameNode_->GetOrCreateChildByIndex(0, false)->IsActive());
 
     pattern_->UpdateStartIndex(0);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    FlushLayoutTask(frameNode_);
     EXPECT_FALSE(frameNode_->GetOrCreateChildByIndex(9, false)->IsActive());
     EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(0, false)->IsActive());
 }
@@ -542,38 +551,30 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest011, TestSize.Level1)
 {
     CreateWithItem([](WaterFlowModelNG model) { model.SetColumnsTemplate("1fr"); });
 
-    EXPECT_TRUE(
-        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { ITEM_HEIGHT, 0 }));
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(-ITEM_HEIGHT), { 0, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { ITEM_HEIGHT, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-ITEM_HEIGHT), { 0, 0 }));
 
     UpdateCurrentOffset(-ITEM_HEIGHT);
-    EXPECT_TRUE(
-        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2), { 0, 0 }));
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
-    EXPECT_TRUE(
-        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(-ITEM_HEIGHT * 2), { 0, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2), { 0, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-ITEM_HEIGHT * 2), { 0, 0 }));
 
     UpdateCurrentOffset(-ITEM_HEIGHT);
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { 0, 0 }));
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
-    EXPECT_TRUE(
-        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(-ITEM_HEIGHT), { 0, -ITEM_HEIGHT }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { 0, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-ITEM_HEIGHT), { 0, -ITEM_HEIGHT }));
 
     pattern_->layoutInfo_.startIndex_ = 0;
     pattern_->layoutInfo_.currentOffset_ = ITEM_HEIGHT;
-    EXPECT_TRUE(
-        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { ITEM_HEIGHT, 0 }));
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
-    EXPECT_TRUE(
-        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(-ITEM_HEIGHT * 2), { -ITEM_HEIGHT, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { ITEM_HEIGHT, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-ITEM_HEIGHT * 2), { -ITEM_HEIGHT, 0 }));
 
     pattern_->layoutInfo_.currentOffset_ = -ITEM_HEIGHT * 3;
-    EXPECT_TRUE(
-        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2), { 0, ITEM_HEIGHT }));
-    EXPECT_TRUE(IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
-    EXPECT_TRUE(
-        IsEqualOverScrollOffset(pattern_->GetOverScrollOffset(-ITEM_HEIGHT), { 0, -ITEM_HEIGHT }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2), { 0, ITEM_HEIGHT }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-ITEM_HEIGHT), { 0, -ITEM_HEIGHT }));
 }
 
 /**
@@ -750,12 +751,12 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPatternTest002, TestSize.Level1)
      * @tc.expected: The return_value is correct.
      */
     pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
+    FlushLayoutTask(frameNode_);
     pattern_->UpdateScrollBarOffset();
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, 0.f);
 
     pattern_->UpdateCurrentOffset(200.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, DEVICE_HEIGHT);
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -ITEM_HEIGHT * 2);
 }
 
@@ -927,6 +928,143 @@ HWTEST_F(WaterFlowTestNg, Callback001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: onScroll
+ * @tc.desc: Test onScroll event
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OnScroll001, TestSize.Level1)
+{
+    CalcDimension scrollOffset;
+    ScrollState scrollState = ScrollState::IDLE;
+    auto onScroll = [&scrollOffset, &scrollState](CalcDimension offset, ScrollState state) {
+        scrollOffset = offset;
+        scrollState = state;
+    };
+    CreateWithItem([onScroll](WaterFlowModelNG model) { model.SetOnScroll(onScroll); });
+
+    /**
+     * @tc.steps: step1. finger moves up
+     * @tc.expected: Trigger onScroll with SCROLL state
+     */
+    UpdateCurrentOffset(-ITEM_HEIGHT);
+    EXPECT_EQ(scrollOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(scrollState, ScrollState::SCROLL);
+
+    /**
+     * @tc.steps: step2. fling
+     * @tc.expected: Trigger onScroll with FLING state
+     */
+    UpdateCurrentOffset(-1, SCROLL_FROM_ANIMATION);
+    EXPECT_EQ(scrollOffset.Value(), 1);
+    EXPECT_EQ(scrollState, ScrollState::FLING);
+
+    /**
+     * @tc.steps: step3. stop
+     * @tc.expected: Trigger onScroll with IDLE state
+     */
+    pattern_->OnAnimateStop();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(scrollOffset.Value(), 0);
+    EXPECT_EQ(scrollState, ScrollState::IDLE);
+}
+
+/**
+ * @tc.name: onScroll
+ * @tc.desc: Test onScroll event
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OnScroll002, TestSize.Level1)
+{
+    CalcDimension scrollOffset;
+    ScrollState scrollState = ScrollState::IDLE;
+    auto onScroll = [&scrollOffset, &scrollState](CalcDimension offset, ScrollState state) {
+        scrollOffset = offset;
+        scrollState = state;
+    };
+    CreateWithItem([onScroll](WaterFlowModelNG model) { model.SetOnScroll(onScroll); });
+
+    /**
+     * @tc.steps: step1. finger moves down at top
+     * @tc.expected: Trigger onScroll with SCROLL state
+     */
+    UpdateCurrentOffset(ITEM_HEIGHT);
+    EXPECT_EQ(scrollOffset.Value(), 0);
+    EXPECT_EQ(scrollState, ScrollState::IDLE);
+}
+
+/**
+ * @tc.name: onScrollIndex
+ * @tc.desc: Test onScrollIndex event
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, onScrollIndex001, TestSize.Level1)
+{
+    int32_t firstIndex = -1;
+    int32_t lastIndex = -1;
+    auto onScrollIndex = [&firstIndex, &lastIndex](int32_t first, int32_t last) {
+        firstIndex = first;
+        lastIndex = last;
+    };
+    // 10 items total, 8 items showed
+    CreateWithItem([onScrollIndex](WaterFlowModelNG model) { model.SetOnScrollIndex(onScrollIndex); });
+
+    /**
+     * @tc.steps: step0. event on first layout
+     * @tc.expected: Trigger onScrollIndex
+     */
+    EXPECT_EQ(firstIndex, 0);
+    EXPECT_EQ(lastIndex, 7);
+
+    /**
+     * @tc.steps: step1. finger move up, offset less than one item height
+     * @tc.expected: last item changed, trigger onScrollIndex
+     */
+    UpdateCurrentOffset(-ITEM_HEIGHT / 2);
+    EXPECT_EQ(firstIndex, 0);
+    EXPECT_EQ(lastIndex, 8);
+
+    /**
+     * @tc.steps: step2. finger move up, offset more than one item height
+     * @tc.expected: first and last item changed, trigger onScrollIndex
+     */
+    UpdateCurrentOffset(-ITEM_HEIGHT);
+    EXPECT_EQ(firstIndex, 1);
+    EXPECT_EQ(lastIndex, 9);
+}
+
+/**
+ * @tc.name: onScrollStart and onScrollStop
+ * @tc.desc: Verify onScrollStart and onScrollStop event
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OnScrollStart001, TestSize.Level1)
+{
+    bool isScrollStartCalled = false;
+    bool isScrollStopCalled = false;
+    auto scrollStart = [&isScrollStartCalled]() { isScrollStartCalled = true; };
+    auto scrollStop = [&isScrollStopCalled]() { isScrollStopCalled = true; };
+    Create([scrollStart, scrollStop](WaterFlowModelNG model) {
+        model.SetOnScrollStart(scrollStart);
+        model.SetOnScrollStop(scrollStop);
+    });
+
+    /**
+     * @tc.steps: step1. pan start
+     * @tc.expected: trigger onScrollStart
+     */
+    pattern_->OnScrollCallback(0, SCROLL_FROM_START);
+    EXPECT_TRUE(isScrollStartCalled);
+
+    /**
+     * @tc.steps: step2. OnScrollEnd
+     * @tc.expected: trigger onScrollStop
+     */
+    pattern_->OnScrollEndCallback();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isScrollStopCalled);
+}
+
+/**
  * @tc.name: WaterFlowLayoutInfoTest001
  * @tc.desc: Test functions in WaterFlowLayoutInfo.
  * @tc.type: FUNC
@@ -939,8 +1077,8 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest001, TestSize.Level1)
         for (int32_t i = 0; i < TOTAL_LINE_NUMBER; i++) {
             WaterFlowItemModelNG waterFlowItemModel;
             waterFlowItemModel.Create();
-            SetWidth(FILL_LENGTH);
-            SetHeight(Dimension(ITEM_HEIGHT));
+            ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+            ViewAbstract::SetHeight(CalcLength(Dimension(ITEM_HEIGHT)));
             ViewStackProcessor::GetInstance()->Pop();
         }
     });
@@ -951,7 +1089,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest001, TestSize.Level1)
      */
     auto reached = pattern_->layoutInfo_.IsAllCrossReachend(ITEM_HEIGHT);
     EXPECT_TRUE(reached);
-    reached = pattern_->layoutInfo_.IsAllCrossReachend(DEVICE_HEIGHT);
+    reached = pattern_->layoutInfo_.IsAllCrossReachend(WATERFLOW_HEIGHT);
     EXPECT_TRUE(reached);
 
     /**
@@ -991,6 +1129,8 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_distributed001, TestSize.Level1)
      */
     WaterFlowModelNG waterFlowModelNG;
     waterFlowModelNG.Create();
+    ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(WATERFLOW_HEIGHT));
     GetInstance();
 
     // need dpi to be 1
@@ -1116,7 +1256,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_OnDirtyLayoutWrapperSwap001, TestSize
     pattern_->InitScrollableEvent();
     EXPECT_NE(pattern_->scrollableEvent_, nullptr);
     pattern_->OnModifyDone();
-
+    EXPECT_FALSE(pattern_->CanOverScroll(SCROLL_FROM_UPDATE));
     /**
      * @tc.steps: step2. test function.
      * @tc.expected: function OnDirtyLayoutWrapperSwap is called.
@@ -1134,6 +1274,25 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_OnDirtyLayoutWrapperSwap001, TestSize
     config.skipLayout = false;
     config.skipMeasure = true;
     EXPECT_EQ(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config), false);
+}
+
+/**
+ * @tc.name: WaterFlowPattern_EdgeEffect001
+ * @tc.desc: Test EdgeEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowPattern_EdgeEffect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Waterflow node
+     */
+    CreateWithItem([](WaterFlowModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
+
+    /**
+     * @tc.steps: step2. test function.
+     * @tc.expected: function CanOverScroll return true with spring edge effect.
+     */
+    EXPECT_TRUE(pattern_->CanOverScroll(SCROLL_FROM_UPDATE));
 }
 
 /**
@@ -1156,9 +1315,9 @@ HWTEST_F(WaterFlowTestNg, Property010, TestSize.Level1)
         model.SetItemMinHeight(Dimension(20));
         model.SetItemMaxWidth(Dimension(200));
         model.SetItemMaxHeight(Dimension(500));
-        });
+    });
 
-     /**
+    /**
      * @tc.steps: step2. test function.
      * @tc.expected: function ToJsonValue is called.
      */
@@ -1276,7 +1435,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest005, TestSize.Level1)
     pattern_->layoutInfo_.waterFlowItems_[crossIndex + 1][0] = std::pair<float, float>(1.0f, maxMainHeight);
     EXPECT_EQ(pattern_->layoutInfo_.GetMaxMainHeight(), maxMainHeight + 1.0f);
 
-     /**
+    /**
      * @tc.steps: Test GetCrossIndexForNextItem function
      * @tc.expected: step3. Check whether the return value is correct.
      */
@@ -1312,11 +1471,9 @@ HWTEST_F(WaterFlowTestNg, WaterFlowGetItemRectTest001, TestSize.Level1)
      * @tc.steps: step3. Get valid WaterFlowItem Rect.
      * @tc.expected: Return actual Rect when input valid index.
      */
-    float itemWidth = DEVICE_WIDTH / colNumber;
+    float itemWidth = WATERFLOW_WIDTH / colNumber;
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, itemWidth, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(5),
-        Rect(DEVICE_WIDTH / 4, ITEM_HEIGHT, itemWidth, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(10),
-        Rect(DEVICE_WIDTH / 2, ITEM_HEIGHT * 2, itemWidth, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(5), Rect(WATERFLOW_WIDTH / 4, ITEM_HEIGHT, itemWidth, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(10), Rect(WATERFLOW_WIDTH / 2, ITEM_HEIGHT * 2, itemWidth, ITEM_HEIGHT)));
 }
 } // namespace OHOS::Ace::NG

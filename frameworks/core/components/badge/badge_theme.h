@@ -40,14 +40,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->badgeColor_ = themeConstants->GetColor(THEME_BADGE_COLOR);
-            theme->messageCount_ = themeConstants->GetInt(THEME_BADGE_MESSAGECOUNT);
-            theme->badgePosition_ = BadgePosition(themeConstants->GetInt(THEME_BADGE_POSITION));
-            theme->showMessage_ = themeConstants->GetInt(THEME_BADGE_SHOWMESSAGE);
-            theme->badgeTextColor_ = themeConstants->GetColor(THEME_BADGE_TEXT_COLOR);
-            theme->badgeFontSize_ = themeConstants->GetDimension(THEME_BADGE_TEXT_FONT_SIZE);
-            theme->badgeBorderColor_ = themeConstants->GetColor(THEME_BADGE_BORDER_COLOR);
-            theme->badgeBorderWidth_ = themeConstants->GetDimension(THEME_BADGE_BORDER_WIDTH);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -63,6 +55,10 @@ public:
                 LOGW("find pattern of badge fail");
                 return;
             }
+            theme->messageCount_ = static_cast<int32_t>(pattern->GetAttr<double>("badge_message_count", 0.0));
+            theme->badgePosition_ =
+                BadgePosition(static_cast<int32_t>(pattern->GetAttr<double>("badge_position", 0.0)));
+            theme->showMessage_ = static_cast<int32_t>(pattern->GetAttr<double>("badge_show_message", 0.0));
             theme->badgeColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::BLACK);
             theme->badgeFontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_vp);
             theme->badgeTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK);

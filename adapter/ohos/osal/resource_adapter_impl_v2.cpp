@@ -57,6 +57,7 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_CALENDAR,
     THEME_PATTERN_CAMERA,
     THEME_PATTERN_CLOCK,
+    THEME_PATTERN_CARD,
     THEME_PATTERN_COUNTER,
     THEME_PATTERN_DIVIDER,
     THEME_PATTERN_FOCUS_ANIMATION,
@@ -93,7 +94,10 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_SIDE_BAR,
     THEME_PATTERN_RICH_EDITOR,
     THEME_PATTERN_PATTERN_LOCK,
-    THEME_PATTERN_GAUGE
+    THEME_PATTERN_GAUGE,
+    THEME_PATTERN_SHEET,
+    THEME_BLUR_STYLE_COMMON,
+    THEME_PATTERN_SHADOW
 };
 
 bool IsDirExist(const std::string& path)
@@ -134,11 +138,17 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     CHECK_NULL_RETURN(container, nullptr);
     auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
     CHECK_NULL_RETURN(aceContainer, nullptr);
+    
+    RefPtr<ResourceAdapter> newResourceAdapter = nullptr;
     auto context = aceContainer->GetAbilityContextByModule(bundleName, moduleName);
-    CHECK_NULL_RETURN(context, nullptr);
-
-    auto resourceManager = context->GetResourceManager();
-    auto newResourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager);
+    if (context) {
+        auto resourceManager = context->GetResourceManager();
+        newResourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager);
+    } else {
+        newResourceAdapter = ResourceAdapter::CreateV2();
+        auto resourceInfo = aceContainer->GetResourceInfo();
+        newResourceAdapter->Init(resourceInfo);
+    }
 
     auto resConfig = aceContainer->GetResourceConfiguration();
     newResourceAdapter->UpdateConfig(resConfig);

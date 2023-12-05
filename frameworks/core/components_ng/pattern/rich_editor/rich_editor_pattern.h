@@ -85,6 +85,15 @@ class RichEditorPattern : public TextPattern, public TextInputClient {
 public:
     RichEditorPattern();
     ~RichEditorPattern() override;
+
+    // RichEditor needs softkeyboard, override function.
+    bool NeedSoftKeyboard() const override
+    {
+        return true;
+    }
+
+    uint32_t GetSCBSystemWindowId();
+    
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<RichEditorEventHub>();
@@ -122,11 +131,6 @@ public:
         return timestamp_;
     }
 
-    bool NeedSoftKeyboard() const override
-    {
-        return true;
-    }
-
     void ResetBeforePaste();
     void ResetAfterPaste();
 
@@ -149,6 +153,8 @@ public:
     void DeleteBackward(int32_t length = 0) override;
     void DeleteForward(int32_t length) override;
     void SetInputMethodStatus(bool keyboardShown) override;
+    bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
+    void HandleClickAISpanEvent(GestureEvent& info);
     void NotifyKeyboardClosedByUser() override
     {
         FocusHub::LostFocusToViewRoot();
@@ -183,6 +189,7 @@ public:
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
+    int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
     RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     void SetSelection(int32_t start, int32_t end);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
@@ -190,7 +197,7 @@ public:
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false,
-        RichEditorResponseType responseType = RichEditorResponseType::LONG_PRESS);
+        RichEditorResponseType responseType = RichEditorResponseType::LONG_PRESS, bool handlReverse = false);
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
@@ -281,7 +288,7 @@ public:
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
-    void OnColorConfigurationUpdate() override {}
+    void OnColorConfigurationUpdate() override;
     bool IsDisabled() const;
     float GetLineHeight() const override;
     std::vector<RectF> GetTextBoxes() override;
@@ -314,6 +321,10 @@ public:
     {
         return true;
     }
+
+    void CheckHandles(SelectHandleInfo& handleInfo) override;
+
+    bool IsShowSelectMenuUsingMouse();
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
@@ -443,6 +454,7 @@ private:
     {
         return true;
     }
+    void ProcessInnerPadding();
 
     // ai analysis fun
     bool NeedAiAnalysis(
@@ -460,11 +472,11 @@ private:
     bool isMousePressed_ = false;
     bool isFirstMouseSelect_ = true;
     bool leftMousePress_ = false;
+    bool isLongPress_ = false;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
     bool imeShown_ = false;
 #endif
-
     bool isTextChange_ = false;
     bool caretVisible_ = false;
     bool isRichEditorInit_ = false;

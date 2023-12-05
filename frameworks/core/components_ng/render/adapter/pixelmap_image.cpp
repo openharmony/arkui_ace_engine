@@ -49,7 +49,7 @@ int32_t PixelMapImage::GetWidth() const
     if (pixmap) {
         return pixmap->GetWidth();
     }
-    LOGW("pixelMap_ is nullptr, return width 0.");
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "pixelMap_ is nullptr, return width 0.");
     return 0;
 }
 
@@ -59,7 +59,7 @@ int32_t PixelMapImage::GetHeight() const
     if (pixmap) {
         return pixmap->GetHeight();
     }
-    LOGW("rsCanvas is nullptr, return height 0.");
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "rsCanvas is nullptr, return height 0.");
     return 0;
 }
 
@@ -88,7 +88,6 @@ void PixelMapImage::DrawToRSCanvas(
 
     Rosen::RsImageInfo rsImageInfo(
         static_cast<int>(config.imageFit_), static_cast<int>(config.imageRepeat_), radii.get(), 1.0, 0, 0, 0);
-
     recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
 #else
     RSBrush brush;
@@ -96,7 +95,7 @@ void PixelMapImage::DrawToRSCanvas(
     RSSamplingOptions options;
     ImagePainterUtils::AddFilter(brush, options, config);
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
-    auto recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
+    auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     std::vector<RSPoint> radius;
     for (int ii = 0; ii < 4; ii++) {
         RSPoint point(radiusXY[ii].GetX(), radiusXY[ii].GetY());
@@ -114,7 +113,7 @@ void PixelMapImage::DrawToRSCanvas(
         static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
         1.0, 0, 0, 0 };
     recordingCanvas.AttachBrush(brush);
-    recordingCanvas.DrawExtendPixelMap(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
+    recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();
 #endif
 #endif
@@ -140,7 +139,7 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
 #endif
 #else
 #ifdef ENABLE_ROSEN_BACKEND
-    auto recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
+    auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     RSBrush brush;
     RSSamplingOptions options;
     RSRect dst = RSRect(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom());
@@ -148,7 +147,7 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
     auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
     RSRect src = RSRect(0, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
     recordingCanvas.AttachBrush(brush);
-    recordingCanvas.DrawPixelMapRect(pixelMap, src, dst, options);
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "Drawing is not supported, DrawPixelMapRect is not define");
     recordingCanvas.DetachBrush();
 #endif
 #endif
@@ -171,7 +170,7 @@ RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)
     CHECK_NULL_RETURN(cache, nullptr);
     auto data = DynamicCast<PixmapData>(cache->GetCacheImageData(key));
     CHECK_NULL_RETURN(data, nullptr);
-    LOGD("pixelMap cache found %{public}s", key.c_str());
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "pixelMap cache found %{public}s", key.c_str());
     return MakeRefPtr<PixelMapImage>(data->GetPixmap());
 }
 } // namespace OHOS::Ace::NG

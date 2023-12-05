@@ -32,6 +32,7 @@
 #include "recording/recording_path.h"
 #include "recording/recording_region.h"
 #include "recording/recording_shader_effect.h"
+#include "pipeline/rs_recording_canvas.h"
 #endif
 #ifndef USE_GRAPHIC_TEXT_GINE
 #include "rosen_text/properties/text_style.h"
@@ -89,6 +90,7 @@ using RSXform = Rosen::Drawing::RSXform;
 using RSTextBlob = Rosen::Drawing::TextBlob;
 using RSTextEncoding = Rosen::Drawing::TextEncoding;
 using RSTypeface = Rosen::Drawing::Typeface;
+using RSEncodedImageFormat = Rosen::Drawing::EncodedImageFormat;
 #ifdef USE_ROSEN_DRAWING
 using RSAutoCanvasRestore = Rosen::Drawing::AutoCanvasRestore;
 using RSCubicResampler = Rosen::Drawing::CubicResampler;
@@ -102,7 +104,7 @@ using RSPathDashStyle = Rosen::Drawing::PathDashStyle;
 using RSPathDirection = Rosen::Drawing::PathDirection;
 using RSPathEffect = Rosen::Drawing::PathEffect;
 using RSPicture = Rosen::Drawing::Picture;
-using RSRecordingCanvas = Rosen::Drawing::RecordingCanvas;
+using RSRecordingCanvas = Rosen::Drawing::ExtendRecordingCanvas;
 using RSRecordingColorFilter = Rosen::Drawing::ColorFilter;
 using RSRecordingColorSpace = Rosen::Drawing::ColorSpace;
 using RSRecordingImageFilter = Rosen::Drawing::ImageFilter;

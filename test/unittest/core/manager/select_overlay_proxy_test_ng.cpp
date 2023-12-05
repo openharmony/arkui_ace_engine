@@ -31,7 +31,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/common/container.h"
 
 using namespace testing;
@@ -53,13 +53,13 @@ public:
 void SelectOverlayProxyTestNg::SetUpTestCase()
 {
     MockContainer::SetUp();
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
 void SelectOverlayProxyTestNg::TearDownTestCase()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
 

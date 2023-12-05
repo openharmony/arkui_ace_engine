@@ -665,10 +665,24 @@ RefPtr<LayoutWrapperNode> UINode::CreateLayoutWrapper(bool forceMeasure, bool fo
     return frameChild ? frameChild->CreateLayoutWrapper(forceMeasure, forceLayout) : nullptr;
 }
 
-void UINode::Build()
+void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
     for (const auto& child : GetChildren()) {
-        child->Build();
+        if (InstanceOf<CustomNode>(child)) {
+            auto custom = DynamicCast<CustomNode>(child);
+            if (custom->HasExtraInfo()) {
+                if (!extraInfos) {
+                    extraInfos = std::make_shared<std::list<ExtraInfo>>();
+                }
+                extraInfos->emplace_front(custom->GetExtraInfo());
+                custom->Build(extraInfos);
+                extraInfos->pop_front();
+            } else {
+                custom->Build(extraInfos);
+            }
+        } else {
+            child->Build(extraInfos);
+        }
     }
 }
 
@@ -682,6 +696,17 @@ void UINode::SetActive(bool active)
 void UINode::SetJSViewActive(bool active)
 {
     for (const auto& child : GetChildren()) {
+        auto frameNodeChild = AceType::DynamicCast<FrameNode>(child);
+        // if child is framenode and its state is inactive, and the new state is active, then
+        // do not inform the state recursively
+        // List (active)
+        //   |--ListItem(inActive)
+        //     |--CustomComponent(fellow ListItem)
+        // if the List setActive(true) when doing some measuring or layout, ListItem is inActive, then
+        // the customComponent only follow the ListItem state changes
+        if (frameNodeChild && !frameNodeChild->IsActive() && active) {
+            return;
+        }
         child->SetJSViewActive(active);
     }
 }
@@ -805,7 +830,10 @@ void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Frame
 bool UINode::RemoveImmediately() const
 {
     auto children = GetChildren();
-    return std::all_of(children.begin(), children.end(), [](const auto& child) { return child->RemoveImmediately(); });
+    return std::all_of(
+               children.begin(), children.end(), [](const auto& child) { return child->RemoveImmediately(); }) &&
+           std::all_of(disappearingChildren_.begin(), disappearingChildren_.end(),
+               [](const auto& pair) { return pair.first->RemoveImmediately(); });
 }
 
 void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
@@ -895,6 +923,26 @@ void UINode::OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConst
     for (const auto& child : GetChildren()) {
         child->OnSetCacheCount(cacheCount, itemConstraint);
     }
+}
+
+std::string UINode::GetCurrentCustomNodeInfo()
+{
+    auto parent = AceType::Claim(this);
+    std::string extraInfo;
+    while (parent) {
+        if (InstanceOf<CustomNode>(parent)) {
+            auto custom = DynamicCast<CustomNode>(parent);
+            auto list = custom->GetExtraInfos();
+            for (const auto& child : list) {
+                extraInfo.append("    ").append(child.page).append(":")
+                    .append(std::to_string(child.line)).append("\n");
+            }
+            break;
+        }
+        parent = parent->GetParent();
+       
+    }
+    return extraInfo;
 }
 
 int32_t UINode::GenerateAccessibilityId()

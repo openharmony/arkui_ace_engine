@@ -28,6 +28,7 @@ using CreateCardFunc = UIContent* (*)(void*, void*, bool);
 using CreateFunc = UIContent* (*)(void*, void*);
 using CreateFunction = UIContent* (*)(void*);
 using GetUIContentFunc = UIContent* (*)(int32_t);
+using GetCurrentUIStackInfoFunction = char* (*)();
 constexpr char UI_CONTENT_CREATE_FUNC[] = "OHOS_ACE_CreateUIContent";
 constexpr char Card_CREATE_FUNC[] = "OHOS_ACE_CreateFormContent";
 constexpr char SUB_WINDOW_UI_CONTENT_CREATE_FUNC[] = "OHOS_ACE_CreateSubWindowUIContent";
@@ -141,4 +142,24 @@ UIContent* UIContent::GetUIContent(int32_t instanceId)
     return content;
 }
 
+std::string UIContent::GetCurrentUIStackInfo()
+{
+    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+    if (handle == nullptr) {
+        return std::string();
+    }
+
+    auto entry = reinterpret_cast<GetCurrentUIStackInfoFunction>(LOADSYM(handle, "OHOS_ACE_GetCurrentUIStackInfo"));
+    if (entry == nullptr) {
+        FREELIB(handle);
+        return std::string();
+    }
+
+    auto content = entry();
+    if (content == nullptr) {
+        return std::string();
+    }
+    
+    return content;
+}
 } // namespace OHOS::Ace

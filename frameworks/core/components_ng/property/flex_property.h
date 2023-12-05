@@ -25,20 +25,22 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-using AlignRulesType = std::map<AlignDirection, AlignRule>;
+using AlignRulesItem = std::map<AlignDirection, AlignRule>;
+using BiasPair = std::pair<float, float>;
 struct FlexItemProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexGrow, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexShrink, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignSelf, FlexAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexBasis, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DisplayIndex, int32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignRules, AlignRulesType);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignRules, AlignRulesItem);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignLeft, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignMiddle, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignRight, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignTop, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignCenter, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignBottom, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Bias, BiasPair);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
@@ -73,7 +75,7 @@ struct FlexItemProperty {
                (HasAlignTop() && HasAlignBottom());
     }
 
-    void SetAlignValue(AlignDirection& alignDirection, float value)
+    void SetAlignValue(const AlignDirection& alignDirection, float value)
     {
         static const std::unordered_map<AlignDirection, void (*)(float, FlexItemProperty&)> operators = {
             { AlignDirection::LEFT,
@@ -96,7 +98,7 @@ struct FlexItemProperty {
         LOGE("Unknown Align Direction");
     }
 
-    bool GetAligned(AlignDirection& alignDirection)
+    bool GetAligned(const AlignDirection& alignDirection)
     {
         static const std::unordered_map<AlignDirection, bool (*)(FlexItemProperty&)> operators = {
             { AlignDirection::LEFT, [](FlexItemProperty& item) { return item.HasAlignLeft(); } },
@@ -114,7 +116,7 @@ struct FlexItemProperty {
         return false;
     }
 
-    float GetAlignValue(AlignDirection& alignDirection)
+    float GetAlignValue(const AlignDirection& alignDirection)
     {
         static const std::unordered_map<AlignDirection, float (*)(FlexItemProperty&)> operators = {
             { AlignDirection::LEFT, [](FlexItemProperty& item) { return item.GetAlignLeft().value_or(0.0f); } },

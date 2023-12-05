@@ -21,6 +21,9 @@
 #include <string>
 #include <unistd.h>
 
+#include "dm_common.h"
+
+#include "locale_config.h"
 #include "parameter.h"
 #include "parameters.h"
 
@@ -43,6 +46,7 @@ constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
+constexpr char CUSTOM_TITLE_KEY[] = "persist.sys.arkui.customtitle";
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int DEFAULT_THRESHOLD_JANK = 15;
@@ -53,6 +57,8 @@ std::shared_mutex mutex_;
 constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
 #endif
+
+using RsOrientation = Rosen::DisplayOrientation;
 
 void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 {
@@ -79,6 +85,11 @@ bool IsTraceEnabled()
 bool IsSvgTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.svg.enabled", "0") == "1");
+}
+
+bool IsLayoutTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true");
 }
 
 bool IsHookModeEnabled()
@@ -209,10 +220,16 @@ bool IsTitleStyleEnabled()
 {
     return system::GetBoolParameter("persist.ace.title.style.enabled", false);
 }
+
+bool IsFlutterDecouplingEnabled()
+{
+    return system::GetBoolParameter("persist.ace.flutter.decoupling.enabled", false);
+}
 } // namespace
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
+bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -250,6 +267,7 @@ ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 bool SystemProperties::resourceDecoupling_ = GetResourceDecoupling();
 bool SystemProperties::changeTitleStyleEnabled_ = IsTitleStyleEnabled();
+bool SystemProperties::flutterDecouplingEnabled_ = IsFlutterDecouplingEnabled();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -361,6 +379,7 @@ void SystemProperties::InitDeviceInfo(
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
+    layoutTraceEnable_ = IsLayoutTraceEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
     isHookModeEnabled_ = IsHookModeEnabled();
@@ -381,10 +400,13 @@ void SystemProperties::InitDeviceInfo(
 
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
 {
-    if (orientation == ORIENTATION_PORTRAIT && orientation_ != DeviceOrientation::PORTRAIT) {
+    int32_t newOrientation = ((orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE)) ||
+        (orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE_INVERTED))) ?
+        ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+    if (newOrientation == ORIENTATION_PORTRAIT && orientation_ != DeviceOrientation::PORTRAIT) {
         Swap(deviceWidth_, deviceHeight_);
         orientation_ = DeviceOrientation::PORTRAIT;
-    } else if (orientation == ORIENTATION_LANDSCAPE && orientation_ != DeviceOrientation::LANDSCAPE) {
+    } else if (newOrientation == ORIENTATION_LANDSCAPE && orientation_ != DeviceOrientation::LANDSCAPE) {
         Swap(deviceWidth_, deviceHeight_);
         orientation_ = DeviceOrientation::LANDSCAPE;
     }
@@ -455,6 +477,11 @@ bool SystemProperties::GetImageFrameworkEnabled()
     return system::GetBoolParameter("persist.ace.image.framework.enabled", true);
 }
 
+bool SystemProperties::GetDebugPixelMapSaveEnabled()
+{
+    return system::GetBoolParameter("persist.ace.save.pixelmap.enabled", false);
+}
+
 ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 {
     static bool isUseMemoryMonitor = IsUseMemoryMonitor();
@@ -474,5 +501,15 @@ bool SystemProperties::GetResourceDecoupling()
 int32_t SystemProperties::GetJankFrameThreshold()
 {
     return system::GetIntParameter<int>("persist.sys.arkui.perf.threshold", DEFAULT_THRESHOLD_JANK);
+}
+
+std::string SystemProperties::GetCustomTitleFilePath()
+{
+    return system::GetParameter(CUSTOM_TITLE_KEY, "");
+}
+
+ACE_WEAK_SYM bool SystemProperties::Is24HourClock()
+{
+    return Global::I18n::LocaleConfig::Is24HourClock();
 }
 } // namespace OHOS::Ace

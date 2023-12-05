@@ -107,9 +107,8 @@ public:
         secondHandleInfo_.rect.SetHeight(height);
     }
 
-    RectF GetCaretRect()
+    RectF GetCaretRect() const
     {
-        UpdateCaretOffset();
         return caretInfo_.rect;
     }
 
@@ -134,6 +133,13 @@ public:
         return firstHandleInfo_.index == 0 && secondHandleInfo_.index >= 0 &&
                abs(firstHandleInfo_.index - secondHandleInfo_.index) ==
                    static_cast<int32_t>(contentController_->GetWideText().length());
+    }
+
+    bool IsHandleSamePosition()
+    {
+        bool sameX = NearEqual(firstHandleInfo_.rect.GetX(), secondHandleInfo_.rect.GetX());
+        bool sameY = NearEqual(firstHandleInfo_.rect.GetY(), secondHandleInfo_.rect.GetY());
+        return (sameX && sameY);
     }
 
     void UpdateParagraph(const RefPtr<Paragraph>& paragraph)
@@ -189,8 +195,11 @@ public:
     void UpdateSecondHandleOffset();
     void MoveFirstHandleToContentRect(int32_t index);
     void MoveSecondHandleToContentRect(int32_t index);
-    void MoveCaretToContentRect(int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM);
-    void MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment = 0.0f);
+    void MoveCaretToContentRect(
+        int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM, bool isEditorValueChanged = true);
+    void MoveHandleToContentRect(
+        RectF& handleRect, float boundaryAdjustment = 0.0f, bool isAdjustUnconditionally = false) const;
+    void AdjustHandleAtEdge(RectF& handleRect, bool isAdjustUnconditionally = false) const;
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
     void CalculateHandleOffset();
     std::vector<RectF> GetSelectedRects() const;

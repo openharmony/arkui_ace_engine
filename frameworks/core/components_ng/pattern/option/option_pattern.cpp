@@ -67,6 +67,9 @@ void OptionPattern::OnModifyDone()
         UpdatePasteFontColor(selectTheme_->GetDisabledMenuFontColor());
         CHECK_NULL_VOID(text_);
         text_->GetRenderContext()->UpdateForegroundColor(selectTheme_->GetDisabledMenuFontColor());
+        auto textLayoutProperty = text_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColor(selectTheme_->GetDisabledMenuFontColor());
         text_->MarkModifyDone();
     } else {
         UpdatePasteFontColor(selectTheme_->GetMenuFontColor());
@@ -370,6 +373,9 @@ Color OptionPattern::GetBgColor()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, Color());
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        return Color::TRANSPARENT;
+    }
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, Color());
     auto bgColor = theme->GetBackgroundColor();

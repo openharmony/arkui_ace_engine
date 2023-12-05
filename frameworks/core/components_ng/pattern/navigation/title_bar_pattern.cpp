@@ -18,6 +18,7 @@
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
@@ -36,12 +37,10 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
 {
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    auto navigatorNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
-    CHECK_NULL_VOID(navigatorNode);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) == TitleBarParentType::NAVBAR) {
-        auto buttonNode = navigatorNode->GetChildren().front();
-        CHECK_NULL_VOID(buttonNode);
-        auto backButtonImageNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
+        auto backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
         CHECK_NULL_VOID(backButtonImageNode);
         auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(backButtonImageLayoutProperty);
@@ -53,36 +52,34 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
         auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
         CHECK_NULL_VOID(navBarLayoutProperty);
         auto hideBackButton = navBarLayoutProperty->GetHideBackButtonValue(false);
-        auto backButtonLayoutProperty = AceType::DynamicCast<FrameNode>(buttonNode)->GetLayoutProperty();
+        auto backButtonLayoutProperty = AceType::DynamicCast<FrameNode>(backButtonNode)->GetLayoutProperty();
         CHECK_NULL_VOID(backButtonLayoutProperty);
         backButtonLayoutProperty->UpdateVisibility(hideBackButton ? VisibleType::GONE : VisibleType::VISIBLE);
         backButtonImageNode->MarkModifyDone();
         return;
     }
     if (!titleBarLayoutProperty->HasNoPixMap()) {
-        navigatorNode->MarkModifyDone();
+        backButtonNode->MarkModifyDone();
         return;
     }
     RefPtr<ImageLayoutProperty> backButtonImageLayoutProperty;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        backButtonImageLayoutProperty = navigatorNode->GetLayoutProperty<ImageLayoutProperty>();
+        backButtonImageLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
     } else {
-        auto buttonNode = navigatorNode->GetChildren().front();
-        CHECK_NULL_VOID(buttonNode);
-        auto backButtonImageNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
+        auto backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
         CHECK_NULL_VOID(backButtonImageNode);
         backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
     }
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
     if (titleBarLayoutProperty->HasImageSource()) {
         backButtonImageLayoutProperty->UpdateImageSourceInfo(titleBarLayoutProperty->GetImageSourceValue());
-        navigatorNode->MarkModifyDone();
+        backButtonNode->MarkModifyDone();
         return;
     }
 
     if (titleBarLayoutProperty->HasPixelMap()) {
         // TODO: use pixelMap
-        navigatorNode->MarkModifyDone();
+        backButtonNode->MarkModifyDone();
         return;
     }
 }
@@ -109,6 +106,31 @@ void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
 }
 
 } // namespace
+
+void TitleBarPattern::InitTitleParam()
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    if (titleBarNode->GetSubtitle()) {
+        tempTitleBarHeight_ = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    } else {
+        tempTitleBarHeight_ = static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    }
+    overDragOffset_ = 0.0f;
+    tempTitleOffsetY_ = 0.0f;
+    fontSize_.reset();
+    opacity_.reset();
+}
+
+bool TitleBarPattern::IsHidden()
+{
+    auto host = GetHost();
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(host->GetParent());
+    CHECK_NULL_RETURN(navBarNode, false);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_RETURN(navBarLayoutProperty, false);
+    return navBarLayoutProperty->GetHideTitleBar().value_or(false);
+}
 
 void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
 {
@@ -159,7 +181,7 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
             UpdateSubTitleOpacity(1.0);
         }
     }
-    
+
     titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
     titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     auto maxLines = hostNode->GetSubtitle() ? 1 : TITLEBAR_MAX_LINES;
@@ -174,6 +196,9 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
 void TitleBarPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    if (isInitialTitle_) {
+        InitTitleParam();
+    }
     auto hostNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     MountBackButton(hostNode);
@@ -314,7 +339,8 @@ void TitleBarPattern::ProcessTitleDragStart(float offset)
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
+        IsHidden()) {
         return;
     }
     if (springController_ && !springController_->IsStopped()) {
@@ -360,7 +386,8 @@ void TitleBarPattern::ProcessTitleDragUpdate(float offset, float dragOffsetY)
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
+        IsHidden()) {
         return;
     }
     SetTitleStyleByOffset(offset);
@@ -381,7 +408,8 @@ void TitleBarPattern::SetTitleStyleByOffset(float offset)
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
+        IsHidden()) {
         return;
     }
     SetTempTitleBarHeight(offset);
@@ -406,7 +434,8 @@ void TitleBarPattern::ProcessTitleDragEnd()
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
+        IsHidden()) {
         return;
     }
 
@@ -443,17 +472,19 @@ float TitleBarPattern::GetSubtitleOpacity()
 float TitleBarPattern::GetFontSize(float offset)
 {
     auto titleBarHeight = defaultTitleBarHeight_ + offset;
-    auto titleFontSizeDiff = MAX_TITLE_FONT_SIZE - MIN_TITLE_FONT_SIZE;
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_RETURN(theme, 0.0f);
+    auto titleFontSizeDiff = theme->GetTitleFontSizeBig() - theme->GetTitleFontSize();
     auto titleBarHeightDiff = maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     fontSizeRatio_ = titleFontSizeDiff.ConvertToPx() / titleBarHeightDiff;
     auto tempFontSize = static_cast<float>(
         (titleBarHeight - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) * fontSizeRatio_ +
-        MIN_TITLE_FONT_SIZE.ConvertToPx());
-    if (GreatNotEqual(tempFontSize, MAX_TITLE_FONT_SIZE.ConvertToPx())) {
-        tempFontSize = MAX_TITLE_FONT_SIZE.ConvertToPx();
+        theme->GetTitleFontSize().ConvertToPx());
+    if (GreatNotEqual(tempFontSize, theme->GetTitleFontSizeBig().ConvertToPx())) {
+        tempFontSize = theme->GetTitleFontSizeBig().ConvertToPx();
     }
-    if (LessNotEqual(tempFontSize, MIN_TITLE_FONT_SIZE.ConvertToPx())) {
-        tempFontSize = MIN_TITLE_FONT_SIZE.ConvertToPx();
+    if (LessNotEqual(tempFontSize, theme->GetTitleFontSize().ConvertToPx())) {
+        tempFontSize = theme->GetTitleFontSize().ConvertToPx();
     }
     return tempFontSize;
 }
@@ -632,11 +663,9 @@ void TitleBarPattern::SetDefaultTitleFontSize()
     CHECK_NULL_VOID(titleNode);
     auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    if (defaultTitleBarHeight_ == maxTitleBarHeight_) {
-        defaultTitleFontSize_ = textLayoutProperty->GetFontSizeValue(MAX_TITLE_FONT_SIZE);
-    } else {
-        defaultTitleFontSize_ = textLayoutProperty->GetFontSizeValue(MIN_TITLE_FONT_SIZE);
-    }
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    defaultTitleFontSize_ = theme->GetTitleFontSize();
 }
 
 void TitleBarPattern::SetDefaultSubtitleOpacity()
@@ -782,7 +811,7 @@ void TitleBarPattern::ResetAssociatedScroll()
     associatedScrollOffsetMax_ = 0.0f;
     enableAssociatedScroll_ =
         (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) &&
-        !IsTitleFullStatus();
+        !IsHidden() && !IsTitleFullStatus();
     SetMaxTitleBarHeight();
 }
 
@@ -842,7 +871,8 @@ bool TitleBarPattern::ProcessTitleAssociatedUpdate(float offset)
     CHECK_NULL_RETURN(titleBarNode, true);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_RETURN(titleBarLayoutProperty, true);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
+        IsHidden()) {
         return true;
     }
     SetTitleStyleByOffset(offset);
@@ -858,5 +888,25 @@ bool TitleBarPattern::ProcessTitleAssociatedUpdate(float offset)
         overDragOffset_ = 0.0f;
     }
     return true;
+}
+
+void TitleBarPattern::OnColorConfigurationUpdate()
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    auto backButton = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButton);
+    if (backButton->GetTag() == "Navigator") {
+        backButton = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
+        CHECK_NULL_VOID(backButton);
+    }
+    auto backButtonImgNode = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
+    CHECK_NULL_VOID(backButtonImgNode);
+    auto backButtonImgRender = backButtonImgNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(backButtonImgRender);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    backButtonImgRender->UpdateSvgFillColor(theme->GetBackButtonIconColor());
+    backButtonImgNode->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

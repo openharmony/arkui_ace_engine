@@ -1,13 +1,13 @@
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onChange(callback: (isOn: boolean) => void): this {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     selectedColor(value: number | undefined): this {
-        var arkColor = new ArkColor();
+        let arkColor = new ArkColor();
         if (arkColor.parseColorValue(value)) {
             modifier(this._modifiers, ToggleSelectedColorModifier, arkColor.color);
         } else {
@@ -16,7 +16,7 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
         return this;
     }
     switchPointColor(value: number | undefined): this {
-        var arkColor = new ArkColor();
+        let arkColor = new ArkColor();
         if (arkColor.parseColorValue(value)) {
             modifier(this._modifiers, ToggleSwitchPointColorModifier, arkColor.color);
         } else {
@@ -26,7 +26,7 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     }
 }
 class ToggleSelectedColorModifier extends Modifier<number | undefined> {
-    static identity = Symbol("toggleSelectedColor");
+    static identity = Symbol('toggleSelectedColor');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
             GetUINativeModule().toggle.resetSelectedColor(node);
@@ -36,7 +36,7 @@ class ToggleSelectedColorModifier extends Modifier<number | undefined> {
     }
 }
 class ToggleSwitchPointColorModifier extends Modifier<number | undefined> {
-    static identity = Symbol("toggleSwitchPointColor");
+    static identity = Symbol('toggleSwitchPointColor');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
             GetUINativeModule().toggle.resetSwitchPointColor(node);
@@ -46,11 +46,10 @@ class ToggleSwitchPointColorModifier extends Modifier<number | undefined> {
     }
 }
 // @ts-ignore
-globalThis.Toggle.attributeModifier = function(modifier) {
+globalThis.Toggle.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    var nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    var component = this.createOrGetNode(elmtId, () =>
-    {
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkToggleComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);

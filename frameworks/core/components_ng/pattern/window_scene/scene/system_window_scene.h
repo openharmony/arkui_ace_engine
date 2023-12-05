@@ -35,6 +35,8 @@ public:
         return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
     }
 
+    sptr<Rosen::Session> GetSession();
+
 private:
     void OnAttachToFrameNode() override;
     void OnBoundsChanged(const Rosen::Vector4f& bounds);

@@ -23,10 +23,11 @@
 #include "frameworks/core/image/image_source_info.h"
 #include "frameworks/core/components/common/properties/animation_option.h"
 #include "frameworks/base/geometry/ng/vector.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint32_t DEFAULT_BUTTON_COLOR = 0xFF007DFF;
+constexpr VisibleType DEFAULT_VISIBILITY = static_cast<VisibleType>(0);
 constexpr float MAX_ANGLE = 360.0f;
 constexpr double PERCENT_100 = 100.0;
 constexpr int NUM_0 = 0;
@@ -47,6 +48,17 @@ constexpr int NUM_14 = 14;
 constexpr int NUM_15 = 15;
 constexpr int DEFAULT_LENGTH = 4;
 constexpr double ROUND_UNIT = 360.0;
+constexpr TextDirection DEFAULT_COMMON_DIRECTION = TextDirection::AUTO;
+constexpr int32_t DEFAULT_COMMON_LAYOUTWEIGHT = 0;
+constexpr int32_t MAX_ALIGN_VALUE = 8;
+constexpr int32_t DEFAULT_GRIDSPAN = 1;
+constexpr uint32_t DEFAULT_ALIGN_VALUE = 2;
+constexpr uint32_t DEFAULT_ALIGN_RULES_SIZE = 6;
+constexpr uint8_t DEFAULT_SAFE_AREA_TYPE = 0b111;
+constexpr uint8_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
+constexpr Dimension DEFAULT_FLEX_BASIS { 0.0, DimensionUnit::AUTO };
+constexpr int32_t DEFAULT_DISPLAY_PRIORITY = 0;
+constexpr int32_t DEFAULT_ID = 0;
 
 BorderStyle ConvertBorderStyle(int32_t value)
 {
@@ -101,7 +113,7 @@ Alignment ParseAlignment(int32_t align)
  * ...
  * @param colorsLength colors length
  */
-void SetGradientColors(NG::Gradient& gradient, const double* colors, int32_t colorsLength)
+void SetGradientColors(NG::Gradient &gradient, const double *colors, int32_t colorsLength)
 {
     if ((colors == nullptr) || (colorsLength % NUM_3) != 0) {
         return;
@@ -123,7 +135,7 @@ void SetGradientColors(NG::Gradient& gradient, const double* colors, int32_t col
     }
 }
 
-void SetLinearGradientDirectionTo(std::shared_ptr<LinearGradient>& linearGradient, const GradientDirection direction)
+void SetLinearGradientDirectionTo(std::shared_ptr<LinearGradient> &linearGradient, const GradientDirection direction)
 {
     switch (direction) {
         case GradientDirection::LEFT:
@@ -169,7 +181,7 @@ void SetLinearGradientDirectionTo(std::shared_ptr<LinearGradient>& linearGradien
  * values[3] : repeating
  * @param valuesLength values length
  */
-void SetLinearGradientValues(NG::Gradient& gradient, const double* values, int32_t valuesLength)
+void SetLinearGradientValues(NG::Gradient &gradient, const double *values, int32_t valuesLength)
 {
     if ((values == nullptr) || (valuesLength != NUM_4)) {
         return;
@@ -291,6 +303,136 @@ void SetRadialGradientValues(NG::Gradient& gradient, const double* values, int32
     gradient.SetRepeat(static_cast<bool>(repeating));
 }
 
+bool SetCalcDimension(std::optional<CalcDimension>& optDimension,
+    const StringAndDouble* options, int32_t optionsLength, int32_t offset,
+    const CalcDimension* defDimension)
+{
+    if ((options == nullptr) || (offset < 0) || ((offset + NUM_3) >= optionsLength)) {
+        return false;
+    }
+    auto hasValue = options[offset];
+    auto value = options[offset + NUM_1];
+    auto unit = options[offset + NUM_2];
+    if (static_cast<bool>(hasValue.value)) {
+        DimensionUnit unitValue = static_cast<DimensionUnit>(unit.value);
+        if (unitValue == DimensionUnit::CALC) {
+            std::string str = value.valueStr;
+            CalcDimension calcDimension(str, unitValue);
+            optDimension = calcDimension;
+        } else {
+            CalcDimension calcDimension(value.value, unitValue);
+            optDimension = calcDimension;
+        }
+    } else if (defDimension != nullptr) {
+        optDimension = *defDimension;
+    }
+    return true;
+}
+
+void SetBorderImageSlice(RefPtr<BorderImage>& borderImage,
+    const std::vector<BorderImageDirection> directions,
+    const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
+{
+    std::unique_ptr<CalcDimension> defDimension = std::make_unique<CalcDimension>(0.0);
+    for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
+        std::optional<CalcDimension> optDimension;
+        SetCalcDimension(optDimension, options, optionsLength, offset + index, defDimension.get());
+        auto direction = directions[index / NUM_3];
+        if (optDimension.has_value()) {
+            borderImage->SetEdgeSlice(direction, optDimension.value());
+        }
+    }
+    offset += NUM_12;
+}
+
+void SetBorderImageRepeat(RefPtr<BorderImage>& borderImage,
+    const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
+{
+    if ((options == nullptr) || (offset < 0) || ((offset + NUM_2) >= optionsLength)) {
+        return;
+    }
+    auto hasValue = options[offset];
+    auto value = options[offset + NUM_1];
+    if (static_cast<bool>(hasValue.value)) {
+        auto repeatMode = static_cast<BorderImageRepeat>(value.value);
+        borderImage->SetRepeatMode(repeatMode);
+    }
+    offset += NUM_2;
+}
+
+void SetBorderImageWidth(RefPtr<BorderImage>& borderImage,
+    const std::vector<BorderImageDirection> directions,
+    const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
+{
+    std::unique_ptr<CalcDimension> defDimension = std::make_unique<CalcDimension>(0.0);
+    for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
+        std::optional<CalcDimension> optDimension;
+        SetCalcDimension(optDimension, options, optionsLength, offset + index, defDimension.get());
+        auto direction = directions[index / NUM_3];
+        if (optDimension.has_value()) {
+            borderImage->SetEdgeWidth(direction, optDimension.value());
+        }
+    }
+    offset += NUM_12;
+}
+
+void SetBorderImageOutset(RefPtr<BorderImage>& borderImage,
+    const std::vector<BorderImageDirection> directions,
+    const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
+{
+    std::unique_ptr<CalcDimension> defDimension = std::make_unique<CalcDimension>(0.0);
+    for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
+        std::optional<CalcDimension> optDimension;
+        SetCalcDimension(optDimension, options, optionsLength, offset + index, defDimension.get());
+        auto direction = directions[index / NUM_3];
+        if (optDimension.has_value()) {
+            borderImage->SetEdgeOutset(direction, optDimension.value());
+        }
+    }
+    offset += NUM_12;
+}
+
+void SetBorderImageFill(RefPtr<BorderImage>& borderImage,
+    const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
+{
+    if ((options == nullptr) || (offset < 0) || ((offset + NUM_2) >= optionsLength)) {
+        return;
+    }
+    auto hasValue = options[offset];
+    auto value = options[offset + NUM_1];
+    if (static_cast<bool>(hasValue.value)) {
+        borderImage->SetNeedFillCenter(static_cast<bool>(value.value));
+    }
+    offset += NUM_2;
+}
+
+/**
+ * @param values value value
+ * values[0], values[1] : angle: hasValue, angle value
+ * values[2] : direction
+ * values[3] : repeating
+ * @param valuesLength values length
+ */
+void SetBorderImageGradientValues(NG::Gradient& gradient, const double* values, int32_t valuesLength)
+{
+    if ((values == nullptr) || (valuesLength != NUM_4)) {
+        return;
+    }
+    auto angleHasValue = values[NUM_0];
+    auto angleValue = values[NUM_1];
+    auto directionValue = values[NUM_2];
+    auto repeating = values[NUM_3];
+    auto linearGradient = gradient.GetLinearGradient();
+    if (linearGradient == nullptr) {
+        return;
+    }
+    if (static_cast<bool>(angleHasValue)) {
+        linearGradient->angle = CalcDimension(angleValue, DimensionUnit::PX);
+    }
+    SetLinearGradientDirectionTo(linearGradient, static_cast<GradientDirection>(directionValue));
+    gradient.SetRepeat(static_cast<bool>(repeating));
+}
+
 void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, const double valueX, const double valueY,
     BackgroundImagePosition& bgImgPosition)
 {
@@ -302,42 +444,54 @@ void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, co
 
 void SetBackgroundColor(NodeHandle node, uint32_t color)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetBackgroundColor(frameNode, Color(color));
 }
 
 void ResetBackgroundColor(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetBackgroundColor(frameNode, Color(DEFAULT_BUTTON_COLOR));
+    ViewAbstract::SetBackgroundColor(frameNode, Color(Color::TRANSPARENT));
 }
 
-void SetWidth(NodeHandle node, double value, int unit)
+void SetWidth(NodeHandle node, double value, int unit, const char* calcVlaue)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetWidth(frameNode, CalcLength(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    if (unitEnum == DimensionUnit::CALC) {
+        ViewAbstract::SetWidth(
+            frameNode, CalcLength(CalcLength(std::string(calcVlaue))));
+    } else {
+        ViewAbstract::SetWidth(frameNode, CalcLength(value, unitEnum));
+    }
 }
 
 void ResetWidth(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ClearWidthOrHeight(frameNode, true);
 }
-void SetHeight(NodeHandle node, double value, int unit)
+void SetHeight(NodeHandle node, double value, int unit, const char* calcVlaue)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetHeight(frameNode, CalcLength(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    if (unitEnum == DimensionUnit::CALC) {
+        ViewAbstract::SetHeight(
+            frameNode, CalcLength(CalcLength(std::string(calcVlaue))));
+    } else {
+        ViewAbstract::SetHeight(frameNode, CalcLength(value, unitEnum));
+    }
 }
 void ResetHeight(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ClearWidthOrHeight(frameNode, true);
+    ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 /**
  * @param values radius values
@@ -347,9 +501,9 @@ void ResetHeight(NodeHandle node)
  * units[0]: radius unit for TopLeft ,units[1] : radius unit for TopRight
  * units[2]: radius unit for BottomLeft, units[3] : radius unit for TopRight
  */
-void SetBorderRadius(NodeHandle node, const double* values, const int* units, int32_t length)
+void SetBorderRadius(NodeHandle node, const double *values, const int *units, int32_t length)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (length != DEFAULT_LENGTH) {
         return;
@@ -365,14 +519,14 @@ void SetBorderRadius(NodeHandle node, const double* values, const int* units, in
 
 void ResetBorderRadius(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     OHOS::Ace::CalcDimension reset;
     ViewAbstract::SetBorderRadius(frameNode, reset);
 }
 
 /**
- * @param values radius values
+ * @param values radius values, -1 means no this border width
  * value[0] : BorderWidth value for left，value[1] : BorderWidth value for right
  * value[2] : BorderWidth value for top，value[3] : BorderWidth value for bottom
  * @param units adius units
@@ -386,40 +540,61 @@ void SetBorderWidth(NodeHandle node, const double* values, const int* units, int
     if (length != DEFAULT_LENGTH) {
         return;
     }
+    std::optional<CalcDimension> leftDimen;
+    std::optional<CalcDimension> rightDimen;
+    std::optional<CalcDimension> topDimen;
+    std::optional<CalcDimension> bottomDimen;
+
+    if (values[NUM_0] != -1 &&
+        static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]) != OHOS::Ace::DimensionUnit::INVALID) {
+        leftDimen = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    }
+    if (values[NUM_1] != -1 &&
+        static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]) != OHOS::Ace::DimensionUnit::INVALID) {
+        rightDimen = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    }
+    if (values[NUM_2] != -1 &&
+        static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]) != OHOS::Ace::DimensionUnit::INVALID) {
+        topDimen = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+    }
+    if (values[NUM_3] != -1 &&
+        static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]) != OHOS::Ace::DimensionUnit::INVALID) {
+        bottomDimen = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
+    }
+
     NG::BorderWidthProperty borderWidth;
-    borderWidth.leftDimen = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
-    borderWidth.rightDimen = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
-    borderWidth.topDimen = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
-    borderWidth.bottomDimen = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
+    borderWidth.leftDimen = leftDimen;
+    borderWidth.rightDimen = rightDimen;
+    borderWidth.topDimen = topDimen;
+    borderWidth.bottomDimen = bottomDimen;
     borderWidth.multiValued = true;
     ViewAbstract::SetBorderWidth(frameNode, borderWidth);
 }
 
 void ResetBorderWidth(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     OHOS::Ace::Dimension borderWidth;
     ViewAbstract::SetBorderWidth(frameNode, borderWidth);
 }
 
-void SetTransform(NodeHandle node, const float* matrix, int32_t length)
+void SetTransform(NodeHandle node, const float *matrix, int32_t length)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
     if (length != matrix4Len) {
         return;
     }
-    NG::ViewAbstract::SetTransformMatrix(frameNode,
-        Matrix4(matrix[NUM_0], matrix[NUM_4], matrix[NUM_8], matrix[NUM_12], matrix[NUM_1], matrix[NUM_5],
-            matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10], matrix[NUM_14],
-            matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
+    NG::ViewAbstract::SetTransformMatrix(frameNode, Matrix4(matrix[NUM_0], matrix[NUM_4], matrix[NUM_8], matrix[NUM_12],
+        matrix[NUM_1], matrix[NUM_5], matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10],
+        matrix[NUM_14], matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
 }
 
 void ResetTransform(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
     std::vector<float> matrix(matrix4Len);
@@ -428,15 +603,14 @@ void ResetTransform(NodeHandle node)
         double value = 1.0;
         matrix[i] = static_cast<float>(value);
     }
-    NG::ViewAbstract::SetTransformMatrix(frameNode,
-        Matrix4(matrix[NUM_0], matrix[NUM_4], matrix[NUM_8], matrix[NUM_12], matrix[NUM_1], matrix[NUM_5],
-            matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10], matrix[NUM_14],
-            matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
+    NG::ViewAbstract::SetTransformMatrix(frameNode, Matrix4(matrix[NUM_0], matrix[NUM_4], matrix[NUM_8], matrix[NUM_12],
+        matrix[NUM_1], matrix[NUM_5], matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10],
+        matrix[NUM_14], matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
 }
-void SetBorderColor(NodeHandle node, const uint32_t& leftColorInt, const uint32_t& rightColorInt,
-    const uint32_t& topColorInt, const uint32_t& bottomColorInt)
+void SetBorderColor(NodeHandle node, const uint32_t &leftColorInt, const uint32_t &rightColorInt,
+    const uint32_t &topColorInt, const uint32_t &bottomColorInt)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     NG::BorderColorProperty borderColors;
     borderColors.leftColor = Color(leftColorInt);
@@ -450,7 +624,7 @@ void SetBorderColor(NodeHandle node, const uint32_t& leftColorInt, const uint32_
 
 void ResetBorderColor(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetBorderColor(frameNode, Color::BLACK);
 }
@@ -463,16 +637,16 @@ void ResetBorderColor(NodeHandle node)
  */
 void SetPosition(NodeHandle node, double xValue, int xUnit, double yValue, int yUnit)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 
     ViewAbstract::SetPosition(frameNode, { Dimension(xValue, static_cast<OHOS::Ace::DimensionUnit>(xUnit)),
-                                             Dimension(yValue, static_cast<OHOS::Ace::DimensionUnit>(yUnit)) });
+        Dimension(yValue, static_cast<OHOS::Ace::DimensionUnit>(yUnit)) });
 }
 
 void ResetPosition(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetPosition(frameNode, { 0.0_vp, 0.0_vp });
 }
@@ -482,9 +656,9 @@ void ResetPosition(NodeHandle node)
  * styles[0] : styleLeft, styles[1] : styleRight, styles[2] : styleTop, styles[3] : styleBottom
  * @param length styles length
  */
-void SetBorderStyle(NodeHandle node, const int32_t* styles, int32_t length)
+void SetBorderStyle(NodeHandle node, const int32_t *styles, int32_t length)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (length == NUM_1) {
         ViewAbstract::SetBorderStyle(frameNode, ConvertBorderStyle(styles[NUM_0]));
@@ -492,10 +666,10 @@ void SetBorderStyle(NodeHandle node, const int32_t* styles, int32_t length)
     }
     if (length == NUM_4) {
         NG::BorderStyleProperty borderStyles;
-        borderStyles.styleLeft = ConvertBorderStyle(styles[NUM_0]);
+        borderStyles.styleLeft = ConvertBorderStyle(styles[NUM_3]);
         borderStyles.styleRight = ConvertBorderStyle(styles[NUM_1]);
-        borderStyles.styleTop = ConvertBorderStyle(styles[NUM_2]);
-        borderStyles.styleBottom = ConvertBorderStyle(styles[NUM_3]);
+        borderStyles.styleTop = ConvertBorderStyle(styles[NUM_0]);
+        borderStyles.styleBottom = ConvertBorderStyle(styles[NUM_2]);
         borderStyles.multiValued = true;
         ViewAbstract::SetBorderStyle(frameNode, borderStyles);
     }
@@ -503,7 +677,7 @@ void SetBorderStyle(NodeHandle node, const int32_t* styles, int32_t length)
 
 void ResetBorderStyle(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
 }
@@ -515,20 +689,25 @@ void ResetBorderStyle(NodeHandle node)
  * shadows[4] : ShadowType, shadows[5] : Color, shadows[6] : IsFilled
  * @param length shadows length
  */
-void SetBackShadow(NodeHandle node, const double* shadows, int32_t length)
+void SetBackShadow(NodeHandle node, const double *shadows, int32_t length)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (length == NUM_1) {
+        auto shadowStyle = static_cast<ShadowStyle>(shadows[NUM_0]);
+        auto shadow = Shadow::CreateShadow(shadowStyle);
+        ViewAbstract::SetBackShadow(frameNode, shadow);
+    }
     if (length != NUM_7) {
         return;
     }
-    auto blurRadius = shadows[NUM_0]; // BlurRadius
-    auto spreadRadius = shadows[NUM_1]; // SpreadRadius
-    auto offsetX = shadows[NUM_2]; // OffsetX
-    auto offsetY = shadows[NUM_3]; // OffsetY
+    auto blurRadius = shadows[NUM_0];                        // BlurRadius
+    auto spreadRadius = shadows[NUM_1];                      // SpreadRadius
+    auto offsetX = shadows[NUM_2];                           // OffsetX
+    auto offsetY = shadows[NUM_3];                           // OffsetY
     auto shadowType = static_cast<uint32_t>(shadows[NUM_4]); // ShadowType
-    auto color = static_cast<uint32_t>(shadows[NUM_5]); // Color
-    auto isFilled = static_cast<uint32_t>(shadows[NUM_6]); // IsFilled
+    auto color = static_cast<uint32_t>(shadows[NUM_5]);      // Color
+    auto isFilled = static_cast<uint32_t>(shadows[NUM_6]);   // IsFilled
     Shadow shadow(blurRadius, spreadRadius, Offset(offsetX, offsetY), Color(color));
     shadow.SetShadowType(static_cast<ShadowType>(shadowType));
     shadow.SetIsFilled(static_cast<bool>(isFilled));
@@ -537,7 +716,7 @@ void SetBackShadow(NodeHandle node, const double* shadows, int32_t length)
 
 void ResetBackShadow(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     Shadow shadow;
     ViewAbstract::SetBackShadow(frameNode, shadow);
@@ -545,7 +724,7 @@ void ResetBackShadow(NodeHandle node)
 
 void SetHitTestBehavior(NodeHandle node, uint32_t value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     NG::HitTestMode hitTestModeNG = static_cast<NG::HitTestMode>(value);
     ViewAbstract::SetHitTestMode(frameNode, hitTestModeNG);
@@ -553,42 +732,45 @@ void SetHitTestBehavior(NodeHandle node, uint32_t value)
 
 void ResetHitTestBehavior(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetHitTestMode(frameNode, NG::HitTestMode::HTMDEFAULT);
 }
 
 void SetZIndex(NodeHandle node, int32_t value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetZIndex(frameNode, value);
 }
 
 void ResetZIndex(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetZIndex(frameNode, 0);
 }
 
 void SetOpacity(NodeHandle node, double opacity)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
+        opacity = 1.0f;
+    }
     ViewAbstract::SetOpacity(frameNode, opacity);
 }
 
 void ResetOpacity(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetOpacity(frameNode, 1.0f);
 }
 
 void SetAlign(NodeHandle node, int32_t align)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     Alignment alignment = ParseAlignment(align);
     ViewAbstract::SetAlign(frameNode, alignment);
@@ -596,7 +778,7 @@ void SetAlign(NodeHandle node, int32_t align)
 
 void ResetAlign(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetAlign(frameNode, Alignment::CENTER);
 }
@@ -604,7 +786,7 @@ void ResetAlign(NodeHandle node)
 void SetBackdropBlur(NodeHandle node, double value)
 {
     float blur = 0.0f;
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (value > 0) {
         blur = value;
@@ -615,7 +797,7 @@ void SetBackdropBlur(NodeHandle node, double value)
 
 void ResetBackdropBlur(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     double blur = 0.0;
     CalcDimension dimensionRadius(blur, DimensionUnit::PX);
@@ -624,7 +806,7 @@ void ResetBackdropBlur(NodeHandle node)
 
 void SetHueRotate(NodeHandle node, float deg)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     deg = std::fmod(deg, ROUND_UNIT);
     if (deg < 0.0f) {
@@ -635,7 +817,7 @@ void SetHueRotate(NodeHandle node, float deg)
 
 void ResetHueRotate(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     float deg = 0.0f;
     ViewAbstract::SetHueRotate(frameNode, deg);
@@ -643,7 +825,7 @@ void ResetHueRotate(NodeHandle node)
 
 void SetInvert(NodeHandle node, double invert)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     InvertVariant invertVariant = static_cast<float>(invert);
     ViewAbstract::SetInvert(frameNode, invertVariant);
@@ -651,7 +833,7 @@ void SetInvert(NodeHandle node, double invert)
 
 void ResetInvert(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     InvertVariant invert = 0.0f;
     ViewAbstract::SetInvert(frameNode, invert);
@@ -659,21 +841,18 @@ void ResetInvert(NodeHandle node)
 
 void SetSepia(NodeHandle node, double sepia)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension value = CalcDimension(sepia, DimensionUnit::VP);
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
-    }
-    if (GreatNotEqual(value.Value(), 1.0)) {
-        value.SetValue(1.0);
     }
     ViewAbstract::SetSepia(frameNode, value);
 }
 
 void ResetSepia(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension value(0.0, DimensionUnit::VP);
     ViewAbstract::SetSepia(frameNode, value);
@@ -681,7 +860,7 @@ void ResetSepia(NodeHandle node)
 
 void SetSaturate(NodeHandle node, double saturate)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension value = CalcDimension(saturate, DimensionUnit::VP);
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -692,7 +871,7 @@ void SetSaturate(NodeHandle node, double saturate)
 
 void ResetSaturate(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension value(1.0, DimensionUnit::VP);
     ViewAbstract::SetSaturate(frameNode, value);
@@ -700,14 +879,14 @@ void ResetSaturate(NodeHandle node)
 
 void SetColorBlend(NodeHandle node, uint32_t color)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetColorBlend(frameNode, Color(color));
 }
 
 void ResetColorBlend(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     Color colorBlend = Color::TRANSPARENT;
     ViewAbstract::SetColorBlend(frameNode, colorBlend);
@@ -715,7 +894,7 @@ void ResetColorBlend(NodeHandle node)
 
 void SetGrayscale(NodeHandle node, double grayScale)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension value = CalcDimension(grayScale, DimensionUnit::VP);
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -729,7 +908,7 @@ void SetGrayscale(NodeHandle node, double grayScale)
 
 void ResetGrayscale(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension value(0.0, DimensionUnit::VP);
     ViewAbstract::SetGrayScale(frameNode, value);
@@ -737,7 +916,7 @@ void ResetGrayscale(NodeHandle node)
 
 void SetContrast(NodeHandle node, double contrast)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension value = CalcDimension(contrast, DimensionUnit::VP);
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -748,7 +927,7 @@ void SetContrast(NodeHandle node, double contrast)
 
 void ResetContrast(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension value(1.0, DimensionUnit::VP);
     ViewAbstract::SetContrast(frameNode, value);
@@ -756,7 +935,7 @@ void ResetContrast(NodeHandle node)
 
 void SetBrightness(NodeHandle node, double brightness)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension value = CalcDimension(brightness, DimensionUnit::VP);
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -767,7 +946,7 @@ void SetBrightness(NodeHandle node, double brightness)
 
 void ResetBrightness(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension value(1.0, DimensionUnit::VP);
     ViewAbstract::SetBrightness(frameNode, value);
@@ -775,7 +954,7 @@ void ResetBrightness(NodeHandle node)
 
 void SetBlur(NodeHandle node, double value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     float blur = 0.0f;
     if (value > 0) {
@@ -787,7 +966,7 @@ void SetBlur(NodeHandle node, double value)
 
 void ResetBlur(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     double blur = 0.0;
     CalcDimension dimensionBlur(blur, DimensionUnit::PX);
@@ -806,10 +985,10 @@ void ResetBlur(NodeHandle node)
  * ...
  * @param colorsLength colors length
  */
-void SetLinearGradient(NodeHandle node, const double* values, int32_t valuesLength,
-    const double* colors, int32_t colorsLength)
+void SetLinearGradient(NodeHandle node, const double *values, int32_t valuesLength, const double *colors,
+    int32_t colorsLength)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if ((values == nullptr) || (valuesLength != NUM_4) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
         return;
@@ -823,7 +1002,7 @@ void SetLinearGradient(NodeHandle node, const double* values, int32_t valuesLeng
 
 void ResetLinearGradient(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
@@ -851,7 +1030,6 @@ void SetSweepGradient(NodeHandle node, const double* values, int32_t valuesLengt
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if ((values == nullptr) || (valuesLength != NUM_13) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
-        LOGE("sweepGradient value error. %{public}d, %{public}d", valuesLength, colorsLength);
         return;
     }
     NG::Gradient gradient;
@@ -889,7 +1067,6 @@ void SetRadialGradient(NodeHandle node, const double* values, int32_t valuesLeng
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if ((values == nullptr) || (valuesLength != NUM_10) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
-        LOGE("radialGradient value error. %{public}d, %{public}d", valuesLength, colorsLength);
         return;
     }
     NG::Gradient gradient;
@@ -908,10 +1085,158 @@ void ResetRadialGradient(NodeHandle node)
     ViewAbstract::SetRadialGradient(frameNode, gradient);
 }
 
+/**
+ * @param text text value
+ * @param options option value
+ * option[0], option[1]: align(hasValue, value)
+ * option[2], option[3], option[4]: offsetX(hasValue, value, unit)
+ * option[5], option[6], option[7]: offsetY(hasValue, value, unit)
+ * option[8]: hasOptions
+ * option[9]: hasOffset
+ * @param optionsLength options length
+ */
+void SetOverlay(NodeHandle node, const char* text, const double* options, int32_t optionsLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((options == nullptr) || (optionsLength != NUM_10)) {
+        return;
+    }
+    auto alignHasValue = options[NUM_0];
+    auto alignValue = options[NUM_1];
+    auto offsetXHasValue = options[NUM_2];
+    auto offsetXValue = options[NUM_3];
+    auto offsetXUnit = options[NUM_4];
+    auto offsetYHasValue = options[NUM_5];
+    auto offsetYValue = options[NUM_6];
+    auto offsetYUnit = options[NUM_7];
+    auto hasOptions = options[NUM_8];
+    auto hasOffset = options[NUM_9];
+    NG::OverlayOptions overlay;
+    if (text != nullptr) {
+        overlay.content = text;
+    }
+    if (static_cast<bool>(hasOptions)) {
+        if (static_cast<bool>(alignHasValue)) {
+            overlay.align = ParseAlignment(static_cast<int32_t>(alignValue));
+        } else {
+            overlay.align = Alignment::TOP_LEFT;
+        }
+        if (static_cast<bool>(hasOffset)) {
+            if (static_cast<bool>(offsetXHasValue)) {
+                overlay.x = CalcDimension(offsetXValue, static_cast<DimensionUnit>(offsetXUnit));
+            }
+            if (static_cast<bool>(offsetYHasValue)) {
+                overlay.y = CalcDimension(offsetYValue, static_cast<DimensionUnit>(offsetYUnit));
+            }
+        }
+    } else {
+        overlay.align = Alignment::CENTER;
+        overlay.x = CalcDimension(0);
+        overlay.y = CalcDimension(0);
+    }
+    ViewAbstract::SetOverlay(frameNode, overlay);
+}
+
+void ResetOverlay(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::OverlayOptions overlay;
+    overlay.align = Alignment::TOP_LEFT;
+    overlay.x = CalcDimension(0);
+    overlay.y = CalcDimension(0);
+    ViewAbstract::SetOverlay(frameNode, overlay);
+}
+
+/**
+ * @param src source value
+ * @param options option value
+ * option[offset + 0], option[offset + 1], option[offset + 2]: sliceTop(hasValue, value, unit)
+ * option[offset + 3], option[offset + 4], option[offset + 5]: sliceRight(hasValue, value, unit)
+ * option[offset + 6], option[offset + 7], option[offset + 8]: sliceBottom(hasValue, value, unit)
+ * option[offset + 9], option[offset + 10], option[offset + 11]: sliceLeft(hasValue, value, unit)
+ * option[offset + 12], option[offset + 13]: repeat(hasValue, value)
+ * option[offset + 14], option[offset + 15], option[offset + 16]: widthTop(hasValue, value, unit)
+ * option[offset + 17], option[offset + 18], option[offset + 19]: widthRight(hasValue, value, unit)
+ * option[offset + 20], option[offset + 21], option[offset + 22]: widthBottom(hasValue, value, unit)
+ * option[offset + 23], option[offset + 24], option[offset + 25]: widthLeft(hasValue, value, unit)
+ * option[offset + 26], option[offset + 27], option[offset + 28]: outsetTop(hasValue, value, unit)
+ * option[offset + 29], option[offset + 30], option[offset + 31]: outsetRight(hasValue, value, unit)
+ * option[offset + 32], option[offset + 33], option[offset + 34]: outsetBottom(hasValue, value, unit)
+ * option[offset + 35], option[offset + 36], option[offset + 37]: outsetLeft(hasValue, value, unit)
+ * option[offset + 38], option[offset + 39]: fill(hasValue, value)
+ * option[offset + 40]: bitset
+ * @param optionsLength options length
+ */
+void SetBorderImage(NodeHandle node, const char* src, const StringAndDouble* options, int32_t optionsLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // slice:12 double, repeat:2 double, width:12 double, outset:12 double, fill:2 double, bitset:1 double
+    auto desireLength = NUM_12 + NUM_2 + NUM_12 + NUM_12 + NUM_2 + NUM_1;
+    if ((options == nullptr) || (optionsLength != desireLength)) {
+        return;
+    }
+    RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
+    if (src != nullptr) {
+        borderImage->SetSrc(std::string(src));
+    }
+    int32_t loc = 0;
+    std::vector<BorderImageDirection> directions = { BorderImageDirection::TOP,
+        BorderImageDirection::RIGHT, BorderImageDirection::BOTTOM, BorderImageDirection::LEFT };
+    SetBorderImageSlice(borderImage, directions, options, optionsLength, loc); // read 12 double
+    SetBorderImageRepeat(borderImage, options, optionsLength, loc); // read 2 double
+    SetBorderImageWidth(borderImage, directions, options, optionsLength, loc); // read 12 double
+    SetBorderImageOutset(borderImage, directions, options, optionsLength, loc); // read 12 double
+    SetBorderImageFill(borderImage, options, optionsLength, loc); // read 2 double
+    auto bitsetValue = options[loc].value;
+    uint8_t bitset = static_cast<uint8_t>(bitsetValue);
+    if (bitset | BorderImage::SOURCE_BIT) {
+        ViewAbstract::SetBorderImageSource(frameNode, borderImage->GetSrc());
+    }
+    if (bitset | BorderImage::OUTSET_BIT) {
+        ViewAbstract::SetHasBorderImageOutset(frameNode, true);
+    }
+    if (bitset | BorderImage::SLICE_BIT) {
+        ViewAbstract::SetHasBorderImageSlice(frameNode, true);
+    }
+    if (bitset | BorderImage::REPEAT_BIT) {
+        ViewAbstract::SetHasBorderImageRepeat(frameNode, true);
+    }
+    if (bitset | BorderImage::WIDTH_BIT) {
+        ViewAbstract::SetHasBorderImageWidth(frameNode, true);
+    }
+    ViewAbstract::SetBorderImage(frameNode, borderImage);
+}
+
+void ResetBorderImage(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
+    ViewAbstract::SetBorderImage(frameNode, borderImage);
+}
+
+void SetBorderImageGradient(NodeHandle node, const double* values, int32_t valuesLength,
+    const double* colors, int32_t colorsLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesLength != NUM_4) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
+        return;
+    }
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    SetBorderImageGradientValues(gradient, values, valuesLength);
+    SetGradientColors(gradient, colors, colorsLength);
+    ViewAbstract::SetBorderImageGradient(frameNode, gradient);
+}
+
 void SetForegroundBlurStyle(NodeHandle node, int32_t blurStyle, int32_t colorMode,
     int32_t adaptiveColor, double scale)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption fgBlurStyle;
     if (blurStyle >= 0) {
@@ -939,7 +1264,7 @@ void SetForegroundBlurStyle(NodeHandle node, int32_t blurStyle, int32_t colorMod
 
 void ResetForegroundBlurStyle(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption styleOption;
     ViewAbstract::SetForegroundBlurStyle(frameNode, styleOption);
@@ -953,10 +1278,10 @@ void ResetForegroundBlurStyle(NodeHandle node)
  * @param stopsLength stops length
  * @param directionValue direction value
  */
-void SetLinearGradientBlur(NodeHandle node, double blurRadius,
-    const double* stops, int32_t stopsLength, int32_t directionValue)
+void SetLinearGradientBlur(NodeHandle node, double blurRadius, const double *stops, int32_t stopsLength,
+    int32_t directionValue)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     blurRadius = std::clamp(blurRadius, 0.0, 60.0); // 60.0 represents largest blur radius;
     std::vector<std::pair<float, float>> fractionStops;
@@ -993,7 +1318,7 @@ void SetLinearGradientBlur(NodeHandle node, double blurRadius,
 
 void ResetLinearGradientBlur(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<std::pair<float, float>> fractionStops;
     fractionStops.push_back(std::pair<float, float>(0.0f, 0.0f));
@@ -1003,10 +1328,9 @@ void ResetLinearGradientBlur(NodeHandle node)
     ViewAbstract::SetLinearGradientBlur(frameNode, blurPara);
 }
 
-void SetBackgroundBlurStyle(NodeHandle node, int32_t blurStyle, int32_t colorMode,
-    int32_t adaptiveColor, double scale)
+void SetBackgroundBlurStyle(NodeHandle node, int32_t blurStyle, int32_t colorMode, int32_t adaptiveColor, double scale)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption bgBlurStyle;
     if (blurStyle >= 0) {
@@ -1034,7 +1358,7 @@ void SetBackgroundBlurStyle(NodeHandle node, int32_t blurStyle, int32_t colorMod
 
 void ResetBackgroundBlurStyle(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption bgBlurStyle;
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
@@ -1072,10 +1396,10 @@ void SetBorder(NodeHandle node, double* values, int32_t* units, uint32_t* colorA
     ViewAbstract::SetBorderRadius(frameNode, borderRadius);
 
     NG::BorderStyleProperty borderStyles;
-    borderStyles.styleLeft = ConvertBorderStyle(colorAndStyle[NUM_4]);
+    borderStyles.styleTop = ConvertBorderStyle(colorAndStyle[NUM_4]);
     borderStyles.styleRight = ConvertBorderStyle(colorAndStyle[NUM_5]);
-    borderStyles.styleTop = ConvertBorderStyle(colorAndStyle[NUM_6]);
-    borderStyles.styleBottom = ConvertBorderStyle(colorAndStyle[NUM_7]);
+    borderStyles.styleBottom = ConvertBorderStyle(colorAndStyle[NUM_6]);
+    borderStyles.styleLeft = ConvertBorderStyle(colorAndStyle[NUM_7]);
     borderStyles.multiValued = true;
     ViewAbstract::SetBorderStyle(frameNode, borderStyles);
 }
@@ -1085,10 +1409,10 @@ void ResetBorder(NodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension borderWidth;
-    ViewAbstract::SetBorderWidth(borderWidth);
-    ViewAbstract::SetBorderColor(Color::BLACK);
-    ViewAbstract::SetBorderRadius(borderWidth);
-    ViewAbstract::SetBorderStyle(BorderStyle::SOLID);
+    ViewAbstract::SetBorderWidth(frameNode, borderWidth);
+    ViewAbstract::SetBorderColor(frameNode, Color::BLACK);
+    ViewAbstract::SetBorderRadius(frameNode, borderWidth);
+    ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
 }
 
 void SetBackgroundImagePosition(NodeHandle node, const double* values, const int32_t* types, bool isAlign, int size)
@@ -1282,7 +1606,7 @@ void ResetRotate(NodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.0f, 0.0f);
-    ViewAbstract::SetRotate(
+    ViewAbstract::SetRotate(frameNode,
         NG::Vector5F(rotate.xDirection, rotate.yDirection, rotate.zDirection, 0.0, rotate.perspective));
 
     DimensionOffset center(rotate.centerX, rotate.centerY);
@@ -1304,6 +1628,49 @@ void ResetGeometryTransition(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+}
+void SetOffset(NodeHandle node, const double *number, const int8_t *unit)
+{
+    CHECK_NULL_VOID(number);
+    CHECK_NULL_VOID(unit);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension xVal(*(number + 0), static_cast<DimensionUnit>(*(unit + 0)));
+    Dimension yVal(*(number + 1), static_cast<DimensionUnit>(*(unit + 1)));
+    ViewAbstract::SetOffset(frameNode, { xVal, yVal });
+}
+
+void ResetOffset(NodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension xVal(0.0, DimensionUnit::VP);
+    Dimension yVal(0.0, DimensionUnit::VP);
+    ViewAbstract::SetOffset(frameNode, { xVal, yVal });
+}
+void SetPadding(NodeHandle node, const struct ArkUISizeType *top, const struct ArkUISizeType *right,
+    const struct ArkUISizeType *bottom, const struct ArkUISizeType *left)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<OHOS::Ace::CalcDimension> topDimen;
+    std::optional<OHOS::Ace::CalcDimension> rightDimen;
+    std::optional<OHOS::Ace::CalcDimension> bottomDimen;
+    std::optional<OHOS::Ace::CalcDimension> leftDimen;
+
+    topDimen = CalcDimension(top->value, static_cast<DimensionUnit>(top->unit));
+    rightDimen = CalcDimension(right->value, static_cast<DimensionUnit>(right->unit));
+    bottomDimen = CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit));
+    leftDimen = CalcDimension(left->value, static_cast<DimensionUnit>(left->unit));
+    NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(topDimen, bottomDimen, leftDimen, rightDimen);
+    ViewAbstract::SetPadding(frameNode, paddings);
+}
+
+void ResetPadding(NodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPadding(frameNode, NG::CalcLength(0.0));
 }
 
 /**
@@ -1468,6 +1835,7 @@ void ResetForegroundColor(NodeHandle node)
     ViewAbstract::SetForegroundColor(frameNode, Color());
 }
 
+
 void SetMotionPath(NodeHandle node, const char* path, float from, float to, bool rotatable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1518,6 +1886,787 @@ void ResetFocusOnTouch(NodeHandle node)
     bool focusOnTouch = false;
     ViewAbstract::SetFocusOnTouch(frameNode, focusOnTouch);
 }
+void SetFocusable(NodeHandle node, bool focusable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetFocusable(frameNode, focusable);
+}
+
+void ResetFocusable(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool focusable = false;
+    ViewAbstract::SetFocusable(frameNode, focusable);
+}
+
+void SetTouchable(NodeHandle node, bool touchable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetTouchable(frameNode, touchable);
+}
+
+void ResetTouchable(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool touchable = true;
+    ViewAbstract::SetTouchable(frameNode, touchable);
+}
+
+void SetDefaultFocus(NodeHandle node, bool defaultFocus)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDefaultFocus(frameNode, defaultFocus);
+}
+
+void ResetDefaultFocus(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool defaultFocus = false;
+    ViewAbstract::SetDefaultFocus(frameNode, defaultFocus);
+}
+
+void SetDisplayPriority(NodeHandle node, double value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDisplayIndex(frameNode, static_cast<int32_t>(value));
+}
+
+void ResetDisplayPriority(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDisplayIndex(frameNode, DEFAULT_DISPLAY_PRIORITY);
+}
+
+void SetMargin(NodeHandle node, const struct ArkUISizeType *top, const struct ArkUISizeType *right,
+    const struct ArkUISizeType *bottom, const struct ArkUISizeType *left)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<OHOS::Ace::CalcDimension> topDimen;
+    std::optional<OHOS::Ace::CalcDimension> rightDimen;
+    std::optional<OHOS::Ace::CalcDimension> bottomDimen;
+    std::optional<OHOS::Ace::CalcDimension> leftDimen;
+    topDimen = CalcDimension(top->value, static_cast<DimensionUnit>(top->unit));
+    rightDimen = CalcDimension(right->value, static_cast<DimensionUnit>(right->unit));
+    bottomDimen = CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit));
+    leftDimen = CalcDimension(left->value, static_cast<DimensionUnit>(left->unit));
+    NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(topDimen, bottomDimen, leftDimen, rightDimen);
+    ViewAbstract::SetMargin(frameNode, paddings);
+}
+
+void ResetMargin(NodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetMargin(frameNode, NG::CalcLength(0.0));
+}
+
+void SetMarkAnchor(NodeHandle node, double xValue, int32_t xUnit, double yValue, int32_t yUnit)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension xDimension { xValue, static_cast<DimensionUnit>(xUnit) };
+    Dimension yDimension { yValue, static_cast<DimensionUnit>(yUnit) };
+    OffsetT<Dimension> value = { xDimension, yDimension };
+    ViewAbstract::MarkAnchor(frameNode, value);
+}
+
+void ResetMarkAnchor(NodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::MarkAnchor(frameNode, { Dimension(0.0_vp), Dimension(0.0_vp) });
+}
+
+void SetVisibility(NodeHandle node, int32_t value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    VisibleType value_visibleType = static_cast<VisibleType>(value);
+    ViewAbstract::SetVisibility(frameNode, value_visibleType);
+}
+
+void ResetVisibility(NodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetVisibility(frameNode, DEFAULT_VISIBILITY);
+}
+
+void SetAccessibilityText(NodeHandle node, const char* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = value;
+    ViewAbstractModelNG::SetAccessibilityText(frameNode, valueStr);
+}
+
+void ResetAccessibilityText(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityText(frameNode, "");
+}
+
+void SetAllowDrop(NodeHandle node, const char** allowDropCharArray, int32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::set<std::string> allowDropSet;
+    allowDropSet.clear();
+    std::string allowDropStr;
+    for (size_t i = 0; i < length; i++) {
+        allowDropStr = allowDropCharArray[i];
+        allowDropSet.insert(allowDropStr);
+    }
+    ViewAbstract::SetAllowDrop(frameNode, allowDropSet);
+}
+
+void ResetAllowDrop(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::set<std::string> allowDrop;
+    ViewAbstract::SetAllowDrop(frameNode, allowDrop);
+}
+
+void SetAccessibilityLevel(NodeHandle node, const char* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::string valueStr = value;
+    ViewAbstractModelNG::SetAccessibilityImportance(frameNode, valueStr);
+}
+
+void ResetAccessibilityLevel(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityImportance(frameNode, "");
+}
+
+void SetDirection(NodeHandle node, int32_t direction)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLayoutDirection(frameNode, static_cast<TextDirection>(direction));
+}
+
+void ResetDirection(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLayoutDirection(frameNode, DEFAULT_COMMON_DIRECTION);
+}
+
+void SetLayoutWeight(NodeHandle node, int32_t layoutWeight)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLayoutWeight(frameNode, layoutWeight);
+}
+
+void ResetLayoutWeight(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLayoutWeight(frameNode, DEFAULT_COMMON_LAYOUTWEIGHT);
+}
+
+void SetMinWidth(NodeHandle node, const struct ArkUISizeType *minWidth)
+{
+    CHECK_NULL_VOID(minWidth);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension result(minWidth->value, static_cast<DimensionUnit>(minWidth->unit));
+    ViewAbstract::SetMinWidth(frameNode, CalcLength(result));
+}
+
+void ResetMinWidth(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetMinSize(frameNode, true);
+}
+
+void SetMaxWidth(NodeHandle node, const struct ArkUISizeType* maxWidth)
+{
+    CHECK_NULL_VOID(maxWidth);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension result(maxWidth->value, static_cast<DimensionUnit>(maxWidth->unit));
+    ViewAbstract::SetMaxWidth(frameNode, CalcLength(result));
+}
+
+void ResetMaxWidth(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetMaxSize(frameNode, true);
+}
+
+void SetMinHeight(NodeHandle node, const struct ArkUISizeType* minHeight)
+{
+    CHECK_NULL_VOID(minHeight);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension result(minHeight->value, static_cast<DimensionUnit>(minHeight->unit));
+    ViewAbstract::SetMinHeight(frameNode, CalcLength(result));
+}
+
+void ResetMinHeight(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetMinSize(frameNode, false);
+}
+
+void SetMaxHeight(NodeHandle node, const struct ArkUISizeType* maxHeight)
+{
+    CHECK_NULL_VOID(maxHeight);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension result(maxHeight->value, static_cast<DimensionUnit>(maxHeight->unit));
+    ViewAbstract::SetMaxHeight(frameNode, CalcLength(result));
+}
+
+void ResetMaxHeight(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetMaxSize(frameNode, false);
+}
+
+void SetSize(NodeHandle node, const double* number, const int8_t* unit, const char** calc)
+{
+    CHECK_NULL_VOID(number);
+    CHECK_NULL_VOID(unit);
+    int widthIndex = 0, heightIndex = 1;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (*(unit + widthIndex) == static_cast<int8_t>(DimensionUnit::CALC) && *(calc + widthIndex) != nullptr) {
+        ViewAbstract::SetWidth(frameNode, CalcLength(std::string(*(calc + widthIndex))));
+    } else {
+        ViewAbstract::SetWidth(
+            frameNode, CalcLength(*(number + widthIndex), static_cast<DimensionUnit>(*(unit + widthIndex))));
+    }
+    if (*(unit + heightIndex) == static_cast<int8_t>(DimensionUnit::CALC) && *(calc + heightIndex) != nullptr) {
+        ViewAbstract::SetHeight(frameNode, CalcLength(std::string(*(calc + heightIndex))));
+    } else {
+        ViewAbstract::SetHeight(
+            frameNode, CalcLength(*(number + heightIndex), static_cast<DimensionUnit>(*(unit + heightIndex))));
+    }
+}
+
+void ResetSize(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetWidth(frameNode, CalcLength(0.0, DimensionUnit::VP));
+    ViewAbstract::SetHeight(frameNode, CalcLength(0.0, DimensionUnit::VP));
+}
+
+void ClearWidthOrHeight(NodeHandle node, bool isWidth)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearWidthOrHeight(frameNode, isWidth);
+}
+
+void SetAlignSelf(NodeHandle node, int32_t value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (value >= 0 && value <= MAX_ALIGN_VALUE) {
+        ViewAbstract::SetAlignSelf(frameNode, static_cast<FlexAlign>(value));
+    } else {
+        ViewAbstract::SetAlignSelf(frameNode, FlexAlign::AUTO);
+    }
+}
+
+void ResetAlignSelf(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetAlignSelf(frameNode, FlexAlign::AUTO);
+}
+
+void SetAspectRatio(NodeHandle node, double value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    double result = value;
+    if (LessOrEqual(result, 0.0)) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            ViewAbstract::ResetAspectRatio(frameNode);
+            return;
+        } else {
+            result = 1.0;
+        }
+    }
+
+    ViewAbstract::SetAspectRatio(frameNode, static_cast<float>(result));
+}
+
+void ResetAspectRatio(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        ViewAbstract::ResetAspectRatio(frameNode);
+    } else {
+        ViewAbstract::SetAspectRatio(frameNode, static_cast<float>(1.0));
+    }
+}
+
+void SetFlexGrow(NodeHandle node, double value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    double result = value;
+    if (result < 0.0) {
+        result = 0.0;
+    }
+    ViewAbstract::SetFlexGrow(frameNode, static_cast<float>(result));
+}
+
+void ResetFlexGrow(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetFlexGrow(static_cast<float>(0.0));
+}
+
+void SetFlexShrink(NodeHandle node, double value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (value < 0.0) {
+        ViewAbstract::ResetFlexShrink(frameNode);
+        return;
+    }
+    ViewAbstract::SetFlexShrink(frameNode, static_cast<float>(value));
+}
+
+void ResetFlexShrink(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetFlexShrink(frameNode);
+}
+
+void SetGridOffset(NodeHandle node, int32_t offset)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetGrid(frameNode, std::nullopt, offset, GridSizeType::UNDEFINED);
+}
+
+void ResetGridOffset(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetGrid(frameNode, std::nullopt, DEFAULT_GRID_OFFSET, GridSizeType::UNDEFINED);
+}
+
+void SetGridSpan(NodeHandle node, int32_t value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetGrid(frameNode, value, std::nullopt);
+}
+
+void ResetGridSpan(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetGrid(frameNode, DEFAULT_GRIDSPAN, std::nullopt);
+}
+
+void SetExpandSafeArea(NodeHandle node, const char* typeStr, const char* edgesStr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::SafeAreaExpandOpts opts {
+        .type = NG::SAFE_AREA_TYPE_ALL,
+        .edges = NG::SAFE_AREA_EDGE_ALL
+    };
+    uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
+    uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
+    std::string safeAreaTypeStr = std::string(typeStr);
+    std::string safeAreaEdgeStr = std::string(edgesStr);
+    std::string delimiter = "|";
+    size_t pos = 0;
+    std::string type;
+    std::string edges;
+    while ((pos = safeAreaTypeStr.find(delimiter)) != std::string::npos) {
+        type = safeAreaTypeStr.substr(0, pos);
+        safeAreaType |= StringUtils::StringToInt(type);
+        safeAreaTypeStr.erase(0, pos + delimiter.length());
+    }
+    safeAreaType |= StringUtils::StringToInt(safeAreaTypeStr);
+    while ((pos = safeAreaEdgeStr.find(delimiter)) != std::string::npos) {
+        edges = safeAreaEdgeStr.substr(0, pos);
+        safeAreaEdge |= StringUtils::StringToInt(edges);
+        safeAreaEdgeStr.erase(0, pos + delimiter.length());
+    }
+    safeAreaEdge |= StringUtils::StringToInt(safeAreaEdgeStr);
+    opts.type = safeAreaType;
+    opts.edges = safeAreaEdge;
+    ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
+}
+
+void ResetExpandSafeArea(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::SafeAreaExpandOpts opts;
+    opts.type = DEFAULT_SAFE_AREA_TYPE;
+    opts.edges = DEFAULT_SAFE_AREA_EDGE;
+    ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
+}
+
+void SetFlexBasis(NodeHandle node, const struct StringAndDouble* flexBasisValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension result;
+    if (flexBasisValue->valueStr != nullptr) {
+        result = StringUtils::StringToDimensionWithUnit(std::string(flexBasisValue->valueStr), DimensionUnit::VP);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            // flexbasis don't support percent case.
+            if (result.Unit() == DimensionUnit::PERCENT) {
+                result.SetUnit(DimensionUnit::AUTO);
+            }
+        }
+    } else {
+        result = Dimension(flexBasisValue->value, DimensionUnit::VP);
+    }
+    ViewAbstract::SetFlexBasis(frameNode, result);
+}
+
+void ResetFlexBasis(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetFlexBasis(frameNode, DEFAULT_FLEX_BASIS);
+}
+
+void SetAlignRules(NodeHandle node, char** anchors, int8_t* direction, int32_t length)
+{
+    CHECK_NULL_VOID(anchors);
+    CHECK_NULL_VOID(direction);
+    if (length != DEFAULT_ALIGN_RULES_SIZE) {
+        return;
+    }
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::map<AlignDirection, AlignRule> rulesMap;
+    for (int index = 0; index < length; index++) {
+        AlignRule alignRule;
+        alignRule.anchor = std::string(*(anchors + index) == nullptr ? "" : *(anchors + index));
+        if (index < DIRECTION_RANGE) {
+            alignRule.horizontal = static_cast<HorizontalAlign>(*(direction + index));
+        } else {
+            alignRule.vertical = static_cast<VerticalAlign>(*(direction + index));
+        }
+        rulesMap[static_cast<AlignDirection>(index)] = alignRule;
+    }
+    ViewAbstract::SetAlignRules(frameNode, rulesMap);
+}
+
+void ResetAlignRules(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const char* keys[] = { "left", "middle", "right", "top", "center", "bottom" };
+    std::map<AlignDirection, AlignRule> alignRules;
+    for (uint32_t i = 0; i < sizeof(keys) / sizeof(const char *); i++) {
+        AlignRule alignRule;
+        alignRule.anchor = "__container__";
+        alignRule.horizontal = static_cast<HorizontalAlign>(DEFAULT_ALIGN_VALUE);
+        alignRule.vertical = static_cast<VerticalAlign>(DEFAULT_ALIGN_VALUE);
+        alignRules[static_cast<AlignDirection>(i)] = alignRule;
+    }
+    ViewAbstract::SetAlignRules(frameNode, alignRules);
+}
+
+void SetAccessibilityDescription(NodeHandle node, const char* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::string valueStr = value;
+    ViewAbstractModelNG::SetAccessibilityDescription(frameNode, valueStr);
+}
+
+void ResetAccessibilityDescription(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityDescription(frameNode, "");
+}
+
+void SetId(NodeHandle node, const char* id)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = id;
+    ViewAbstract::SetInspectorId(frameNode, valueStr);
+}
+
+void ResetId(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string id = "";
+    ViewAbstract::SetInspectorId(frameNode, id);
+}
+
+void SetKey(NodeHandle node, const char* key)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = key;
+    ViewAbstract::SetInspectorId(frameNode, valueStr);
+}
+
+void ResetKey(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string key = "";
+    ViewAbstract::SetInspectorId(frameNode, key);
+}
+
+void SetRestoreId(NodeHandle node, uint32_t id)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetRestoreId(frameNode, id);
+}
+
+void ResetRestoreId(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetRestoreId(frameNode, DEFAULT_ID);
+}
+
+void SetTabIndex(NodeHandle node, int32_t index)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetTabIndex(frameNode, index);
+}
+
+void ResetTabIndex(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t index = 0;
+    ViewAbstract::SetTabIndex(frameNode, index);
+}
+
+void SetObscured(NodeHandle node, const int32_t* reason, int32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<ObscuredReasons> reasons(length);
+    reasons.clear();
+    for (int32_t i = 0; i < length; i++) {
+            reasons.emplace_back(static_cast<ObscuredReasons>(reason[i]));
+    }
+
+    ViewAbstract::SetObscured(frameNode, reasons);
+}
+
+void ResetObscured(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<ObscuredReasons> reasons(0);
+    ViewAbstract::SetObscured(frameNode, reasons);
+}
+
+void SetResponseRegion(NodeHandle node, const double* values, const int32_t* units, int32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<DimensionRect> region;
+    for (int32_t i = 0; i < length / NUM_4; i++) {
+        CalcDimension xDimen =
+            CalcDimension(values[i * NUM_4 + NUM_0], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_0]));
+        CalcDimension yDimen =
+            CalcDimension(values[i * NUM_4 + NUM_1], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_1]));
+        CalcDimension widthDimen =
+            CalcDimension(values[i * NUM_4 + NUM_2], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_2]));
+        CalcDimension heightDimen =
+            CalcDimension(values[i * NUM_4 + NUM_3], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_3]));
+        DimensionOffset offsetDimen(xDimen, yDimen);
+        DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+        region.emplace_back(dimenRect);
+    }
+    ViewAbstract::SetResponseRegion(frameNode, region);
+}
+
+void ResetResponseRegion(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<DimensionRect> region;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    DimensionOffset offsetDimen(xDimen, yDimen);
+    DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+    region.emplace_back(dimenRect);
+    ViewAbstract::SetResponseRegion(frameNode, region);
+}
+
+void SetMouseResponseRegion(NodeHandle node, const double* values, const int32_t* units, int32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<DimensionRect> region;
+    for (int32_t i = 0; i < length / NUM_4; i++) {
+        CalcDimension xDimen =
+            CalcDimension(values[i * NUM_4 + NUM_0], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_0]));
+        CalcDimension yDimen =
+            CalcDimension(values[i * NUM_4 + NUM_1], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_1]));
+        CalcDimension widthDimen =
+            CalcDimension(values[i * NUM_4 + NUM_2], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_2]));
+        CalcDimension heightDimen =
+            CalcDimension(values[i * NUM_4 + NUM_3], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_3]));
+        DimensionOffset offsetDimen(xDimen, yDimen);
+        DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+        region.emplace_back(dimenRect);
+    }
+    ViewAbstract::SetMouseResponseRegion(frameNode, region);
+}
+
+void ResetMouseResponseRegion(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<DimensionRect> region;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    DimensionOffset offsetDimen(xDimen, yDimen);
+    DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+    region.emplace_back(dimenRect);
+    ViewAbstract::SetMouseResponseRegion(frameNode, region);
+}
+
+void SetEnabled(NodeHandle node, bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetEnabled(frameNode, value);
+}
+
+void ResetEnabled(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetEnabled(frameNode, true);
+}
+
+void SetDraggable(NodeHandle node, bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDraggable(frameNode, value);
+}
+
+void ResetDraggable(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDraggable(frameNode, false);
+}
+
+void SetAccessibilityGroup(NodeHandle node, bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityGroup(frameNode, value);
+}
+
+void ResetAccessibilityGroup(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityGroup(frameNode, false);
+}
+
+void SetHoverEffect(NodeHandle node, int32_t hoverEffectValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::HoverEffectType hoverEffect = OHOS::Ace::HoverEffectType::AUTO;
+    hoverEffect = static_cast<OHOS::Ace::HoverEffectType>(hoverEffectValue);
+    ViewAbstract::SetHoverEffect(frameNode, hoverEffect);
+}
+
+void ResetHoverEffect(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetHoverEffect(frameNode, OHOS::Ace::HoverEffectType::AUTO);
+}
+
+void SetClickEffect(NodeHandle node, const int32_t levelValue, float scaleValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::ClickEffectLevel level = OHOS::Ace::ClickEffectLevel::UNDEFINED;
+    level = static_cast<OHOS::Ace::ClickEffectLevel>(levelValue);
+    ViewAbstract::SetClickEffectLevel(frameNode, level, scaleValue);
+}
+
+void ResetClickEffect(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetClickEffectLevel(frameNode, OHOS::Ace::ClickEffectLevel::UNDEFINED, 0.9f);
+}
+
+void SetKeyBoardShortCut(NodeHandle node, const char* value, const int32_t* keysIntArray, int32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = value;
+    std::vector<OHOS::Ace::ModifierKey> keysVector(length);
+    keysVector.clear();
+    for (int32_t i = 0; i < length; i++) {
+        keysVector.emplace_back(static_cast<OHOS::Ace::ModifierKey>(keysIntArray[i]));
+    }
+    ViewAbstractModelNG::SetKeyboardShortcut(frameNode, valueStr, keysVector, nullptr);
+}
+
+void ResetKeyBoardShortCut(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetKeyboardShortcut(frameNode, "", std::vector<OHOS::Ace::ModifierKey>(), nullptr);
+}
 ArkUICommonModifierAPI GetCommonModifier()
 {
     static const ArkUICommonModifierAPI modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
@@ -1528,7 +2677,10 @@ ArkUICommonModifierAPI GetCommonModifier()
         ResetInvert, SetSepia, ResetSepia, SetSaturate, ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale,
         ResetGrayscale, SetContrast, ResetContrast, SetBrightness, ResetBrightness, SetBlur, ResetBlur,
         SetLinearGradient, ResetLinearGradient, SetSweepGradient, ResetSweepGradient, SetRadialGradient,
-        ResetRadialGradient, SetForegroundBlurStyle, ResetForegroundBlurStyle, SetLinearGradientBlur,
+        ResetRadialGradient,
+        SetOverlay, ResetOverlay,
+        SetBorderImage, ResetBorderImage, SetBorderImageGradient,
+        SetForegroundBlurStyle, ResetForegroundBlurStyle, SetLinearGradientBlur,
         ResetLinearGradientBlur, SetBackgroundBlurStyle, ResetBackgroundBlurStyle, SetBorder, ResetBorder,
         SetBackgroundImagePosition, ResetBackgroundImagePosition, SetBackgroundImageSize, ResetBackgroundImageSize,
         SetBackgroundImage, ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale, ResetScale, SetRotate,
@@ -1540,8 +2692,23 @@ ArkUICommonModifierAPI GetCommonModifier()
         SetRenderFit, ResetRenderFit,
         SetUseEffect, ResetUseEffect,
         SetForegroundColor, ResetForegroundColor, SetMotionPath, ResetMotionPath,
-        SetGroupDefaultFocus, ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch
-    };
+        SetGroupDefaultFocus, ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable,
+        ResetFocusable, SetTouchable, ResetTouchable, SetDefaultFocus, ResetDefaultFocus,
+        SetDisplayPriority, ResetDisplayPriority, SetOffset, ResetOffset,
+        SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
+        SetVisibility, ResetVisibility, SetAccessibilityText, ResetAccessibilityText,
+        SetAllowDrop, ResetAllowDrop, SetAccessibilityLevel, ResetAccessibilityLevel,
+        SetDirection, ResetDirection, SetLayoutWeight, ResetLayoutWeight,
+        SetMinWidth, ResetMinWidth, SetMaxWidth, ResetMaxWidth, SetMinHeight, ResetMinHeight, SetMaxHeight,
+        ResetMaxHeight, SetSize, ResetSize, ClearWidthOrHeight, SetAlignSelf, ResetAlignSelf,
+        SetAspectRatio, ResetAspectRatio, SetFlexGrow, ResetFlexGrow, SetFlexShrink, ResetFlexShrink,
+        SetGridOffset, ResetGridOffset, SetGridSpan, ResetGridSpan, SetExpandSafeArea, ResetExpandSafeArea,
+        SetFlexBasis, ResetFlexBasis, SetAlignRules, ResetAlignRules,
+        SetAccessibilityDescription, ResetAccessibilityDescription, SetId, ResetId, SetKey, ResetKey, SetRestoreId,
+        ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured, ResetObscured, SetResponseRegion, ResetResponseRegion,
+        SetMouseResponseRegion, ResetMouseResponseRegion, SetEnabled, ResetEnabled,
+        SetDraggable, ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect,
+        SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut};
 
     return modifier;
 }

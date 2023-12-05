@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
-#include "core/components_ng/pattern/scroll/scroll_paint_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -35,7 +35,7 @@ void ScrollModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::SCROLL_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SCROLL_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::SCROLL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
     stack->Push(frameNode);
@@ -68,7 +68,6 @@ RefPtr<ScrollProxy> ScrollModelNG::CreateScrollBarProxy()
 void ScrollModelNG::SetAxis(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis);
-    ACE_UPDATE_LAYOUT_PROPERTY(ScrollPaintProperty, Axis, axis);
 }
 
 void ScrollModelNG::SetOnScrollBegin(OnScrollBeginEvent&& event)
@@ -134,6 +133,16 @@ void ScrollModelNG::SetOnScrollStop(OnScrollStopEvent&& event)
     eventHub->SetOnScrollStop(std::move(event));
 }
 
+void ScrollModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
+{
+    ScrollableModelNG::SetOnReachStart(std::move(onReachStart));
+}
+
+void ScrollModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
+{
+    ScrollableModelNG::SetOnReachEnd(std::move(onReachEnd));
+}
+
 void ScrollModelNG::SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -151,7 +160,7 @@ void ScrollModelNG::InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std
 
 void ScrollModelNG::SetDisplayMode(int value)
 {
-    auto displayMode = static_cast<NG::DisplayMode>(value);
+    auto displayMode = static_cast<DisplayMode>(value);
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, displayMode);
 }
 
@@ -167,13 +176,7 @@ void ScrollModelNG::SetScrollBarColor(const Color& color)
 
 void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, EdgeEffect, edgeEffect);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetAlwaysEnabled(alwaysEnabled);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);
 }
 
 void ScrollModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)

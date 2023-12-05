@@ -48,7 +48,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #undef protected
 #undef private
 
@@ -76,7 +76,7 @@ public:
 void SearchTestNg::SetUpTestSuite()
 {
     MockContainer::SetUp();
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
     auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
@@ -95,7 +95,7 @@ void SearchTestNg::SetUpTestSuite()
         }
         return textFieldTheme;
     });
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     SearchModelNG searchModelInstance;
     searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
@@ -104,7 +104,7 @@ void SearchTestNg::SetUpTestSuite()
 void SearchTestNg::TearDownTestSuite()
 {
     MockContainer::TearDown();
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -1496,5 +1496,26 @@ HWTEST_F(SearchTestNg, Pattern014, TestSize.Level1)
     auto cancelButtonTextLayout = cancelButtonTextNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(cancelButtonTextLayout, nullptr);
     EXPECT_EQ(cancelButtonTextLayout->GetTextColor(), Color::RED);
+}
+
+/**
+ * @tc.name: Pattern015
+ * @tc.desc: test NeedSoftKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, Pattern015, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Get frameNode and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test whether search need soft keyboard.
+     */
+    EXPECT_TRUE(pattern->NeedSoftKeyboard());
 }
 } // namespace OHOS::Ace::NG

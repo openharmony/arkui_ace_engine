@@ -54,14 +54,19 @@ struct ImageSpanAttribute {
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius;
 };
-struct ImageSpanOptions {
+
+struct SpanOptionBase {
+    std::optional<int32_t> offset;
+    UserGestureOptions userGestureOption;
+};
+
+struct ImageSpanOptions : SpanOptionBase {
     std::optional<int32_t> offset;
     std::optional<std::string> image;
     std::optional<std::string> bundleName;
     std::optional<std::string> moduleName;
     std::optional<RefPtr<PixelMap>> imagePixelMap;
     std::optional<ImageSpanAttribute> imageAttribute;
-    UserGestureOptions userGestureOption;
 };
 
 struct SpanPositionInfo {
@@ -81,6 +86,12 @@ struct SpanPositionInfo {
     int32_t spanStart_ = 0;
     int32_t spanEnd_ = 0;
     int32_t spanOffset_ = 0;
+
+    std::string ToString()
+    {
+        return "spanIndex: " + std::to_string(spanIndex_) + ", spanStart: " + std::to_string(spanStart_) + ", spanEnd" +
+               std::to_string(spanEnd_) + ", spanOffset: " + std::to_string(spanOffset_);
+    }
 };
 
 struct UpdateSpanStyle {
@@ -93,6 +104,7 @@ struct UpdateSpanStyle {
         updateFontFamily.reset();
         updateTextDecoration.reset();
         updateTextDecorationColor.reset();
+        updateTextShadows.reset();
 
         updateImageWidth.reset();
         updateImageHeight.reset();
@@ -109,6 +121,7 @@ struct UpdateSpanStyle {
     std::optional<std::vector<std::string>> updateFontFamily = std::nullopt;
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
     std::optional<Color> updateTextDecorationColor = std::nullopt;
+    std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
 
     std::optional<CalcDimension> updateImageWidth = std::nullopt;
     std::optional<CalcDimension> updateImageHeight = std::nullopt;
@@ -116,6 +129,7 @@ struct UpdateSpanStyle {
     std::optional<ImageFit> updateImageFit = std::nullopt;
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp = std::nullopt;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
+    bool hasResourceFontColor = false;
 };
 
 struct UpdateParagraphStyle {
@@ -138,12 +152,13 @@ struct SelectMenuParam {
     std::function<void()> onDisappear;
 };
 
-struct TextSpanOptions {
+struct TextSpanOptions : SpanOptionBase {
     std::optional<int32_t> offset;
     std::string value;
     std::optional<TextStyle> style;
     std::optional<UpdateParagraphStyle> paraStyle;
     UserGestureOptions userGestureOption;
+    bool hasResourceFontColor = false;
 };
 
 class ACE_EXPORT RichEditorControllerBase : public AceType {
@@ -152,6 +167,7 @@ class ACE_EXPORT RichEditorControllerBase : public AceType {
 public:
     virtual int32_t AddImageSpan(const ImageSpanOptions& options) = 0;
     virtual int32_t AddTextSpan(const TextSpanOptions& options) = 0;
+    virtual int32_t AddPlaceholderSpan(const RefPtr<NG::UINode>& customNode, const SpanOptionBase& options) = 0;
     virtual int32_t GetCaretOffset() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
     virtual void UpdateParagraphStyle(int32_t start, int32_t end, const UpdateParagraphStyle& style) = 0;
@@ -183,7 +199,8 @@ public:
     virtual void BindSelectionMenu(RichEditorType& editorType, RichEditorResponseType& responseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) = 0;
     virtual void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
-
+    virtual void SetTextDetectEnable(bool value) = 0;
+    virtual void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) = 0;
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

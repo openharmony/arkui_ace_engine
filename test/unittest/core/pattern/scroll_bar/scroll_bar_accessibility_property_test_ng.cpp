@@ -21,7 +21,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #undef private
 #undef protected
 
@@ -49,7 +49,7 @@ public:
 
 void ScrollBarAccessibilityPropertyTestNg::SetUp()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void ScrollBarAccessibilityPropertyTestNg::TearDown()
@@ -57,7 +57,7 @@ void ScrollBarAccessibilityPropertyTestNg::TearDown()
     frameNode_ = nullptr;
     scrollBarPattern_ = nullptr;
     scrollBarAccessibilityProperty_ = nullptr;
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void ScrollBarAccessibilityPropertyTestNg::InitScrollBarTestNg()

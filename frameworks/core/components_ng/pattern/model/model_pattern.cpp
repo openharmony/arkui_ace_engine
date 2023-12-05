@@ -141,4 +141,9 @@ void ModelPattern::MarkDirtyNode(const PropertyChangeFlag flag)
     host->MarkDirtyNode(flag);
 }
 
+ModelPattern::~ModelPattern()
+{
+    CHECK_NULL_VOID(modelAdapter_);
+    modelAdapter_->Deinit();
+}
 } // namespace OHOS::Ace::NG

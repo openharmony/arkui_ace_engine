@@ -80,27 +80,25 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-    auto param = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!param || param->IsNull()) {
-        return;
-    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     // max
-    auto max = param->GetDouble("max", 100.0);
+    double max = jsObj->GetPropertyValue<double>("max", 100.0);
     // values
-    auto values = param->GetValue("values");
-    if (!values || !values->IsArray()) {
+    JSRef<JSVal> jsValue = jsObj->GetProperty("values");
+    if (!jsValue->IsArray()) {
         return;
     }
-    size_t length = static_cast<size_t>(values->GetArraySize());
+    JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsValue);
+    size_t length = jsArray->Length();
     std::vector<double> dateValues;
     double dataSum = 0.0;
     size_t count = std::min(length, MAX_COUNT);
     for (size_t i = 0; i < count; ++i) {
-        auto item = values->GetArrayItem(i);
-        if (!item || !item->IsNumber()) {
+        JSRef<JSVal> item = jsArray->GetValueAt(i);
+        if (!item->IsNumber()) {
             continue;
         }
-        auto value = item->GetDouble();
+        double value = item->ToNumber<double>();
         if (LessOrEqual(value, 0.0)) {
             value = 0.0;
         }
@@ -116,14 +114,10 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
         max = dataSum;
     }
 
-    auto type = param->GetValue("type");
     size_t dataPanelType = 0;
-    if (type->IsNumber()) {
-        if (type->GetInt() == static_cast<int32_t>(ChartType::LINE)) {
-            dataPanelType = 1;
-        } else if (type->GetInt() == static_cast<int32_t>(ChartType::RAINBOW)) {
-            dataPanelType = 0;
-        }
+    size_t type = jsObj->GetPropertyValue<int32_t>("type", static_cast<int32_t>(ChartType::RAINBOW));
+    if (type == static_cast<int32_t>(ChartType::LINE)) {
+        dataPanelType = 1;
     }
     DataPanelModel::GetInstance()->Create(dateValues, max, dataPanelType);
 }

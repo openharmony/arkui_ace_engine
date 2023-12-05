@@ -40,6 +40,7 @@ extern const char THEME_PATTERN_SEMI_MODAL[];
 extern const char THEME_PATTERN_BADGE[];
 extern const char THEME_PATTERN_CALENDAR[];
 extern const char THEME_PATTERN_CAMERA[];
+extern const char THEME_PATTERN_CARD[];
 extern const char THEME_PATTERN_CLOCK[];
 extern const char THEME_PATTERN_COUNTER[];
 extern const char THEME_PATTERN_DIVIDER[];
@@ -78,6 +79,9 @@ extern const char THEME_PATTERN_FORM[];
 extern const char THEME_PATTERN_SIDE_BAR[];
 extern const char THEME_PATTERN_PATTERN_LOCK[];
 extern const char THEME_PATTERN_GAUGE[];
+extern const char THEME_PATTERN_SHEET[];
+extern const char THEME_BLUR_STYLE_COMMON[];
+extern const char THEME_PATTERN_SHADOW[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
@@ -227,6 +231,8 @@ extern const char INLINE_RADIUS_SIZE[];
 extern const char INLINE_BG_COLOR[];
 extern const char INLINE_BORDER_COLOR[];
 extern const char DISABLE_UNDERLINE_ALPHA[];
+extern const char DEFAULT_COUNTER_COLOR[];
+extern const char OVER_COUNTER_COLOR[];
 
 // linear split attributes
 extern const char LINEAR_SPLIT_CHILD_MIN_SIZE[];

@@ -75,6 +75,8 @@
       OHOS::Ace::ResourceManager::*;
       OHOS::Ace::NG::AppBarView::*;
       OHOS::Ace::Color::*;
+      OHOS::Ace::NG::UIObserverHandler::*;
+      OHOS::Ace::UIDisplaySync::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
 

@@ -36,13 +36,15 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(richEditorPattern);
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
     overlayMod->SetPrintOffset(richEditorPattern->GetTextRect().GetOffset());
-    if (!richEditorPattern->HasFocus()) {
-        overlayMod->SetScrollOffset(richEditorPattern->GetScrollOffset());
+    overlayMod->SetTextHeight(richEditorPattern->GetTextRect().Height());
+    overlayMod->SetScrollOffset(richEditorPattern->GetScrollOffset());
+    if (!richEditorPattern->HasFocus() && !richEditorPattern->GetTextDetectEnable()) {
         overlayMod->UpdateScrollBar(paintWrapper);
         overlayMod->SetCaretVisible(false);
         return;
     }
     auto caretVisible = richEditorPattern->GetCaretVisible();
+    overlayMod->SetShowSelect(richEditorPattern->GetShowSelect());
     overlayMod->SetCaretVisible(caretVisible);
     overlayMod->SetCaretColor(Color::BLUE.GetValue());
     constexpr float CARET_WIDTH = 1.5f;
@@ -57,6 +59,8 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
             OffsetF caretOffsetUp = richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight);
             overlayMod->SetCaretOffsetAndHeight(caretOffsetUp, caretHeight);
             richEditorPattern->ResetLastClickOffset();
+        } else {
+            overlayMod->SetCaretOffsetAndHeight(caretOffsetDown, caretHeight);
         }
     } else {
         auto rect = richEditorPattern->GetTextContentRect();
@@ -73,7 +77,6 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto contentRect = richEditorPattern->GetTextContentRect();
     overlayMod->SetContentRect(contentRect);
     overlayMod->SetSelectedRects(selectedRects);
-    overlayMod->SetScrollOffset(richEditorPattern->GetScrollOffset());
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     overlayMod->SetFrameSize(frameSize);
     overlayMod->UpdateScrollBar(paintWrapper);
@@ -90,5 +93,11 @@ void RichEditorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto richtTextOffset = richEditorPattern->GetTextRect().GetOffset();
     contentMod->SetRichTextRectX(richtTextOffset.GetX());
     contentMod->SetRichTextRectY(richtTextOffset.GetY());
+
+    const auto& geometryNode = paintWrapper->GetGeometryNode();
+    auto frameSize = geometryNode->GetPaddingSize();
+    OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
+    contentMod->SetClipOffset(paddingOffset);
+    contentMod->SetClipSize(frameSize);
 }
 } // namespace OHOS::Ace::NG

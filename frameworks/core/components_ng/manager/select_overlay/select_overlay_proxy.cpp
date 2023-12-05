@@ -161,6 +161,14 @@ bool SelectOverlayProxy::IsSingleHandle()
     return pattern->IsSingleHandle();
 }
 
+bool SelectOverlayProxy::IsHandleReverse()
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_RETURN(pattern, false);
+    auto info = pattern->GetSelectOverlayInfo();
+    return info && info->handleReverse;
+}
+
 SelectOverlayInfo SelectOverlayProxy::GetSelectOverlayMangerInfo()
 {
     auto pipeline = PipelineContext::GetCurrentContext();

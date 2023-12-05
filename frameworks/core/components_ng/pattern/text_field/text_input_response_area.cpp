@@ -92,7 +92,7 @@ void PasswordResponseArea::InitResponseArea()
     }
     auto passwordNode = CreateNode();
     CHECK_NULL_VOID(passwordNode);
-    passwordNode->MountToParent(host, 0);
+    passwordNode->MountToParent(host);
 }
 
 const RefPtr<FrameNode> PasswordResponseArea::GetFrameNode()
@@ -322,8 +322,7 @@ void UnitResponseArea::InitResponseArea()
         return;
     }
     CHECK_NULL_VOID(unitNode_);
-    unitNode_->MountToParent(host, 0);
-    unitNode_.Reset();
+    unitNode_->MountToParent(host);
 }
 
 const RefPtr<FrameNode> UnitResponseArea::GetFrameNode()
@@ -502,5 +501,46 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
     }
     imageFrameNode->MarkModifyDone();
     imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CleanNodeResponseArea::Refresh()
+{
+    CHECK_NULL_VOID(cleanNode_);
+    auto imageNode = AceType::DynamicCast<FrameNode>(cleanNode_->GetFirstChild());
+    CHECK_NULL_VOID(imageNode);
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (textFieldLayoutProperty->HasIconSize()) {
+        iconSize_ = textFieldLayoutProperty->GetIconSizeValue();
+    }
+    if (textFieldLayoutProperty->HasIconSrc()) {
+        iconSrc_ = textFieldLayoutProperty->GetIconSrcValue();
+    }
+    if (textFieldLayoutProperty->HasIconColor()) {
+        iconColor_ = textFieldLayoutProperty->GetIconColorValue();
+    }
+    ImageSourceInfo info;
+    if (iconSrc_.empty()) {
+        info.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
+    } else {
+        info.SetSrc(iconSrc_);
+    }
+    if (info.IsSvg()) {
+        info.SetFillColor(iconColor_);
+        auto imageRenderProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imageRenderProperty);
+        imageRenderProperty->UpdateSvgFillColor(iconColor_);
+    }
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageSourceInfo(info);
+    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
+    imageNode->MarkModifyDone();
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

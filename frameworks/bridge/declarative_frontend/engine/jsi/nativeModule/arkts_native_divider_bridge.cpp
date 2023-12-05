@@ -14,31 +14,13 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
 
-#include <cstdint>
 #include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/divider/divider_theme.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
-static bool ParseJsDimensionNG(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
-    DimensionUnit defaultUnit, bool isSupportPercent)
-{
-    if (jsValue->IsNumber()) {
-        result = CalcDimension(jsValue->ToNumber(vm)->Value(), defaultUnit);
-        return true;
-    }
-    if (jsValue->IsString()) {
-        auto value = jsValue->ToString(vm)->ToString();
-        if (value.back() == '%' && !isSupportPercent) {
-            return false;
-        }
-        return StringUtils::StringToCalcDimensionNG(jsValue->ToString(vm)->ToString(), result, false, defaultUnit);
-    }
-    // resouce ignore by design
-    return false;
-}
-
 ArkUINativeModuleValue DividerBridge::SetStrokeWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -46,10 +28,8 @@ ArkUINativeModuleValue DividerBridge::SetStrokeWidth(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> strokeWidthArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    auto theme = Framework::JSViewAbstract::GetTheme<DividerTheme>();
-    CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
-    CalcDimension strokeWidth(theme->GetStokeWidth().Value(), theme->GetStokeWidth().Unit());
-    if (ParseJsDimensionNG(vm, strokeWidthArg, strokeWidth, DimensionUnit::VP, false)) {
+    CalcDimension strokeWidth;
+    if (ArkTSUtils::ParseJsDimensionNG(vm, strokeWidthArg, strokeWidth, DimensionUnit::VP, false)) {
         GetArkUIInternalNodeAPI()->GetDividerModifier().SetDividerStrokeWidth(
             nativeNode, strokeWidth.Value(), static_cast<int32_t>(strokeWidth.Unit()));
     } else {
@@ -97,8 +77,12 @@ ArkUINativeModuleValue DividerBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    uint32_t color = colorArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetDividerModifier().SetDividerColor(nativeNode, color);
+    Color color;
+    if (ArkTSUtils::ParseJsColor(vm, colorArg, color)) {
+        GetArkUIInternalNodeAPI()->GetDividerModifier().SetDividerColor(nativeNode, color.GetValue());
+    } else {
+        GetArkUIInternalNodeAPI()->GetDividerModifier().ResetDividerColor(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

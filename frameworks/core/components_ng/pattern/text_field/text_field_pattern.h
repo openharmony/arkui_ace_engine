@@ -84,6 +84,16 @@ enum class DragStatus { DRAGGING, ON_DROP, NONE };
 
 enum class CaretStatus { SHOW, HIDE, NONE };
 
+enum class InputOperation {
+    INSERT,
+    DELETE_BACKWARD,
+    DELETE_FORWARD,
+    CURSOR_UP,
+    CURSOR_DOWN,
+    CURSOR_LEFT,
+    CURSOR_RIGHT
+};
+
 enum {
     ACTION_SELECT_ALL, // Smallest code unit.
     ACTION_UNDO,
@@ -141,6 +151,12 @@ public:
     TextFieldPattern();
     ~TextFieldPattern() override;
 
+    // TextField needs softkeyboard, override function.
+    bool NeedSoftKeyboard() const override
+    {
+        return true;
+    }
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -167,14 +183,8 @@ public:
     {
         if (IsTextArea()) {
             return MakeRefPtr<TextAreaLayoutAlgorithm>();
-        } else {
-            return MakeRefPtr<TextInputLayoutAlgorithm>();
         }
-    }
-
-    bool NeedSoftKeyboard() const override
-    {
-        return true;
+        return MakeRefPtr<TextInputLayoutAlgorithm>();
     }
 
     void OnModifyDone() override;
@@ -184,14 +194,34 @@ public:
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
     int32_t ConvertTouchOffsetToCaretPositionNG(const Offset& localOffset);
 
+    // Obtain the systemWindowsId when switching between windows
+    uint32_t GetSCBSystemWindowId();
+
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
+    void UpdateAreaTextColor();
+    void UltralimitShake();
     void DeleteBackward(int32_t length) override;
     void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
+
+    WeakPtr<LayoutWrapper> GetCounterNode()
+    {
+        return counterTextNode_;
+    }
+
+    bool GetCounterState() const
+    {
+        return counterChange_;
+    }
+
+    void SetCounterState(bool counterChange)
+    {
+        counterChange_ = counterChange;
+    }
 
     float GetTextOrPlaceHolderFontSize();
 
@@ -438,17 +468,21 @@ public:
     }
 
     bool CursorMoveLeft() override;
+    bool CursorMoveLeftOperation();
     bool CursorMoveLeftWord();
     bool CursorMoveLineBegin();
     bool CursorMoveToParagraphBegin();
     bool CursorMoveHome();
     bool CursorMoveRight() override;
+    bool CursorMoveRightOperation();
     bool CursorMoveRightWord();
     bool CursorMoveLineEnd();
     bool CursorMoveToParagraphEnd();
     bool CursorMoveEnd();
     bool CursorMoveUp() override;
     bool CursorMoveDown() override;
+    bool CursorMoveUpOperation();
+    bool CursorMoveDownOperation();
     void SetCaretPosition(int32_t position);
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
     void HandleExtendAction(int32_t action) override;
@@ -942,6 +976,7 @@ public:
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
     bool IsInPasswordMode() const;
+    bool IsShowCancelButtonMode() const;
 
     bool GetShowSelect() const
     {
@@ -998,6 +1033,7 @@ protected:
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
+    void OnAfterModifyDone() override;
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
@@ -1038,10 +1074,11 @@ private:
     void HandleLongPress(GestureEvent& info);
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void ShowSelectOverlay(const ShowSelectOverlayParams& params);
-
+    void ShowSelectOverlayAfterDrag();
     void CursorMoveOnClick(const Offset& offset);
 
-    void ProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
+    void ProcessOverlay(
+        bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true, bool isHiddenHandle = false);
     void DelayProcessOverlay(bool isUpdateMenu = true, bool animation = false, bool isShowMenu = true);
     SelectHandleInfo GetSelectHandleInfo(OffsetF info);
     void UpdateSelectOverlaySecondHandle(bool needLayout = false);
@@ -1056,7 +1093,8 @@ private:
 
     void FireEventHubOnChange(const std::string& text);
     void FireOnChangeIfNeeded();
-    void FireOnTextChangeEvent();
+    // The return value represents whether the editor content has change.
+    bool FireOnTextChangeEvent();
 
     void FilterInitializeText();
 
@@ -1065,7 +1103,7 @@ private:
     void FireOnSelectionChange(int32_t start, int32_t end);
     void UpdateCaretPositionByLastTouchOffset();
     bool UpdateCaretPosition();
-    void UpdateCaretRect();
+    void UpdateCaretRect(bool isEditorValueChanged);
     void AdjustTextInReasonableArea();
     bool CharLineChanged(int32_t caretPosition);
 
@@ -1142,6 +1180,7 @@ private:
     bool CheckAutoFill();
     bool ProcessAutoFill();
     void ScrollToSafeArea() const override;
+    void RecordSubmitEvent() const;
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1189,6 +1228,9 @@ private:
     bool needToRequestKeyboardOnFocus_ = false;
     bool isTransparent_ = false;
     bool contChange_ = false;
+    bool counterChange_ = false;
+    WeakPtr<LayoutWrapper> counterTextNode_;
+    bool hasCounterMargin_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
@@ -1234,7 +1276,6 @@ private:
     int32_t dragTextEnd_ = 0;
     RefPtr<FrameNode> dragNode_;
     DragStatus dragStatus_ = DragStatus::NONE; // The status of the dragged initiator
-    std::vector<std::string> dragContents_;
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
     std::vector<TextEditingValueNG> redoOperationRecords_;
@@ -1274,6 +1315,7 @@ private:
     std::queue<int32_t> deleteBackwardOperations_;
     std::queue<int32_t> deleteForwardOperations_;
     std::queue<std::string> insertValueOperations_;
+    std::queue<InputOperation> inputOperations_;
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
     bool showSelect_ = false;

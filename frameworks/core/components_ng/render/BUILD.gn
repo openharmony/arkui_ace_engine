@@ -98,4 +98,8 @@ build_component_ng("render_ng") {
   } else {
     sources += [ "adapter/media_player_impl.cpp" ]
   }
+
+  if (is_arkui_x) {
+    sources += [ "adapter/render_texture_impl.cpp" ]
+  }
 }

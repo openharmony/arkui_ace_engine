@@ -37,6 +37,7 @@ const char THEME_PATTERN_SEMI_MODAL[] = "semi_modal_pattern";
 const char THEME_PATTERN_BADGE[] = "badge_pattern";
 const char THEME_PATTERN_CALENDAR[] = "calendar_pattern";
 const char THEME_PATTERN_CAMERA[] = "camera_pattern";
+const char THEME_PATTERN_CARD[] = "card_pattern";
 const char THEME_PATTERN_CLOCK[] = "clock_pattern";
 const char THEME_PATTERN_COUNTER[] = "counter_pattern";
 const char THEME_PATTERN_DIVIDER[] = "divider_pattern";
@@ -75,6 +76,10 @@ const char THEME_PATTERN_FORM[] = "form_pattern";
 const char THEME_PATTERN_SIDE_BAR[] = "side_bar_pattern";
 const char THEME_PATTERN_PATTERN_LOCK[] = "pattern_lock_pattern";
 const char THEME_PATTERN_GAUGE[] = "gauge_pattern";
+const char THEME_PATTERN_SHEET[] = "sheet_pattern";
+
+const char THEME_BLUR_STYLE_COMMON[] = "blur_style_common";
+const char THEME_PATTERN_SHADOW[] = "shadow_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
@@ -223,6 +228,9 @@ const char INLINE_RADIUS_SIZE[] = "inline_radius_size";
 const char INLINE_BG_COLOR[] = "inline_bg_color";
 const char INLINE_BORDER_COLOR[] = "inline_border_color";
 const char DISABLE_UNDERLINE_ALPHA[] = "disable_underline_alpha";
+
+const char DEFAULT_COUNTER_COLOR[] = "default_counter_color";
+const char OVER_COUNTER_COLOR[] = "over_counter_color";
 
 // linear split attributes
 const char LINEAR_SPLIT_CHILD_MIN_SIZE[] = "linear_split_child_min_size";

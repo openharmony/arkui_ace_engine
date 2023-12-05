@@ -17,25 +17,30 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_CPP_ACE_CONTAINER_H
 
 #include <cstddef>
+#include <list>
 #include <memory>
 #include <mutex>
-#include <list>
 
+#include "display_manager.h"
+#include "dm_common.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
 
 #include "adapter/ohos/entrance/ace_ability.h"
 #include "adapter/ohos/entrance/platform_event_callback.h"
+#include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
+#include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
+#include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_context.h"
-#include "base/memory/ace_type.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -234,6 +239,27 @@ public:
         return resourceInfo_.GetHapPath();
     }
 
+    const ResourceInfo& GetResourceInfo() const
+    {
+        return resourceInfo_;
+    }
+
+    void SetOrientation(Orientation orientation) override
+    {
+        CHECK_NULL_VOID(uiWindow_);
+        auto dmOrientation = static_cast<Rosen::Orientation>(static_cast<uint32_t>(orientation));
+        uiWindow_->SetRequestedOrientation(dmOrientation);
+    }
+
+    Orientation GetOrientation() override
+    {
+        CHECK_NULL_RETURN(uiWindow_, Orientation::UNSPECIFIED);
+        auto dmOrientation = uiWindow_->GetRequestedOrientation();
+        return static_cast<Orientation>(static_cast<uint32_t>(dmOrientation));
+    }
+
+    RefPtr<DisplayInfo> GetDisplayInfo() override;
+
     void SetHapPath(const std::string& hapPath);
 
     void Dispatch(
@@ -327,15 +353,7 @@ public:
         }
     }
 
-    void SetIsTransparentForm(bool isTransparentForm)
-    {
-        isTransparentForm_ = isTransparentForm;
-    }
-
-    bool IsTransparentForm() const
-    {
-        return isTransparentForm_;
-    }
+    bool IsTransparentBg() const;
 
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
@@ -522,6 +540,7 @@ private:
     RefPtr<PlatformResRegister> resRegister_;
     RefPtr<PipelineBase> pipelineContext_;
     RefPtr<Frontend> frontend_;
+    RefPtr<DisplayInfo> displayInfo_ = MakeRefPtr<DisplayInfo>();
     std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap_;
     std::unordered_map<int64_t, WeakPtr<PipelineBase>> cardPipelineMap_;
 
@@ -547,7 +566,6 @@ private:
     bool isFormRender_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
-    bool isTransparentForm_ = false;
 
     mutable std::mutex frontendMutex_;
     mutable std::mutex pipelineMutex_;

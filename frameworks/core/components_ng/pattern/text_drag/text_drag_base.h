@@ -22,6 +22,7 @@
 #include "core/components_ng/render/paragraph.h"
 
 constexpr uint32_t DRAGGED_TEXT_OPACITY = 0x66;
+constexpr uint32_t DRAGGED_TEXT_TRANSPARENCY = 0x40;
 
 namespace OHOS::Ace::NG {
 using ParagraphT = std::variant<std::shared_ptr<RSParagraph>, RefPtr<Paragraph>>;
@@ -57,7 +58,7 @@ public:
     virtual bool CloseKeyboard(bool forceClose) = 0;
     virtual OffsetF GetDragUpperLeftCoordinates() = 0;
 
-    virtual void InitSpanImageLayout(const std::vector<int32_t>& placeHolderIndex,
+    virtual void InitSpanImageLayout(const std::vector<int32_t>& placeholderIndex,
         const std::vector<RectF>& rectsForPlaceholders, OffsetF contentOffset) {}
     
     virtual OffsetF GetContentOffset()

@@ -87,6 +87,10 @@ public:
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    void InitTitleParam();
+
+    bool IsHidden();
+
     bool IsInitialTitle() const
     {
         return isInitialTitle_;
@@ -113,6 +117,8 @@ public:
     void ProcessTitleDragUpdate(float offset, float dragOffsetY);
     void ProcessTitleDragEnd();
     
+    void OnColorConfigurationUpdate() override;
+
     float GetCurrentOffset()
     {
         return tempTitleBarHeight_ - defaultTitleBarHeight_;

@@ -14,10 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h"
 
-#include "base/utils/string_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "core/components_ng/pattern/counter/counter_model_ng.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue CounterBridge::SetEnableInc(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -35,6 +32,7 @@ ArkUINativeModuleValue CounterBridge::SetEnableInc(ArkUIRuntimeCallInfo* runtime
     GetArkUIInternalNodeAPI()->GetCounterModifier().SetEnableInc(nativeNode, flag);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue CounterBridge::ResetEnableInc(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -44,6 +42,7 @@ ArkUINativeModuleValue CounterBridge::ResetEnableInc(ArkUIRuntimeCallInfo* runti
     GetArkUIInternalNodeAPI()->GetCounterModifier().ReSetEnableInc(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue CounterBridge::SetEnableDec(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -59,6 +58,7 @@ ArkUINativeModuleValue CounterBridge::SetEnableDec(ArkUIRuntimeCallInfo* runtime
     GetArkUIInternalNodeAPI()->GetCounterModifier().SetEnableDec(nativeNode, flag);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue CounterBridge::ResetEnableDec(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

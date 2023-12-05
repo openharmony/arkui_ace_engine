@@ -36,10 +36,13 @@ CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
     : UINode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
 {}
 
-void CustomNode::Build()
+void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
     Render();
-    UINode::Build();
+    if (extraInfos) {
+        extraInfos_ = *extraInfos;
+    }
+    UINode::Build(extraInfos);
 }
 
 void CustomNode::Render()
@@ -55,8 +58,8 @@ void CustomNode::Render()
             FireOnAppear();
         }
         {
-            ACE_SCOPED_TRACE("CustomNode:BuildItem [%s][self:%d][parent:%d]", GetJSViewName().c_str(),
-                GetId(), GetParent() ? GetParent()->GetId() : 0);
+            ACE_SCOPED_TRACE("CustomNode:BuildItem [%s][self:%d][parent:%d]", GetJSViewName().c_str(), GetId(),
+                GetParent() ? GetParent()->GetId() : 0);
             // first create child node and wrapper.
             ScopedViewStackProcessor scopedViewStackProcessor;
             auto child = renderFunction();
@@ -131,7 +134,7 @@ void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent
 
 RefPtr<LayoutWrapperNode> CustomNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
-    Build();
+    Build(nullptr);
     return UINode::CreateLayoutWrapper(forceMeasure, forceLayout);
 }
 

@@ -54,6 +54,7 @@ namespace {
 #ifdef ENABLE_DRAG_FRAMEWORK
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
 #endif
+
 // create menuWrapper and menu node, update menu props
 std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, const std::string& targetTag = "",
     MenuType type = MenuType::MENU, const RefPtr<UINode>& previewCustomNode = nullptr)
@@ -65,6 +66,14 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuNode = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetId, targetTag, type));
+
+    auto renderContext = menuNode->GetRenderContext();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        renderContext->UpdateBackBlurStyle(styleOption);
+    }
 
     menuNode->MountToParent(wrapperNode);
     if (previewCustomNode) {
@@ -437,6 +446,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
 
     auto customMenuNode = AceType::DynamicCast<FrameNode>(customNode);
     if (customMenuNode) {
+        customMenuNode->SetDraggable(false);
         auto menuLayoutProperty = customMenuNode->GetLayoutProperty<MenuLayoutProperty>();
         auto renderContext = scroll->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, nullptr);
@@ -455,11 +465,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     }
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
-    if (menuParam.backgroundEffectOption.has_value()) {
-        auto renderContext = menuNode->GetRenderContext();
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        renderContext->UpdateBackgroundEffect(menuParam.backgroundEffectOption.value());
-    }
+    UpdateMenuBorderEffect(menuNode);
     menuNode->MarkModifyDone();
 
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
@@ -535,5 +541,58 @@ RefPtr<FrameNode> MenuView::Create(
 
     menuPattern->SetIsSelectMenu(true);
     return wrapperNode;
+}
+
+void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
+{
+    auto pipeLineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeLineContext);
+    auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    if (menuTheme->GetBgBlurEffectEnable()) {
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto saturation = menuTheme->GetBgEffectSaturation();
+        auto brightness = menuTheme->GetBgEffectBrightness();
+        auto radius = menuTheme->GetBgEffectRadius();
+        auto color = menuTheme->GetBgEffectColor();
+        EffectOption option = { radius, saturation, brightness, color };
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        renderContext->UpdateBackgroundEffect(option);
+    }
+}
+
+void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
+{
+    auto pipeLineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeLineContext);
+    auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    if (menuTheme->GetDoubleBorderEnable()) {
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        BorderStyleProperty styleProp;
+        styleProp.SetBorderStyle(BorderStyle::SOLID);
+        BorderColorProperty outerColorProp;
+        outerColorProp.SetColor(menuTheme->GetOuterBorderColor());
+        BorderRadiusProperty outerRadiusProp;
+        outerRadiusProp.SetRadius(menuTheme->GetOuterBorderRadius());
+        BorderWidthProperty outerWidthProp;
+        outerWidthProp.SetBorderWidth(menuTheme->GetOuterBorderWidth());
+        renderContext->SetOuterBorderStyle(styleProp);
+        renderContext->SetOuterBorderColor(outerColorProp);
+        renderContext->SetOuterBorderRadius(outerRadiusProp);
+        renderContext->SetOuterBorderWidth(outerWidthProp);
+        BorderColorProperty innerColorProp;
+        innerColorProp.SetColor(menuTheme->GetInnerBorderColor());
+        BorderRadiusProperty innerRadiusProp;
+        innerRadiusProp.SetRadius(menuTheme->GetInnerBorderRadius());
+        BorderWidthProperty innerWidthProp;
+        innerWidthProp.SetBorderWidth(menuTheme->GetInnerBorderWidth());
+        renderContext->SetBorderStyle(styleProp);
+        renderContext->SetBorderColor(innerColorProp);
+        renderContext->SetBorderRadius(innerRadiusProp);
+        renderContext->SetBorderWidth(innerWidthProp);
+    }
 }
 } // namespace OHOS::Ace::NG

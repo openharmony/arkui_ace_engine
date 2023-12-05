@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,12 +27,13 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/scroll/scroll_bar_theme.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/event/touch_event.h"
-#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
-#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -43,36 +44,7 @@ constexpr double DEFAULT_MINANGLE = 10.0;
 constexpr double STRAIGHT_ANGLE = 180.0;
 constexpr double BAR_FRICTION = 0.9;
 constexpr Color PRESSED_BLEND_COLOR = Color(0x19000000);
-
-enum class ShapeMode {
-    /*
-     * unspecified, follow theme.
-     */
-    DEFAULT = 0,
-    /*
-     * rect scrollbar.
-     */
-    RECT,
-    /*
-     * round scrollbar.
-     */
-    ROUND,
-};
-
-enum class DisplayMode {
-    /*
-     * do not display scrollbar.
-     */
-    OFF = 0,
-    /*
-     * display scrollbar on demand.
-     */
-    AUTO,
-    /*
-     * always display scrollbar.
-     */
-    ON,
-};
+using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 
 class ScrollBar final : public AceType {
     DECLARE_ACE_TYPE(ScrollBar, AceType);
@@ -490,6 +462,11 @@ public:
         TouchTestResult& result);
     void ScheduleDisappearDelayTask();
 
+    void SetDragFRCSceneCallback(DragFRCSceneCallback&& dragFRCSceneCallback)
+    {
+        dragFRCSceneCallback_ = std::move(dragFRCSceneCallback);
+    }
+
 protected:
     void InitTheme();
 
@@ -571,6 +548,8 @@ private:
     OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;
     HoverAnimationType hoverAnimationType_ = HoverAnimationType::NONE;
     CancelableCallback<void()> disappearDelayTask_;
+
+    DragFRCSceneCallback dragFRCSceneCallback_;
 };
 
 } // namespace OHOS::Ace::NG

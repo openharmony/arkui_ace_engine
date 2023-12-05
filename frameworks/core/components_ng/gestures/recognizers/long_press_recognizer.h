@@ -61,6 +61,19 @@ public:
         onLongPress_ = onLongPress;
     }
 
+    bool HasAction() const
+    {
+        if (onAction_ && *onAction_) {
+            return true;
+        }
+        return false;
+    }
+
+    void SetOnLongPressRecorder(const GestureEventFunc& recorder)
+    {
+        longPressRecorder_ = std::make_unique<GestureEventFunc>(recorder);
+    }
+
     void SetUseCatchMode(bool useCatchMode)
     {
         useCatchMode_ = useCatchMode;
@@ -128,6 +141,7 @@ private:
     Point globalPoint_;
     DelayedTask task_;
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
+    std::unique_ptr<GestureEventFunc> longPressRecorder_;
 };
 
 } // namespace OHOS::Ace::NG

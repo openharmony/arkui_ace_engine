@@ -61,6 +61,10 @@ public:
 
     void RemoveSurfaceChangedCallBack() override;
 
+    void MarkNewFrameAvailable(void* nativeWindow) override;
+    void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) override;
+    void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) override;
+
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
     void SyncGeometryProperties(GeometryNode* geometryNode, bool needRoundToPixelGrid = false) override;
@@ -68,6 +72,20 @@ public:
     void SyncGeometryProperties(const RectF& paintRect) override;
 
     void SetBorderRadius(const BorderRadiusProperty& value) override;
+
+    void SetBorderStyle(const BorderStyleProperty& value) override;
+
+    void SetBorderColor(const BorderColorProperty& value) override;
+
+    void SetBorderWidth(const BorderWidthProperty& value) override;
+
+    void SetOuterBorderRadius(const BorderRadiusProperty& value) override;
+
+    void SetOuterBorderStyle(const BorderStyleProperty& value) override;
+
+    void SetOuterBorderColor(const BorderColorProperty& value) override;
+
+    void SetOuterBorderWidth(const BorderWidthProperty& value) override;
 
     void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) override;
 
@@ -161,6 +179,7 @@ public:
     void OnLightUpEffectUpdate(double radio) override;
     void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList) override;
 
+    Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void OnBackBlendModeUpdate(BlendMode blendMode) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
@@ -309,6 +328,11 @@ private:
     void OnBorderColorUpdate(const BorderColorProperty& value) override;
     void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
 
+    void OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value) override;
+    void OnOuterBorderColorUpdate(const BorderColorProperty& value) override;
+    void OnOuterBorderStyleUpdate(const BorderStyleProperty& value) override;
+    void OnOuterBorderWidthUpdate(const BorderWidthProperty& value) override;
+
     void OnTransformScaleUpdate(const VectorF& value) override;
     void OnTransformCenterUpdate(const DimensionOffset& value) override;
     void OnTransformRotateUpdate(const Vector5F& value) override;
@@ -367,6 +391,7 @@ private:
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
     void RemoveDefaultTransition();
+    static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
@@ -455,6 +480,7 @@ private:
     float RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid(float absoluteLeft, float absoluteTop);
     Matrix4 GetRevertMatrix();
+    bool IsUniRenderEnabled() override;
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
@@ -472,6 +498,7 @@ private:
     bool hasDefaultTransition_ = false;
     bool measureTriggered_ = false;
     bool particleAnimationPlaying_ = false;
+    bool allowSandBox_ = true;
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;

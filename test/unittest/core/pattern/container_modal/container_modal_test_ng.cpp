@@ -16,6 +16,11 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
+
 #include "base/log/log_wrapper.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/test/mock/mock_resource_adapter.h"
@@ -31,11 +36,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/unittest/core/pattern/test_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -44,14 +45,9 @@ bool SystemProperties::changeTitleStyleEnabled_ = false;
 }
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t TITLE_LABEL_INDEX = 1;
-constexpr int32_t LEFT_SPLIT_BUTTON_INDEX = 2;
-constexpr int32_t MAX_RECOVER_BUTTON_INDEX = 3;
-constexpr int32_t MINIMIZE_BUTTON_INDEX = 4;
-constexpr int32_t CLOSE_BUTTON_INDEX = 5;
 constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0; // 5.0px
 } // namespace
-class ContainerModelTestNg : public testing::Test, public TestNG {
+class ContainerModelTestNg : public TestNG {
 protected:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -77,9 +73,9 @@ protected:
 
 void ContainerModelTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(nullptr));
     EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
@@ -87,7 +83,7 @@ void ContainerModelTestNg::SetUpTestSuite()
 
 void ContainerModelTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 void ContainerModelTestNg::SetUp()
@@ -122,7 +118,7 @@ void ContainerModelTestNg::SetMockWindow(WindowMode windowMode)
     const auto windowManager = AceType::MakeRefPtr<WindowManager>();
     auto windowModeCallback = [windowMode]() { return windowMode; };
     windowManager->SetWindowGetModeCallBack(std::move(windowModeCallback));
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->windowManager_ = windowManager;
 }
 
@@ -133,7 +129,7 @@ void ContainerModelTestNg::CreateContainerModal()
     auto frameNode = view.Create(content);
     ViewStackProcessor::GetInstance()->Push(frameNode);
     GetInstance();
-    RunMeasureAndLayout(frameNode_);
+    FlushLayoutTask(frameNode_);
 }
 
 void ContainerModelTestNg::Touch(TouchLocationInfo locationInfo)
@@ -176,9 +172,8 @@ void ContainerModelTestNg::Mouse(Offset moveOffset)
 
 void ContainerModelTestNg::ClickBtn(int32_t index)
 {
-    auto column = frameNode_->GetChildAtIndex(0);
-    auto container_modal_title = column->GetChildAtIndex(0);
-    auto btn = AceType::DynamicCast<FrameNode>(container_modal_title->GetChildAtIndex(index));
+    auto container_modal_control_buttons = frameNode_->GetChildAtIndex(2);
+    auto btn = AceType::DynamicCast<FrameNode>(container_modal_control_buttons->GetChildAtIndex(index));
     auto eventHub = btn->GetOrCreateGestureEventHub();
     eventHub->clickEventActuator_ =
         AceType::MakeRefPtr<ClickEventActuator>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
@@ -192,9 +187,8 @@ void ContainerModelTestNg::ClickBtn(int32_t index)
 
 OnHoverEventFunc ContainerModelTestNg::GetHovertEvent(int32_t index)
 {
-    auto column = frameNode_->GetChildAtIndex(0);
-    auto container_modal_title = column->GetChildAtIndex(0);
-    auto btn = AceType::DynamicCast<FrameNode>(container_modal_title->GetChildAtIndex(index));
+    auto container_modal_control_buttons = frameNode_->GetChildAtIndex(2);
+    auto btn = AceType::DynamicCast<FrameNode>(container_modal_control_buttons->GetChildAtIndex(index));
     auto inputHub = btn->GetOrCreateInputEventHub();
     auto inputEvents = inputHub->hoverEventActuator_->inputEvents_;
     return inputEvents.front()->GetOnHoverEventFunc();
@@ -202,9 +196,8 @@ OnHoverEventFunc ContainerModelTestNg::GetHovertEvent(int32_t index)
 
 OnMouseEventFunc ContainerModelTestNg::GetMouseEvent(int32_t index)
 {
-    auto column = frameNode_->GetChildAtIndex(0);
-    auto container_modal_title = column->GetChildAtIndex(0);
-    auto btn = AceType::DynamicCast<FrameNode>(container_modal_title->GetChildAtIndex(index));
+    auto container_modal_control_buttons = frameNode_->GetChildAtIndex(2);
+    auto btn = AceType::DynamicCast<FrameNode>(container_modal_control_buttons->GetChildAtIndex(index));
     auto inputHub = btn->GetOrCreateInputEventHub();
     auto inputEvents = inputHub->mouseEventActuator_->inputEvents_;
     return inputEvents.front()->GetOnMouseEventFunc();
@@ -221,33 +214,38 @@ HWTEST_F(ContainerModelTestNg, Test001, TestSize.Level1)
      * The structure of container_modal is designed as follows :
      * |--container_modal(stack)
      *   |--column
-     *      |--container_modal_title(row)
-     *          |--icon(image), label(text), [leftSplit, maxRecover, minimize, close](button)
+     *      |--container_modal_custom_title(row)
+     *          |--custom_node(js)
      *      |--stack
      *          |--container_modal_content(stage)
      *              |--page
      *          |--dialog(when show)
-     *   |--container_modal_floating_title(row)
-     *          |--icon(image), label(text), [leftSplit, maxRecover, minimize, close](button)
+     *   |--container_modal_custom_floating_title(row)
+     *          |--custom_node(js)
+     *   |--container_modal_control_buttons(row)
+     *          |--[leftSplit, maxRecover, minimize, close](button)
      */
     CreateContainerModal();
 
     EXPECT_EQ(frameNode_->GetTag(), "ContainerModal");
-    EXPECT_EQ(frameNode_->GetChildren().size(), 2);
+    EXPECT_EQ(frameNode_->GetChildren().size(), 3);
     auto column = frameNode_->GetChildAtIndex(0);
     EXPECT_EQ(column->GetTag(), V2::COLUMN_ETS_TAG);
     EXPECT_EQ(column->GetChildren().size(), 2);
-    auto container_modal_title = column->GetChildAtIndex(0);
-    EXPECT_EQ(container_modal_title->GetTag(), V2::ROW_ETS_TAG);
-    EXPECT_EQ(container_modal_title->GetChildren().size(), 6);
+    auto container_modal_custom_title = column->GetChildAtIndex(0);
+    EXPECT_EQ(container_modal_custom_title->GetTag(), V2::ROW_ETS_TAG);
+    EXPECT_EQ(container_modal_custom_title->GetChildren().size(), 1);
     auto stack = column->GetChildAtIndex(1);
     EXPECT_EQ(stack->GetTag(), V2::STACK_ETS_TAG);
     EXPECT_EQ(stack->GetChildren().size(), 1);
     auto container_modal_content = stack->GetChildAtIndex(0);
     EXPECT_EQ(container_modal_content->GetTag(), "content");
-    auto container_modal_floating_title = frameNode_->GetChildAtIndex(1);
-    EXPECT_EQ(container_modal_floating_title->GetTag(), V2::ROW_ETS_TAG);
-    EXPECT_EQ(container_modal_title->GetChildren().size(), 6);
+    auto container_modal_custom_floating_title = frameNode_->GetChildAtIndex(1);
+    EXPECT_EQ(container_modal_custom_floating_title->GetTag(), V2::ROW_ETS_TAG);
+    EXPECT_EQ(container_modal_custom_floating_title->GetChildren().size(), 1);
+    auto container_modal_control_buttons = frameNode_->GetChildAtIndex(2);
+    EXPECT_EQ(container_modal_control_buttons->GetTag(), V2::ROW_ETS_TAG);
+    EXPECT_EQ(container_modal_control_buttons->GetChildren().size(), 4);
 }
 
 /**
@@ -285,19 +283,14 @@ HWTEST_F(ContainerModelTestNg, Test002, TestSize.Level1)
     windowManager->SetWindowMaximizeCallBack(std::move(windowMaximizeCallBack));
     windowManager->SetWindowMinimizeCallBack(std::move(windowMinimizeCallBack));
     windowManager->SetWindowCloseCallBack(std::move(windowCloseCallBack));
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->windowManager_ = windowManager;
     CreateContainerModal();
-    auto column = frameNode_->GetChildAtIndex(0);
-    auto container_modal_title = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
-    auto eventHub = container_modal_title->GetOrCreateGestureEventHub();
-    GestureEvent info;
-    auto panEvents = eventHub->panEventActuator_->panEvents_;
-    panEvents.front()->GetActionStartEventFunc()(info);
+    pattern_->ShowTitle(true, true);
+    ClickBtn(0);
+    ClickBtn(1);
     ClickBtn(2);
     ClickBtn(3);
-    ClickBtn(4);
-    ClickBtn(5);
     EXPECT_FALSE(isWindowStartMove);
     EXPECT_FALSE(iswindowSplitPrimary);
     EXPECT_FALSE(iswindowRecover);
@@ -313,12 +306,13 @@ HWTEST_F(ContainerModelTestNg, Test002, TestSize.Level1)
     windowManager->SetCurrentWindowMaximizeMode(maximizeMode);
     windowMode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
     CreateContainerModal();
-    column = frameNode_->GetChildAtIndex(0);
-    container_modal_title = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
-    eventHub = container_modal_title->GetOrCreateGestureEventHub();
-    panEvents = eventHub->panEventActuator_->panEvents_;
+    pattern_->ShowTitle(true, true);
+    auto container_modal_control_buttons = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(2));
+    auto eventHub = container_modal_control_buttons->GetOrCreateGestureEventHub();
+    auto panEvents = eventHub->panEventActuator_->panEvents_;
+    GestureEvent info;
     panEvents.front()->GetActionStartEventFunc()(info);
-    ClickBtn(3);
+    ClickBtn(1);
     EXPECT_TRUE(isWindowStartMove);
     EXPECT_FALSE(windowMaximize);
 }
@@ -331,17 +325,17 @@ HWTEST_F(ContainerModelTestNg, Test002, TestSize.Level1)
 HWTEST_F(ContainerModelTestNg, Test003, TestSize.Level1)
 {
     CreateContainerModal();
-    GetHovertEvent(2)(true);
+    GetHovertEvent(0)(true);
     MouseInfo mouseInfo;
     mouseInfo.SetAction(MouseAction::PRESS);
     mouseInfo.SetLocalLocation(Offset(0, 0));
-    GetMouseEvent(2)(mouseInfo);
+    GetMouseEvent(0)(mouseInfo);
     mouseInfo.SetAction(MouseAction::MOVE);
-    GetMouseEvent(2)(mouseInfo);
+    GetMouseEvent(0)(mouseInfo);
 
-    GetHovertEvent(2)(false);
+    GetHovertEvent(0)(false);
     mouseInfo.SetAction(MouseAction::MOVE);
-    GetMouseEvent(2)(mouseInfo);
+    GetMouseEvent(0)(mouseInfo);
     SUCCEED();
 }
 
@@ -359,7 +353,7 @@ HWTEST_F(ContainerModelTestNg, Test004, TestSize.Level1)
      * @tc.expected: Do nothing
      */
     pattern_->ShowTitle(true, false);
-    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildren().back());
+    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(1));
     auto floatingLayoutProperty = floatingTitleNode->GetLayoutProperty();
     Touch(Offset::Zero(), Offset::Zero(), Offset::Zero());
     EXPECT_EQ(floatingLayoutProperty->GetVisibility(), VisibleType::GONE);
@@ -492,7 +486,7 @@ HWTEST_F(ContainerModelTestNg, Test005, TestSize.Level1)
     /**
      * @tc.steps: step3. Alter maxId.
      */
-    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->windowManager_->SetCurrentWindowMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
     pattern_->OnWindowFocused();
     EXPECT_TRUE(pattern_->isFocus_);
@@ -509,79 +503,7 @@ HWTEST_F(ContainerModelTestNg, Test006, TestSize.Level1)
     bool bResult = pattern_->CanShowFloatingTitle();
     EXPECT_FALSE(bResult);
 }
-/**
- * @tc.name: Test007
- * @tc.desc: Cover Other set Func.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, Test007, TestSize.Level1)
-{
-    CreateContainerModal();
-    /**
-     * @tc.steps: step1. set appTitle.
-     * @tc.expected: front and back both set ok.
-     */
-    pattern_->SetAppTitle("ContainerModelTest");
 
-    auto host = pattern_->GetHost();
-    CHECK_NULL_VOID(host);
-    auto titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front()->GetChildren().front());
-    auto titleLabel = AceType::DynamicCast<FrameNode>(pattern_->GetTitleItemByIndex(titleNode, TITLE_LABEL_INDEX));
-    EXPECT_EQ(titleLabel->GetLayoutProperty<TextLayoutProperty>()->GetContentValue(), "ContainerModelTest");
-
-    auto floatingNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());
-    auto floatingTitleLabel =
-        AceType::DynamicCast<FrameNode>(pattern_->GetTitleItemByIndex(floatingNode, TITLE_LABEL_INDEX));
-    EXPECT_EQ(floatingTitleLabel->GetLayoutProperty<TextLayoutProperty>()->GetContentValue(), "ContainerModelTest");
-
-    /**
-     * @tc.steps: step2. SetContainerButtonHide
-     * @tc.expected: front and back both are HIDE VIVIBLE HIDE.
-     */
-    pattern_->SetContainerButtonHide(true, false, true);
-    titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front()->GetChildren().front());
-    auto leftSplitButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
-    EXPECT_EQ(leftSplitButton->GetLayoutProperty()->propVisibility_.value(), VisibleType::GONE);
-    auto maximizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MAX_RECOVER_BUTTON_INDEX));
-    EXPECT_EQ(maximizeButton->GetLayoutProperty()->propVisibility_.value(), VisibleType::VISIBLE);
-    auto minimizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MINIMIZE_BUTTON_INDEX));
-    EXPECT_EQ(minimizeButton->GetLayoutProperty()->propVisibility_.value(), VisibleType::GONE);
-
-    titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());
-    leftSplitButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
-    EXPECT_EQ(leftSplitButton->GetLayoutProperty()->propVisibility_.value(), VisibleType::GONE);
-    maximizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MAX_RECOVER_BUTTON_INDEX));
-    EXPECT_EQ(maximizeButton->GetLayoutProperty()->propVisibility_.value(), VisibleType::VISIBLE);
-    minimizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MINIMIZE_BUTTON_INDEX));
-    EXPECT_EQ(minimizeButton->GetLayoutProperty()->propVisibility_.value(), VisibleType::GONE);
-
-    /**
-     * @tc.steps: step3. SetCloseButtonStatus
-     * @tc.expected: Button Status is equal with parameter.
-     */
-    pattern_->SetCloseButtonStatus(true);
-    titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front()->GetChildren().front());
-    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());
-    auto closeButton = AceType::DynamicCast<FrameNode>(pattern_->GetTitleItemByIndex(titleNode, CLOSE_BUTTON_INDEX));
-    auto buttonEvent = closeButton->GetEventHub<ButtonEventHub>();
-    EXPECT_EQ(buttonEvent->IsEnabled(), true);
-    auto floatingCloseButton =
-        AceType::DynamicCast<FrameNode>(pattern_->GetTitleItemByIndex(floatingTitleNode, CLOSE_BUTTON_INDEX));
-    auto floatingButtonEvent = floatingCloseButton->GetEventHub<ButtonEventHub>();
-    EXPECT_EQ(floatingButtonEvent->IsEnabled(), true);
-
-    pattern_->SetCloseButtonStatus(false);
-    titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front()->GetChildren().front());
-    floatingTitleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());
-    closeButton = AceType::DynamicCast<FrameNode>(pattern_->GetTitleItemByIndex(titleNode, CLOSE_BUTTON_INDEX));
-    buttonEvent = closeButton->GetEventHub<ButtonEventHub>();
-    EXPECT_EQ(buttonEvent->IsEnabled(), false);
-    floatingCloseButton =
-        AceType::DynamicCast<FrameNode>(pattern_->GetTitleItemByIndex(floatingTitleNode, CLOSE_BUTTON_INDEX));
-    floatingButtonEvent = floatingCloseButton->GetEventHub<ButtonEventHub>();
-    EXPECT_EQ(floatingButtonEvent->IsEnabled(), false);
-    pattern_->SetAppIcon(nullptr);
-}
 /**
  * @tc.name: AccessibilityProperty001
  * @tc.desc: Test GetText of containerModal.

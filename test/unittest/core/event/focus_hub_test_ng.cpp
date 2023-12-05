@@ -36,7 +36,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -61,13 +61,13 @@ public:
 
 void FocusHubTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     GTEST_LOG_(INFO) << "FocusHubTestNg SetUpTestCase";
 }
 
 void FocusHubTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
     GTEST_LOG_(INFO) << "FocusHubTestNg TearDownTestCase";
 }
 
@@ -2060,7 +2060,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0048, TestSize.Level1)
      * @tc.steps: step1. Create frameNode.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
@@ -2100,7 +2100,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0049, TestSize.Level1)
      * @tc.steps: step1. Create frameNode.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
@@ -2833,7 +2833,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0073, TestSize.Level1)
      * @tc.steps: step1. Create frameNode.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
 }
 
@@ -2848,7 +2848,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0074, TestSize.Level1)
      * @tc.steps1: create focusHub and construct allNodes.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
     auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
@@ -2873,7 +2873,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0075, TestSize.Level1)
      * @tc.steps1: create focusHub and construct allNodes.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
     auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
@@ -3118,5 +3118,54 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0083, TestSize.Level1)
 
     auto res = focusHub->FocusToHeadOrTailChild(true);
     ASSERT_TRUE(res);
+}
+
+/**
+ * @tc.name: LostFocusToViewRoot001
+ * @tc.desc: Test the function LostFocusToViewRoot.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, LostFocusToViewRoot001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+     /**
+     * @tc.Calling LostFocusToViewRoot to increase coverage
+     */
+    focusHub->LostFocusToViewRoot();
+    ASSERT_TRUE(focusHub->currentFocus_ == false);
+}
+
+/*
+ * @tc.name: SetEnabledNode01
+ * @tc.desc: Test the function SetEnabledScope and SetEnabledScope.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, SetEnabledScope001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    focusHub->SetEnabledNode(true);
+    ASSERT_TRUE(focusHub->currentFocus_ == false);
+
+    focusHub->SetEnabledScope(true);
+    ASSERT_TRUE(focusHub->IsFocusableNode());
+
+    focusHub->SetShowNode(true);
+    ASSERT_TRUE(focusHub->currentFocus_ == false);
+
+    focusHub->SetShowScope(true);
+    ASSERT_TRUE(focusHub->currentFocus_ == false);
+    ASSERT_FALSE(focusHub->HandleFocusOnMainView());
 }
 } // namespace OHOS::Ace::NG

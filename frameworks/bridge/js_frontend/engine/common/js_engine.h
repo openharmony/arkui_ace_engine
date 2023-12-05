@@ -147,6 +147,11 @@ public:
         return false;
     }
 
+    virtual bool ExecuteJs(const uint8_t* content, int32_t size)
+    {
+        return false;
+    }
+
     // Update running page
     virtual void UpdateRunningPage(const RefPtr<JsAcePage>& page) = 0;
 
@@ -396,6 +401,11 @@ public:
         const std::string& bundleName, const std::string& moduleName, const std::string assetPath, bool isBundle)
     {
         LOGE("Ark does not support InitializeModuleSearcher");
+    }
+
+    virtual bool IsComponentPreview()
+    {
+        return false;
     }
 #endif
     virtual void FlushReload() {}

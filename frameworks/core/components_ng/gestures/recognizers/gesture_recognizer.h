@@ -33,6 +33,7 @@ struct DelayedTask {
     int64_t timeStamp = 0;
     int32_t time = 0;
     std::function<void()> task;
+    bool deleted = false;
 };
 
 enum class RefereeState { READY, DETECTING, PENDING, PENDING_BLOCKED, SUCCEED_BLOCKED, SUCCEED, FAIL };
@@ -71,6 +72,8 @@ public:
     {
         OnFinishGestureReferee(touchId, isBlocked);
     }
+
+    virtual void AboutToAccept();
 
     // Called when request of handling gesture sequence is accepted by gesture referee.
     virtual void OnAccepted() = 0;
@@ -141,9 +144,11 @@ public:
         return refereeState_;
     }
 
-    void SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
+    bool SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
+
+    const WeakPtr<NGGestureRecognizer>& GetGestureGroup() const
     {
-        gestureGroup_ = gestureGroup;
+        return gestureGroup_;
     }
 
     void SetOnAction(const GestureEventFunc& onAction)
@@ -207,6 +212,7 @@ public:
         }
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
+        currentFingers_ = 0;
         OnResetStatus();
     }
 
@@ -259,6 +265,7 @@ public:
         }
     }
 
+    virtual void ForceCleanRecognizer() {};
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -282,6 +289,7 @@ protected:
     virtual void OnResetStatus() = 0;
 
     virtual void OnSucceedCancel() {}
+    bool ShouldResponse() override;
 
     RefereeState refereeState_ = RefereeState::READY;
 

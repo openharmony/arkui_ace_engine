@@ -25,7 +25,7 @@
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/calc_length.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -53,9 +54,9 @@ public:
 
 void AppBarTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppBarTheme>()));
     EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
@@ -63,7 +64,7 @@ void AppBarTestNg::SetUpTestSuite()
 
 void AppBarTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 void AppBarTestNg::SetUp() {}
@@ -133,7 +134,7 @@ HWTEST_F(AppBarTestNg, Test003, TestSize.Level1)
     auto test = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
     SystemProperties::SetExtSurfaceEnabled(true);
     auto frameNode = AppBarView::Create(test);
-    AppBarView::BindContentCover(0);
+    AppBarView::BindContentCover(nullptr);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetChildren().size(), 3);
     auto titleBar = frameNode->GetChildAtIndex(0);

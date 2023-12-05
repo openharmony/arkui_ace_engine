@@ -42,7 +42,7 @@ void CalendarModelNG::Create(const CalendarData& calendarData)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::CALENDAR_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::CALENDAR_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CalendarPattern>(); });
     auto calendarPattern = frameNode->GetPattern<CalendarPattern>();

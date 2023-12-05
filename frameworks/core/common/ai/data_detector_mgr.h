@@ -30,7 +30,7 @@ struct AISpan {
     TextDataDetectType type = TextDataDetectType::PHONE_NUMBER;
 };
 
-class ACE_EXPORT DataDetectorMgr final : public DataDetectorInterface {
+class ACE_EXPORT DataDetectorMgr : public DataDetectorInterface {
 public:
     static DataDetectorMgr& GetInstance();
 
@@ -40,7 +40,7 @@ public:
     // ui extension
     RefPtr<NG::FrameNode> CreateUIExtensionMenu(
         const std::map<std::string, std::string>& paramaters, std::function<void(const std::string&)> onClickMenu);
-    bool ShowUIExtensionMenu(const std::map<std::string, std::string>& paramaters, NG::RectF safeArea,
+    bool ShowUIExtensionMenu(const std::map<std::string, std::string>& paramaters, NG::RectF aiRect,
         std::function<void(const std::string&)> onClickMenu, std::vector<std::string> aiMenuOptions,
         const RefPtr<NG::FrameNode>& targetNode);
 
@@ -68,14 +68,15 @@ public:
     int8_t GetCursorPosition(const std::string& text, int8_t offset) override;
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset) override;
 
-private:
-    DataDetectorMgr();
+protected:
     ~DataDetectorMgr() = default;
 
+private:
+    DataDetectorMgr();
     DataDetectorInstance engine_ = nullptr;
 
-    std::string bundleName_ = "";
-    std::string abilityName_ = "";
+    std::string bundleName_;
+    std::string abilityName_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_DATA_DETECTOR_MGR_H

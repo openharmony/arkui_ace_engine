@@ -94,6 +94,10 @@ OffsetF ParagraphManager::ComputeCursorOffset(int32_t index, float& selectLineHe
     float y = 0.0f;
     while (it != paragraphs_.end()) {
         if (index >= it->start && index < it->end) {
+            if (it->paragraph && it->paragraph->GetParagraphText().empty()) {
+                it++;
+                index++;
+            }
             break;
         }
         y += it->paragraph->GetHeight();
@@ -119,7 +123,9 @@ OffsetF ParagraphManager::ComputeCursorOffset(int32_t index, float& selectLineHe
                           paragraph->ComputeOffsetForCaretDownstream(relativeIndex, metrics);
     }
     CHECK_NULL_RETURN(computeSuccess, OffsetF(0.0f, y));
-
+    if (NearZero(paragraph->GetTextWidth()) && paragraph->GetParagraphStyle().leadingMargin) {
+        metrics.offset.AddX(paragraph->GetParagraphStyle().leadingMargin->size.Width());
+    }
     selectLineHeight = metrics.height;
     return { static_cast<float>(metrics.offset.GetX()), static_cast<float>(metrics.offset.GetY() + y) };
 }

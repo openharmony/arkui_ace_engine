@@ -117,6 +117,7 @@ public:
     virtual void SetIndents(const std::vector<float>& indents) = 0;
     virtual bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) = 0;
     virtual std::u16string GetParagraphText() = 0;
+    virtual const ParagraphStyle& GetParagraphStyle() const = 0;
 
     // interfaces for painting
     virtual void Paint(RSCanvas& canvas, float x, float y) = 0;

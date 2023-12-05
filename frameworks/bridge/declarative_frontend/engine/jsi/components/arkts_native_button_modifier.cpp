@@ -277,18 +277,7 @@ void SetButtonLabelStyle(NodeHandle node, const char* fontFamily, const double* 
 
 void ResetButtonLabelStyle(NodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    if (!buttonTheme) {
-        return;
-    }
-    auto textStyle = buttonTheme->GetTextStyle();
-    Ace::ButtonParameters buttonParameters;
-    ButtonCompleteParameters(buttonParameters);
-    ButtonModelNG::SetLableStyle(frameNode, buttonParameters);
+    return;
 }
 
 ArkUIButtonModifierAPI GetButtonModifier()

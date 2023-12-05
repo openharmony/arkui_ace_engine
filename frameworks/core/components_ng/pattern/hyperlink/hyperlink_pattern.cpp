@@ -179,6 +179,8 @@ void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(theme);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(hyperlinkLayoutProperty);
     auto touchList = info.GetChangedTouches();
@@ -196,12 +198,18 @@ void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
                 theme->GetTextTouchedColor()));
             hyperlinkLayoutProperty->UpdateTextDecorationColor(
                 hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextTouchedColor()));
+            hyperlinkLayoutProperty->UpdateForegroundColor(
+                hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextTouchedColor()));
+            renderContext->UpdateForegroundColor(
+                hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextTouchedColor()));
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else if (touchType == TouchType::UP) {
         hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
         if (!isLinked_) {
             hyperlinkLayoutProperty->UpdateTextColor(hyperlinkLayoutProperty->GetColor().value_or(color));
+            hyperlinkLayoutProperty->UpdateForegroundColor(hyperlinkLayoutProperty->GetColor().value_or(color));
+            renderContext->UpdateForegroundColor(hyperlinkLayoutProperty->GetColor().value_or(color));
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }

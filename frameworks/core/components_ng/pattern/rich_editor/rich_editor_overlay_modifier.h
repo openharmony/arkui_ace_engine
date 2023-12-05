@@ -34,13 +34,13 @@ public:
     void SetCaretVisible(bool value);
     void SetScrollOffset(float value);
     void SetScrollBarOpacityType(int32_t type);
+    void SetTextHeight(float value);
     void SetFrameSize(const SizeF& value);
     float GetCaretHeight() const;
     float GetCaretWidth() const;
     OffsetF GetCaretOffset() const;
     void onDraw(DrawingContext& drawingContext) override;
     void UpdateScrollBar(PaintWrapper* paintWrapper);
-
 private:
     void PaintCaret(DrawingContext& drawingContext) const;
     void PaintScrollBar(DrawingContext& context);
@@ -53,6 +53,7 @@ private:
     RefPtr<PropertyInt> caretColor_;
     RefPtr<PropertyFloat> scrollOffset_;
     RefPtr<PropertyInt> scrollBarOpacityType_;
+    RefPtr<PropertyFloat> textHeight_;
     WeakPtr<Pattern> pattern_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
     WeakPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;

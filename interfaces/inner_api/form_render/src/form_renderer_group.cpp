@@ -196,5 +196,14 @@ void FormRendererGroup::UpdateConfiguration(
     }
     formRenderer_->UpdateConfiguration(config);
 }
+
+void FormRendererGroup::RecycleForm(std::string& statusData) const
+{
+    if (formRenderer_ == nullptr) {
+        HILOG_ERROR("RecycleForm failed, formRenderer is null");
+        return;
+    }
+    formRenderer_->RecycleForm(statusData);
+}
 }  // namespace Ace
 }  // namespace OHOS

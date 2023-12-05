@@ -28,7 +28,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -70,12 +70,12 @@ public:
 
 void RadioTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void RadioTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -278,7 +278,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest004, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
     radioTheme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
     radioTheme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
@@ -590,7 +590,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest015, TestSize.Level1)
     radioPaintProperty->ResetRadioCheck();
     pattern->OnClick();
     auto select1 = radioPaintProperty->GetRadioCheckValue();
-    EXPECT_TRUE(select1);
+    EXPECT_FALSE(select1);
 }
 
 /**
@@ -613,7 +613,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest016, TestSize.Level1)
     radioPaintProperty->ResetRadioCheck();
     pattern->OnClick();
     auto select1 = radioPaintProperty->GetRadioCheckValue();
-    EXPECT_TRUE(select1);
+    EXPECT_FALSE(select1);
 }
 
 /**
@@ -685,7 +685,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest021, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty();
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(radioTheme));
 
@@ -923,7 +923,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest001, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
     radioTheme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
     radioTheme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
@@ -946,7 +946,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest002, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
     /**
     //     corresponding ets code:
@@ -973,7 +973,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest003, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
     /**
     //     corresponding ets code:
@@ -999,7 +999,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest004, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
     /**
     //     corresponding ets code:
@@ -1025,7 +1025,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest005, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
     radioTheme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
     radioTheme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
@@ -1060,7 +1060,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest006, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
@@ -1083,7 +1083,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest007, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
@@ -1105,7 +1105,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest008, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RadioTheme>()));
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());

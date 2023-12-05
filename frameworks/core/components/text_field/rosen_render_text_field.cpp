@@ -618,7 +618,11 @@ void RosenRenderTextField::PaintFocus(const Offset& offset, const Size& widthHei
 #endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderTextField::PaintScrollBar(const Offset& offset, RenderContext& context, SkCanvas* canvas)
+#else
+void RosenRenderTextField::PaintScrollBar(const Offset& offset, RenderContext& context, RSCanvas* canvas)
+#endif
 {
     if (scrollBar_ && scrollBar_->NeedPaint()) {
         scrollBar_->UpdateScrollBarRegion(offset, GetLayoutSize(), GetLastOffset(), GetLongestLine());
@@ -1127,7 +1131,11 @@ void RosenRenderTextField::SetShaderIfNeeded(std::unique_ptr<Rosen::TypographySt
     txtStyle->foreground->setShader(shader);
 #endif
 #else
+#ifndef USE_GRAPHIC_TEXT_GINE
     txtStyle->foreground_brush.SetShaderEffect(shader);
+#else
+    txtStyle->foregroundBrush->SetShaderEffect(shader);
+#endif
 #endif
     builder->PushStyle(*txtStyle);
 #ifndef USE_GRAPHIC_TEXT_GINE

@@ -26,7 +26,11 @@ const uint32_t u16m = 65535;
 void MinorTest(const uint8_t* data, size_t size)
 {
     OHOS::Ace::ImageSourceInfo i;
+#ifndef USE_ROSEN_DRAWING
     const sk_sp<SkImage> rawImage;
+#else
+    const std::shared_ptr<RSImage> rawImage;
+#endif
     auto ri = size % u16m;
     std::string s(reinterpret_cast<const char*>(data), ri);
     i = ImageSourceInfo(s);
@@ -38,8 +42,13 @@ void MinorTest(const uint8_t* data, size_t size)
     auto k = ImageCompressor::GetInstance();
     Size s2;
     ImageProvider::ResizeSkImage(rawImage, s, s2) ;
+#ifndef USE_ROSEN_DRAWING
     SkPixmap  pixmap;
     sk_sp<SkData> compressdImage;
+#else
+    RSBitmap rsBitmap;
+    std::shared_ptr<RSData> compressdImage;
+#endif
 #ifdef FUZZTEST
     k->PartDoing();
 #endif

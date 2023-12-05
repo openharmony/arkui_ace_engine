@@ -14,9 +14,8 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
 
-#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
-
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::NG {
@@ -28,29 +27,8 @@ constexpr int NUM_4 = 4;
 const int SIZE_OF_TWO = 2;
 const std::string FORMAT_FONT = "%s|%s|%s";
 const std::string DEFAULT_STR = "-1";
+const int DEFAULT_SELECT_INDEX = -1;
 
-std::string GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value)
-{
-    std::string result = DEFAULT_STR;
-    if (!value->IsNull() && value->IsString()) {
-        result = value->ToString(vm)->ToString();
-    }
-    return result;
-}
-
-bool ParseJsDimensionFp(const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension &result)
-{
-    if (value->IsNumber()) {
-        result = CalcDimension(value->ToNumber(vm)->Value(), DimensionUnit::FP);
-        return true;
-    }
-    if (value->IsString()) {
-        result = StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::FP);
-        return true;
-    }
-    // resouce ignore by design
-    return false;
-}
 ArkUINativeModuleValue SelectBridge::SelectBridge::SetSpace(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -61,7 +39,7 @@ ArkUINativeModuleValue SelectBridge::SelectBridge::SetSpace(ArkUIRuntimeCallInfo
 
     if (secondArg->IsNumber() || secondArg->IsString()) {
         CalcDimension space;
-        ParseJsDimensionFp(vm, secondArg, space);
+        ArkTSUtils::ParseJsDimensionFp(vm, secondArg, space);
         GetArkUIInternalNodeAPI()->GetSelectModifier().SetSpace(
             nativeNode, space.Value(), static_cast<int>(space.Unit()));
     }
@@ -78,7 +56,6 @@ ArkUINativeModuleValue SelectBridge::SetValue(ArkUIRuntimeCallInfo* runtimeCallI
     if (secondArg->IsFunction()) {
         return panda::JSValueRef::Undefined(vm);
     }
-
     std::string value = secondArg->ToString(vm)->ToString();
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetValue(nativeNode, value.c_str());
     return panda::JSValueRef::Undefined(vm);
@@ -91,9 +68,12 @@ ArkUINativeModuleValue SelectBridge::SetSelected(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t value = secondArg->Int32Value(vm);
-    if (value < -1) {
-        value = -1;
+    int32_t value = 0;
+    if (secondArg->IsNumber()) {
+        value = secondArg->Int32Value(vm);
+    }
+    if (value < DEFAULT_SELECT_INDEX) {
+        value = DEFAULT_SELECT_INDEX;
     }
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetSelected(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
@@ -107,9 +87,7 @@ ArkUINativeModuleValue SelectBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     uint32_t colorVal = secondArg->Uint32Value(vm);
-
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetSelectFontColor(nativeNode, colorVal);
-
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -121,9 +99,7 @@ ArkUINativeModuleValue SelectBridge::SetSelectedOptionBgColor(ArkUIRuntimeCallIn
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     uint32_t colorVal = secondArg->Uint32Value(vm);
-
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetSelectedOptionBgColor(nativeNode, colorVal);
-
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -135,9 +111,7 @@ ArkUINativeModuleValue SelectBridge::SetOptionBgColor(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     uint32_t colorVal = secondArg->Uint32Value(vm);
-
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetOptionBgColor(nativeNode, colorVal);
-
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -149,9 +123,7 @@ ArkUINativeModuleValue SelectBridge::SetOptionFontColor(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     uint32_t colorVal = secondArg->Uint32Value(vm);
-
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetOptionFontColor(nativeNode, colorVal);
-
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -163,11 +135,10 @@ ArkUINativeModuleValue SelectBridge::SetSelectedOptionFontColor(ArkUIRuntimeCall
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     uint32_t colorVal = secondArg->Uint32Value(vm);
-
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetSelectedOptionFontColor(nativeNode, colorVal);
-
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue SelectBridge::SelectBridge::SetArrowPosition(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -176,10 +147,10 @@ ArkUINativeModuleValue SelectBridge::SelectBridge::SetArrowPosition(ArkUIRuntime
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     int32_t arrowPosition = secondArg->Int32Value(vm);
-
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetArrowPosition(nativeNode, arrowPosition);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue SelectBridge::SetMenuAlign(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -194,14 +165,14 @@ ArkUINativeModuleValue SelectBridge::SetMenuAlign(ArkUIRuntimeCallInfo* runtimeC
     if (secondArg->IsNumber()) {
         alignType = secondArg->Int32Value(vm);
     }
+
     CalcDimension menuAlignOffsetDx = Dimension(0.0);
     CalcDimension menuAlignOffsetDy = Dimension(0.0);
-
-    if (offsetDx->IsNull() || !ParseJsDimensionFp(vm, offsetDx, menuAlignOffsetDx)) {
+    if (offsetDx->IsNull() || !ArkTSUtils::ParseJsDimensionFp(vm, offsetDx, menuAlignOffsetDx)) {
         menuAlignOffsetDx = Dimension(0.0);
     }
 
-    if (offsetDy->IsNull() || !ParseJsDimensionFp(vm, offsetDy, menuAlignOffsetDy)) {
+    if (offsetDy->IsNull() || !ArkTSUtils::ParseJsDimensionFp(vm, offsetDy, menuAlignOffsetDy)) {
         menuAlignOffsetDx = Dimension(0.0);
     }
 
@@ -213,9 +184,9 @@ ArkUINativeModuleValue SelectBridge::SetMenuAlign(ArkUIRuntimeCallInfo* runtimeC
     values[1] = menuAlignOffsetDy.Value();
     units[1] = static_cast<int>(menuAlignOffsetDy.Unit());
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetMenuAlign(nativeNode, alignType, values, units, SIZE_OF_TWO);
-    
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue SelectBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -227,10 +198,9 @@ ArkUINativeModuleValue SelectBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallIn
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     
-    std::string fontSize = GetStringFromJS(vm, secondArg);
-    std::string weight = GetStringFromJS(vm, thirdArg);
-    std::string fontFamily = GetStringFromJS(vm, fourthArg);
-
+    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, secondArg);
+    std::string weight = ArkTSUtils::GetStringFromJS(vm, thirdArg);
+    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fourthArg);
     int32_t styleVal = 0;
     if (!fifthArg->IsNull()) {
         styleVal = fifthArg->Int32Value(vm);
@@ -238,10 +208,10 @@ ArkUINativeModuleValue SelectBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallIn
 
     std::string fontInfo = StringUtils::FormatString(
         FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
-
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetFont(nativeNode, fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue SelectBridge::SetOptionFont(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -253,10 +223,9 @@ ArkUINativeModuleValue SelectBridge::SetOptionFont(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    std::string fontSize = GetStringFromJS(vm, secondArg);
-    std::string weight = GetStringFromJS(vm, thirdArg);
-    std::string fontFamily = GetStringFromJS(vm, fourthArg);
-
+    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, secondArg);
+    std::string weight = ArkTSUtils::GetStringFromJS(vm, thirdArg);
+    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fourthArg);
     int32_t styleVal = 0;
     if (!fifthArg->IsNull()) {
         styleVal = fifthArg->Int32Value(vm);
@@ -264,10 +233,10 @@ ArkUINativeModuleValue SelectBridge::SetOptionFont(ArkUIRuntimeCallInfo* runtime
 
     std::string fontInfo = StringUtils::FormatString(
         FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
-    
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetOptionFont(nativeNode, fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue SelectBridge::SetSelectedOptionFont(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -279,10 +248,9 @@ ArkUINativeModuleValue SelectBridge::SetSelectedOptionFont(ArkUIRuntimeCallInfo*
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    std::string fontSize = GetStringFromJS(vm, secondArg);
-    std::string weight = GetStringFromJS(vm, thirdArg);
-    std::string fontFamily = GetStringFromJS(vm, fourthArg);
-    
+    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, secondArg);
+    std::string weight = ArkTSUtils::GetStringFromJS(vm, thirdArg);
+    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fourthArg);
     int32_t styleVal = 0;
     if (!fifthArg->IsNull()) {
         styleVal = fifthArg->Int32Value(vm);
@@ -290,7 +258,6 @@ ArkUINativeModuleValue SelectBridge::SetSelectedOptionFont(ArkUIRuntimeCallInfo*
     
     std::string fontInfo = StringUtils::FormatString(
         FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
- 
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetSelectedOptionFont(nativeNode, fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -374,6 +341,7 @@ ArkUINativeModuleValue SelectBridge::ResetSelectedOptionFontColor(ArkUIRuntimeCa
     GetArkUIInternalNodeAPI()->GetSelectModifier().ResetSelectedOptionFontColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue SelectBridge::ResetFont(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -383,6 +351,7 @@ ArkUINativeModuleValue SelectBridge::ResetFont(ArkUIRuntimeCallInfo* runtimeCall
     GetArkUIInternalNodeAPI()->GetSelectModifier().ResetFont(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue SelectBridge::ResetOptionFont(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -392,6 +361,7 @@ ArkUINativeModuleValue SelectBridge::ResetOptionFont(ArkUIRuntimeCallInfo* runti
     GetArkUIInternalNodeAPI()->GetSelectModifier().ResetOptionFont(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue SelectBridge::ResetSelectedOptionFont(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -401,6 +371,7 @@ ArkUINativeModuleValue SelectBridge::ResetSelectedOptionFont(ArkUIRuntimeCallInf
     GetArkUIInternalNodeAPI()->GetSelectModifier().ResetSelectedOptionFont(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue SelectBridge::ResetMenuAlign(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -410,6 +381,7 @@ ArkUINativeModuleValue SelectBridge::ResetMenuAlign(ArkUIRuntimeCallInfo* runtim
     GetArkUIInternalNodeAPI()->GetSelectModifier().ResetMenuAlign(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue SelectBridge::ResetArrowPosition(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

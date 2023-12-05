@@ -28,7 +28,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
     CHECK_NULL_VOID(container);
-    if (container->IsSubContainer()) {
+    if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
     }
@@ -111,22 +111,24 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
         }
         CHECK_NULL_VOID(dialog);
         if (dialogProperties.isShowInSubWindow) {
-            auto containerId = Container::CurrentId();
-            RefPtr<PipelineContext> parentContext;
-            auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-            auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
-            CHECK_NULL_VOID(parentContainer);
-            parentContext = AccessibilityManager::DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
+            SubwindowManager::GetInstance()->CloseDialogNG(dialog);
+            dialogs.pop_back();
+
+            auto parentContext = PipelineContext::GetMainPipelineContext();
             CHECK_NULL_VOID(parentContext);
-            auto parentoverlay = parentContext->GetOverlayManager();
-            CHECK_NULL_VOID(parentoverlay);
-            SubwindowManager::GetInstance()->DeleteHotAreas(parentoverlay->GetSubwindowId(), dialog->GetId());
+            auto parentOverlay = parentContext->GetOverlayManager();
+            CHECK_NULL_VOID(parentOverlay);
+            SubwindowManager::GetInstance()->DeleteHotAreas(parentOverlay->GetSubwindowId(), dialog->GetId());
+            SubwindowManager::GetInstance()->HideDialogSubWindow(parentOverlay->GetSubwindowId());
             if (dialogProperties.isModal) {
-                parentoverlay->CloseMask();
+                auto maskNode = parentOverlay->GetDialog(parentOverlay->GetMaskNodeId());
+                CHECK_NULL_VOID(maskNode);
+                parentOverlay->CloseDialog(maskNode);
             }
+        } else {
+            overlayManager->CloseDialog(dialog);
+            dialogs.pop_back();
         }
-        overlayManager->CloseDialog(dialog);
-        dialogs.pop_back();
     };
     executor->PostTask(task, TaskExecutor::TaskType::UI);
 }

@@ -503,9 +503,8 @@ void FrameNode::DumpCommonInfo()
         layoutProperty_->GetMarginProperty() || layoutProperty_->GetCalcLayoutConstraint()) {
         DumpLog::GetInstance().AddDesc(
             std::string("ContentConstraint: ")
-                .append(layoutProperty_->GetContentLayoutConstraint().has_value()
-                            ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
-                            : "NA"));
+                .append(layoutProperty_->GetContentLayoutConstraint().has_value() ?
+                            layoutProperty_->GetContentLayoutConstraint().value().ToString() : "NA"));
     }
     DumpOverlayInfo();
     if (frameProxy_->Dump().compare("totalCount is 0") != 0) {
@@ -705,6 +704,7 @@ void FrameNode::OnAttachToMainTree(bool recursive)
 {
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
+    pattern_->OnAttachToMainTree();
     if (IsResponseRegion() || HasPositionProp()) {
         auto parent = GetParent();
         while (parent) {
@@ -752,6 +752,10 @@ void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configuration
         pattern_->OnDpiConfigurationUpdate();
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    if (configurationChange.defaultFontUpdate) {
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -1064,9 +1068,9 @@ void FrameNode::SetActive(bool active)
             parent->MarkNeedSyncRenderTree();
         }
     }
-    if (GetTag() == V2::TAB_CONTENT_ITEM_ETS_TAG) {
-        SetJSViewActive(active);
-    }
+    // inform the js side the active status
+    SetJSViewActive(active);
+
 }
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
@@ -1083,7 +1087,7 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
     UpdateLayoutPropertyFlag();
     SetSkipSyncGeometryNode(false);
     {
-        ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
+        ACE_LAYOUT_SCOPED_TRACE("CreateLayoutTask[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
             GetParent() ? GetParent()->GetId() : 0);
         Measure(GetLayoutConstraint());
         Layout();
@@ -1530,6 +1534,12 @@ bool FrameNode::GetTouchable() const
     return gestureHub ? gestureHub->GetTouchable() : true;
 }
 
+bool FrameNode::GetMonopolizeEvents() const
+{
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    return gestureHub ? gestureHub->GetMonopolizeEvents() : false;
+}
+
 bool FrameNode::IsResponseRegion() const
 {
     auto renderContext = GetRenderContext();
@@ -1814,6 +1824,13 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
     return responseRegionList;
 }
 
+std::vector<RectF> FrameNode::GetResponseRegionListForRecognizer(int32_t sourceType)
+{
+    auto paintRect = renderContext_->GetPaintRectWithoutTransform();
+    auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
+    return responseRegionList;
+}
+
 bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const
 {
     for (const auto& rect : responseRegionList) {
@@ -1943,6 +1960,12 @@ std::pair<float, float> FrameNode::ContextPositionConvertToPX(
         ConvertToPx(context->GetPositionProperty()->GetPosition()->GetY(), scaleProperty, percentReference.Height())
             .value_or(0.0);
     return position;
+}
+
+void FrameNode::OnPixelRoundFinish(const SizeF& pixelGridRoundSize)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->OnPixelRoundFinish(pixelGridRoundSize);
 }
 
 void FrameNode::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
@@ -2474,7 +2497,7 @@ void FrameNode::UpdatePercentSensitive()
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
-    ACE_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", GetTag().c_str(),
+    ACE_LAYOUT_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", GetTag().c_str(),
         GetId(), GetParent() ? GetParent()->GetId() : 0);
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
@@ -2568,7 +2591,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 // Called to perform layout children.
 void FrameNode::Layout()
 {
-    ACE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(),
+    ACE_LAYOUT_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(),
         GetId(), GetParent() ? GetParent()->GetId() : 0);
     int64_t time = GetSysTimestamp();
     OffsetNodeToSafeArea();
@@ -2639,7 +2662,7 @@ void FrameNode::SyncGeometryNode()
         contentOffsetChange = geometryNode_->GetContentOffset() != oldGeometryNode_->GetContentOffset();
         oldGeometryNode_.Reset();
     }
-    
+
     // update border.
     if (layoutProperty_->GetBorderWidthProperty()) {
         if (!renderContext_->HasBorderColor()) {
@@ -2861,13 +2884,33 @@ void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     isActive_ = false;
 }
 
-void FrameNode::OnInspectorIdUpdate(const std::string& /*unused*/)
+void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
+    RecordExposureIfNeed(id);
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     if (parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+}
+
+void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
+{
+    if (exposureProcessor_) {
+        return;
+    }
+    exposureProcessor_ = MakeRefPtr<Recorder::ExposureProcessor>(inspectorId);
+    if (!exposureProcessor_->IsNeedRecord()) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(RawPtr(exposureProcessor_))](bool visible, double ratio) {
+        auto processor = weak.Upgrade();
+        CHECK_NULL_VOID(processor);
+        processor->OnVisibleChange(visible);
+    };
+    pipeline->AddVisibleAreaChangeNode(Claim(this), exposureProcessor_->GetRatio(), callback, false);
 }
 
 void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId)
@@ -2882,6 +2925,7 @@ void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId)
         .parentNodeId = parentId,
         .tag = GetTag(),
         .comId = propInspectorId_.value_or(""),
+        .monopolizeEvents = GetMonopolizeEvents(),
         .isHit = isHit,
         .hitTestMode = static_cast<int32_t>(GetHitTestMode())
     };

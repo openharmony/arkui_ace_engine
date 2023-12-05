@@ -41,6 +41,7 @@ template("pa_backend") {
       "c_utils:utils",
       "eventhandler:libeventhandler",
       "hilog:libhilog",
+      "i18n:intl_util",
       "ipc:ipc_core",
       "ipc:ipc_napi_common",
       "napi:ace_napi",

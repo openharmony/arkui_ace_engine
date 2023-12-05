@@ -16,13 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_WEB_PATTERN_WEB_DELEGATE_CROSS_H
 #define FOUNDATION_ACE_FRAMEWORKS_WEB_PATTERN_WEB_DELEGATE_CROSS_H
 
-#include "base/memory/referenced.h"
-#include "core/components_ng/pattern/web/web_delegate_interface.h"
-#include "core/components_ng/pattern/web/cross_platform/web_resource.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/common/container.h"
+#include "web_object_event.h"
 
+#include "base/log/log.h"
+#include "core/common/container.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
+#include "core/components_ng/pattern/web/cross_platform/web_resource.h"
+#include "core/components_ng/pattern/web/web_delegate_interface.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 class WebResourceRequsetImpl : public AceType {
@@ -85,6 +87,219 @@ private:
     void* object_ = nullptr;
 };
 
+class DialogResult : public Result {
+    DECLARE_ACE_TYPE(DialogResult, Result);
+public:
+    DialogResult(void* object, DialogEventType dialogEventType) : object_(object), dialogEventType_(dialogEventType)
+    {
+        auto obj = WebObjectEventManager::GetInstance().GetCommonDialogObject();
+        index_ = obj->AddObject(object);
+    }
+    ~DialogResult()
+    {
+        auto obj = WebObjectEventManager::GetInstance().GetCommonDialogObject();
+        obj->DelObject(index_);
+    }
+    void Confirm(const std::string& promptResult) override;
+    void Confirm() override;
+    void Cancel() override;
+
+private:
+    void* object_ = nullptr;
+    DialogEventType dialogEventType_;
+    int index_;
+};
+
+class WebAuthResult : public AuthResult {
+    DECLARE_ACE_TYPE(WebAuthResult, AuthResult);
+public:
+    explicit WebAuthResult(void* object) : object_(object)
+    {
+        auto obj = WebObjectEventManager::GetInstance().GetHttpAuthRequestObject();
+        index_ = obj->AddObject(object);
+    }
+    ~WebAuthResult()
+    {
+        auto obj = WebObjectEventManager::GetInstance().GetHttpAuthRequestObject();
+        obj->DelObject(index_);
+    }
+    bool Confirm(std::string& userName, std::string& pwd) override;
+    bool IsHttpAuthInfoSaved() override;
+    void Cancel() override;
+
+private:
+    void* object_ = nullptr;
+    int index_;
+};
+
+class WebCommonDialogImpl : public AceType {
+    DECLARE_ACE_TYPE(WebCommonDialogImpl, AceType);
+public:
+    explicit WebCommonDialogImpl(void* object) : object_(object) {}
+    std::string GetUrl() const;
+    std::string GetMessage() const;
+    std::string GetValue() const;
+
+private:
+    void* object_ = nullptr;
+};
+
+class PermissionRequestImpl : public WebPermissionRequest {
+    DECLARE_ACE_TYPE(PermissionRequestImpl, WebPermissionRequest);
+public:
+    explicit PermissionRequestImpl(void* object) : object_(object)
+    {
+        auto obj = WebObjectEventManager::GetInstance().GetPermissionRequestObject();
+        index_ = obj->AddObject(object);
+    }
+    ~PermissionRequestImpl()
+    {
+        auto obj = WebObjectEventManager::GetInstance().GetPermissionRequestObject();
+        obj->DelObject(index_);
+    }
+
+    void Deny() const override;
+    std::string GetOrigin() const override;
+    std::vector<std::string> GetResources() const override;
+    void Grant(std::vector<std::string>& resources) const override;
+    void SetOrigin();
+    void SetResources();
+
+private:
+    void* object_ = nullptr;
+    int index_;
+    std::string origin_;
+    std::vector<std::string> resources_;
+};
+
+class WebFileSelectorResult : public FileSelectorResult {
+    DECLARE_ACE_TYPE(WebFileSelectorResult, FileSelectorResult);
+public:
+    explicit WebFileSelectorResult(void* object) : object_(object)
+    {
+        auto obj = WebObjectEventManager::GetInstance().GetFileChooserObject();
+        index_ = obj->AddObject(object);
+    }
+    ~WebFileSelectorResult()
+    {
+        auto obj = WebObjectEventManager::GetInstance().GetFileChooserObject();
+        obj->DelObject(index_);
+    }
+
+    void HandleFileList(std::vector<std::string>& fileList) override;
+
+private:
+    void* object_;
+    int index_;
+};
+
+class WebFileChooserImpl : public AceType {
+    DECLARE_ACE_TYPE(WebFileChooserImpl, AceType);
+public:
+    explicit WebFileChooserImpl(void* object) : object_(object) {}
+    std::string GetTitle() const;
+    int GetMode() const;
+    std::string GetDefaultFileName() const;
+    std::vector<std::string> GetAcceptType() const;
+    bool IsCapture() const;
+
+private:
+    void* object_ = nullptr;
+};
+
+class FileSelectorParam : public WebFileSelectorParam {
+    DECLARE_ACE_TYPE(FileSelectorParam, AceType);
+public:
+    FileSelectorParam(
+        std::string title, int mode, std::string defaultFileName, std::vector<std::string> acceptType, bool isCapture)
+        : title_(title), mode_(mode), defaultFileName_(defaultFileName), acceptType_(acceptType), isCapture_(isCapture)
+    {}
+    ~FileSelectorParam() = default;
+
+    std::string GetTitle() override
+    {
+        return title_;
+    }
+    int GetMode() override
+    {
+        return mode_;
+    }
+    std::string GetDefaultFileName() override
+    {
+        return defaultFileName_;
+    }
+    std::vector<std::string> GetAcceptType() override
+    {
+        return acceptType_;
+    }
+    bool IsCapture() override
+    {
+        return isCapture_;
+    }
+
+private:
+    std::string title_;
+    int mode_;
+    std::string defaultFileName_;
+    std::vector<std::string> acceptType_;
+    bool isCapture_;
+};
+
+class Geolocation : public WebGeolocation {
+    DECLARE_ACE_TYPE(Geolocation, WebGeolocation);
+public:
+    explicit Geolocation(void* object) : object_(object)
+    {
+        auto obj = WebObjectEventManager::GetInstance().GetGeolocationObject();
+        index_ = obj->AddObject(object);
+    }
+    ~Geolocation()
+    {
+        auto obj = WebObjectEventManager::GetInstance().GetGeolocationObject();
+        obj->DelObject(index_);
+    }
+    void Invoke(const std::string& origin, const bool& allow, const bool& retain) override;
+
+private:
+    void* object_ = nullptr;
+    int index_;
+};
+
+class WebAuthRequestImpl : public AceType {
+    DECLARE_ACE_TYPE(WebAuthRequestImpl, AceType);
+public:
+    explicit WebAuthRequestImpl(void* object) : object_(object) {}
+    std::string GetHost() const;
+    std::string GetRealm() const;
+
+private:
+    void* object_ = nullptr;
+};
+
+class WebGeolocationImpl : public AceType {
+    DECLARE_ACE_TYPE(WebGeolocationImpl, AceType);
+
+public:
+    explicit WebGeolocationImpl(void* object) : object_(object) {}
+    std::string GetOrigin() const;
+private:
+    void* object_ = nullptr;
+};
+
+class WebDownloadResponseImpl : public AceType {
+    DECLARE_ACE_TYPE(WebDownloadResponseImpl, AceType);
+public:
+    explicit WebDownloadResponseImpl(void* object) : object_(object) {}
+    std::string GetUrl() const;
+    std::string GetMimetype() const;
+    long GetContentLength() const;
+    std::string GetUserAgent() const;
+    std::string GetContentDisposition() const;
+
+private:
+    void* object_ = nullptr;
+};
+
 class WebResourceErrorImpl : public AceType {
     DECLARE_ACE_TYPE(WebResourceErrorImpl, AceType);
 public:
@@ -141,6 +356,8 @@ public:
     void OnPageError(const std::string& param) override;
     void OnProgressChanged(const std::string& param) override;
     void OnReceivedTitle(const std::string& param) override;
+    void OnPageVisible(const std::string& param) override;
+    void OnGeolocationPermissionsHidePrompt() override;
 
     void UpdateUserAgent(const std::string& userAgent) override;
     void UpdateBackgroundColor(const int backgroundColor) override;
@@ -187,7 +404,6 @@ public:
     bool LoadDataWithRichText() override;
 
     void SetBoundsOrResize(const Size& drawSize, const Offset& offset) override;
-    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height) override;
 private:
     void ReleasePlatformResource();
     void CreatePluginResource(const Size& size, const Offset& position, const WeakPtr<NG::PipelineContext>& context);
@@ -200,6 +416,13 @@ private:
     void OnHttpErrorReceive(void* object);
     bool OnConsoleMessage(void* object);
     bool OnLoadIntercept(void* object);
+    bool OnCommonDialog(void* object, DialogEventType dialogEventType);
+    bool OnPermissionRequest(void* object);
+    bool OnHttpAuthRequest(void* object);
+    void OnDownloadStart(void* object);
+    bool OnShowFileChooser(void* object);
+    void OnGeolocationPermissionsShowPrompt(void* object);
+    void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
 
     WeakPtr<NG::WebPattern> webPattern_;
     WeakPtr<PipelineBase> context_;
@@ -253,6 +476,6 @@ private:
 
     int instanceId_ = -1;
 };
-}
+} // namespace OHOS::Ace
 
 #endif

@@ -22,6 +22,7 @@
 
 #include "core/animation/animation_pub.h"
 #include "core/animation/curve.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync.h"
 
 namespace OHOS::Ace {
 
@@ -146,6 +147,16 @@ public:
         return finishCallbackType_;
     }
 
+    void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange)
+    {
+        rateRange_ = rateRange;
+    }
+
+    const RefPtr<FrameRateRange>& GetFrameRateRange() const
+    {
+        return rateRange_;
+    }
+
 private:
     int32_t duration_ = 0;
     int32_t delay_ = 0;
@@ -157,6 +168,7 @@ private:
     std::function<void()> onFinishEvent_;
     AnimationDirection direction_ = AnimationDirection::NORMAL;
     FinishCallbackType finishCallbackType_ = FinishCallbackType::REMOVED;
+    RefPtr<FrameRateRange> rateRange_;
 };
 
 } // namespace OHOS::Ace

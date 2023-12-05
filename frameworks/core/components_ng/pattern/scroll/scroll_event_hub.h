@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_EVENT_HUB_H
 
-#include "base/memory/ace_type.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
@@ -41,8 +38,8 @@ using ScrollEvent = std::function<void(Dimension, Dimension)>;
 using ScrollEdgeEvent = std::function<void(ScrollEdge)>;
 using ScrollEndEvent = std::function<void()>;
 
-class ScrollEventHub : public EventHub {
-    DECLARE_ACE_TYPE(ScrollEventHub, EventHub)
+class ScrollEventHub : public ScrollableEventHub {
+    DECLARE_ACE_TYPE(ScrollEventHub, ScrollableEventHub)
 
 public:
     ScrollEventHub() = default;
@@ -78,26 +75,6 @@ public:
         onScrollEnd_ = std::move(event);
     }
 
-    const OnScrollStartEvent& GetScrollStartEvent()
-    {
-        return onScrollStart_;
-    }
-
-    void SetOnScrollStart(OnScrollStartEvent&& event)
-    {
-        onScrollStart_ = std::move(event);
-    }
-
-    const OnScrollStopEvent& GetScrollStopEvent()
-    {
-        return onScrollStop_;
-    }
-
-    void SetOnScrollStop(OnScrollStopEvent&& event)
-    {
-        onScrollStop_ = std::move(event);
-    }
-
     const OnScrollBeginEvent& GetScrollBeginEvent()
     {
         return onScrollBegin_;
@@ -108,23 +85,10 @@ public:
         onScrollBegin_ = std::move(event);
     }
 
-    const OnScrollFrameBeginEvent& GetScrollFrameBeginEvent()
-    {
-        return onScrollFrameBegin_;
-    }
-
-    void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event)
-    {
-        onScrollFrameBegin_ = std::move(event);
-    }
-
 private:
     ScrollEvent onScroll_;
     OnScrollBeginEvent onScrollBegin_;
-    OnScrollFrameBeginEvent onScrollFrameBegin_;
     ScrollEndEvent onScrollEnd_;
-    OnScrollStartEvent onScrollStart_;
-    OnScrollStopEvent onScrollStop_;
     ScrollEdgeEvent onScrollEdge_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ScrollEventHub);

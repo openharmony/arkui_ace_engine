@@ -66,6 +66,8 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     targetOffset_ = bubbleLayoutAlgorithm->GetTargetOffset();
     targetSize_ = bubbleLayoutAlgorithm->GetTargetSize();
     arrowPlacement_ = bubbleLayoutAlgorithm->GetArrowPlacement();
+    clipPath_ = bubbleLayoutAlgorithm->GetClipPath();
+    clipFrameNode_ = bubbleLayoutAlgorithm->GetClipFrameNode();
     paintProperty->UpdatePlacement(bubbleLayoutAlgorithm->GetArrowPlacement());
     if (delayShow_) {
         delayShow_ = false;
@@ -122,6 +124,13 @@ void BubblePattern::InitTouchEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto bubbleRenderProp = host->GetPaintProperty<BubbleRenderProperty>();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        CHECK_NULL_VOID(bubbleRenderProp);
+        if (!bubbleRenderProp->GetAutoCancel().value_or(true)) {
+            return;
+        }
+    }
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -147,7 +156,11 @@ void BubblePattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchType = info.GetTouches().front().GetTouchType();
     auto clickPos = info.GetTouches().front().GetLocalLocation();
     if (touchType == TouchType::DOWN) {
-        HandleTouchDown(clickPos);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            HandleTouchDown(clickPos);
+        } else {
+            PopBubble();
+        }
     }
 }
 
@@ -299,7 +312,7 @@ RefPtr<FrameNode> BubblePattern::GetButtonRowNode()
     CHECK_NULL_RETURN(columnNode, nullptr);
     auto buttonRowNode = AceType::DynamicCast<FrameNode>(columnNode->GetLastChild());
     CHECK_NULL_RETURN(buttonRowNode, nullptr);
-    if (buttonRowNode->GetTag() != V2::ROW_ETS_TAG) {
+    if (buttonRowNode->GetTag() != V2::FLEX_ETS_TAG) {
         return nullptr;
     }
     if (buttonRowNode->GetChildren().empty()) {

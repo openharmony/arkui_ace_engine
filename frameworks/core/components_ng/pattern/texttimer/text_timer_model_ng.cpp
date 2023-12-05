@@ -25,7 +25,7 @@ RefPtr<TextTimerController> TextTimerModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXTTIMER_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXTTIMER_ETS_TAG, nodeId);
     auto textTimerNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXTTIMER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextTimerPattern>(); });
 
@@ -68,6 +68,11 @@ void TextTimerModelNG::SetTextColor(const Color& value)
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
+}
+
+void TextTimerModelNG::SetTextShadow(const std::vector<Shadow>& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, value);
 }
 
 void TextTimerModelNG::SetItalicFontStyle(Ace::FontStyle value)

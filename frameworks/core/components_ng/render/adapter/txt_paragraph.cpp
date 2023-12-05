@@ -133,7 +133,7 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 #else
     builder_->AppendPlaceholder(txtSpan);
 #endif
-    return ++placeHolderIndex_;
+    return ++placeholderIndex_;
 }
 
 void TxtParagraph::Build()
@@ -155,9 +155,9 @@ uint32_t TxtParagraph::destructCount = 0;
 TxtParagraph::~TxtParagraph()
 {
     if (destructCount % 100 == 0) {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-        "destroy TxtParagraph with placeHolderIndex_ %{public}d, textAlign_ %{public}d, count %{public}u",
-        placeHolderIndex_, static_cast<int>(textAlign_), destructCount);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+            "destroy TxtParagraph with placeholderIndex_ %{public}d, textAlign_ %{public}d, count %{public}u",
+            placeholderIndex_, static_cast<int>(textAlign_), destructCount);
     }
     destructCount++;
 }
@@ -317,7 +317,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
     if (!paragraph_) {
         return false;
     }
-    if (text_.empty() && placeHolderIndex_ == -1) {
+    if (text_.empty() && placeholderIndex_ == -1) {
         if (paragraph_->GetLineCount() > 0) {
             result.offset.Reset();
             result.height = paragraph_->GetHeight();
@@ -372,7 +372,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
 
     const auto& textBox = *boxes.begin();
     // when text_ ends with a \n, return the top position of the next line.
-    auto last = extent - placeHolderIndex_ - 1;
+    auto last = extent - placeholderIndex_ - 1;
     auto index = static_cast<size_t>(last) == text_.length() ? last : extent;
     prevChar = text_[std::max(0, index - 1)];
     if (prevChar == NEWLINE_CODE && !text_[index]) {
@@ -594,5 +594,10 @@ bool TxtParagraph::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end)
 std::u16string TxtParagraph::GetParagraphText()
 {
     return text_;
+}
+
+const ParagraphStyle& TxtParagraph::GetParagraphStyle() const
+{
+    return paraStyle_;
 }
 } // namespace OHOS::Ace::NG

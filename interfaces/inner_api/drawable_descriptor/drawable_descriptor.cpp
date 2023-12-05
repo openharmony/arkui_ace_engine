@@ -19,7 +19,7 @@
 #include <memory>
 #include <string>
 
-#include "cJSON.h"
+#include "third_party/cJSON/cJSON.h"
 #include "include/core/SkSamplingOptions.h"
 
 #include "base/utils/string_utils.h"
@@ -139,6 +139,7 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         item = cJSON_GetObjectItem(roots->child, DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND);
     }
     if (item == nullptr) {
+        cJSON_Delete(roots);
         HILOG_ERROR("GetObjectItem from json buffer failed");
         return false;
     }
@@ -147,6 +148,7 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         std::unique_ptr<Media::ImageSource> imageSource =
             LayeredDrawableDescriptor::CreateImageSource(item->valuestring, errorCode);
         if (errorCode != 0) {
+            cJSON_Delete(roots);
             HILOG_ERROR("CreateImageSource from json buffer failed");
             return false;
         }
@@ -155,6 +157,7 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         if (imageSource) {
             auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
             if (errorCode != 0) {
+                cJSON_Delete(roots);
                 HILOG_ERROR("Get PixelMap from json buffer failed");
                 return false;
             }
@@ -166,9 +169,11 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
             }
         }
     } else {
+        cJSON_Delete(roots);
         HILOG_ERROR("Get background from json buffer failed");
         return false;
     }
+    cJSON_Delete(roots);
     return true;
 #else
     return false;

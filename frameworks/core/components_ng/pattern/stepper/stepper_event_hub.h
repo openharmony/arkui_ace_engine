@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STEPPER_STEPPER_EVENT_HUB_H
 
 #include "core/components_ng/event/event_hub.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -52,17 +54,19 @@ public:
         previousEvent_ = previousEvent;
     }
 
-    void FireFinishEvent() const
+    void FireFinishEvent(int32_t index) const
     {
         if (finishEvent_) {
             finishEvent_();
         }
+        RecordEvent(Recorder::EventType::STEPPER_FINISH, index);
     }
-    void FireSkipEvent() const
+    void FireSkipEvent(int32_t index) const
     {
         if (skipEvent_) {
             skipEvent_();
         }
+        RecordEvent(Recorder::EventType::STEPPER_SKIP, index);
     }
     void FireChangeEvent(int32_t prevIndex, int32_t index) const
     {
@@ -78,12 +82,14 @@ public:
         if (nextEvent_) {
             nextEvent_(index, pendingIndex);
         }
+        RecordEvent(Recorder::EventType::STEPPER_NEXT, index);
     }
     void FirePreviousEvent(int32_t index, int32_t pendingIndex) const
     {
         if (previousEvent_) {
             previousEvent_(index, pendingIndex);
         }
+        RecordEvent(Recorder::EventType::STEPPER_PREVIOUS, index);
     }
     void SetOnChangeEvent(IndexChangeEvent&& onChangeEvent)
     {
@@ -91,6 +97,21 @@ public:
     }
 
 private:
+    void RecordEvent(Recorder::EventType eventType, int32_t index) const
+    {
+        if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            return;
+        }
+        Recorder::EventParamsBuilder builder;
+        auto host = GetFrameNode();
+        if (host) {
+            auto id = host->GetInspectorIdValue("");
+            builder.SetId(id).SetType(host->GetHostTag());
+        }
+        builder.SetEventType(eventType).SetIndex(index);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
+
     RoutineCallbackEvent finishEvent_;
     RoutineCallbackEvent skipEvent_;
     IndexCallbackEvent changeEvent_;

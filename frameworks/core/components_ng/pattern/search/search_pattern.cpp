@@ -20,6 +20,7 @@
 #include "base/geometry/rect.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -176,7 +177,6 @@ void SearchPattern::OnModifyDone()
 
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
-    InitTextFieldMouseEvent();
     InitTextFieldValueChangeEvent();
     InitButtonMouseEvent(searchButtonMouseEvent_, BUTTON_INDEX);
     InitButtonMouseEvent(cancelButtonMouseEvent_, CANCEL_BUTTON_INDEX);
@@ -203,6 +203,21 @@ void SearchPattern::InitTextFieldValueChangeEvent()
             searchPattern->UpdateChangeEvent(value);
         };
         eventHub->SetOnChange(std::move(searchChangeFunc));
+    }
+}
+
+void SearchPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (!inspectorId.empty()) {
+        auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+        CHECK_NULL_VOID(textFieldFrameNode);
+        auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(textFieldPattern);
+        auto text = textFieldPattern->GetTextValue();
+        Recorder::NodeDataCache::Get().PutString(inspectorId, text);
     }
 }
 
@@ -603,27 +618,6 @@ void SearchPattern::InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int
     gesture->AddTouchEvent(touchEvent);
 }
 
-void SearchPattern::InitTextFieldMouseEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_VOID(textFieldFrameNode);
-    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto inputHub = eventHub->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(inputHub);
-
-    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->SetMouseStyle(isHover ? MouseFormat::TEXT_CURSOR : MouseFormat::DEFAULT);
-        }
-    };
-    textFieldHoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
-    inputHub->AddOnHoverEvent(textFieldHoverEvent_);
-}
-
 void SearchPattern::InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId)
 {
     if (inputEvent) {
@@ -732,6 +726,23 @@ void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, f
     option.SetCurve(curve);
     AnimationUtils::Animate(
         option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
+}
+
+void SearchPattern::ResetDragOption()
+{
+    ClearButtonStyle(BUTTON_INDEX);
+    ClearButtonStyle(CANCEL_BUTTON_INDEX);
+}
+
+void SearchPattern::ClearButtonStyle(int32_t childId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childId));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto renderContext = buttonFrameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
 }
 
 void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)

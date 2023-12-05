@@ -18,14 +18,22 @@
 
 #include "gtest/gtest.h"
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/render/mock_render_context.h"
+
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "test/mock/core/render/mock_render_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -33,28 +41,35 @@ using namespace testing;
 using namespace testing::ext;
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
-constexpr float DEVICE_WIDTH = 480.f;
-constexpr float DEVICE_HEIGHT = 800.f;
 constexpr Dimension FILL_LENGTH = Dimension(1.0, DimensionUnit::PERCENT);
 constexpr double DEFAULT_FRICTION = 0.6;
 constexpr int32_t NULL_VALUE = -1;
 } // namespace
 
-class TestNG {
+class TestNG : public testing::Test {
 public:
-    static void SetWidth(const Dimension& width);
-    static void SetHeight(const Dimension& height);
-    void RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode,
-        float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
 
-    AssertionResult IsEqualOverScrollOffset(const OverScrollOffset& actual, const OverScrollOffset& expected)
+    AssertionResult IsEqual(const SizeF& actual, const SizeF& expected)
+    {
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
+    }
+
+    AssertionResult IsEqual(const OverScrollOffset& actual, const OverScrollOffset& expected)
     {
         if (NearEqual(actual.start, expected.start) && NearEqual(actual.end, expected.end)) {
             return AssertionSuccess();
         }
-        return AssertionFailure() << "Actual: " << "{ " << actual.start << " , " << actual.end << " }" <<
-            " Expected: " << "{ " << expected.start << " , " << expected.end << " }";
+        return AssertionFailure() << "Actual: "
+                                  << "{ " << actual.start << " , " << actual.end << " }"
+                                  << " Expected: "
+                                  << "{ " << expected.start << " , " << expected.end << " }";
     }
 
     AssertionResult IsEqual(const Offset& actual, const Offset& expected)
@@ -139,9 +154,29 @@ public:
         return GetChildFrameNode(frameNode, index)->GetGeometryNode()->GetFrameRect();
     }
 
-    const OffsetF& GetChildOffset(const RefPtr<FrameNode>& frameNode, int32_t index)
+    OffsetF GetChildOffset(const RefPtr<FrameNode>& frameNode, int32_t index)
     {
         return GetChildFrameNode(frameNode, index)->GetGeometryNode()->GetFrameOffset();
+    }
+
+    float GetChildX(const RefPtr<FrameNode>& frameNode, int32_t index)
+    {
+        return GetChildRect(frameNode, index).GetX();
+    }
+
+    float GetChildY(const RefPtr<FrameNode>& frameNode, int32_t index)
+    {
+        return GetChildRect(frameNode, index).GetY();
+    }
+
+    float GetChildWidth(const RefPtr<FrameNode>& frameNode, int32_t index)
+    {
+        return GetChildRect(frameNode, index).Width();
+    }
+
+    float GetChildHeight(const RefPtr<FrameNode>& frameNode, int32_t index)
+    {
+        return GetChildRect(frameNode, index).Height();
     }
 };
 } // namespace OHOS::Ace::NG

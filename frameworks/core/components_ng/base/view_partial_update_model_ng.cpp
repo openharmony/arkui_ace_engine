@@ -21,7 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/custom/custom_title_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -29,14 +29,16 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
 {
     // create component, return new something, need to set proper ID
     auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", info.jsViewName.c_str(), viewId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", info.jsViewName.c_str(), viewId);
     auto viewIdStr = std::to_string(viewId);
     if (info.updateViewIdFunc) {
         info.updateViewIdFunc(viewIdStr);
     }
     auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewIdStr);
     RefPtr<NG::CustomNodeBase> customNode;
-    if (info.hasMeasureOrLayout) {
+    if (info.isCustomTitle) {
+        customNode = NG::CustomTitleNode::CreateCustomTitleNode(viewId, key);
+    } else if (info.hasMeasureOrLayout) {
         customNode = NG::CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(viewId, key);
         auto customMeasureLayoutNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(customNode);
         if (info.measureSizeFunc && customMeasureLayoutNode) {
@@ -51,6 +53,7 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
         }
     } else {
         customNode = NG::CustomNode::CreateCustomNode(viewId, key);
+        customNode->SetExtraInfo(std::move(info.extraInfo));
     }
 
     if (info.updateNodeFunc) {
@@ -93,17 +96,4 @@ void ViewPartialUpdateModelNG::FinishUpdate(
     NG::ViewStackProcessor::GetInstance()->FlushRerenderTask();
 }
 
-void ViewPartialUpdateModelNG::InvalidateLayout(const WeakPtr<AceType>& node)
-{
-    auto weakNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(node);
-    auto customNode = weakNode.Upgrade();
-    if (customNode) {
-        customNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
-
-    auto parentNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetParent());
-    if (parentNode && parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
-        parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
-}
 } // namespace OHOS::Ace::NG

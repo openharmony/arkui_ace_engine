@@ -131,6 +131,59 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
     }
 }
 
+void SetFormCallbacks(RefPtr<Container> container, JSView* view)
+{
+    auto pipeline = container->GetPipelineContext();
+    if (pipeline != nullptr) {
+        pipeline->SetOnFormRecycleCallback([weak = Referenced::WeakClaim(view)]() {
+            auto view = weak.Upgrade();
+            std::string statusData;
+            if (view) {
+                statusData = view->FireOnFormRecycle();
+            } else {
+                LOGE("view is null");
+            }
+            return statusData;
+        });
+
+        pipeline->SetOnFormRecoverCallback([weak = Referenced::WeakClaim(view)](const std::string& statusData) {
+            auto view = weak.Upgrade();
+            if (view) {
+                view->FireOnFormRecover(statusData);
+            } else {
+                LOGE("view is null");
+            }
+        });
+    } else {
+        LOGE("execute SetOnFormRecycleCallback and SetOnFormRecoverCallback failed due to pipeline is null");
+    }
+}
+
+void UpdatePageLifeCycleFunctions(RefPtr<NG::FrameNode> pageNode, JSView* view)
+{
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->SetOnPageShow([weak = Referenced::WeakClaim(view)]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->FireOnShow();
+        }
+    });
+    pagePattern->SetOnPageHide([weak = Referenced::WeakClaim(view)]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->FireOnHide();
+        }
+    });
+    pagePattern->SetOnBackPressed([weak = Referenced::WeakClaim(view)]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            return view->FireOnBackPress();
+        }
+        return false;
+    });
+}
+
 void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
@@ -171,29 +224,8 @@ void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
         CHECK_NULL_VOID(pageRootNode);
         pageRootNode->MountToParent(pageNode);
 
-        // update page life cycle function.
-        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-        CHECK_NULL_VOID(pagePattern);
-        pagePattern->SetOnPageShow([weak = Referenced::WeakClaim(view)]() {
-            auto view = weak.Upgrade();
-            if (view) {
-                view->FireOnShow();
-            }
-        });
-        pagePattern->SetOnPageHide([weak = Referenced::WeakClaim(view)]() {
-            auto view = weak.Upgrade();
-            if (view) {
-                view->FireOnHide();
-            }
-        });
-        pagePattern->SetOnBackPressed([weak = Referenced::WeakClaim(view)]() {
-            auto view = weak.Upgrade();
-            if (view) {
-                return view->FireOnBackPress();
-            }
-            return false;
-        });
-        return;
+        SetFormCallbacks(container, view);
+        UpdatePageLifeCycleFunctions(pageNode, view);
     }
 }
 
@@ -217,6 +249,24 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
     shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     arkRuntime->AddRootView(rootView);
 #endif
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> JsLoadCustomTitleBar(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    if (argc != 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsObject()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+    AddCustomTitleBarComponent(obj);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1249,6 +1299,8 @@ void JsRegisterViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsRegisterNamedRoute));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getArkUINativeModule"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NG::ArkUINativeModule::GetArkUINativeModule));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomTitleBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomTitleBar));
 
     BindingTarget cursorControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
     cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCursor"),

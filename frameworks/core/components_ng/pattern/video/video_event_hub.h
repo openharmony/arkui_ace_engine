@@ -19,12 +19,14 @@
 #include <functional>
 
 #include "base/memory/ace_type.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
-using EventCallback = std::function<void(const std::string&)>;
+using VideoEventCallback = std::function<void(const std::string&)>;
 
 class VideoEventHub : public EventHub {
     DECLARE_ACE_TYPE(VideoEventHub, EventHub)
@@ -33,7 +35,7 @@ public:
     VideoEventHub() = default;
     ~VideoEventHub() override = default;
 
-    void SetOnStart(EventCallback&& onStart)
+    void SetOnStart(VideoEventCallback&& onStart)
     {
         onStart_ = std ::move(onStart);
     }
@@ -44,9 +46,10 @@ public:
             auto onStart = onStart_;
             onStart(param);
         }
+        RecorderOnEvent(Recorder::EventType::VIDEO_START, param);
     }
 
-    void SetOnPause(EventCallback&& onPause)
+    void SetOnPause(VideoEventCallback&& onPause)
     {
         onPause_ = std ::move(onPause);
     }
@@ -57,9 +60,10 @@ public:
             auto onPause = onPause_;
             onPause(param);
         }
+        RecorderOnEvent(Recorder::EventType::VIDEO_PAUSE, param);
     }
 
-    void SetOnFinish(EventCallback&& onFinish)
+    void SetOnFinish(VideoEventCallback&& onFinish)
     {
         onFinish_ = std ::move(onFinish);
     }
@@ -70,9 +74,10 @@ public:
             auto onFinish = onFinish_;
             onFinish(param);
         }
+        RecorderOnEvent(Recorder::EventType::VIDEO_FINISH, param);
     }
 
-    void SetOnError(EventCallback&& onError)
+    void SetOnError(VideoEventCallback&& onError)
     {
         onError_ = std ::move(onError);
     }
@@ -83,9 +88,10 @@ public:
             auto onError = onError_;
             onError(param);
         }
+        RecorderOnEvent(Recorder::EventType::VIDEO_ERROR, param);
     }
 
-    void SetOnPrepared(EventCallback&& onPrepared)
+    void SetOnPrepared(VideoEventCallback&& onPrepared)
     {
         onPrepared_ = std ::move(onPrepared);
     }
@@ -96,9 +102,10 @@ public:
             auto onPrepared = onPrepared_;
             onPrepared(param);
         }
+        RecorderOnEvent(Recorder::EventType::VIDEO_PREPARED, param);
     }
 
-    void SetOnSeeking(EventCallback&& onSeeking)
+    void SetOnSeeking(VideoEventCallback&& onSeeking)
     {
         onSeeking_ = std ::move(onSeeking);
     }
@@ -111,7 +118,7 @@ public:
         }
     }
 
-    void SetOnSeeked(EventCallback&& onSeeked)
+    void SetOnSeeked(VideoEventCallback&& onSeeked)
     {
         onSeeked_ = std ::move(onSeeked);
     }
@@ -122,9 +129,10 @@ public:
             auto onSeeked = onSeeked_;
             onSeeked(param);
         }
+        RecorderOnEvent(Recorder::EventType::VIDEO_SEEKED, param);
     }
 
-    void SetOnUpdate(EventCallback&& onUpdate)
+    void SetOnUpdate(VideoEventCallback&& onUpdate)
     {
         onUpdate_ = std ::move(onUpdate);
     }
@@ -137,7 +145,7 @@ public:
         }
     }
 
-    void SetOnFullScreenChange(EventCallback&& onFullScreenChange)
+    void SetOnFullScreenChange(VideoEventCallback&& onFullScreenChange)
     {
         onFullScreenChange_ = std ::move(onFullScreenChange);
     }
@@ -148,18 +156,34 @@ public:
             auto onFullScreenChange = onFullScreenChange_;
             onFullScreenChange(param);
         }
+        RecorderOnEvent(Recorder::EventType::VIDEO_SCREEN_CHANGE, param);
     }
 
 private:
-    EventCallback onStart_;
-    EventCallback onPause_;
-    EventCallback onFinish_;
-    EventCallback onError_;
-    EventCallback onPrepared_;
-    EventCallback onSeeking_;
-    EventCallback onSeeked_;
-    EventCallback onUpdate_;
-    EventCallback onFullScreenChange_;
+    void RecorderOnEvent(Recorder::EventType eventType, const std::string& param) const
+    {
+        if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            return;
+        }
+        Recorder::EventParamsBuilder builder;
+        auto host = GetFrameNode();
+        if (host) {
+            auto id = host->GetInspectorIdValue("");
+            builder.SetId(id).SetType(host->GetHostTag());
+        }
+        builder.SetEventType(eventType).SetText(param);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
+
+    VideoEventCallback onStart_;
+    VideoEventCallback onPause_;
+    VideoEventCallback onFinish_;
+    VideoEventCallback onError_;
+    VideoEventCallback onPrepared_;
+    VideoEventCallback onSeeking_;
+    VideoEventCallback onSeeked_;
+    VideoEventCallback onUpdate_;
+    VideoEventCallback onFullScreenChange_;
 };
 
 } // namespace OHOS::Ace::NG

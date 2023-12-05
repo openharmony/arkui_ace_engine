@@ -32,6 +32,7 @@ public:
     bool IsScrollable() const override;
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
+    bool IsReverse() const override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void UpdateScrollBarOffset() override;
 
@@ -100,11 +101,11 @@ public:
 
     void SetAccessibilityAction();
 
+    void OnAnimateStop() override;
+
     void ScrollPage(bool reverse);
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
-
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     double GetStoredOffset() const
     {
@@ -121,12 +122,23 @@ public:
     Rect GetItemRect(int32_t index) const override;
 
 private:
+    DisplayMode GetDefaultScrollBarDisplayMode() const override
+    {
+        return DisplayMode::OFF;
+    }
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitScrollableEvent();
     void CheckScrollable();
+    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
+    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
+    SizeF GetContentSize() const;
+    void MarkDirtyNodeSelf();
+    void OnScrollEndCallback() override;
 
     WaterFlowLayoutInfo layoutInfo_;
+
+    float prevOffset_ = 0.0f;
 
     // clip padding of WaterFlow
     RefPtr<WaterFlowContentModifier> contentModifier_;

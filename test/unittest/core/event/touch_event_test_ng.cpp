@@ -24,7 +24,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -66,12 +66,12 @@ void TouchEventTestNg::TearDownTestSuite()
 
 void TouchEventTestNg::SetUp()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
 }
 
 void TouchEventTestNg::TearDown()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -225,7 +225,7 @@ HWTEST_F(TouchEventTestNg, TouchEventActuatorHandleAndDispatchTest004, TestSize.
      * touchPoint value, and the function return true.
      */
     EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent));
-    EXPECT_EQ(unknownTiltX, TILT_X_VALUE);
+    EXPECT_EQ(unknownTiltX, 0);
 
     /**
      * @tc.steps: step7. Invoke HandleEvent when touchEvents_ and userCallback_ is not empty but the event is
@@ -234,7 +234,7 @@ HWTEST_F(TouchEventTestNg, TouchEventActuatorHandleAndDispatchTest004, TestSize.
      */
     TouchEventFunc callback3 = [](TouchEventInfo& info) { info.SetStopPropagation(STOP_PROPAGATION_VALUE); };
     touchEventActuator->ReplaceTouchEvent(std::move(callback3));
-    EXPECT_FALSE(touchEventActuator->HandleEvent(touchEvent));
+    EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent));
 
     /**
      * @tc.steps: step8. Invoke HandleEvent when touchEvents_ has nullptr event and userCallback_ is nullptr.
@@ -243,6 +243,17 @@ HWTEST_F(TouchEventTestNg, TouchEventActuatorHandleAndDispatchTest004, TestSize.
     touchEventActuator->userCallback_ = nullptr;
     const TouchEvent touchEvent3 { .pointers = POINTERS_2 };
     EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent3));
+
+    /**
+     * @tc.steps: step9. add history.
+     * @tc.expected: HandleEvent return TRUE;
+     */
+    TouchEvent touchEvent4 = touchEvent;
+    touchEvent4.history.push_back(touchEvent);
+    touchEvent4.history.push_back(touchEvent);
+    touchEvent4.history.push_back(touchEvent);
+    touchEvent4.isInterpolated = true;
+    EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent4));
 }
 
 /**
@@ -283,7 +294,7 @@ HWTEST_F(TouchEventTestNg, TouchEventDisable001, TestSize.Level1)
     EXPECT_NE(touchEventActuator->userCallback_, nullptr);
 
     EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent));
-    EXPECT_EQ(unknownTiltX, TILT_X_VALUE);
+    EXPECT_EQ(unknownTiltX, 0);
 
     /**
      * @tc.steps: step5. Invoke Clear func to clear userCallback_.

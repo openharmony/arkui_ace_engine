@@ -176,6 +176,8 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     auto childFrameOffset = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    layoutInfo_.UpdateStartIndex();
+    auto firstIndex = layoutInfo_.endIndex_;
     for (const auto& mainPositions : layoutInfo_.waterFlowItems_) {
         for (const auto& item : mainPositions.second) {
             if (item.first < layoutInfo_.startIndex_ || item.first > layoutInfo_.endIndex_) {
@@ -203,13 +205,23 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (item.first == layoutInfo_.startIndex_) {
                 layoutInfo_.storedOffset_ = mainOffset;
             }
+
+            if (NonNegative(mainOffset + item.second.second)) {
+                firstIndex = std::min(firstIndex, item.first);
+            }
         }
     }
+    layoutInfo_.firstIndex_ = firstIndex;
+    LayoutFooter(layoutWrapper, childFrameOffset, layoutProperty->IsReverse());
+}
+
+void WaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse)
+{
     if (layoutInfo_.itemEnd_ && layoutInfo_.footerIndex_ >= 0) {
         auto footer = layoutWrapper->GetOrCreateChildByIndex(layoutInfo_.footerIndex_);
         auto footerOffset = childFrameOffset;
         auto mainOffset = layoutInfo_.GetMaxMainHeight() + layoutInfo_.currentOffset_;
-        if (layoutProperty->IsReverse()) {
+        if (reverse) {
             mainOffset = mainSize_ - footerMainSize_ - mainOffset;
         }
         footerOffset += (axis_ == Axis::VERTICAL) ? OffsetF(0, mainOffset) : OffsetF(mainOffset, 0);
@@ -272,9 +284,12 @@ LayoutConstraintF WaterFlowLayoutAlgorithm::CreateChildConstraint(int32_t crossI
         }
     }
 
-    childLayoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(itemConstraint.maxSize.Width(), DimensionUnit::PX),
+    childLayoutProperty->ResetCalcMinSize();
+    childLayoutProperty->ResetCalcMaxSize();
+
+    childLayoutProperty->UpdateItemCalcMaxSize(CalcSize(CalcLength(itemConstraint.maxSize.Width(), DimensionUnit::PX),
         CalcLength(itemConstraint.maxSize.Height(), DimensionUnit::PX)));
-    childLayoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(itemConstraint.minSize.Width(), DimensionUnit::PX),
+    childLayoutProperty->UpdateItemCalcMinSize(CalcSize(CalcLength(itemConstraint.minSize.Width(), DimensionUnit::PX),
         CalcLength(itemConstraint.minSize.Height(), DimensionUnit::PX)));
 
     return itemConstraint;
@@ -298,7 +313,9 @@ FlowItemPosition WaterFlowLayoutAlgorithm::GetItemPosition(int32_t index)
 void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layoutWrapper)
 {
     if (layoutInfo_.currentOffset_ >= 0) {
-        layoutInfo_.currentOffset_ = 0;
+        if (!canOverScroll_) {
+            layoutInfo_.currentOffset_ = 0;
+        }
         layoutInfo_.itemStart_ = true;
     } else {
         layoutInfo_.itemStart_ = false;
@@ -332,7 +349,6 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
                 -(layoutInfo_.waterFlowItems_[position.crossIndex][currentIndex].first) + layoutInfo_.restoreOffset_;
             // restoreOffSet only be used once
             layoutInfo_.restoreOffset_ = 0.0f;
-            layoutInfo_.UpdateStartIndex();
             layoutInfo_.jumpIndex_ = -1;
             layoutInfo_.itemStart_ = false;
         }
@@ -359,7 +375,9 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
     layoutInfo_.maxHeight_ = maxItemHeight;
 
     if (mainSize >= maxItemHeight) {
-        layoutInfo_.currentOffset_ = 0;
+        if (!canOverScroll_) {
+            layoutInfo_.currentOffset_ = 0;
+        }
         layoutInfo_.offsetEnd_ = true;
         layoutInfo_.itemStart_ = true;
         return;
@@ -367,7 +385,10 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
 
     if (layoutInfo_.currentOffset_ + maxItemHeight <= mainSize) {
         layoutInfo_.offsetEnd_ = true;
-        layoutInfo_.currentOffset_ = mainSize - maxItemHeight;
+        if (!canOverScroll_) {
+            layoutInfo_.currentOffset_ = mainSize - maxItemHeight;
+        }
+
         auto oldStart = layoutInfo_.startIndex_;
         layoutInfo_.UpdateStartIndex();
         // lazyforeach

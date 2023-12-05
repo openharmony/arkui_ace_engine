@@ -1,0 +1,89 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "core/components_ng/pattern/folder_stack/folder_stack_model_ng.h"
+
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/utils/utils.h"
+#include "core/animation/page_transition_common.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/folder_stack/control_parts_stack_node.h"
+#include "core/components_ng/pattern/folder_stack/control_parts_stack_pattern.h"
+#include "core/components_ng/pattern/folder_stack/folder_stack_event_hub.h"
+#include "core/components_ng/pattern/folder_stack/folder_stack_group_node.h"
+#include "core/components_ng/pattern/folder_stack/folder_stack_layout_property.h"
+#include "core/components_ng/pattern/folder_stack/folder_stack_pattern.h"
+#include "core/components_ng/pattern/folder_stack/hover_stack_node.h"
+#include "core/components_ng/pattern/folder_stack/hover_stack_pattern.h"
+#include "core/components_ng/pattern/stack/stack_layout_property.h"
+
+namespace OHOS::Ace::NG {
+void FolderStackModelNG::Create()
+{
+    std::vector<std::string> itemId;
+    Create(itemId);
+}
+void FolderStackModelNG::Create(const std::vector<std::string>& itemId)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto folderStackGroupNode = FolderStackGroupNode::GetOrCreateGroupNode(
+        V2::FOLDER_STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FolderStackPattern>(); });
+    folderStackGroupNode->SetItemId(itemId);
+    if (!folderStackGroupNode->GetHoverNode()) {
+        int32_t hoverId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto hoverStackNode = HoverStackNode::GetOrCreateHoverStackNode(
+            V2::HOVER_STACK_ETS_TAG, hoverId, []() { return AceType::MakeRefPtr<HoverStackPattern>(); });
+        folderStackGroupNode->AddChild(hoverStackNode);
+        folderStackGroupNode->SetHoverNode(hoverStackNode);
+    }
+    if (!folderStackGroupNode->GetControlPartsStackNode()) {
+        int32_t controlPartsId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto controlPartsNode = ControlPartsStackNode::GetOrCreateControlPartsStackNode(V2::CONTROL_PARTS_STACK_ETS_TAG,
+            controlPartsId, []() { return AceType::MakeRefPtr<ControlPartsStackPattern>(); });
+        folderStackGroupNode->AddChild(controlPartsNode);
+        folderStackGroupNode->SetControlPartsStackNode(controlPartsNode);
+    }
+    stack->Push(folderStackGroupNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(FolderStackLayoutProperty, UpperItems, itemId);
+}
+
+void FolderStackModelNG::SetAlignment(Alignment alignment)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
+}
+
+void FolderStackModelNG::SetEnableAnimation(bool IsEnableAnimation)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FolderStackLayoutProperty, EnableAnimation, IsEnableAnimation);
+}
+
+void FolderStackModelNG::SetAutoHalfFold(bool IsAutoHalfFold)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FolderStackLayoutProperty, AutoHalfFold, IsAutoHalfFold);
+}
+
+void FolderStackModelNG::SetOnFolderStateChange(
+    std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnFolderStateChange(std::move(onChange));
+}
+} // namespace OHOS::Ace::NG

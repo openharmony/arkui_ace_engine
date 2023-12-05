@@ -37,7 +37,7 @@ void GridRowModelNG::Create(const RefPtr<V2::GridContainerSize>& col, const RefP
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::GRID_ROW_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::GRID_ROW_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::GRID_ROW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridRowLayoutPattern>(); });
     stack->Push(frameNode);
@@ -64,5 +64,14 @@ void GridRowModelNG::SetAlignItems(FlexAlign alignItem)
     CHECK_NULL_VOID(layoutPriority);
     layoutPriority->UpdateAlignItems(alignItem);
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, AlignItems, alignItem);
+}
+
+void GridRowModelNG::SetAlignItems(FrameNode* frameNode, FlexAlign alignItem)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutPriority = frameNode->GetLayoutProperty<GridRowLayoutProperty>();
+    CHECK_NULL_VOID(layoutPriority);
+    layoutPriority->UpdateAlignItems(alignItem);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, AlignItems, alignItem, frameNode);
 }
 } // namespace OHOS::Ace::NG

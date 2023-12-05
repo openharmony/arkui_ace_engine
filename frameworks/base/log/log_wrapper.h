@@ -113,6 +113,7 @@ enum class AceLogTag : uint8_t {
     ACE_RICH_TEXT,
     ACE_WEB,
     ACE_FOCUS,
+    ACE_MOUSE,
     ACE_GESTURE,
     ACE_IMAGE,
     ACE_RATING,
@@ -130,7 +131,7 @@ enum class AceLogTag : uint8_t {
     ACE_BORDER_IMAGE,
     ACE_LINEAR_SPLIT,
     ACE_GRID,
-    ACE_PLUGINCOMPONENT,
+    ACE_PLUGIN_COMPONENT,
     ACE_UIEXTENSIONCOMPONENT,
     ACE_IF,
     ACE_FOREACH,
@@ -144,6 +145,7 @@ enum class AceLogTag : uint8_t {
     ACE_AUTO_FILL,
     ACE_KEYBOARD,
     ACE_UIEVENT,
+    ACE_DISPLAY_SYNC,
 };
 
 enum class LogDomain : uint32_t {
@@ -212,7 +214,9 @@ public:
     // MUST implement these interface on each platform.
     static char GetSeparatorCharacter();
     static void PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const char* fmt, va_list args);
+#ifdef ACE_INSTANCE_LOG
     static int32_t GetId();
+#endif
 
 private:
     LogWrapper() = delete;

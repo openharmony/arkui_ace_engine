@@ -35,7 +35,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -67,14 +67,14 @@ public:
 
 void GestureEventHubTestNg::SetUpTestSuite()
 {
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     MOCK_DRAG_WINDOW = DragWindow::CreateDragWindow("", 0, 0, 0, 0);
     GTEST_LOG_(INFO) << "GestureEventHubTestNg SetUpTestCase";
 }
 
 void GestureEventHubTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
     MOCK_DRAG_WINDOW = nullptr;
     GTEST_LOG_(INFO) << "GestureEventHubTestNg TearDownTestCase";
 }
@@ -1107,5 +1107,91 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest017, TestSize.Level1)
     result = guestureEventHub->ProcessTouchTestHit(
         coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, nullptr);
     EXPECT_FALSE(result);
+}
+/**
+ * @tc.name: ResetDragActionForWeb001
+ * @tc.desc: Test ResetDragActionForWeb
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, ResetDragActionForWeb001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create GestureEventHub.
+    * @tc.expected: gestureEventHub is not null.
+    */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+    /**
+    * @tc.steps: step1. Calling the ResetDragActionForWeb interface
+    * @tc.expected: IsReceivedDragGestureInfo_ Equal to false.
+    */
+    guestureEventHub->ResetDragActionForWeb();
+    ASSERT_EQ(guestureEventHub->isReceivedDragGestureInfo_, false);
+}
+
+/**
+ * @tc.name: ResetDragActionForWeb001
+ * @tc.desc: Test ResetDragActionForWeb
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, OnDragStart001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create GestureEventHub.
+    * @tc.expected: gestureEventHub is not null.
+    */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 101, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    auto eventHub = guestureEventHub->eventHub_.Upgrade();
+
+    GestureEvent info;
+    auto pipline = PipelineContext::GetCurrentContext();
+
+    auto EventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(EventHub);
+
+    auto frameNodeOfEvent = EventHub->GetFrameNode();
+    EXPECT_TRUE(frameNodeOfEvent);
+    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    DragDropInfo dragDropInfo;
+    dragDropInfo.customNode = customNode;
+
+    /**
+    * @tc.steps: step1. Calling the ResetDragActionForWeb interface
+    * @tc.expected: dragDropProxy_ Equal to false.
+    */
+    guestureEventHub->OnDragStart(info, pipline, frameNode, dragDropInfo, event);
+    EXPECT_TRUE(EventHub->dragDropProxy_ == false);
+}
+
+/**
+ * @tc.name: GetHitTestModeStr
+ * @tc.desc: Test GetHitTestModeStr001
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetHitTestModeStr001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 101, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    auto eventHub = guestureEventHub->eventHub_.Upgrade();
+    auto pipline = PipelineContext::GetCurrentContext();
+    auto EventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EventHub->CancelDragForWeb();
+    string testModeStr;
+    /**
+    * @tc.steps: step1. Calling the GetHitTestModeStr interface
+    * @tc.expected: EventHub ->GetHitTestModeStr() is not equal to nullptr
+    */
+    EXPECT_TRUE(testModeStr != EventHub->GetHitTestModeStr());
 }
 } // namespace OHOS::Ace::NG

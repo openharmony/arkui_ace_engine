@@ -160,6 +160,15 @@ public:
         return AceType::DynamicCast<Pattern>(frameNode->GetPattern());
     }
 
+    template<typename Pattern>
+    RefPtr<Pattern> GetMainFrameNodePattern(FrameNode* frameNode) const
+    {
+        if (!frameNode) {
+            return nullptr;
+        }
+        return AceType::DynamicCast<Pattern>(frameNode->GetPattern());
+    }
+
     template<typename EventHubType>
     RefPtr<EventHubType> GetMainFrameNodeEventHub() const
     {
@@ -378,6 +387,16 @@ public:
         return node->IsFirstBuilding();
     }
 
+    void SetCustomTitleNode(const RefPtr<UINode>& customTitleNode)
+    {
+        customTitleNode_ = customTitleNode;
+    }
+
+    const RefPtr<UINode> GetCustomTitleNode() const
+    {
+        return customTitleNode_;
+    }
+
 private:
     ViewStackProcessor();
 
@@ -390,6 +409,8 @@ private:
     std::stack<RefPtr<UINode>> elementsStack_;
 
     RefPtr<FrameNode> currentPage_;
+
+    RefPtr<UINode> customTitleNode_;
 
     RefPtr<GestureProcessor> gestureStack_;
 

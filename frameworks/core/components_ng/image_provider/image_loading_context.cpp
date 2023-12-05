@@ -58,7 +58,7 @@ RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
     auto drawingData = ImageLoader::LoadDataFromCachedFile(src.GetSrc());
     if (drawingData) {
         auto data = std::make_shared<RSData>();
-        data->BuildWithCopy(drawingData->data(), drawingData->size());
+        data->BuildWithCopy(drawingData->GetData(), drawingData->GetSize());
         return AceType::MakeRefPtr<NG::DrawingImageData>(data);
     }
 #endif
@@ -270,7 +270,7 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage
 void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
     errorMsg_ = errorMsg;
-    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(),
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, source = %{public}s, reason: %{public}s", src_.ToString().c_str(),
         errorMsg.c_str());
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
 }

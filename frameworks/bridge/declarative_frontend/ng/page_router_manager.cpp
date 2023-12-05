@@ -29,6 +29,7 @@
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
 #include "bridge/js_frontend/frontend_delegate.h"
 #include "core/common/container.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -916,6 +917,9 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
         loadJs_(target.path, target.errorCallback);
     }
 
+#if defined(PREVIEW)
+    if (!isComponentPreview_()) {
+#endif
     auto result = loadNamedRouter_(target.url, target.isNamedRouterMode);
     if (!result) {
         if (!target.isNamedRouterMode) {
@@ -930,9 +934,16 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
         return;
     }
 
+    if (target.isNamedRouterMode) {
+        manifestParser_->SetPagePath(target.url);
+    }
+
     if (target.errorCallback != nullptr) {
         target.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
     }
+#if defined(PREVIEW)
+    }
+#endif
 
     if (!OnPageReady(pageNode, needHideLast, needTransition)) {
         pageRouterStack_.pop_back();
@@ -1100,6 +1111,7 @@ void PageRouterManager::PopPageToIndex(int32_t index, const std::string& params,
 bool PageRouterManager::OnPageReady(
     const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition, bool isCardRouter, int64_t cardId)
 {
+    Recorder::NodeDataCache::Get().OnPageReady();
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     RefPtr<PipelineBase> pipeline;
@@ -1129,6 +1141,7 @@ bool PageRouterManager::OnPopPage(bool needShowNext, bool needTransition)
     auto context = DynamicCast<NG::PipelineContext>(pipeline);
     auto stageManager = context ? context->GetStageManager() : nullptr;
     if (stageManager) {
+        Recorder::NodeDataCache::Get().OnBeforePagePop();
         return stageManager->PopPage(needShowNext, needTransition);
     }
     return false;
@@ -1143,6 +1156,7 @@ bool PageRouterManager::OnPopPageToIndex(int32_t index, bool needShowNext, bool 
     auto context = DynamicCast<NG::PipelineContext>(pipeline);
     auto stageManager = context ? context->GetStageManager() : nullptr;
     if (stageManager) {
+        Recorder::NodeDataCache::Get().OnBeforePagePop();
         return stageManager->PopPageToIndex(index, needShowNext, needTransition);
     }
     return false;

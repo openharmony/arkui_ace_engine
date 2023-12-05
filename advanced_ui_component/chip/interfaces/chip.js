@@ -27,7 +27,14 @@ export const defaultTheme = {
         }
     },
     label: {
-        fontSize: {
+        normalFontSize: {
+            id: -1,
+            type: 10002,
+            params: ["sys.float.ohos_id_text_size_button2"],
+            bundleName: "",
+            moduleName: ""
+        },
+        smallFontSize: {
             id: -1,
             type: 10002,
             params: ["sys.float.ohos_id_text_size_button3"],
@@ -64,6 +71,7 @@ export const defaultTheme = {
         focusable: !1
     },
     chipNode: {
+        minLabelWidth: 12,
         normalHeight: 36,
         smallHeight: 28,
         enabled: !0,
@@ -84,14 +92,14 @@ export const defaultTheme = {
         normalBorderRadius: {
             id: -1,
             type: 10002,
-            params: ["sys.float.ohos_id_corner_radius_button"],
+            params: ["sys.float.ohos_id_corner_radius_tips_instant_tip"],
             bundleName: "",
             moduleName: ""
         },
         smallBorderRadius: {
             id: -1,
             type: 10002,
-            params: ["sys.float.ohos_id_corner_radius_small_button"],
+            params: ["sys.float.ohos_id_corner_radius_piece"],
             bundleName: "",
             moduleName: ""
         },
@@ -163,9 +171,9 @@ export function Chip(e, i = null) {
 }
 
 export class ChipComponent extends ViewPU {
-    constructor(e, i, t, o = -1, h = void 0) {
+    constructor(e, i, t, o = -1, s = void 0) {
         super(e, t, o);
-        "function" == typeof h && (this.paramsGenerator_ = h);
+        "function" == typeof s && (this.paramsGenerator_ = s);
         this.theme = defaultTheme;
         this.__chipSize = new SynchedPropertyObjectOneWayPU(i.chipSize, this, "chipSize");
         this.__allowClose = new SynchedPropertySimpleOneWayPU(i.allowClose, this, "allowClose");
@@ -185,6 +193,7 @@ export class ChipComponent extends ViewPU {
         this.__useDefaultSuffixIcon = new ObservedPropertySimplePU(!1, this, "useDefaultSuffixIcon");
         this.chipNodeSize = {};
         this.onClose = noop;
+        this.__suffixIconOnFocus = new ObservedPropertySimplePU(!1, this, "suffixIconOnFocus");
         this.__chipBreakPoints = new ObservedPropertySimplePU(BreakPointsType.SM, this, "chipBreakPoints");
         this.smListener = mediaquery.matchMediaSync("0vp<width<600vp");
         this.mdListener = mediaquery.matchMediaSync("600vp<=width<840vp");
@@ -212,6 +221,7 @@ export class ChipComponent extends ViewPU {
         void 0 !== e.useDefaultSuffixIcon && (this.useDefaultSuffixIcon = e.useDefaultSuffixIcon);
         void 0 !== e.chipNodeSize && (this.chipNodeSize = e.chipNodeSize);
         void 0 !== e.onClose && (this.onClose = e.onClose);
+        void 0 !== e.suffixIconOnFocus && (this.suffixIconOnFocus = e.suffixIconOnFocus);
         void 0 !== e.chipBreakPoints && (this.chipBreakPoints = e.chipBreakPoints);
         void 0 !== e.smListener && (this.smListener = e.smListener);
         void 0 !== e.mdListener && (this.mdListener = e.mdListener);
@@ -246,6 +256,7 @@ export class ChipComponent extends ViewPU {
         this.__deleteChip.purgeDependencyOnElmtId(e);
         this.__chipNodeOnFocus.purgeDependencyOnElmtId(e);
         this.__useDefaultSuffixIcon.purgeDependencyOnElmtId(e);
+        this.__suffixIconOnFocus.purgeDependencyOnElmtId(e);
         this.__chipBreakPoints.purgeDependencyOnElmtId(e)
     }
 
@@ -266,6 +277,7 @@ export class ChipComponent extends ViewPU {
         this.__deleteChip.aboutToBeDeleted();
         this.__chipNodeOnFocus.aboutToBeDeleted();
         this.__useDefaultSuffixIcon.aboutToBeDeleted();
+        this.__suffixIconOnFocus.aboutToBeDeleted();
         this.__chipBreakPoints.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal()
@@ -399,6 +411,14 @@ export class ChipComponent extends ViewPU {
         this.__useDefaultSuffixIcon.set(e)
     }
 
+    get suffixIconOnFocus() {
+        return this.__suffixIconOnFocus.get()
+    }
+
+    set suffixIconOnFocus(e) {
+        this.__suffixIconOnFocus.set(e)
+    }
+
     get chipBreakPoints() {
         return this.__chipBreakPoints.get()
     }
@@ -414,7 +434,7 @@ export class ChipComponent extends ViewPU {
     getLabelFontSize() {
         var e;
         try {
-            return void 0 !== (null === (e = this.label) || void 0 === e ? void 0 : e.fontSize) && this.label.fontSize >= 0 ? this.label.fontSize : resourceManager.getSystemResourceManager().getNumberByName(this.theme.label.fontSize.params[0].split(".")[2])
+            return void 0 !== (null === (e = this.label) || void 0 === e ? void 0 : e.fontSize) && this.toVp(this.label.fontSize) >= 0 ? this.label.fontSize : this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL ? resourceManager.getSystemResourceManager().getNumberByName(this.theme.label.smallFontSize.params[0].split(".")[2]) : resourceManager.getSystemResourceManager().getNumberByName(this.theme.label.normalFontSize.params[0].split(".")[2])
         } catch (e) {
             return 0
         }
@@ -432,60 +452,60 @@ export class ChipComponent extends ViewPU {
 
     toVp(e) {
         var i, t;
-        if (void 0 === e) return 0;
+        if (void 0 === e) return Number.NEGATIVE_INFINITY;
         switch (typeof e) {
             case "number":
                 return e;
             case "object":
                 try {
-                    return resourceManager.getSystemResourceManager().getNumber(e.id)
+                    return px2vp(getContext(this).resourceManager.getNumber(e.id))
                 } catch (e) {
-                    return 0
+                    return Number.NEGATIVE_INFINITY
                 }
             case "string":
                 let o = new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i");
-                let h = e.match(o);
-                if (!h) return 0;
-                let s = Number(null !== (i = null == h ? void 0 : h[1]) && void 0 !== i ? i : 0);
-                switch ((null !== (t = null == h ? void 0 : h[2]) && void 0 !== t ? t : "vp").toLowerCase()) {
+                let s = e.match(o);
+                if (!s) return Number.NEGATIVE_INFINITY;
+                let h = Number(null !== (i = null == s ? void 0 : s[1]) && void 0 !== i ? i : 0);
+                switch ((null !== (t = null == s ? void 0 : s[2]) && void 0 !== t ? t : "vp").toLowerCase()) {
                     case "px":
-                        s = px2vp(s);
+                        h = px2vp(h);
                         break;
                     case "fp":
-                        s = px2vp(fp2px(s));
+                        h = px2vp(fp2px(h));
                         break;
                     case "lpx":
-                        s = px2vp(lpx2px(s));
+                        h = px2vp(lpx2px(h));
                         break;
                     case "%":
-                        s = Number.NEGATIVE_INFINITY
+                        h = Number.NEGATIVE_INFINITY
                 }
-                return s;
+                return h;
             default:
-                return 0
+                return Number.NEGATIVE_INFINITY
         }
     }
 
     getLabelMargin() {
-        var e, i, t, o, h, s, n, l;
+        var e, i, t, o, s, h, n, l;
         let r = { left: 0, right: 0 };
         void 0 !== (null === (i = null === (e = this.label) || void 0 === e ? void 0 : e.labelMargin) || void 0 === i ? void 0 : i.left) && this.toVp(this.label.labelMargin.left) >= 0 ? r.left = null === (o = null === (t = this.label) || void 0 === t ? void 0 : t.labelMargin) || void 0 === o ? void 0 : o.left : this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL ? r.left = this.theme.label.smallMargin.left : r.left = this.theme.label.normalMargin.left;
-        void 0 !== (null === (s = null === (h = this.label) || void 0 === h ? void 0 : h.labelMargin) || void 0 === s ? void 0 : s.right) && this.toVp(this.label.labelMargin.right) >= 0 ? r.right = null === (l = null === (n = this.label) || void 0 === n ? void 0 : n.labelMargin) || void 0 === l ? void 0 : l.right : this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL ? r.right = this.theme.label.smallMargin.right : r.right = this.theme.label.normalMargin.right;
+        void 0 !== (null === (h = null === (s = this.label) || void 0 === s ? void 0 : s.labelMargin) || void 0 === h ? void 0 : h.right) && this.toVp(this.label.labelMargin.right) >= 0 ? r.right = null === (l = null === (n = this.label) || void 0 === n ? void 0 : n.labelMargin) || void 0 === l ? void 0 : l.right : this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL ? r.right = this.theme.label.smallMargin.right : r.right = this.theme.label.normalMargin.right;
         return r
     }
 
     getSuffixIconSize() {
-        var e, i, t, o, h, s, n, l, r, d, a, c;
+        var e, i, t, o, s, h, n, l, r, d, a, c;
         let p = { width: 0, height: 0 };
-        void 0 !== (null === (i = null === (e = this.suffixIcon) || void 0 === e ? void 0 : e.size) || void 0 === i ? void 0 : i.width) && this.toVp(null === (o = null === (t = this.suffixIcon) || void 0 === t ? void 0 : t.size) || void 0 === o ? void 0 : o.width) >= 0 ? p.width = null === (s = null === (h = this.suffixIcon) || void 0 === h ? void 0 : h.size) || void 0 === s ? void 0 : s.width : this.getSuffixIconSrc() ? p.width = this.theme.suffixIcon.size.width : p.width = 0;
+        void 0 !== (null === (i = null === (e = this.suffixIcon) || void 0 === e ? void 0 : e.size) || void 0 === i ? void 0 : i.width) && this.toVp(null === (o = null === (t = this.suffixIcon) || void 0 === t ? void 0 : t.size) || void 0 === o ? void 0 : o.width) >= 0 ? p.width = null === (h = null === (s = this.suffixIcon) || void 0 === s ? void 0 : s.size) || void 0 === h ? void 0 : h.width : this.getSuffixIconSrc() ? p.width = this.theme.suffixIcon.size.width : p.width = 0;
         void 0 !== (null === (l = null === (n = this.suffixIcon) || void 0 === n ? void 0 : n.size) || void 0 === l ? void 0 : l.height) && this.toVp(null === (d = null === (r = this.suffixIcon) || void 0 === r ? void 0 : r.size) || void 0 === d ? void 0 : d.height) >= 0 ? p.height = null === (c = null === (a = this.suffixIcon) || void 0 === a ? void 0 : a.size) || void 0 === c ? void 0 : c.height : this.getSuffixIconSrc() ? p.height = this.theme.suffixIcon.size.height : p.height = 0;
         return p
     }
 
     getPrefixIconSize() {
-        var e, i, t, o, h, s, n, l, r, d, a, c, p, u;
+        var e, i, t, o, s, h, n, l, r, d, a, c, p, u;
         let f = { width: 0, height: 0 };
-        void 0 !== (null === (i = null === (e = this.prefixIcon) || void 0 === e ? void 0 : e.size) || void 0 === i ? void 0 : i.width) && this.toVp(null === (o = null === (t = this.prefixIcon) || void 0 === t ? void 0 : t.size) || void 0 === o ? void 0 : o.width) >= 0 ? f.width = null === (s = null === (h = this.prefixIcon) || void 0 === h ? void 0 : h.size) || void 0 === s ? void 0 : s.width : (null === (n = this.prefixIcon) || void 0 === n ? void 0 : n.src) ? f.width = this.theme.prefixIcon.size.width : f.width = 0;
+        void 0 !== (null === (i = null === (e = this.prefixIcon) || void 0 === e ? void 0 : e.size) || void 0 === i ? void 0 : i.width) && this.toVp(null === (o = null === (t = this.prefixIcon) || void 0 === t ? void 0 : t.size) || void 0 === o ? void 0 : o.width) >= 0 ? f.width = null === (h = null === (s = this.prefixIcon) || void 0 === s ? void 0 : s.size) || void 0 === h ? void 0 : h.width : (null === (n = this.prefixIcon) || void 0 === n ? void 0 : n.src) ? f.width = this.theme.prefixIcon.size.width : f.width = 0;
         void 0 !== (null === (r = null === (l = this.prefixIcon) || void 0 === l ? void 0 : l.size) || void 0 === r ? void 0 : r.height) && this.toVp(null === (a = null === (d = this.prefixIcon) || void 0 === d ? void 0 : d.size) || void 0 === a ? void 0 : a.height) >= 0 ? f.height = null === (p = null === (c = this.prefixIcon) || void 0 === c ? void 0 : c.size) || void 0 === p ? void 0 : p.height : (null === (u = this.prefixIcon) || void 0 === u ? void 0 : u.src) ? f.height = this.theme.prefixIcon.size.height : f.height = 0;
         return f
     }
@@ -547,6 +567,10 @@ export class ChipComponent extends ViewPU {
         e += this.toVp(this.getSuffixIconSize().width);
         e += this.getChipNodePadding().right;
         return e
+    }
+
+    getReserveChipNodeWidth() {
+        return this.getCalculateChipNodeWidth() - this.getLabelWidth() + this.theme.chipNode.minLabelWidth
     }
 
     getChipEnable() {
@@ -619,37 +643,41 @@ export class ChipComponent extends ViewPU {
     }
 
     getFocusOverlaySize() {
-        return { width: this.getChipNodeWidth() + 8, height: this.getChipNodeHeight() + 8 }
+        return {
+            width: Math.max(this.getChipNodeWidth(), this.getChipConstraintWidth().minWidth) + 8,
+            height: this.getChipNodeHeight() + 8
+        }
     }
 
     getChipConstraintWidth() {
         var e, i;
+        let t = this.getReserveChipNodeWidth();
         if (!this.isChipSizeEnum()) {
             this.chipNodeSize = this.chipSize;
             if (void 0 !== (null === (e = this.chipNodeSize) || void 0 === e ? void 0 : e.width) && this.toVp(null === (i = this.chipNodeSize) || void 0 === i ? void 0 : i.width) >= 0) return {
-                minWidth: 0,
+                minWidth: t,
                 maxWidth: this.chipNodeSize.width
             }
         }
-        let t = this.getCalculateChipNodeWidth();
+        let o = this.getCalculateChipNodeWidth();
         switch (this.chipBreakPoints) {
             case BreakPointsType.SM:
                 return {
-                    minWidth: 0,
-                    maxWidth: Math.min(t, this.theme.chipNode.breakPointConstraintWidth.breakPointSmMaxWidth)
+                    minWidth: t,
+                    maxWidth: Math.min(o, this.theme.chipNode.breakPointConstraintWidth.breakPointSmMaxWidth)
                 };
             case BreakPointsType.MD:
                 return {
-                    minWidth: Math.max(t, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
-                    maxWidth: Math.min(t, this.theme.chipNode.breakPointConstraintWidth.breakPointMdMaxWidth)
+                    minWidth: Math.max(o, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
+                    maxWidth: Math.min(o, this.theme.chipNode.breakPointConstraintWidth.breakPointMdMaxWidth)
                 };
             case BreakPointsType.LG:
                 return {
-                    minWidth: Math.max(t, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
-                    maxWidth: Math.min(t, this.theme.chipNode.breakPointConstraintWidth.breakPointLgMaxWidth)
+                    minWidth: Math.max(o, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
+                    maxWidth: Math.min(o, this.theme.chipNode.breakPointConstraintWidth.breakPointLgMaxWidth)
                 };
             default:
-                return { minWidth: 0, maxWidth: t }
+                return { minWidth: t, maxWidth: o }
         }
     }
 
@@ -661,7 +689,7 @@ export class ChipComponent extends ViewPU {
         }), Stack);
         this.observeComponentCreation2(((e, i) => {
             If.create();
-            this.chipNodeOnFocus ? this.ifElseBranchUpdateFunction(0, (() => {
+            this.chipNodeOnFocus && !this.suffixIconOnFocus ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation2(((e, i) => {
                     Stack.create();
                     Stack.borderRadius(this.getChipNodeRadius());
@@ -687,6 +715,10 @@ export class ChipComponent extends ViewPU {
         this.lgListener.on("change", (e => {
             e.matches && (this.chipBreakPoints = BreakPointsType.LG)
         }))
+    }
+
+    getVisibility() {
+        return this.toVp(this.getChipNodeHeight()) > 0 ? Visibility.Visible : Visibility.None
     }
 
     aboutToDisappear() {
@@ -725,13 +757,13 @@ export class ChipComponent extends ViewPU {
                 this.hoverAnimate(e)
             }));
             Row.onKeyEvent((e => {
-                e.type === KeyType.Down && e.keyCode === KeyCode.KEYCODE_FORWARD_DEL && this.deleteChipNodeAnimate()
+                e.type !== KeyType.Down || e.keyCode !== KeyCode.KEYCODE_FORWARD_DEL || this.suffixIconOnFocus || this.deleteChipNodeAnimate()
             }))
         }), Row);
         this.observeComponentCreation2(((e, i) => {
             var t;
             If.create();
-            (null === (t = this.prefixIcon) || void 0 === t ? void 0 : t.src) ? this.ifElseBranchUpdateFunction(0, (() => {
+            "" !== (null === (t = this.prefixIcon) || void 0 === t ? void 0 : t.src) ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation2(((e, i) => {
                     var t;
                     Image.create(null === (t = this.prefixIcon) || void 0 === t ? void 0 : t.src);
@@ -741,7 +773,8 @@ export class ChipComponent extends ViewPU {
                     Image.enabled(this.getChipEnable());
                     Image.objectFit(ImageFit.Cover);
                     Image.focusable(!1);
-                    Image.flexShrink(0)
+                    Image.flexShrink(0);
+                    Image.visibility(this.getVisibility())
                 }), Image)
             })) : this.ifElseBranchUpdateFunction(1, (() => {
             }))
@@ -760,7 +793,8 @@ export class ChipComponent extends ViewPU {
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.flexShrink(1);
             Text.focusable(!0);
-            Text.textAlign(TextAlign.Center)
+            Text.textAlign(TextAlign.Center);
+            Text.visibility(this.getVisibility())
         }), Text);
         Text.pop();
         this.observeComponentCreation2(((e, i) => {
@@ -772,6 +806,7 @@ export class ChipComponent extends ViewPU {
             Image.focusable(this.getSuffixIconFocusable());
             Image.objectFit(ImageFit.Cover);
             Image.flexShrink(0);
+            Image.visibility(this.getVisibility());
             ViewStackProcessor.visualState("focused");
             Image.borderColor(this.theme.chipNode.focusOutlineColor);
             Image.borderWidth(this.getSuffixIconFocusable() ? this.theme.chipNode.borderWidth : 0);
@@ -779,6 +814,12 @@ export class ChipComponent extends ViewPU {
             Image.borderColor(Color.Transparent);
             Image.borderWidth(0);
             ViewStackProcessor.visualState();
+            Image.onFocus((() => {
+                this.suffixIconOnFocus = !0
+            }));
+            Image.onBlur((() => {
+                this.suffixIconOnFocus = !1
+            }));
             Image.onClick((() => {
                 var e;
                 if (this.getChipEnable()) if (null === (e = this.suffixIcon) || void 0 === e ? void 0 : e.action) this.suffixIcon.action(); else if (this.allowClose && this.useDefaultSuffixIcon) {
@@ -793,9 +834,9 @@ export class ChipComponent extends ViewPU {
     initialRender() {
         this.observeComponentCreation2(((e, i) => {
             If.create();
-            !this.deleteChip && this.toVp(this.getChipNodeHeight()) > 0 && this.toVp(this.getChipNodeWidth()) > 0 ? this.ifElseBranchUpdateFunction(0, (() => {
+            this.deleteChip ? this.ifElseBranchUpdateFunction(1, (() => {
+            })) : this.ifElseBranchUpdateFunction(0, (() => {
                 this.chipBuilder.bind(this)()
-            })) : this.ifElseBranchUpdateFunction(1, (() => {
             }))
         }), If);
         If.pop()

@@ -45,6 +45,10 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
                                   option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
     timingProtocol.SetFillMode(static_cast<Rosen::FillMode>(option.GetFillMode()));
     timingProtocol.SetFinishCallbackType(ToAnimationFinishCallbackType(option.GetFinishCallbackType()));
+    auto rateRange = option.GetFrameRateRange();
+    if (rateRange) {
+        timingProtocol.SetFrameRateRange({ rateRange->min_, rateRange->max_, rateRange->preferred_ });
+    }
     return timingProtocol;
 }
 } // namespace
@@ -56,8 +60,8 @@ private:
     friend AnimationUtils;
 };
 
-void AnimationUtils::OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-    const std::function<void()>& finishCallback)
+void AnimationUtils::OpenImplicitAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
 {
     const auto& timingProtocol = OptionToTimingProtocol(option);
     Rosen::RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), finishCallback);
@@ -113,17 +117,16 @@ std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const 
     const auto& timingProtocol = OptionToTimingProtocol(option);
     animation->animations_ = Rosen::RSNode::Animate(
         timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback, finishCallback, repeatCallback);
-    if (animation->animations_.size()) {
+    if (!animation->animations_.empty()) {
         return animation;
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
 {
     CHECK_NULL_VOID(animation);
-    if (animation->animations_.size()) {
+    if (!animation->animations_.empty()) {
         for (auto& ani : animation->animations_) {
             ani->Finish();
         }

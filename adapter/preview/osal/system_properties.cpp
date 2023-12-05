@@ -40,6 +40,7 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 
 bool SystemProperties::traceEnabled_ = false;
 bool SystemProperties::svgTraceEnable_ = false;
+bool SystemProperties::layoutTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -80,6 +81,7 @@ bool SystemProperties::rosenBackendEnabled_ = false;
 #else
 bool SystemProperties::rosenBackendEnabled_ = true;
 #endif
+bool SystemProperties::flutterDecouplingEnabled_ = true;
 
 void SystemProperties::InitDeviceType(DeviceType type)
 {
@@ -189,13 +191,11 @@ std::string SystemProperties::GetRegion()
 
 std::string SystemProperties::GetPartialUpdatePkg()
 {
-    // TODO: add support for pc preview.
     return {};
 }
 
 std::string SystemProperties::GetNewPipePkg()
 {
-    // TODO: add support for pc preview.
     return {};
 }
 
@@ -219,6 +219,11 @@ bool SystemProperties::GetImageFrameworkEnabled()
     return false;
 }
 
+bool SystemProperties::GetDebugPixelMapSaveEnabled()
+{
+    return false;
+}
+
 bool SystemProperties::GetResourceDecoupling()
 {
     return true;
@@ -227,5 +232,15 @@ bool SystemProperties::GetResourceDecoupling()
 int32_t SystemProperties::GetJankFrameThreshold()
 {
     return 0;
+}
+
+std::string SystemProperties::GetCustomTitleFilePath()
+{
+    return UNDEFINED_PARAM;
+}
+
+bool SystemProperties::Is24HourClock()
+{
+    return false;
 }
 } // namespace OHOS::Ace

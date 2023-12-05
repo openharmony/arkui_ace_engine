@@ -1090,7 +1090,10 @@ void WebDelegate::AddJavascriptInterface(const std::string& objectName, const st
                 return;
             }
             if (delegate->nweb_) {
-                delegate->nweb_->RegisterArkJSfunction(objectName, methodList);
+                // webcontroller not support object, so the object_id param assign
+                // error code
+                delegate->nweb_->RegisterArkJSfunctionExt(
+                    objectName, methodList, static_cast<int32_t>(JavaScriptObjIdErrorCode::WEBCONTROLLERERROR));
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -2637,6 +2640,11 @@ void WebDelegate::InitWebViewWithSurface()
             }
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--init-background-color=").append(std::to_string(delegate->backgroundColor_)));
+            if (delegate->richtextData_) {
+                // Created a richtext component
+                initArgs.web_engine_args_to_add.push_back(
+                    std::string("--init-richtext-data=").append(delegate->richtextData_.value()));
+            }
             if (isEnhanceSurface) {
                 TAG_LOGD(AceLogTag::ACE_WEB, "Create webview with isEnhanceSurface");
                 delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
@@ -3887,6 +3895,20 @@ void WebDelegate::CallIsPagePathInvalid(const bool& isPageInvalid)
     CallResRegisterMethod(isPagePathInvalidMethod_, param, nullptr);
 }
 
+void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::string& param) const
+{
+    if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        return;
+    }
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    Recorder::EventParamsBuilder builder;
+    builder.SetId(host->GetInspectorIdValue("")).SetType(host->GetHostTag()).SetEventType(eventType).SetText(param);
+    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+}
+
 void WebDelegate::OnPageStarted(const std::string& param)
 {
     auto context = context_.Upgrade();
@@ -3907,6 +3929,7 @@ void WebDelegate::OnPageStarted(const std::string& param)
             if (onPageStartedV2) {
                 onPageStartedV2(std::make_shared<LoadWebPageStartEvent>(param));
             }
+            delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_BEGIN, param);
         },
         TaskExecutor::TaskType::JS);
 }
@@ -3930,6 +3953,7 @@ void WebDelegate::OnPageFinished(const std::string& param)
             if (onPageFinishedV2) {
                 onPageFinishedV2(std::make_shared<LoadWebPageFinishEvent>(param));
             }
+            delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_END, param);
         },
         TaskExecutor::TaskType::JS);
 }
@@ -4336,6 +4360,13 @@ void WebDelegate::OnAccessibilityEvent(int32_t accessibilityId, AccessibilityEve
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     AccessibilityEvent event;
+    if (accessibilityId <= 0) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webNode = webPattern->GetHost();
+        CHECK_NULL_VOID(webNode);
+        accessibilityId = webNode->GetAccessibilityId();
+    }
     event.nodeId = accessibilityId;
     event.type = eventType;
     context->SendEventToAccessibility(event);
@@ -5010,6 +5041,14 @@ void WebDelegate::OnFocus()
     if (nweb_) {
         nweb_->OnFocus(OHOS::NWeb::FocusReason::EVENT_REQUEST);
     }
+}
+
+bool WebDelegate::NeedSoftKeyboard()
+{
+    if (nweb_) {
+        return nweb_->NeedSoftKeyboard();
+    }
+    return false;
 }
 
 void WebDelegate::OnBlur()
