@@ -48,7 +48,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
   ]
   configs = [ "$ace_root/test/fuzztest:ace_fuzz_config" ]
   if (ace_use_rosen_drawing) {
-    include_dirs += [
+    include_dirs = [
       "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
       "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
     ]
