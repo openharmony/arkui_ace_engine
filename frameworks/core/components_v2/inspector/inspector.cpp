@@ -168,7 +168,7 @@ std::string Inspector::GetInspectorTree(const RefPtr<PipelineContext>& context, 
     double rootWidth = context->GetRootWidth();
     jsonRoot->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
     jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
-    jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
+    jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(PipelineBase::GetCurrentDensity()).c_str());
 
     auto root = AceType::DynamicCast<Element>(context->GetRootElement());
     if (root == nullptr) {

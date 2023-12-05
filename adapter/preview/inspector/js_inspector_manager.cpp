@@ -123,7 +123,7 @@ void JsInspectorManager::AssembleJSONTree(std::string& jsonStr)
         jsonNode->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
         jsonNode->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
     }
-    jsonNode->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
+    jsonNode->Put(INSPECTOR_RESOLUTION, std::to_string(PipelineBase::GetCurrentDensity()).c_str());
     auto node = GetAccessibilityNodeFromPage(0);
     if (!node) {
         return;

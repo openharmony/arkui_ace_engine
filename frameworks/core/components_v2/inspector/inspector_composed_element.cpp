@@ -541,10 +541,14 @@ std::string InspectorComposedElement::GetConstraintSize() const
         layoutParam = render->GetConstraints();
     }
     auto jsonStr = JsonUtil::Create(true);
-    Dimension minWidth = Dimension(SystemProperties::Px2Vp(layoutParam.GetMinSize().Width()), DimensionUnit::VP);
-    Dimension minHeight = Dimension(SystemProperties::Px2Vp(layoutParam.GetMinSize().Height()), DimensionUnit::VP);
-    Dimension maxWidth = Dimension(SystemProperties::Px2Vp(layoutParam.GetMaxSize().Width()), DimensionUnit::VP);
-    Dimension maxHeight = Dimension(SystemProperties::Px2Vp(layoutParam.GetMaxSize().Height()), DimensionUnit::VP);
+    Dimension minWidth = Dimension(
+        PipelineBase::Px2VpWithCurrentDensity(layoutParam.GetMinSize().Width()), DimensionUnit::VP);
+    Dimension minHeight = Dimension(
+        PipelineBase::Px2VpWithCurrentDensity(layoutParam.GetMinSize().Height()), DimensionUnit::VP);
+    Dimension maxWidth = Dimension(
+        PipelineBase::Px2VpWithCurrentDensity(layoutParam.GetMaxSize().Width()), DimensionUnit::VP);
+    Dimension maxHeight = Dimension(
+        PipelineBase::Px2VpWithCurrentDensity(layoutParam.GetMaxSize().Height()), DimensionUnit::VP);
     jsonStr->Put("minWidth", minWidth.ToString().c_str());
     jsonStr->Put("minHeight", minHeight.ToString().c_str());
     jsonStr->Put("maxWidth", maxWidth.ToString().c_str());

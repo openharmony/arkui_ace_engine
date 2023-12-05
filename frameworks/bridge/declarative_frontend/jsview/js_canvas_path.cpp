@@ -37,8 +37,8 @@ void JSCanvasPath::JsPath2DSetTransform(const JSCallbackInfo& info)
             JSViewAbstract::ParseJsDouble(info[3], scaleY);
             JSViewAbstract::ParseJsDouble(info[4], translateX);
             JSViewAbstract::ParseJsDouble(info[5], translateY);
-            translateX = SystemProperties::Vp2Px(translateX);
-            translateY = SystemProperties::Vp2Px(translateY);
+            translateX = PipelineBase::Vp2PxWithCurrentDensity(translateX);
+            translateY = PipelineBase::Vp2PxWithCurrentDensity(translateY);
             path2d_->SetTransform(scaleX, skewX, skewY, scaleY, translateX, translateY);
         }
     }
@@ -52,8 +52,8 @@ void JSCanvasPath::JsPath2DMoveTo(const JSCallbackInfo& info)
             double Y = 0.0;
             JSViewAbstract::ParseJsDouble(info[0], X);
             JSViewAbstract::ParseJsDouble(info[1], Y);
-            X = SystemProperties::Vp2Px(X);
-            Y = SystemProperties::Vp2Px(Y);
+            X = PipelineBase::Vp2PxWithCurrentDensity(X);
+            Y = PipelineBase::Vp2PxWithCurrentDensity(Y);
             path2d_->MoveTo(X, Y);
         }
     }
@@ -67,8 +67,8 @@ void JSCanvasPath::JsPath2DLineTo(const JSCallbackInfo& info)
             double Y = 0.0;
             JSViewAbstract::ParseJsDouble(info[0], X);
             JSViewAbstract::ParseJsDouble(info[1], Y);
-            X = SystemProperties::Vp2Px(X);
-            Y = SystemProperties::Vp2Px(Y);
+            X = PipelineBase::Vp2PxWithCurrentDensity(X);
+            Y = PipelineBase::Vp2PxWithCurrentDensity(Y);
             path2d_->LineTo(X, Y);
         }
     }
@@ -89,9 +89,9 @@ void JSCanvasPath::JsPath2DArc(const JSCallbackInfo& info)
             JSViewAbstract::ParseJsDouble(info[2], radius);
             JSViewAbstract::ParseJsDouble(info[3], startAngle);
             JSViewAbstract::ParseJsDouble(info[4], endAngle);
-            X = SystemProperties::Vp2Px(X);
-            Y = SystemProperties::Vp2Px(Y);
-            radius = SystemProperties::Vp2Px(radius);
+            X = PipelineBase::Vp2PxWithCurrentDensity(X);
+            Y = PipelineBase::Vp2PxWithCurrentDensity(Y);
+            radius = PipelineBase::Vp2PxWithCurrentDensity(radius);
             if (info.Length() == 6) {
                 JSViewAbstract::ParseJsBool(info[5], anticlockwise);
             }
@@ -114,11 +114,11 @@ void JSCanvasPath::JsPath2DArcTo(const JSCallbackInfo& info)
             JSViewAbstract::ParseJsDouble(info[2], x2);
             JSViewAbstract::ParseJsDouble(info[3], y2);
             JSViewAbstract::ParseJsDouble(info[4], radius);
-            x1 = SystemProperties::Vp2Px(x1);
-            y1 = SystemProperties::Vp2Px(y1);
-            x2 = SystemProperties::Vp2Px(x2);
-            y2 = SystemProperties::Vp2Px(y2);
-            radius = SystemProperties::Vp2Px(radius);
+            x1 = PipelineBase::Vp2PxWithCurrentDensity(x1);
+            y1 = PipelineBase::Vp2PxWithCurrentDensity(y1);
+            x2 = PipelineBase::Vp2PxWithCurrentDensity(x2);
+            y2 = PipelineBase::Vp2PxWithCurrentDensity(y2);
+            radius = PipelineBase::Vp2PxWithCurrentDensity(radius);
             path2d_->ArcTo(x1, y1, x2, y2, radius);
         }
     }
@@ -135,10 +135,10 @@ void JSCanvasPath::JsPath2DQuadraticCurveTo(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], cpy);
         JSViewAbstract::ParseJsDouble(info[2], x);
         JSViewAbstract::ParseJsDouble(info[3], y);
-        cpx = SystemProperties::Vp2Px(cpx);
-        cpy = SystemProperties::Vp2Px(cpy);
-        x = SystemProperties::Vp2Px(x);
-        y = SystemProperties::Vp2Px(y);
+        cpx = PipelineBase::Vp2PxWithCurrentDensity(cpx);
+        cpy = PipelineBase::Vp2PxWithCurrentDensity(cpy);
+        x = PipelineBase::Vp2PxWithCurrentDensity(x);
+        y = PipelineBase::Vp2PxWithCurrentDensity(y);
         path2d_->QuadraticCurveTo(cpx, cpy, x, y);
     }
 }
@@ -158,12 +158,12 @@ void JSCanvasPath::JsPath2DBezierCurveTo(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[3], cp2y);
         JSViewAbstract::ParseJsDouble(info[4], x);
         JSViewAbstract::ParseJsDouble(info[5], y);
-        cp1x = SystemProperties::Vp2Px(cp1x);
-        cp1y = SystemProperties::Vp2Px(cp1y);
-        cp2x = SystemProperties::Vp2Px(cp2x);
-        cp2y = SystemProperties::Vp2Px(cp2y);
-        x = SystemProperties::Vp2Px(x);
-        y = SystemProperties::Vp2Px(y);
+        cp1x = PipelineBase::Vp2PxWithCurrentDensity(cp1x);
+        cp1y = PipelineBase::Vp2PxWithCurrentDensity(cp1y);
+        cp2x = PipelineBase::Vp2PxWithCurrentDensity(cp2x);
+        cp2y = PipelineBase::Vp2PxWithCurrentDensity(cp2y);
+        x = PipelineBase::Vp2PxWithCurrentDensity(x);
+        y = PipelineBase::Vp2PxWithCurrentDensity(y);
         path2d_->BezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
     }
 }
@@ -186,10 +186,10 @@ void JSCanvasPath::JsPath2DEllipse(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[4], rotation);
         JSViewAbstract::ParseJsDouble(info[5], startAngle);
         JSViewAbstract::ParseJsDouble(info[6], endAngle);
-        X = SystemProperties::Vp2Px(X);
-        Y = SystemProperties::Vp2Px(Y);
-        radiusX = SystemProperties::Vp2Px(radiusX);
-        radiusY = SystemProperties::Vp2Px(radiusY);
+        X = PipelineBase::Vp2PxWithCurrentDensity(X);
+        Y = PipelineBase::Vp2PxWithCurrentDensity(Y);
+        radiusX = PipelineBase::Vp2PxWithCurrentDensity(radiusX);
+        radiusY = PipelineBase::Vp2PxWithCurrentDensity(radiusY);
 
         bool anticlockwise = false;
 
@@ -212,10 +212,10 @@ void JSCanvasPath::JsPath2DRect(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], y);
         JSViewAbstract::ParseJsDouble(info[2], width);
         JSViewAbstract::ParseJsDouble(info[3], height);
-        x = SystemProperties::Vp2Px(x);
-        y = SystemProperties::Vp2Px(y);
-        width = SystemProperties::Vp2Px(width);
-        height = SystemProperties::Vp2Px(height);
+        x = PipelineBase::Vp2PxWithCurrentDensity(x);
+        y = PipelineBase::Vp2PxWithCurrentDensity(y);
+        width = PipelineBase::Vp2PxWithCurrentDensity(width);
+        height = PipelineBase::Vp2PxWithCurrentDensity(height);
 
         path2d_->Rect(x, y, width, height);
     }

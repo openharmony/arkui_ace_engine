@@ -29,6 +29,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/display_info.h"
 #include "core/common/frontend.h"

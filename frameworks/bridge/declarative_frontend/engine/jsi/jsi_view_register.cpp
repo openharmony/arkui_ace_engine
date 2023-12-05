@@ -837,7 +837,7 @@ panda::Local<panda::JSValueRef> Vp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo
     }
 
     double vpValue = firstArg->ToNumber(vm)->Value();
-    double density = SystemProperties::GetResolution();
+    double density = PipelineBase::GetCurrentDensity();
     double pxValue = vpValue * density;
     return panda::NumberRef::New(vm, pxValue);
 }
@@ -853,7 +853,7 @@ panda::Local<panda::JSValueRef> Px2Vp(panda::JsiRuntimeCallInfo* runtimeCallInfo
     if (!firstArg->IsNumber()) {
         return panda::JSValueRef::Undefined(vm);
     }
-    double density = SystemProperties::GetResolution();
+    double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -876,7 +876,7 @@ panda::Local<panda::JSValueRef> Fp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo
         return panda::JSValueRef::Undefined(vm);
     }
 
-    double density = SystemProperties::GetResolution();
+    double density = PipelineBase::GetCurrentDensity();
     double fpValue = firstArg->ToNumber(vm)->Value();
 
     auto container = Container::Current();
@@ -903,7 +903,7 @@ panda::Local<panda::JSValueRef> Px2Fp(panda::JsiRuntimeCallInfo* runtimeCallInfo
     if (!firstArg->IsNumber()) {
         return panda::JSValueRef::Undefined(vm);
     }
-    double density = SystemProperties::GetResolution();
+    double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
         return panda::JSValueRef::Undefined(vm);
     }

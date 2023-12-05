@@ -270,7 +270,7 @@ void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF off
 {
     auto& canvas = context.canvas;
     auto totalWidth = context.width;
-    auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
+    auto spaceWidth = PipelineBase::Vp2PxWithCurrentDensity(FIXED_WIDTH);
     auto segmentWidthSum = 0.0f;
     auto segmentSize = 0.0;
     for (size_t i = 0; i < valuesLastLength_; ++i) {

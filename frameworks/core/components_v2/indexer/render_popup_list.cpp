@@ -181,7 +181,7 @@ void RenderPopupList::OnRequestPopupDataSelected(std::vector<std::string>& data)
     datas_.assign(data.begin(), data.end());
 
     // calculate view port size
-    viewPortWidth_ = SystemProperties::Vp2Px(POPUP_BOX_SIZE);
+    viewPortWidth_ = PipelineBase::Vp2PxWithCurrentDensity(POPUP_BOX_SIZE);
     viewPortHeight_ = ApplyLayoutParam();
 
     LOGI("size of datas %{public}zu view port height %{public}.2f ", datas_.size(), viewPortHeight_);
@@ -238,9 +238,10 @@ double RenderPopupList::ApplyLayoutParam()
 {
     double viewPortSize = 0.0;
     if (datas_.size() > POPUP_ITEM_VIEW_MAX_COUNT) {
-        viewPortSize = SystemProperties::Vp2Px(POPUP_BOX_SIZE) * POPUP_ITEM_VIEW_MAX_COUNT + POPUP_BORDER_RADIUS_SIZE;
+        viewPortSize = PipelineBase::Vp2PxWithCurrentDensity(POPUP_BOX_SIZE) *
+                       POPUP_ITEM_VIEW_MAX_COUNT + POPUP_BORDER_RADIUS_SIZE;
     } else {
-        viewPortSize = SystemProperties::Vp2Px(POPUP_BOX_SIZE) * datas_.size() + POPUP_BORDER_RADIUS_SIZE;
+        viewPortSize = PipelineBase::Vp2PxWithCurrentDensity(POPUP_BOX_SIZE) * datas_.size() + POPUP_BORDER_RADIUS_SIZE;
     }
 
     // start position and end position of scrollable

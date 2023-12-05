@@ -167,8 +167,8 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
         JSViewAbstract::ParseJsDouble(args[0], fWidth);
         JSViewAbstract::ParseJsDouble(args[1], fHeight);
 
-        fWidth = SystemProperties::Vp2Px(fWidth);
-        fHeight = SystemProperties::Vp2Px(fHeight);
+        fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
+        fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
         width = round(fWidth);
         height = round(fHeight);
 

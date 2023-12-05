@@ -35,18 +35,24 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
 {
     JSRef<JSObject> gestureInfoObj = JSRef<JSObject>::New();
     gestureInfoObj->SetProperty<bool>("repeat", info.GetRepeat());
-    gestureInfoObj->SetProperty<double>("offsetX", SystemProperties::Px2Vp(info.GetOffsetX()));
-    gestureInfoObj->SetProperty<double>("offsetY", SystemProperties::Px2Vp(info.GetOffsetY()));
+    gestureInfoObj->SetProperty<double>("offsetX", PipelineBase::Px2VpWithCurrentDensity(info.GetOffsetX()));
+    gestureInfoObj->SetProperty<double>("offsetY", PipelineBase::Px2VpWithCurrentDensity(info.GetOffsetY()));
     gestureInfoObj->SetProperty<double>("scale", info.GetScale());
     gestureInfoObj->SetProperty<double>("angle", info.GetAngle());
     gestureInfoObj->SetProperty<double>("speed", info.GetSpeed());
     gestureInfoObj->SetProperty<double>("timestamp", info.GetTimeStamp().time_since_epoch().count());
-    gestureInfoObj->SetProperty<double>("globalX", SystemProperties::Px2Vp(info.GetGlobalLocation().GetX()));
-    gestureInfoObj->SetProperty<double>("globalY", SystemProperties::Px2Vp(info.GetGlobalLocation().GetY()));
-    gestureInfoObj->SetProperty<double>("localX", SystemProperties::Px2Vp(info.GetLocalLocation().GetX()));
-    gestureInfoObj->SetProperty<double>("localY", SystemProperties::Px2Vp(info.GetLocalLocation().GetY()));
-    gestureInfoObj->SetProperty<double>("pinchCenterX", SystemProperties::Px2Vp(info.GetPinchCenter().GetX()));
-    gestureInfoObj->SetProperty<double>("pinchCenterY", SystemProperties::Px2Vp(info.GetPinchCenter().GetY()));
+    gestureInfoObj->SetProperty<double>(
+        "globalX", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetX()));
+    gestureInfoObj->SetProperty<double>(
+        "globalY", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetY()));
+    gestureInfoObj->SetProperty<double>(
+        "localX", PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetX()));
+    gestureInfoObj->SetProperty<double>(
+        "localY", PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetY()));
+    gestureInfoObj->SetProperty<double>(
+        "pinchCenterX", PipelineBase::Px2VpWithCurrentDensity(info.GetPinchCenter().GetX()));
+    gestureInfoObj->SetProperty<double>(
+        "pinchCenterY", PipelineBase::Px2VpWithCurrentDensity(info.GetPinchCenter().GetY()));
     gestureInfoObj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     gestureInfoObj->SetProperty<double>("pressure", info.GetForce());
     if (info.GetTiltX().has_value()) {
@@ -57,9 +63,12 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     }
     gestureInfoObj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
 
-    gestureInfoObj->SetProperty<double>("velocityX", SystemProperties::Px2Vp(info.GetVelocity().GetVelocityX()));
-    gestureInfoObj->SetProperty<double>("velocityY", SystemProperties::Px2Vp(info.GetVelocity().GetVelocityY()));
-    gestureInfoObj->SetProperty<double>("velocity", SystemProperties::Px2Vp(info.GetVelocity().GetVelocityValue()));
+    gestureInfoObj->SetProperty<double>(
+        "velocityX", PipelineBase::Px2VpWithCurrentDensity(info.GetVelocity().GetVelocityX()));
+    gestureInfoObj->SetProperty<double>(
+        "velocityY", PipelineBase::Px2VpWithCurrentDensity(info.GetVelocity().GetVelocityY()));
+    gestureInfoObj->SetProperty<double>(
+        "velocity", PipelineBase::Px2VpWithCurrentDensity(info.GetVelocity().GetVelocityValue()));
 
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info.GetFingerList();
@@ -94,10 +103,10 @@ JSRef<JSObject> JsGestureFunction::CreateFingerInfo(const FingerInfo& fingerInfo
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     fingerInfoObj->SetProperty<int32_t>("id", fingerInfo.fingerId_);
-    fingerInfoObj->SetProperty<double>("globalX", SystemProperties::Px2Vp(globalLocation.GetX()));
-    fingerInfoObj->SetProperty<double>("globalY", SystemProperties::Px2Vp(globalLocation.GetY()));
-    fingerInfoObj->SetProperty<double>("localX", SystemProperties::Px2Vp(localLocation.GetX()));
-    fingerInfoObj->SetProperty<double>("localY", SystemProperties::Px2Vp(localLocation.GetY()));
+    fingerInfoObj->SetProperty<double>("globalX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
+    fingerInfoObj->SetProperty<double>("globalY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
+    fingerInfoObj->SetProperty<double>("localX", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
+    fingerInfoObj->SetProperty<double>("localY", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
     return fingerInfoObj;
 }
 

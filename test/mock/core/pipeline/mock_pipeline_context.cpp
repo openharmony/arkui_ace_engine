@@ -426,6 +426,24 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     return NG::MockPipelineContext::GetCurrent();
 }
 
+double PipelineBase::GetCurrentDensity()
+{
+    auto pipelineContext = NG::MockPipelineContext::GetCurrentContext();
+    return pipelineContext ? pipelineContext->GetDensity() : 1.0;
+}
+
+double PipelineBase::Px2VpWithCurrentDensity(double px)
+{
+    double density = GetCurrentDensity();
+    return px / density;
+}
+
+double PipelineBase::Vp2PxWithCurrentDensity(double vp)
+{
+    double density = GetCurrentDensity();
+    return vp * density;
+}
+
 double PipelineBase::NormalizeToPx(const Dimension& dimension) const
 {
     if ((dimension.Unit() == DimensionUnit::VP) || (dimension.Unit() == DimensionUnit::FP)) {

@@ -89,10 +89,10 @@ inline Rect GetJsRectParam(const JSCallbackInfo& info)
     JSViewAbstract::ParseJsDouble(info[1], y);
     JSViewAbstract::ParseJsDouble(info[2], width);
     JSViewAbstract::ParseJsDouble(info[3], height);
-    x = SystemProperties::Vp2Px(x);
-    y = SystemProperties::Vp2Px(y);
-    width = SystemProperties::Vp2Px(width);
-    height = SystemProperties::Vp2Px(height);
+    x = PipelineBase::Vp2PxWithCurrentDensity(x);
+    y = PipelineBase::Vp2PxWithCurrentDensity(y);
+    width = PipelineBase::Vp2PxWithCurrentDensity(width);
+    height = PipelineBase::Vp2PxWithCurrentDensity(height);
 
     Rect rect = Rect(x, y, width, height);
     return rect;
@@ -188,10 +188,10 @@ void JSCanvasRenderer::JsCreateLinearGradient(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], y0);
         JSViewAbstract::ParseJsDouble(info[2], x1);
         JSViewAbstract::ParseJsDouble(info[3], y1);
-        x0 = SystemProperties::Vp2Px(x0);
-        y0 = SystemProperties::Vp2Px(y0);
-        x1 = SystemProperties::Vp2Px(x1);
-        y1 = SystemProperties::Vp2Px(y1);
+        x0 = PipelineBase::Vp2PxWithCurrentDensity(x0);
+        y0 = PipelineBase::Vp2PxWithCurrentDensity(y0);
+        x1 = PipelineBase::Vp2PxWithCurrentDensity(x1);
+        y1 = PipelineBase::Vp2PxWithCurrentDensity(y1);
         Offset beginOffset = Offset(x0, y0);
         Offset endOffset = Offset(x1, y1);
 
@@ -225,12 +225,12 @@ void JSCanvasRenderer::JsCreateRadialGradient(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[3], endX);
         JSViewAbstract::ParseJsDouble(info[4], endY);
         JSViewAbstract::ParseJsDouble(info[5], endRadial);
-        startX = SystemProperties::Vp2Px(startX);
-        startY = SystemProperties::Vp2Px(startY);
-        startRadial = SystemProperties::Vp2Px(startRadial);
-        endX = SystemProperties::Vp2Px(endX);
-        endY = SystemProperties::Vp2Px(endY);
-        endRadial = SystemProperties::Vp2Px(endRadial);
+        startX = PipelineBase::Vp2PxWithCurrentDensity(startX);
+        startY = PipelineBase::Vp2PxWithCurrentDensity(startY);
+        startRadial = PipelineBase::Vp2PxWithCurrentDensity(startRadial);
+        endX = PipelineBase::Vp2PxWithCurrentDensity(endX);
+        endY = PipelineBase::Vp2PxWithCurrentDensity(endY);
+        endRadial = PipelineBase::Vp2PxWithCurrentDensity(endRadial);
         Offset innerCenter = Offset(startX, startY);
         Offset outerCenter = Offset(endX, endY);
 
@@ -276,8 +276,8 @@ void JSCanvasRenderer::JsCreateConicGradient(const JSCallbackInfo& info)
         y = 0.0;
     }
 
-    x = SystemProperties::Vp2Px(x);
-    y = SystemProperties::Vp2Px(y);
+    x = PipelineBase::Vp2PxWithCurrentDensity(x);
+    y = PipelineBase::Vp2PxWithCurrentDensity(y);
     startAngle = fmod(startAngle, (2 * M_PI));
 
     Gradient* gradient = new Gradient();
@@ -304,8 +304,8 @@ void JSCanvasRenderer::JsFillText(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsString(info[0], text);
         JSViewAbstract::ParseJsDouble(info[1], x);
         JSViewAbstract::ParseJsDouble(info[2], y);
-        x = SystemProperties::Vp2Px(x);
-        y = SystemProperties::Vp2Px(y);
+        x = PipelineBase::Vp2PxWithCurrentDensity(x);
+        y = PipelineBase::Vp2PxWithCurrentDensity(y);
         std::optional<double> maxWidth;
         if (info.Length() >= 4) {
             double width = 0.0;
@@ -313,7 +313,7 @@ void JSCanvasRenderer::JsFillText(const JSCallbackInfo& info)
                 width = FLT_MAX;
             } else if (info[3]->IsNumber()) {
                 JSViewAbstract::ParseJsDouble(info[3], width);
-                width = SystemProperties::Vp2Px(width);
+                width = PipelineBase::Vp2PxWithCurrentDensity(width);
             }
             maxWidth = width;
         }
@@ -347,8 +347,8 @@ void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsString(info[0], text);
         JSViewAbstract::ParseJsDouble(info[1], x);
         JSViewAbstract::ParseJsDouble(info[2], y);
-        x = SystemProperties::Vp2Px(x);
-        y = SystemProperties::Vp2Px(y);
+        x = PipelineBase::Vp2PxWithCurrentDensity(x);
+        y = PipelineBase::Vp2PxWithCurrentDensity(y);
         std::optional<double> maxWidth;
         if (info.Length() >= 4) {
             double width = 0.0;
@@ -356,7 +356,7 @@ void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
                 width = FLT_MAX;
             } else if (info[3]->IsNumber()) {
                 JSViewAbstract::ParseJsDouble(info[3], width);
-                width = SystemProperties::Vp2Px(width);
+                width = PipelineBase::Vp2PxWithCurrentDensity(width);
             }
             maxWidth = width;
         }
@@ -762,8 +762,8 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
             image.flag = 0;
             JSViewAbstract::ParseJsDouble(info[1], image.dx);
             JSViewAbstract::ParseJsDouble(info[2], image.dy);
-            image.dx = SystemProperties::Vp2Px(image.dx);
-            image.dy = SystemProperties::Vp2Px(image.dy);
+            image.dx = PipelineBase::Vp2PxWithCurrentDensity(image.dx);
+            image.dy = PipelineBase::Vp2PxWithCurrentDensity(image.dy);
             break;
         // 5 parameters: drawImage(image, dx, dy, dWidth, dHeight)
         case 5:
@@ -772,10 +772,10 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
             JSViewAbstract::ParseJsDouble(info[2], image.dy);
             JSViewAbstract::ParseJsDouble(info[3], image.dWidth);
             JSViewAbstract::ParseJsDouble(info[4], image.dHeight);
-            image.dx = SystemProperties::Vp2Px(image.dx);
-            image.dy = SystemProperties::Vp2Px(image.dy);
-            image.dWidth = SystemProperties::Vp2Px(image.dWidth);
-            image.dHeight = SystemProperties::Vp2Px(image.dHeight);
+            image.dx = PipelineBase::Vp2PxWithCurrentDensity(image.dx);
+            image.dy = PipelineBase::Vp2PxWithCurrentDensity(image.dy);
+            image.dWidth = PipelineBase::Vp2PxWithCurrentDensity(image.dWidth);
+            image.dHeight = PipelineBase::Vp2PxWithCurrentDensity(image.dHeight);
             break;
         // 9 parameters: drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
         case 9:
@@ -789,15 +789,15 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
             JSViewAbstract::ParseJsDouble(info[7], image.dWidth);
             JSViewAbstract::ParseJsDouble(info[8], image.dHeight);
             if (isImage) {
-                image.sx = SystemProperties::Vp2Px(image.sx);
-                image.sy = SystemProperties::Vp2Px(image.sy);
-                image.sWidth = SystemProperties::Vp2Px(image.sWidth);
-                image.sHeight = SystemProperties::Vp2Px(image.sHeight);
+                image.sx = PipelineBase::Vp2PxWithCurrentDensity(image.sx);
+                image.sy = PipelineBase::Vp2PxWithCurrentDensity(image.sy);
+                image.sWidth = PipelineBase::Vp2PxWithCurrentDensity(image.sWidth);
+                image.sHeight = PipelineBase::Vp2PxWithCurrentDensity(image.sHeight);
             }
-            image.dx = SystemProperties::Vp2Px(image.dx);
-            image.dy = SystemProperties::Vp2Px(image.dy);
-            image.dWidth = SystemProperties::Vp2Px(image.dWidth);
-            image.dHeight = SystemProperties::Vp2Px(image.dHeight);
+            image.dx = PipelineBase::Vp2PxWithCurrentDensity(image.dx);
+            image.dy = PipelineBase::Vp2PxWithCurrentDensity(image.dy);
+            image.dWidth = PipelineBase::Vp2PxWithCurrentDensity(image.dWidth);
+            image.dHeight = PipelineBase::Vp2PxWithCurrentDensity(image.dHeight);
             break;
         default:
             break;
@@ -845,8 +845,8 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
     if (info.Length() == 2) {
         JSViewAbstract::ParseJsDouble(info[0], width);
         JSViewAbstract::ParseJsDouble(info[1], height);
-        width = SystemProperties::Vp2Px(width);
-        height = SystemProperties::Vp2Px(height);
+        width = PipelineBase::Vp2PxWithCurrentDensity(width);
+        height = PipelineBase::Vp2PxWithCurrentDensity(height);
     }
     if (info.Length() == 1 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -938,7 +938,7 @@ void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& ima
         imageData.x = value.Value();
     } else {
         ParseJsInt(info[1], imageData.x);
-        imageData.x = SystemProperties::Vp2Px(imageData.x);
+        imageData.x = PipelineBase::Vp2PxWithCurrentDensity(imageData.x);
     }
     if (info[2]->IsString()) {
         std::string imageDataYStr = "";
@@ -947,7 +947,7 @@ void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& ima
         imageData.y = value.Value();
     } else {
         ParseJsInt(info[2], imageData.y);
-        imageData.y = SystemProperties::Vp2Px(imageData.y);
+        imageData.y = PipelineBase::Vp2PxWithCurrentDensity(imageData.y);
     }
 
     imageData.dirtyWidth = width;
@@ -973,7 +973,7 @@ void JSCanvasRenderer::ParseImageDataAsStr(const JSCallbackInfo& info, ImageData
         imageData.dirtyX = value.Value();
     } else {
         ParseJsInt(info[3], imageData.dirtyX);
-        imageData.dirtyX = SystemProperties::Vp2Px(imageData.dirtyX);
+        imageData.dirtyX = PipelineBase::Vp2PxWithCurrentDensity(imageData.dirtyX);
     }
     if (info[4]->IsString()) {
         std::string imageDataDirtyYStr = "";
@@ -982,7 +982,7 @@ void JSCanvasRenderer::ParseImageDataAsStr(const JSCallbackInfo& info, ImageData
         imageData.dirtyY = value.Value();
     } else {
         ParseJsInt(info[4], imageData.dirtyY);
-        imageData.dirtyY = SystemProperties::Vp2Px(imageData.dirtyY);
+        imageData.dirtyY = PipelineBase::Vp2PxWithCurrentDensity(imageData.dirtyY);
     }
     if (info[5]->IsString()) {
         std::string imageDataDirtWidth = "";
@@ -991,7 +991,7 @@ void JSCanvasRenderer::ParseImageDataAsStr(const JSCallbackInfo& info, ImageData
         imageData.dirtyWidth = value.Value();
     } else {
         ParseJsInt(info[5], imageData.dirtyWidth);
-        imageData.dirtyWidth = SystemProperties::Vp2Px(imageData.dirtyWidth);
+        imageData.dirtyWidth = PipelineBase::Vp2PxWithCurrentDensity(imageData.dirtyWidth);
     }
     if (info[6]->IsString()) {
         std::string imageDataDirtyHeight = "";
@@ -1000,7 +1000,7 @@ void JSCanvasRenderer::ParseImageDataAsStr(const JSCallbackInfo& info, ImageData
         imageData.dirtyHeight = value.Value();
     } else {
         ParseJsInt(info[6], imageData.dirtyHeight);
-        imageData.dirtyHeight = SystemProperties::Vp2Px(imageData.dirtyHeight);
+        imageData.dirtyHeight = PipelineBase::Vp2PxWithCurrentDensity(imageData.dirtyHeight);
     }
 }
 
@@ -1037,17 +1037,17 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     width = fWidth;
     height = fHeight;
 
-    left = SystemProperties::Vp2Px(left);
-    top = SystemProperties::Vp2Px(top);
-    width = SystemProperties::Vp2Px(width);
-    height = SystemProperties::Vp2Px(height);
+    left = PipelineBase::Vp2PxWithCurrentDensity(left);
+    top = PipelineBase::Vp2PxWithCurrentDensity(top);
+    width = PipelineBase::Vp2PxWithCurrentDensity(width);
+    height = PipelineBase::Vp2PxWithCurrentDensity(height);
 
     finalHeight = static_cast<uint32_t>(std::abs(height));
     finalWidth = static_cast<uint32_t>(std::abs(width));
     int32_t length = finalHeight * finalWidth * 4;
     JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(length);
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
-    
+
     BaseInfo baseInfo;
     baseInfo.canvasPattern = canvasPattern_;
     baseInfo.offscreenPattern = offscreenPattern_;
@@ -1088,10 +1088,10 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     JSViewAbstract::ParseJsDouble(info[2], fWidth);
     JSViewAbstract::ParseJsDouble(info[3], fHeight);
 
-    fLeft = SystemProperties::Vp2Px(fLeft);
-    fTop = SystemProperties::Vp2Px(fTop);
-    fWidth = SystemProperties::Vp2Px(fWidth);
-    fHeight = SystemProperties::Vp2Px(fHeight);
+    fLeft = PipelineBase::Vp2PxWithCurrentDensity(fLeft);
+    fTop = PipelineBase::Vp2PxWithCurrentDensity(fTop);
+    fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
+    fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
 
     left = fLeft;
     top = fTop;
@@ -1301,7 +1301,7 @@ void JSCanvasRenderer::JsSetLineCap(const JSCallbackInfo& info)
             { "square", LineCapStyle::SQUARE },
         };
         auto lineCap = ConvertStrToEnum(capStr.c_str(), lineCapTable, ArraySize(lineCapTable), LineCapStyle::BUTT);
-        
+
         BaseInfo baseInfo;
         baseInfo.canvasPattern = canvasPattern_;
         baseInfo.offscreenPattern = offscreenPattern_;
@@ -1323,7 +1323,7 @@ void JSCanvasRenderer::JsSetLineJoin(const JSCallbackInfo& info)
         };
         auto lineJoin = ConvertStrToEnum(
             joinStr.c_str(), lineJoinTable, ArraySize(lineJoinTable), LineJoinStyle::MITER);
-        
+
         BaseInfo baseInfo;
         baseInfo.canvasPattern = canvasPattern_;
         baseInfo.offscreenPattern = offscreenPattern_;
@@ -1353,7 +1353,7 @@ void JSCanvasRenderer::JsSetLineWidth(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double lineWidth = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], lineWidth);
-        lineWidth = SystemProperties::Vp2Px(lineWidth);
+        lineWidth = PipelineBase::Vp2PxWithCurrentDensity(lineWidth);
 
         BaseInfo baseInfo;
         baseInfo.canvasPattern = canvasPattern_;
@@ -1417,7 +1417,7 @@ void JSCanvasRenderer::JsSetLineDashOffset(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double lineDashOffset = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], lineDashOffset);
-        lineDashOffset = SystemProperties::Vp2Px(lineDashOffset);
+        lineDashOffset = PipelineBase::Vp2PxWithCurrentDensity(lineDashOffset);
 
         BaseInfo baseInfo;
         baseInfo.canvasPattern = canvasPattern_;
@@ -1464,7 +1464,7 @@ void JSCanvasRenderer::JsSetShadowOffsetX(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double offsetX = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], offsetX);
-        offsetX = SystemProperties::Vp2Px(offsetX);
+        offsetX = PipelineBase::Vp2PxWithCurrentDensity(offsetX);
 
         BaseInfo baseInfo;
         baseInfo.canvasPattern = canvasPattern_;
@@ -1480,7 +1480,7 @@ void JSCanvasRenderer::JsSetShadowOffsetY(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double offsetY = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], offsetY);
-        offsetY = SystemProperties::Vp2Px(offsetY);
+        offsetY = PipelineBase::Vp2PxWithCurrentDensity(offsetY);
 
         BaseInfo baseInfo;
         baseInfo.canvasPattern = canvasPattern_;
@@ -1540,8 +1540,8 @@ void JSCanvasRenderer::JsMoveTo(const JSCallbackInfo& info)
         double y = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], x);
         JSViewAbstract::ParseJsDouble(info[1], y);
-        x = SystemProperties::Vp2Px(x);
-        y = SystemProperties::Vp2Px(y);
+        x = PipelineBase::Vp2PxWithCurrentDensity(x);
+        y = PipelineBase::Vp2PxWithCurrentDensity(y);
 
         BaseInfo baseInfo;
         baseInfo.canvasPattern = canvasPattern_;
@@ -1563,8 +1563,8 @@ void JSCanvasRenderer::JsLineTo(const JSCallbackInfo& info)
         double y = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], x);
         JSViewAbstract::ParseJsDouble(info[1], y);
-        x = SystemProperties::Vp2Px(x);
-        y = SystemProperties::Vp2Px(y);
+        x = PipelineBase::Vp2PxWithCurrentDensity(x);
+        y = PipelineBase::Vp2PxWithCurrentDensity(y);
 
         BaseInfo baseInfo;
         baseInfo.canvasPattern = canvasPattern_;
@@ -1590,12 +1590,12 @@ void JSCanvasRenderer::JsBezierCurveTo(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[3], param.cp2y);
         JSViewAbstract::ParseJsDouble(info[4], param.x);
         JSViewAbstract::ParseJsDouble(info[5], param.y);
-        param.cp1x = SystemProperties::Vp2Px(param.cp1x);
-        param.cp1y = SystemProperties::Vp2Px(param.cp1y);
-        param.cp2x = SystemProperties::Vp2Px(param.cp2x);
-        param.cp2y = SystemProperties::Vp2Px(param.cp2y);
-        param.x = SystemProperties::Vp2Px(param.x);
-        param.y = SystemProperties::Vp2Px(param.y);
+        param.cp1x = PipelineBase::Vp2PxWithCurrentDensity(param.cp1x);
+        param.cp1y = PipelineBase::Vp2PxWithCurrentDensity(param.cp1y);
+        param.cp2x = PipelineBase::Vp2PxWithCurrentDensity(param.cp2x);
+        param.cp2y = PipelineBase::Vp2PxWithCurrentDensity(param.cp2y);
+        param.x = PipelineBase::Vp2PxWithCurrentDensity(param.x);
+        param.y = PipelineBase::Vp2PxWithCurrentDensity(param.y);
 
         BaseInfo baseInfo;
         baseInfo.canvasPattern = canvasPattern_;
@@ -1618,10 +1618,10 @@ void JSCanvasRenderer::JsQuadraticCurveTo(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], param.cpy);
         JSViewAbstract::ParseJsDouble(info[2], param.x);
         JSViewAbstract::ParseJsDouble(info[3], param.y);
-        param.cpx = SystemProperties::Vp2Px(param.cpx);
-        param.cpy = SystemProperties::Vp2Px(param.cpy);
-        param.x = SystemProperties::Vp2Px(param.x);
-        param.y = SystemProperties::Vp2Px(param.y);
+        param.cpx = PipelineBase::Vp2PxWithCurrentDensity(param.cpx);
+        param.cpy = PipelineBase::Vp2PxWithCurrentDensity(param.cpy);
+        param.x = PipelineBase::Vp2PxWithCurrentDensity(param.x);
+        param.y = PipelineBase::Vp2PxWithCurrentDensity(param.y);
 
         BaseInfo baseInfo;
         baseInfo.canvasPattern = canvasPattern_;
@@ -1646,11 +1646,11 @@ void JSCanvasRenderer::JsArcTo(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[2], param.x2);
         JSViewAbstract::ParseJsDouble(info[3], param.y2);
         JSViewAbstract::ParseJsDouble(info[4], param.radius);
-        param.x1 = SystemProperties::Vp2Px(param.x1);
-        param.y1 = SystemProperties::Vp2Px(param.y1);
-        param.x2 = SystemProperties::Vp2Px(param.x2);
-        param.y2 = SystemProperties::Vp2Px(param.y2);
-        param.radius = SystemProperties::Vp2Px(param.radius);
+        param.x1 = PipelineBase::Vp2PxWithCurrentDensity(param.x1);
+        param.y1 = PipelineBase::Vp2PxWithCurrentDensity(param.y1);
+        param.x2 = PipelineBase::Vp2PxWithCurrentDensity(param.x2);
+        param.y2 = PipelineBase::Vp2PxWithCurrentDensity(param.y2);
+        param.radius = PipelineBase::Vp2PxWithCurrentDensity(param.radius);
 
         BaseInfo baseInfo;
         baseInfo.canvasPattern = canvasPattern_;
@@ -1675,9 +1675,9 @@ void JSCanvasRenderer::JsArc(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[2], param.radius);
         JSViewAbstract::ParseJsDouble(info[3], param.startAngle);
         JSViewAbstract::ParseJsDouble(info[4], param.endAngle);
-        param.x = SystemProperties::Vp2Px(param.x);
-        param.y = SystemProperties::Vp2Px(param.y);
-        param.radius = SystemProperties::Vp2Px(param.radius);
+        param.x = PipelineBase::Vp2PxWithCurrentDensity(param.x);
+        param.y = PipelineBase::Vp2PxWithCurrentDensity(param.y);
+        param.radius = PipelineBase::Vp2PxWithCurrentDensity(param.radius);
 
         if (info.Length() == 6) {
             JSViewAbstract::ParseJsBool(info[5], param.anticlockwise);
@@ -1708,10 +1708,10 @@ void JSCanvasRenderer::JsEllipse(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[4], param.rotation);
         JSViewAbstract::ParseJsDouble(info[5], param.startAngle);
         JSViewAbstract::ParseJsDouble(info[6], param.endAngle);
-        param.x = SystemProperties::Vp2Px(param.x);
-        param.y = SystemProperties::Vp2Px(param.y);
-        param.radiusX = SystemProperties::Vp2Px(param.radiusX);
-        param.radiusY = SystemProperties::Vp2Px(param.radiusY);
+        param.x = PipelineBase::Vp2PxWithCurrentDensity(param.x);
+        param.y = PipelineBase::Vp2PxWithCurrentDensity(param.y);
+        param.radiusX = PipelineBase::Vp2PxWithCurrentDensity(param.radiusX);
+        param.radiusY = PipelineBase::Vp2PxWithCurrentDensity(param.radiusY);
 
         if (info.Length() == 8) {
             JSViewAbstract::ParseJsBool(info[7], param.anticlockwise);
@@ -1963,8 +1963,8 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[3], param.scaleY);
         JSViewAbstract::ParseJsDouble(info[4], param.translateX);
         JSViewAbstract::ParseJsDouble(info[5], param.translateY);
-        param.translateX = SystemProperties::Vp2Px(param.translateX);
-        param.translateY = SystemProperties::Vp2Px(param.translateY);
+        param.translateX = PipelineBase::Vp2PxWithCurrentDensity(param.translateX);
+        param.translateY = PipelineBase::Vp2PxWithCurrentDensity(param.translateY);
 
         CanvasRendererModel::GetInstance()->SetTransform(baseInfo, param, true);
         return;
@@ -2008,8 +2008,8 @@ void JSCanvasRenderer::JsTransform(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[3], param.scaleY);
         JSViewAbstract::ParseJsDouble(info[4], param.translateX);
         JSViewAbstract::ParseJsDouble(info[5], param.translateY);
-        param.translateX = SystemProperties::Vp2Px(param.translateX);
-        param.translateY = SystemProperties::Vp2Px(param.translateY);
+        param.translateX = PipelineBase::Vp2PxWithCurrentDensity(param.translateX);
+        param.translateY = PipelineBase::Vp2PxWithCurrentDensity(param.translateY);
 
         BaseInfo baseInfo;
         baseInfo.canvasPattern = canvasPattern_;
@@ -2031,8 +2031,8 @@ void JSCanvasRenderer::JsTranslate(const JSCallbackInfo& info)
         double y = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], x);
         JSViewAbstract::ParseJsDouble(info[1], y);
-        x = SystemProperties::Vp2Px(x);
-        y = SystemProperties::Vp2Px(y);
+        x = PipelineBase::Vp2PxWithCurrentDensity(x);
+        y = PipelineBase::Vp2PxWithCurrentDensity(y);
 
         BaseInfo baseInfo;
         baseInfo.canvasPattern = canvasPattern_;
@@ -2052,7 +2052,7 @@ void JSCanvasRenderer::JsSetLineDash(const JSCallbackInfo& info)
     }
     if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         for (auto i = 0U; i < lineDash.size(); i++) {
-            lineDash[i] = SystemProperties::Vp2Px(lineDash[i]);
+            lineDash[i] = PipelineBase::Vp2PxWithCurrentDensity(lineDash[i]);
         }
     }
 
@@ -2172,19 +2172,20 @@ void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
         height = CanvasRendererModel::GetInstance()->GetMeasureTextHeight(baseInfo, text);
 
         auto retObj = JSRef<JSObject>::New();
-        retObj->SetProperty("width", SystemProperties::Px2Vp(width));
-        retObj->SetProperty("height", SystemProperties::Px2Vp(height));
-        retObj->SetProperty("actualBoundingBoxLeft", SystemProperties::Px2Vp(actualBoundingBoxLeft));
-        retObj->SetProperty("actualBoundingBoxRight", SystemProperties::Px2Vp(actualBoundingBoxRight));
-        retObj->SetProperty("actualBoundingBoxAscent", SystemProperties::Px2Vp(actualBoundingBoxAscent));
-        retObj->SetProperty("actualBoundingBoxDescent", SystemProperties::Px2Vp(actualBoundingBoxDescent));
-        retObj->SetProperty("hangingBaseline", SystemProperties::Px2Vp(hangingBaseline));
-        retObj->SetProperty("alphabeticBaseline", SystemProperties::Px2Vp(alphabeticBaseline));
-        retObj->SetProperty("ideographicBaseline", SystemProperties::Px2Vp(ideographicBaseline));
-        retObj->SetProperty("emHeightAscent", SystemProperties::Px2Vp(emHeightAscent));
-        retObj->SetProperty("emHeightDescent", SystemProperties::Px2Vp(emHeightDescent));
-        retObj->SetProperty("fontBoundingBoxAscent", SystemProperties::Px2Vp(fontBoundingBoxAscent));
-        retObj->SetProperty("fontBoundingBoxDescent", SystemProperties::Px2Vp(fontBoundingBoxDescent));
+        retObj->SetProperty("width", PipelineBase::Px2VpWithCurrentDensity(width));
+        retObj->SetProperty("height", PipelineBase::Px2VpWithCurrentDensity(height));
+        retObj->SetProperty("actualBoundingBoxLeft", PipelineBase::Px2VpWithCurrentDensity(actualBoundingBoxLeft));
+        retObj->SetProperty("actualBoundingBoxRight", PipelineBase::Px2VpWithCurrentDensity(actualBoundingBoxRight));
+        retObj->SetProperty("actualBoundingBoxAscent", PipelineBase::Px2VpWithCurrentDensity(actualBoundingBoxAscent));
+        retObj->SetProperty(
+            "actualBoundingBoxDescent", PipelineBase::Px2VpWithCurrentDensity(actualBoundingBoxDescent));
+        retObj->SetProperty("hangingBaseline", PipelineBase::Px2VpWithCurrentDensity(hangingBaseline));
+        retObj->SetProperty("alphabeticBaseline", PipelineBase::Px2VpWithCurrentDensity(alphabeticBaseline));
+        retObj->SetProperty("ideographicBaseline", PipelineBase::Px2VpWithCurrentDensity(ideographicBaseline));
+        retObj->SetProperty("emHeightAscent", PipelineBase::Px2VpWithCurrentDensity(emHeightAscent));
+        retObj->SetProperty("emHeightDescent", PipelineBase::Px2VpWithCurrentDensity(emHeightDescent));
+        retObj->SetProperty("fontBoundingBoxAscent", PipelineBase::Px2VpWithCurrentDensity(fontBoundingBoxAscent));
+        retObj->SetProperty("fontBoundingBoxDescent", PipelineBase::Px2VpWithCurrentDensity(fontBoundingBoxDescent));
         info.SetReturnValue(retObj);
     }
 }
@@ -2204,10 +2205,10 @@ void JSCanvasRenderer::JsFillRect(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], y);
         JSViewAbstract::ParseJsDouble(info[2], width);
         JSViewAbstract::ParseJsDouble(info[3], height);
-        x = SystemProperties::Vp2Px(x);
-        y = SystemProperties::Vp2Px(y);
-        width = SystemProperties::Vp2Px(width);
-        height = SystemProperties::Vp2Px(height);
+        x = PipelineBase::Vp2PxWithCurrentDensity(x);
+        y = PipelineBase::Vp2PxWithCurrentDensity(y);
+        width = PipelineBase::Vp2PxWithCurrentDensity(width);
+        height = PipelineBase::Vp2PxWithCurrentDensity(height);
 
         Rect rect = Rect(x, y, width, height);
 
@@ -2235,10 +2236,10 @@ void JSCanvasRenderer::JsStrokeRect(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], y);
         JSViewAbstract::ParseJsDouble(info[2], width);
         JSViewAbstract::ParseJsDouble(info[3], height);
-        x = SystemProperties::Vp2Px(x);
-        y = SystemProperties::Vp2Px(y);
-        width = SystemProperties::Vp2Px(width);
-        height = SystemProperties::Vp2Px(height);
+        x = PipelineBase::Vp2PxWithCurrentDensity(x);
+        y = PipelineBase::Vp2PxWithCurrentDensity(y);
+        width = PipelineBase::Vp2PxWithCurrentDensity(width);
+        height = PipelineBase::Vp2PxWithCurrentDensity(height);
 
         Rect rect = Rect(x, y, width, height);
 
@@ -2266,10 +2267,10 @@ void JSCanvasRenderer::JsClearRect(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], y);
         JSViewAbstract::ParseJsDouble(info[2], width);
         JSViewAbstract::ParseJsDouble(info[3], height);
-        x = SystemProperties::Vp2Px(x);
-        y = SystemProperties::Vp2Px(y);
-        width = SystemProperties::Vp2Px(width);
-        height = SystemProperties::Vp2Px(height);
+        x = PipelineBase::Vp2PxWithCurrentDensity(x);
+        y = PipelineBase::Vp2PxWithCurrentDensity(y);
+        width = PipelineBase::Vp2PxWithCurrentDensity(width);
+        height = PipelineBase::Vp2PxWithCurrentDensity(height);
 
         Rect rect = Rect(x, y, width, height);
 

@@ -311,7 +311,7 @@ bool ClickRecognizer::ExceedSlop()
     if (tappedCount_ > 0 && tappedCount_ < count_) {
         Offset currentFocusPoint = ComputeFocusPoint();
         Offset slop = currentFocusPoint - focusPoint_;
-        if (GreatOrEqual(SystemProperties::Px2Vp(slop.GetDistance()), MAX_THRESHOLD_MANYTAP)) {
+        if (GreatOrEqual(PipelineBase::Px2VpWithCurrentDensity(slop.GetDistance()), MAX_THRESHOLD_MANYTAP)) {
             return true;
         }
     }

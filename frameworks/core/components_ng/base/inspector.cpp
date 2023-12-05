@@ -322,7 +322,7 @@ void GetContextInfo(const RefPtr<PipelineContext>& context, std::unique_ptr<Json
     deviceRect.SetRect(0, 0, rootWidth * scale, rootHeight * scale);
     jsonRoot->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
     jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
-    jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
+    jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(PipelineBase::GetCurrentDensity()).c_str());
 }
 
 std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t pageId,
