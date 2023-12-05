@@ -203,7 +203,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     UpdateFingerListInfo();
     auto isUpInRegion = IsPointInRegion(event);
     if (fingersId_.find(event.id) != fingersId_.end()) {
-        fingersId_.erase(fingersId_);
+        fingersId_.erase(event.id);
     }
     --currentTouchPointsNum_;
     if (currentTouchPointsNum_ == 0) {
