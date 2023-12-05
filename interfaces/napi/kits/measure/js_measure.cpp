@@ -272,7 +272,6 @@ static void SetContextProperty(
     context.baselineOffset = baselineOffset;
     context.textCase = static_cast<TextCase>(textCase);
     context.textIndent = textIndent;
-    
 }
 
 static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
