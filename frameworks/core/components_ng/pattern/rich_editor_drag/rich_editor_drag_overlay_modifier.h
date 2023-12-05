@@ -30,7 +30,7 @@ class RichEditorDragOverlayModifier : public TextDragOverlayModifier {
 
 public:
     RichEditorDragOverlayModifier(
-        const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, const WeakPtr<RichEditorPattern>& hostPattern)
+        const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, const WeakPtr<TextPattern>& hostPattern)
         : TextDragOverlayModifier(pattern), hostPattern_(hostPattern)
     {}
     ~RichEditorDragOverlayModifier() override = default;
@@ -38,7 +38,9 @@ public:
     void onDraw(DrawingContext& context) override;
 
 private:
-    const WeakPtr<RichEditorPattern> hostPattern_;
+    void PaintImage(DrawingContext& context);
+
+    const WeakPtr<TextPattern> hostPattern_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorDragOverlayModifier);
 };
 } // namespace OHOS::Ace::NG
