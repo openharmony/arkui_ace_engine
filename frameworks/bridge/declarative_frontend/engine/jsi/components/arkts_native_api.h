@@ -401,6 +401,8 @@ struct ArkUIButtonModifierAPI {
     void (*SetButtonLabelStyle)(NodeHandle node, const char *fontFamily, const double *valueArray,
         const double *dimensionValueArray, const int *dimensionUnitArray);
     void (*ResetButtonLabelStyle)(NodeHandle node);
+    void (*SetButtonBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetButtonBackgroundColor)(NodeHandle node);
 };
 
 struct ArkUIToggleModifierAPI {
