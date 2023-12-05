@@ -68,7 +68,10 @@ ArkUINativeModuleValue SelectBridge::SetSelected(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t value = secondArg->Int32Value(vm);
+    int32_t value = 0;
+    if (secondArg->IsNumber()) {
+        value = secondArg->Int32Value(vm);
+    }
     if (value < DEFAULT_SELECT_INDEX) {
         value = DEFAULT_SELECT_INDEX;
     }

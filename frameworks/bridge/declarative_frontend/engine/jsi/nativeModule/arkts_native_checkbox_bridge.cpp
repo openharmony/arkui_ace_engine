@@ -62,7 +62,10 @@ ArkUINativeModuleValue CheckboxBridge::SetSelect(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    bool select = secondArg->ToBoolean(vm)->Value();
+    bool select = false;
+    if (secondArg->IsBoolean()) {
+        select = secondArg->ToBoolean(vm)->Value();
+    }
     GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetSelect(nativeNode, select);
     return panda::JSValueRef::Undefined(vm);
 }

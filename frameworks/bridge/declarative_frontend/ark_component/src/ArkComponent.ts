@@ -774,7 +774,7 @@ class MaskModifier extends ModifierWithKey<boolean | object> {
   }
 
   checkObjectDiff(): boolean {
-    return false;
+    return true;
   }
 }
 

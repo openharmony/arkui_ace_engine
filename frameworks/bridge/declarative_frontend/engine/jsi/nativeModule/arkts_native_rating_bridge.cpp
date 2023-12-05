@@ -33,8 +33,9 @@ ArkUINativeModuleValue RatingBridge::SetStars(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t stars = secondArg->Int32Value(vm);
-    if (LessNotEqual(stars, 0.0)) {
+    auto input = secondArg->ToNumber(vm)->Value();
+    int32_t stars = static_cast<int32_t>(input);
+    if (stars <= 0) {
         stars = STARS_DEFAULT;
     }
     GetArkUIInternalNodeAPI()->GetRatingModifier().SetStars(nativeNode, stars);
