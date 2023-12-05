@@ -1425,7 +1425,7 @@ HWTEST_F(FocusHubTestNg, SetIsDefaultFocus001, TestSize.Level1)
     auto manager = pipeline->GetOverlayManager();
     ASSERT_NE(manager, nullptr);
     auto rootNode = pipeline->GetRootElement();
-    EXPECT_EQ(rootNode, nullptr);
+    EXPECT_NE(rootNode, nullptr);
 
     focusHub->focusCallbackEvents_ = nullptr;
     focusHub->SetIsDefaultGroupFocus(false);
