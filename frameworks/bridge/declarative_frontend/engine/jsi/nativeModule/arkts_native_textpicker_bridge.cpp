@@ -19,6 +19,7 @@
 
 namespace OHOS::Ace::NG {
 const std::string FORMAT_FONT = "%s|%s|%s";
+const std::string DEFAULT_ERR_CODE = "-1";
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -108,20 +109,43 @@ ArkUINativeModuleValue TextpickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
-    uint32_t color = colorArg->Uint32Value(vm);
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArg);
-    std::string weight = ArkTSUtils::GetStringFromJS(vm, fontWeightArg);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArg);
+    Color textColor;
+    ArkTSUtils::ParseJsColor(vm, colorArg, textColor);
+    CalcDimension size;
+    if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
+        size = Dimension(-1);
+    } else {
+        if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, size, false)) {
+            size = Dimension(-1);
+        }
+    }
+    std::string weight = DEFAULT_ERR_CODE;
+    if (!fontWeightArg->IsNull() && !fontWeightArg->IsUndefined()) {
+        if (fontWeightArg->IsNumber()) {
+            weight = std::to_string(fontWeightArg->Int32Value(vm));
+        } else {
+            ArkTSUtils::ParseJsString(vm, fontWeightArg, weight);
+        }
+    }
+    std::vector<std::string> fontFamilies;
+    ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArg, fontFamilies);
+    std::string families;
+    if (fontFamilies.size() > 0) {
+        for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+            families += fontFamilies.at(i);
+        }
+    } else {
+        families = DEFAULT_ERR_CODE;
+    }
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull()) {
         styleVal = fontStyleArg->Int32Value(vm);
     }
+    std::string fontSizeStr = size.ToString();
     std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
-
+        FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), families.c_str());
     GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerTextStyle(
-        nativeNode, color, fontInfo.c_str(), styleVal);
+        nativeNode, textColor.GetValue(), fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -136,20 +160,43 @@ ArkUINativeModuleValue TextpickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
-    uint32_t color = colorArg->Uint32Value(vm);
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArg);
-    std::string weight = ArkTSUtils::GetStringFromJS(vm, fontWeightArg);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArg);
+    Color textColor;
+    ArkTSUtils::ParseJsColor(vm, colorArg, textColor);
+    CalcDimension size;
+    if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
+        size = Dimension(-1);
+    } else {
+        if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, size, false)) {
+            size = Dimension(-1);
+        }
+    }
+    std::string weight = DEFAULT_ERR_CODE;
+    if (!fontWeightArg->IsNull() && !fontWeightArg->IsUndefined()) {
+        if (fontWeightArg->IsNumber()) {
+            weight = std::to_string(fontWeightArg->Int32Value(vm));
+        } else {
+            ArkTSUtils::ParseJsString(vm, fontWeightArg, weight);
+        }
+    }
+    std::vector<std::string> fontFamilies;
+    ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArg, fontFamilies);
+    std::string families;
+    if (fontFamilies.size() > 0) {
+        for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+            families += fontFamilies.at(i);
+        }
+    } else {
+        families = DEFAULT_ERR_CODE;
+    }
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull()) {
         styleVal = fontStyleArg->Int32Value(vm);
     }
+    std::string fontSizeStr = size.ToString();
     std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
-
+        FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), families.c_str());
     GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerSelectedTextStyle(
-        nativeNode, color, fontInfo.c_str(), styleVal);
+        nativeNode, textColor.GetValue(), fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -164,20 +211,43 @@ ArkUINativeModuleValue TextpickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    
-    uint32_t color = colorArg->Uint32Value(vm);
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArg);
-    std::string weight = ArkTSUtils::GetStringFromJS(vm, fontWeightArg);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArg);
+    Color textColor;
+    ArkTSUtils::ParseJsColor(vm, colorArg, textColor);
+    CalcDimension size;
+    if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
+        size = Dimension(-1);
+    } else {
+        if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, size, false)) {
+            size = Dimension(-1);
+        }
+    }
+    std::string weight = DEFAULT_ERR_CODE;
+    if (!fontWeightArg->IsNull() && !fontWeightArg->IsUndefined()) {
+        if (fontWeightArg->IsNumber()) {
+            weight = std::to_string(fontWeightArg->Int32Value(vm));
+        } else {
+            ArkTSUtils::ParseJsString(vm, fontWeightArg, weight);
+        }
+    }
+    std::vector<std::string> fontFamilies;
+    ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArg, fontFamilies);
+    std::string families;
+    if (fontFamilies.size() > 0) {
+        for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+            families += fontFamilies.at(i);
+        }
+    } else {
+        families = DEFAULT_ERR_CODE;
+    }
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull()) {
         styleVal = fontStyleArg->Int32Value(vm);
     }
+    std::string fontSizeStr = size.ToString();
     std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
-
+        FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), families.c_str());
     GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerDisappearTextStyle(
-        nativeNode, color, fontInfo.c_str(), styleVal);
+        nativeNode, textColor.GetValue(), fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -190,15 +260,15 @@ ArkUINativeModuleValue TextpickerBridge::SetDefaultPickerItemHeight(ArkUIRuntime
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     CalcDimension height;
-    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
-        GetArkUIInternalNodeAPI()->GetTextpickerModifier().ResetTextpickerDefaultPickerItemHeight(nativeNode);
-    } else {
-        if (LessNotEqual(height.Value(), 0.0)) {
-            height.SetValue(0.0);
+    if (jsValue->IsNumber() || jsValue->IsString()) {
+        if (!ArkTSUtils::ParseJsDimensionFp(vm, jsValue, height)) {
+            return panda::JSValueRef::Undefined(vm);
         }
-        GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerDefaultPickerItemHeight(
-            nativeNode, height.Value(), static_cast<int>(height.Unit()));
     }
+ 
+    GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerDefaultPickerItemHeight(
+        nativeNode, height.Value(), static_cast<int>(height.Unit()));
+    
     return panda::JSValueRef::Undefined(vm);
 }
 

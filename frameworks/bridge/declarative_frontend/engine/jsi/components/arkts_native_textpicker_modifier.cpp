@@ -22,13 +22,11 @@
 #include "bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-constexpr uint32_t DEFAULT_BG_COLOR = 0xFF007DFF;
 constexpr int SIZE_OF_THREE = 3;
 constexpr int POS_0 = 0;
 constexpr int POS_1 = 1;
 constexpr int POS_2 = 2;
 const char DEFAULT_DELIMITER = '|';
-const float DEFAULT_PICKER_ITEM_HEIGHT = -1.0;
 
 void SetTextpickerBackgroundColor(NodeHandle node, uint32_t color)
 {
@@ -41,7 +39,13 @@ void ResetTextpickerBackgroundColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextPickerModelNG::SetBackgroundColor(frameNode, Color(DEFAULT_BG_COLOR));
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto dialogTheme = themeManager->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    TextPickerModelNG::SetBackgroundColor(frameNode, dialogTheme->GetBackgroundColor());
 }
 
 void SetTextpickerCanLoop(NodeHandle node, bool canLoop)
@@ -259,13 +263,7 @@ void SetTextpickerDefaultPickerItemHeight(NodeHandle node, float dVal, int dUnit
         frameNode, Dimension(dVal, static_cast<DimensionUnit>(dUnit)));
 }
 
-void ResetTextpickerDefaultPickerItemHeight(NodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextPickerModelNG::SetDefaultPickerItemHeight(
-        frameNode, Dimension(DEFAULT_PICKER_ITEM_HEIGHT, DimensionUnit::FP));
-}
+void ResetTextpickerDefaultPickerItemHeight(NodeHandle node) {}
 
 NG::PickerTextStyle GetPickerTextStyle(uint32_t color, const char* fontInfo, int32_t styleVal)
 {
@@ -281,7 +279,7 @@ NG::PickerTextStyle GetPickerTextStyle(uint32_t color, const char* fontInfo, int
     }
 
     if (res[POS_0] != "-1") {
-        textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false);
+        textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
     } else {
         textStyle.fontSize = Dimension(-1);
     }
