@@ -161,8 +161,10 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             responseRegionBuffer_ = host->GetResponseRegionListForRecognizer(static_cast<int32_t>(event.sourceType));
         }
     }
-    ++currentTouchPointsNum_;
-    touchPoints_[event.id] = event;
+    if (fingersId_.find(event.id) == fingersId_.end()) {
+        ++currentTouchPointsNum_;
+        touchPoints_[event.id] = event;
+    }
     UpdateFingerListInfo();
     if (fingers_ > currentTouchPointsNum_) {
         // waiting for multi-finger press
@@ -200,6 +202,9 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     touchPoints_[event.id] = event;
     UpdateFingerListInfo();
     auto isUpInRegion = IsPointInRegion(event);
+    if (fingersId_.find(event.id) != fingersId_.end()) {
+        fingersId_.erase(event.id);
+    }
     --currentTouchPointsNum_;
     if (currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();
