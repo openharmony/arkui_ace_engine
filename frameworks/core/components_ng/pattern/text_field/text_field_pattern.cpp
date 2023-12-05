@@ -1964,6 +1964,7 @@ void TextFieldPattern::OnModifyDone()
         inlineSelectAllFlag_ = false;
         inlineFocusState_ = false;
         RestorePreInlineStates();
+        UpdateSelection(0);
     }
     if (!IsTextArea() && layoutProperty->GetShowCounterValue(false) && !IsNormalInlineState() &&
         GetMarginBottom() == MARGIN_NONE) {
