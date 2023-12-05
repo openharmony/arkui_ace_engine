@@ -24,7 +24,6 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "test/mock/base/mock_drag_window.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -33,10 +32,13 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
-
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/common/interaction/interaction_interface.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "test/mock/base/mock_drag_window.h"
+#include "test/mock/core/common/mock_interaction_interface.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/pattern/mock_list_drag_status_listener.h"
 
@@ -1882,5 +1884,50 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerNotifyDragRegisterFrameNode002, T
     dragDropManager->UnRegisterDragStatusListener(listNode2->GetId());
     dragDropManager->UnRegisterDragStatusListener(listNode3->GetId());
     EXPECT_EQ(dragDropManager->nodesForDragNotify_.size(), 0);
+}
+
+/**
+ * @tc.name: DragDropManagerFireOnEditableTextComponent
+ * @tc.desc: Test FireOnEditableTextComponent
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerFireOnEditableTextComponent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager and create a point.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. Create a normal frameNode which is not a editable text component,
+     *  and test FireOnEditableTextComponent.
+     * @tc.expected: step2.
+     */
+    {
+        auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
+    }
+
+    /**
+     * @tc.steps: step3. Create a editable text component, and test FireOnEditableTextComponent.
+     * @tc.expected: step3.
+     */
+    {
+        auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXTINPUT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+#ifdef ENABLE_DRAG_FRAMEWORK
+        EXPECT_CALL(*(AceType::DynamicCast<MockInteractionInterface>(
+            MockInteractionInterface::GetInstance())), EnterTextEditorArea(_))
+            .Times(1).WillOnce(::testing::Return(0));
+#else
+        EXPECT_CALL(*(AceType::DynamicCast<MockInteractionInterface>(
+            MockInteractionInterface::GetInstance())), EnterTextEditorArea(_))
+            .Times(0);
+#endif // ENABLE_DRAG_FRAMEWORK
+        dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
+        dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
+        dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::MOVE);
+        dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::LEAVE);
+    }
 }
 } // namespace OHOS::Ace::NG
