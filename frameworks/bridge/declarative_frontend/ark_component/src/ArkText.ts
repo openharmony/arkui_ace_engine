@@ -221,7 +221,7 @@ class TextLetterSpacingModifier extends ModifierWithKey<number | string> {
   }
 }
 
-class TextTextOverflowModifier extends ModifierWithKey<TextOverflow> {
+class TextTextOverflowModifier extends ModifierWithKey<{ overflow: TextOverflow }> {
   static identity: Symbol = Symbol('textTextOverflow');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
