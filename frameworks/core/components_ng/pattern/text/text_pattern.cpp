@@ -263,10 +263,12 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     CHECK_NULL_VOID(paragraph_);
     // the handle position is calculated based on the middle of the handle height.
     if (isFirstHandle) {
-        auto start = GetHandleIndex(Offset(localOffset.GetX(), localOffset.GetY() + handleRect.Height() / 2));
+        auto start = GetHandleIndex(Offset(localOffset.GetX(), localOffset.GetY() +
+            (selectOverlayProxy_->IsHandleReverse() ? handleRect.Height() : 0)));
         textSelector_.Update(start, textSelector_.destinationOffset);
     } else {
-        auto end = GetHandleIndex(Offset(localOffset.GetX(), localOffset.GetY() + handleRect.Height() / 2));
+        auto end = GetHandleIndex(Offset(localOffset.GetX(), localOffset.GetY() +
+            (selectOverlayProxy_->IsHandleReverse() ? 0 : handleRect.Height())));
         textSelector_.Update(textSelector_.baseOffset, end);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
