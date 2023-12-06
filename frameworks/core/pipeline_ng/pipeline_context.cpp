@@ -1557,6 +1557,14 @@ bool PipelineContext::CheckNeedAutoSave()
     return pageNode->NeedRequestAutoSave();
 }
 
+bool PipelineContext::CheckPageFocus()
+{
+    CHECK_NULL_RETURN(stageManager_, true);
+    auto pageNode = stageManager_->GetLastPage();
+    CHECK_NULL_RETURN(pageNode, true);
+    return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
+}
+
 void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap)
 {
     CHECK_NULL_VOID(viewDataWrap);
