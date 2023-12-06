@@ -382,8 +382,7 @@ ArkUINativeModuleValue TabsBridge::SetTabBarWidth(ArkUIRuntimeCallInfo* runtimeC
     CalcDimension width;
     ArkUINativeModuleValue undefinedRes = panda::JSValueRef::Undefined(vm);
 
-    if (jsValue->IsNull() || jsValue->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimension(vm, jsValue, width, DimensionUnit::VP)) {
+    if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width)) {
         GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarWidth(nativeNode);
         return undefinedRes;
     }
@@ -396,9 +395,6 @@ ArkUINativeModuleValue TabsBridge::SetTabBarWidth(ArkUIRuntimeCallInfo* runtimeC
         return undefinedRes;
     }
 
-    if (LessNotEqual(width.Value(), 0.0)) {
-        width.SetValue(0.0);
-    }
     GetArkUIInternalNodeAPI()->GetTabsModifier().SetTabBarWidth(nativeNode, width.Value(),
         static_cast<int>(width.Unit()));
     return undefinedRes;
@@ -424,8 +420,7 @@ ArkUINativeModuleValue TabsBridge::SetTabBarHeight(ArkUIRuntimeCallInfo* runtime
     CalcDimension height;
     ArkUINativeModuleValue undefinedRes = panda::JSValueRef::Undefined(vm);
 
-    if (jsValue->IsNull() || jsValue->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimension(vm, jsValue, height, DimensionUnit::VP)) {
+    if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
         GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarHeight(nativeNode);
         return undefinedRes;
     }
@@ -437,10 +432,7 @@ ArkUINativeModuleValue TabsBridge::SetTabBarHeight(ArkUIRuntimeCallInfo* runtime
         GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarHeight(nativeNode);
         return undefinedRes;
     }
-
-    if (LessNotEqual(height.Value(), 0.0)) {
-        height.SetValue(0.0);
-    }
+    
     GetArkUIInternalNodeAPI()->GetTabsModifier().SetTabBarHeight(
         nativeNode, height.Value(), static_cast<int>(height.Unit()));
     return undefinedRes;

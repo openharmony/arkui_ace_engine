@@ -36,22 +36,16 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
   }
 
   barWidth(value: Length): TabsAttribute {
-    if (isUndefined(value) || isNull(value)) {
-      modifierWithKey(this._modifiersWithKeys, BarWidthModifier.identity, BarWidthModifier, undefined);
-    }
-
     modifierWithKey(this._modifiersWithKeys, BarWidthModifier.identity, BarWidthModifier, value);
+
     return this;
   }
   barHeight(value: Length): TabsAttribute {
     if (isUndefined(value) || isNull(value)) {
       modifierWithKey(this._modifiersWithKeys, BarHeightModifier.identity, BarHeightModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, BarHeightModifier.identity, BarHeightModifier, value);
     }
-
-    let adaptiveHeight: boolean = false;
-
-    modifier(this._modifiers, BarAdaptiveHeightModifier, adaptiveHeight);
-    modifierWithKey(this._modifiersWithKeys, BarHeightModifier.identity, BarHeightModifier, value);
 
     return this;
   }
@@ -92,12 +86,11 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     return this;
   }
   barGridAlign(value: BarGridColumnOptions): TabsAttribute {
-    
     if (isObject(value)) {
       let arkBarGridAlign = new ArkBarGridAlign();
       arkBarGridAlign.barGridAlign = value;
       modifier(this._modifiers, BarGridAlignModifier, arkBarGridAlign);
-    }else{
+    } else {
       modifier(this._modifiers, BarGridAlignModifier, undefined);
     }
 

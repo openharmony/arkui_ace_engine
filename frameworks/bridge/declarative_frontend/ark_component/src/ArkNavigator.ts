@@ -1,10 +1,4 @@
 /// <reference path='./import.ts' />
-enum NavigatorType {
-  DEFAULT = 0,
-  PUSH,
-  REPLACE,
-  BACK
-};
 
 class ArkNavigatorComponent extends ArkComponent implements NavigatorAttribute {
   active(value: boolean): NavigatorAttribute {
@@ -14,10 +8,10 @@ class ArkNavigatorComponent extends ArkComponent implements NavigatorAttribute {
     return this;
   }
   type(value: NavigationType): NavigatorAttribute {
-    if (isNumber(value) && value > NavigatorType.DEFAULT && value <= NavigatorType.REPLACE) {
+    if (isNumber(value)) {
       modifier(this._modifiers, TypeModifier, value);
     } else {
-      modifier(this._modifiers, TypeModifier, NavigatorType.DEFAULT);
+      modifier(this._modifiers, TypeModifier, undefined);
     }
     return this;
   }
