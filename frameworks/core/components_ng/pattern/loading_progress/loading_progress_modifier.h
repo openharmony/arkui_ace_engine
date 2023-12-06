@@ -108,7 +108,7 @@ private:
 
     LoadingProgressOwner loadingProgressOwner_;
     bool isLoading_ = false;
-    bool isVisible_ = true;
+    bool isVisible_ = false;
     float recycleSizeScale_ = 1.0f;
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressModifier);
 };
