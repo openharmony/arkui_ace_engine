@@ -2331,19 +2331,19 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea2, TestSize.Level1)
 HWTEST_F(OverlayManagerTestNg, DialogTest004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create root node and prepare dialogProperties.
+     * @tc.steps: step1. create root node and dialogProperties.
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     DialogProperties dialogProperties;
     /**
-     * @tc.steps: step2. create overlayManager and call ShowDateDialog.
-     * @tc.expected: DialogNode is created successfully
+     * @tc.steps: step2. create overlayManager and call ShowDialog.
+     * @tc.expected: DialogNode created successfully
      */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
     /**
-     * @tc.steps: step3. test OverlayManager's GetDialog function.
+     * @tc.steps: step3. test OverlayManager.GetDialog function.
      * @tc.expected: overlayManager.dialog.id equal to GetDialog(dialogId).id.
      */
     int32_t dialogId = dialog->GetId();
@@ -2354,27 +2354,27 @@ HWTEST_F(OverlayManagerTestNg, DialogTest004, TestSize.Level1)
 
 /**
  * @tc.name: DialogTest005
- * @tc.desc: Test OverlayManager::GetDialog.
+ * @tc.desc: Test OverlayManager.GetDialog.
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestNg, DialogTest005, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create root node and prepare dialogProperties.
+     * @tc.steps: step1. create root node and dialogProperties.
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     DialogProperties dialogProperties;
     dialogProperties.isMask = true;
     /**
-     * @tc.steps: step2. create overlayManager and call ShowDateDialog.
-     * @tc.expected: DialogNode is created successfully
+     * @tc.steps: step2. create overlayManager and call ShowDialog.
+     * @tc.expected: DialogNode created successfully
      */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
     /**
-     * @tc.steps: step3. test OverlayManager's GetDialog function.
-     * @tc.expected: overlayManager.dialogMap_.size to 0.
+     * @tc.steps: step3. test OverlayManager.GetDialog function.
+     * @tc.expected: overlayManager.dialogMap_.size() to 0.
      */
     auto maskNode = overlayManager->GetDialog(overlayManager->maskNodeId_);
     CHECK_NULL_VOID(maskNode);

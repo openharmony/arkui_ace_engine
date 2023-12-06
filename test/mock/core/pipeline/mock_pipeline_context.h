@@ -113,6 +113,7 @@ public:
     MOCK_METHOD1(SetIsFocusActive, bool(bool isFocusActive));
     MOCK_METHOD1(SetCursor, void(int32_t cursorValue));
     MOCK_METHOD0(RestoreDefault, void());
+    MOCK_METHOD0(GetOverlayManager, const RefPtr<NG::OverlayManager>());
 
     static RefPtr<MockPipelineContext> pipeline_;
 
