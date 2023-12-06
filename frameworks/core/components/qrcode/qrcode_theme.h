@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_QRCODE_THEME_H
 
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme.h"
@@ -26,6 +27,9 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr double QRCODE_SIZE = 200.0;
+} // namespace
 
 class QrcodeTheme : public virtual Theme {
     DECLARE_ACE_TYPE(QrcodeTheme, Theme);
@@ -42,11 +46,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_RETURN(pipeline, theme);
-            if (pipeline->GetMinPlatformVersion() > static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
-                ParsePattern(themeConstants->GetThemeStyle(), theme);
-            }
+            ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
 
@@ -59,8 +59,15 @@ public:
             if (!pattern) {
                 return;
             }
-            theme->qrcodeColor_ = pattern->GetAttr<Color>("qrcode_foreground_color", Color::RED);
             theme->backgroundColor_ = pattern->GetAttr<Color>("qrcode_background_color", Color::RED);
+            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                theme->qrcodeColor_ = Color(0xff000000);
+                theme->qrcodeType_ = QrcodeType::RECT;
+                theme->qrcodeWidth_ = Dimension(QRCODE_SIZE, DimensionUnit::PX);
+                theme->qrcodeHeight_ = Dimension(QRCODE_SIZE, DimensionUnit::PX);
+                return;
+            }
+            theme->qrcodeColor_ = pattern->GetAttr<Color>("qrcode_foreground_color", Color::RED);
             theme->focusedColor_ = pattern->GetAttr<Color>("qrcode_focused_color", Color::RED);
             theme->qrcodeType_ = QrcodeType(pattern->GetAttr<int>("qrcode_type", 0));
             theme->qrcodeWidth_ = pattern->GetAttr<Dimension>("qrcode_size", 200.0_px);
