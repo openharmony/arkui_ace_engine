@@ -173,9 +173,12 @@ void RichEditorPattern::OnModifyDone()
         TextPattern::StartAITask();
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
-    if (host->IsDraggable()) {
+    if (host->IsDraggable() && copyOption_ != CopyOptions::None) {
         InitDragDropEvent();
         AddDragFrameNodeToManager(host);
+    } else {
+        ClearDragDropEvent();
+        RemoveDragFrameNodeFromManager(host);
     }
 #endif // ENABLE_DRAG_FRAMEWORK
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1544,6 +1547,9 @@ bool RichEditorPattern::JudgeDraggable(GestureEvent& info)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    if (copyOption_ == CopyOptions::None) {
+        return false;
+    }
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(hub, false);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -1728,6 +1734,23 @@ void RichEditorPattern::InitDragDropEvent()
         pattern->StopAutoScroll();
     };
     eventHub->SetOnDragLeave(onDragDragLeave);
+}
+
+void RichEditorPattern::ClearDragDropEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetIsTextDraggable(false);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragStart(nullptr);
+    eventHub->SetOnDragEnter(nullptr);
+    eventHub->SetOnDragMove(nullptr);
+    eventHub->SetOnDragLeave(nullptr);
+    eventHub->SetOnDragEnd(nullptr);
+    eventHub->SetOnDrop(nullptr);
 }
 
 NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEvent>& event)
