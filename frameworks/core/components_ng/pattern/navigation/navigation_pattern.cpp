@@ -386,6 +386,7 @@ void NavigationPattern::NotifyPageHide(const std::string& pageName)
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto pageUrlChecker = container->GetPageUrlChecker();
+    CHECK_NULL_VOID(pageUrlChecker);
     pageUrlChecker->NotifyPageHide(pageName);
 }
 
@@ -394,6 +395,7 @@ void NavigationPattern::NotifyPageShow(const std::string& pageName)
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto pageUrlChecker = container->GetPageUrlChecker();
+    CHECK_NULL_VOID(pageUrlChecker);
     pageUrlChecker->NotifyPageShow(pageName);
 }
 

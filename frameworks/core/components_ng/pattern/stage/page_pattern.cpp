@@ -167,7 +167,9 @@ void PagePattern::OnShow()
     JankFrameReport::StartRecord(pageInfo_->GetPageUrl());
     PerfMonitor::GetPerfMonitor()->SetPageUrl(pageInfo_->GetPageUrl());
     auto pageUrlChecker = container->GetPageUrlChecker();
-    pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
+    if (pageUrlChecker != nullptr) {
+        pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
+    }
     if (onPageShow_) {
         onPageShow_();
     }
@@ -184,9 +186,11 @@ void PagePattern::OnHide()
     auto container = Container::Current();
     if (container) {
         auto pageUrlChecker = container->GetPageUrlChecker();
-        pageUrlChecker->NotifyPageHide(pageInfo_->GetPageUrl());
+        // ArkTSCard container no SetPageUrlChecker
+        if (pageUrlChecker != nullptr) {
+            pageUrlChecker->NotifyPageHide(pageInfo_->GetPageUrl());
+        }
     }
-    
     if (onPageHide_) {
         onPageHide_();
     }
