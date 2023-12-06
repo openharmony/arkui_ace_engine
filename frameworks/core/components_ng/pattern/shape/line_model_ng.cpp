@@ -44,5 +44,16 @@ void LineModelNG::EndPoint(const ShapePoint& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(LinePaintProperty, EndPoint, value);
 }
+
+void LineModelNG::StartPoint(FrameNode* frameNode, const ShapePoint& value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(LinePaintProperty, StartPoint, value, frameNode);
+}
+
+void LineModelNG::EndPoint(FrameNode* frameNode, const ShapePoint& value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(LinePaintProperty, EndPoint, value, frameNode);
+}
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_LINE_MODEL_NG_CPP

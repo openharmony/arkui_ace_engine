@@ -25,6 +25,8 @@ class ACE_EXPORT PolygonModelNG : public OHOS::Ace::PolygonModel {
 public:
     void Create(bool isPolygon) override;
     void SetPoints(const ShapePoints& points) override;
+
+    static void SetPoints(FrameNode* frameNode, const ShapePoints& points);
 };
 
 } // namespace OHOS::Ace::NG

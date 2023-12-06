@@ -1,43 +1,27 @@
 /// <reference path='./import.ts' />
-class ArkPathComponent extends ArkComponent implements PathAttribute {
+class ArkPathComponent extends ArkCommonShapeComponent implements PathAttribute {
   commands(value: string): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, CommandsModifier.identity, CommandsModifier, value);
+    return this;
   }
-  stroke(value: any): this {
-    throw new Error('Method not implemented.');
+}
+
+class CommandsModifier extends ModifierWithKey<string> {
+  static identity: Symbol = Symbol('commands');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().path.resetPathCommands(node);
+    } else {
+      GetUINativeModule().path.setPathCommands(node, this.value);
+    }
   }
-  fill(value: any): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeDashOffset(value: string | number): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeLineCap(value: LineCapStyle): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeLineJoin(value: LineJoinStyle): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeMiterLimit(value: string | number): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeOpacity(value: any): this {
-    throw new Error('Method not implemented.');
-  }
-  fillOpacity(value: any): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeWidth(value: any): this {
-    throw new Error('Method not implemented.');
-  }
-  antiAlias(value: boolean): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeDashArray(value: any[]): this {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
+
+  checkObjectDiff(): boolean {
+    if (isString(this.stageValue) && isString(this.value)) {
+      return this.stageValue !== this.value;
+    } else {
+      return true;
+    }
   }
 }
 
