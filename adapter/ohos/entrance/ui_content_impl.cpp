@@ -21,7 +21,6 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "configuration.h"
-#include "dm/display_manager.h"
 #include "init_data.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
@@ -252,6 +251,30 @@ public:
 private:
     NG::SafeAreaInsets systemSafeArea_;
     NG::SafeAreaInsets::Inset navigationBar_;
+    int32_t instanceId_ = -1;
+};
+
+class AvailableAreaChangedListener : public OHOS::Rosen::DisplayManager::IAvailableAreaListener {
+public:
+    explicit AvailableAreaChangedListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~AvailableAreaChangedListener() = default;
+
+    void OnAvailableAreaChanged(const Rosen::DMRect availableArea) override
+    {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto displayAvailableRect = ConvertDMRect2Rect(availableArea);
+        ContainerScope scope(instanceId_);
+        taskExecutor->PostTask(
+            [pipeline, displayAvailableRect] { pipeline->UpdateDisplayAvailableRect(displayAvailableRect); },
+            TaskExecutor::TaskType::UI);
+    }
+
+private:
     int32_t instanceId_ = -1;
 };
 
@@ -1415,6 +1438,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
 
     InitializeSafeArea(container);
+    InitializeDisplayAvailableRect(container);
 
     // set container temp dir
     if (abilityContext) {
@@ -1437,6 +1461,22 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
         window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         pipeline->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
         pipeline->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
+    }
+}
+
+void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceContainer>& container)
+{
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    auto& DMManager = Rosen::DisplayManager::GetInstance();
+    availableAreaChangedListener_ = new AvailableAreaChangedListener(instanceId_);
+    DMManager.RegisterAvailableAreaListener(availableAreaChangedListener_);
+    Rosen::DMRect availableArea;
+    auto defaultDisplay = DMManager.GetDefaultDisplay();
+    if (pipeline && defaultDisplay) {
+        Rosen::DMError ret = defaultDisplay->GetAvailableArea(availableArea);
+        if (ret == Rosen::DMError::DM_OK) {
+            pipeline->UpdateDisplayAvailableRect(ConvertDMRect2Rect(availableArea));
+        }
     }
 }
 

@@ -243,6 +243,14 @@ public:
 
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
+    void UpdateDisplayAvailableRect(const Rect& displayAvailableRect)
+    {
+        displayAvailableRect_ = displayAvailableRect;
+    }
+    Rect GetDisplayAvailableRect() const
+    {
+        return displayAvailableRect_;
+    }
     void SetEnableKeyBoardAvoidMode(bool value) override;
     bool IsEnableKeyBoardAvoidMode() override;
     const RefPtr<SafeAreaManager>& GetSafeAreaManager() const
@@ -643,6 +651,7 @@ private:
     RefPtr<SharedOverlayManager> sharedTransitionManager_;
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
+    Rect displayAvailableRect_;
 #ifdef WINDOW_SCENE_SUPPORTED
     RefPtr<UIExtensionManager> uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
 #endif

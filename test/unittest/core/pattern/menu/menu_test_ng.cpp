@@ -7548,4 +7548,51 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNg103, TestSize.Level1)
     algorithm->Layout(wrapper);
     ASSERT_TRUE(algorithm);
 }
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg104
+ * @tc.desc: Verify UpdateConstraintHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg104, TestSize.Level1)
+{
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    optionParams.emplace_back("MenuItem2", "", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::CONTEXT_MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    ASSERT_TRUE(property->GetPositionOffset().has_value());
+    EXPECT_EQ(property->GetPositionOffset().value(), OffsetF());
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
+    layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    MockPipelineContext::GetCurrent()->UpdateDisplayAvailableRect(
+        Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    MockPipelineContext::GetCurrent()->SetDisplayWindowRectInfo(
+        Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    auto pipelineContext = layoutAlgorithm->GetCurrentPipelineContext();
+    float actualHeight = FULL_SCREEN_HEIGHT * 0.8;
+    layoutAlgorithm->hierarchicalParameters_ = true;
+    LayoutConstraintF childLayoutConstraint;
+    layoutAlgorithm->UpdateConstraintHeight(&layoutWrapper, childLayoutConstraint);
+    EXPECT_EQ(childLayoutConstraint.maxSize.Height(), actualHeight);
+    layoutAlgorithm->hierarchicalParameters_ = false;
+    layoutAlgorithm->UpdateConstraintHeight(&layoutWrapper, childLayoutConstraint);
+    EXPECT_EQ(childLayoutConstraint.maxSize.Height(), actualHeight);
+}
 } // namespace OHOS::Ace::NG
