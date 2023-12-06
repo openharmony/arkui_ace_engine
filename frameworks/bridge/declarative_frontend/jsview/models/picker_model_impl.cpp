@@ -143,7 +143,8 @@ void DatePickerDialogModelImpl::SetDatePickerDialogShow(PickerDialogInfo& picker
     }
     auto datePicker = AceType::DynamicCast<PickerBaseComponent>(component);
     DialogProperties properties {};
-    properties.alignment = DialogAlignment::CENTER;
+    properties.alignment = Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ? DialogAlignment::CENTER
+                                                                                          : DialogAlignment::DEFAULT;
     properties.customComponent = datePicker;
     properties.customStyle = true;
     auto acceptId = EventMarker(std::move(onAccept));
