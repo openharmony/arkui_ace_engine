@@ -277,10 +277,10 @@ public:
     void CloseModalUIExtension(int32_t sessionId);
 
     RefPtr<FrameNode> BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
-        const RefPtr<NG::FrameNode>& targetNode, const std::vector<std::string>& aiMenuOptions);
-    SizeF CaculateMenuSize(const RefPtr<FrameNode>& menuNode, const std::vector<std::string>& aiMenuOptions);
-    bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect,
-        const std::vector<std::string>& aiMenuOptions, const RefPtr<NG::FrameNode>& targetNode);
+        const RefPtr<NG::FrameNode>& targetNode,  std::string longestContent, int32_t menuSize);
+    SizeF CaculateMenuSize(const RefPtr<FrameNode>& menuNode,  std::string longestContent, int32_t menuSize);
+    bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect, std::string longestContent,
+        int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode);
 
     void MarkDirty(PropertyChangeFlag flag);
     float GetRootHeight() const;

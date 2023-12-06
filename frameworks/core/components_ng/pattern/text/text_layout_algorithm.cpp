@@ -343,7 +343,8 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         paragraph_->PushStyle(textStyle);
         CHECK_NULL_RETURN(pattern, -1);
         if (spanItemChildren_.empty()) {
-            if (pattern->GetTextDetectEnable() && !pattern->GetAISpanMap().empty()) {
+            if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None &&
+                pattern->GetTextDetectEnable() && !pattern->GetAISpanMap().empty()) {
                 UpdateParagraphForAISpan(textStyle, layoutWrapper);
             } else {
                 StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
